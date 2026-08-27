@@ -39,20 +39,17 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 
 Project strcuture plan
 
+```text
 src/
-│
 ├── app/
-│   │
 │   ├── (auth)/
 │   │   ├── login/
 │   │   └── forgot-password/
-│   │
 │   ├── (carer)/
 │   │   ├── dashboard/
 │   │   ├── clients/
 │   │   ├── calendar/
 │   │   └── expenses/
-│   │
 │   ├── (admin)/
 │   │   ├── dashboard/
 │   │   ├── clients/
@@ -62,13 +59,11 @@ src/
 │   │   ├── funding/
 │   │   ├── reports/
 │   │   └── audit/
-│   │
 │   ├── (family)/
 │   │   ├── dashboard/
 │   │   ├── clients/
 │   │   ├── calendar/
 │   │   └── finances/
-│   │
 │   └── api/
 │       ├── clients/
 │       ├── care/
@@ -76,15 +71,12 @@ src/
 │       ├── expenses/
 │       ├── notifications/
 │       └── ...
-│
 ├── components/
 │   ├── ui/
 │   ├── layout/
 │   ├── forms/
 │   └── ...
-│
 ├── features/
-│   │
 │   ├── auth/
 │   ├── clients/
 │   ├── care/
@@ -96,15 +88,14 @@ src/
 │   ├── notifications/
 │   ├── audit/
 │   └── reports/
-│
 ├── infrastructure/
 │   ├── database/
 │   ├── storage/
 │   ├── email/
 │   ├── notifications/
 │   └── payments/
-│
 └── lib/
     ├── permissions/
     ├── validation/
     └── utils/
+```
