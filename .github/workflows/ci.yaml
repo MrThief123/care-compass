@@ -23,11 +23,37 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # Check for known security vulnerabilities.
+      - name: Security audit
+        run: npm audit --audit-level=high
+
+      # Check whether dependencies have newer versions available.
+      # This is informational and will not fail the pipeline.
+      - name: Check outdated dependencies
+        run: |
+          echo "Checking for outdated dependencies..."
+          npm outdated || true
+
       - name: Lint
         run: npm run lint
 
       - name: Type check
         run: npx tsc --noEmit
 
+      - name: Test
+        run: npm test -- --ci
+
       - name: Build
         run: npm run build
+
+      # Store the build output as a GitHub Actions artifact.
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-${{ github.sha }}
+          path: |
+            dist/
+            build/
+            .next/
+          if-no-files-found: ignore
+          retention-days: 7
