@@ -91,8 +91,16 @@ export function expandOccurrences(
     return [];
   }
 
+  // Canonicalize each override's originalStart to second precision before using it as a
+  // map key: localDateTimeSchema (and therefore RecurrenceRule.anchor / override.originalStart)
+  // accepts both "YYYY-MM-DDTHH:mm" and "YYYY-MM-DDTHH:mm:ss", but formatLocalDateTime(candidate)
+  // — the key every candidate is looked up under — always emits seconds. Without this, a
+  // minute-precision originalStart silently never matches and the override is dropped.
   const overridesByOriginalStart = new Map<string, RecurrenceOverride>(
-    parsedOverrides.map((override) => [override.originalStart, override]),
+    parsedOverrides.map((override) => [
+      formatLocalDateTime(parseLocalDateTime(override.originalStart)),
+      override,
+    ]),
   );
 
   const anchor = parseLocalDateTime(parsedRule.anchor);
