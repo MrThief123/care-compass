@@ -1,12 +1,12 @@
 # Progress — F0-01 Validate planning pack against repository, Figma and sources
 
-Status: IN PROGRESS
+Status: MERGED TO DEV
 Owner: Dhruv Verma
 Lane: S — Shared kit
 Sprint: SPRINT · planned D1
-Branch: `feature/shared-plan-validation` (created from `main`)
+Branch: `feature/shared-plan-validation` (created from `main`, merged via PR #5, branch deleted)
 PR target: `main (per OQ-01 — shared work)`
-Last updated: 2026-09-17 (validation complete, awaiting human approval)
+Last updated: 2026-09-17 (PR #5 merged to main; planning freeze declared in root DECISIONS.md §1)
 
 ## Blockers
 - None — OQ-01 ANSWERED 2026-09-17 (PD-030); OQ-20 ANSWERED 2026-09-17 (PD-031)
@@ -28,7 +28,7 @@ Last updated: 2026-09-17 (validation complete, awaiting human approval)
 - None
 
 ## Remaining
-- Declare the planning freeze in DECISIONS.md once the human approves docs/VALIDATION_REPORT.md (Gate G1 sign-off).
+- None — feature complete.
 
 ## Acceptance criteria status
 - 4 / 4 MET (see ACCEPTANCE_CRITERIA.md)
@@ -55,7 +55,7 @@ Last updated: 2026-09-17 (validation complete, awaiting human approval)
 - None outstanding — see docs/VALIDATION_REPORT.md §8 for non-blocking items carried forward (CIS4, commitlint, test frameworks).
 
 ## Next action
-- Present docs/VALIDATION_REPORT.md to the human for approval. On approval: add the planning-freeze entry to DECISIONS.md, mark this feature READY FOR PR, then open the PR to `main`. F0-02 becomes startable once this feature is MERGED TO DEV (main).
+- None for this feature. F0-02 (Tooling baseline) is now startable — run `node scripts/plan-status.mjs` to confirm.
 
 ## Ready for PR
-- Pending human approval of docs/VALIDATION_REPORT.md (see Next action)
+- N/A — merged (PR #5)

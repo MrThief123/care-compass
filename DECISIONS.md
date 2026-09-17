@@ -6,7 +6,7 @@ Feature-level decisions live in each feature's `DECISIONS.md`.
 ---
 
 ## 1. Planning freeze
-Status: **NOT FROZEN** — the planning pack is unvalidated (Stage G0). F0-01 produces `docs/VALIDATION_REPORT.md`; the freeze is declared here after human approval.
+Status: **FROZEN** — declared 2026-09-17 by Dhruv Verma, approving `docs/VALIDATION_REPORT.md` (F0-01, merged to `main` in PR #5). Gate **G1 — Plan validated** is satisfied. The planning pack (`PRD.md`, `ARCHITECTURE.md`, `DEVELOPMENT_PLAN.md`, feature docs) is now authoritative and controlled per CLAUDE.md §9 — changes go through a `CHG-xxx` entry or a recorded decision, not ad hoc edits. F0-02 and other features listing only F0-01 as a dependency are now startable subject to their own dependencies and decisions.
 
 ---
 
