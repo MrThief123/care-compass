@@ -1,57 +1,63 @@
 # Progress — F0-09 Recurrence engine (pure TypeScript)
 
-Status: NOT STARTED
-Owner: unclaimed
+Status: READY FOR PR
+Owner: Dhruv Verma
 Lane: B — Backend
 Sprint: SPRINT · planned D2–D3
-Branch: `feature/shared-recurrence-engine` (not yet created)
+Branch: `feature/shared-recurrence-engine`
 PR target: `main (per OQ-01 — shared work)`
-Last updated: 2026-09-17 (planning pack generated)
+Last updated: 2026-09-17
 
 ## Blockers
-- OQ-01 — Branch parent and naming for shared (foundation and cross-cutting) work
-- OQ-12 — Recurrence options and plan horizon
+- None. OQ-01 and OQ-12 are ANSWERED in root DECISIONS.md (PD-030, PD-046).
 
 ## Dependencies status
-- F0-02 — NOT STARTED
+- F0-02 — MERGED TO DEV (per `node scripts/plan-status.mjs`, which lists F0-09 as Ready to start)
 
 ## Completed
-- Feature documentation drafted (Claude Chat planning pack)
+- `src/lib/recurrence/types.ts` — `RecurrenceRule`, `RecurrenceOverride` (cancelled/modified), `DateRange`, `Occurrence`, `LocalDateTime`/`LocalDate` aliases.
+- `src/lib/recurrence/schema.ts` — Zod schemas: `recurrenceRuleSchema`, `recurrenceOverrideSchema` (discriminated union), `dateRangeSchema`.
+- `src/lib/recurrence/local-time.ts` — Melbourne wall-clock parse/format helpers (`parseLocalDateTime`, `parseLocalDate`, `formatLocalDateTime`, `isAfterLocalDate`, `daysInMonth`).
+- `src/lib/recurrence/expand.ts` — `expandOccurrences(rule, range, overrides?)`: anchor-relative candidate stepping (no drift), month/year-end clamping, cancel/move overrides, `until` cutoff, `[range.start, range.end)` windowing.
+- `src/lib/recurrence/index.ts` — barrel export.
+- All 8 ACs covered by unit tests, written first and confirmed to fail for the right reason before implementation.
 
 ## In progress
-- None
+- None.
 
 ## Remaining
-- Types: `RecurrenceRule { frequency: 'none'|'daily'|'weekly'|'monthly'|'yearly'; interval: number; anchor: LocalDateTime; until?: LocalDate }` (final option list per OQ-12).
-- `expandOccurrences(rule, range, overrides)` → ordered occurrences within [range.start, range.end).
-- Override types: cancelled occurrence; moved/modified occurrence (new start, duration).
-- Occurrence identity: `originalStart` ISO string (stable key).
-- Timezone handling in Australia/Melbourne including DST transitions (OQ-32).
-- Month-end rule (e.g. anchor on 31st) and 29 February yearly rule — PROPOSED: clamp to last valid day; record in feature DECISIONS.md for confirmation.
-- Performance guard: expanding 500 rules over a 6-week range completes within 100 ms in unit tests (PROPOSED budget).
+- None in scope. Out of scope (unchanged): DB storage of rules (F0-11), UI for choosing recurrence (FAM-06).
 
 ## Acceptance criteria status
-- 0 / 8 MET
+- 8 / 8 MET (AC-01 .. AC-08)
 
 ## Tests
-- Written: 0 / 8
-- Passing: 0
+- Written: 10 / 10 (8 ACs; AC-07 covered by 3 tests — zero, negative, and end-to-end rejection)
+- Passing: 10
 - Failing: 0
+- Full repo suite: 46 / 46 passing (`npm run test`)
 
 ## Files changed
-- None yet. Likely files: `src/lib/recurrence/types.ts`, `src/lib/recurrence/expand.ts`, `src/lib/recurrence/expand.test.ts`, `src/lib/recurrence/schema.ts`
+- `src/lib/recurrence/types.ts` (new)
+- `src/lib/recurrence/schema.ts` (new)
+- `src/lib/recurrence/local-time.ts` (new)
+- `src/lib/recurrence/expand.ts` (new)
+- `src/lib/recurrence/index.ts` (new)
+- `src/lib/recurrence/expand.test.ts` (new)
+- `src/lib/recurrence/schema.test.ts` (new)
+- `package.json`, `package-lock.json` — added `zod` (used). `date-fns` and `@date-fns/tz` were added then removed after benchmarking showed they missed the AC-08 performance budget; see DECISIONS.md FD-01.
 
 ## Decisions
-- See DECISIONS.md
+- See DECISIONS.md: FD-01 (in-house wall-clock arithmetic instead of `@date-fns/tz` for performance), FD-02 (interval covers PD-046's full frequency list, no type change needed). OQ-32 non-blocking default (Australia/Melbourne) applied.
 
 ## Problems encountered
-- None
+- Initial implementation used `@date-fns/tz`'s `TZDate` for candidate stepping; AC-08 (500 rules / 6 weeks / <100ms) measured ~93–111ms (over budget on a cold run) due to per-operation IANA timezone resolution. Replaced with a lightweight wall-clock-only `Date`-based representation (see FD-01); AC-08 now runs in ~5ms.
 
 ## Assumptions
-- PROPOSED items in PRD.md are unconfirmed until validated in F0-01 or answered in DECISIONS.md.
+- Filtering by `[range.start, range.end)` is based on each occurrence's *original* (un-overridden) candidate position; a `modified` override's new `start` may fall outside the window if the override moves it there. No AC exercises this edge case; documented for FAM-06/F0-11 to be aware of when they route real overrides through this engine.
 
 ## Next action
-- Wait for answers to OQ-01, OQ-12; then complete dependencies, run START FEATURE F0-09, and write the tests in TEST_PLAN.md first.
+- None — ready for human review and PR approval.
 
 ## Ready for PR
-- No
+- Yes (pending human approval to open the PR, per repo policy — not opened by this session).

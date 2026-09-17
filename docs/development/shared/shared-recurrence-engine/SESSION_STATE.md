@@ -1,14 +1,36 @@
 # Session State — F0-09 Recurrence engine (pure TypeScript)
 
-Last session date: none (no implementation session yet)
-Current branch: n/a — `feature/shared-recurrence-engine` not created
-Worked on: n/a
-What changed: n/a
-Tests run: none
-Test results: n/a
-Current blocker: OQ-01, OQ-12
-Important discoveries: none
-Important decisions: none
-Exact next action: Run `START FEATURE F0-09` once dependencies are MERGED TO DEV (or COMPLETE) and blocking decisions are answered.
-Files likely to be touched next: `src/lib/recurrence/types.ts`, `src/lib/recurrence/expand.ts`, `src/lib/recurrence/expand.test.ts`, `src/lib/recurrence/schema.ts`
-Warning for next session: Read PRD.md, ACCEPTANCE_CRITERIA.md and TEST_PLAN.md before writing any code. Do not create the branch from the wrong parent (`main (per OQ-01 — shared work)`).
+Last session date: 2026-09-17
+Current branch: `feature/shared-recurrence-engine` (created from `main` at `e5818c5`, pushed to origin)
+Worked on: full implementation of the recurrence engine per PRD Scope.
+What changed: added `src/lib/recurrence/{types,schema,local-time,expand,index}.ts` and
+  `src/lib/recurrence/{expand,schema}.test.ts`; added `zod` dependency; added then removed
+  `date-fns`/`@date-fns/tz` after benchmarking (see DECISIONS.md FD-01).
+Tests run: `npx vitest run src/lib/recurrence`, then full `npm run test` and `npm run verify`.
+Test results: 10/10 recurrence tests passing; 46/46 full suite passing; `npm run verify`
+  (lint, typecheck, format:check, test) all green.
+Current blocker: none.
+Important discoveries:
+  - `@date-fns/tz`'s `TZDate` is too slow for AC-08's 500-rule/6-week/<100ms budget
+    (~93-111ms measured) because each operation resolves the IANA timezone. Switched to
+    a plain-`Date`-with-UTC-slot wall-clock representation (~5ms for the same case).
+  - date-fns's own `addMonths`/`addYears` already clamp to the target month's last day,
+    but only when computed cumulatively from the previous occurrence they *drift*
+    (Jan31->Feb28->Mar28->...). Computing every candidate as `anchor + n*interval` avoids
+    this — confirmed by direct benchmarking before writing the in-house version.
+Important decisions:
+  - FD-01 (DECISIONS.md): in-house wall-clock arithmetic instead of TZDate for performance.
+  - FD-02 (DECISIONS.md): `frequency`+`interval` already covers PD-046's full option list
+    (Fortnightly/Every 2 months/Quarterly/Every 6 months map onto interval multiples); no
+    type change needed.
+  - OQ-01, OQ-12 confirmed ANSWERED in root DECISIONS.md (PD-030, PD-046) before starting.
+  - OQ-32 (non-blocking): used proposed default, Australia/Melbourne for all date logic.
+Exact next action: none — feature is READY FOR PR. Await human review/approval before
+  opening the PR (per repo policy; this session did not open one).
+Files likely to be touched next: none for F0-09. Consumers: F0-11 (event schema, will need
+  real local->UTC conversion for `timestamptz` storage — re-add date-fns/@date-fns/tz there
+  under its own DECISIONS.md entry if needed) and FAM-06 (event form, maps UI recurrence
+  options onto `RecurrenceRule`).
+Warning for next session: do not re-introduce `@date-fns/tz` `TZDate` into the hot
+  candidate-stepping loop (`stepDate` in `expand.ts`) without re-benchmarking against
+  AC-08 — it was removed specifically because it missed the 100ms budget.
