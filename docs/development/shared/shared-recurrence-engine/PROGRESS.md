@@ -1,6 +1,6 @@
 # Progress — F0-09 Recurrence engine (pure TypeScript)
 
-Status: READY FOR PR
+Status: PR OPEN
 Owner: Dhruv Verma
 Lane: B — Backend
 Sprint: SPRINT · planned D2–D3
