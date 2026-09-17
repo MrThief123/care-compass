@@ -33,6 +33,17 @@ Record feature-level decisions here using the template below. Project-wide decis
 - Human confirmation required: no (clarifying note, not a scope or type change).
 - Test changes caused: none.
 
+### FD-03 — Bug fix: minute-precision `originalStart` silently failed to match overrides
+- Date: 2026-09-17
+- Context: found during live testing (reported by coordinator, not by this session's own test suite). A scratch script called `expandOccurrences()` with a fortnightly rule and cancellation/modification overrides whose `originalStart` used minute precision (`"2026-10-19T09:00"`, no seconds) — matching the precision rule anchors typically use. Both overrides were silently ignored; the occurrences rendered as if unmodified, with no error or warning.
+- Root cause: `localDateTimeSchema` (`schema.ts`) accepts both `YYYY-MM-DDTHH:mm` and `YYYY-MM-DDTHH:mm:ss`, so a minute-precision `originalStart` passes Zod validation. But the map used to look up overrides during expansion (`overridesByOriginalStart` in `expand.ts`) was keyed on the override's raw `originalStart` string, while candidates were looked up using `formatLocalDateTime(candidate)`, which always emits seconds (`:00`). `"2026-10-19T09:00"` (override key) never equals `"2026-10-19T09:00:00"` (candidate key) as plain strings, so `Map.get` always missed and the override fell through silently — `addCandidate` treated it as an unmodified occurrence. Every override in the original `expand.test.ts` happened to already use explicit `:00` seconds, so this was never caught.
+- Decision: canonicalize each override's `originalStart` through `parseLocalDateTime` → `formatLocalDateTime` when building `overridesByOriginalStart`, so both minute- and second-precision inputs resolve to the same second-precision key that candidate lookups use.
+- Reason: fixes the mismatch at its source (key construction) rather than requiring every caller to pre-format `originalStart` to second precision, which the schema doesn't require and callers (e.g. FAM-06/F0-11) shouldn't have to know about.
+- Alternatives considered: (a) tighten `localDateTimeSchema` to require seconds — rejected, would break the PRD's own `LocalDateTime` shape and reject legitimately valid minute-precision input elsewhere (e.g. rule anchors); (b) normalize at read time inside `addCandidate` instead of when building the map — rejected, less efficient (re-parses per candidate instead of once per override) for no behavioural difference.
+- Consequences: `src/lib/recurrence/expand.ts` — `overridesByOriginalStart` now maps `formatLocalDateTime(parseLocalDateTime(override.originalStart))` to the override. Added two regression tests (`[F0-09][AC-05]`/`[F0-09][AC-06]`, minute-precision variants) to `expand.test.ts`, confirmed they failed for this exact reason before the fix, now passing. No change to `types.ts`/`schema.ts`/public API.
+- Human confirmation required: no (bug fix restoring already-specified behaviour — AC-05/AC-06 always required overrides to take effect; no AC, PRD Scope item, or type changed).
+- Test changes caused: none removed or weakened; two tests added (`expand.test.ts`, both currently passing).
+
 <!-- Template
 ### FD-01 — <title>
 - Date:
