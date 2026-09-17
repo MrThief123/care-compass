@@ -1,18 +1,18 @@
 # Progress — F0-02 Tooling baseline: TypeScript, lint, format, test runners
 
-Status: NOT STARTED
-Owner: unclaimed
+Status: IN PROGRESS
+Owner: Dhruv Verma
 Lane: S — Shared kit
 Sprint: SPRINT · planned D1
-Branch: `feature/shared-tooling-baseline` (not yet created)
+Branch: `feature/shared-tooling-baseline`
 PR target: `main (per OQ-01 — shared work)`
-Last updated: 2026-09-17 (planning pack generated)
+Last updated: 2026-09-17 (claimed)
 
 ## Blockers
-- OQ-01 — Branch parent and naming for shared (foundation and cross-cutting) work
+- None — OQ-01 answered (PD-030, root DECISIONS.md)
 
 ## Dependencies status
-- F0-01 — NOT STARTED
+- F0-01 — MERGED TO DEV
 
 ## Completed
 - Feature documentation drafted (Claude Chat planning pack)
