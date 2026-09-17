@@ -124,6 +124,222 @@ CONFIRMED.
 - Decision: delete `AGENTS.md` and the `@AGENTS.md` import. CLAUDE.md §15 carries the rule to read `node_modules/next/dist/docs/` before writing Next.js code. If `next dev` re-creates AGENTS.md, delete it again and add it to `.gitignore` (F0-02).
 - Human confirmation: requested by the human 2026-09-17.
 
+### PD-030 — Shared-work branch parent and naming: Option B
+- Date: 2026-09-17 · Decided by: Dhruv Verma (answering OQ-01)
+- Decision: shared/cross-cutting work (Phase 0 foundation kit, Phase 4 integration) uses `feature/shared-<name>` branched from `main`, PR back to `main` with mandatory human review; `main` is then merged into all three dashboard dev branches per §3.4.
+- Reason: matches CLAUDE.md's recommended default (Option B); avoids routing shared work through a single dashboard's dev branch.
+- Alternatives: Option A — host shared work in `family-dev` as `feature/family-shared-<name>`, promote via release (rejected — adds an extra promotion step with no offsetting benefit here).
+- Consequences: `feature/shared-*` branches may now be created. Gate 0 requirement for OQ-01 is satisfied.
+- Human confirmation: CONFIRMED 2026-09-17.
+
+### PD-031 — Repository is authoritative; no existing Supabase project to adopt
+- Date: 2026-09-17 · Decided by: Dhruv Verma (answering OQ-20)
+- Decision: the current repository (empty Next.js scaffold) is treated as the actual starting state. There is no existing Supabase project, schema, or CI to adopt; the 4/9 team-meeting report of a live repo with RLS tests for all four roles does not apply here.
+- Reason: human confirmation supersedes the team-meeting report (PD-007 source precedence: client/human confirmation outranks internal meeting notes for state-of-the-world facts).
+- Alternatives: adopt an existing Supabase project (rejected — none exists); investigate further before deciding (unnecessary — human gave a direct answer).
+- Consequences: F0-01/F0-02 proceed by provisioning Supabase from scratch, not by importing an existing schema. The archived Confluence "Tech Stack" (MongoDB) and the 4/9 meeting report are both superseded for infra purposes.
+- Human confirmation: CONFIRMED 2026-09-17.
+
+### PD-032 — Budget alert thresholds: 75 / 85 / 100
+- Date: 2026-09-17 · Decided by: Dhruv Verma (answering OQ-03)
+- Decision: budget bucket alert thresholds are 75% (first warning), 85% (second warning), 100% (exhausted). The UI Spec D4 mockup value of 70/90/100 is a design inaccuracy, not the source of truth.
+- Reason: Client Information Sheet 3 and user stories P-18/UC-F02 outrank the UI mockup (PD-007 source precedence: client-confirmed sources over designs shown but not confirmed).
+- Alternatives: 70/90/100 (rejected, UI-only); per-client/per-bucket configurable thresholds (rejected — not asked for, adds scope).
+- Consequences: thresholds implemented as a single configuration constant, not per-bucket. Design D4 and the bucket card states should be corrected to show 75/85/100 (flag to design owner). Resolves C-01.
+- Human confirmation: CONFIRMED 2026-09-17.
+
+### PD-033 — Funding model: three fixed buckets, no categories (MVP)
+- Date: 2026-09-17 · Decided by: Dhruv Verma (answering OQ-04)
+- Decision: MVP funding model is per-client buckets of kind NDIS / Fixed / Government, one accounting period each, no categories/subcategories, no source-specific spending restrictions.
+- Reason: matches the current design (three fixed buckets) and CM-0309's descope of funding rules; avoids building an undesigned, unconfirmed full funding model (Pension/NDIS/Disability Trust/Family & other with restrictions) from the original brief.
+- Alternatives: full brief model with multiple sources, categories and restrictions (rejected — larger scope, not designed, Client Information Sheet No 4 on budgeting was never supplied).
+- Consequences: categories/restrictions/multiple funding sources go to the parking lot (PL-10). F0-12, FAM-03, FAM-10, FAM-11, CAR-08 proceed against the 3-bucket model.
+- Human confirmation: CONFIRMED 2026-09-17.
+
+### PD-034 — Fund/budget edit rights: Family and organisation admins can both edit
+- Date: 2026-09-17 · Decided by: Dhruv Verma (answering OQ-05)
+- Decision: both Family and the client's current organisation admins can add funds and edit budgets (not admin-read-only). Carers continue to record expenses during their shifts (unchanged from the proposed default — not contested). Budget History shows both top-ups and expenses, each attributed to the actor who recorded it.
+- Reason: CM-0409 ("organisations can edit family budgets") is a later client source than UI-D1 ("only Family adds funds"); PD-007 source precedence favours the later client confirmation.
+- Alternatives: Family-only edit rights per UI-D1 (rejected — superseded by CM-0409); admin read-only per the original proposed default (rejected by human).
+- Consequences: the Admin Budget screen needs edit controls, not just read access — the "Update" interaction UI-D19 flagged as undesigned still needs a design (raise as a design gap alongside OQ-19). RLS policies must allow admin writes to budget tables for their organisation's clients. Resolves C-02.
+- Human confirmation: CONFIRMED 2026-09-17.
+
+### PD-035 — Budget email recipients: Family + current org admins; period = bucket period
+- Date: 2026-09-17 · Decided by: Dhruv Verma (answering OQ-28)
+- Decision: budget warning emails go to Family and the client's current organisation's admins (role-based, not a separate configurable registry). The "present period" for a warning is whatever accounting period the triggering bucket already tracks.
+- Reason: matches the proposed default; a registry adds configuration UI not currently designed or requested with priority.
+- Alternatives: CIS5 "Warning Notification Entities" registry (rejected for MVP — no design, no confirmed priority; parked as PL-02).
+- Consequences: notification recipient logic is role-derived (Family + org admins for the client), re-derived on organisation transfer per PD-018/OQ-06. Resolves E-1..E-3 ambiguity for MVP.
+- Human confirmation: CONFIRMED 2026-09-17.
+
+### PD-036 — Organisation change is family-initiated, via picker
+- Date: 2026-09-17 · Decided by: Dhruv Verma (answering OQ-06)
+- Decision: Family uses "Change organisation" → an organisation picker → confirmation, matching UI-D3/D36 and the Settings design. Admin's "Remove" action on a client detaches that organisation's access without deleting client data (per PD-018).
+- Reason: matches the latest design shown to the client; CM-0309's "replace with Add/Delete Organisation" is treated as superseded by the design (PD-007: designs shown to the client outrank a meeting note where they conflict, absent a later client confirmation reinstating CM-0309).
+- Alternatives: CM-0309's admin-driven Add/Delete Organisation (rejected); FR-5.8 admin-initiated transfer (rejected as the primary mechanism — admin retains only the "Remove" detach action).
+- Consequences: the organisation picker screen still needs a design (tracked under OQ-19's design gaps). FAM-13, ADM-05, INT-02 proceed on this basis. Resolves C-03 for the initiator question.
+- Human confirmation: CONFIRMED 2026-09-17.
+
+### PD-037 — Family creates the client record and assigns a provider organisation
+- Date: 2026-09-17 · Decided by: Dhruv Verma (answering OQ-07)
+- Decision: the family/POA creates the client record and then assigns (links) an organisation as provider, per CIS3 Order 1–3 and CM-1908's workflow. This supersedes the Admin Clients design's "admin adds client with family contact name and email" flow.
+- Reason: human chose the client-confirmed workflow (CIS3/CM-1908) over the Admin Clients design, which was drawn before this workflow was confirmed.
+- Alternatives: admin-created client + family invitation email (rejected — was the proposed default, but superseded by this answer).
+- Consequences: the Admin Clients "add client" screen needs rework or removal — flag to the design owner as a **HUMAN REVIEW** item, since it contradicts an approved design. The family-side "create client + assign provider" flow (including how the organisation is selected/notified) is undesigned and needs a design gap entry (fold into OQ-19). F0-06, ADM-04, ADM-05 proceed on family-created clients, admin no longer being the client-creation path. Resolves C-04.
+- Human confirmation: CONFIRMED 2026-09-17.
+
+### PD-038 — Staff names: full name always shown
+- Date: 2026-09-17 · Decided by: Dhruv Verma (answering OQ-13)
+- Decision: store first and last name; display the full name everywhere (not first name + initial). This supersedes the "Aisha R." / "Daniel K." display convention shown in the current designs. Job titles remain a per-organisation editable list, seeded with Registered Nurse / Enrolled Nurse / Support Worker.
+- Reason: human chose CIS5's "some organisations show full name" over the abbreviated display in the current design mockups.
+- Alternatives: first name + initial per the current design (rejected); per-organisation configurable display format (not chosen — human picked a single fixed convention).
+- Consequences: designs showing "Aisha R." / "Daniel K." need a copy update to full names — flag to the design owner. Applies wherever a staff name is displayed (records, Task log, Task detail assignee). Resolves relevant part of OQ-13.
+- Human confirmation: CONFIRMED 2026-09-17.
+
+### PD-039 — Staff deactivation via a Deactivate action with confirmation
+- Date: 2026-09-17 · Decided by: Dhruv Verma (answering OQ-36)
+- Decision: add a "Deactivate" action to the Staff Add/edit panel, with a confirmation step, per FR-5.6/US A-2/CIS5. Deactivated staff lose access immediately; their historical records (completions, audit entries) are retained, not deleted.
+- Reason: matches the proposed default — soft deactivation preserves audit/history integrity (consistent with PD-005/PD-006 append-only history) while satisfying the access-withdrawal requirement.
+- Alternatives: full removal/deletion of staff records (rejected — would break append-only completion/audit history and actor attribution).
+- Consequences: the Staff design needs a Deactivate control added (design gap, fold into OQ-19). ADM-03 implements deactivation as a status flag, not a delete.
+- Human confirmation: CONFIRMED 2026-09-17.
+
+### PD-040 — Simple email+password login, no mandatory MFA
+- Date: 2026-09-17 · Decided by: Dhruv Verma (answering OQ-08)
+- Decision: Supabase Auth email + password for all roles. No mandatory MFA for any role, including Admin. Account creation still uses invitation emails for new users (not contested).
+- Reason: human prioritised CIS3's "bank-like simplicity" request over NFR-3/ADR-03/TM-2108's MFA push.
+- Alternatives: TOTP MFA required for admins (rejected — the original proposed default); MFA optional for all (not chosen).
+- Consequences: NFR-3/TM-2108's MFA expectation is descoped for MVP — flag this to the human as a security tradeoff worth reconfirming before production launch, since Admin accounts hold access to health/financial data across an organisation's whole client base. F0-07, ADM-02, ADM-04 implement plain email/password auth only.
+- Human confirmation: CONFIRMED 2026-09-17.
+
+### PD-041 — Carer visibility and edit access derived from shift schedule (no separate assignment table)
+- Date: 2026-09-17 · Decided by: Dhruv Verma (answering OQ-09)
+- Decision: a carer's access to a client is computed directly from that carer's shifts with that client — there is no separate persistent "assignment" record.
+  - **Read (visibility):** a carer can see a client the moment any shift is scheduled for that carer↔client pairing, however far in the future. Visibility persists as long as at least one shift (current or future) exists for that pairing. The instant the last remaining shift for that pairing ends with nothing else scheduled, visibility disappears immediately (no grace period, no lookback).
+  - **Write (edit):** a carer can edit a client's events, tasks, and information only while a shift for that pairing is actively in progress (`start_time ≤ now < end_time`). Outside that window, access reverts to read-only (or no access, per the rule above).
+  - During an active shift, edit access is full: carers may create and edit events, tasks, and client information for that client — not completion-only.
+- Reason: this is the human's direct, detailed answer, replacing the "auto-assign on first shift, ended by admin/transfer" mechanism in the original proposed default.
+- Alternatives: a persistent assignment table created on first shift and explicitly ended by admin/transfer (rejected — proposed default, superseded); completion-only edit rights during shift (rejected).
+- Consequences: ADR-03's mention of "a separate assignment table" is superseded — access-control queries and RLS policies for F0-06, F0-10, F0-11, CAR-01, CAR-03, CAR-04, CAR-06, CAR-07, ADM-07, ADM-08, INT-04 derive carer↔client access directly from the shifts table (start_time/end_time) rather than a join through an assignment table. Flag as an architecture update to ARCHITECTURE.md §6 (controlled change). Resolves C-05 in full (previously PARTLY RESOLVED).
+- Human confirmation: CONFIRMED 2026-09-17.
+
+### PD-042 — Single Family role with full authority
+- Date: 2026-09-17 · Decided by: Dhruv Verma (answering OQ-16)
+- Decision: Family is a single role with full family authority for MVP, matching the UI Spec's POA-acting-nominee model. View-only family access is parked (PL-16).
+- Reason: matches the proposed default; CIS5's four-group model (Carers, Managers, Family, POA) adds role granularity not requested with priority or designed.
+- Alternatives: multiple family sub-roles per CIS5 (rejected for MVP — parked).
+- Consequences: F0-06 implements one `family` role; no per-user family permission tiers.
+- Human confirmation: CONFIRMED 2026-09-17.
+
+### PD-043 — Carer Calendar blocks are events, not shift slots; no structured checklist sub-tasks
+- Date: 2026-09-17 · Decided by: Dhruv Verma (answering OQ-33)
+- Decision:
+  - (a) Carer Calendar blocks represent individual care events at their real times (e.g. "09:00 Margaret — Morning medication"), not the 4-hour shift slots assigned in Admin Manage.
+  - (b) There is no separate structured checklist sub-task list. The "checklist" text seen in the Carer Calendar design (e.g. "Administer morning medication, Record in medication log, Check for side effects before leaving") is descriptive content of the event itself, not a distinct authored sub-task entity.
+  - (c) Carer Home shows events for clients the carer is currently or upcoming rostered to, per PD-041's visibility rule.
+- Reason: matches the proposed default combination; avoids building an undesigned structured checklist sub-task feature with an unclear authoring model.
+- Alternatives: blocks = shift slots with separate admin-authored checklist sub-tasks (rejected — bigger scope, no confirmed authoring workflow).
+- Consequences: F0-11, CAR-01, CAR-05, CAR-06, INT-03, INT-04 build the carer calendar against the events data model already used elsewhere (Home, Task log), not a new shift-block or checklist model. Resolves C-17.
+- Human confirmation: CONFIRMED 2026-09-17.
+
+### PD-044 — Per-event completion mode: Manual (tick-off + optional proof) vs Automatic (self-completing)
+- Date: 2026-09-17 · Decided by: Dhruv Verma (answering OQ-10, extended per human's own design)
+- Decision: every event/routine has a **completion mode** field, set once per event and applied to all its occurrences: `manual` (default) or `automatic`.
+  - **Manual**: a carer or family member must explicitly mark the occurrence Done, with their name recorded (core safeguarding requirement), optionally attaching a document/photo as proof using the existing Documents field (not a mandatory gate). If due time passes with nothing recorded, the occurrence becomes **Overdue** automatically — Overdue is never user-selectable. Done can be undone by whoever marked it, or by Family, via an append-only "undone" entry (never deleting the original completion row, consistent with PD-005).
+  - **Automatic**: no confirmation is required. Once the occurrence's scheduled time passes, the system marks it Done by itself — no actor attached, no Overdue state for this mode.
+- Reason: reconciles the human's request (some tasks, e.g. "go on a walk," don't need proof; others, e.g. "buy prescriptions," need explicit tick-off with optional receipt upload) with the project's core safeguarding purpose (care must be verifiably confirmed by a named actor for tasks that matter) and with the sources' Overdue-is-derived intent (US A-5/P-4, CM-0309).
+- Alternatives: a single global auto-vs-manual toggle (rejected — the whole point is that different routines need different modes); auto mode marking events "Done" with no distinction from manual (rejected in discussion — would defeat safeguarding intent, since a missed automatic task would show as completed with no one having confirmed it).
+- Consequences: this is a **new capability beyond any original source document** — logged separately as **CHG-001** (below) since it adds a field to the event data model and a toggle to the Edit event form that no PRD/AC/design currently shows. F0-11 (event schema) gains a `completion_mode` column; FAM-06/FAM-07/CAR-06/CAR-07 (event create/edit UI) gain the mode toggle; the Edit event design needs this control added (fold into OQ-19 design gaps). Resolves OQ-10 in full.
+- Human confirmation: CONFIRMED 2026-09-17.
+
+### PD-045 — Recurring event edits get a scope selector (this occurrence / this and future / entire series)
+- Date: 2026-09-17 · Decided by: Dhruv Verma (answering OQ-11)
+- Decision: editing a recurring event presents a scope choice — "this occurrence only," "this and future occurrences," or "entire series" — before applying the edit, matching the Prototype A behaviour cited in the design traceability (FR-2.5).
+- Reason: matches the proposed default; without a scope choice, PD-004's per-occurrence override model has no UI to drive it.
+- Alternatives: edits always apply to the whole series (rejected — loses the ability to make one-off changes without a scope choice).
+- Consequences: the Edit event design needs a scope selector added (design gap, fold into OQ-19). FAM-07 implements the selector and routes the edit through `src/lib/recurrence` per-occurrence overrides (PD-004). Resolves C-11.
+- Human confirmation: CONFIRMED 2026-09-17.
+
+### PD-046 — Recurrence options: full frequency set incl. Fortnightly, perpetual by default
+- Date: 2026-09-17 · Decided by: Dhruv Verma (answering OQ-12)
+- Decision: the event form's recurrence options are: Does not repeat, Daily, Weekly, Fortnightly, Monthly, Every 2 months, Quarterly, Every 6 months, Yearly. Recurrence repeats indefinitely unless an explicit end date is set.
+- Reason: matches the proposed default, covering every frequency mentioned across sources (FR-2.1, US C-5) plus Fortnightly, and honouring CIS5's multi-year (4–5 year) rollover expectation via perpetual-by-default recurrence.
+- Alternatives: Weekly-only, matching the current design exactly (rejected — too narrow for the confirmed use cases).
+- Consequences: F0-09 (recurrence logic) and FAM-06 (event form) implement the full option set; the Edit event design's "Recurring" select needs the additional options added (design gap, fold into OQ-19).
+- Human confirmation: CONFIRMED 2026-09-17.
+
+### PD-047 — Event form gains Title, Start time, and Duration fields
+- Date: 2026-09-17 · Decided by: Dhruv Verma (answering OQ-22)
+- Decision: the Edit event form adds Title, Start time, and Duration fields, alongside the existing Date, Recurring, Status, Description, Documents, and the new completion-mode toggle (PD-044).
+- Reason: matches the proposed default — Home, Calendar, and Task log already display title/time/duration for events, and CM-0309 requires tasks to have a date and time; the current Edit event form is missing the fields that produce that display data.
+- Alternatives: deriving a display title/time from other data instead of explicit fields (rejected — no reliable source to derive from; the brief and CM-0309 imply these are first-class inputs).
+- Consequences: the Edit event design needs Title, Start time, and Duration fields added (design gap, fold into OQ-19). F0-11 (event schema), FAM-06, FAM-07, CAR-07 implement the new fields. Resolves C-22.
+- Human confirmation: CONFIRMED 2026-09-17.
+
+### PD-048 — Carer notification scope: shift + family-update triggers
+- Date: 2026-09-17 · Decided by: Dhruv Verma (answering OQ-14)
+- Decision: Carer notifications trigger on shift assigned/changed/cancelled, and on family adding a document or an event. The bell shows an unread count; clicking a notification scrolls to the relevant card.
+- Reason: matches the proposed default and the design's own examples.
+- Alternatives: broader scope including budget/status-change notifications (not chosen — not designed, adds scope).
+- Consequences: CAR-02 implements this fixed set of trigger types; retention/read-unread mechanics still need basic definition during implementation (not further specified here).
+- Human confirmation: CONFIRMED 2026-09-17.
+
+### PD-049 — Incoming organisation sees full client history, labelled by recording organisation
+- Date: 2026-09-17 · Decided by: Dhruv Verma (answering OQ-15)
+- Decision: on organisation transfer (PD-018/PD-036), the incoming organisation sees the client's full history (events, completions, budget, documents) from before the transfer, with each item labelled with the organisation that originally recorded it.
+- Reason: matches the proposed default and US A-12/P-15/P-17's requirement that history remains available and identifiable to authorised parties.
+- Alternatives: hiding pre-transfer history from the new organisation (rejected — contradicts the user stories' identifiability requirement).
+- Consequences: FAM-13, INT-02 carry an `organisation_id` (or equivalent) on historical records for labelling; RLS grants read access to the current organisation across organisation boundaries for that client's history.
+- Human confirmation: CONFIRMED 2026-09-17.
+
+### PD-050 — Hosting stack: Vercel + Supabase paid tier + Resend
+- Date: 2026-09-17 · Decided by: Dhruv Verma (answering OQ-17)
+- Decision: deploy on Vercel with a paid Supabase tier (Postgres, Auth, Storage) and Resend (or Supabase SMTP) for transactional email; Vercel Cron or pg_cron for scheduled jobs (e.g. budget threshold checks).
+- Reason: matches the proposed default; the human chose to proceed on the assumption that budget is available, over descoping to free tiers.
+- Alternatives: free/low-cost tiers accepting reduced availability/backup guarantees (not chosen — human picked the fuller stack).
+- Consequences: NFR-8's 99.9%/backup requirement is targeted rather than descoped. INT-01, INT-08 provision these services; actual billing/budget confirmation with the client sponsor is still needed operationally, but does not block implementation.
+- Human confirmation: CONFIRMED 2026-09-17.
+
+### PD-051 — File uploads: PDF/JPEG/PNG/HEIC/DOCX up to 20MB, no video
+- Date: 2026-09-17 · Decided by: Dhruv Verma (answering OQ-26)
+- Decision: uploads (client documents, event proof-of-completion attachments per PD-044) accept PDF, JPEG, PNG, HEIC, and DOCX, up to 20MB per file. Video is excluded for MVP.
+- Reason: matches the proposed default; covers documents and photos (including completion-proof receipts) without the storage-cost implications of video.
+- Alternatives: including short video clips per CIS3's mention of video recordings (not chosen — human kept video out of scope for MVP).
+- Consequences: F0-13, FAM-08, FAM-09 implement this file-type/size allowlist in upload validation and Supabase Storage policies. Storage cost documented in project handover, per the original proposed default.
+- Human confirmation: CONFIRMED 2026-09-17.
+
+### PD-052 — Undesigned gaps are built directly from Figma tokens/patterns, flagged for review
+- Date: 2026-09-17 · Decided by: Dhruv Verma (answering OQ-19)
+- Decision: for the outstanding undesigned screens/controls (organisation picker, budget Update flow, staff Deactivate control, recurring-edit scope selector, extra recurrence options, event Title/Start/Duration fields, the completion-mode toggle from PD-044, and any others found when re-checking Figma per the original OQ-19 default), Claude Code builds the missing UI directly from the Figma "01 · Foundations" tokens and the visual patterns already established elsewhere in the app, rather than pausing for a separate design/approval step. Each such addition is flagged in its PR for human sanity-check (per §5.3/§10-style HUMAN REVIEW flagging), not silently merged as if it were pre-approved.
+- Reason: there is no separate design step scheduled in the two-week sprint plan; blocking every affected feature on new Figma work would stall the schedule.
+- Alternatives: pausing each affected feature until the human supplies/approves a design first (rejected — human chose speed, accepting review-after-build risk).
+- Consequences: PRs touching any of these gaps must call out "design gap, built from tokens — please review" explicitly, per CLAUDE.md §10's spirit even though this specific case is now pre-authorised. Applies to FAM-11, CAR-07, CAR-08, ADM-03, ADM-05, ADM-08, ADM-09 and any other feature citing an OQ-19 design gap.
+- Human confirmation: CONFIRMED 2026-09-17.
+
+### PD-053 — Shift edit/cancel: simple edit of time/carer, or outright cancellation; no separate "extend" action
+- Date: 2026-09-17 · Decided by: Dhruv Verma (answering OQ-27)
+- Decision: an admin can open a scheduled shift and edit its start/end time or reassign the carer, or cancel it outright (soft-delete, preserving history). There is no separate "extend shift" action distinct from editing the end time.
+- Reason: matches the proposed default framing — simplest workflow that still satisfies CIS5's need to lengthen a shift (via editing the end time) and to cancel one.
+- Alternatives: a distinct "Extend shift" action separate from general edit (rejected — redundant with editing the end time).
+- Consequences: ADM-09 implements a single shift edit/cancel UI; cancellation keeps the shift row (status = cancelled) rather than deleting it, consistent with the project's append-only/audit conventions (PD-005/PD-006).
+- Human confirmation: CONFIRMED 2026-09-17.
+
+### PD-054 — Settings: per-card Save button; Role read-only for carers; email field is contact-only
+- Date: 2026-09-17 · Decided by: Dhruv Verma (answering OQ-35)
+- Decision: each Settings card (Family info, My info, Organisation info) gets its own Save button. Carers cannot edit their own Role field (admin-controlled elsewhere). The email field shown in Settings is a contact email, distinct from the Supabase Auth login email — editing it does not change how the user signs in.
+- Reason: matches the proposed default; keeps login-credential changes (a security-sensitive flow) out of a simple contact-info form.
+- Alternatives: making the Settings email field also update the login email (rejected — adds a re-verification flow not currently designed or requested).
+- Consequences: FAM-12, CAR-09, ADM-10 implement per-card Save actions; Role field is rendered read-only (absent an edit control) for the carer's own Settings view, consistent with PD-008 (controls absent, not disabled).
+- Human confirmation: CONFIRMED 2026-09-17.
+
+### PD-055 — Event assignee derived from the covering shift; actor shown once Done
+- Date: 2026-09-17 · Decided by: Dhruv Verma (answering OQ-29)
+- Decision: the assignee shown on a Planned event is derived from whichever carer has a shift covering that event's scheduled time — consistent with PD-041's shift-derived access model. If no shift covers it, show "—". Once the event is marked Done, show the actor who actually completed it, not the derived assignee.
+- Reason: matches the proposed default; avoids adding a redundant manual assignee field when the shift schedule already determines who is responsible.
+- Alternatives: an explicit manual "assign to" field on the event, independent of shifts (rejected — redundant with the shift schedule and adds a second source of truth for who's responsible).
+- Consequences: F0-11, FAM-01, FAM-14, FAM-15, ADM-01 compute the displayed assignee via a query joining events to shifts by covering time range, not a stored field.
+- Human confirmation: CONFIRMED 2026-09-17.
+
 ---
 
 ## 3. Open decisions (human input required)
@@ -134,42 +350,42 @@ Claude Code never changes a status in this table, never adds an ANSWERED heading
 
 | ID | Decision needed | Conflict / context | Sources | Blocking | Blocks features | Proposed default | Status |
 |---|---|---|---|---|---|---|---|
-| OQ-01 | Branch parent and naming for shared (foundation and cross-cutting) work | The Git model requires every feature to belong to one dashboard stream and forbids feature branches from main, but Phase 0 foundation and some Phase 4 work serve all three dashboards. | User constitution §5–6 | YES | F0-01, F0-02, F0-05, F0-03, F0-14, UI-00, F0-15, UI-01, UI-02, UI-03, F0-04, F0-09, F0-06, F0-08, F0-10, F0-07, F0-11, F0-12, F0-13, F0-16, INT-01, INT-05, INT-06, INT-07, INT-08 | Option B (recommended): `feature/shared-<name>` branched from `main`, PR → `main` with mandatory human review, then `main` merged into all three dev branches. Option A (strict): host shared work in `family-dev` as `feature/family-shared-<name>` and promote via release. Claude Code must not start any shared feature until this is answered. | OPEN |
+| OQ-01 | Branch parent and naming for shared (foundation and cross-cutting) work | The Git model requires every feature to belong to one dashboard stream and forbids feature branches from main, but Phase 0 foundation and some Phase 4 work serve all three dashboards. | User constitution §5–6 | YES | F0-01, F0-02, F0-05, F0-03, F0-14, UI-00, F0-15, UI-01, UI-02, UI-03, F0-04, F0-09, F0-06, F0-08, F0-10, F0-07, F0-11, F0-12, F0-13, F0-16, INT-01, INT-05, INT-06, INT-07, INT-08 | Option B (recommended): `feature/shared-<name>` branched from `main`, PR → `main` with mandatory human review, then `main` merged into all three dev branches. Option A (strict): host shared work in `family-dev` as `feature/family-shared-<name>` and promote via release. Claude Code must not start any shared feature until this is answered. | ANSWERED |
 | OQ-02 | Dashboard phase order | The planning template lists Carer → Admin → Family; UI Specs §4 build order is Family (1–6, 13–14) → Carer (7–9) → Admin (10–12). Plan v0.2 builds the three dashboards in parallel lanes, so order now only matters when a team is too small to staff every lane (SPRINT_PLAN §2). | User constitution §7; UI-§4 | no | — | Family → Carer → Admin (source build order). Seed data (F0-16) removes cross-dashboard data dependencies. | OPEN |
-| OQ-03 | Budget threshold percentages | Client Information Sheet 3 and user stories P-18/UC-F02 say 75% / 85% / 100%; UI Spec D4 and the bucket card states say 70% / 90% / 100%. The design shows Government at 92% in alert state (true under both). | CIS3 Data 6a; CIS5; US P-18; UC-F02; UI-D4; UI-§6 | YES | F0-12, FAM-03, INT-01 | Follow the client's 75/85/100 unless the client approved D4; make thresholds a single configuration constant. | OPEN |
-| OQ-04 | Funding model: buckets, categories and periods | Brief lists funding sources Pension, NDIS, Disability Trust, Family & other with restrictions and different accounting periods (FR-6.1–6.4). CM-0309 descoped funding rules and chose predefined categories/subcategories. The design shows three fixed buckets NDIS, Fixed, Government with no categories. Client Information Sheet No 4 (budgeting) was not supplied. | BRIEF IV, item 5; CIS5; CM-0309; UI-D1; Design Budget | YES | F0-12, FAM-03, FAM-10, FAM-11, CAR-08 | MVP: per-client buckets of kinds NDIS / Fixed / Government with one period each; categories and restrictions parked (PL-10). Obtain CIS4 before F0-12. | OPEN |
-| OQ-05 | Who can add funds and record spending; Budget History contents | UI-D1 'Only Family adds funds'; CM-0409 (later) 'Organisations can edit family budgets'. Design History lists only top-ups; whether expenses appear and who records them (carer? admin?) is unstated. The Update interaction is not designed. | UI-D1, D19; CM-0409; CM-0309; US C-11; Design Budget | YES | F0-12, FAM-10, FAM-11, CAR-08 | Family adds funds; carers record expenses during shifts; admins read — confirm, and design the Update flow. | OPEN |
-| OQ-06 | Organisation change model | UI-D3/D36 and the Settings design: Family 'Change organisation' → picker → confirmation. CM-0309: replace 'Change Organisation' with Add/Delete Organisation. FR-5.8: Admin transfers the client. Admin Clients design has 'Remove'. The organisation picker is not designed. | UI-D3, D24, D36; CM-0309; FR-5.8; Design Settings/Clients | YES | FAM-13, ADM-05, INT-02 | Family-initiated change per the latest design; Admin 'Remove' detaches without deleting. Picker design required. | OPEN |
-| OQ-07 | Client record creation and family linking | CIS3 and CM-1908: family sets up the client and assigns a provider. Admin Clients design: admin adds client with family contact name and email. How the family contact becomes a user is undefined. | CIS3 Order 1–3; CM-1908 workflow; UI-D28; Design Admin Clients | YES | F0-06, ADM-04, ADM-05 | Admin adds client + family contact email → family receives an invitation to set a password; confirm. | OPEN |
-| OQ-08 | Account provisioning, sign-in method and MFA | No sign-in screen is designed. Settings designs imply email-based password reset. Staff and family account creation (invite vs admin-set password) is undefined. NFR-3/ADR-03/TM-2108 require or strongly prompt MFA for Admin; CIS3 asks for bank-like simplicity. | CIS3; CIS5 Q&A; NFR-3; ADR-03; TM-2108; Design Settings | YES | F0-07, ADM-02, ADM-04 | Email + password via Supabase Auth, invitation emails for new users, TOTP MFA required for admins; confirm. | OPEN |
-| OQ-09 | Carer access model | CM-0409: read while assigned, edit only during active shift. UI-D29: carer client-info edit rights match Family's. FR-5.2: carer cannot view clients when not scheduled. ADR-03 uses a separate assignment table; Admin Manage only assigns shifts. Undefined: what creates/ends an assignment, active-shift window, and whether carers create/edit events. | CM-0409; UI-D10, D29; FR-5.2; ADR-03; Sequence UC2, UC3; CM-0309 | YES | F0-06, F0-10, F0-11, CAR-01, CAR-03, CAR-04, CAR-06, CAR-07, ADM-07, ADM-08, INT-04 | Assignment created automatically on first shift and ended by admin or transfer; edits allowed only within [shift start, shift end); carers may create/edit events and client info only during shift. | OPEN |
-| OQ-10 | Status behaviour and undo | UI-D18 three statuses; the Edit event design lets users pick Overdue manually although Overdue should be derived (A-5/P-4). UI Q16: can Done be undone and by whom? CM-0309 asks how automatic Planned/Overdue works. | UI-D18, Q16; US A-5, P-4; CM-0309; Design Edit event | YES | F0-11, FAM-05, FAM-06, FAM-07, FAM-15, CAR-06 | Overdue derived when due time passes without Done (not selectable); Done can be undone by the same actor or family via an append-only 'undone' entry. | OPEN |
-| OQ-11 | Editing recurring events: scope | Prototype A had 'this occurrence / this and future / entire series' and the design traceability cites it for FR-2.5, but the final Edit event design has no scope selector or cancel-occurrence control. | FR-2.5; US C-6; BRIEF item 3; DD §4, §8; Design Edit event | YES | FAM-07 | Add a scope choice when editing a recurring event (design required). | OPEN |
-| OQ-12 | Recurrence options and plan horizon | FR-2.1: weekly, monthly, every 2 months, quarterly, 6-monthly, yearly, one-off. C-5: daily, weekly, monthly. CIS5: multi-year plans (e.g. 4–5 years) rolled over. Design shows a 'Recurring' select with 'Weekly' only. | FR-2.1; US C-5; CIS5 Perpetual; Design Edit event | YES | F0-09, FAM-06 | Options: Does not repeat, Daily, Weekly, Fortnightly, Monthly, Every 2 months, Quarterly, Every 6 months, Yearly; repeats indefinitely unless an end date is set. | OPEN |
-| OQ-13 | Staff names and job titles | CIS5: some organisations show full name, others first name + surname initial. Design shows 'Aisha R.' on records and 'Daniel K.' stored as a name. Role select shows Registered Nurse / Enrolled Nurse / Support Worker; CIS3 wants organisation-defined labels. | CIS3 #3–4; CIS5 Rostering & Q&A; UI-D33; Design Staff | YES | ADM-02 | Store first and last name; display first name + initial everywhere (matches design); job titles are a per-organisation editable list seeded with the three design values. | OPEN |
-| OQ-14 | Carer notifications scope | D34 gives Carers an in-app notifications panel. The design shows notifications for 'new shift assigned', 'family updated care plan documents' and 'family added a note'. Undefined: full list of types, bell click behaviour, read/unread, retention. | UI-D34; Design Carer Home | YES | CAR-02 | Types: shift assigned/changed/cancelled, family document added, family event added/changed; bell shows unread count and scrolls to the card. | OPEN |
-| OQ-15 | Incoming organisation's visibility of history | UI Q15: D24 retains everything on transfer, but can the new organisation see records created under the previous one? US P-17/A-12 say history remains available and identifiable to authorised parties. | UI-Q15; US A-12, P-15, P-17 | YES | FAM-13, INT-02 | Incoming organisation sees full history, labelled with the organisation that recorded it. | OPEN |
-| OQ-16 | Family role granularity | UI Spec: Family = nominee acting under Power of Attorney (single role). CIS5 lists four groups (Carers, Managers, Family, POA). FR-5.3: Family view-only. US P-11: view-only family vs POA authority. | UI-§2; CIS3 #8; CIS5 Q&A; FR-5.3; US P-11 | YES | F0-06 | Single Family role with full family authority for MVP; view-only family parked (PL-16). | OPEN |
-| OQ-17 | Hosting, email, scheduler, environments and availability | Brief: 'loaded on a Microsoft based computer … accessed by others'; NFR-1 cloud; NFR-8 99.9% with daily backups; ADR-01 notes the Supabase free tier does not meet this. Email provider and scheduler not chosen. | BRIEF wish; NFR-1, NFR-8; ADR-01; TD | YES | INT-01, INT-08 | Vercel (or equivalent) + Supabase paid tier; Resend (or Supabase SMTP) for email; Vercel Cron or pg_cron for jobs — confirm budget with client. | OPEN |
+| OQ-03 | Budget threshold percentages | Client Information Sheet 3 and user stories P-18/UC-F02 say 75% / 85% / 100%; UI Spec D4 and the bucket card states say 70% / 90% / 100%. The design shows Government at 92% in alert state (true under both). | CIS3 Data 6a; CIS5; US P-18; UC-F02; UI-D4; UI-§6 | YES | F0-12, FAM-03, INT-01 | Follow the client's 75/85/100 unless the client approved D4; make thresholds a single configuration constant. | ANSWERED |
+| OQ-04 | Funding model: buckets, categories and periods | Brief lists funding sources Pension, NDIS, Disability Trust, Family & other with restrictions and different accounting periods (FR-6.1–6.4). CM-0309 descoped funding rules and chose predefined categories/subcategories. The design shows three fixed buckets NDIS, Fixed, Government with no categories. Client Information Sheet No 4 (budgeting) was not supplied. | BRIEF IV, item 5; CIS5; CM-0309; UI-D1; Design Budget | YES | F0-12, FAM-03, FAM-10, FAM-11, CAR-08 | MVP: per-client buckets of kinds NDIS / Fixed / Government with one period each; categories and restrictions parked (PL-10). Obtain CIS4 before F0-12. | ANSWERED |
+| OQ-05 | Who can add funds and record spending; Budget History contents | UI-D1 'Only Family adds funds'; CM-0409 (later) 'Organisations can edit family budgets'. Design History lists only top-ups; whether expenses appear and who records them (carer? admin?) is unstated. The Update interaction is not designed. | UI-D1, D19; CM-0409; CM-0309; US C-11; Design Budget | YES | F0-12, FAM-10, FAM-11, CAR-08 | Family adds funds; carers record expenses during shifts; admins read — confirm, and design the Update flow. | ANSWERED |
+| OQ-06 | Organisation change model | UI-D3/D36 and the Settings design: Family 'Change organisation' → picker → confirmation. CM-0309: replace 'Change Organisation' with Add/Delete Organisation. FR-5.8: Admin transfers the client. Admin Clients design has 'Remove'. The organisation picker is not designed. | UI-D3, D24, D36; CM-0309; FR-5.8; Design Settings/Clients | YES | FAM-13, ADM-05, INT-02 | Family-initiated change per the latest design; Admin 'Remove' detaches without deleting. Picker design required. | ANSWERED |
+| OQ-07 | Client record creation and family linking | CIS3 and CM-1908: family sets up the client and assigns a provider. Admin Clients design: admin adds client with family contact name and email. How the family contact becomes a user is undefined. | CIS3 Order 1–3; CM-1908 workflow; UI-D28; Design Admin Clients | YES | F0-06, ADM-04, ADM-05 | Admin adds client + family contact email → family receives an invitation to set a password; confirm. | ANSWERED |
+| OQ-08 | Account provisioning, sign-in method and MFA | No sign-in screen is designed. Settings designs imply email-based password reset. Staff and family account creation (invite vs admin-set password) is undefined. NFR-3/ADR-03/TM-2108 require or strongly prompt MFA for Admin; CIS3 asks for bank-like simplicity. | CIS3; CIS5 Q&A; NFR-3; ADR-03; TM-2108; Design Settings | YES | F0-07, ADM-02, ADM-04 | Email + password via Supabase Auth, invitation emails for new users, TOTP MFA required for admins; confirm. | ANSWERED |
+| OQ-09 | Carer access model | CM-0409: read while assigned, edit only during active shift. UI-D29: carer client-info edit rights match Family's. FR-5.2: carer cannot view clients when not scheduled. ADR-03 uses a separate assignment table; Admin Manage only assigns shifts. Undefined: what creates/ends an assignment, active-shift window, and whether carers create/edit events. | CM-0409; UI-D10, D29; FR-5.2; ADR-03; Sequence UC2, UC3; CM-0309 | YES | F0-06, F0-10, F0-11, CAR-01, CAR-03, CAR-04, CAR-06, CAR-07, ADM-07, ADM-08, INT-04 | Assignment created automatically on first shift and ended by admin or transfer; edits allowed only within [shift start, shift end); carers may create/edit events and client info only during shift. | ANSWERED |
+| OQ-10 | Status behaviour and undo | UI-D18 three statuses; the Edit event design lets users pick Overdue manually although Overdue should be derived (A-5/P-4). UI Q16: can Done be undone and by whom? CM-0309 asks how automatic Planned/Overdue works. | UI-D18, Q16; US A-5, P-4; CM-0309; Design Edit event | YES | F0-11, FAM-05, FAM-06, FAM-07, FAM-15, CAR-06 | Overdue derived when due time passes without Done (not selectable); Done can be undone by the same actor or family via an append-only 'undone' entry. | ANSWERED |
+| OQ-11 | Editing recurring events: scope | Prototype A had 'this occurrence / this and future / entire series' and the design traceability cites it for FR-2.5, but the final Edit event design has no scope selector or cancel-occurrence control. | FR-2.5; US C-6; BRIEF item 3; DD §4, §8; Design Edit event | YES | FAM-07 | Add a scope choice when editing a recurring event (design required). | ANSWERED |
+| OQ-12 | Recurrence options and plan horizon | FR-2.1: weekly, monthly, every 2 months, quarterly, 6-monthly, yearly, one-off. C-5: daily, weekly, monthly. CIS5: multi-year plans (e.g. 4–5 years) rolled over. Design shows a 'Recurring' select with 'Weekly' only. | FR-2.1; US C-5; CIS5 Perpetual; Design Edit event | YES | F0-09, FAM-06 | Options: Does not repeat, Daily, Weekly, Fortnightly, Monthly, Every 2 months, Quarterly, Every 6 months, Yearly; repeats indefinitely unless an end date is set. | ANSWERED |
+| OQ-13 | Staff names and job titles | CIS5: some organisations show full name, others first name + surname initial. Design shows 'Aisha R.' on records and 'Daniel K.' stored as a name. Role select shows Registered Nurse / Enrolled Nurse / Support Worker; CIS3 wants organisation-defined labels. | CIS3 #3–4; CIS5 Rostering & Q&A; UI-D33; Design Staff | YES | ADM-02 | Store first and last name; display first name + initial everywhere (matches design); job titles are a per-organisation editable list seeded with the three design values. | ANSWERED |
+| OQ-14 | Carer notifications scope | D34 gives Carers an in-app notifications panel. The design shows notifications for 'new shift assigned', 'family updated care plan documents' and 'family added a note'. Undefined: full list of types, bell click behaviour, read/unread, retention. | UI-D34; Design Carer Home | YES | CAR-02 | Types: shift assigned/changed/cancelled, family document added, family event added/changed; bell shows unread count and scrolls to the card. | ANSWERED |
+| OQ-15 | Incoming organisation's visibility of history | UI Q15: D24 retains everything on transfer, but can the new organisation see records created under the previous one? US P-17/A-12 say history remains available and identifiable to authorised parties. | UI-Q15; US A-12, P-15, P-17 | YES | FAM-13, INT-02 | Incoming organisation sees full history, labelled with the organisation that recorded it. | ANSWERED |
+| OQ-16 | Family role granularity | UI Spec: Family = nominee acting under Power of Attorney (single role). CIS5 lists four groups (Carers, Managers, Family, POA). FR-5.3: Family view-only. US P-11: view-only family vs POA authority. | UI-§2; CIS3 #8; CIS5 Q&A; FR-5.3; US P-11 | YES | F0-06 | Single Family role with full family authority for MVP; view-only family parked (PL-16). | ANSWERED |
+| OQ-17 | Hosting, email, scheduler, environments and availability | Brief: 'loaded on a Microsoft based computer … accessed by others'; NFR-1 cloud; NFR-8 99.9% with daily backups; ADR-01 notes the Supabase free tier does not meet this. Email provider and scheduler not chosen. | BRIEF wish; NFR-1, NFR-8; ADR-01; TD | YES | INT-01, INT-08 | Vercel (or equivalent) + Supabase paid tier; Resend (or Supabase SMTP) for email; Vercel Cron or pg_cron for jobs — confirm budget with client. | ANSWERED |
 | OQ-18 | Printable schedule and data export | TM-2808 says the client moved printable export to Must; user stories v3 rate A-15 COULD and P-16 SHOULD; CIS3 requires POA/parent approval for downloads. No design. | TM-2808; US A-15, P-16; CIS3 Data 7 | no | — | Parked (PL-08) pending client priority. | OPEN |
-| OQ-19 | Figma access and remaining design gaps | Figma MCP exposed only page '01 · Foundations'; screens were supplied as images (a '06 · States' sheet implies pages 02–06). Not designed: sign-in/reset pages, add-event header and title/time fields, organisation picker, budget Update, staff deactivate, client remove, custom time slot input, shift edit, expense entry, event notes/comments, carer add-event entry, admin overdue drill-down. | FIG; user-supplied screen images (17 Sep 2026) | YES | FAM-11, CAR-07, CAR-08, ADM-03, ADM-05, ADM-08, ADM-09 | Claude Code re-checks Figma in F0-01; each gap blocks only the features that cite it. | OPEN |
-| OQ-20 | Repository and infrastructure reality | Team meeting 4/9 reports a live repository with CI, Supabase schema and RLS tests for all four roles; the human reports an essentially empty Next.js scaffold. An archived Confluence 'Tech Stack' page lists MongoDB. | TM-0409; archived Confluence 'Tech Stack'; user constitution §3 | YES | F0-01 | Treat the current repository as authoritative; ask whether any Supabase project/schema exists to adopt. | OPEN |
+| OQ-19 | Figma access and remaining design gaps | Figma MCP exposed only page '01 · Foundations'; screens were supplied as images (a '06 · States' sheet implies pages 02–06). Not designed: sign-in/reset pages, add-event header and title/time fields, organisation picker, budget Update, staff deactivate, client remove, custom time slot input, shift edit, expense entry, event notes/comments, carer add-event entry, admin overdue drill-down. | FIG; user-supplied screen images (17 Sep 2026) | YES | FAM-11, CAR-07, CAR-08, ADM-03, ADM-05, ADM-08, ADM-09 | Claude Code re-checks Figma in F0-01; each gap blocks only the features that cite it. | ANSWERED |
+| OQ-20 | Repository and infrastructure reality | Team meeting 4/9 reports a live repository with CI, Supabase schema and RLS tests for all four roles; the human reports an essentially empty Next.js scaffold. An archived Confluence 'Tech Stack' page lists MongoDB. | TM-0409; archived Confluence 'Tech Stack'; user constitution §3 | YES | F0-01 | Treat the current repository as authoritative; ask whether any Supabase project/schema exists to adopt. | ANSWERED |
 | OQ-21 | Rostering scope and shift patterns | Product requirements OOS-5 says rostering is out of scope; CM-1908, CM-0309, UI §7.14 and the Manage design include shift assignment. CIS5 wants organisation-configurable shift patterns and extension; the design uses fixed slot chips + Custom. | OOS-5; CM-1908; CIS5 Rostering; Design Manage | no | — | Shift assignment in scope per later sources; fixed chips for MVP, configurable patterns parked (PL-19). | OPEN |
-| OQ-22 | Event fields | Home, Calendar, Task log and Task detail display event title, start time and duration, and CM-0309 says tasks require date and time, but the Edit event form only has Date, Recurring, Status, Description and Documents. | CM-0309; Design Edit event vs Home/Calendar | YES | F0-11, FAM-06, FAM-07, CAR-07 | Add Title, Start time and Duration fields to the event form (design update). | OPEN |
+| OQ-22 | Event fields | Home, Calendar, Task log and Task detail display event title, start time and duration, and CM-0309 says tasks require date and time, but the Edit event form only has Date, Recurring, Status, Description and Documents. | CM-0309; Design Edit event vs Home/Calendar | YES | F0-11, FAM-06, FAM-07, CAR-07 | Add Title, Start time and Duration fields to the event form (design update). | ANSWERED |
 | OQ-23 | Dependency security tool ('X-ray') | Testing Decision selects 'X-ray' checks without naming the tool. | TD | no | — | npm audit (high) + Dependabot. | OPEN |
 | OQ-24 | Undesigned empty states | UI Q17 (client with no funding) and other empty states (no events today, no history) are not in the States sheet. | UI-Q17; Design States | no | — | Use the EmptyState primitive with proposed copy flagged for review. | OPEN |
 | OQ-25 | Help tooltips, FAQ and discussion board | CIS3 asks for '?'/'i' help bubbles and an editable Q&A; CIS5 adds an editable FAQ and a staff discussion board; CM-0309 agreed contextual help throughout. None designed. | CIS3 Access 6; CIS5 FAQ; CM-0309 | no | — | Parked (PL-05) pending design and priority. | OPEN |
-| OQ-26 | File upload constraints | US C-4 refers to an 'agreed file-size limit'; CIS3 mentions photos and video recordings kept in perpetuity and asks about subscription fees. No limits agreed. | US C-4; CIS3 Data 4 | YES | F0-13, FAM-08, FAM-09 | PDF, JPEG, PNG, HEIC, DOCX up to 20 MB; video excluded for MVP; storage cost documented in handover. | OPEN |
-| OQ-27 | Shift edit, extend and cancel workflow | CIS5 requires extending a shift; CM-0309 lists the workflow as unresolved. No design. | CIS5 Rostering; CM-0309 | YES | ADM-09 | Design required. | OPEN |
-| OQ-28 | Budget email recipients and budget period | D4: family, nurse and admin. CIS5: a 'Warning Notification Entities' registry of names/emails, changeable, excluding removed organisations. E-1..E-3: POA and/or Family. 'Present period' boundaries undefined. | UI-D4; CIS5 Notifications; US E-1..E-3 | YES | INT-01 | Family + current organisation admins; registry parked (PL-02); period = bucket period. | OPEN |
-| OQ-29 | Which nurse is shown on an event | Home blocks, Task log 'Nurse' and Task detail 'Assigned to Aisha R.' show an assignee; overdue rows show '—'. The event form has no assignee field. Could be derived from the shift covering the event time or stored on the event. | UI-D25; Design Home, Task log, Task detail | YES | F0-11, FAM-01, FAM-14, FAM-15, ADM-01 | Derive from the carer whose shift covers the occurrence start; '—' if none; for Done show the actor. | OPEN |
+| OQ-26 | File upload constraints | US C-4 refers to an 'agreed file-size limit'; CIS3 mentions photos and video recordings kept in perpetuity and asks about subscription fees. No limits agreed. | US C-4; CIS3 Data 4 | YES | F0-13, FAM-08, FAM-09 | PDF, JPEG, PNG, HEIC, DOCX up to 20 MB; video excluded for MVP; storage cost documented in handover. | ANSWERED |
+| OQ-27 | Shift edit, extend and cancel workflow | CIS5 requires extending a shift; CM-0309 lists the workflow as unresolved. No design. | CIS5 Rostering; CM-0309 | YES | ADM-09 | Design required. | ANSWERED |
+| OQ-28 | Budget email recipients and budget period | D4: family, nurse and admin. CIS5: a 'Warning Notification Entities' registry of names/emails, changeable, excluding removed organisations. E-1..E-3: POA and/or Family. 'Present period' boundaries undefined. | UI-D4; CIS5 Notifications; US E-1..E-3 | YES | INT-01 | Family + current organisation admins; registry parked (PL-02); period = bucket period. | ANSWERED |
+| OQ-29 | Which nurse is shown on an event | Home blocks, Task log 'Nurse' and Task detail 'Assigned to Aisha R.' show an assignee; overdue rows show '—'. The event form has no assignee field. Could be derived from the shift covering the event time or stored on the event. | UI-D25; Design Home, Task log, Task detail | YES | F0-11, FAM-01, FAM-14, FAM-15, ADM-01 | Derive from the carer whose shift covers the occurrence start; '—' if none; for Done show the actor. | ANSWERED |
 | OQ-30 | Multi-client family accounts | CM-2108 decided one account can access multiple client schedules; prior-group clarification (parent with several children); US P-10 COULD. UI Spec says Family context is one client; no client switcher designed. | CM-2108; US P-10; UI-§2 | no | — | Routes include clientId; switcher parked (PL-15). | OPEN |
 | OQ-31 | Task log range | 'Every task' is unbounded for perpetual recurrences. The design shows past items and today's planned items only. | UI-D27; Design Task log | no | — | Occurrences up to end of today, newest first. | OPEN |
 | OQ-32 | Timezone | All sources are Victorian; no multi-timezone requirement exists. | Design content (Preston VIC) | no | — | Australia/Melbourne for all date logic. | OPEN |
-| OQ-33 | Carer calendar and task semantics | Carer Calendar is titled 'Shifts' but its blocks show events ('09:00 Margaret — Morning medication') at event times, unlike the 4-hour slots assigned in Manage. 'Tasks for the selected shift' lists checklist steps (Administer morning medication, Record in medication log, Check for side effects before leaving) that exist nowhere else. Carer Home 'Tasks' lists events. Which clients' events appear on Carer Home is undefined. | UI-D8; Design Carer Calendar, Carer Home, Admin Manage | YES | F0-11, CAR-01, CAR-05, CAR-06, INT-03, INT-04 | Decide: (a) blocks = shifts or events; (b) whether events have checklist sub-tasks and who authors them; (c) Carer Home scope. | OPEN |
+| OQ-33 | Carer calendar and task semantics | Carer Calendar is titled 'Shifts' but its blocks show events ('09:00 Margaret — Morning medication') at event times, unlike the 4-hour slots assigned in Manage. 'Tasks for the selected shift' lists checklist steps (Administer morning medication, Record in medication log, Check for side effects before leaving) that exist nowhere else. Carer Home 'Tasks' lists events. Which clients' events appear on Carer Home is undefined. | UI-D8; Design Carer Calendar, Carer Home, Admin Manage | YES | F0-11, CAR-01, CAR-05, CAR-06, INT-03, INT-04 | Decide: (a) blocks = shifts or events; (b) whether events have checklist sub-tasks and who authors them; (c) Carer Home scope. | ANSWERED |
 | OQ-34 | Event notes and comments | CIS5 Q&A and brief item 4 require comments on completed tasks; the Carer notification 'Helen added a note to today's Afternoon check-in' implies notes exist; no note/comment UI is designed. | BRIEF item 4(i, iii); CIS5 Q&A; US C-3, C-10; Design Carer Home | no | — | Parked (PL-21) until designed. | OPEN |
-| OQ-35 | Settings forms save behaviour | Family info, My info and Organisation info cards show inputs but no Save button. Unclear whether carers can edit Role and whether email changes the login email. | Design Family/Carer/Admin Settings | YES | FAM-12, CAR-09, ADM-10 | Add a Save button per card; Role read-only for carers; email field is contact email only. | OPEN |
-| OQ-36 | Staff deactivation | FR-5.6/US A-2 and CIS5 require withdrawing access when staff leave; the Staff design has no deactivate/remove control. | FR-5.6; US A-2; CIS5 Q&A; Design Staff | YES | ADM-03 | Design a Deactivate action in the Add/edit panel with confirmation. | OPEN |
+| OQ-35 | Settings forms save behaviour | Family info, My info and Organisation info cards show inputs but no Save button. Unclear whether carers can edit Role and whether email changes the login email. | Design Family/Carer/Admin Settings | YES | FAM-12, CAR-09, ADM-10 | Add a Save button per card; Role read-only for carers; email field is contact email only. | ANSWERED |
+| OQ-36 | Staff deactivation | FR-5.6/US A-2 and CIS5 require withdrawing access when staff leave; the Staff design has no deactivate/remove control. | FR-5.6; US A-2; CIS5 Q&A; Design Staff | YES | ADM-03 | Design a Deactivate action in the Add/edit panel with confirmation. | ANSWERED |
 | OQ-37 | Admin Home overdue row destination | Rows have chevrons but Admin has no task detail or task log screen (UI Q14). | UI-Q14; Design Admin Home | no | — | Omit navigation until an admin detail view is designed (PL-20). | OPEN |
 | OQ-38 | Client information fields | CIS3/CIS5 request DOB, contacts (parents, POA), disability, behaviours of concern up front, date admitted, 'last updated', photo, expandable headings with summary flags and SPO forms with archive. The Info design has Description, Habits, Medical history and Documentation only. | CIS3 Data 1–2; CIS5 Front page; Design Family Info | no | — | Build the design for MVP; remaining fields parked (PL-13, PL-22) pending client confirmation. | OPEN |
 | OQ-39 | Design copy and visual inconsistencies | Manage warning example (11:30–13:00) does not overlap the selected 07:00–11:00 slot; States sheet repeats no-results copy twice; Budget screen bar colours differ from Home; Task log Nurse column misaligned on Planned rows; Task log status filter is a dropdown despite 'chips over dropdowns'; Staff and Clients rail items share an icon. | Design images; DD §5, §7 | no | — | Follow tokens and the rules in UI-§5; generate warning text from real data; confirm copy. | OPEN |
@@ -184,34 +400,44 @@ Recorded as: PD-0xx
 Docs updated: <files>
 ```
 
+### OQ-01 — ANSWERED 2026-09-17 by Dhruv Verma
+Answer: Option B — `feature/shared-<name>` from `main`, PR to `main` with mandatory human review, then merged into all three dashboard dev branches.
+Recorded as: PD-030
+Docs updated: DECISIONS.md
+
+### OQ-20 — ANSWERED 2026-09-17 by Dhruv Verma
+Answer: The current repository is authoritative and starts empty; no existing Supabase project/schema/CI exists to adopt.
+Recorded as: PD-031
+Docs updated: DECISIONS.md
+
 ---
 
 ## 4. Source conflict register
 
 | # | Conflict | Sources | Resolution | Status |
 |---|---|---|---|---|
-| C-01 | Budget thresholds 75/85/100 vs 70/90/100 | CIS3, US P-18 vs UI-D4 | OQ-03 | OPEN |
-| C-02 | Fund editing: Family only vs organisation can edit | UI-D1 vs CM-0409 | OQ-05 | OPEN |
-| C-03 | Change organisation vs Add/Delete organisation vs Admin transfer | UI-D3/D36 + design vs CM-0309 vs FR-5.8 | OQ-06 | OPEN |
-| C-04 | Client created by family vs by admin | CIS3, CM-1908 vs UI-D28 + Admin Clients design | OQ-07 | OPEN |
-| C-05 | Carer edit rights same as family vs only during shift | UI-D29 vs CM-0409 | PD-019 (shift-limited) + OQ-09 details | PARTLY RESOLVED |
+| C-01 | Budget thresholds 75/85/100 vs 70/90/100 | CIS3, US P-18 vs UI-D4 | OQ-03 / PD-032 (75/85/100 wins) | RESOLVED |
+| C-02 | Fund editing: Family only vs organisation can edit | UI-D1 vs CM-0409 | OQ-05 / PD-034 (CM-0409 wins) | RESOLVED |
+| C-03 | Change organisation vs Add/Delete organisation vs Admin transfer | UI-D3/D36 + design vs CM-0309 vs FR-5.8 | OQ-06 / PD-036 (design wins) | RESOLVED |
+| C-04 | Client created by family vs by admin | CIS3, CM-1908 vs UI-D28 + Admin Clients design | OQ-07 / PD-037 (CIS3/CM-1908 wins; design needs rework) | RESOLVED |
+| C-05 | Carer edit rights same as family vs only during shift | UI-D29 vs CM-0409 | PD-019 + PD-041 (shift-limited, fully specified) | RESOLVED |
 | C-06 | Family view-only vs family edits, adds funds, changes organisation | FR-5.3, US v2 vs UI-D1, D9, D26, CM-0309 | Later sources win (family edits); granularity OQ-16 | PARTLY RESOLVED |
 | C-07 | Supervisor confirms completion vs no approval | CIS5 Q&A vs CM-0309 | PD-020 | RESOLVED |
 | C-08 | Rostering out of scope vs shift assignment designed | OOS-5 vs CM-1908, CM-0309, UI §7.14 | PD-025 / OQ-21 | PROPOSED |
-| C-09 | Configurable funding sources/restrictions/periods vs three fixed buckets | BRIEF, FR-6.x vs CM-0309, UI-D1, designs | OQ-04 | OPEN |
-| C-10 | Overdue as user-selectable status vs derived | Edit event design vs US A-5/P-4 | OQ-10 | OPEN |
-| C-11 | Recurring edit scope present in Prototype A / traceability vs absent in final | DD §4, §8 vs Edit event design | OQ-11 | OPEN |
+| C-09 | Configurable funding sources/restrictions/periods vs three fixed buckets | BRIEF, FR-6.x vs CM-0309, UI-D1, designs | OQ-04 / PD-033 | RESOLVED |
+| C-10 | Overdue as user-selectable status vs derived | Edit event design vs US A-5/P-4 | OQ-10 / PD-044 (derived, for manual-mode events) | RESOLVED |
+| C-11 | Recurring edit scope present in Prototype A / traceability vs absent in final | DD §4, §8 vs Edit event design | OQ-11 / PD-045 | RESOLVED |
 | C-12 | Printable export Must vs Could | TM-2808 vs US A-15 | OQ-18 | OPEN |
 | C-13 | MFA Must vs should be supported vs simple bank-like login | TM-2108 vs NFR-3 vs CIS3 | OQ-08 | OPEN |
-| C-14 | Repo has CI/Supabase/RLS vs empty scaffold | TM-0409 vs human | OQ-20 | OPEN |
+| C-14 | Repo has CI/Supabase/RLS vs empty scaffold | TM-0409 vs human | OQ-20 / PD-031 (human wins) | RESOLVED |
 | C-15 | Tech stack MongoDB (archived page) vs Supabase | Archived "Tech Stack" vs ADR-01 | ADR-01 wins (PD-001) | RESOLVED |
 | C-16 | ERD integer money/no roles vs ADR consequences | Database Model vs ADR-01 | PD-024 | PROPOSED |
-| C-17 | Carer calendar "Shifts" showing events and checklist sub-tasks vs shift slots in Manage | Carer Calendar design vs Admin Manage design, UI-D8 | OQ-33 | OPEN |
+| C-17 | Carer calendar "Shifts" showing events and checklist sub-tasks vs shift slots in Manage | Carer Calendar design vs Admin Manage design, UI-D8 | OQ-33 / PD-043 | RESOLVED |
 | C-18 | Client info fields requested by client vs design sections | CIS3/CIS5 vs Family Info design | OQ-38 | OPEN |
-| C-19 | Email recipients: registry vs roles vs POA/Family | CIS5 vs UI-D4 vs E-1..E-3 | OQ-28 | OPEN |
+| C-19 | Email recipients: registry vs roles vs POA/Family | CIS5 vs UI-D4 vs E-1..E-3 | OQ-28 / PD-035 | RESOLVED |
 | C-20 | Family context one client vs multi-client accounts | UI-§2 vs CM-2108, US P-10 | OQ-30 | PARKED |
 | C-21 | FR-5.2 carer cannot view when not scheduled vs read while assigned | FR-5.2 vs CM-0409 | CM-0409 wins (PD-019) | RESOLVED |
-| C-22 | Edit event form lacks title/time/duration shown elsewhere | Edit event vs Home/Calendar/Task log designs, CM-0309 | OQ-22 | OPEN |
+| C-22 | Edit event form lacks title/time/duration shown elsewhere | Edit event vs Home/Calendar/Task log designs, CM-0309 | OQ-22 / PD-047 | RESOLVED |
 | C-23 | "Chips over dropdowns" vs dropdowns in Recurring, Status filter, Staff Role | DD §5, §7 vs designs | Follow designs; noted OQ-39 | NOTED |
 | C-24 | Screen detail source UI Spec v1 §7 referenced but not available | UI Specs §7 | Designs supplied as images; OQ-19 | PARTLY RESOLVED |
 
@@ -219,9 +445,19 @@ Docs updated: <files>
 ---
 
 ## 5. Controlled changes
-_None yet._ Template:
+
+### CHG-001 — Per-event completion mode (Manual with optional proof / Automatic self-completing)
+- Date / requested by: 2026-09-17 / Dhruv Verma (human, project lead)
+- Type: new requirement
+- Description: add a `completion_mode` attribute to every event/routine (`manual` or `automatic`, set once per event, applying to all its occurrences). Manual events require a carer/family member to explicitly mark them Done with their name recorded, optionally attaching a document/photo as proof (using the existing per-event Documents field). Automatic events self-complete when their scheduled time passes, with no confirmation, no actor, and no Overdue state. See PD-044 for full behaviour.
+- Source / justification: no PRD/AC/design document specifies this distinction; it is a new requirement the human introduced directly in this session, motivated by a real gap (not every task needs proof of completion — e.g. "go on a walk" vs "buy prescriptions").
+- Impact: F0-11 event schema gains `completion_mode`; FAM-06/FAM-07/CAR-06/CAR-07 event create/edit UI gain a mode toggle; Edit event design needs the control added (design gap, fold into OQ-19); ACCEPTANCE_CRITERIA.md for affected features needs new ACs for both modes; TEST_PLAN.md needs cases for automatic self-completion and manual tick-off with/without proof.
+- Human confirmation: Dhruv Verma, 2026-09-17.
+- Docs updated: DECISIONS.md (PD-044, this entry). Still to update: PRD.md scope section, affected features' ACCEPTANCE_CRITERIA.md and TEST_PLAN.md, DEVELOPMENT_PLAN.md if it changes feature sizing.
+
+Template for future entries:
 ```
-### CHG-001 — <title>
+### CHG-xxx — <title>
 - Date / requested by:
 - Type: new requirement | new feature | scope change | architectural change
 - Description:
