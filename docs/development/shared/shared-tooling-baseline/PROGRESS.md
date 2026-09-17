@@ -1,12 +1,12 @@
 # Progress — F0-02 Tooling baseline: TypeScript, lint, format, test runners
 
-Status: PR OPEN
+Status: MERGED TO DEV
 Owner: Dhruv Verma
 Lane: S — Shared kit
 Sprint: SPRINT · planned D1
 Branch: `feature/shared-tooling-baseline`
 PR target: `main (per OQ-01 — shared work)`
-Last updated: 2026-09-17 (PR opened, human-approved)
+Last updated: 2026-09-17 (merged via PR #8; family-dev/carer-dev/admin-dev created from main)
 
 ## Blockers
 - None — OQ-01 answered (PD-030, root DECISIONS.md)
@@ -30,16 +30,16 @@ Last updated: 2026-09-17 (PR opened, human-approved)
 - None
 
 ## Remaining
-- Create `family-dev`, `carer-dev`, `admin-dev` from `main` **after this PR merges** (AC-04/T-04) — first action once merge lands
+- None
 
 ## Acceptance criteria status
-- 3 / 4 MET (AC-01, AC-02, AC-03); AC-04 BLOCKED on merge (see Remaining)
+- 4 / 4 MET (AC-01, AC-02, AC-03, AC-04 — `family-dev`, `carer-dev`, `admin-dev` created from `main` post-merge)
 
 ## Tests
 - Written: 4 / 4 (T-01..T-04; T-01/T-02/T-03 are demonstrated per the TESTING.md §2 config-feature exception — deliberate fail + pass, not classical red/green unit tests)
-- Passing: 3 (T-01, T-02, T-03)
+- Passing: 4 (T-01, T-02, T-03, T-04)
 - Failing: 0
-- Pending: 1 (T-04, blocked on merge)
+- Pending: 0
 
 ## Files changed
 - `package.json`, `package-lock.json`, `tsconfig.json`, `eslint.config.mjs`, `.prettierrc.json`, `.prettierignore`, `.gitignore`, `vitest.config.ts`, `vitest.setup.ts`, `playwright.config.ts`, `commitlint.config.cjs`, `tests/e2e/smoke.spec.ts`, `src/lib/example.ts`, `src/lib/example.test.ts`, `src/lib/example-component.test.tsx`
@@ -57,7 +57,7 @@ Last updated: 2026-09-17 (PR opened, human-approved)
 - PROPOSED items in PRD.md are unconfirmed until validated in F0-01 or answered in DECISIONS.md.
 
 ## Next action
-- Await PR review/merge. After merge: create `family-dev`, `carer-dev`, `admin-dev` from `main` and confirm T-04/AC-04.
+- None — feature complete.
 
 ## Ready for PR
-- Yes — approved by Dhruv Verma 2026-09-17; PR opened
+- Yes — merged via PR #8, 2026-09-17
