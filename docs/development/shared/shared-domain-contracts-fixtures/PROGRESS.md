@@ -32,9 +32,9 @@ Last updated: 2026-09-17 (implementation session)
 - 0 / 6 MET
 
 ## Tests
-- Written: 0 / 6
+- Written: 6 / 6 (T-01..T-06, plus supporting tests for formatMoney/ageFromDob/formatShortDate not tied to a specific AC)
 - Passing: 0
-- Failing: 0
+- Failing: 6 (all failing for the expected reason before implementation: `npx vitest run` — T-01..T-05 fail with "Failed to resolve import" for the not-yet-created `src/lib/format/*` and `src/server/budget/queries.ts`/`src/mocks/*` modules; T-06 fails with `errorCount` 0 (expected >0) because the `no-restricted-imports` lint rule for `src/mocks` doesn't exist yet)
 
 ## Files changed
 - None yet. Likely files: `src/types/domain.ts`, `src/server/data-source.ts`, `src/server/*/queries.ts`, `src/mocks/fixtures.ts`, `src/mocks/current-user.ts`, `src/lib/format/*`
