@@ -111,6 +111,50 @@ describe("expandOccurrences", () => {
     expect(moved?.start).toBe("2026-12-08T10:00:00");
   });
 
+  it("[F0-09][AC-05] excludes a cancelled occurrence when originalStart is given at minute precision", () => {
+    const rule: RecurrenceRule = {
+      frequency: "weekly",
+      interval: 1,
+      anchor: "2026-11-30T09:00:00",
+    };
+    // No seconds — same precision rule anchors typically use.
+    const overrides: RecurrenceOverride[] = [{ type: "cancelled", originalStart: "2026-12-07T09:00" }];
+
+    const occurrences = expandOccurrences(
+      rule,
+      { start: "2026-11-30T00:00:00", end: "2026-12-21T00:00:00" },
+      overrides,
+    );
+
+    expect(occurrences.map((o) => o.start)).toEqual(["2026-11-30T09:00:00", "2026-12-14T09:00:00"]);
+  });
+
+  it("[F0-09][AC-06] moves an occurrence when originalStart is given at minute precision", () => {
+    const rule: RecurrenceRule = {
+      frequency: "weekly",
+      interval: 1,
+      anchor: "2026-11-30T09:00:00",
+    };
+    const overrides: RecurrenceOverride[] = [
+      {
+        type: "modified",
+        // No seconds — same precision rule anchors typically use.
+        originalStart: "2026-12-07T09:00",
+        start: "2026-12-08T10:00:00",
+      },
+    ];
+
+    const occurrences = expandOccurrences(
+      rule,
+      { start: "2026-11-30T00:00:00", end: "2026-12-21T00:00:00" },
+      overrides,
+    );
+
+    const moved = occurrences.find((o) => o.originalStart === "2026-12-07T09:00:00");
+    expect(moved).toBeDefined();
+    expect(moved?.start).toBe("2026-12-08T10:00:00");
+  });
+
   it("[F0-09][AC-08] expands 500 weekly rules over a 6-week range in under 100ms", () => {
     const rules: RecurrenceRule[] = Array.from({ length: 500 }, (_, i) => ({
       frequency: "weekly",
