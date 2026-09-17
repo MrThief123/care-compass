@@ -1,0 +1,6 @@
+{
+  "enabledPlugins": {
+    "designagent@designagent": false
+  },
+  "disableClaudeAiConnectors": true
+}
