@@ -1,6 +1,6 @@
 # Progress — F0-05 Design tokens, typography and base styles
 
-Status: PR OPEN
+Status: MERGED TO DEV
 Owner: Dhruv Verma
 Lane: S — Shared kit
 Sprint: SPRINT · planned D1
