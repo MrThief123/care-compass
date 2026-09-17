@@ -1,14 +1,14 @@
 # Session State — F0-05 Design tokens, typography and base styles
 
-Last session date: none (no implementation session yet)
-Current branch: n/a — `feature/shared-design-tokens` not created
-Worked on: n/a
-What changed: n/a
-Tests run: none
-Test results: n/a
-Current blocker: OQ-01
-Important discoveries: none
-Important decisions: none
-Exact next action: Run `START FEATURE F0-05` once dependencies are MERGED TO DEV (or COMPLETE) and blocking decisions are answered.
-Files likely to be touched next: `src/styles/tokens.css`, `src/app/globals.css`, `src/app/layout.tsx`, `src/styles/tokens.fixture.json`, `src/styles/contrast.test.ts`, `components.json`
-Warning for next session: Read PRD.md, ACCEPTANCE_CRITERIA.md and TEST_PLAN.md before writing any code. Do not create the branch from the wrong parent (`main (per OQ-01 — shared work)`).
+Last session date: 2026-09-17
+Current branch: `feature/shared-design-tokens` (from `main`, parentage verified)
+Worked on: F0-05 full implementation — tokens, contrast tests, shadcn/ui init + Button
+What changed: Added `src/styles/tokens.css` (Tailwind v4 `@theme` colour/spacing/radius tokens, shadcn semantic vars, type-ramp `@utility` classes, rail gradient), `src/styles/tokens.fixture.json`, `src/lib/contrast.ts`, `src/styles/contrast-pairs.ts`, `src/lib/utils.ts` (`cn`), `components.json`, `src/components/ui/button.tsx`; switched `layout.tsx`/`globals.css` from Geist to IBM Plex Sans and added the global focus-visible ring; wrote T-01..T-04
+Tests run: `npx vitest run` (all), `npm run verify`, `npm run build`
+Test results: T-01..T-04 all PASS (36/36 tests in suite); lint/typecheck/format clean; build succeeds
+Current blocker: none
+Important discoveries: Tailwind v4 auto-generates utilities from `@theme` namespaces (e.g. `--radius-control` → `rounded-control`); type-ramp/spacing scale utilities have no dedicated AC/test (see PROGRESS.md Known limitations)
+Important decisions: FD-01 (shadcn/ui utility deps: clsx, tailwind-merge, class-variance-authority) — see DECISIONS.md
+Exact next action: Announce READY FOR PR to the human and wait for explicit approval before opening the PR (per PR approval gate); docs are already up to date so the PR can ship as soon as approved.
+Files likely to be touched next: none for this feature; F0-14 will extend `src/components/ui/**` with the rest of the primitives kit
+Warning for next session: none
