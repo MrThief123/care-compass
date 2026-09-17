@@ -463,6 +463,15 @@ Docs updated: DECISIONS.md
 - Human confirmation: Dhruv Verma, 2026-09-17.
 - Docs updated: DECISIONS.md (PD-044, this entry). Still to update: PRD.md scope section, affected features' ACCEPTANCE_CRITERIA.md and TEST_PLAN.md, DEVELOPMENT_PLAN.md if it changes feature sizing.
 
+### CHG-002 — `budget`/`events` `src/server/<domain>/` contract files: ownership reconciled to UI-00 (initial shape) / Lane B (extension)
+- Date / requested by: 2026-09-17 / Dhruv Verma (human, project lead)
+- Type: architectural change (doc reconciliation, no code/behaviour change)
+- Description: UI-00's PRD.md Scope explicitly required creating `src/server/budget/queries.ts` and `src/server/events/{queries,actions}.ts` (needed to implement AC-04's `getBudgetSummary`), but `docs/AGENT_REFERENCE.md`'s folder-ownership table assigned all of `src/server/**` (except `data-source.ts`) to Lane B with no carve-out, and `ARCHITECTURE.md` §3.1's directory-layout tags didn't call out these two files as UI-00-owned the way `types/domain.ts`/`mocks/`/`data-source.ts` were. UI-00 built the files anyway (new/additive, nothing pre-existing in Lane B's territory) and flagged the doc gap (FD-02) for reconciliation rather than resolving it unilaterally.
+- Source / justification: found during PR review of UI-00 (feature/shared-domain-contracts-fixtures, PR #11) when the human asked for this to be resolved.
+- Impact: `ARCHITECTURE.md` §3.1 (directory layout note + data-source-adapter principle) and `docs/AGENT_REFERENCE.md`'s folder-ownership table updated to state: UI-00 authors the initial `queries.ts`/`actions.ts` contract shape for the `budget` and `events` domains only; Lane B and dashboard wiring features extend (not recreate) those two, and author every other domain's contract files from scratch. No other domain, no code, and no AC changed.
+- Human confirmation: Dhruv Verma, 2026-09-17.
+- Docs updated: ARCHITECTURE.md §3.1, docs/AGENT_REFERENCE.md folder-ownership table, DECISIONS.md (this entry).
+
 Template for future entries:
 ```
 ### CHG-xxx — <title>

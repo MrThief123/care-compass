@@ -39,6 +39,9 @@ const eslintConfig = defineConfig([
     "playwright-report/**",
     "test-results/**",
     "coverage/**",
+    // Nested git worktrees created by Claude Code's Agent tool (isolation: "worktree")
+    // are full copies of this source tree and must not be linted as part of it.
+    ".claude/worktrees/**",
   ]),
 ]);
 
