@@ -1,12 +1,12 @@
 # Progress — F0-02 Tooling baseline: TypeScript, lint, format, test runners
 
-Status: IN PROGRESS
+Status: PR OPEN
 Owner: Dhruv Verma
 Lane: S — Shared kit
 Sprint: SPRINT · planned D1
 Branch: `feature/shared-tooling-baseline`
 PR target: `main (per OQ-01 — shared work)`
-Last updated: 2026-09-17 (implementation complete, pending human PR approval)
+Last updated: 2026-09-17 (PR opened, human-approved)
 
 ## Blockers
 - None — OQ-01 answered (PD-030, root DECISIONS.md)
@@ -57,7 +57,7 @@ Last updated: 2026-09-17 (implementation complete, pending human PR approval)
 - PROPOSED items in PRD.md are unconfirmed until validated in F0-01 or answered in DECISIONS.md.
 
 ## Next action
-- Report readiness and wait for explicit human approval before opening the PR (root DECISIONS.md §PR approval workflow). After merge: create `family-dev`, `carer-dev`, `admin-dev` from `main` and confirm T-04/AC-04.
+- Await PR review/merge. After merge: create `family-dev`, `carer-dev`, `admin-dev` from `main` and confirm T-04/AC-04.
 
 ## Ready for PR
-- Yes — pending explicit human approval to open it
+- Yes — approved by Dhruv Verma 2026-09-17; PR opened
