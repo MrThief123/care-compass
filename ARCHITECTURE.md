@@ -264,7 +264,7 @@ See `TESTING.md`. Layers: unit (pure logic) → component (UI + axe) → integra
 - Feature docs kept current (CLAUDE.md §4). Plain-English user-facing docs (CIS1 #4). ADR-style entries in DECISIONS.md for architectural changes.
 
 ### 12.10 Git and code review
-- CLAUDE.md §3, §7; docs/DEVELOPMENT_WORKFLOW.md §4, §7. Reviewers check: scope, tests-first evidence, RLS tests, tokens usage, accessibility, docs updated.
+- CLAUDE.md §3, §7; docs/DEVELOPMENT_WORKFLOW.md §4, §7, §8. Reviewers check: scope, tests-first evidence, RLS tests, tokens usage, accessibility, docs updated.
 
 ---
 

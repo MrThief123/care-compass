@@ -340,6 +340,14 @@ CONFIRMED.
 - Consequences: F0-11, FAM-01, FAM-14, FAM-15, ADM-01 compute the displayed assignee via a query joining events to shifts by covering time range, not a stored field.
 - Human confirmation: CONFIRMED 2026-09-17.
 
+### PD-056 — PR approval gate: Claude Code never opens a PR without explicit human approval
+- Date: 2026-09-17 · Decided by: Dhruv Verma (process rule, not tied to an OQ)
+- Decision: on reaching a feature's Definition of Done, Claude Code reports status and states readiness to open the PR, then stops and waits for explicit approval. On approval, the feature's PROGRESS.md/SESSION_STATE.md is updated to `PR OPEN` on the same feature branch, committed with the final implementation work, pushed, then the PR is opened — as one unit, not a separate before/after step. No separate branch is created after a merge solely to record that the PR merged. Documented in `docs/DEVELOPMENT_WORKFLOW.md` §7 (new section; renumbered old §7–§10 to §8–§11).
+- Reason: hardens CLAUDE.md's general "confirm before shared-visible actions" guidance into an explicit, repo-documented gate so every session (not just one Claude Code instance) follows it, and avoids redundant cleanup branches.
+- Alternatives: leaving it as an unwritten convention (rejected — not visible to other sessions/team members); updating docs only after merge confirmation (rejected by the human — adds an extra round trip for no benefit).
+- Consequences: `docs/DEVELOPMENT_WORKFLOW.md` gained new §7 and renumbered §7→§8 (PR template), §8→§9 (dev-branch testing), §9→§10 (checkpoints), §10→§11 (session hygiene). Cross-references updated: CLAUDE.md §3 and §8 (this file's own PR/commit rules already implied this; now explicit), PRD.md §19, ARCHITECTURE.md §12.10.
+- Human confirmation: CONFIRMED 2026-09-17.
+
 ---
 
 ## 3. Open decisions (human input required)

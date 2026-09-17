@@ -60,7 +60,7 @@ Branches: `main` (production) ← `family-dev` / `carer-dev` / `admin-dev` (per-
 - Merge PRs yourself, force-push shared branches, rewrite pushed history, delete branches.
 - Commit secrets, `.env*.local`, or credentials from source documents.
 
-Full branching, daily sync and checkpoint procedure: `docs/DEVELOPMENT_WORKFLOW.md` §3–§9.
+Full branching, daily sync and checkpoint procedure: `docs/DEVELOPMENT_WORKFLOW.md` §3–§10.
 
 ---
 
@@ -119,7 +119,7 @@ Root `PROGRESS.md`/`SESSION_STATE.md` and multi-worktree setup: `docs/AGENT_REFE
 
 ## 8. Commits and PRs
 - Conventional Commits: `feat(family): …`, `test(carer): …`, `fix(admin): …`, `feat(db): …`, `chore(ci): …`, `docs(<slug>): …`. Never `update`, `wip`, `fix`, `stuff`.
-- PR title `<ID> <Feature name>`; body from `docs/DEVELOPMENT_WORKFLOW.md` §7.
+- PR title `<ID> <Feature name>`; body from `docs/DEVELOPMENT_WORKFLOW.md` §8. Never open the PR without prior human approval (`docs/DEVELOPMENT_WORKFLOW.md` §7).
 
 ### Definition of Done (feature → READY FOR PR)
 - [ ] In-scope ACs MET with tests written first and passing

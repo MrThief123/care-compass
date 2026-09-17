@@ -143,7 +143,18 @@ See CLAUDE.md §7. Types: `feat`, `fix`, `test`, `refactor`, `docs`, `chore`, `c
 
 ---
 
-## 7. Pull request template
+## 7. PR approval gate
+
+Claude Code never opens a PR unprompted, even once a feature meets the Definition of Done (CLAUDE.md §8). Instead:
+
+1. On reaching Definition of Done, report status and state readiness to open the PR, then stop.
+2. Wait for explicit human approval (e.g. "yes").
+3. On approval, update the feature's `PROGRESS.md` / `SESSION_STATE.md` to `PR OPEN` (§1) on the same feature branch, commit it together with the final implementation work, push, then open the PR — as one unit. The docs update ships inside the PR, not before or after it.
+4. Never create a separate branch after a PR merges solely to update docs saying "PR was merged" — that status flows through the normal `MERGED TO DEV` update (§8) on the next touch of that feature, not a dedicated cleanup branch.
+
+---
+
+## 8. Pull request template
 
 Title: `<ID> <Feature name>` (e.g. `FAM-01 Family Home — Today day-view timeline`)
 
@@ -193,7 +204,7 @@ Title: `<ID> <Feature name>` (e.g. `FAM-01 Family Home — Today day-view timeli
 
 ---
 
-## 8. Development-branch testing
+## 9. Development-branch testing
 After each merge into a dev branch:
 1. CI runs lint, typecheck, unit/component and build on the dev branch (integration and db jobs once F0-06 exists).
 2. Update the merged feature to MERGED TO DEV.
@@ -202,7 +213,7 @@ After each merge into a dev branch:
 
 ---
 
-## 9. Checkpoints (dev → main)
+## 10. Checkpoints (dev → main)
 
 Plan v0.2 replaces per-dashboard phase releases with three team checkpoints:
 
@@ -223,7 +234,7 @@ Procedure for each dev branch:
 
 ---
 
-## 10. Session hygiene
+## 11. Session hygiene
 - Start: CLAUDE.md §1 reading order.
 - During: update feature PROGRESS.md at each meaningful step; commit.
 - End (always, including before likely context/usage exhaustion): run `END SESSION` (CLAUDE.md §11) — update the feature's SESSION_STATE.md and PROGRESS.md on its branch; commit and push. Root files are updated only in sync/checkpoint PRs.
