@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { getBudgetSummary } from "@/server/budget/queries";
 import { MARGARET_CLIENT_ID } from "@/mocks/fixtures";
+import { getBudgetSummary } from "@/server/budget/queries";
 
 describe("[UI-00][AC-04] getBudgetSummary via the mock data source", () => {
   afterEach(() => {

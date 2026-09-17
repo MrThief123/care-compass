@@ -11,7 +11,9 @@ async function lintVirtualFile(filePath: string, code: string) {
     cwd: rootDir,
     overrideConfigFile: path.join(rootDir, "eslint.config.mjs"),
   });
-  const [result] = await eslint.lintText(code, { filePath: path.join(rootDir, filePath) });
+  const results = await eslint.lintText(code, { filePath: path.join(rootDir, filePath) });
+  const result = results[0];
+  if (!result) throw new Error(`ESLint#lintText returned no result for ${filePath}`);
   return result;
 }
 
