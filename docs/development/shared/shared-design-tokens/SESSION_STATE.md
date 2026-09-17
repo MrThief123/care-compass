@@ -9,6 +9,6 @@ Test results: T-01..T-04 all PASS (36/36 tests in suite); lint/typecheck/format 
 Current blocker: none
 Important discoveries: Tailwind v4 auto-generates utilities from `@theme` namespaces (e.g. `--radius-control` → `rounded-control`); type-ramp/spacing scale utilities have no dedicated AC/test (see PROGRESS.md Known limitations)
 Important decisions: FD-01 (shadcn/ui utility deps: clsx, tailwind-merge, class-variance-authority) — see DECISIONS.md
-Exact next action: Announce READY FOR PR to the human and wait for explicit approval before opening the PR (per PR approval gate); docs are already up to date so the PR can ship as soon as approved.
+Exact next action: None — human approved 2026-09-17; PR opened to `main`.
 Files likely to be touched next: none for this feature; F0-14 will extend `src/components/ui/**` with the rest of the primitives kit
 Warning for next session: none

@@ -1,12 +1,12 @@
 # Progress — F0-05 Design tokens, typography and base styles
 
-Status: IN PROGRESS
+Status: PR OPEN
 Owner: Dhruv Verma
 Lane: S — Shared kit
 Sprint: SPRINT · planned D1
 Branch: `feature/shared-design-tokens`
 PR target: `main (per OQ-01 — shared work)`
-Last updated: 2026-09-17 (implementation complete, tests green)
+Last updated: 2026-09-17 (PR opened, human-approved)
 
 ## Blockers
 - None — OQ-01 answered (PD-030, root DECISIONS.md)
@@ -59,4 +59,4 @@ Last updated: 2026-09-17 (implementation complete, tests green)
 - None — feature complete, ready for PR review.
 
 ## Ready for PR
-- Awaiting human approval to open the PR (per PR approval gate).
+- Yes — approved by Dhruv Verma 2026-09-17; PR opened
