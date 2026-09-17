@@ -1,6 +1,6 @@
 # Progress — UI-00 Domain types, data-access contracts and design fixtures
 
-Status: READY FOR PR
+Status: PR OPEN
 Owner: Dhruv Verma
 Lane: S — Shared kit
 Sprint: SPRINT · planned D2
