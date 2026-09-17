@@ -1,0 +1,11 @@
+.next
+node_modules
+coverage
+playwright-report
+test-results
+package-lock.json
+
+# Hand-authored planning/decision docs are controlled (CLAUDE.md §9) and not
+# reformatted by tooling — Prettier covers source and config files only.
+*.md
+docs/
