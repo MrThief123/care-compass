@@ -1,6 +1,6 @@
 # ARCHITECTURE — Care Compass
 
-Version 0.2 · 17 September 2026 (plan v0.2: data-source adapter, lane folder ownership) · Status: **DRAFT — must be validated against the repository in F0-01**
+Version 0.2 · 17 September 2026 (plan v0.2: data-source adapter, lane folder ownership) · Status: **VALIDATED against the repository in F0-01 (see docs/VALIDATION_REPORT.md)**
 Labels: **CONFIRMED** = decided in source material (ADRs, team/client meetings, designs) · **PROPOSED** = this plan's proposal · **UNKNOWN / HUMAN DECISION REQUIRED** = see DECISIONS.md.
 
 ---
@@ -23,12 +23,12 @@ Supabase                                               CONFIRMED (ADR-01)
    ├─ Postgres functions for atomic multi-table writes CONFIRMED (ADR-02 consequence)
    ├─ Auth (email/password; MFA for admins?)           CONFIRMED platform; method OQ-08
    └─ Storage (private client-documents bucket)        CONFIRMED platform; policies PROPOSED
-Scheduled job runner → /api/jobs/* (service role)      CONFIRMED concept (TM-2808); runner UNKNOWN (OQ-17)
-Email provider                                         UNKNOWN (OQ-17)
-Hosting                                                UNKNOWN (OQ-17)
+Scheduled job runner → /api/jobs/* (service role)      CONFIRMED (TM-2808; runner: Vercel Cron or pg_cron, PD-050)
+Email provider                                         CONFIRMED (Resend or Supabase SMTP, PD-050)
+Hosting                                                CONFIRMED (Vercel + Supabase paid tier, PD-050)
 ```
 
-Repository state: the human reports an essentially empty Next.js scaffold (CONFIRMED by human); team meeting 4/9 reports CI, Supabase schema and RLS tests — **UNKNOWN until F0-01** (OQ-20). The archived Confluence "Tech Stack" page (MongoDB) is superseded by ADR-01.
+Repository state: **CONFIRMED by F0-01 inspection (17 Sep 2026)**. The human's report is accurate: Next.js 16.3.3 App Router scaffold (`src/app/` only — `layout.tsx`, `page.tsx`, default styling), npm as package manager (`package-lock.json`), TypeScript 5 strict, Tailwind v4, ESLint (`eslint-config-next`, no custom rules yet), no `supabase/` directory, no test framework installed (Vitest/Playwright/pgTAP all still to be added). A basic GitHub Actions workflow does exist (`.github/workflows/ci.yaml`: install, `npm audit`, lint, `tsc --noEmit`, build) but it has no Supabase schema, no RLS tests, and no commitlint step — the team meeting 4/9 claim of a live repo with CI, Supabase schema and RLS tests for all four roles does **not** hold; per OQ-20 (ANSWERED, PD-031) this repository is authoritative and there is no existing Supabase project to adopt. The archived Confluence "Tech Stack" page (MongoDB) is superseded by ADR-01. Full check-by-check evidence: `docs/VALIDATION_REPORT.md`.
 
 ---
 
@@ -47,17 +47,17 @@ Repository state: the human reports an essentially empty Next.js scaffold (CONFI
 | Supabase integration | @supabase/ssr session forwarding | CONFIRMED (ADR-02 notes team confirmation pending) | ADR-02 |
 | File storage | Supabase Storage | CONFIRMED | ADR-01 |
 | Lint/format | ESLint + Prettier | CONFIRMED | TM-2808 |
-| Commits | Conventional Commits + commitlint in CI | CONFIRMED | TM-0409 |
-| CI | GitHub Actions: lint, typecheck, test, build, dependency check | CONFIRMED (tool name PROPOSED) | TD, TM-2808 |
+| Commits | Conventional Commits (commitlint step PROPOSED — not yet in `.github/workflows/ci.yaml`) | CONFIRMED convention; CI enforcement PROPOSED | TM-0409; F0-01 |
+| CI | GitHub Actions: lint, typecheck, build, dependency audit (`npm audit`) all CONFIRMED present in `.github/workflows/ci.yaml`; test step scaffolded but commented out pending a test framework | CONFIRMED (partial — see VALIDATION_REPORT.md) | TD, TM-2808; F0-01 |
 | Unit/component tests | Vitest + Testing Library + jest-axe/axe-core | PROPOSED | TD (unit tests), PD-014 |
 | DB/RLS tests | pgTAP via `supabase test db` | PROPOSED | TM-2808 (integration tests for policies) |
 | E2E | Playwright | PROPOSED | TM-2808 (e2e for journeys) |
 | Validation | Zod (single library) | PROPOSED | PD-015 |
 | Dates/recurrence | date-fns + @date-fns/tz; in-house rule expander | PROPOSED | TM-2108, ADR-01 |
 | Dependency security | npm audit + Dependabot | PROPOSED | TD ("X-ray", OQ-23) |
-| Email | Provider adapter (Resend/SMTP) | UNKNOWN | OQ-17 |
-| Scheduler | Vercel Cron or pg_cron → protected Route Handler | UNKNOWN | OQ-17 |
-| Hosting | Vercel (or equivalent) + Supabase paid tier | UNKNOWN | OQ-17, NFR-8, ADR-01 |
+| Email | Provider adapter (Resend/SMTP) | CONFIRMED | PD-050 (OQ-17) |
+| Scheduler | Vercel Cron or pg_cron → protected Route Handler | CONFIRMED | PD-050 (OQ-17) |
+| Hosting | Vercel + Supabase paid tier | CONFIRMED | PD-050 (OQ-17), NFR-8, ADR-01 |
 
 ---
 
@@ -200,10 +200,10 @@ Rules stored on `care_events.recurrence`; occurrences generated on demand for a 
 ## 8. External integrations
 | Integration | Status | Notes |
 |---|---|---|
-| Supabase | CONFIRMED | Local via Supabase CLI; hosted project UNKNOWN (OQ-20) |
-| Email provider | UNKNOWN | Adapter interface in `src/server/email`; test double in tests |
-| Scheduler | UNKNOWN | Calls job endpoints |
-| Figma MCP | CONFIRMED (development tooling) | Only page "01 · Foundations" visible on 17 Sep 2026 (OQ-19) |
+| Supabase | CONFIRMED | Local via Supabase CLI; no hosted project exists to adopt — provision new (PD-031, OQ-20) |
+| Email provider | CONFIRMED | Resend or Supabase SMTP (PD-050, OQ-17); adapter interface in `src/server/email`; test double in tests |
+| Scheduler | CONFIRMED | Vercel Cron or pg_cron (PD-050, OQ-17); calls job endpoints |
+| Figma MCP | CONFIRMED (development tooling) | Still only page "01 · Foundations" visible — re-confirmed by F0-01 on 17 Sep 2026 (OQ-19, ANSWERED); build remaining screens from tokens + `docs/design/screens/*` per PD (OQ-19) |
 
 ---
 
@@ -217,8 +217,8 @@ Rules stored on `care_events.recurrence`; occurrences generated on demand for a 
 
 ---
 
-## 10. Deployment architecture (UNKNOWN — OQ-17)
-Environments PROPOSED: `local` (Supabase CLI + seed), `preview` (per PR, seeded demo project), `staging` (dev branches), `production` (`main`). Brief requires accessibility "on a Microsoft based computer … accessed by others" — satisfied by a hosted web app used from Windows browsers (PROPOSED interpretation; confirm). NFR-8 (99.9%, daily backups, 1-hour redeploy) requires paid tiers.
+## 10. Deployment architecture (CONFIRMED stack, PD-050; environments PROPOSED)
+Vercel + Supabase paid tier (PD-050, OQ-17). Environments PROPOSED: `local` (Supabase CLI + seed), `preview` (per PR, seeded demo project), `staging` (dev branches), `production` (`main`). Brief requires accessibility "on a Microsoft based computer … accessed by others" — satisfied by a hosted web app used from Windows browsers (PROPOSED interpretation; confirm). NFR-8 (99.9%, daily backups, 1-hour redeploy) requires paid tiers (now confirmed available, PD-050).
 
 ---
 

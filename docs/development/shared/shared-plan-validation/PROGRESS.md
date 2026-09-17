@@ -1,58 +1,61 @@
 # Progress — F0-01 Validate planning pack against repository, Figma and sources
 
-Status: NOT STARTED
-Owner: unclaimed
+Status: IN PROGRESS
+Owner: Dhruv Verma
 Lane: S — Shared kit
 Sprint: SPRINT · planned D1
-Branch: `feature/shared-plan-validation` (not yet created)
+Branch: `feature/shared-plan-validation` (created from `main`)
 PR target: `main (per OQ-01 — shared work)`
-Last updated: 2026-09-17 (planning pack generated)
+Last updated: 2026-09-17 (validation complete, awaiting human approval)
 
 ## Blockers
-- OQ-01 — Branch parent and naming for shared (foundation and cross-cutting) work
-- OQ-20 — Repository and infrastructure reality
+- None — OQ-01 ANSWERED 2026-09-17 (PD-030); OQ-20 ANSWERED 2026-09-17 (PD-031)
 
 ## Dependencies status
 - None
 
 ## Completed
 - Feature documentation drafted (Claude Chat planning pack)
+- Inspected repository: package manager, Next.js/React/TS/Tailwind versions, lint config, CI workflow, `supabase/` (absent), branches. See docs/VALIDATION_REPORT.md §1.
+- Inspected Figma via MCP: only "01 · Foundations" (`0:1`) reachable, pages 02–06 still not exposed. Recorded node IDs in `docs/design/FIGMA_INDEX.md`. See docs/VALIDATION_REPORT.md §2.
+- Checked `docs/sources/`: no new source documents added since planning; only the manifest README present. See docs/VALIDATION_REPORT.md §3.
+- Updated ARCHITECTURE.md labels (repository state, hosting/email/scheduler per PD-050, CI/commitlint accuracy, external integrations, deployment architecture) from UNKNOWN/DRAFT to CONFIRMED where the repository or an answered OQ now supports it. See docs/VALIDATION_REPORT.md §6.
+- Confirmed via DECISIONS.md sweep and `node scripts/plan-status.mjs` that every currently-OPEN decision is non-blocking, and no feature lists an OPEN decision as BLOCKING. See docs/VALIDATION_REPORT.md §4–5.
+- Ran `node scripts/plan-status.mjs --write` to refresh the generated status block in root PROGRESS.md.
+- Wrote `docs/VALIDATION_REPORT.md` summarising every check, discrepancy and resulting documentation change.
 
 ## In progress
 - None
 
 ## Remaining
-- Inspect repository: package manager + lockfile, Next.js version, App Router vs Pages Router, TypeScript config, Tailwind version, existing lint/test config, existing `supabase/` directory, CI workflows, branches that already exist.
-- Inspect Figma via MCP: list pages; confirm whether pages 02–06 (screens, states) are now reachable; record node IDs for each screen in `docs/design/FIGMA_INDEX.md`.
-- Check `docs/sources/` for newly added source documents listed as missing in DECISIONS.md OQ-19 and record what was added.
-- Update ARCHITECTURE.md labels (CONFIRMED / PROPOSED / UNKNOWN) using repository facts.
-- Record answers the human gives to open decisions (OQ-xx) in DECISIONS.md as PD-xxx entries.
-- Re-derive each feature's status: PLANNED when docs are complete and no BLOCKING decision remains; otherwise BLOCKED with the blocking OQ IDs.
-- Write `docs/VALIDATION_REPORT.md` summarising every check, discrepancy and resulting documentation change.
-- Declare the planning freeze in DECISIONS.md once the human approves the report.
+- Declare the planning freeze in DECISIONS.md once the human approves docs/VALIDATION_REPORT.md (Gate G1 sign-off).
 
 ## Acceptance criteria status
-- 0 / 4 MET
+- 4 / 4 MET (see ACCEPTANCE_CRITERIA.md)
 
 ## Tests
-- Written: 0 / 4
-- Passing: 0
+- Written: 4 / 4 (review-level, TEST_PLAN.md)
+- Passing: 4
 - Failing: 0
 
 ## Files changed
-- None yet. Likely files: `docs/VALIDATION_REPORT.md`, `docs/design/FIGMA_INDEX.md`, `ARCHITECTURE.md`, `DECISIONS.md`, `PROGRESS.md`, `DEVELOPMENT_PLAN.md`
+- `docs/VALIDATION_REPORT.md` (new)
+- `docs/design/FIGMA_INDEX.md` (new)
+- `ARCHITECTURE.md` (labels updated)
+- `PROGRESS.md` (root — generated status block refreshed)
+- This feature's `PROGRESS.md`, `ACCEPTANCE_CRITERIA.md`
 
 ## Decisions
-- See DECISIONS.md
+- See DECISIONS.md. No new project-wide decisions recorded by this feature; PD-030, PD-031, PD-050 (all pre-existing) were the ones this validation relied on and corroborated.
 
 ## Problems encountered
-- None
+- None. Repository matched the human's report; no contradictions requiring a stop-and-ask were found (PRD Error/Edge case did not trigger).
 
 ## Assumptions
-- PROPOSED items in PRD.md are unconfirmed until validated in F0-01 or answered in DECISIONS.md.
+- None outstanding — see docs/VALIDATION_REPORT.md §8 for non-blocking items carried forward (CIS4, commitlint, test frameworks).
 
 ## Next action
-- Wait for answers to OQ-01, OQ-20; then complete dependencies, run START FEATURE F0-01, and write the tests in TEST_PLAN.md first.
+- Present docs/VALIDATION_REPORT.md to the human for approval. On approval: add the planning-freeze entry to DECISIONS.md, mark this feature READY FOR PR, then open the PR to `main`. F0-02 becomes startable once this feature is MERGED TO DEV (main).
 
 ## Ready for PR
-- No
+- Pending human approval of docs/VALIDATION_REPORT.md (see Next action)
