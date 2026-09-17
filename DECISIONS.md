@@ -119,9 +119,9 @@ CONFIRMED.
 - Alternatives: hard-coded props in screens (rework at wiring); MSW network mocks (no network layer exists — Server Components call functions directly).
 - Human confirmation: pending (F0-01 review).
 
-### PD-029 — No AGENTS.md; Next.js agent rules live in CLAUDE.md §15 (HUMAN REQUEST)
+### PD-029 — No AGENTS.md; Next.js agent rules live in CLAUDE.md §14 (HUMAN REQUEST)
 - Date: 2026-09-17 · Requested by: human
-- Decision: delete `AGENTS.md` and the `@AGENTS.md` import. CLAUDE.md §15 carries the rule to read `node_modules/next/dist/docs/` before writing Next.js code. If `next dev` re-creates AGENTS.md, delete it again and add it to `.gitignore` (F0-02).
+- Decision: delete `AGENTS.md` and the `@AGENTS.md` import. CLAUDE.md §14 carries the rule to read `node_modules/next/dist/docs/` before writing Next.js code. If `next dev` re-creates AGENTS.md, delete it again and add it to `.gitignore` (F0-02).
 - Human confirmation: requested by the human 2026-09-17.
 
 ### PD-030 — Shared-work branch parent and naming: Option B
