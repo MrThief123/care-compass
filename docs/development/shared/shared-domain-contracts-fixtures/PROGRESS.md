@@ -1,18 +1,18 @@
 # Progress — UI-00 Domain types, data-access contracts and design fixtures
 
-Status: NOT STARTED
-Owner: unclaimed
+Status: IN PROGRESS
+Owner: Dhruv Verma
 Lane: S — Shared kit
 Sprint: SPRINT · planned D2
-Branch: `feature/shared-domain-contracts-fixtures` (not yet created)
-PR target: `main (per OQ-01 — shared work)`
-Last updated: 2026-09-17 (planning pack generated)
+Branch: `feature/shared-domain-contracts-fixtures`
+PR target: `main (per OQ-01 — shared work, ANSWERED PD-030)`
+Last updated: 2026-09-17 (implementation session)
 
 ## Blockers
-- OQ-01 — Branch parent and naming for shared (foundation and cross-cutting) work
+- None. OQ-01 is ANSWERED (PD-030) in root DECISIONS.md; gate confirmed via `node scripts/plan-status.mjs` listing UI-00 under "Ready to start".
 
 ## Dependencies status
-- F0-02 — NOT STARTED
+- F0-02 — MERGED TO DEV
 
 ## Completed
 - Feature documentation drafted (Claude Chat planning pack)
