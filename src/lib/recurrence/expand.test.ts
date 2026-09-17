@@ -73,7 +73,9 @@ describe("expandOccurrences", () => {
       interval: 1,
       anchor: "2026-11-30T09:00:00",
     };
-    const overrides: RecurrenceOverride[] = [{ type: "cancelled", originalStart: "2026-12-07T09:00:00" }];
+    const overrides: RecurrenceOverride[] = [
+      { type: "cancelled", originalStart: "2026-12-07T09:00:00" },
+    ];
 
     const occurrences = expandOccurrences(
       rule,
