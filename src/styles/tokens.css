@@ -1,0 +1,132 @@
+/*
+ * Design tokens — Care Compass visual foundation.
+ * Source of truth for colour, spacing, radius and font values (Figma "01 · Foundations").
+ * F0-05. Values here are authoritative; screens must reference tokens, never raw hex.
+ */
+
+@theme {
+  /* Colour — exact hex from Figma variables (UI-§5). */
+  --color-bg-canvas: #e9f8fa;
+  --color-bg-surface: #fefefe;
+  --color-bg-inset: #e9f8fa;
+  --color-bg-brand: #0c9ba9;
+  --color-bg-brand-deep: #07727d;
+  --color-bg-brand-light: #49b7bf;
+  --color-bg-brand-pale: #c6eaef;
+  --color-bg-muted: #8db8c8;
+  --color-bg-accent: #e69a81;
+  --color-bg-alert: #fdf1ec;
+  --color-bg-alert-badge: #f7c4b4;
+  --color-bg-alert-strong: #b5543a;
+
+  --color-text-primary: #1f282d;
+  --color-text-secondary: #696e6a;
+  --color-text-muted: #8db8c8;
+  --color-text-brand: #07727d;
+  --color-text-alert: #b5543a;
+  --color-text-alert-strong: #8a3a24;
+  --color-text-on-dark: #fefefe;
+
+  --color-border-subtle: #e9f8fa;
+  --color-border-default: #d7f2f4;
+  --color-border-brand: #07727d;
+  --color-border-alert: #e8a98f;
+
+  /* shadcn/ui semantic mapping onto the tokens above. */
+  --color-background: var(--color-bg-surface);
+  --color-foreground: var(--color-text-primary);
+  --color-primary: var(--color-bg-brand-deep);
+  --color-primary-foreground: var(--color-text-on-dark);
+  --color-secondary: var(--color-bg-brand-pale);
+  --color-secondary-foreground: var(--color-text-brand);
+  --color-muted: var(--color-bg-muted);
+  --color-muted-foreground: var(--color-text-secondary);
+  --color-accent: var(--color-bg-accent);
+  --color-accent-foreground: var(--color-text-primary);
+  --color-destructive: var(--color-bg-alert-strong);
+  --color-destructive-foreground: var(--color-text-on-dark);
+  --color-border: var(--color-border-default);
+  --color-input: var(--color-border-default);
+  --color-ring: var(--color-border-brand);
+
+  /* Spacing scale space/1–9 (UI-§5.3). */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 32px;
+  --space-8: 40px;
+  --space-9: 48px;
+
+  /* Radius tokens (UI-§5.3; numeric values pending Figma variable export — see F0-05 DECISIONS.md). */
+  --radius-pill: 6px;
+  --radius-control: 8px;
+  --radius-card: 10px;
+  --radius-inset: 8px;
+  --radius-full: 9999px;
+  --radius: var(--radius-control);
+
+  /* Font. */
+  --font-sans: var(--font-ibm-plex-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Rail gradient (UI-§5: 88px rail, vertical bg/brand-deep → bg/brand). */
+.bg-rail-gradient {
+  background-image: linear-gradient(180deg, var(--color-bg-brand-deep), var(--color-bg-brand));
+}
+
+/* Type ramp (Figma text styles, UI-§5). */
+@utility text-title-page {
+  font-size: 20px;
+  line-height: 26px;
+  font-weight: 500;
+}
+@utility text-title-section {
+  font-size: 16px;
+  line-height: 22px;
+  font-weight: 500;
+}
+@utility text-title-card {
+  font-size: 15px;
+  line-height: 20px;
+  font-weight: 500;
+}
+@utility text-metric-large {
+  font-size: 22px;
+  line-height: 28px;
+  font-weight: 500;
+}
+@utility text-metric-medium {
+  font-size: 18px;
+  line-height: 24px;
+  font-weight: 500;
+}
+@utility text-body-emphasis {
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 500;
+}
+@utility text-body-default {
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 400;
+}
+@utility text-body-small {
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 400;
+}
+@utility text-body-secondary {
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 400;
+}
+@utility text-label-caps {
+  font-size: 11px;
+  line-height: 14px;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
