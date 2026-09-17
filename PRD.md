@@ -213,7 +213,7 @@ Note: OOS-5 (rostering out of scope) is superseded by later client meetings and 
 - Client answers to blocking decisions (DECISIONS.md).
 
 ## 19. Release considerations
-- Releases go dev branch → `main` with human approval (docs/DEVELOPMENT_WORKFLOW.md §9).
+- Releases go dev branch → `main` with human approval (docs/DEVELOPMENT_WORKFLOW.md §10).
 - Supabase free tier is not acceptable for the NFR-8 availability/backup target (ADR-01).
 - Handover pack and running-cost explanation required before final release (INT-08).
 
