@@ -1,18 +1,18 @@
 # Progress — F0-14 Core UI primitives and state components
 
-Status: NOT STARTED
-Owner: unclaimed
+Status: IN PROGRESS
+Owner: Dhruv Verma
 Lane: S — Shared kit
 Sprint: SPRINT · planned D2
-Branch: `feature/shared-ui-primitives` (not yet created)
+Branch: `feature/shared-ui-primitives`
 PR target: `main (per OQ-01 — shared work)`
-Last updated: 2026-09-17 (planning pack generated)
+Last updated: 2026-09-18
 
 ## Blockers
-- OQ-01 — Branch parent and naming for shared (foundation and cross-cutting) work
+- None (OQ-01 ANSWERED 2026-09-17)
 
 ## Dependencies status
-- F0-05 — NOT STARTED
+- F0-05 — MERGED TO DEV
 
 ## Completed
 - Feature documentation drafted (Claude Chat planning pack)
