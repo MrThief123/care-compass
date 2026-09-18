@@ -1,20 +1,20 @@
 # Progress — UI-02 Forms kit: fields, settings cards, side panels, chips, modal, event form
 
-Status: NOT STARTED
-Owner: unclaimed
+Status: IN PROGRESS
+Owner: Dhruv Verma
 Lane: S — Shared kit
 Sprint: SPRINT · planned D3–D4
-Branch: `feature/shared-forms-kit` (not yet created)
+Branch: `feature/shared-forms-kit` (created from `main` per OQ-01)
 PR target: `main (per OQ-01 — shared work)`
-Last updated: 2026-09-17 (planning pack generated)
+Last updated: 2026-09-19 (claimed)
 
 ## Blockers
-- OQ-01 — Branch parent and naming for shared (foundation and cross-cutting) work
+- None. OQ-01 ANSWERED 2026-09-17; OQ-10, OQ-22, OQ-35 also ANSWERED in root DECISIONS.md.
 
 ## Dependencies status
-- F0-14 — NOT STARTED
-- UI-00 — NOT STARTED
-- UI-01 — NOT STARTED
+- F0-14 — MERGED
+- UI-00 — MERGED
+- UI-01 — MERGED
 
 ## Completed
 - Feature documentation drafted (Claude Chat planning pack)
@@ -54,7 +54,7 @@ Last updated: 2026-09-17 (planning pack generated)
 - PROPOSED items in PRD.md are unconfirmed until validated in F0-01 or answered in DECISIONS.md.
 
 ## Next action
-- Wait for answers to OQ-01; then complete dependencies, run START FEATURE UI-02, and write the tests in TEST_PLAN.md first.
+- Write T-01..T-06 from TEST_PLAN.md first, confirm they fail for the right reason, then implement `src/components/shared/forms/*`.
 
 ## Ready for PR
 - No
