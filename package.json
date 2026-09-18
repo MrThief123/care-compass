@@ -13,17 +13,23 @@
     "format:check": "prettier --check .",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:integration": "vitest run tests/integration",
+    "db:types": "supabase gen types typescript --local > src/lib/supabase/database.types.ts",
+    "check:client-bundle-secrets": "node scripts/check-client-bundle-secrets.mjs",
     "pretest:e2e": "next build",
     "test:e2e": "playwright test",
     "verify": "npm run lint && npm run typecheck && npm run format:check && npm run test"
   },
   "dependencies": {
+    "@supabase/ssr": "^0.12.7",
+    "@supabase/supabase-js": "^2.116.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^1.47.0",
     "next": "16.3.3",
     "react": "19.2.8",
     "react-dom": "19.2.8",
+    "server-only": "^0.0.1",
     "tailwind-merge": "^3.7.0",
     "zod": "^4.6.5"
   },

@@ -17,6 +17,11 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(dirname, "./src"),
+      // Vite/Vitest never sets Next's "react-server" resolve condition, so
+      // `import "server-only"` (F0-04's src/server/jobs/supabase-admin.ts)
+      // always resolves to the throwing build. Point tests at its no-op
+      // build instead — same fix Next's own examples use for Vitest.
+      "server-only": path.resolve(dirname, "./node_modules/server-only/empty.js"),
     },
   },
 });
