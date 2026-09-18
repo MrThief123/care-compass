@@ -78,6 +78,7 @@ src/
     shared/      cross-dashboard composites, owned by lane S: app shell/rail/page-header (F0-15), calendar/* (UI-01), forms/* incl. event-form layout, side-panel-form, confirmation-modal (UI-02), lists/cards incl. data-table, activity-row, stat-card, budget-bucket-card, task-checklist, client-info-view (UI-03)
   features/<feature-area>/   screen-specific components (family-home, carer-home, admin-manage …)
   server/<domain>/           queries.ts · actions.ts · schemas.ts   (auth, clients, events, shifts, budget, documents, staff, notifications, email)
+                              — budget/, events/: initial queries.ts/actions.ts contract shape authored by UI-00 (CHG-002); Lane B/dashboard features extend, not recreate, these files. Other domains: Lane B.
   server/jobs/               service-role jobs (only place allowed to import the admin client)
   lib/
     supabase/{browser,server,proxy}.ts  database.types.ts
@@ -95,7 +96,7 @@ docs/ …
 ```
 
 ### 3.2 Principles
-- **Data-source adapter (PROPOSED, PD-028):** screens never import fixtures or Supabase directly. They call contract functions in `src/server/<domain>/queries.ts` whose signatures and return types are fixed in UI-00. `src/server/data-source.ts` routes each call to the mock implementation (`src/mocks/fixtures.ts`, built from design content) or the Supabase implementation, chosen by `DATA_SOURCE=mock|supabase`. Phase 1 screens run on `mock`; each Phase 3 wiring feature implements the Supabase side for its functions and flips its tests to integration. `getCurrentUser()` is mocked in `src/mocks/current-user.ts` (throws when `NODE_ENV=production`) until F0-07 replaces it with the real session.
+- **Data-source adapter (PROPOSED, PD-028):** screens never import fixtures or Supabase directly. They call contract functions in `src/server/<domain>/queries.ts` whose signatures and return types are fixed in UI-00 for the `budget` and `events` domains (the ones UI-00's PRD names); other domains' contract files are authored by the Lane B feature that needs them first. `src/server/data-source.ts` routes each call to the mock implementation (`src/mocks/fixtures.ts`, built from design content) or the Supabase implementation, chosen by `DATA_SOURCE=mock|supabase`. Phase 1 screens run on `mock`; each Phase 3 wiring feature implements the Supabase side for its functions and flips its tests to integration. `getCurrentUser()` is mocked in `src/mocks/current-user.ts` (throws when `NODE_ENV=production`) until F0-07 replaces it with the real session.
 - **Folder ownership by lane (PROPOSED, PD-027):** see CLAUDE.md §4.2. Dashboard features never edit `src/components/shared/**` or `src/components/ui/**`; they request changes from lane S.
 - **Three portals** (CONFIRMED FR-5.4, DD): separate route groups and layouts per role; no shared UI with hidden controls. Shared *components* are allowed.
 - **Controls absent, not disabled** for role restrictions (DD §8 NFR-3).

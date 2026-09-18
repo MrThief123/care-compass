@@ -33,11 +33,15 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
+# env files (F0-04: .env.example is committed; everything else stays local)
 .env*
+!.env.example
 
 # vercel
 .vercel
+
+# Claude Code agent worktrees (created by the Agent tool's isolation: "worktree" option)
+.claude/worktrees/
 
 # typescript
 *.tsbuildinfo

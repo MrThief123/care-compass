@@ -11,7 +11,15 @@ Record feature-level decisions here using the template below. Project-wide decis
 
 ## Feature decisions log
 
-_No decisions recorded yet._
+### FD-01 — shadcn/ui utility dependencies
+- Date: 2026-09-17
+- Context: PRD scope requires "shadcn/ui initialised with its CSS variables mapped to the tokens above." shadcn/ui components conventionally depend on `clsx` + `tailwind-merge` (the `cn` helper) and `class-variance-authority` (variant classes); none were present in the repo.
+- Decision: Add `clsx`, `tailwind-merge`, `class-variance-authority` as dependencies; create `src/lib/utils.ts` (`cn`) and `components.json`. Added a minimal `Button` primitive (`src/components/ui/button.tsx`) only to prove the token mapping and satisfy AC-04/T-04 — the full primitives kit remains F0-14 scope.
+- Reason: These are shadcn/ui's own standard utilities (already CONFIRMED stack choice, ADR-02), not a second library for an existing concern.
+- Alternatives considered: Hand-rolled className concatenation — rejected, diverges from the shadcn convention F0-14 will build on.
+- Consequences: F0-14 extends `Button` and adds further primitives on this same foundation; no new pattern introduced.
+- Human confirmation required: no — implements an already-CONFIRMED architecture choice (ADR-02).
+- Test changes caused: none.
 
 <!-- Template
 ### FD-01 — <title>

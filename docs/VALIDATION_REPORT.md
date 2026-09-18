@@ -3,7 +3,7 @@
 Feature: F0-01 Validate planning pack against repository, Figma and sources
 Branch: `feature/shared-plan-validation` · Date: 17 September 2026 · Run by: Claude Code (Dhruv Verma, owner)
 
-This report is the evidence base for Gate **G1 — Plan validated**. Gate G1 also requires this report to be **approved by the human** — see "Sign-off" at the end. Until approved, the planning freeze declared in DECISIONS.md §"Planning freeze" (not yet added) does not apply.
+This report is the evidence base for Gate **G1 — Plan validated**. Gate G1 also requires this report to be **approved by the human** — see "Sign-off" at the end. Approved 17 September 2026; the planning freeze is recorded in DECISIONS.md §1.
 
 ---
 
@@ -126,6 +126,6 @@ No dependencies were installed, no application code was touched, no branches wer
 
 ## Sign-off
 
-- [ ] **Human approval of this report** (required for Gate G1, per CLAUDE.md §2). Once approved, add a "Planning freeze" entry to DECISIONS.md declaring the pack authoritative, and F0-02 becomes startable.
+- [x] **Human approval of this report** (required for Gate G1, per CLAUDE.md §2). Approved — see the "Planning freeze" entry in DECISIONS.md §1 declaring the pack authoritative; F0-02 became startable from that point.
 
-Approved by: _____________ Date: _____________
+Approved by: Dhruv Verma · Date: 17 September 2026

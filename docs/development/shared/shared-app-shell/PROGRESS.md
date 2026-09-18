@@ -1,58 +1,64 @@
 # Progress — F0-15 Role app shell: rail, header and layouts
 
-Status: NOT STARTED
-Owner: unclaimed
+Status: MERGED TO DEV
+Owner: MrThief123
 Lane: S — Shared kit
 Sprint: SPRINT · planned D3
-Branch: `feature/shared-app-shell` (not yet created)
-PR target: `main (per OQ-01 — shared work)`
-Last updated: 2026-09-17 (planning pack generated)
+Branch: `feature/shared-app-shell`
+PR target: `main (per OQ-01 — shared work)` — PR #33 merged 2026-09-18
+Last updated: 2026-09-19
 
 ## Blockers
-- OQ-01 — Branch parent and naming for shared (foundation and cross-cutting) work
+- None — OQ-01 answered (PD-030)
 
 ## Dependencies status
-- F0-14 — NOT STARTED
-- UI-00 — NOT STARTED
+- F0-14 — MERGED TO DEV
+- UI-00 — MERGED TO DEV
 
 ## Completed
 - Feature documentation drafted (Claude Chat planning pack)
+- Rail (88px, `bg-rail-gradient`) with role label (FAMILY/CARER/ADMIN) and icon+label nav items; active item is a `bg-surface`/`text-brand` tile, derived from the route via `usePathname` in the small `RailNav` client component (PRD Technical Considerations).
+- Family/Carer/Admin rail contents exactly as scoped, in `src/components/shared/nav-config.ts`.
+- Header (76px): Family → client avatar (lg/46) + first name (Title/Page) + computed subline; Carer/Admin → active screen name via `ScreenTitle`. Right side: current date (`formatLongDate(new Date())`), divider, bell (Carer only), user avatar (md/32) + first name.
+- Role layouts: `(family)/family/[clientId]/layout.tsx`, `(carer)/carer/layout.tsx`, `(admin)/admin/layout.tsx`, each composing Rail + PageHeader and fetching `getCurrentUser()` / `getClientHeaderSummary()`.
+- 14 placeholder `page.tsx` routes (one per rail nav item) so rail links actually navigate instead of 404ing; real content is each dashboard feature's job (Out of Scope).
+- New `src/server/clients/queries.ts` and `src/server/auth/queries.ts` contracts (FD-01), since none existed yet.
 
 ## In progress
 - None
 
-## Remaining
-- Rail (88px, vertical gradient #07727D→#0C9BA9) with role label at top (FAMILY / CARER / ADMIN) and icon+label items; active item is a surface tile with brand text.
-- Family items: Home · Info · Calendar · Budget · Settings. Carer: Home · Patients · Calendar · Settings. Admin: Home · Manage · Staff · Clients · Settings.
-- Nav items in the top ~43% of the rail; nothing bottom-anchored.
-- Header 76px: Family → client avatar (46) + name (Title/Page) + subline '78 years · Preston VIC · Banksia Home Care'; Carer/Admin → screen name. Right side: current date ('Monday 30 November 2026'), divider, [Carer only: bell], user avatar + first name.
-- Top-bar placement of sign-out (UI-§5.1 says log-out/help in the top bar; exact control not drawn — PROPOSED user menu on avatar).
-- Role layouts in `(family)/family/[clientId]`, `(carer)/carer`, `(admin)/admin`; active item derived from route.
-- Bell renders only in the Carer header (panel behaviour in CAR-02).
-- Signed-in user comes from the `getCurrentUser()` contract (UI-00): mock session until F0-07 swaps in Supabase Auth; role layouts are unguarded mock routes until F0-07.
+## Remaining (deferred, not blocking any AC)
+- Top-bar sign-out control — PRD marks this PROPOSED/not drawn; no click behaviour implemented (avatar renders, no menu).
+- Carer notification bell has no click behaviour — panel behaviour is CAR-02's scope.
 
 ## Acceptance criteria status
-- 0 / 6 MET
+- 6 / 6 MET (see ACCEPTANCE_CRITERIA.md; AC-01 and AC-06 have notes — FD-02, FD-03)
 
 ## Tests
-- Written: 0 / 6
-- Passing: 0
+- Written: 8 (T-01..T-06 plus 2 axe checks) + 2 new integration tests for the `clients` contract
+- Passing: all (`npx vitest run` — 107/107 repo-wide; `npx playwright test tests/e2e/shared-app-shell.spec.ts` — 1/1, run against `next dev`)
 - Failing: 0
 
 ## Files changed
-- None yet. Likely files: `src/components/shared/rail.tsx`, `src/components/shared/page-header.tsx`, `src/app/(family)/family/[clientId]/layout.tsx`, `src/app/(carer)/carer/layout.tsx`, `src/app/(admin)/admin/layout.tsx`
+- `src/components/shared/{nav-config.ts,rail.tsx,rail-nav.tsx,rail.test.tsx,page-header.tsx,page-header.test.tsx,screen-title.tsx}`
+- `src/components/ui/icon.tsx` (added the 24px size the rail design needs)
+- `src/server/clients/queries.ts`, `src/mocks/queries/clients.ts`, `src/server/auth/queries.ts`
+- `src/app/(family)/family/[clientId]/{layout.tsx,home,info,calendar,budget,settings}/page.tsx`
+- `src/app/(carer)/carer/{layout.tsx,home,patients,calendar,settings}/page.tsx`
+- `src/app/(admin)/admin/{layout.tsx,home,manage,staff,clients,settings}/page.tsx`
+- `tests/integration/shared-app-shell-clients-contract.test.ts`, `tests/e2e/shared-app-shell.spec.ts`
 
 ## Decisions
-- See DECISIONS.md
+- See DECISIONS.md — FD-01 (new clients/auth contracts), FD-02 (AC-01 figures vs. fixtures), FD-03 (`next build` fails for any mock-backed route — **needs human decision**, affects every future dashboard feature's e2e).
 
 ## Problems encountered
-- None
+- `npm run pretest:e2e` (`next build`) fails on any route under these layouts: `src/mocks/current-user.ts`'s production guard throws during static prerender. Not fixed (out of F0-15's scope — see DECISIONS.md FD-03). Verified T-06 against `next dev` instead.
 
 ## Assumptions
 - PROPOSED items in PRD.md are unconfirmed until validated in F0-01 or answered in DECISIONS.md.
 
 ## Next action
-- Wait for answers to OQ-01; then complete dependencies, run START FEATURE F0-15, and write the tests in TEST_PLAN.md first.
+- None for the merge itself (PR #33). Carried forward, not resolved by it: FD-03 (`next build` throws on any mock-backed role layout, so the CI `build` job has been red on `main` since this merged and `e2e` cannot run — needs a decision on which lane owns the fix) and FD-02 (Margaret's fixture figures). See DECISIONS.md.
 
 ## Ready for PR
-- No
+- Merged
