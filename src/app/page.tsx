@@ -59,11 +59,7 @@ function App() {
 
   const toggleTask = (id: string) => {
     setTasks((current) =>
-      current.map((task) =>
-        task.id === id
-          ? { ...task, checked: !task.checked }
-          : task
-      )
+      current.map((task) => (task.id === id ? { ...task, checked: !task.checked } : task)),
     );
   };
 
@@ -84,8 +80,7 @@ function App() {
         <h1>Component Showcase</h1>
 
         <p>
-          Development page displaying the components from{" "}
-          <code>src/components</code>.
+          Development page displaying the components from <code>src/components</code>.
         </p>
       </header>
 
@@ -129,21 +124,14 @@ function App() {
         {/* Progress Bar */}
         <div>
           <h3>Progress Bar</h3>
-          <ProgressBar
-            value={65}
-            label="Care plan completion"
-          />
+          <ProgressBar value={65} label="Care plan completion" />
         </div>
 
         {/* Checkbox */}
         <div>
           <h3>Checkbox</h3>
 
-          <Checkbox
-            label="Example checkbox"
-            checked={checked}
-            onChange={setChecked}
-          />
+          <Checkbox label="Example checkbox" checked={checked} onChange={setChecked} />
         </div>
 
         {/* Card Shell */}
@@ -164,41 +152,28 @@ function App() {
         <div>
           <h3>Rail</h3>
 
-          <Rail
-            role="family"
-            basePath="/"
-          />
+          <Rail role="family" basePath="/" />
         </div>
 
         {/* Rail Navigation */}
         <div>
           <h3>Rail Navigation</h3>
 
-          <RailNav
-            role="family"
-            basePath="/"
-          />
+          <RailNav role="family" basePath="/" />
         </div>
 
         {/* Page Header */}
         <div>
           <h3>Page Header</h3>
 
-          <PageHeader
-            subject="Client Care Plan"
-            date="18 September 2026"
-            userFirstName="Sarah"
-          />
+          <PageHeader subject="Client Care Plan" date="18 September 2026" userFirstName="Sarah" />
         </div>
 
         {/* Screen Title */}
         <div>
           <h3>Screen Title</h3>
 
-          <ScreenTitle
-            role="carer"
-            basePath="/"
-          />
+          <ScreenTitle role="carer" basePath="/" />
         </div>
       </section>
 
@@ -243,21 +218,14 @@ function App() {
         <div>
           <h3>Activity Row</h3>
 
-          <ActivityRow
-            title="Care plan updated"
-            date="18 September 2026"
-            status="done"
-          />
+          <ActivityRow title="Care plan updated" date="18 September 2026" status="done" />
         </div>
 
         {/* Search Field */}
         <div>
           <h3>Search Field</h3>
 
-          <SearchField
-            value={search}
-            onChange={setSearch}
-          />
+          <SearchField value={search} onChange={setSearch} />
         </div>
       </section>
 
@@ -272,10 +240,7 @@ function App() {
         <div>
           <h3>Task Checklist</h3>
 
-          <TaskChecklist
-            items={tasks}
-            onToggle={toggleTask}
-          />
+          <TaskChecklist items={tasks} onToggle={toggleTask} />
         </div>
 
         {/* Data Table */}
@@ -363,10 +328,7 @@ function App() {
         <div>
           <h3>Person Card</h3>
 
-          <PersonCard
-            name="Sarah Johnson"
-            meta="NDIS Participant · Melbourne"
-          />
+          <PersonCard name="Sarah Johnson" meta="NDIS Participant · Melbourne" />
         </div>
 
         {/* Budget Bucket Card */}
@@ -390,10 +352,7 @@ function App() {
         <div>
           <h3>Stat Card</h3>
 
-          <StatCard
-            label="Planned Clients"
-            value="24"
-          />
+          <StatCard label="Planned Clients" value="24" />
         </div>
       </section>
 
@@ -465,4 +424,3 @@ function App() {
 }
 
 export default App;
-
