@@ -13,17 +13,19 @@ const buttonVariants = cva(
     variants: {
       variant: {
         primary: "bg-primary text-primary-foreground hover:bg-primary/90",
-        secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
+        secondary:
+          "border border-border-brand bg-transparent text-secondary-foreground hover:bg-secondary/40",
+        ghost: "bg-transparent text-secondary-foreground underline-offset-4 hover:underline",
         destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90",
       },
       size: {
-        default: "h-11 px-4 py-2", // 44px min target (UI-§5.1)
-        sm: "h-9 px-3",
+        md: "h-11 px-4 py-2", // 44px min target (UI-§5.1)
+        lg: "h-12 px-6 py-3 text-base",
       },
     },
     defaultVariants: {
       variant: "primary",
-      size: "default",
+      size: "md",
     },
   },
 );
