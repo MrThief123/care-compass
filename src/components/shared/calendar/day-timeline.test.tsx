@@ -315,4 +315,17 @@ describe("[UI-01] DayTimeline", () => {
       "1",
     );
   });
+
+  it("gives up title height, not the time range, when the status pill grows", () => {
+    render(<DayTimeline occurrences={[OUTING]} />);
+    const block = blockFor(OUTING);
+
+    // A status pill is free to render taller than its reserved height — a
+    // longer label, a larger icon. The rows that carry the time and the status
+    // hold their height; the title is the only row allowed to lose one, so a
+    // pill can never squeeze the time range down to a clipped half-line.
+    expect(within(block).getByText("15:00–17:00")).toHaveClass("shrink-0");
+    expect(within(block).getByText(OUTING.title).parentElement).toHaveClass("min-h-0");
+    expect(within(block).getByText("Jordan Lee").parentElement).toHaveClass("shrink-0");
+  });
 });

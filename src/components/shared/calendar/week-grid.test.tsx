@@ -263,6 +263,17 @@ describe("[UI-01][AC-03] WeekGrid", () => {
     );
   });
 
+  it("[AC-03] gives up title height, not the time range, when a row grows", () => {
+    render(<WeekGrid weekStart="2026-11-30" occurrences={[PHYSIO]} />);
+    const full = block(PHYSIO);
+
+    // Whatever height the assignee line actually takes, the title is the only
+    // row allowed to lose one — never the time range.
+    expect(within(full).getByText("09:30–11:30")).toHaveClass("shrink-0");
+    expect(within(full).getByText("Sarah Nguyen")).toHaveClass("shrink-0");
+    expect(within(full).getByText("Physiotherapy").parentElement).toHaveClass("min-h-0");
+  });
+
   it("[AC-03] calls onSelectDay when a day header is clicked", async () => {
     const user = userEvent.setup();
     const onSelectDay = vi.fn();
