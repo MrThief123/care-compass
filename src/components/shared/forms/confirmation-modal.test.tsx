@@ -56,7 +56,7 @@ describe("[UI-02][AC-02] ConfirmationModal", () => {
     await user.click(screen.getByRole("button", { name: "Deactivate staff member" }));
 
     const dialog = screen.getByRole("dialog");
-    expect(dialog).toContainElement(document.activeElement);
+    expect(dialog).toContainElement(document.activeElement as HTMLElement);
   });
 
   it("traps Tab focus inside the dialog", async () => {
@@ -68,7 +68,7 @@ describe("[UI-02][AC-02] ConfirmationModal", () => {
 
     for (let i = 0; i < 6; i += 1) {
       await user.tab();
-      expect(dialog).toContainElement(document.activeElement);
+      expect(dialog).toContainElement(document.activeElement as HTMLElement);
     }
   });
 

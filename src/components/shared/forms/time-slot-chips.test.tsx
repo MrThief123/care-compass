@@ -57,9 +57,7 @@ describe("[UI-02][AC-04] TimeSlotChips custom range validation", () => {
 
   it("shows the same error when start and end are equal", () => {
     render(
-      <TimeSlotHarness
-        initial={{ slot: "custom", customStart: "12:00", customEnd: "12:00" }}
-      />,
+      <TimeSlotHarness initial={{ slot: "custom", customStart: "12:00", customEnd: "12:00" }} />,
     );
 
     expect(screen.getByLabelText("End time")).toHaveAccessibleDescription(
