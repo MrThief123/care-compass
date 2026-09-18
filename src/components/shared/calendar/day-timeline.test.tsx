@@ -49,9 +49,7 @@ describe("[UI-01] DayTimeline", () => {
     expect(within(morning).getByText("30 min")).toBeInTheDocument();
     expect(within(morning).getByText("Done · Aisha Rahman")).toBeInTheDocument();
 
-    const afternoon = screen.getByTestId(
-      "day-timeline-block-event-walk:2026-11-30T14:00:00+11:00",
-    );
+    const afternoon = screen.getByTestId("day-timeline-block-event-walk:2026-11-30T14:00:00+11:00");
     expect(within(afternoon).getByText("Afternoon walk")).toBeInTheDocument();
     expect(within(afternoon).getByText("45 min")).toBeInTheDocument();
     expect(within(afternoon).getByText("Planned")).toBeInTheDocument();

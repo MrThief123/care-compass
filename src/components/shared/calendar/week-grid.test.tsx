@@ -22,13 +22,11 @@ describe("[UI-01][AC-03] WeekGrid", () => {
   it("highlights today's column and places the occurrence under its day", () => {
     render(<WeekGrid weekStart="2026-11-30" today="2026-11-30" occurrences={OCCURRENCES} />);
 
-    expect(screen.getByRole("columnheader", { name: /MON\s*30/ })).toHaveAttribute(
+    expect(screen.getByTestId("week-grid-header-2026-11-30")).toHaveAttribute(
       "aria-current",
       "date",
     );
-    expect(screen.getByRole("columnheader", { name: /THU\s*3/ })).not.toHaveAttribute(
-      "aria-current",
-    );
+    expect(screen.getByTestId("week-grid-header-2026-12-03")).not.toHaveAttribute("aria-current");
 
     const thursday = screen.getByTestId("week-grid-day-2026-12-03");
     expect(within(thursday).getByText("09:30 Weekly weigh-in")).toBeInTheDocument();

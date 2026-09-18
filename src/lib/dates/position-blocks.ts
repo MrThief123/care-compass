@@ -31,7 +31,9 @@ function localHourMinute(iso: string): { hour: number; minute: number } {
     hour: "2-digit",
     minute: "2-digit",
   });
-  const parts = Object.fromEntries(formatter.formatToParts(new Date(iso)).map((p) => [p.type, p.value]));
+  const parts = Object.fromEntries(
+    formatter.formatToParts(new Date(iso)).map((p) => [p.type, p.value]),
+  );
   return { hour: Number(parts.hour), minute: Number(parts.minute) };
 }
 

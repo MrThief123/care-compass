@@ -15,14 +15,8 @@ describe("[UI-01] MonthGrid", () => {
       />,
     );
 
-    expect(screen.getByTestId("month-grid-day-2026-11-30")).toHaveAttribute(
-      "aria-current",
-      "date",
-    );
-    expect(screen.getByTestId("month-grid-day-2026-11-24")).toHaveAttribute(
-      "aria-pressed",
-      "true",
-    );
+    expect(screen.getByTestId("month-grid-day-2026-11-30")).toHaveAttribute("aria-current", "date");
+    expect(screen.getByTestId("month-grid-day-2026-11-24")).toHaveAttribute("aria-pressed", "true");
     expect(screen.getByTestId("month-grid-day-2026-11-26")).toHaveAttribute(
       "data-has-events",
       "true",

@@ -59,11 +59,7 @@ describe("[UI-01][AC-06] calendar kit accessibility", () => {
 
   it("DatePickerGrid has no axe violations", async () => {
     const { container } = render(
-      <DatePickerGrid
-        month="2026-11-15"
-        selected="2026-11-30"
-        datesWithItems={["2026-11-24"]}
-      />,
+      <DatePickerGrid month="2026-11-15" selected="2026-11-30" datesWithItems={["2026-11-24"]} />,
     );
     expect(await axe(container)).toHaveNoViolations();
   });
