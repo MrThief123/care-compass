@@ -1,19 +1,19 @@
 # Progress — UI-03 Lists and cards kit: tables, rows, person/stat/budget/alert cards, client info view
 
-Status: NOT STARTED
-Owner: unclaimed
+Status: IN PROGRESS
+Owner: MrThief123
 Lane: S — Shared kit
 Sprint: SPRINT · planned D3
-Branch: `feature/shared-lists-cards-kit` (not yet created)
+Branch: `feature/shared-lists-cards-kit`
 PR target: `main (per OQ-01 — shared work)`
-Last updated: 2026-09-17 (planning pack generated)
+Last updated: 2026-09-18
 
 ## Blockers
-- OQ-01 — Branch parent and naming for shared (foundation and cross-cutting) work
+- None — OQ-01 answered (PD-030)
 
 ## Dependencies status
-- F0-14 — NOT STARTED
-- UI-00 — NOT STARTED
+- F0-14 — MERGED TO DEV
+- UI-00 — MERGED TO DEV
 
 ## Completed
 - Feature documentation drafted (Claude Chat planning pack)
