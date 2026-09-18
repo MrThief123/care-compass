@@ -1,11 +1,11 @@
 # Progress — F0-14 Core UI primitives and state components
 
-Status: PR OPEN
+Status: MERGED TO MAIN
 Owner: Dhruv Verma
 Lane: S — Shared kit
 Sprint: SPRINT · planned D2
 Branch: `feature/shared-ui-primitives`
-PR target: `main (per OQ-01 — shared work)`
+PR target: `main (per OQ-01 — shared work)` — PR #17 merged 2026-09-18
 Last updated: 2026-09-18
 
 ## Blockers
@@ -63,7 +63,7 @@ Last updated: 2026-09-18
 - Visual styling (colours, spacing, borders) follows the tokens in `src/styles/tokens.css` and the PRD's prose description of each variant; exact Figma pixel values were not re-verified node-by-node against the Figma file in this session. Flag for design review before/at PR.
 
 ## Next action
-- PR opened to `main`. Suggest also reviewing FD-02 (Status pill full-name text change) since it's a flagged test-expectation change.
+- None — PR #17 merged to `main`, CI green.
 
 ## Ready for PR
-- Yes — PR opened this session.
+- Done — PR #17 merged 2026-09-18.

@@ -9,6 +9,6 @@ Test results: all passing
 Current blocker: none
 Important discoveries: two test-infra defects fixed in `vitest.setup.ts` (RTL cleanup not wired with `globals: false`; `jest-axe` matcher double-wrapped) — see PROGRESS.md "Problems encountered". Also: `.next` type-check cache can go stale after deleting an app route — clear `.next` if `tsc --noEmit` references a deleted page.
 Important decisions: FD-01 (lucide-react + jest-axe deps), FD-02 (Status pill shows full actor name per PD-038, not 'Aisha R.' — HUMAN REVIEW flagged), FD-03 (dedicated `loader` icon replaces spun `sliders` in SearchField)
-Exact next action: Human approved opening the PR to `main` (per OQ-01 shared-work target); opening now.
+Exact next action: None — PR #17 merged to `main` (per OQ-01 shared-work target), CI green.
 Files touched: see PROGRESS.md "Files changed"
-Warning for next session: none — feature is READY FOR PR, PR being opened this session.
+Warning for next session: none — feature is MERGED TO MAIN.
