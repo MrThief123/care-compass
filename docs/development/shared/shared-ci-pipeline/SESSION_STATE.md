@@ -9,6 +9,6 @@ Test results: All green; deliberate-failure demonstrations behaved as expected (
 Current blocker: None. AC-04 (db-test job) can't be fully exercised until F0-06 creates `supabase/tests` — this is expected per PRD, not a blocker for this feature.
 Important discoveries: A prior out-of-process commit on `chore/typo-pipeline` (merged to `main` before this feature existed) had commented out the test step in the old ad-hoc `ci.yaml`; this feature restores and supersedes it.
 Important decisions: Kept `.github/workflows/ci.yaml` filename instead of renaming to the PRD's literal `ci.yml` (see PROGRESS.md Decisions) — content matches PRD scope; renaming was blocked by the auto-mode classifier as a destructive CI-file operation.
-Exact next action: Open PR to `main` (feature/shared-ci-pipeline → main, per OQ-01) once the human reviews and approves opening it (CLAUDE.md §8: never open without prior approval).
-Files likely to be touched next: None expected for this feature; PR review may request adjustments to `.github/workflows/ci.yaml`.
-Warning for next session: If picking this back up, re-run `npm run verify` and `npm run test:e2e` before opening/updating the PR to confirm nothing drifted.
+Exact next action: None — PR #19 merged to `main` 2026-09-18. Feature complete.
+Files likely to be touched next: None expected for this feature.
+Warning for next session: N/A — feature closed.
