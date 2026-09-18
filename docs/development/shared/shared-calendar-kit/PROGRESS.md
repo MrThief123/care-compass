@@ -1,19 +1,19 @@
 # Progress — UI-01 Calendar kit: week/day/month grids, event blocks, date picker
 
-Status: NOT STARTED
-Owner: unclaimed
+Status: IN PROGRESS
+Owner: Dhruv Verma
 Lane: S — Shared kit
 Sprint: SPRINT · planned D3
-Branch: `feature/shared-calendar-kit` (not yet created)
+Branch: `feature/shared-calendar-kit`
 PR target: `main (per OQ-01 — shared work)`
-Last updated: 2026-09-17 (planning pack generated)
+Last updated: 2026-09-18 (claimed)
 
 ## Blockers
-- OQ-01 — Branch parent and naming for shared (foundation and cross-cutting) work
+- None
 
 ## Dependencies status
-- F0-14 — NOT STARTED
-- UI-00 — NOT STARTED
+- F0-14 — MERGED TO DEV
+- UI-00 — MERGED TO DEV
 
 ## Completed
 - Feature documentation drafted (Claude Chat planning pack)
