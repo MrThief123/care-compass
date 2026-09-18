@@ -2,9 +2,11 @@ name: CI
 
 on:
   push:
-    branches: [main, family-dev, carer-dev, admin-dev]
   pull_request:
     branches: [main, family-dev, carer-dev, admin-dev]
+on:
+  push:
+  pull_request:
 
 jobs:
   lint:
