@@ -120,6 +120,7 @@ Root `PROGRESS.md`/`SESSION_STATE.md` and multi-worktree setup: `docs/AGENT_REFE
 ## 8. Commits and PRs
 - Conventional Commits: `feat(family): …`, `test(carer): …`, `fix(admin): …`, `feat(db): …`, `chore(ci): …`, `docs(<slug>): …`. Never `update`, `wip`, `fix`, `stuff`.
 - PR title `<ID> <Feature name>`; body from `docs/DEVELOPMENT_WORKFLOW.md` §8. Never open the PR without prior human approval (`docs/DEVELOPMENT_WORKFLOW.md` §7).
+- No AI-attribution lines in commits or PRs: never add `Co-Authored-By: Claude …` trailers or a "Generated with Claude Code" footer. Commits and PRs are authored under the human owner's name only.
 
 ### Definition of Done (feature → READY FOR PR)
 - [ ] In-scope ACs MET with tests written first and passing
