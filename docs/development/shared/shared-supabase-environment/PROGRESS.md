@@ -1,18 +1,18 @@
 # Progress — F0-04 Environment configuration and Supabase integration
 
-Status: NOT STARTED
-Owner: unclaimed
+Status: IN PROGRESS
+Owner: MrThief123
 Lane: B — Backend
 Sprint: SPRINT · planned D2
-Branch: `feature/shared-supabase-environment` (not yet created)
+Branch: `feature/shared-supabase-environment`
 PR target: `main (per OQ-01 — shared work)`
-Last updated: 2026-09-17 (planning pack generated)
+Last updated: 2026-09-18
 
 ## Blockers
-- OQ-01 — Branch parent and naming for shared (foundation and cross-cutting) work
+- None — OQ-01 ANSWERED (see root DECISIONS.md)
 
 ## Dependencies status
-- F0-02 — NOT STARTED
+- F0-02 — MERGED TO DEV
 
 ## Completed
 - Feature documentation drafted (Claude Chat planning pack)
