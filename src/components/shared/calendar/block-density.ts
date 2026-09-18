@@ -8,17 +8,39 @@
  */
 export type BlockDensity = "compact" | "regular" | "full";
 
+/** A block's border, top and bottom — blocks are sized border-box. */
+export const BLOCK_BORDER_PX = 2;
+/** A block's own vertical padding (`py-1`), top and bottom. */
+export const BLOCK_PADDING_PX = 8;
 /**
- * Thresholds are the height the tier's content actually occupies, measured
- * against the rendered type ramp, not round numbers — a tier that starts below
- * what it needs clips its own last line.
- *
- * `regular` = title (16px at `leading-tight`) + time range (16px) + 8px of
- * vertical padding = 40px. `full` adds an assignee/status row (26px + 4px of
- * separation) = 70px, rounded to 72.
+ * One line of title: `text-body-small` (13px) at `leading-tight` is 16.25px,
+ * rounded up. Rounding up costs a line at the boundary; rounding down would
+ * clip the last one, and a clipped line is the defect this whole tier system
+ * exists to avoid.
  */
-const REGULAR_MIN_PX = 40;
-const FULL_MIN_PX = 72;
+export const TITLE_LINE_PX = 17;
+/** The time row under the title (`text-body-secondary`, 12/16). */
+export const TIME_LINE_PX = 16;
+/** A secondary detail line, such as the week grid's assignee (12/16). */
+export const DETAIL_LINE_PX = 16;
+/**
+ * The day view's status row: `StatusPill` (an 18px line box, `py-1` and a 1px
+ * border = 28px) over `pt-1` of separation. A pill that renders taller than
+ * this costs the title a line rather than the time range — see the views'
+ * `shrink-0` rows.
+ */
+export const STATUS_ROW_PX = 32;
+
+/** Everything a block spends before any of its content: border and padding. */
+export const BLOCK_CHROME_PX = BLOCK_BORDER_PX + BLOCK_PADDING_PX;
+
+/**
+ * Thresholds are the height the tier's content actually occupies, built from
+ * the row metrics above rather than written as round numbers — a tier that
+ * starts below what it needs clips its own last line.
+ */
+const REGULAR_MIN_PX = BLOCK_CHROME_PX + TITLE_LINE_PX + TIME_LINE_PX;
+const FULL_MIN_PX = REGULAR_MIN_PX + STATUS_ROW_PX;
 
 /**
  * `compact`  — one line: title, with the time trailing it inline.
@@ -31,17 +53,6 @@ export function blockDensity(heightPx: number): BlockDensity {
   return "compact";
 }
 
-/** A block's own vertical padding (`py-1`), top and bottom. */
-export const BLOCK_PADDING_PX = 8;
-/** The time row under the title (`text-body-secondary`, 12/16). */
-export const TIME_LINE_PX = 16;
-/**
- * One line of title: 13px at `leading-tight` is 16.25px, rounded up. Rounding
- * up costs a line at the boundary; rounding down would clip the last one, and
- * a clipped line is the defect this whole tier system exists to avoid.
- */
-export const TITLE_LINE_PX = 17;
-
 /** The deepest `line-clamp-*` utility Tailwind provides. */
 const MAX_TITLE_LINES = 6;
 
@@ -51,8 +62,11 @@ const MAX_TITLE_LINES = 6;
  * Truncating every title to one line loses the end of the long ones, but
  * wrapping freely pushes the time range out of the block. So the title gets
  * the height left over once everything else the block must show is reserved
- * (`reservedPx`: padding, the time row, and any status or assignee row the
- * density tier adds) — and is cut off with an ellipsis beyond that.
+ * (`reservedPx`: `BLOCK_CHROME_PX`, the time row, and any status or assignee
+ * row the density tier adds) — and is cut off with an ellipsis beyond that.
+ *
+ * Every term is rounded so the count can only ever *under*-estimate what fits:
+ * a line too few shows an ellipsis, a line too many would be cut through.
  */
 export function titleLines(heightPx: number, reservedPx: number): number {
   const spare = Math.floor((heightPx - reservedPx) / TITLE_LINE_PX);

@@ -7,7 +7,8 @@ import { cn } from "@/lib/utils";
 import type { Occurrence } from "@/types/domain";
 
 import {
-  BLOCK_PADDING_PX,
+  BLOCK_CHROME_PX,
+  DETAIL_LINE_PX,
   TIME_LINE_PX,
   blockDensity,
   titleClampClass,
@@ -26,8 +27,6 @@ const DAY_LABELS = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
 const BLOCK_GAP_PX = 2;
 /** Smallest height a block is rendered at (see `layoutBlocks`). */
 const MIN_BLOCK_PX = 22;
-/** The `full` tier's assignee line (`text-body-secondary`, 12/16). */
-const ASSIGNEE_LINE_PX = 16;
 
 export interface WeekGridProps {
   /** Monday of the visible week. */
@@ -190,13 +189,14 @@ export function WeekGrid({
                   const label = labelFormat ? labelFormat(item) : item.title;
                   const { time } = melbourneDateTime(item.start);
                   const cue = STATUS_CUE[item.status];
-                  // Everything but the title: padding, the time row, and the
-                  // assignee line the `full` tier adds when there is one.
+                  // Everything but the title: the block's own chrome, the time
+                  // row, and the assignee line the `full` tier adds when there
+                  // is one.
                   const lines = titleLines(
                     clampedHeight,
-                    BLOCK_PADDING_PX +
+                    BLOCK_CHROME_PX +
                       TIME_LINE_PX +
-                      (density === "full" && item.assignee ? ASSIGNEE_LINE_PX : 0),
+                      (density === "full" && item.assignee ? DETAIL_LINE_PX : 0),
                   );
 
                   return (
@@ -221,17 +221,23 @@ export function WeekGrid({
                       <span
                         className={cn(
                           "flex min-w-0 flex-1 flex-col overflow-hidden px-2",
-                          density === "compact" ? "justify-center py-0.5" : "py-1",
+                          // A compact block is 22px: its one row is centred in
+                          // what the border leaves, with no padding to spare.
+                          density === "compact" ? "justify-center" : "py-1",
                         )}
                       >
                         <span className="sr-only">{cue.label}: </span>
                         {density === "compact" ? (
                           <span className="flex min-w-0 items-baseline gap-1.5">
+                            {/* Centred, not baselined: a 14px glyph on the
+                                text baseline stands taller than the text does
+                                and would push this row past the height a 22px
+                                block has for it. */}
                             {cue.icon ? (
                               <Icon
                                 name={cue.icon}
                                 size={14}
-                                className="shrink-0 text-text-secondary"
+                                className="shrink-0 self-center text-text-secondary"
                               />
                             ) : null}
                             <span
@@ -248,7 +254,12 @@ export function WeekGrid({
                           </span>
                         ) : (
                           <>
-                            <span className="flex min-w-0 items-start gap-1.5">
+                            {/* The only row allowed to lose height: the rows
+                                below it hold theirs, so a detail line that
+                                renders taller than its reserved height costs
+                                the title a line instead of clipping the time
+                                range through the middle. */}
+                            <span className="flex min-h-0 min-w-0 items-start gap-1.5">
                               {cue.icon ? (
                                 <Icon
                                   name={cue.icon}
@@ -273,11 +284,11 @@ export function WeekGrid({
                                 {label}
                               </span>
                             </span>
-                            <span className="truncate text-body-secondary text-text-secondary tabular-nums">
+                            <span className="shrink-0 truncate text-body-secondary text-text-secondary tabular-nums">
                               {melbourneTimeRange(item.start, item.durationMinutes)}
                             </span>
                             {density === "full" && item.assignee ? (
-                              <span className="truncate text-body-secondary text-text-secondary">
+                              <span className="shrink-0 truncate text-body-secondary text-text-secondary">
                                 {item.assignee}
                               </span>
                             ) : null}

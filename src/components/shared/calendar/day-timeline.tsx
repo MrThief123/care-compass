@@ -8,7 +8,8 @@ import type { Occurrence } from "@/types/domain";
 import { StatusPill } from "../status-pill";
 
 import {
-  BLOCK_PADDING_PX,
+  BLOCK_CHROME_PX,
+  STATUS_ROW_PX,
   TIME_LINE_PX,
   blockDensity,
   titleClampClass,
@@ -41,8 +42,6 @@ export interface DayTimelineProps {
 
 /** Breathing room between a block's card and its column edges, so its border reads. */
 const COLUMN_GUTTER_PX = 3;
-/** The `full` tier's status row: a 26px pill plus its 4px of separation. */
-const STATUS_ROW_PX = 30;
 
 /**
  * Family Home "Today" day view (UI-01 Scope).
@@ -100,11 +99,12 @@ export function DayTimeline({
         const { time: startTime } = melbourneDateTime(item.start);
         const timeRange = melbourneTimeRange(item.start, item.durationMinutes);
         const cue = STATUS_CUE[item.status];
-        // Everything but the title: padding, the time row, and the status row
-        // the `full` tier adds. Whatever is left over, the title may wrap into.
+        // Everything but the title: the block's own chrome, the time row, and
+        // the status row the `full` tier adds. Whatever is left over, the
+        // title may wrap into.
         const lines = titleLines(
           blockHeight,
-          BLOCK_PADDING_PX + TIME_LINE_PX + (density === "full" ? STATUS_ROW_PX : 0),
+          BLOCK_CHROME_PX + TIME_LINE_PX + (density === "full" ? STATUS_ROW_PX : 0),
         );
 
         return (
@@ -128,7 +128,9 @@ export function DayTimeline({
             <span
               className={cn(
                 "flex min-w-0 flex-1 flex-col overflow-hidden px-2",
-                density === "compact" ? "justify-center py-0.5" : "py-1",
+                // A compact block is 22px: its one row is centred in what the
+                // border leaves, with no padding to give away.
+                density === "compact" ? "justify-center" : "py-1",
               )}
             >
               {/* The `full` tier renders StatusPill, which already says it. */}
@@ -136,8 +138,15 @@ export function DayTimeline({
 
               {density === "compact" ? (
                 <span className="flex min-w-0 items-baseline gap-1.5">
+                  {/* Centred, not baselined: a 14px glyph on the text baseline
+                      stands taller than 13px text does and would push this
+                      row past the height a 22px block has for it. */}
                   {cue.icon && (
-                    <Icon name={cue.icon} size={14} className="shrink-0 text-text-secondary" />
+                    <Icon
+                      name={cue.icon}
+                      size={14}
+                      className="shrink-0 self-center text-text-secondary"
+                    />
                   )}
                   <span
                     data-title-lines={lines}
@@ -151,7 +160,11 @@ export function DayTimeline({
                 </span>
               ) : (
                 <>
-                  <span className="flex min-w-0 items-start gap-1.5">
+                  {/* The only row allowed to lose height. Everything below it
+                      is `shrink-0`, so a status pill that renders taller than
+                      its reserved height costs the title a line instead of
+                      clipping the time range through the middle. */}
+                  <span className="flex min-h-0 min-w-0 items-start gap-1.5">
                     {cue.icon && (
                       <Icon
                         name={cue.icon}
@@ -177,14 +190,14 @@ export function DayTimeline({
                       {item.title}
                     </span>
                   </span>
-                  <span className="min-w-0 truncate text-body-secondary text-text-secondary tabular-nums">
+                  <span className="min-w-0 shrink-0 truncate text-body-secondary text-text-secondary tabular-nums">
                     {timeRange}
                   </span>
                 </>
               )}
 
               {density === "full" && (
-                <span className="mt-auto flex min-w-0 items-center gap-2 pt-1">
+                <span className="mt-auto flex min-w-0 shrink-0 items-center gap-2 pt-1">
                   {item.assignee && (
                     <span className="min-w-0 truncate text-body-secondary text-text-secondary">
                       {item.assignee}
