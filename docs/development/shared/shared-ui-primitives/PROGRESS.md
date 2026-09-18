@@ -1,6 +1,6 @@
 # Progress — F0-14 Core UI primitives and state components
 
-Status: READY FOR PR
+Status: PR OPEN
 Owner: Dhruv Verma
 Lane: S — Shared kit
 Sprint: SPRINT · planned D2
@@ -63,7 +63,7 @@ Last updated: 2026-09-18
 - Visual styling (colours, spacing, borders) follows the tokens in `src/styles/tokens.css` and the PRD's prose description of each variant; exact Figma pixel values were not re-verified node-by-node against the Figma file in this session. Flag for design review before/at PR.
 
 ## Next action
-- Ready for PR. Suggest also reviewing FD-02 (Status pill full-name text change) since it's a flagged test-expectation change.
+- PR opened to `main`. Suggest also reviewing FD-02 (Status pill full-name text change) since it's a flagged test-expectation change.
 
 ## Ready for PR
-- Yes
+- Yes — PR opened this session.
