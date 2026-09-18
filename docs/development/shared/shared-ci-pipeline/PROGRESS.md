@@ -1,11 +1,11 @@
 # Progress — F0-03 Continuous integration pipeline
 
-Status: IN PROGRESS
+Status: MERGED TO DEV
 Owner: MrThief123
 Lane: S — Shared kit
 Sprint: SPRINT · planned D2
 Branch: `feature/shared-ci-pipeline`
-PR target: `main (per OQ-01 — shared work)`
+PR target: `main (per OQ-01 — shared work)` — PR #19 merged 2026-09-18
 Last updated: 2026-09-18
 
 ## Blockers
@@ -56,7 +56,7 @@ Last updated: 2026-09-18
 - PROPOSED items in PRD.md (OQ-23 audit-level interpretation, OQ-17 CD scope) are unconfirmed until answered; audit job implements the documented proposed default (`npm audit --audit-level=high`) only, no CD.
 
 ## Next action
-- Ready for PR. Human should review the "CI Bypass" note above (about the old `ci.yaml` disabling tests) before approving.
+- None. Merged (PR #19).
 
 ## Ready for PR
-- Yes
+- Merged
