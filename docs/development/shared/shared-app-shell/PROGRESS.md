@@ -1,12 +1,12 @@
 # Progress — F0-15 Role app shell: rail, header and layouts
 
-Status: IN PROGRESS
+Status: MERGED TO DEV
 Owner: MrThief123
 Lane: S — Shared kit
 Sprint: SPRINT · planned D3
 Branch: `feature/shared-app-shell`
-PR target: `main (per OQ-01 — shared work)`
-Last updated: 2026-09-18
+PR target: `main (per OQ-01 — shared work)` — PR #33 merged 2026-09-18
+Last updated: 2026-09-19
 
 ## Blockers
 - None — OQ-01 answered (PD-030)
@@ -58,7 +58,7 @@ Last updated: 2026-09-18
 - PROPOSED items in PRD.md are unconfirmed until validated in F0-01 or answered in DECISIONS.md.
 
 ## Next action
-- Human review of FD-03 (next build / e2e gap) and FD-02 (Margaret's fixture figures) — see DECISIONS.md. Then push and open PR to `main` once approved (CLAUDE.md §8 — never open the PR without prior human approval).
+- None for the merge itself (PR #33). Carried forward, not resolved by it: FD-03 (`next build` throws on any mock-backed role layout, so the CI `build` job has been red on `main` since this merged and `e2e` cannot run — needs a decision on which lane owns the fix) and FD-02 (Margaret's fixture figures). See DECISIONS.md.
 
 ## Ready for PR
-- Yes, pending human review of FD-02/FD-03 and PR approval.
+- Merged

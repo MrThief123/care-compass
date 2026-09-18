@@ -12,6 +12,6 @@ Important discoveries:
 - Domain `Occurrence` type (UI-00) already matches the PRD field list — `DayTimeline`/`WeekGrid` take `Occurrence[]` directly instead of a bespoke prop shape.
 - `role="columnheader"` on day headers fails axe without a full ARIA `grid`/`row` structure; switched to `data-testid` + `aria-current`/`aria-pressed`.
 Important decisions: none new; OQ-32/OQ-33 non-blocking proposed defaults applied (see PROGRESS.md).
-Exact next action: announce readiness to the human and wait for explicit approval before opening the PR to `main` (per CLAUDE.md §8 / feedback memory).
+Exact next action: None — PR #36 merged to `main` 2026-09-19. The review items carried forward from it (FD-01 – FD-07 sign-off, the `cn` fix's effect on UI-03/F0-15 components, all-day/multi-day rows) are listed in PROGRESS.md.
 Files touched: see PROGRESS.md "Files changed".
-Warning for next session: none — feature is READY FOR PR pending human go-ahead.
+Warning for next session: none — feature merged; open review items are in PROGRESS.md.

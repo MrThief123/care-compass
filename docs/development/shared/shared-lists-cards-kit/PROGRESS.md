@@ -1,12 +1,12 @@
 # Progress — UI-03 Lists and cards kit: tables, rows, person/stat/budget/alert cards, client info view
 
-Status: IN PROGRESS
+Status: MERGED TO DEV
 Owner: MrThief123
 Lane: S — Shared kit
 Sprint: SPRINT · planned D3
 Branch: `feature/shared-lists-cards-kit`
-PR target: `main (per OQ-01 — shared work)`
-Last updated: 2026-09-18
+PR target: `main (per OQ-01 — shared work)` — PR #34 merged 2026-09-18
+Last updated: 2026-09-19
 
 ## Blockers
 - None — OQ-01 answered (PD-030)
@@ -59,7 +59,7 @@ Last updated: 2026-09-18
 - PROPOSED items in PRD.md are unconfirmed until validated in F0-01 or answered in DECISIONS.md.
 
 ## Next action
-- Push (already pushed) and open PR to `main` once a human approves (CLAUDE.md §8 — never open the PR without prior human approval).
+- None. Merged (PR #34).
 
 ## Ready for PR
-- Yes, pending PR approval.
+- Merged
