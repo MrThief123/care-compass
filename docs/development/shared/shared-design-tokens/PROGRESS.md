@@ -1,58 +1,62 @@
 # Progress — F0-05 Design tokens, typography and base styles
 
-Status: NOT STARTED
-Owner: unclaimed
+Status: MERGED TO DEV
+Owner: Dhruv Verma
 Lane: S — Shared kit
 Sprint: SPRINT · planned D1
-Branch: `feature/shared-design-tokens` (not yet created)
+Branch: `feature/shared-design-tokens`
 PR target: `main (per OQ-01 — shared work)`
-Last updated: 2026-09-17 (planning pack generated)
+Last updated: 2026-09-17 (PR opened, human-approved)
 
 ## Blockers
-- OQ-01 — Branch parent and naming for shared (foundation and cross-cutting) work
+- None — OQ-01 answered (PD-030, root DECISIONS.md)
 
 ## Dependencies status
-- F0-02 — NOT STARTED
+- F0-02 — MERGED TO DEV
 
 ## Completed
 - Feature documentation drafted (Claude Chat planning pack)
+- Colour tokens (exact hex from Figma variables) as Tailwind v4 `@theme` CSS variables in `src/styles/tokens.css`, plus a `tokens.fixture.json` ground truth backing T-01
+- shadcn/ui semantic variables (`--color-background`, `--color-primary`, `--color-ring`, etc.) mapped onto the Figma tokens
+- Type ramp utilities (`text-title-page`, `text-title-section`, `text-title-card`, `text-metric-large`, `text-metric-medium`, `text-body-emphasis`, `text-body-default`, `text-body-small`, `text-body-secondary`, `text-label-caps`) via Tailwind v4 `@utility`
+- IBM Plex Sans wired via `next/font/google` in `src/app/layout.tsx` (`--font-ibm-plex-sans`), consumed by `--font-sans` in tokens.css; Tailwind's built-in `tabular-nums` utility is available for times/currency/counts (no custom CSS needed)
+- Spacing scale `--space-1`..`--space-9` (4–48px) and radius tokens `--radius-pill/control/card/inset/full`
+- Rail gradient utility `.bg-rail-gradient` (vertical bg/brand-deep → bg/brand)
+- Global visible `:focus-visible` ring in `globals.css`; body base font-size 14px (Body/Default), never below Body/Small (13px)
+- shadcn/ui initialised (`components.json`, `src/lib/utils.ts` `cn` helper, `clsx`/`tailwind-merge`/`class-variance-authority` deps — FD-01) with a minimal `Button` primitive (`src/components/ui/button.tsx`) proving the token mapping and satisfying AC-04; the full primitives kit is F0-14
+- Contrast utility (`src/lib/contrast.ts`, WCAG relative luminance/ratio) and an approved foreground/background pairs list (`src/styles/contrast-pairs.ts`) satisfying AC-02/AC-03
 
 ## In progress
 - None
 
 ## Remaining
-- Colour tokens (exact hex from Figma variables): bg/canvas #E9F8FA, bg/surface #FEFEFE, bg/inset #E9F8FA, bg/brand #0C9BA9, bg/brand-deep #07727D, bg/brand-light #49B7BF, bg/brand-pale #C6EAEF, bg/muted #8DB8C8, bg/accent #E69A81, bg/alert #FDF1EC, bg/alert-badge #F7C4B4, bg/alert-strong #B5543A, text/primary #1F282D, text/secondary #696E6A, text/muted #8DB8C8, text/brand #07727D, text/alert #B5543A, text/alert-strong #8A3A24, text/on-dark #FEFEFE, border/subtle #E9F8FA, border/default #D7F2F4, border/brand #07727D, border/alert #E8A98F.
-- Type ramp utilities from Figma text styles: Title/Page 20/26 500, Title/Section 16/22 500, Title/Card 15/20 500, Metric/Large 22/28 500, Metric/Medium 18/24 500, Body/Emphasis 14/20 500, Body/Default 14/20 400, Body/Small 13/18 400, Body/Secondary 12/16 400, Label/Caps 11/14 400 uppercase 0.06em.
-- IBM Plex Sans via `next/font`; `tabular-nums` utility applied to times, currency, percentages and counts.
-- Spacing scale space/1–9 = 4, 8, 12, 16, 20, 24, 32, 40, 48 px.
-- Radius tokens: pill 6, control 8, card 10, inset 8, full 9999 (numeric values from UI Spec §5.3 because Figma radius variables did not expose values — confirm in F0-01).
-- Rail gradient style: vertical #07727D → #0C9BA9.
-- Global visible focus ring on all interactive elements; body text min 13px.
-- shadcn/ui initialised with its CSS variables mapped to the tokens above.
-- Contrast test over an approved foreground/background pair list.
+- None for this session's scope
 
 ## Acceptance criteria status
-- 0 / 4 MET
+- 4 / 4 MET (AC-01, AC-02, AC-03, AC-04)
 
 ## Tests
-- Written: 0 / 4
-- Passing: 0
+- Written: 4 / 4 (T-01..T-04, written before implementation; confirmed failing on missing `tokens.css`/`button.tsx` before implementing)
+- Passing: 4
 - Failing: 0
 
 ## Files changed
-- None yet. Likely files: `src/styles/tokens.css`, `src/app/globals.css`, `src/app/layout.tsx`, `src/styles/tokens.fixture.json`, `src/styles/contrast.test.ts`, `components.json`
+- `src/styles/tokens.css`, `src/styles/tokens.fixture.json`, `src/styles/tokens.test.ts`, `src/styles/contrast-pairs.ts`, `src/styles/contrast.test.ts`, `src/lib/contrast.ts`, `src/lib/utils.ts`, `src/components/ui/button.tsx`, `src/components/ui/button.test.tsx`, `src/app/globals.css`, `src/app/layout.tsx`, `components.json`, `package.json`, `package-lock.json`
 
 ## Decisions
-- See DECISIONS.md
+- See DECISIONS.md (FD-01 — shadcn/ui utility dependencies)
 
 ## Problems encountered
 - None
 
 ## Assumptions
-- PROPOSED items in PRD.md are unconfirmed until validated in F0-01 or answered in DECISIONS.md.
+- PROPOSED items in PRD.md are unconfirmed until validated in F0-01 or answered in DECISIONS.md; radius numeric values (pill 6, control 8, card 10, inset 8) taken from PRD.md as ARCHITECTURE.md §4 records the same range and F0-01 validation found no more precise Figma export.
+
+## Known limitations
+- Type ramp utilities (`text-title-page` etc.) and the spacing scale have no dedicated AC/test in this feature's TEST_PLAN.md (only colour tokens, contrast and focus ring are covered by AC-01..04); they are implemented per PRD Scope and verified by `npm run build`, but a future controlled change could add explicit coverage if the human wants it.
 
 ## Next action
-- Wait for answers to OQ-01; then complete dependencies, run START FEATURE F0-05, and write the tests in TEST_PLAN.md first.
+- None — feature complete, ready for PR review.
 
 ## Ready for PR
-- No
+- Yes — approved by Dhruv Verma 2026-09-17; PR opened

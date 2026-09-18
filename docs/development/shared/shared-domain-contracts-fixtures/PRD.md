@@ -33,7 +33,7 @@ Lets all three dashboards build real-looking screens in parallel now, and wire d
 - `src/server/data-source.ts`: selects `mock` or `supabase` implementation via `DATA_SOURCE` env (default `mock` until Phase 3). Mock implementations live in `src/mocks/` and read fixtures.
 - `src/mocks/fixtures.ts`: design content at reference date Monday 30 November 2026 (Banksia Home Care; Margaret, Robert, Elsie, Frank, Doris, Harold, Jean; Helen, Michael, Susan, Karen, Tom; Priya; Aisha Rahman, Daniel K., Sarah Nguyen, Marcus Chen, Fatima Ali; events, statuses, budgets, fund history, documents, notifications).
 - `src/mocks/current-user.ts`: mock session with role selectable in development only (`?as=family|carer|admin` or cookie); throws in production builds.
-- Formatters in `src/lib/format/`: `displayName` ('Aisha Rahman' → 'Aisha R.'), `ageFromDob`, `formatDuration` (90 → '1 hr 30 min'), `formatShortDate` ('Mon 30 Nov'), `formatLongDate` ('Monday 30 November 2026'), `formatMoney` ('$14,880', '+$6,000').
+- Formatters in `src/lib/format/`: `displayName` (returns the full name unchanged, e.g. 'Aisha Rahman' → 'Aisha Rahman' — per FD-01/PD-038, supersedes the earlier 'Aisha R.' abbreviation example), `ageFromDob`, `formatDuration` (90 → '1 hr 30 min'), `formatShortDate` ('Mon 30 Nov'), `formatLongDate` ('Monday 30 November 2026'), `formatMoney` ('$14,880', '+$6,000').
 
 ## Out of Scope
 - Supabase implementation of the queries (Phase 2/3)

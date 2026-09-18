@@ -58,3 +58,28 @@ Root session state is a **team-level log**. Update it only in daily sync PRs or 
 - No application code before F0-01 is merged and its validation report approved (G1).
 - No `feature/shared-*` branch until OQ-01 is answered.
 - Never act on a proposed default for a blocking decision. Treat every PROPOSED label as unconfirmed.
+
+---
+
+### 2026-09-18 — Doc-drift cleanup: status corrections, attribution rule (Claude Code, repository access)
+**Worked on**
+- Found via `gh pr list` that F0-05 (PR #9), F0-09 (PR #10) and UI-00 (PR #11) were all merged to `main`, but each feature's own `PROGRESS.md` still said `Status: PR OPEN` — the merge never triggered a doc update. Root `PROGRESS.md`'s generated Status block was also a day stale (predated all three merges), and `docs/VALIDATION_REPORT.md`'s sign-off checkbox/signature were left blank even though DECISIONS.md §1 already records the human's G1 approval.
+- Added a repo-wide rule (CLAUDE.md §8): commits/PRs must not carry `Co-Authored-By: Claude …` trailers or a "Generated with Claude Code" footer — human request, applies to every session on this repo.
+
+**What changed**
+- `docs/development/shared/shared-design-tokens/PROGRESS.md`: `PR OPEN` → `MERGED TO DEV` (branch `docs/fix-f0-05-status`, PR #13, open).
+- `docs/development/shared/shared-recurrence-engine/PROGRESS.md` and `docs/development/shared/shared-domain-contracts-fixtures/PROGRESS.md`: same correction (this branch, `chore/refresh-project-status`).
+- Root `PROGRESS.md`: regenerated Status block via `node scripts/plan-status.mjs --write`; hand-updated the `## Overall` table (Stage → G1, merged-to-main list, next human actions).
+- `docs/VALIDATION_REPORT.md`: sign-off checkbox checked, signature/date filled to match the approval already recorded in DECISIONS.md §1.
+- CLAUDE.md §8: added the no-AI-attribution rule (branch `docs/no-ai-attribution`, PR #14, open).
+
+**Tests run**
+- None — docs-only changes, nothing to run.
+
+**Exact next action**
+- Human: merge PR #13, PR #14 and this branch's PR. Re-run `node scripts/plan-status.mjs --write` once all three land, since each merge changes feature counts.
+- Human: lane owners in `docs/SPRINT_PLAN.md` §2 are still blank — assign before more lanes start.
+- Next ready-to-start features once caught up: F0-03 (CI pipeline), F0-04 (Supabase env) — both lane S/B, unclaimed.
+
+**Warnings**
+- This is the second time a merged PR left its feature's `Status:` field stale — consider adding "update PROGRESS.md to MERGED TO DEV" as an explicit post-merge step in `docs/DEVELOPMENT_WORKFLOW.md` if it recurs a third time.

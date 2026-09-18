@@ -1,0 +1,278 @@
+/**
+ * Shared domain types (UI-00).
+ *
+ * This is the one typed contract between UI and data (PRD "Purpose"). Every
+ * screen feature must read data only through `src/server/**` contract
+ * functions, whose inputs/outputs are these types — never by importing
+ * `src/mocks` directly (lint-enforced, see eslint.config.mjs).
+ *
+ * Types are defined as Zod schemas (`z.infer`) per ARCHITECTURE.md §12.4
+ * ("Zod at every trust boundary") and CLAUDE.md §7 ("Zod for validation;
+ * one pattern per problem") so the same schema can validate fixtures,
+ * Server Action inputs and (from Phase 3) Supabase row shapes.
+ *
+ * Field shapes for Occurrence and BudgetBucketSummary are taken verbatim
+ * from PRD.md Scope. Other types are inferred from ARCHITECTURE.md §6
+ * (Data architecture) and the confirmed decisions referenced inline.
+ */
+import { z } from "zod";
+
+// ---------------------------------------------------------------------------
+// Organisation
+// ---------------------------------------------------------------------------
+
+export const OrganisationSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  abn: z.string().optional(),
+  phone: z.string().optional(),
+  address: z.string().optional(),
+});
+export type Organisation = z.infer<typeof OrganisationSchema>;
+
+// ---------------------------------------------------------------------------
+// Profile (family | carer | admin)
+// ---------------------------------------------------------------------------
+
+/** PD-042: Family is a single role with full authority for MVP. */
+export const RoleSchema = z.enum(["family", "carer", "admin"]);
+export type Role = z.infer<typeof RoleSchema>;
+
+export const ProfileSchema = z.object({
+  id: z.string(),
+  organisationId: z.string(),
+  role: RoleSchema,
+  /** Store first and last name; display the full name everywhere (PD-038). */
+  firstName: z.string(),
+  lastName: z.string(),
+  email: z.string(),
+  phone: z.string().optional(),
+  /** Admin/carer only; per-organisation editable list (PD-038/OQ-13). */
+  jobTitle: z.string().optional(),
+  isActive: z.boolean(),
+});
+export type Profile = z.infer<typeof ProfileSchema>;
+
+// ---------------------------------------------------------------------------
+// Client
+// ---------------------------------------------------------------------------
+
+export const ClientSchema = z.object({
+  id: z.string(),
+  organisationId: z.string(),
+  firstName: z.string(),
+  lastName: z.string(),
+  /** ISO date (YYYY-MM-DD). */
+  dob: z.string(),
+  suburb: z.string().optional(),
+  avatarUrl: z.string().optional(),
+});
+export type Client = z.infer<typeof ClientSchema>;
+
+/** ARCHITECTURE.md §6: client_info_sections — Description / Habits / Medical history. */
+export const ClientInfoSectionKindSchema = z.enum(["description", "habits", "medicalHistory"]);
+export type ClientInfoSectionKind = z.infer<typeof ClientInfoSectionKindSchema>;
+
+export const ClientInfoSectionSchema = z.object({
+  id: z.string(),
+  clientId: z.string(),
+  kind: ClientInfoSectionKindSchema,
+  title: z.string(),
+  content: z.string(),
+  /** ISO datetime. */
+  updatedAt: z.string(),
+});
+export type ClientInfoSection = z.infer<typeof ClientInfoSectionSchema>;
+
+// ---------------------------------------------------------------------------
+// Care events and occurrences
+// ---------------------------------------------------------------------------
+
+/** PD-046: full recurrence-frequency set; perpetual (no endDate) by default. */
+export const RecurrenceFrequencySchema = z.enum([
+  "none",
+  "daily",
+  "weekly",
+  "fortnightly",
+  "monthly",
+  "every2months",
+  "quarterly",
+  "every6months",
+  "yearly",
+]);
+export type RecurrenceFrequency = z.infer<typeof RecurrenceFrequencySchema>;
+
+/** PD-044: every event has a completion mode, set once and applied to all occurrences. */
+export const CompletionModeSchema = z.enum(["manual", "automatic"]);
+export type CompletionMode = z.infer<typeof CompletionModeSchema>;
+
+export const CareEventSchema = z.object({
+  id: z.string(),
+  clientId: z.string(),
+  /** PD-047: Title, Start time and Duration are first-class event fields. */
+  title: z.string(),
+  description: z.string(),
+  /** ISO datetime of the first/anchor occurrence. */
+  start: z.string(),
+  durationMinutes: z.number().int().nonnegative(),
+  recurrenceFrequency: RecurrenceFrequencySchema,
+  /** ISO date; absent means the series repeats indefinitely (PD-046). */
+  recurrenceEndDate: z.string().optional(),
+  completionMode: CompletionModeSchema,
+});
+export type CareEvent = z.infer<typeof CareEventSchema>;
+
+export const OccurrenceStatusSchema = z.enum(["planned", "done", "overdue"]);
+export type OccurrenceStatus = z.infer<typeof OccurrenceStatusSchema>;
+
+/**
+ * PRD.md Scope, verbatim field list:
+ * `{key, eventId, clientId, title, description, start, durationMinutes,
+ *   status: 'planned'|'done'|'overdue', actor?, assignee?, completedAt?}`
+ *
+ * `key` is `${eventId}:${originalStartISO}` (ARCHITECTURE.md §6.2).
+ * `assignee` (PD-029): the carer whose shift covers the occurrence start,
+ * or undefined if none. `actor` (REQ-19): who actually completed it.
+ */
+export const OccurrenceSchema = z.object({
+  key: z.string(),
+  eventId: z.string(),
+  clientId: z.string(),
+  title: z.string(),
+  description: z.string(),
+  start: z.string(),
+  durationMinutes: z.number().int().nonnegative(),
+  status: OccurrenceStatusSchema,
+  actor: z.string().optional(),
+  assignee: z.string().optional(),
+  completedAt: z.string().optional(),
+});
+export type Occurrence = z.infer<typeof OccurrenceSchema>;
+
+// ---------------------------------------------------------------------------
+// Shifts
+// ---------------------------------------------------------------------------
+
+export const ShiftSchema = z.object({
+  id: z.string(),
+  carerId: z.string(),
+  clientId: z.string(),
+  /** ISO datetime. */
+  start: z.string(),
+  /** ISO datetime. */
+  end: z.string(),
+});
+export type Shift = z.infer<typeof ShiftSchema>;
+
+// ---------------------------------------------------------------------------
+// Budget
+// ---------------------------------------------------------------------------
+
+/** PD-033: three fixed buckets, no categories (MVP). */
+export const BudgetBucketKindSchema = z.enum(["ndis", "fixed", "government"]);
+export type BudgetBucketKind = z.infer<typeof BudgetBucketKindSchema>;
+
+/** PD-032: thresholds 75% (warning) / 85% (alert) / 100% (exhausted). */
+export const BudgetBucketStateSchema = z.enum(["ok", "warning", "alert", "exhausted"]);
+export type BudgetBucketState = z.infer<typeof BudgetBucketStateSchema>;
+
+/** PRD.md Scope, verbatim field list: `{kind, label, total, used, remaining, percentUsed, state}`. */
+export const BudgetBucketSummarySchema = z.object({
+  kind: BudgetBucketKindSchema,
+  label: z.string(),
+  total: z.number().nonnegative(),
+  used: z.number().nonnegative(),
+  remaining: z.number(),
+  percentUsed: z.number().nonnegative(),
+  state: BudgetBucketStateSchema,
+});
+export type BudgetBucketSummary = z.infer<typeof BudgetBucketSummarySchema>;
+
+/** PD-005-consistent append-only ledger entry (top-up or expense). */
+export const FundEntryTypeSchema = z.enum(["topup", "expense"]);
+export type FundEntryType = z.infer<typeof FundEntryTypeSchema>;
+
+export const FundEntrySchema = z.object({
+  id: z.string(),
+  clientId: z.string(),
+  bucketKind: BudgetBucketKindSchema,
+  type: FundEntryTypeSchema,
+  amount: z.number(),
+  /** ISO date. */
+  date: z.string(),
+  description: z.string().optional(),
+  recordedBy: z.string().optional(),
+});
+export type FundEntry = z.infer<typeof FundEntrySchema>;
+
+// ---------------------------------------------------------------------------
+// Documents
+// ---------------------------------------------------------------------------
+
+export const DocumentRefSchema = z.object({
+  id: z.string(),
+  clientId: z.string(),
+  eventId: z.string().optional(),
+  name: z.string(),
+  url: z.string(),
+  /** ISO datetime. */
+  uploadedAt: z.string(),
+  uploadedBy: z.string().optional(),
+});
+export type DocumentRef = z.infer<typeof DocumentRefSchema>;
+
+// ---------------------------------------------------------------------------
+// Carer notifications
+// ---------------------------------------------------------------------------
+
+/** PD-048: notifications trigger on shift assigned/changed/cancelled and family document/event additions. */
+export const CarerNotificationSourceSchema = z.enum(["admin", "family"]);
+export type CarerNotificationSource = z.infer<typeof CarerNotificationSourceSchema>;
+
+/** PRD.md Scope, verbatim field list: `{source: 'admin'|'family', message, createdAt}`. */
+export const CarerNotificationSchema = z.object({
+  id: z.string(),
+  carerId: z.string(),
+  source: CarerNotificationSourceSchema,
+  message: z.string(),
+  /** ISO datetime. */
+  createdAt: z.string(),
+  /** Drives the unread count (PD-048); not in the PRD's literal field list but required to implement it. */
+  read: z.boolean(),
+});
+export type CarerNotification = z.infer<typeof CarerNotificationSchema>;
+
+// ---------------------------------------------------------------------------
+// Staff
+// ---------------------------------------------------------------------------
+
+/** PD-038/PD-039: full name display; per-organisation job title list; soft deactivation. */
+export const StaffMemberSchema = z.object({
+  id: z.string(),
+  organisationId: z.string(),
+  firstName: z.string(),
+  lastName: z.string(),
+  jobTitle: z.string(),
+  email: z.string(),
+  phone: z.string().optional(),
+  isActive: z.boolean(),
+});
+export type StaffMember = z.infer<typeof StaffMemberSchema>;
+
+// ---------------------------------------------------------------------------
+// Query parameter / result shapes referenced by PRD.md Scope examples
+// ---------------------------------------------------------------------------
+
+export const TaskLogQuerySchema = z.object({
+  q: z.string().optional(),
+  status: OccurrenceStatusSchema.optional(),
+  page: z.number().int().positive().optional(),
+});
+export type TaskLogQuery = z.infer<typeof TaskLogQuerySchema>;
+
+export interface TaskLogResult {
+  items: Occurrence[];
+  page: number;
+  pageSize: number;
+  total: number;
+}

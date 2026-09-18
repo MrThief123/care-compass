@@ -1,101 +1,55 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Care Compass
 
-## Getting Started
+Care Compass ("Scheduling of Care Program") is a desktop web app safeguarding the lifelong care of a person with special needs. Families schedule perpetual recurring care events; carers see assigned patients and shifts and tick off care with their name recorded; organisation admins manage staff, clients and shifts; budgets per funding bucket are tracked with automatic warning emails. Three dashboards — Family, Carer, Admin — on Next.js (App Router, TypeScript, Tailwind v4, shadcn/ui) and Supabase (Postgres, Auth, Storage, Row Level Security).
 
-First, run the development server:
+## Getting started
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) to see the result. Run `npm run verify` (lint + typecheck + format check + tests) before committing.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Supabase local development
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Requires [Docker](https://docs.docker.com/get-docker/) and the [Supabase CLI](https://supabase.com/docs/guides/cli/getting-started) (`brew install supabase/tap/supabase`).
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-
-
-
-Project strcuture plan
-
-```text
-src/
-├── app/
-│   ├── (auth)/
-│   │   ├── login/
-│   │   └── forgot-password/
-│   ├── (carer)/
-│   │   ├── dashboard/
-│   │   ├── clients/
-│   │   ├── calendar/
-│   │   └── expenses/
-│   ├── (admin)/
-│   │   ├── dashboard/
-│   │   ├── clients/
-│   │   ├── users/
-│   │   ├── carers/
-│   │   ├── budgets/
-│   │   ├── funding/
-│   │   ├── reports/
-│   │   └── audit/
-│   ├── (family)/
-│   │   ├── dashboard/
-│   │   ├── clients/
-│   │   ├── calendar/
-│   │   └── finances/
-│   └── api/
-│       ├── clients/
-│       ├── care/
-│       ├── schedules/
-│       ├── expenses/
-│       ├── notifications/
-│       └── ...
-├── components/
-│   ├── ui/
-│   ├── layout/
-│   ├── forms/
-│   └── ...
-├── features/
-│   ├── auth/
-│   ├── clients/
-│   ├── care/
-│   ├── scheduling/
-│   ├── expenses/
-│   ├── budgets/
-│   ├── funding/
-│   ├── files/
-│   ├── notifications/
-│   ├── audit/
-│   └── reports/
-├── infrastructure/
-│   ├── database/
-│   ├── storage/
-│   ├── email/
-│   ├── notifications/
-│   └── payments/
-└── lib/
-    ├── permissions/
-    ├── validation/
-    └── utils/
+```bash
+supabase start          # starts the local Postgres/Auth/Storage stack
+supabase status -o env  # prints API_URL, ANON_KEY, SERVICE_ROLE_KEY, ...
 ```
+
+Copy `.env.example` to `.env.local` and fill in `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` / `SUPABASE_SERVICE_ROLE_KEY` from that output (never commit `.env.local`). Then:
+
+```bash
+supabase db reset            # (re)applies supabase/migrations and supabase/seed.sql
+supabase test db             # runs pgTAP tests under supabase/tests
+npm run test:integration     # runs tests/integration/**, including ones that need the local stack
+npm run db:types             # regenerates src/lib/supabase/database.types.ts from the local schema
+supabase stop                # stops the stack when you're done
+```
+
+Query Supabase only through `src/lib/supabase/browser.ts` (Client Components) or `src/lib/supabase/server.ts` (Server Components, Server Actions, Route Handlers) — both run as the signed-in user, so RLS stays the authorisation boundary. `src/server/jobs/supabase-admin.ts` is the one service-role (RLS-bypassing) client, restricted by lint to `src/server/jobs/**`.
+
+## Project docs
+
+This repo is run by a documented plan (see `CLAUDE.md` for the full operating rules). Every session starts by reading `CLAUDE.md`, then the current feature's docs under `docs/development/`. The rest of the root-level docs are the plan's controlled source of truth:
+
+| File | What it's for |
+|---|---|
+| `CLAUDE.md` | Operating rules for every session/agent working in this repo — read this first |
+| `PRD.md` | Product requirements and traceability |
+| `ARCHITECTURE.md` | Directory layout, data model, engineering standards |
+| `DEVELOPMENT_PLAN.md` | Backlog and feature cards (F0-xx, UI-xx, FAM-xx, CAR-xx, ADM-xx, INT-xx) |
+| `DECISIONS.md` | Open questions, answered decisions, controlled changes (CHG-xxx) |
+| `TESTING.md` | Testing strategy and standards |
+| `PROGRESS.md` / `SESSION_STATE.md` | Generated/live project status — see `node scripts/plan-status.mjs` |
+
+Further reference docs (sprint schedule, folder ownership, agent commands, workflow/PR template, per-feature `PRD.md`/`ACCEPTANCE_CRITERIA.md`/`TEST_PLAN.md`) live under `docs/` — see `CLAUDE.md` §13 for the full map.
+
+## Learn more
+
+- [Next.js Documentation](https://nextjs.org/docs)
+- [Tailwind CSS v4](https://tailwindcss.com/docs)
+- [Supabase Documentation](https://supabase.com/docs)

@@ -120,6 +120,7 @@ Root `PROGRESS.md`/`SESSION_STATE.md` and multi-worktree setup: `docs/AGENT_REFE
 ## 8. Commits and PRs
 - Conventional Commits: `feat(family): …`, `test(carer): …`, `fix(admin): …`, `feat(db): …`, `chore(ci): …`, `docs(<slug>): …`. Never `update`, `wip`, `fix`, `stuff`.
 - PR title `<ID> <Feature name>`; body from `docs/DEVELOPMENT_WORKFLOW.md` §8. Never open the PR without prior human approval (`docs/DEVELOPMENT_WORKFLOW.md` §7).
+- No AI-attribution lines in commits or PRs: never add `Co-Authored-By: Claude …` trailers or a "Generated with Claude Code" footer. Commits and PRs are authored under the human owner's name only.
 
 ### Definition of Done (feature → READY FOR PR)
 - [ ] In-scope ACs MET with tests written first and passing
@@ -175,3 +176,13 @@ Client data is health and financial information about vulnerable people. Only sy
 
 ## 14. Next.js version rules
 This project uses a recent Next.js whose APIs and file conventions may differ from your training data (for example, request middleware is `proxy.ts` in Next.js 16). Before writing Next.js code — routing, layouts, server actions, caching, proxy/middleware, config — read the relevant guide in `node_modules/next/dist/docs/` and follow deprecation notices. If a guide conflicts with ARCHITECTURE.md, follow the guide, record it in the feature DECISIONS.md and flag it for a controlled change.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->

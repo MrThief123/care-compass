@@ -9,7 +9,7 @@ Supporting tables for `CLAUDE.md`. These are reference data, not daily-reading �
 | Folder | Owned by |
 |---|---|
 | `src/components/ui/**`, `src/components/shared/**`, `src/styles/**`, `src/types/**`, `src/lib/**`, `src/mocks/**`, `src/server/data-source.ts` | Lane S (shared PRs) |
-| `supabase/**`, `src/server/**` (except data-source.ts), `src/lib/supabase/**`, `proxy.ts`/`middleware.ts` | Lane B (shared PRs); dashboard wiring features may add functions in `src/server/<domain>/` for their feature |
+| `supabase/**`, `src/server/**` (except `data-source.ts`, and except the initial `budget`/`events` `queries.ts`/`actions.ts` contract files created by UI-00 — see ARCHITECTURE.md §3.1, CHG-002), `src/lib/supabase/**`, `proxy.ts`/`middleware.ts` | Lane B (shared PRs); dashboard wiring features may add functions in `src/server/<domain>/` for their feature, and may extend (not recreate) the UI-00-originated `budget`/`events` contract files |
 | `src/app/(family)/**`, `src/features/family-*/**` | Lane F |
 | `src/app/(carer)/**`, `src/features/carer-*/**` | Lane C |
 | `src/app/(admin)/**`, `src/features/admin-*/**` | Lane A |
