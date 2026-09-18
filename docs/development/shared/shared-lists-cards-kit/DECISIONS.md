@@ -13,7 +13,19 @@ Record feature-level decisions here using the template below. Project-wide decis
 
 ## Feature decisions log
 
-_No decisions recorded yet._
+### FD-01 — Non-blocking OQ defaults applied as-is
+- Date: 2026-09-18
+- Context: OQ-01 is ANSWERED (root DECISIONS.md PD-030). OQ-03 (budget thresholds) is ANSWERED (PD-032: 75/85/100) and already implemented as `BUDGET_THRESHOLDS`/`deriveBudgetBucketState` in `src/mocks/fixtures.ts` — `BudgetBucketCard` just renders the `BudgetBucketSummary.state` it's given, so no new threshold logic was needed here.
+- Decision: used the proposed defaults for OQ-38 (client info fields — built to the design, no extra fields) and OQ-39 (design copy/visual inconsistencies — followed design tokens per UI-§5) without modification.
+- Reason: both are non-blocking; CLAUDE.md §2 says use the documented default and note it.
+- Human confirmation required: no.
+
+### FD-02 — BudgetBucketCard's "warning" state keeps the neutral ground
+- Date: 2026-09-18
+- Context: the Figma component doc for the source card says "warning70 keeps the white ground and adds the alert icon; alert90 and depleted100 move to the bg/alert ground". `BudgetBucketState` has four values (`ok`/`warning`/`alert`/`exhausted`), but AC-01 only specifies the `alert` case explicitly.
+- Decision: implemented three visual tiers — `ok` (neutral, no icon), `warning` (neutral ground, alert-triangle icon shown), `alert`/`exhausted` (alert ground, alert-strong ink, alert-tone bar, icon).
+- Reason: matches the Figma component's documented behaviour precisely; AC-01's literal test only exercises `alert`, so this is filled in from the design doc, not invented.
+- Human confirmation required: no — directly sourced from the fetched Figma component description, not a guess.
 
 <!-- Template
 ### FD-01 — <title>
