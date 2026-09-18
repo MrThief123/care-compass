@@ -16,7 +16,7 @@ Last updated: 2026-09-18
 
 ## Completed
 - Feature documentation drafted (Claude Chat planning pack)
-- Icon library `lucide-react` with an `Icon` wrapper (sizes 14/16/20) covering: home, info, calendar, dollar, sliders, person, clipboard-check, bell, search, file, plus, check, alert-triangle, chevron-left/right/up/down, x.
+- Icon library `lucide-react` with an `Icon` wrapper (sizes 14/16/20) covering: home, info, calendar, dollar, sliders, person, clipboard-check, bell, search, file, loader, plus, check, alert-triangle, chevron-left/right/up/down, x.
 - Avatar (sm 28 / md 32 / lg 46; initials on brand-pale ground).
 - Button extended (primary brand-deep fill / secondary outline / ghost link; md / lg; disabled) — `destructive` variant retained from F0-05.
 - Status pill: planned (outline, 'Planned'), done (brand-pale fill, check icon, 'Done · <full name>' per PD-038 — see FD-02), overdue (alert outline, warning icon, 'Overdue'); status conveyed by icon + text, never colour alone.
@@ -24,7 +24,7 @@ Last updated: 2026-09-18
 - Card shell (neutral / alert tone with border/alert and bg/alert).
 - Checkbox (checked label struck through and muted, ≥44px tap target via label padding).
 - Segmented control D / W / M (uncontrolled default W; controlled via `value`/`onChange`), `radiogroup`/`radio` roles.
-- Search field with clear button and states: empty, typing, loading (`role="status"`), no-results ('No matches for "Zoe".').
+- Search field with clear button and states: empty, typing, loading (`role="status"`, spinning `loader` icon — see FD-03), no-results ('No matches for "Zoe".').
 - File tile: filled (file icon + filename, optional onClick) and add ('+ Add file', dashed border).
 - EmptyState, ErrorState (+ Retry), Skeletons (ListRowSkeleton, CardGridSkeleton).
 - Component tests including axe accessibility assertions for every primitive.
@@ -40,8 +40,8 @@ Last updated: 2026-09-18
 - 6 / 6 MET
 
 ## Tests
-- Written: 6 / 6 (plus additional coverage for uncontrolled/controlled SegmentedControl, SearchField clear/loading/empty states, EmptyState rendering)
-- Passing: all (26 new; 91/91 full suite via `npm run test`)
+- Written: 6 / 6 (plus additional coverage for uncontrolled/controlled SegmentedControl, SearchField clear/loading/empty states, EmptyState rendering, and FD-03's loader-icon regression test)
+- Passing: all (27 new; 92/92 full suite via `npm run test`)
 - Failing: 0
 
 ## Files changed
@@ -52,6 +52,7 @@ Last updated: 2026-09-18
 ## Decisions
 - See DECISIONS.md
 - **HUMAN REVIEW: test expectation changed** — FD-02: AC-01/T-01 changed from 'Done · Aisha R.' to 'Done · Aisha Rahman' (full name) to match confirmed root decision PD-038, which postdates and supersedes the original AC text (same fix already applied by UI-00/FD-01).
+- FD-03: SearchField's loading indicator was spinning the `sliders` icon (settings/filter glyph), an unrecorded implementation shortcut discovered during manual visual review. Fixed by adding a dedicated `loader` icon (lucide `Loader2`) to the Icon map. No existing AC/test text changed — new regression test added.
 
 ## Problems encountered
 - `jest-axe`'s `toHaveNoViolations` export is already a matchers object (`{ toHaveNoViolations: fn }`); wrapping it again as `expect.extend({ toHaveNoViolations })` nests it one level too deep and fails at runtime (`expectAssertion.call is not a function`). Fixed by calling `expect.extend(toHaveNoViolations)` directly.

@@ -31,6 +31,16 @@ Record feature-level decisions here using the template below. Project-wide decis
 - Human confirmation required: **HUMAN REVIEW: test expectation changed** — AC-01/T-01 assertion changed from an abbreviated to a full-name expected value; flagged in PROGRESS.md and to be flagged again in the PR description.
 - Test changes caused: T-01 ([F0-14][AC-01]) — before: `'Done · Aisha R.'`; after: `'Done · Aisha Rahman'`; reason: recorded requirement change (PD-038 postdates and supersedes the original AC text).
 
+### FD-03 — SearchField loading indicator uses a dedicated `loader` icon, not spun `sliders`
+- Date: 2026-09-18
+- Context: PRD.md Scope fixes the Icon set to a named list (home, info, calendar, dollar, sliders, person, clipboard-check, bell, search, file, plus, check, alert-triangle, chevrons, x) with no spinner/loader icon in it. The original SearchField implementation reused `sliders` (a settings/filter glyph) with `animate-spin` as a stand-in loading indicator. Found during manual visual review (dev-preview) — the spun `sliders` icon reads as a spinning settings icon, which is confusing and was never recorded as an intentional choice.
+- Decision: Add `loader` (lucide `Loader2`) to the `Icon` component's icon map and use it (still with `animate-spin`) for SearchField's loading state, in place of `sliders`.
+- Reason: The fixed icon list did not anticipate a loading state needing its own glyph; reusing an unrelated icon (settings/filter) for "loading" is a UX/legibility defect, not a deliberate design decision, and no DECISIONS entry recorded it as intentional.
+- Alternatives considered: leave `sliders` spinning (rejected — confusing, unrecorded); use a CSS-only spinner with no icon (rejected — inconsistent with how every other stateful primitive in this kit renders via the shared `Icon` component).
+- Consequences: `IconName` union gains one more member (`loader`); no other primitive references `sliders` as a loading state.
+- Human confirmation required: no (small, additive fix to an unrecorded implementation gap within this feature's own scope; not a new architectural pattern).
+- Test changes caused: none removed; added `search-field.test.tsx` — "[F0-14][FD-03] uses the loader icon (not sliders/settings) for the loading indicator" (new test, not a change to an existing assertion).
+
 <!-- Template
 ### FD-01 — <title>
 - Date:

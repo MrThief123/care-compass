@@ -23,6 +23,13 @@ describe("SearchField", () => {
     expect(screen.getByRole("status", { name: /searching/i })).toBeInTheDocument();
   });
 
+  it("[F0-14][FD-03] uses the loader icon (not sliders/settings) for the loading indicator", () => {
+    render(<SearchField value="Zoe" onChange={() => {}} loading />);
+
+    expect(screen.getByTestId("icon-loader")).toBeInTheDocument();
+    expect(screen.queryByTestId("icon-sliders")).not.toBeInTheDocument();
+  });
+
   it("calls onClear when the clear button is clicked", async () => {
     const user = userEvent.setup();
     const onClear = vi.fn();

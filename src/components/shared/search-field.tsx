@@ -35,7 +35,7 @@ export function SearchField({
         />
         {loading && (
           <span role="status" aria-label="Searching" className="shrink-0">
-            <Icon name="sliders" size={16} className="animate-spin text-text-secondary" />
+            <Icon name="loader" size={16} className="animate-spin text-text-secondary" />
           </span>
         )}
         {!loading && value.length > 0 && onClear && (
