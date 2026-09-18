@@ -1,12 +1,12 @@
 # Progress — F0-09 Recurrence engine (pure TypeScript)
 
-Status: PR OPEN
+Status: MERGED TO DEV
 Owner: Dhruv Verma
 Lane: B — Backend
 Sprint: SPRINT · planned D2–D3
 Branch: `feature/shared-recurrence-engine`
 PR target: `main (per OQ-01 — shared work)`
-Last updated: 2026-09-17
+Last updated: 2026-09-18 (PR #10 merged to main)
 
 ## Blockers
 - None. OQ-01 and OQ-12 are ANSWERED in root DECISIONS.md (PD-030, PD-046).

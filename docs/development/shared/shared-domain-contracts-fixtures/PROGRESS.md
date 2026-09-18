@@ -1,12 +1,12 @@
 # Progress — UI-00 Domain types, data-access contracts and design fixtures
 
-Status: PR OPEN
+Status: MERGED TO DEV
 Owner: Dhruv Verma
 Lane: S — Shared kit
 Sprint: SPRINT · planned D2
 Branch: `feature/shared-domain-contracts-fixtures`
 PR target: `main (per OQ-01 — shared work, ANSWERED PD-030)`
-Last updated: 2026-09-17 (implementation session)
+Last updated: 2026-09-18 (PR #11 merged to main)
 
 ## Blockers
 - None. OQ-01 is ANSWERED (PD-030) in root DECISIONS.md; gate confirmed via `node scripts/plan-status.mjs` listing UI-00 under "Ready to start". Non-blocking OQ-13/OQ-22/OQ-29/OQ-33 are all ANSWERED and their answers are reflected in `src/types/domain.ts` and `src/mocks/fixtures.ts`.
