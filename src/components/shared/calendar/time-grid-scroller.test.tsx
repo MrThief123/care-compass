@@ -36,6 +36,28 @@ describe("[UI-01] TimeGridScroller", () => {
     expect(screen.getByTestId("time-grid-viewport").scrollTop).toBe(0);
   });
 
+  it("labels the current time in the hour gutter", () => {
+    render(<TimeGridScroller now={new Date("2026-09-18T12:30:00+10:00")}>{null}</TimeGridScroller>);
+    const label = screen.getByTestId("time-grid-now-label");
+    expect(label).toHaveTextContent("12:30");
+    // Centred on 12:30 the same way the hour labels are centred on their rule.
+    expect(label).toHaveStyle({ top: "542px" });
+  });
+
+  it("shows no now label when the grid is given no clock", () => {
+    render(<TimeGridScroller>{null}</TimeGridScroller>);
+    expect(screen.queryByTestId("time-grid-now-label")).not.toBeInTheDocument();
+  });
+
+  it("shows no now label when the clock is outside the rendered canvas", () => {
+    render(
+      <TimeGridScroller now={new Date("2026-09-18T12:30:00+10:00")} dayStartHour={14}>
+        {null}
+      </TimeGridScroller>,
+    );
+    expect(screen.queryByTestId("time-grid-now-label")).not.toBeInTheDocument();
+  });
+
   it("indents the header so it lines up with the columns", () => {
     render(
       <TimeGridScroller header={<div data-testid="header">days</div>}>{null}</TimeGridScroller>,

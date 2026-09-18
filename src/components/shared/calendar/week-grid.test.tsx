@@ -1,4 +1,4 @@
-import { render, screen, within } from "@testing-library/react";
+import { render, screen, waitForElementToBeRemoved, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
@@ -43,6 +43,19 @@ const PHYSIO: Occurrence = {
   durationMinutes: 120,
   status: "planned",
   assignee: "Sarah Nguyen",
+};
+
+/** Monday 10:00–14:00 — 176px, deep enough for its long title to wrap. */
+const DAY_PROGRAM: Occurrence = {
+  key: "event-program:2026-11-30T10:00:00+11:00",
+  eventId: "event-program",
+  clientId: "client-margaret",
+  title: "Community participation day program with the Thursday group",
+  description: "",
+  start: "2026-11-30T10:00:00+11:00",
+  durationMinutes: 240,
+  status: "planned",
+  assignee: "Jordan Lee",
 };
 
 /** Wednesday 23:30 — runs past midnight, so it must be clamped to the canvas. */
@@ -161,7 +174,42 @@ describe("[UI-01][AC-03] WeekGrid", () => {
     expect(within(full).getByText("Sarah Nguyen")).toBeInTheDocument();
   });
 
-  it("[AC-03] opens the detail popover on click and reports the selection", async () => {
+  it("[AC-03] shows the detail card on hover", async () => {
+    const user = userEvent.setup();
+    render(<WeekGrid weekStart="2026-11-30" occurrences={OCCURRENCES} />);
+
+    await user.hover(block(MEDS));
+
+    const popover = await screen.findByTestId(`event-popover-${MEDS.key}`);
+    // The detail the regular tier had no room for.
+    expect(within(popover).getByText("Aisha Rahman")).toBeInTheDocument();
+    expect(within(popover).getByText("Two tablets with breakfast")).toBeInTheDocument();
+  });
+
+  it("[AC-03] hides the detail card when the pointer leaves the block", async () => {
+    const user = userEvent.setup();
+    render(<WeekGrid weekStart="2026-11-30" occurrences={OCCURRENCES} />);
+
+    await user.hover(block(WEIGH_IN));
+    await screen.findByTestId(`event-popover-${WEIGH_IN.key}`);
+
+    await user.unhover(block(WEIGH_IN));
+    await waitForElementToBeRemoved(() => screen.queryByTestId(`event-popover-${WEIGH_IN.key}`));
+  });
+
+  it("[AC-03] shows the detail card on keyboard focus", async () => {
+    const user = userEvent.setup();
+    render(<WeekGrid weekStart="2026-11-30" occurrences={[WEIGH_IN]} />);
+
+    block(WEIGH_IN).focus();
+
+    const popover = await screen.findByTestId(`event-popover-${WEIGH_IN.key}`);
+    expect(block(WEIGH_IN)).toHaveAttribute("aria-describedby", popover.id);
+    await user.keyboard("{Escape}");
+    expect(screen.queryByTestId(`event-popover-${WEIGH_IN.key}`)).not.toBeInTheDocument();
+  });
+
+  it("[AC-03] reports the selection on click without leaving the card open", async () => {
     const user = userEvent.setup();
     const onSelectOccurrence = vi.fn();
     render(
@@ -174,33 +222,45 @@ describe("[UI-01][AC-03] WeekGrid", () => {
 
     await user.click(block(MEDS));
 
+    // Clicking an event opens it for editing (UI-02), not the hover card.
     expect(onSelectOccurrence).toHaveBeenCalledWith(MEDS);
-    const popover = screen.getByTestId(`event-popover-${MEDS.key}`);
-    // The detail the regular tier had no room for.
-    expect(within(popover).getByText("Aisha Rahman")).toBeInTheDocument();
-    expect(within(popover).getByText("Two tablets with breakfast")).toBeInTheDocument();
+    expect(screen.queryByTestId(`event-popover-${MEDS.key}`)).not.toBeInTheDocument();
   });
 
-  it("[AC-03] closes the detail popover on Escape", async () => {
-    const user = userEvent.setup();
-    render(<WeekGrid weekStart="2026-11-30" occurrences={OCCURRENCES} />);
+  it("[AC-03] draws the current-time line in today's column only", () => {
+    render(
+      <WeekGrid
+        weekStart="2026-11-30"
+        today="2026-12-01"
+        occurrences={[]}
+        now={new Date("2026-12-01T12:30:00+11:00")}
+      />,
+    );
 
-    await user.click(block(WEIGH_IN));
-    expect(screen.getByTestId(`event-popover-${WEIGH_IN.key}`)).toBeInTheDocument();
-
-    await user.keyboard("{Escape}");
-    expect(screen.queryByTestId(`event-popover-${WEIGH_IN.key}`)).not.toBeInTheDocument();
+    const tuesday = screen.getByTestId("week-grid-day-2026-12-01");
+    expect(within(tuesday).getByTestId("current-time-line")).toHaveStyle({ top: "550px" });
+    expect(screen.getAllByTestId("current-time-line")).toHaveLength(1);
+    expect(screen.getByTestId("time-grid-now-label")).toHaveTextContent("12:30");
   });
 
-  it("[AC-03] closes the detail popover on an outside click", async () => {
-    const user = userEvent.setup();
-    render(<WeekGrid weekStart="2026-11-30" occurrences={OCCURRENCES} />);
+  it("[AC-03] wraps a long title onto the lines the block's height affords", () => {
+    render(<WeekGrid weekStart="2026-11-30" occurrences={[WEIGH_IN, MEDS, DAY_PROGRAM]} />);
 
-    await user.click(block(WEIGH_IN));
-    expect(screen.getByTestId(`event-popover-${WEIGH_IN.key}`)).toBeInTheDocument();
-
-    await user.click(document.body);
-    expect(screen.queryByTestId(`event-popover-${WEIGH_IN.key}`)).not.toBeInTheDocument();
+    // 22px compact: the title shares its only line with the start time.
+    expect(within(block(WEIGH_IN)).getByText("Weekly weigh-in")).toHaveAttribute(
+      "data-title-lines",
+      "1",
+    );
+    // 44px regular: the time range below it takes what is left.
+    expect(within(block(MEDS)).getByText("Morning medication")).toHaveAttribute(
+      "data-title-lines",
+      "1",
+    );
+    // 176px full: room for every clamp the styles provide.
+    expect(within(block(DAY_PROGRAM)).getByText(DAY_PROGRAM.title)).toHaveAttribute(
+      "data-title-lines",
+      "6",
+    );
   });
 
   it("[AC-03] calls onSelectDay when a day header is clicked", async () => {

@@ -1,4 +1,4 @@
-import { render, screen, within } from "@testing-library/react";
+import { render, screen, waitForElementToBeRemoved, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
@@ -55,6 +55,19 @@ const OUTING: Occurrence = {
   description: "",
   start: "2026-11-30T15:00:00+11:00",
   durationMinutes: 120,
+  status: "planned",
+  assignee: "Jordan Lee",
+};
+
+/** 4 hours → 176px: deep enough that its long title can wrap several times. */
+const DAY_PROGRAM: Occurrence = {
+  key: "event-program:2026-11-30T09:00:00+11:00",
+  eventId: "event-program",
+  clientId: "client-margaret",
+  title: "Community participation day program with the Thursday group",
+  description: "",
+  start: "2026-11-30T09:00:00+11:00",
+  durationMinutes: 240,
   status: "planned",
   assignee: "Jordan Lee",
 };
@@ -175,50 +188,133 @@ describe("[UI-01] DayTimeline", () => {
     expect(block).toHaveStyle({ top: "1012px", height: "44px" });
   });
 
-  it("opens the detail popover on click and reports the selection", async () => {
+  it("shows the detail card on hover", async () => {
     const user = userEvent.setup();
-    const onSelect = vi.fn();
-    render(<DayTimeline occurrences={OCCURRENCES} onSelect={onSelect} />);
+    render(<DayTimeline occurrences={OCCURRENCES} />);
 
-    await user.click(blockFor(MORNING));
+    await user.hover(blockFor(MORNING));
 
-    expect(onSelect).toHaveBeenCalledWith(MORNING);
-    const popover = screen.getByTestId(`event-popover-${MORNING.key}`);
+    const popover = await screen.findByTestId(`event-popover-${MORNING.key}`);
     // Everything the compact block had no room for.
     expect(popover).toHaveTextContent("09:00–09:30");
     expect(popover).toHaveTextContent("Two tablets with breakfast");
     expect(popover).toHaveTextContent("Done · Aisha Rahman");
   });
 
-  it("closes the popover on a second click of the same block", async () => {
+  it("hides the detail card when the pointer leaves the block", async () => {
     const user = userEvent.setup();
     render(<DayTimeline occurrences={OCCURRENCES} />);
 
-    await user.click(blockFor(MORNING));
-    expect(screen.getByTestId(`event-popover-${MORNING.key}`)).toBeInTheDocument();
+    await user.hover(blockFor(MORNING));
+    await screen.findByTestId(`event-popover-${MORNING.key}`);
 
-    await user.click(blockFor(MORNING));
+    await user.unhover(blockFor(MORNING));
+    await waitForElementToBeRemoved(() =>
+      screen.queryByTestId(`event-popover-${MORNING.key}`),
+    );
+  });
+
+  it("holds the card open while the pointer moves onto it (WCAG 1.4.13)", async () => {
+    const user = userEvent.setup();
+    render(<DayTimeline occurrences={OCCURRENCES} />);
+
+    await user.hover(blockFor(MORNING));
+    const popover = await screen.findByTestId(`event-popover-${MORNING.key}`);
+
+    await user.unhover(blockFor(MORNING));
+    await user.hover(popover);
+    await new Promise((resolve) => setTimeout(resolve, 400));
+
+    expect(screen.getByTestId(`event-popover-${MORNING.key}`)).toBeInTheDocument();
+  });
+
+  it("moves the card to the block hovered next", async () => {
+    const user = userEvent.setup();
+    render(<DayTimeline occurrences={OCCURRENCES} />);
+
+    await user.hover(blockFor(MORNING));
+    await screen.findByTestId(`event-popover-${MORNING.key}`);
+
+    await user.hover(blockFor(AFTERNOON));
+
+    expect(await screen.findByTestId(`event-popover-${AFTERNOON.key}`)).toBeInTheDocument();
     expect(screen.queryByTestId(`event-popover-${MORNING.key}`)).not.toBeInTheDocument();
   });
 
-  it("closes the popover on Escape", async () => {
+  it("shows the detail card on keyboard focus and describes the block with it", async () => {
     const user = userEvent.setup();
     render(<DayTimeline occurrences={OCCURRENCES} />);
 
-    await user.click(blockFor(MORNING));
+    await user.tab();
+
+    const block = blockFor(MORNING);
+    expect(block).toHaveFocus();
+    const popover = await screen.findByTestId(`event-popover-${MORNING.key}`);
+    expect(block).toHaveAttribute("aria-describedby", popover.id);
+  });
+
+  it("closes the detail card on Escape", async () => {
+    const user = userEvent.setup();
+    render(<DayTimeline occurrences={OCCURRENCES} />);
+
+    await user.hover(blockFor(MORNING));
+    await screen.findByTestId(`event-popover-${MORNING.key}`);
+
     await user.keyboard("{Escape}");
 
     expect(screen.queryByTestId(`event-popover-${MORNING.key}`)).not.toBeInTheDocument();
   });
 
-  it("moves the popover to the block clicked next", async () => {
+  it("reports the selection on click and gets the card out of the editor's way", async () => {
     const user = userEvent.setup();
-    render(<DayTimeline occurrences={OCCURRENCES} />);
+    const onSelect = vi.fn();
+    render(<DayTimeline occurrences={OCCURRENCES} onSelect={onSelect} />);
 
     await user.click(blockFor(MORNING));
-    await user.click(blockFor(AFTERNOON));
 
+    // Clicking an event opens it for editing (UI-02); it is not what shows the
+    // hover card, and the card must not be left sitting over the editor.
+    expect(onSelect).toHaveBeenCalledWith(MORNING);
     expect(screen.queryByTestId(`event-popover-${MORNING.key}`)).not.toBeInTheDocument();
-    expect(screen.getByTestId(`event-popover-${AFTERNOON.key}`)).toBeInTheDocument();
+  });
+
+  it("marks the current time with a line across the day and a gutter label", () => {
+    render(<DayTimeline occurrences={[]} now={new Date("2026-11-30T12:30:00+11:00")} />);
+
+    // 12:30 on a canvas of 44px hours starting at midnight.
+    expect(screen.getByTestId("current-time-line")).toHaveStyle({ top: "550px" });
+    expect(screen.getByTestId("time-grid-now-label")).toHaveTextContent("12:30");
+  });
+
+  it("keeps a compact block's title on its single line", () => {
+    render(<DayTimeline occurrences={OCCURRENCES} />);
+    expect(within(blockFor(MORNING)).getByText("Morning medication")).toHaveAttribute(
+      "data-title-lines",
+      "1",
+    );
+  });
+
+  it("wraps a long title onto the lines the block's height affords", () => {
+    render(<DayTimeline occurrences={[PHYSIO, DAY_PROGRAM]} />);
+
+    // 66px regular block: 42px spare over its time range and padding.
+    expect(within(blockFor(PHYSIO)).getByText("Physiotherapy")).toHaveAttribute(
+      "data-title-lines",
+      "2",
+    );
+    // 176px full block: room for every clamp the styles provide.
+    expect(within(blockFor(DAY_PROGRAM)).getByText(DAY_PROGRAM.title)).toHaveAttribute(
+      "data-title-lines",
+      "6",
+    );
+  });
+
+  it("never wraps a title into the room the time range needs", () => {
+    render(<DayTimeline occurrences={[LATE]} />);
+    // Clamped to 44px, so only the title's own line is left over.
+    expect(within(blockFor(LATE)).getByText("Settling routine")).toHaveAttribute(
+      "data-title-lines",
+      "1",
+    );
   });
 });
