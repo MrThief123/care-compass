@@ -209,9 +209,7 @@ describe("[UI-01] DayTimeline", () => {
     await screen.findByTestId(`event-popover-${MORNING.key}`);
 
     await user.unhover(blockFor(MORNING));
-    await waitForElementToBeRemoved(() =>
-      screen.queryByTestId(`event-popover-${MORNING.key}`),
-    );
+    await waitForElementToBeRemoved(() => screen.queryByTestId(`event-popover-${MORNING.key}`));
   });
 
   it("holds the card open while the pointer moves onto it (WCAG 1.4.13)", async () => {

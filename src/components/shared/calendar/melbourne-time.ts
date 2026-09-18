@@ -35,6 +35,15 @@ export function melbourneDateTime(iso: string): MelbourneDateTime {
 }
 
 /**
+ * Minutes since Melbourne midnight, which is what places anything on the hour
+ * canvas — the current-time line as much as an event block.
+ */
+export function melbourneMinutesOfDay(iso: string): number {
+  const [hour, minute] = melbourneDateTime(iso).time.split(":").map(Number);
+  return hour! * 60 + minute!;
+}
+
+/**
  * `HH:mm–HH:mm` Melbourne wall-clock span for an occurrence, as the event
  * blocks and their popover label themselves (e.g. "09:00–09:30"). Uses an en
  * dash, matching the reference calendars.

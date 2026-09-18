@@ -13,9 +13,14 @@ import { melbourneTimeRange } from "./melbourne-time";
 
 export interface EventPopoverProps {
   occurrence: Occurrence;
-  /** The block that was clicked; the card is placed beside it. */
+  /** The block being hovered or focused; the card is placed beside it. */
   anchor: HTMLElement | null;
+  /** DOM id, so the block can point at the card with `aria-describedby`. */
+  id?: string;
   onClose: () => void;
+  /** Cancels the block's close timer while the pointer rests on the card. */
+  onPointerEnter?: () => void;
+  onPointerLeave?: () => void;
   className?: string;
 }
 
@@ -24,14 +29,26 @@ const GAP = 8;
 const MARGIN = 8;
 
 /**
- * The detail a short event block had no room to show, opened on click.
+ * The detail a short event block had no room to show, raised on hover.
  *
  * Portalled to `document.body` and positioned `fixed` beside the block,
  * because the blocks live inside the scrolling hour canvas and an in-flow card
- * would be clipped by it. Closes on Escape, on a click outside, and on any
- * scroll or resize that would strand it away from its block.
+ * would be clipped by it. Closes on Escape, on any press outside itself, and
+ * on any scroll or resize that would strand it away from its block.
+ *
+ * `role="tooltip"` rather than `dialog`: nothing here is interactive and it
+ * takes no focus — the block it describes points at it with `aria-describedby`
+ * so a keyboard user hears the same detail on focus.
  */
-export function EventPopover({ occurrence, anchor, onClose, className }: EventPopoverProps) {
+export function EventPopover({
+  occurrence,
+  anchor,
+  id,
+  onClose,
+  onPointerEnter,
+  onPointerLeave,
+  className,
+}: EventPopoverProps) {
   const cardRef = useRef<HTMLDivElement>(null);
   const [position, setPosition] = useState<{ top: number; left: number } | null>(null);
 
@@ -52,9 +69,10 @@ export function EventPopover({ occurrence, anchor, onClose, className }: EventPo
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") onClose();
     };
+    // A press on the block itself opens the editor (UI-02), so only a press
+    // inside the card — selecting its text — leaves the card up.
     const onPointerDown = (event: PointerEvent) => {
-      const target = event.target as Node;
-      if (cardRef.current?.contains(target) || anchor?.contains(target)) return;
+      if (cardRef.current?.contains(event.target as Node)) return;
       onClose();
     };
     document.addEventListener("keydown", onKeyDown);
@@ -74,9 +92,11 @@ export function EventPopover({ occurrence, anchor, onClose, className }: EventPo
   return createPortal(
     <div
       ref={cardRef}
-      role="dialog"
-      aria-label={occurrence.title}
+      id={id}
+      role="tooltip"
       data-testid={`event-popover-${occurrence.key}`}
+      onPointerEnter={onPointerEnter}
+      onPointerLeave={onPointerLeave}
       style={{
         width: CARD_WIDTH,
         top: position?.top ?? 0,

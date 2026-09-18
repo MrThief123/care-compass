@@ -1,11 +1,12 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import type { ComponentProps } from "react";
 import { describe, expect, it, vi } from "vitest";
 
 import type { Occurrence } from "@/types/domain";
 
 import { EventPopover } from "./event-popover";
+
+import type { ComponentProps } from "react";
 
 const OCCURRENCE: Occurrence = {
   key: "event-meds:2026-11-30T09:00:00+11:00",
@@ -20,8 +21,10 @@ const OCCURRENCE: Occurrence = {
   assignee: "Aisha Rahman",
 };
 
-function renderPopover(props: Partial<ComponentProps<typeof EventPopover>> = {}) {
-  const onClose = props.onClose ?? vi.fn();
+type PopoverProps = Omit<ComponentProps<typeof EventPopover>, "occurrence" | "anchor" | "onClose">;
+
+function renderPopover(props: Partial<PopoverProps> = {}) {
+  const onClose = vi.fn();
   const anchor = document.createElement("button");
   document.body.append(anchor);
   render(<EventPopover occurrence={OCCURRENCE} anchor={anchor} {...props} onClose={onClose} />);

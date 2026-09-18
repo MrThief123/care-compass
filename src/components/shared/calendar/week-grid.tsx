@@ -1,18 +1,24 @@
 "use client";
 
-import { useState } from "react";
-
 import { Icon } from "@/components/ui/icon";
 import { layoutBlocks } from "@/lib/dates/layout-blocks";
 import type { LocalDate } from "@/lib/dates/week-range";
 import { cn } from "@/lib/utils";
 import type { Occurrence } from "@/types/domain";
 
-import { blockDensity } from "./block-density";
+import {
+  BLOCK_PADDING_PX,
+  TIME_LINE_PX,
+  blockDensity,
+  titleClampClass,
+  titleLines,
+} from "./block-density";
+import { CurrentTimeLine, useCurrentTime } from "./current-time-line";
 import { EventPopover } from "./event-popover";
 import { melbourneDateTime, melbourneTimeRange } from "./melbourne-time";
 import { STATUS_CUE } from "./status-cue";
 import { TimeGridScroller } from "./time-grid-scroller";
+import { useEventHover } from "./use-event-hover";
 
 const DAY_LABELS = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
 
@@ -20,6 +26,8 @@ const DAY_LABELS = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
 const BLOCK_GAP_PX = 2;
 /** Smallest height a block is rendered at (see `layoutBlocks`). */
 const MIN_BLOCK_PX = 22;
+/** The `full` tier's assignee line (`text-body-secondary`, 12/16). */
+const ASSIGNEE_LINE_PX = 16;
 
 export interface WeekGridProps {
   /** Monday of the visible week. */
@@ -37,14 +45,12 @@ export interface WeekGridProps {
   /** Hour the canvas ends at (default 24 = 23:59). */
   dayEndHour?: number;
   rowPx?: number;
+  /** Pins the current-time line (tests); omit to track the real clock. */
+  now?: Date | null;
   onSelectDay?: (date: LocalDate) => void;
+  /** Fired when a block is clicked — the event is being opened for editing. */
   onSelectOccurrence?: (occurrence: Occurrence) => void;
   className?: string;
-}
-
-interface Selection {
-  occurrence: Occurrence;
-  anchor: HTMLElement;
 }
 
 function pad2(value: number): string {
@@ -70,7 +76,7 @@ function percent(value: number): string {
  * `startHour`–`endHour`. Events overlapping inside one day sit side by side
  * (`layoutBlocks`), every block is at least `MIN_BLOCK_PX` tall, and each one
  * renders only the detail its height affords (`blockDensity`) — the rest is in
- * the popover its click opens.
+ * the card it raises on hover, because a click opens the event for editing.
  */
 export function WeekGrid({
   weekStart,
@@ -82,11 +88,14 @@ export function WeekGrid({
   dayStartHour = 0,
   dayEndHour = 24,
   rowPx = 44,
+  now,
   onSelectDay,
   onSelectOccurrence,
   className,
 }: WeekGridProps) {
-  const [selected, setSelected] = useState<Selection | null>(null);
+  const hover = useEventHover("week-grid");
+  // One clock for the line and the gutter label, so they cannot disagree.
+  const clock = useCurrentTime(now);
 
   const days = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
   const canvasHeight = (dayEndHour - dayStartHour) * rowPx;
@@ -143,6 +152,7 @@ export function WeekGrid({
         focusStartHour={startHour}
         focusEndHour={endHour}
         rowPx={rowPx}
+        now={clock}
         header={header}
         className={className}
       >
@@ -164,6 +174,15 @@ export function WeekGrid({
                   isToday && "bg-bg-inset/60",
                 )}
               >
+                {/* The line marks only the column it belongs to. */}
+                <CurrentTimeLine
+                  now={clock}
+                  dayStartHour={dayStartHour}
+                  dayEndHour={dayEndHour}
+                  rowPx={rowPx}
+                  onDate={day}
+                />
+
                 {blocks.map(({ item, top, height, columnIndex, columnCount }) => {
                   const clampedTop = Math.max(0, Math.min(top, canvasHeight - MIN_BLOCK_PX));
                   const clampedHeight = Math.max(0, Math.min(height, canvasHeight - clampedTop));
@@ -171,6 +190,14 @@ export function WeekGrid({
                   const label = labelFormat ? labelFormat(item) : item.title;
                   const { time } = melbourneDateTime(item.start);
                   const cue = STATUS_CUE[item.status];
+                  // Everything but the title: padding, the time row, and the
+                  // assignee line the `full` tier adds when there is one.
+                  const lines = titleLines(
+                    clampedHeight,
+                    BLOCK_PADDING_PX +
+                      TIME_LINE_PX +
+                      (density === "full" && item.assignee ? ASSIGNEE_LINE_PX : 0),
+                  );
 
                   return (
                     <button
@@ -178,10 +205,9 @@ export function WeekGrid({
                       type="button"
                       data-testid={`week-grid-block-${item.key}`}
                       data-density={density}
-                      onClick={(event) => {
-                        setSelected({ occurrence: item, anchor: event.currentTarget });
-                        onSelectOccurrence?.(item);
-                      }}
+                      aria-describedby={hover.describedBy(item)}
+                      onClick={() => onSelectOccurrence?.(item)}
+                      {...hover.blockProps(item)}
                       style={{
                         top: clampedTop,
                         height: clampedHeight,
@@ -208,7 +234,10 @@ export function WeekGrid({
                                 className="shrink-0 text-text-secondary"
                               />
                             ) : null}
-                            <span className="truncate text-body-secondary text-text-primary">
+                            <span
+                              data-title-lines={lines}
+                              className="truncate text-body-secondary text-text-primary"
+                            >
                               {label}
                             </span>
                             {/* In a narrow overlap column the title matters
@@ -219,15 +248,28 @@ export function WeekGrid({
                           </span>
                         ) : (
                           <>
-                            <span className="flex min-w-0 items-center gap-1.5">
+                            <span className="flex min-w-0 items-start gap-1.5">
                               {cue.icon ? (
                                 <Icon
                                   name={cue.icon}
                                   size={14}
-                                  className="shrink-0 text-text-secondary"
+                                  className="mt-0.5 shrink-0 text-text-secondary"
                                 />
                               ) : null}
-                              <span className="truncate text-body-small text-text-primary">
+                              {/* Whole words only, and only in a column wide
+                                  enough to hold one — a narrow overlap column
+                                  wrapping "Occupational therapy" gives
+                                  "Occup / the…", which reads worse than one
+                                  truncated line. */}
+                              <span
+                                data-title-lines={lines}
+                                className={cn(
+                                  "min-w-0 text-body-small leading-tight text-text-primary",
+                                  lines === 1
+                                    ? "truncate"
+                                    : cn(titleClampClass(lines), "@max-[5rem]:truncate"),
+                                )}
+                              >
                                 {label}
                               </span>
                             </span>
@@ -251,11 +293,12 @@ export function WeekGrid({
         </div>
       </TimeGridScroller>
 
-      {selected ? (
+      {hover.hovered ? (
         <EventPopover
-          occurrence={selected.occurrence}
-          anchor={selected.anchor}
-          onClose={() => setSelected(null)}
+          occurrence={hover.hovered.occurrence}
+          anchor={hover.hovered.anchor}
+          onClose={hover.close}
+          {...hover.cardProps}
         />
       ) : null}
     </>
