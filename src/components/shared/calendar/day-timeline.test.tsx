@@ -316,6 +316,17 @@ describe("[UI-01] DayTimeline", () => {
     );
   });
 
+  it("keeps a compact block's status icon out of its row height", () => {
+    render(<DayTimeline occurrences={[MORNING]} />);
+    // The row baseline-aligns the title with the time trailing it. A 14px icon
+    // baselined alongside 13px text sits taller than the text's own line box
+    // and pushes a 22px block's single row past the height it has, so the icon
+    // is centred instead and the text alone decides the row.
+    const icon = blockFor(MORNING).querySelector("svg");
+    expect(icon).toHaveClass("self-center");
+    expect(icon?.parentElement).toHaveClass("items-baseline");
+  });
+
   it("gives up title height, not the time range, when the status pill grows", () => {
     render(<DayTimeline occurrences={[OUTING]} />);
     const block = blockFor(OUTING);
