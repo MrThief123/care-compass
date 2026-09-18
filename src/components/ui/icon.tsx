@@ -45,7 +45,7 @@ const ICONS = {
 
 export type IconName = keyof typeof ICONS;
 
-const SIZES = { 14: 14, 16: 16, 20: 20 } as const;
+const SIZES = { 14: 14, 16: 16, 20: 20, 24: 24 } as const;
 
 export interface IconProps extends Omit<LucideProps, "size"> {
   name: IconName;
