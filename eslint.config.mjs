@@ -28,6 +28,28 @@ const eslintConfig = defineConfig([
       ],
     },
   },
+  {
+    // ARCHITECTURE.md §3.2 / CLAUDE.md §7: screens read data only through
+    // src/server/** contract functions; src/mocks is never imported from
+    // src/app or src/features directly (UI-00 AC-06).
+    files: ["src/app/**/*.{ts,tsx}", "src/features/**/*.{ts,tsx}"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: ["**/mocks/*", "**/mocks"],
+              message:
+                "src/mocks is a Phase 1 fixture/dev-mock module and must not be imported from src/app or " +
+                "src/features. Read data through the matching src/server/<domain>/queries.ts or actions.ts " +
+                "contract function instead (CLAUDE.md §7, ARCHITECTURE.md §3.2).",
+            },
+          ],
+        },
+      ],
+    },
+  },
   eslintConfigPrettier,
   // Override default ignores of eslint-config-next.
   globalIgnores([
