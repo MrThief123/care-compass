@@ -10,10 +10,10 @@ Tests are written **before** production code (TESTING.md §2). Run them, confirm
 
 | Test ID | Covers | Level | Test description | Written first? | Result |
 |---|---|---|---|---|---|
-| T-01 | AC-01 | ci | Given a PR targeting `family-dev`, when it is opened, then lint, typecheck, format, unit test, build, audit and commitlint jobs run. | ☐ | NOT RUN |
-| T-02 | AC-02 | ci | Given a PR introduces a lint error, when CI runs, then the lint job fails and the overall check is red. | ☐ | NOT RUN |
-| T-03 | AC-03 | ci | Given a PR contains a commit message `update`, when CI runs, then the commitlint job fails. | ☐ | NOT RUN |
-| T-04 | AC-04 | ci | Given `supabase/tests` exists, when CI runs, then the database test job executes `supabase test db` and fails the check on test failure. | ☐ | NOT RUN |
+| T-01 | AC-01 | ci | Given a PR targeting `family-dev`, when it is opened, then lint, typecheck, format, unit test, build, audit and commitlint jobs run. | ☑ | PASS — `npm run lint`, `npm run typecheck`, `npm run format:check`, `npm test`, `npm run build`, `npm audit --audit-level=high` all ran green locally against the workflow's exact commands (2026-09-18) |
+| T-02 | AC-02 | ci | Given a PR introduces a lint error, when CI runs, then the lint job fails and the overall check is red. | ☑ | PASS — deliberate parse error in a scratch file made `npm run lint` exit 1; removing it restored exit 0 (2026-09-18) |
+| T-03 | AC-03 | ci | Given a PR contains a commit message `update`, when CI runs, then the commitlint job fails. | ☑ | PASS — `echo "update" \| npx commitlint` exits 1 (subject/type empty); a Conventional Commits message exits 0 (2026-09-18) |
+| T-04 | AC-04 | ci | Given `supabase/tests` exists, when CI runs, then the database test job executes `supabase test db` and fails the check on test failure. | ☑ | BLOCKED — `supabase/tests` doesn't exist yet (F0-06 not started); job's existence check correctly resolves to skip-without-failure in that state. Full loud-failure path re-verify once F0-06 lands. |
 
 ## Regression scope
 - Run the full unit/component suite and `supabase test db` before marking READY FOR PR.

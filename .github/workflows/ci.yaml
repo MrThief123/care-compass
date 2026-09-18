@@ -2,51 +2,70 @@ name: CI
 
 on:
   push:
-    branches: ["main"]
   pull_request:
-    branches: ["main"]
 
 jobs:
-  build:
+  lint:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
+      - run: npm ci
+      - run: npm run lint
 
-      - name: Install dependencies
-        run: npm ci
+  typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
 
-      # Check for known security vulnerabilities.
-      - name: Security audit
-        run: npm audit --audit-level=high
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run format:check
 
-      # Check whether dependencies have newer versions available.
-      # This is informational and will not fail the pipeline.
-      - name: Check outdated dependencies
-        run: |
-          echo "Checking for outdated dependencies..."
-          npm outdated || true
+  unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Run tests
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: npm test
 
-      - name: Lint
-        run: npm run lint
-
-      - name: Type check
-        run: npx tsc --noEmit
-
-      # - name: Test
-      #   run: npm test -- --ci
-
-      - name: Build
-        run: npm run build
-
-      # Store the build output as a GitHub Actions artifact.
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - name: Check service-role key never reaches the client bundle
+        run: npm run check:client-bundle-secrets
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
@@ -57,3 +76,70 @@ jobs:
             .next/
           if-no-files-found: ignore
           retention-days: 7
+
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Security audit
+        run: npm audit --audit-level=high
+      - name: Check outdated dependencies
+        run: |
+          echo "Checking for outdated dependencies..."
+          npm outdated || true
+
+  commitlint:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - uses: wagoid/commitlint-github-action@v6
+
+  db-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check for database tests
+        id: check
+        run: |
+          if [ -d supabase/tests ]; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+      # Placeholder until F0-06 adds supabase/tests. Once that directory
+      # exists, a missing/broken Supabase CLI must fail this job loudly
+      # rather than being swallowed by an `if:` skip.
+      - name: Set up Supabase CLI
+        if: steps.check.outputs.exists == 'true'
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      - name: Run database tests
+        if: steps.check.outputs.exists == 'true'
+        run: supabase test db
+
+  e2e:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
