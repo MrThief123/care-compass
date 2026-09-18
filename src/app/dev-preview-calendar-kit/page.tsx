@@ -31,8 +31,8 @@ export default function CalendarKitPreviewPage() {
   const [selected, setSelected] = useState(TODAY);
 
   return (
-    <div className="mx-auto flex h-dvh w-full max-w-[1400px] flex-col gap-4 p-6">
-      <header className="flex shrink-0 items-center justify-between gap-4">
+    <div className="mx-auto flex w-full max-w-[1400px] flex-col gap-4 p-6">
+      <header className="flex items-center justify-between gap-4">
         <h1 className="text-title-page">Calendar kit preview (UI-01, dev only)</h1>
         <div className="flex gap-1 rounded-control bg-bg-inset p-1">
           {VIEWS.map((option) => (
@@ -55,15 +55,10 @@ export default function CalendarKitPreviewPage() {
 
       <CalendarHeader range={weekRange(TODAY)} />
 
-      <section className="flex min-h-0 flex-1 flex-col rounded-card border border-border-default p-3">
-        {view === "day" && <DayTimeline occurrences={DAY_OCCURRENCES} className="flex-1" />}
+      <section className="flex flex-col rounded-card border border-border-default p-3">
+        {view === "day" && <DayTimeline occurrences={DAY_OCCURRENCES} />}
         {view === "week" && (
-          <WeekGrid
-            weekStart={WEEK_START}
-            today={TODAY}
-            occurrences={WEEK_OCCURRENCES}
-            className="flex-1"
-          />
+          <WeekGrid weekStart={WEEK_START} today={TODAY} occurrences={WEEK_OCCURRENCES} />
         )}
         {view === "month" && (
           <MonthGrid
@@ -72,12 +67,11 @@ export default function CalendarKitPreviewPage() {
             selected={selected}
             occurrences={MONTH_OCCURRENCES}
             onSelectDate={setSelected}
-            className="flex-1"
           />
         )}
       </section>
 
-      <section className="flex shrink-0 flex-col gap-2">
+      <section className="flex flex-col gap-2">
         <h2 className="text-title-section">DatePickerGrid</h2>
         <div className="max-w-xs">
           <DatePickerGrid

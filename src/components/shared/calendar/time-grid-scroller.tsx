@@ -24,6 +24,9 @@ export interface TimeGridScrollerProps {
   className?: string;
 }
 
+/** Half an hour label's line box — how far it sits above its own gridline. */
+const LABEL_BLEED_PX = 8;
+
 function pad2(value: number): string {
   return String(value).padStart(2, "0");
 }
@@ -49,7 +52,9 @@ export function TimeGridScroller({
   className,
 }: TimeGridScrollerProps) {
   const viewportRef = useRef<HTMLDivElement>(null);
-  const offsetPx = (focusStartHour - dayStartHour) * rowPx;
+  // Hour labels are centred on their gridline, so they bleed half a line above
+  // it. Open scrolled that much higher, or the first label is sliced in half.
+  const offsetPx = Math.max(0, (focusStartHour - dayStartHour) * rowPx - LABEL_BLEED_PX);
 
   useEffect(() => {
     if (viewportRef.current) viewportRef.current.scrollTop = offsetPx;
@@ -57,7 +62,7 @@ export function TimeGridScroller({
 
   const hours = Array.from({ length: dayEndHour - dayStartHour }, (_, i) => dayStartHour + i);
   const gridHeight = hours.length * rowPx;
-  const viewportHeight = (focusEndHour - focusStartHour) * rowPx;
+  const viewportHeight = (focusEndHour - focusStartHour) * rowPx + LABEL_BLEED_PX;
 
   return (
     <div className={cn("flex min-w-0 flex-col", className)}>

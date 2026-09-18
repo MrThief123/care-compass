@@ -8,10 +8,17 @@
  */
 export type BlockDensity = "compact" | "regular" | "full";
 
-/** Below this many px only a single line of text fits. */
-const REGULAR_MIN_PX = 30;
-/** At or above this many px there is room for a third line and a status pill. */
-const FULL_MIN_PX = 56;
+/**
+ * Thresholds are the height the tier's content actually occupies, measured
+ * against the rendered type ramp, not round numbers — a tier that starts below
+ * what it needs clips its own last line.
+ *
+ * `regular` = title (16px at `leading-tight`) + time range (16px) + 8px of
+ * vertical padding = 40px. `full` adds an assignee/status row (26px + 4px of
+ * separation) = 70px, rounded to 72.
+ */
+const REGULAR_MIN_PX = 40;
+const FULL_MIN_PX = 72;
 
 /**
  * `compact`  — one line: title, with the time trailing it inline.

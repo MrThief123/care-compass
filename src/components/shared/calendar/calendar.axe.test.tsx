@@ -44,7 +44,7 @@ describe("[UI-01][AC-06] calendar kit accessibility", () => {
         month="2026-11-15"
         today="2026-11-30"
         selected="2026-11-24"
-        datesWithEvents={["2026-11-24"]}
+        occurrences={OCCURRENCES}
       />,
     );
     expect(await axe(container)).toHaveNoViolations();

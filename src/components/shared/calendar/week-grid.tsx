@@ -1,26 +1,50 @@
 "use client";
 
-import { positionBlocks } from "@/lib/dates/position-blocks";
+import { useState } from "react";
+
+import { Icon } from "@/components/ui/icon";
+import { layoutBlocks } from "@/lib/dates/layout-blocks";
 import type { LocalDate } from "@/lib/dates/week-range";
 import { cn } from "@/lib/utils";
 import type { Occurrence } from "@/types/domain";
 
-import { melbourneDateTime } from "./melbourne-time";
+import { blockDensity } from "./block-density";
+import { EventPopover } from "./event-popover";
+import { melbourneDateTime, melbourneTimeRange } from "./melbourne-time";
+import { STATUS_CUE } from "./status-cue";
+import { TimeGridScroller } from "./time-grid-scroller";
 
 const DAY_LABELS = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
+
+/** Horizontal breathing room between a block and its column's edges, in px. */
+const BLOCK_GAP_PX = 2;
+/** Smallest height a block is rendered at (see `layoutBlocks`). */
+const MIN_BLOCK_PX = 22;
 
 export interface WeekGridProps {
   /** Monday of the visible week. */
   weekStart: LocalDate;
   occurrences: Occurrence[];
   today?: LocalDate;
-  /** Overrides the default "HH:mm Title" block label (e.g. carer "Margaret — Morning m…"). */
+  /** Overrides the default block title (e.g. carer "Margaret — Morning m…"). */
   labelFormat?: (occurrence: Occurrence) => string;
+  /** First hour shown when the grid opens (default 7 = 07:00). */
   startHour?: number;
+  /** Last hour shown when the grid opens (default 18 = 18:00). */
   endHour?: number;
+  /** First hour of the scrollable canvas (default 0 = 00:00). */
+  dayStartHour?: number;
+  /** Hour the canvas ends at (default 24 = 23:59). */
+  dayEndHour?: number;
   rowPx?: number;
   onSelectDay?: (date: LocalDate) => void;
+  onSelectOccurrence?: (occurrence: Occurrence) => void;
   className?: string;
+}
+
+interface Selection {
+  occurrence: Occurrence;
+  anchor: HTMLElement;
 }
 
 function pad2(value: number): string {
@@ -33,7 +57,21 @@ function addDays(date: LocalDate, amount: number): LocalDate {
   return `${next.getUTCFullYear()}-${pad2(next.getUTCMonth() + 1)}-${pad2(next.getUTCDate())}`;
 }
 
-/** MON–SUN week grid with an hour gutter (UI-01 Scope). */
+/** Percentages are used for column placement so the day columns stay fluid. */
+function percent(value: number): string {
+  return `${Math.round(value * 1e4) / 1e4}%`;
+}
+
+/**
+ * MON–SUN week grid (UI-01 Scope).
+ *
+ * Seven fluid day columns over the shared full-day hour canvas
+ * (`TimeGridScroller`): the whole day is scrollable but the view opens on
+ * `startHour`–`endHour`. Events overlapping inside one day sit side by side
+ * (`layoutBlocks`), every block is at least `MIN_BLOCK_PX` tall, and each one
+ * renders only the detail its height affords (`blockDensity`) — the rest is in
+ * the popover its click opens.
+ */
 export function WeekGrid({
   weekStart,
   occurrences,
@@ -41,13 +79,17 @@ export function WeekGrid({
   labelFormat,
   startHour = 7,
   endHour = 18,
+  dayStartHour = 0,
+  dayEndHour = 24,
   rowPx = 44,
   onSelectDay,
+  onSelectOccurrence,
   className,
 }: WeekGridProps) {
+  const [selected, setSelected] = useState<Selection | null>(null);
+
   const days = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
-  const hours = Array.from({ length: endHour - startHour + 1 }, (_, i) => startHour + i);
-  const gridHeight = (hours.length - 1) * rowPx;
+  const canvasHeight = (dayEndHour - dayStartHour) * rowPx;
 
   const occurrencesByDay = new Map<LocalDate, Occurrence[]>();
   for (const day of days) occurrencesByDay.set(day, []);
@@ -56,9 +98,8 @@ export function WeekGrid({
     occurrencesByDay.get(date)?.push(occurrence);
   }
 
-  return (
-    <div className={cn("grid grid-cols-[56px_repeat(7,1fr)]", className)}>
-      <div />
+  const header = (
+    <div className="grid grid-cols-7 border-b border-border-default">
       {days.map((day, index) => {
         const isToday = day === today;
         const dayNumber = Number(day.split("-")[2]);
@@ -70,51 +111,153 @@ export function WeekGrid({
             aria-current={isToday ? "date" : undefined}
             onClick={() => onSelectDay?.(day)}
             className={cn(
-              "flex flex-col items-center gap-0.5 rounded-inset py-1 text-body-small",
-              isToday ? "bg-bg-brand-pale text-text-brand" : "text-text-secondary",
+              // py-3 keeps the day header a 44px-high touch target (UI-§5.1).
+              "flex min-w-0 items-baseline justify-center gap-1.5 border-l border-border-default px-2 py-3",
+              isToday && "bg-bg-inset/60",
             )}
           >
-            <span>{DAY_LABELS[index]}</span>
-            <span className="text-body-emphasis text-text-primary">{dayNumber}</span>
+            <span
+              className={cn("text-label-caps", isToday ? "text-text-brand" : "text-text-secondary")}
+            >
+              {DAY_LABELS[index]}
+            </span>
+            <span
+              className={cn(
+                "text-body-emphasis",
+                isToday ? "text-text-brand" : "text-text-primary",
+              )}
+            >
+              {dayNumber}
+            </span>
           </button>
         );
       })}
-
-      <div>
-        {hours.map((hour) => (
-          <div
-            key={hour}
-            style={{ height: rowPx }}
-            className="text-body-secondary text-text-secondary"
-          >
-            {pad2(hour)}:00
-          </div>
-        ))}
-      </div>
-
-      {days.map((day) => (
-        <div
-          key={day}
-          data-testid={`week-grid-day-${day}`}
-          className="relative border-l border-border-default"
-          style={{ height: gridHeight }}
-        >
-          {positionBlocks(occurrencesByDay.get(day) ?? [], { startHour, rowPx }).map(
-            ({ item, top, height }) => {
-              const { time } = melbourneDateTime(item.start);
-              return (
-                <div
-                  key={item.key}
-                  style={{ top, height: Math.max(height, rowPx / 2) }}
-                  className="absolute inset-x-0.5 overflow-hidden rounded-inset border-l-2 border-bg-brand bg-bg-surface px-1 text-body-small text-text-primary"
-                >
-                  {labelFormat ? labelFormat(item) : `${time} ${item.title}`}
-                </div>
-              );
-            },
-          )}
-        </div>
-      ))}
     </div>
+  );
+
+  return (
+    <>
+      <TimeGridScroller
+        dayStartHour={dayStartHour}
+        dayEndHour={dayEndHour}
+        focusStartHour={startHour}
+        focusEndHour={endHour}
+        rowPx={rowPx}
+        header={header}
+        className={className}
+      >
+        <div className="absolute inset-0 grid grid-cols-7">
+          {days.map((day) => {
+            const isToday = day === today;
+            const blocks = layoutBlocks(occurrencesByDay.get(day) ?? [], {
+              startHour: dayStartHour,
+              rowPx,
+              minHeightPx: MIN_BLOCK_PX,
+            });
+
+            return (
+              <div
+                key={day}
+                data-testid={`week-grid-day-${day}`}
+                className={cn(
+                  "relative min-w-0 border-l border-border-default",
+                  isToday && "bg-bg-inset/60",
+                )}
+              >
+                {blocks.map(({ item, top, height, columnIndex, columnCount }) => {
+                  const clampedTop = Math.max(0, Math.min(top, canvasHeight - MIN_BLOCK_PX));
+                  const clampedHeight = Math.max(0, Math.min(height, canvasHeight - clampedTop));
+                  const density = blockDensity(clampedHeight);
+                  const label = labelFormat ? labelFormat(item) : item.title;
+                  const { time } = melbourneDateTime(item.start);
+                  const cue = STATUS_CUE[item.status];
+
+                  return (
+                    <button
+                      key={item.key}
+                      type="button"
+                      data-testid={`week-grid-block-${item.key}`}
+                      data-density={density}
+                      onClick={(event) => {
+                        setSelected({ occurrence: item, anchor: event.currentTarget });
+                        onSelectOccurrence?.(item);
+                      }}
+                      style={{
+                        top: clampedTop,
+                        height: clampedHeight,
+                        left: `calc(${percent((columnIndex / columnCount) * 100)} + ${BLOCK_GAP_PX}px)`,
+                        width: `calc(${percent(100 / columnCount)} - ${BLOCK_GAP_PX * 2}px)`,
+                      }}
+                      className="absolute flex @container overflow-hidden rounded-inset border border-border-default bg-bg-surface text-left transition-colors hover:border-border-brand"
+                    >
+                      {/* Status reads at every density: colour, backed by a shape and a word. */}
+                      <span className={cn("w-1 shrink-0", cue.bar)} aria-hidden />
+                      <span
+                        className={cn(
+                          "flex min-w-0 flex-1 flex-col overflow-hidden px-2",
+                          density === "compact" ? "justify-center py-0.5" : "py-1",
+                        )}
+                      >
+                        <span className="sr-only">{cue.label}: </span>
+                        {density === "compact" ? (
+                          <span className="flex min-w-0 items-baseline gap-1.5">
+                            {cue.icon ? (
+                              <Icon
+                                name={cue.icon}
+                                size={14}
+                                className="shrink-0 text-text-secondary"
+                              />
+                            ) : null}
+                            <span className="truncate text-body-secondary text-text-primary">
+                              {label}
+                            </span>
+                            {/* In a narrow overlap column the title matters
+                                more than the time, which the popover repeats. */}
+                            <span className="hidden shrink-0 text-body-secondary text-text-secondary tabular-nums @[8rem]:inline">
+                              {time}
+                            </span>
+                          </span>
+                        ) : (
+                          <>
+                            <span className="flex min-w-0 items-center gap-1.5">
+                              {cue.icon ? (
+                                <Icon
+                                  name={cue.icon}
+                                  size={14}
+                                  className="shrink-0 text-text-secondary"
+                                />
+                              ) : null}
+                              <span className="truncate text-body-small text-text-primary">
+                                {label}
+                              </span>
+                            </span>
+                            <span className="truncate text-body-secondary text-text-secondary tabular-nums">
+                              {melbourneTimeRange(item.start, item.durationMinutes)}
+                            </span>
+                            {density === "full" && item.assignee ? (
+                              <span className="truncate text-body-secondary text-text-secondary">
+                                {item.assignee}
+                              </span>
+                            ) : null}
+                          </>
+                        )}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            );
+          })}
+        </div>
+      </TimeGridScroller>
+
+      {selected ? (
+        <EventPopover
+          occurrence={selected.occurrence}
+          anchor={selected.anchor}
+          onClose={() => setSelected(null)}
+        />
+      ) : null}
+    </>
   );
 }
