@@ -1,11 +1,11 @@
 # Progress — UI-01 Calendar kit: week/day/month grids, event blocks, date picker
 
-Status: IN REVIEW
+Status: MERGED TO DEV
 Owner: Dhruv Verma
 Lane: S — Shared kit
 Sprint: SPRINT · planned D3
 Branch: `feature/shared-calendar-kit`
-PR target: `main (per OQ-01 — shared work)`
+PR target: `main (per OQ-01 — shared work)` — PR #36 merged 2026-09-19
 Last updated: 2026-09-19 (visual QA round 8: `cn` was silently deleting the `@utility` type ramp whenever a colour token shared the call, so every block was measured against a ramp that never reached the DOM; fixed in `src/lib/utils.ts`, block metrics rebuilt on the rows they actually hold, and the time/assignee/status rows pinned `shrink-0` so a status pill can never squeeze them. HUMAN REVIEW: two density thresholds moved and one `titleLines` expectation changed — see DECISIONS.md FD-07)
 
 ## Blockers
@@ -82,11 +82,11 @@ Last updated: 2026-09-19 (visual QA round 8: `cn` was silently deleting the `@ut
 - Round 8 chose a CSS guarantee (`shrink-0` / `min-h-0`) over measuring the status row at runtime with `ResizeObserver`. Runtime measurement would answer "tags can vary in size" most directly, but it adds a measurement pattern to components that are currently pure functions of their props (ARCHITECTURE §12, "one pattern per problem"). Flagging the trade-off rather than deciding it permanently: if a future status needs a genuinely variable-height row, that is the point to revisit.
 
 ## Next action
-- **PR #36 is open to `main`** (approved by the human on 2026-09-19): https://github.com/MrThief123/care-compass/pull/36
-- Awaiting review. Three things need a reviewer's decision rather than a rubber stamp:
+- None for the merge itself. **PR #36 merged to `main` 2026-09-19**: https://github.com/MrThief123/care-compass/pull/36
+- Carried forward — the merge recorded no decision on these three:
   1. **FD-01 – FD-07 are still unsigned**, in particular the changed/deleted test expectations listed in the PR body (FD-05's deleted test, FD-06's role change and inverted assertion, FD-07's two moved density thresholds).
-  2. **The `cn` fix changes rendered type in UI-03 and F0-15 components** that merged while this branch was open — their authors should look at their own components in this branch.
+  2. **The `cn` fix changes rendered type in UI-03 and F0-15 components** that merged while this branch was open — their authors should look at their own components on `main`.
   3. **All-day / multi-day event rows** are still not built and still need a call.
 
 ## Ready for PR
-- Opened — PR #36
+- Merged — PR #36

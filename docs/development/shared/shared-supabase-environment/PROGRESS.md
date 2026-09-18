@@ -1,12 +1,12 @@
 # Progress — F0-04 Environment configuration and Supabase integration
 
-Status: IN PROGRESS
+Status: MERGED TO DEV
 Owner: MrThief123
 Lane: B — Backend
 Sprint: SPRINT · planned D2
 Branch: `feature/shared-supabase-environment`
-PR target: `main (per OQ-01 — shared work)`
-Last updated: 2026-09-18
+PR target: `main (per OQ-01 — shared work)` — PR #30 merged 2026-09-18
+Last updated: 2026-09-19
 
 ## Blockers
 - None — OQ-01 ANSWERED (see root DECISIONS.md)
@@ -70,7 +70,7 @@ Last updated: 2026-09-18
 - PROPOSED items in PRD.md are unconfirmed until validated in F0-01 or answered in DECISIONS.md. None of F0-04's scope touched a PROPOSED item.
 
 ## Next action
-- Ready for PR. Human should independently confirm the port-3000 e2e note above isn't masking a real issue, and review FD-01–FD-04 in DECISIONS.md.
+- None. Merged (PR #30). The human review this file asked for (the port-3000 e2e note, FD-01–FD-04) has no record on the PR, which merged with no reviews or comments.
 
 ## Ready for PR
-- Yes
+- Merged
