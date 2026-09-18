@@ -26,7 +26,11 @@ export function StatusPill({ status, actorName, className }: StatusPillProps) {
   if (status === "overdue") {
     return (
       <span
-        className={cn(BASE, "border border-border-alert bg-transparent text-text-alert", className)}
+        className={cn(
+          BASE,
+          "border border-border-alert bg-transparent text-text-alert-strong",
+          className,
+        )}
       >
         <Icon name="alert-triangle" size={14} />
         Overdue
@@ -36,11 +40,7 @@ export function StatusPill({ status, actorName, className }: StatusPillProps) {
 
   return (
     <span
-      className={cn(
-        BASE,
-        "border border-border-default bg-transparent text-text-secondary",
-        className,
-      )}
+      className={cn(BASE, "border border-bg-muted bg-bg-surface text-text-secondary", className)}
     >
       Planned
     </span>
