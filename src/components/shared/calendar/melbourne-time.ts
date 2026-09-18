@@ -33,3 +33,16 @@ export function melbourneDateTime(iso: string): MelbourneDateTime {
     time: `${parts.hour}:${parts.minute}`,
   };
 }
+
+/**
+ * `HH:mm–HH:mm` Melbourne wall-clock span for an occurrence, as the event
+ * blocks and their popover label themselves (e.g. "09:00–09:30"). Uses an en
+ * dash, matching the reference calendars.
+ */
+export function melbourneTimeRange(iso: string, durationMinutes: number): string {
+  const { time: start } = melbourneDateTime(iso);
+  const end = melbourneDateTime(
+    new Date(new Date(iso).getTime() + durationMinutes * 60_000).toISOString(),
+  ).time;
+  return `${start}–${end}`;
+}
