@@ -1,60 +1,65 @@
 # Progress — UI-03 Lists and cards kit: tables, rows, person/stat/budget/alert cards, client info view
 
-Status: NOT STARTED
-Owner: unclaimed
+Status: IN PROGRESS
+Owner: MrThief123
 Lane: S — Shared kit
 Sprint: SPRINT · planned D3
-Branch: `feature/shared-lists-cards-kit` (not yet created)
+Branch: `feature/shared-lists-cards-kit`
 PR target: `main (per OQ-01 — shared work)`
-Last updated: 2026-09-17 (planning pack generated)
+Last updated: 2026-09-18
 
 ## Blockers
-- OQ-01 — Branch parent and naming for shared (foundation and cross-cutting) work
+- None — OQ-01 answered (PD-030)
 
 ## Dependencies status
-- F0-14 — NOT STARTED
-- UI-00 — NOT STARTED
+- F0-14 — MERGED TO DEV
+- UI-00 — MERGED TO DEV
 
 ## Completed
 - Feature documentation drafted (Claude Chat planning pack)
+- All 10 scoped components, each reusing F0-14 primitives directly rather than duplicating them:
+  - `DataTable` (generic columns/rows, optional chevron column)
+  - `ActivityRow` (title, short date, `StatusPill`, chevron) — used by `AlertListCard`
+  - `AlertListCard` (alert `CardShell`, warning icon, `CountBadge`, `ActivityRow` list, optional caption)
+  - `SelectableListRow` (role="option", selected = solid brand-deep + white text + check icon; Avatar swaps to white-ground/brand-deep initials and is `aria-hidden` to avoid double-announcing the name)
+  - `PersonCard` (Avatar lg + name + meta)
+  - `NotificationRow` (Admin neutral / Family brand chip + message)
+  - `StatCard` (label + Metric/Large value)
+  - `BudgetBucketCard` (ok/warning/alert/exhausted tiers per FD-02, `ProgressBar`, `formatMoney`)
+  - `TaskChecklist` (wraps `Checkbox`, which already strikes through when checked)
+  - `ClientInfoView` (section cards with optional Edit, `FileTile` documents with optional Add file, gated by `canEdit`)
 
 ## In progress
 - None
 
 ## Remaining
-- `DataTable` (uppercase label header, 50px rows, optional chevron link column) — Task log, Budget History, Staff list, Client list.
-- `ActivityRow` (title, short date, status pill, chevron) — Overdue card, Recent activity, Log panel.
-- `AlertListCard` (alert tone, warning icon title, count badge, rows, optional caption 'across all clients').
-- `SelectableListRow` (avatar + name; selected solid #07727D with white text and check; hover tint) — Admin Manage.
-- `PersonCard` (avatar initial, name, '78 years · Preston VIC') — Patients grid.
-- `NotificationRow` (source chip Admin neutral / Family brand + message).
-- `StatCard` (label + Metric/Large number).
-- `BudgetBucketCard` (label caps, remaining metric, 'of $total · N% used', progress bar; states normal/warning/alert/depleted; alert shows warning icon and alert tone).
-- `TaskChecklist` (checkbox rows, checked struck through and muted).
-- `ClientInfoView` (client summary, section cards Description / Habits / Medical history with optional 'Edit', Documentation file tiles with optional Add file) with `canEdit` prop.
+- None — full PRD Scope implemented.
 
 ## Acceptance criteria status
-- 0 / 6 MET
+- 6 / 6 MET
 
 ## Tests
-- Written: 0 / 6
-- Passing: 0
+- Written: 15 test files' worth of cases (T-01..T-05 behavioural + T-06 axe covering all 10 components)
+- Passing: all (`npx vitest run` — 116/116 repo-wide on this branch)
 - Failing: 0
 
 ## Files changed
-- None yet. Likely files: `src/components/shared/lists/*`, `src/components/shared/cards/*`, `src/components/shared/client-info-view.tsx`
+- `src/components/shared/lists/{data-table,activity-row,alert-list-card,selectable-list-row,notification-row,task-checklist}.tsx` (+ `.test.tsx` for AC-02/03/05)
+- `src/components/shared/cards/{person-card,stat-card,budget-bucket-card}.tsx` (+ `.test.tsx` for AC-01)
+- `src/components/shared/client-info-view.tsx` (+ `.test.tsx` for AC-04)
+- `src/components/shared/lists-cards-kit.axe.test.tsx` (AC-06, all 10 components)
 
 ## Decisions
-- See DECISIONS.md
+- See DECISIONS.md — FD-01 (non-blocking OQ defaults), FD-02 (BudgetBucketCard warning-tier behaviour sourced from the Figma component doc).
 
 ## Problems encountered
-- None
+- None.
 
 ## Assumptions
 - PROPOSED items in PRD.md are unconfirmed until validated in F0-01 or answered in DECISIONS.md.
 
 ## Next action
-- Wait for answers to OQ-01; then complete dependencies, run START FEATURE UI-03, and write the tests in TEST_PLAN.md first.
+- Push (already pushed) and open PR to `main` once a human approves (CLAUDE.md §8 — never open the PR without prior human approval).
 
 ## Ready for PR
-- No
+- Yes, pending PR approval.
