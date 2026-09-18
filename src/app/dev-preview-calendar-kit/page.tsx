@@ -1,5 +1,27 @@
 "use client";
 
+/**
+ * Dev-only preview harness for the UI-01 calendar kit. **Not a product screen.**
+ *
+ * It has no PRD entry, no acceptance criterion and no test of its own, and it
+ * is not a template for the Family, Carer or Admin calendars — those compose
+ * these components against real data through `src/server/**`, and nothing here
+ * should be copied into them. Every occurrence it renders is synthetic (see
+ * `./fixtures`); no client data ever belongs in this file.
+ *
+ * It exists because the kit's defects are visual, and the unit tests passed
+ * green through every one of them: clipped rows, a missing ellipsis, mid-word
+ * breaks, a type ramp that `cn` was silently deleting. jsdom cannot measure a
+ * line box, so this page is the only place those are visible. It is kept for
+ * exactly as long as that is true.
+ *
+ * **Delete this route** once a real screen renders `DayTimeline`, `WeekGrid`
+ * and `MonthGrid` against `src/server/**` data — that screen becomes the
+ * regression surface and this one stops being worth maintaining. UI-02 or the
+ * Family Home calendar is the expected trigger. See DECISIONS.md FD-08 in
+ * `docs/development/shared/shared-calendar-kit/`.
+ */
+
 import { useState } from "react";
 
 import { CalendarHeader } from "@/components/shared/calendar/calendar-header";
@@ -52,6 +74,12 @@ export default function CalendarKitPreviewPage() {
           ))}
         </div>
       </header>
+
+      <p className="rounded-inset border border-border-default bg-bg-inset px-3 py-2 text-body-small text-text-secondary">
+        Not a product screen. This route exists to render the shared calendar components for visual
+        review, on synthetic fixtures only — never client data. It is deleted once a real screen
+        renders the kit.
+      </p>
 
       <CalendarHeader range={weekRange(TODAY)} />
 
