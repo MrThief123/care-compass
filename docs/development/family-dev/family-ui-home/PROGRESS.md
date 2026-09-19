@@ -6,7 +6,7 @@ Lane: F — Family
 Sprint: SPRINT · planned D4
 Branch: `feature/family-ui-home` (created from `origin/family-dev`)
 PR target: `family-dev`
-Last updated: 2026-09-19 (claimed)
+Last updated: 2026-09-19 (tests written, red)
 
 ## Blockers
 - None recorded at planning time
@@ -20,7 +20,7 @@ Last updated: 2026-09-19 (claimed)
 - Feature documentation drafted (Claude Chat planning pack)
 
 ## In progress
-- None
+- Implementation of the Family Home screen against the failing tests (tests-first, CLAUDE.md §5).
 
 ## Remaining
 - Route `/family/[clientId]/home` inside the family layout.
@@ -34,9 +34,11 @@ Last updated: 2026-09-19 (claimed)
 - 0 / 6 MET
 
 ## Tests
-- Written: 0 / 6
-- Passing: 0
-- Failing: 0
+- Written: 6 / 6 ACs, plus PRD Scope tests (commit `test(family): add Family Home screen tests`)
+- Red run (before implementation, 2026-09-19): `src/features/family-home/family-home.test.tsx` 22 tests, 19 failed on assertions (stub page renders "Coming soon.", so no Today/Overdue/Recent activity/Budget regions and no error state), 3 passed vacuously (axe on the stub). `home-data.test.ts` failed to import `./home-data` (module not yet written). A temporary `loading.tsx` stub was used only to get past the missing-import error and was removed before committing.
+- Passing: 0 meaningful (see red run)
+- Failing: all AC tests
+- Baseline before any change: `npx vitest run src` 49 files / 287 tests green; `npm run lint` 0 errors, 23 pre-existing warnings.
 
 ## Files changed
 - None yet. Likely files: `src/app/(family)/family/[clientId]/home/page.tsx`
