@@ -52,10 +52,16 @@ Last updated: 2026-09-19
 Only lane-S folders touched (CLAUDE.md §4.2). No shared primitive in `src/components/ui/` was modified — `ConfirmationModal` focuses the first focusable node in the dialog rather than adding ref forwarding to `Button`.
 
 ## Decisions
-- See DECISIONS.md — FD-01 … FD-07.
+- See DECISIONS.md — FD-01 … FD-08.
 
 ## Problems encountered
 - `npm run build` fails prerendering `/admin/clients` because `src/mocks/current-user` throws by design in production until F0-07. Verified identical on a clean `origin/main` checkout, so it is **not** a regression from this branch. See FD-07.
+- CI `commitlint` fails on two of this branch's commits, whose subjects lead with `UI-02` and so trip `subject-case`. Owner decided 2026-09-19 to merge as-is and hand the rule question to the CI lane. See FD-08.
+
+## Follow-up work
+- **F0-03 (CI lane)** — settle commitlint `subject-case` vs the project's feature-ID conventions, and fix the rule or the convention (FD-08). Needs a root `CHG-xxx` entry authored by the human; root plan docs are human/controlled-only.
+- Delete `/dev-preview-forms-kit` once FAM-UI-03 / FAM-UI-06 / ADM-UI-02 render this kit against `src/server/**` (FD-04).
+- Revisit `ConfirmationModal`'s focus handling if UI-01 later adds ref forwarding to `Button`.
 
 ## Assumptions
 - PROPOSED items in PRD.md are unconfirmed until validated in F0-01 or answered in DECISIONS.md.

@@ -12,7 +12,8 @@ Important discoveries:
 - PD-044 makes Overdue derived, so the Edit event frame's selectable Overdue chip is out of date. PD-046 likewise widens the Recurring select beyond the frame's single "Weekly". Both built per PD-053 and flagged for human sanity-check (FD-01, FD-02).
 - `npm run build` already fails on `origin/main` prerendering `/admin/clients` (deliberate mock-session guard until F0-07). Not caused by this branch — FD-07.
 - `Button` in `src/components/ui/` does not forward refs. Rather than edit another lane's primitive, `ConfirmationModal` queries the first focusable node in the dialog.
-Important decisions: FD-01 … FD-07 in DECISIONS.md.
+Important decisions: FD-01 … FD-08 in DECISIONS.md.
+CI on PR #41: unit, lint, typecheck, format, audit, db-test pass. `build` and `e2e` fail — pre-existing on `main` (run 35405894795), FD-07. `commitlint` fails on this branch's `feat(shared): UI-02 …` and `test(shared): UI-02 …` commits, whose subjects lead with the feature ID and trip `subject-case` — owner chose to merge as-is and defer the rule question to F0-03 (FD-08).
 Exact next action: none for Claude Code — the owner reviews and merges the PR. On merge, UI-02's status becomes MERGED on the next touch of this feature (DEVELOPMENT_WORKFLOW.md §7.4 — no dedicated cleanup branch).
 Files likely to be touched next: none in this feature — UI-02 is complete. Downstream: FAM-UI-03, FAM-UI-06, FAM-UI-07, CAR-UI-04, ADM-UI-02..05, F0-07 all unblock once this merges.
 Warning for next session: do not fold PD-047's Title / Start time / Duration or PD-044's completion-mode toggle into this kit — those belong to FAM-06 / FAM-07 / CAR-07 and pass through `EventForm`'s `extraFields` slot (FD-03).

@@ -83,6 +83,16 @@ All four are now ANSWERED in root DECISIONS.md; none blocked implementation.
 - Human confirmation required: no — informational.
 - Test changes caused: none.
 
+### FD-08 — commitlint `subject-case` rejects subjects led by a feature ID; deferred to the CI lane
+- Date: 2026-09-19
+- Context: CI's `commitlint` job fails on this branch for two commits — `feat(shared): UI-02 forms kit — …` and `test(shared): UI-02 forms kit tests, …`. The rule is `subject-case` (`subject must not be sentence-case, start-case, pascal-case, upper-case`): a subject beginning with a feature ID such as `UI-02` reads as upper-case. `docs(shared-forms-kit): claim UI-02` passes, because the ID is not leading. This sits awkwardly against the project's own conventions, which use feature IDs everywhere — `docs/DEVELOPMENT_WORKFLOW.md` §8 mandates PR titles of `<ID> <Feature name>`, and test titles must start `[<ID>][AC-xx]` (CLAUDE.md §5).
+- Decision: **merge UI-02 as-is; do not fix it here.** The rule question — whether `subject-case` should permit a leading feature ID, or whether commit subjects should simply never lead with one — is a CI-configuration change belonging to **F0-03 (shared-ci-pipeline)**, not to a kit feature.
+- Reason: the fix is either a `commitlint.config` change (another lane's file, and a root-level tooling decision) or a rewrite of pushed history, which CLAUDE.md §3 forbids. `main` is itself red on `commitlint`, `build` and `e2e`, so this PR does not lower the CI baseline. Following the UI-00 / CHG-002 precedent: flag the gap, let the human raise it, rather than resolve it unilaterally.
+- Alternatives considered: reword the two commits and force-push (rejected — CLAUDE.md §3 "never rewrite pushed history"; offered to the human, who chose to merge as-is); relax `subject-case` in `commitlint.config.mjs` as part of this PR (rejected — out of scope, another lane's file, §6).
+- Consequences: PR #41 merges with `commitlint`, `build` and `e2e` red. `build`/`e2e` are FD-07 and pre-existing; `commitlint` is this branch's, and stays red in history. **Needs a root `CHG-xxx` entry in `DECISIONS.md` and a fix on F0-03** — the human must author both, as root plan docs are human/controlled-only (`docs/AGENT_REFERENCE.md`, folder ownership). Draft CHG text supplied to the human at PR review.
+- Human confirmation required: yes — **CONFIRMED by Dhruv Verma, 2026-09-19**: "go with 1, log it as follow-up".
+- Test changes caused: none.
+
 <!-- Template
 ### FD-01 — <title>
 - Date:
