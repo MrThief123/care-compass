@@ -148,3 +148,116 @@ describe("TaskLogPager (CHG-005)", () => {
     expect(await axe(last.container)).toHaveNoViolations();
   });
 });
+
+/**
+ * A log of any length keeps a pager of one size: 537 rows is 27 pages, 5,000 rows is 250. jsdom has
+ * no layout, so the compact-layout classes are pinned here and the layout itself is proven by the
+ * real-browser width sweep in PROGRESS.md (DECISIONS.md FD-22).
+ */
+describe("[FAM-UI-07] TaskLogPager at scale and at narrow widths", () => {
+  const classesOf = (element: Element) => [...element.classList];
+  const linkNames = () =>
+    within(nav())
+      .getAllByRole("link")
+      .map((link) => link.getAttribute("aria-label") ?? link.textContent);
+
+  it("[FAM-UI-07][AC-05] a 5,000-row log has 250 pages: 'Showing 2481-2500 of 5000' in the middle, seven numbered slots, first and last always one link away", () => {
+    renderPager(125, 5000);
+
+    expect(within(nav()).getByText("Showing 2481-2500 of 5000")).toBeInTheDocument();
+    expect(linkNames()).toEqual(["Previous", "Page 1", "Page 124", "Page 126", "Page 250", "Next"]);
+    expect(within(nav()).getByText("125")).toHaveAttribute("aria-current", "page");
+    expect(within(nav()).getAllByText("…")).toHaveLength(2);
+    expect(within(nav()).getByRole("link", { name: "Page 250" })).toHaveAttribute(
+      "href",
+      "/family/client-margaret/tasks?page=250",
+    );
+  });
+
+  it("[FAM-UI-07][AC-05] the first and the last page of 250 show their own rows and only the controls that make sense", () => {
+    const first = renderPager(1, 5000);
+    expect(within(nav()).getByText("Showing 1-20 of 5000")).toBeInTheDocument();
+    expect(linkNames()).toEqual(["Page 2", "Page 3", "Page 4", "Page 5", "Page 250", "Next"]);
+    first.unmount();
+
+    renderPager(250, 5000);
+    expect(within(nav()).getByText("Showing 4981-5000 of 5000")).toBeInTheDocument();
+    expect(linkNames()).toEqual([
+      "Previous",
+      "Page 1",
+      "Page 246",
+      "Page 247",
+      "Page 248",
+      "Page 249",
+    ]);
+  });
+
+  it("[FAM-UI-07][PRD] never shows more than seven numbered slots however long the log is (7 pages, 27 pages, 250 pages, 100,000 rows)", () => {
+    for (const [page, total] of [
+      [4, 140],
+      [14, 537],
+      [125, 5000],
+      [2500, 50000],
+    ] as const) {
+      const { container, unmount } = renderPager(page, total);
+      const numbers = container.querySelectorAll("a[aria-label^='Page '], [aria-current='page']");
+      const gaps = within(nav()).queryAllByText("…");
+      expect(numbers.length + gaps.length).toBeLessThanOrEqual(7);
+      unmount();
+    }
+  });
+
+  it("[FAM-UI-07][PRD] follows the width of the log, not the window: the pager is a size container", () => {
+    renderPager(125, 5000);
+
+    expect(classesOf(nav())).toContain("@container");
+  });
+
+  it("[FAM-UI-07][PRD] below that width Previous, 'Page 125 of 250' and Next share one line, and the numbered links are hidden, not squeezed", () => {
+    renderPager(125, 5000);
+
+    const compact = within(nav()).getByText("Page 125 of 250");
+    expect(classesOf(compact)).toContain("@md:hidden");
+    expect(compact.tagName).not.toBe("A");
+
+    // The numbers live in one wrapper: hidden when narrow, laid out as before when wide.
+    const numbers = within(nav()).getByText("125").parentElement!;
+    expect(classesOf(numbers)).toEqual(expect.arrayContaining(["hidden", "@md:contents"]));
+    expect(numbers).toContainElement(within(nav()).getByRole("link", { name: "Page 124" }));
+
+    // Previous and Next are never hidden: they are the controls that work at every width.
+    for (const name of ["Previous", "Next"]) {
+      const link = within(nav()).getByRole("link", { name });
+      expect(link).toHaveClass("h-11", "min-w-11");
+      expect(numbers).not.toContainElement(link);
+      expect(classesOf(link)).not.toContain("hidden");
+    }
+  });
+
+  it("[FAM-UI-07][PRD] the compact line says where you are on the first and the last page too", () => {
+    const first = renderPager(1, 5000);
+    expect(within(nav()).getByText("Page 1 of 250")).toBeInTheDocument();
+    first.unmount();
+
+    renderPager(250, 5000);
+    expect(within(nav()).getByText("Page 250 of 250")).toBeInTheDocument();
+  });
+
+  it("[FAM-UI-07][PRD] the controls wrap onto another line instead of running past the log, and the summary does too", () => {
+    const { container } = renderPager(125, 5000);
+
+    expect(classesOf(nav())).toContain("flex-wrap");
+    const controls = within(nav()).getByRole("link", { name: "Next" }).parentElement!;
+    expect(classesOf(controls)).toEqual(expect.arrayContaining(["flex", "@md:flex-wrap"]));
+    expect(classesOf(controls)).toContain("w-full");
+    expect(container.querySelector("nav")).toBe(nav());
+  });
+
+  it("[FAM-UI-07][PRD] has no axe violations with 250 pages, on the first, a middle and the last page", async () => {
+    for (const page of [1, 125, 250]) {
+      const { container, unmount } = renderPager(page, 5000);
+      expect(await axe(container)).toHaveNoViolations();
+      unmount();
+    }
+  });
+});
