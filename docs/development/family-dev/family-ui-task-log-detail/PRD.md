@@ -31,7 +31,8 @@ A clickable, reviewable screen that matches the design, ready for data wiring in
 - Route `/family/[clientId]/tasks` inside the family layout.
 - Task log: title, search field, 'Status' select (All statuses/Planned/Done/Overdue), `DataTable` DATE · TASK · NURSE · STATUS with chevrons.
 - Task detail `/family/[clientId]/tasks/[occurrenceKey]`: 'Back to Task log', title, 'Monday 30 November 2026 · Assigned to Aisha R.', Status card with 'Completed at 09:14', Description card with Edit link to edit event, Documents card.
-- Search and filter act on fixtures client-side (server search comes with wiring, D32).
+- Search, Status filter and paging are server-driven through `getTaskLog(clientId, {q, status, page})` and cover the whole history, not only the rows on screen (changed by CHG-005, confirmed by the human 2026-09-19; was: client-side over fixtures, D32). The URL is the state: `/family/[clientId]/tasks?q=<text>&status=<planned|done|overdue>&page=<n>`, all optional, absent status = all, page defaults to 1. Invalid or hostile values fall back safely (bad status = all, bad page = 1, page past the last = the last page, q trimmed and capped at 200 characters). A pager shows 'Showing 21-40 of 137', Previous / Next and the current page.
+- Task detail links carry the validated q / status / page, and 'Back to Task log' returns to that exact view. Any task in the history can be opened, past or future.
 - Loading skeleton, empty state and error state (States sheet) wired to the query contract's states.
 - Data only via `src/server/**` contract functions (mock data source).
 
@@ -40,7 +41,8 @@ A clickable, reviewable screen that matches the design, ready for data wiring in
 - Undesigned flows (listed in DECISIONS.md OQ-19)
 
 ## Functional Requirements
-- Interactions (ticks, selections, toggles, form input) update local state only and are clearly reset on reload.
+- Interactions (ticks, selections, toggles, form input) update local state only and are clearly reset on reload, except the Task log's search, Status and page, which live in the URL so links, Back/Forward and reloads show the same view (CHG-005).
+- Must hold for the data users build up over time: hundreds of log rows across many pages, exactly one page, exactly one page size, one over, none; titles up to 120 characters, names up to 60, non-ASCII text.
 
 ## UI / UX Requirements
 - Pixel-level match to the design image in `docs/design/screens/`; attach side-by-side screenshot to the PR.

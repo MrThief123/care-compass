@@ -28,6 +28,9 @@ Tests are written **before** production code (TESTING.md §2). Run them, confirm
 | T-13 | PRD | component | Route states: Task log loading skeleton and error state with Retry; Task detail loading skeleton and not-found page; axe on each. | ☑ | GREEN 2026-09-19 (red first: missing module) |
 | T-14 | PRD | component | Added after a browser check (each run red first): a nurse name stays on one line so rows stay 50px and its full text is on hover; the task link is sized to its text so its focus ring does not span the column. | ☑ | GREEN 2026-09-19 (red first) |
 
+
+**Requirement change (CHG-005, FD-12):** search, Status filter and paging are now server-driven across the whole history, so the client-side filter/sort tests (T-06 and the filtering assertions in T-01, T-02, T-03, T-09) change or move to the page and loader level. Each changed or removed test is listed with before, after and reason in DECISIONS.md FD-13. New tests use `[FAM-UI-07][AC-05]` to `[AC-08]` and `[FAM-UI-07][PRD]`, and run against generated data at realistic volumes (537 rows, exactly one page, exactly 20, 21, none; 120-character titles, 60-character names, non-ASCII), never only the sample rows.
+
 ### Test files
 - `src/features/family-task-log/`: `occurrence-display.test.ts` (T-05), `task-log-query.test.ts` (T-06), `task-routes.test.ts` (T-07), `melbourne-time.test.ts` (T-08), `task-log-view.test.tsx` (T-01, T-02, T-03, T-09, T-14); `design-fixtures.ts` is test-support data (FD-02).
 - `src/features/family-task-detail/`: `task-detail-view.test.tsx` (T-04, T-10), `find-occurrence.test.ts` (T-11).

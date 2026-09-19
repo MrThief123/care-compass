@@ -107,6 +107,20 @@ Status verified against root `DECISIONS.md` on 2026-09-19 (`grep -n "OQ-xx" DECI
 - Two tests added after a browser check found layout bugs jsdom cannot see, each run red before its fix: nurse name stays on one line so rows stay 50px (`truncate` plus `title`), and the task link is sized to its text so its focus ring does not span the column (`w-fit`). New tests, not changes to existing ones.
 - Human confirmation required: no.
 
+### FD-12 — Requirement change CHG-005: the Task log is the full, server-driven history (not client-side over fixtures)
+- Date: 2026-09-19
+- Context: the PRD Scope line said "Search and filter act on fixtures client-side (server search comes with wiring, D32)". My first pass followed it: the page took one page of `getTaskLog`, then filtered and re-sorted those rows in the browser. With real data that silently shows only the newest page, searches only what is on screen, cannot reach older rows, and cannot open a task that is outside the first page. The human reviewed the hand-back and required the opposite: a real person will use and input into the app, so every screen must work for whatever data builds up, including getting the whole log, searching and filtering the entire history, opening any task (past or future) and seeing its documents. Fixture rows are a stand-in only.
+- Decision: recorded as **CHG-005** (being recorded in root `DECISIONS.md` on `feature/shared-screen-contracts-fixtures`; confirmed by the human in-session on 2026-09-19). This feature's PRD Scope and Functional Requirements lines, two AC wordings (AC-02, AC-03) and four added ACs (AC-05 to AC-08) were updated to match; TEST_PLAN.md follows. The behaviour now is:
+  - The page reads `searchParams` (a Promise in Next 16.3), validates them with Zod, and calls the existing `getTaskLog(clientId, {q, status, page})`. It honours `total`, `page` and `pageSize` from the result and shows a pager.
+  - The URL is the state: `/family/{clientId}/tasks?q=&status=&page=` (shared with Home, do not deviate). Search (debounced, or Enter) and the Status select update it with `router.replace`; changing q or status resets page to 1. Pager links are real links, so Back/Forward, reload and shared links work.
+  - Client-side page filtering (`filterTaskLog`) and single-page re-sorting (`sortTaskLog`) are removed. Ordering is the contract's job (the shared branch defines newest first); re-sorting one page can never surface newer rows from other pages.
+  - Task detail links carry the validated q/status/page and "Back to Task log" returns to that view. Hrefs are built only from validated values.
+- Reason: a screen that only looks right on the sample rows is not fit to use. CLAUDE.md §9 lets a controlled document change through a CHG confirmed by the human.
+- Alternatives considered: keep client-side filtering and add paging over the first page only (rejected: still cannot search the history); fetch every page and filter in the browser (rejected: unbounded work for a perpetual log).
+- Consequences: tests that asserted client-side filtering or re-sorting are changed or removed (FD-13, **HUMAN REVIEW: test expectation changed**). AC-05 to AC-08 are new (**HUMAN REVIEW: ACs added under CHG-005**). AC-01, AC-02 and AC-04 stay BLOCKED until the shared fixtures land (FD-02).
+- Human confirmation required: yes, already given in-session for the requirement (2026-09-19); please confirm the AC additions and FD-13.
+- Test changes caused: see FD-13.
+
 <!-- Template
 ### FD-01 — <title>
 - Date:
