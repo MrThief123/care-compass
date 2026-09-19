@@ -1,12 +1,12 @@
 # Progress — FAM-UI-01 Family Home screen (UI)
 
-Status: NOT STARTED
-Owner: unclaimed
+Status: IN PROGRESS
+Owner: Dhruv Verma
 Lane: F — Family
 Sprint: SPRINT · planned D4
-Branch: `feature/family-ui-home` (not yet created)
+Branch: `feature/family-ui-home` (created from `origin/family-dev`)
 PR target: `family-dev`
-Last updated: 2026-09-17 (planning pack generated)
+Last updated: 2026-09-19 (claimed)
 
 ## Blockers
 - None recorded at planning time
