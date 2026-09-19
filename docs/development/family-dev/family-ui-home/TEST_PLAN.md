@@ -26,7 +26,7 @@ Tests are written **before** production code (TESTING.md §2). Run them, confirm
 | `activity-cards.test.tsx` | Overdue badge = total (3, 2, 40), "View all N overdue" only when rows are hidden, rows are links, two-line title and one-line name (102 and 51 characters from the mock data, 120 and 60), pill never squeezed, axe. |
 | `budget-strip.test.tsx` | $1,234,567.89 with cents, zero-dollar budget, over 100%, 0/1/3/8 buckets, duplicate kinds, 60-character names, status not by colour alone, axe. |
 | `home-format.test.ts` | Three-letter Melbourne dates ("Sep"), cent-accurate dollars. |
-| `responsive-layout.test.tsx` | The causes of a broken layout: stacking classes, `min-w-0` on every grid item, `title` on everything cut off, pills keep size, rows clipped, auto-fit budget grid. jsdom has no layout: the layout itself is the browser width sweep in PROGRESS.md. |
+| `responsive-layout.test.tsx` | The causes of a broken layout: stacking classes (one column, two from 1024px, the 340px column from 1280px), `min-w-0` on every grid item, `title` on everything cut off, pills keep size, rows clipped, auto-fit budget grid. jsdom has no layout: the layout itself is the browser width sweep in PROGRESS.md. |
 
 ### Where the tests live and what else they cover
 - `src/features/family-home/family-home.test.tsx` renders the route's page (`await FamilyHomePage(...)` then `render`) with the `src/server/**` contract replaced by test-local fixtures that mirror the design (DECISIONS.md FD-08). T-01 to T-06 are the AC-01 to AC-06 tests. AC-06 also has a logging test and runs once per contract function (`getTodayOccurrences`, `getTaskLog`, `getBudgetSummary`).

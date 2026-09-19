@@ -167,9 +167,9 @@ Record feature-level decisions here using the template below. Project-wide decis
 ### FD-18 — Breakpoints and stacking (2026-09-20, human addendum: nothing overlaps at any width)
 - Date: 2026-09-20
 - Context: the Task log sibling screen overlapped below about 1100px because one long value widened a column. Required: clean from 1920 to 1024, graceful (no overlap, no page scroll) to 768, information only at 640 and 375.
-- Decision (design call flagged for human review): the design's two columns (Today, 340px column) need about 1280px. From 1280px: as designed (`xl`). Below: one column in this order: Enter event, Today, Overdue, Recent activity, Budget; from 768px (`md`) Overdue and Recent activity sit side by side. Every grid item is `min-w-0`; the Today rows, card rows, pills, tiles and header lines are all cut with an ellipsis (full text in `title`) or wrap, never widen. The Budget cards use `auto-fit` columns. The shared header, rail and layout are not this feature's and were only observed in the sweep.
+- Decision (design call flagged for human review): the design's two columns (Today, 340px column) need about 1280px. From 1280px: as designed (`xl`). Below: one column in this order: Enter event, Today, Overdue, Recent activity, Budget; from 1024px (`lg`) Overdue and Recent activity sit side by side (a first attempt at 768px put them in 308px cards, where a normal word, "Physiotherapy", broke mid-word). Every grid item is `min-w-0`; the Today rows, card rows, pills, tiles and header lines are all cut with an ellipsis (full text in `title`) or wrap, never widen. The Budget cards use `auto-fit` columns. The shared header, rail and layout are not this feature's and were only observed in the sweep.
 - Verified in a real browser (PROGRESS.md, width sweep table).
-- Human confirmation required: yes (the 1280px breakpoint and the stacking order).
+- Human confirmation required: yes (the 1280px and 1024px breakpoints and the stacking order).
 
 ### FD-19 — Human answers of 2026-09-20 (ANSWERED)
 - Date: 2026-09-20
