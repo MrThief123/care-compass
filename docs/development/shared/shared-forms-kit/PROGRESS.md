@@ -1,6 +1,6 @@
 # Progress — UI-02 Forms kit: fields, settings cards, side panels, chips, modal, event form
 
-Status: READY FOR PR
+Status: PR OPEN
 Owner: Dhruv Verma
 Lane: S — Shared kit
 Sprint: SPRINT · planned D3–D4
@@ -34,7 +34,7 @@ Last updated: 2026-09-19
 - None
 
 ## Remaining
-- Human review of the two design-gap items (FD-01, FD-02), then PR to `main`.
+- None. The two design-gap items (FD-01, FD-02) were reviewed by the owner at `/dev-preview-forms-kit` on 2026-09-19 and accepted as built.
 
 ## Acceptance criteria status
 - 6 / 6 MET
@@ -65,10 +65,12 @@ Two places where this build knowingly departs from the Edit event frame, both re
 1. **FD-01** — the Overdue chip is rendered but **not selectable** (PD-044: Overdue is derived). The frame draws it as selectable.
 2. **FD-02** — the Recurring select offers **all nine** PD-046 frequencies. The frame shows only "Weekly".
 
+**Reviewed and accepted** by the owner (Dhruv Verma) on 2026-09-19, rendered at `/dev-preview-forms-kit`. Both stay as built; the Edit event frame is the out-of-date artefact.
+
 No test expectation was changed after implementation began.
 
 ## Next action
-- Await human approval, then open the PR to `main`.
+- PR open to `main`. Await review and merge by the human owner (CLAUDE.md §3 — Claude Code never merges).
 
 ## Ready for PR
-- Yes — pending the human approval gate (`docs/DEVELOPMENT_WORKFLOW.md` §7).
+- Yes — approval given 2026-09-19; PR opened from `feature/shared-forms-kit` to `main`.

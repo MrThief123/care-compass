@@ -22,7 +22,7 @@ All four are now ANSWERED in root DECISIONS.md; none blocked implementation.
 - Reason: the answered decision outranks the frame (CLAUDE.md §2 — decisions are the source of truth once closed). Hiding the chip entirely would make a genuinely overdue occurrence unreadable.
 - Alternatives considered: omit the Overdue chip (rejected — loses the derived state's display); leave it selectable to match the frame (rejected — contradicts PD-044).
 - Consequences: the Edit event design is now knowingly out of step with the build on this point. **Flagged for human sanity-check in the PR** per PD-053.
-- Human confirmation required: yes — sanity-check at PR review.
+- Human confirmation required: yes — **CONFIRMED by Dhruv Verma, 2026-09-19**, reviewed as rendered at `/dev-preview-forms-kit`. Stays as built; the frame is the out-of-date artefact.
 - Test changes caused: none.
 
 ### FD-02 — Recurring select offers all nine PD-046 frequencies
@@ -32,7 +32,7 @@ All four are now ANSWERED in root DECISIONS.md; none blocked implementation.
 - Reason: PD-046 is answered and the domain type already carries the full set; building only "Weekly" would need rework at FAM-06.
 - Alternatives considered: pass the options in as a prop per dashboard (rejected — would let three dashboards define three different recurrence vocabularies).
 - Consequences: design gap built directly from tokens per PD-053. **Flagged in the PR.**
-- Human confirmation required: yes — sanity-check at PR review.
+- Human confirmation required: yes — **CONFIRMED by Dhruv Verma, 2026-09-19**, reviewed as rendered at `/dev-preview-forms-kit`.
 - Test changes caused: none.
 
 ### FD-03 — PD-047 / PD-044 event fields are left to the dashboard features, behind a slot
