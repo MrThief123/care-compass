@@ -12,10 +12,15 @@ export default async function FamilyHomePage({
   let data: FamilyHomeData;
   try {
     data = await loadFamilyHomeData(clientId);
-  } catch {
+  } catch (error) {
     // A rejected contract query is the screen's error state, not a crash.
-    // Nothing is logged here: the Phase 3 data layer's messages may carry
-    // client data (CLAUDE.md §7, no PII in logs). See DECISIONS.md FD-07.
+    // ARCHITECTURE.md §12.5: log a feature tag and the error's class only. The
+    // message is left out because Phase 3 data-layer errors may carry client
+    // data, and nothing here may log PII. See DECISIONS.md FD-07.
+    console.error(
+      "[family-home] could not load home data:",
+      error instanceof Error ? error.name : "unknown error",
+    );
     return <HomeErrorState />;
   }
 
