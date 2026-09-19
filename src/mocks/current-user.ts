@@ -33,9 +33,7 @@ function profileForRole(role: Role): CurrentUser {
       const carer = CARER_PROFILES[0];
 
       if (!carer) {
-        throw new Error(
-          "src/mocks/fixtures CARER_PROFILES is unexpectedly empty.",
-        );
+        throw new Error("src/mocks/fixtures CARER_PROFILES is unexpectedly empty.");
       }
 
       return {
@@ -52,9 +50,7 @@ function profileForRole(role: Role): CurrentUser {
       const family = FAMILY_PROFILES[0];
 
       if (!family) {
-        throw new Error(
-          "src/mocks/fixtures FAMILY_PROFILES is unexpectedly empty.",
-        );
+        throw new Error("src/mocks/fixtures FAMILY_PROFILES is unexpectedly empty.");
       }
 
       return {
@@ -71,8 +67,6 @@ function profileForRole(role: Role): CurrentUser {
 /**
  * Returns the mock signed-in user.
  */
-export async function getCurrentUser(
-  role: Role = DEFAULT_ROLE,
-): Promise<CurrentUser> {
+export async function getCurrentUser(role: Role = DEFAULT_ROLE): Promise<CurrentUser> {
   return profileForRole(role);
 }
