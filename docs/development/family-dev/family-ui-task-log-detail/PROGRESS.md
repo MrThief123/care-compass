@@ -1,6 +1,6 @@
 # Progress — FAM-UI-07 Family Task log and Task detail screens (UI)
 
-Status: IN PROGRESS (CHG-005 green and browser-checked by the reviewer; responsive Task log table (Task A) and Task detail / document tile (Task B) DONE, green and pushed; Tasks C to E remain)
+Status: IN PROGRESS (CHG-005 green and browser-checked by the reviewer; responsive Task log table (Task A), Task detail / document tile (Task B) and pager (Task C) DONE, green and pushed; Tasks D and E remain)
 Owner: Dhruv Verma
 Lane: F — Family
 Sprint: SPRINT · planned D6–D7
@@ -18,6 +18,7 @@ Last updated: 2026-09-20
 - **HUMAN REVIEW: test expectation changed (FD-13):** 13 items with before, after and reason; client-side filter and sort tests, the `findOccurrence` tests and the Documents-empty test changed or were replaced. No test skipped, `.only`-ed or silently deleted.
 - **Design conflict (UI-04 FD-04):** Home's design shows 3 overdue, the Task log design 2; UI-04 chose 2. Human to confirm.
 - **Design gaps built from tokens (FD-08, PD-052)** and the pager, "No tasks to show", document tile type/size line: design owner to review.
+- **Design call in FD-22 (Task C), please review:** below a 28rem-wide pager the numbers give way to Previous / 'Page x of y' / Next on one line.
 - **Design calls in FD-21 (Task B), please review:** the document tile is 160 to 192px wide in a wrapping grid where the design draws 104px (the added type and size line needs the room, and 104px broke ordinary names mid-word); long document names are cut at two lines with an ellipsis (whole name on hover and in the DOM). **HUMAN REVIEW: test expectation changed** (FD-21): one assertion in `document-tile.test.tsx` (`toHaveClass("break-all")` became `not.toHaveClass("break-all")`).
 - **Design calls in FD-20 (Task A), please review:** the card layout below a 48rem-wide log (about a 920px window), its three lines and the middle-dot separator, long names and titles cut with an ellipsis (full text on hover and in the DOM) instead of shown whole, column headings visually hidden in card layout. Also the shared `DataTable` follow-up request (fixed widths, overflow handling, narrow layout) for Carer and Admin.
 - **Shared kit requests (FD-09, FD-18):** SearchField label prop, `DataTable` column widths, a 44px Clear-search target, vertical file tile, time/size formatters.
@@ -35,12 +36,12 @@ Last updated: 2026-09-20
 - Task A (2026-09-20, commits 77af56f red, 573c732 green): `src/features/family-task-log/task-log-table.tsx` replaces the shared `DataTable` in `TaskLogView`. Fixed grid tracks (DATE 7rem, TASK minmax(0,1fr), NURSE clamp(9rem,20%,14rem), STATUS clamp(12rem,26%,20rem), chevron 2.5rem), every cell `min-w-0`, title `line-clamp-2` + `overflow-wrap:anywhere` + `title`, nurse `truncate`, pill capped (`max-w-full`, label ellipsis, icon `shrink-0`, full text in `title` and DOM), a three-line card layout below a 48rem-wide log (container query `@3xl`), headings `sr-only` there, one DOM for both layouts, toolbar wraps. See FD-20.
 
 - Task B (2026-09-20, commits 6f3d9ac red, then green): `document-tile.tsx` and `task-detail-view.tsx`. Documents are a wrapping grid (`minmax(min(10rem,100%),12rem)`), the tile fills its cell, the name is `line-clamp-2` with `[overflow-wrap:anywhere]` (no `break-all`), type and size are one line, the header, the Status pill (capped wrapper, full-size icon) and the description wrap or cut instead of spilling. See FD-21.
+- Task C (2026-09-20, commits 13a7a40 red, then green): `task-log-pager.tsx` is a size container; below `@md` (28rem) the numbered links give way to 'Page 125 of 250' between Previous and Next, one line; the 7-slot window already made 27 and 250 pages read the same. See FD-22.
 
 ## In progress
 - None.
 
-## Remaining (in this order; commit and push after each; details in SESSION_STATE.md; Task B is done)
-- **C. Pager at narrow widths and at scale**: 25 and 250 pages (537 and 5,000 rows), windowed with ellipses, 44px targets, no overflow or overlap at 1024, 768, 640, 375; compact Previous / 'Page x of y' / Next under a recorded breakpoint if wrapping is not enough; tests first.
+## Remaining (in this order; commit and push after each; details in SESSION_STATE.md; Tasks B and C are done)
 - **D. Visual polish (capped)**: FD-18 differences via className overrides (search border, placeholder colour, focus ring, header colour and underline, row-separator inset, pill height, 4px label gap), the kit's 24px Clear-search button (44px rule), an accessible name for the search input (`SearchField` has no label prop: aria-label from our side, or state exactly why not); shared changes become recorded follow-ups. Design PNGs: `docs/design/screens/family-07-task-log.png`, `family-08-task-detail.png`.
 - **E. Record and finish**: (1) FD-21: FD-04 answered "Doesn't matter" (Task log's 2 overdue stays) and FD-05 answered "Based off time they were created in calendar" (read as strictly by calendar start time, the contract rule as built: newest first, ties by key ascending; AC-01 wording stands), both by the human on 2026-09-20; (2) the shared `DataTable` follow-up is already recorded in FD-20 (repeat it in the PR body); (3) merge `origin/feature/shared-screen-contracts-fixtures` once (docs-only commit 788cd6c) and keep the PR order note (FD-14); (4) update ACCEPTANCE_CRITERIA, TEST_PLAN, PROGRESS, SESSION_STATE, DECISIONS honestly; (5) final verification (below, plain `npx vitest run` included), `END SESSION`, report READY FOR PR.
 
@@ -94,6 +95,18 @@ Columns: page-level horizontal scroll (px) | rows of text overlapping a neighbou
 
 The 57px at 375 is the family layout header (not this feature; phone views are parked, PL-17). Before Task B the extra 61px at 375 was the 60-character no-space name in the "Assigned to" line running past the card edge. No element inside `main` is past the viewport edge at 375 after the fix. Screenshots looked at: eye-drops at 1440, 768 and 375; worst case at 768 (six tiles, no mid-word breaks, 92-character names cut at two lines with an ellipsis, type and size on one line, "Excel · 25.0 GB" whole) and 375 (title wraps, the no-space name wraps, the pill ends in an ellipsis with a full-size icon). No console errors.
 
+## Task C evidence: pager sweep (real Chromium against `next dev` on :3107, throwaway preview route, 2026-09-20)
+Page-level scroll from the pager was 0 at every width (the +57px at 375 is the family layout header). Controls per row | smallest control | controls past the pager's edge | text overlaps, then nav height. Same for 137 rows (7 pages, page 2), 537 (27 pages, page 14) and 5,000 (250 pages, pages 1, 125 and 250):
+
+| Window | Layout | Rows of controls | Smallest control | Past edge | Overlaps | Nav height |
+|---|---|---|---|---|---|---|
+| 1920 to 900 | numbers | 1 | 44x44 | 0 | 0 | 44px |
+| 768 | numbers | 1 | 44x44 | 0 | 0 | 44px (70px for the 5,000-row middle page: summary wraps above) |
+| 640 | numbers | 1 | 44x44 | 0 | 0 | 70px (summary above the controls) |
+| 375 | Previous / Page x of y / Next | 1 | 54x44 | 0 | 0 | 70px |
+
+Before (375, 5,000 rows, page 125): 2 rows of controls, nav 118px; the current page was on the second row. Screenshots looked at: 5,000 rows at 768 and 640 (numbers, one row) and 375 (before: two rows; after: "Previous  Page 125 of 250  Next").
+
 ## Verification of Task A (commit 573c732, 2026-09-20)
 - `npx vitest run src` -> 74 files, 747 tests, all pass (was 73 / 730: `task-log-table.test.tsx` adds 14, `task-log-view.test.tsx` adds 3).
 - `npm run lint` -> 0 errors, 23 warnings (the same pre-existing ones). `npm run typecheck` -> clean. `npm run format:check` -> clean.
@@ -113,13 +126,13 @@ The 57px at 375 is the family layout header (not this feature; phone views are p
 - `docs/development/family-dev/family-ui-task-log-detail/`: this feature's docs. The UI-04 merge brings `src/mocks`, `src/server`, `src/types` and its docs into the diff (not this feature's edits).
 
 ## Decisions
-- FD-01 to FD-21 in DECISIONS.md (FD-02, FD-03, FD-04 superseded by UI-04; FD-20 is the responsive Task log table; FD-21 is Task detail and the document tile).
+- FD-01 to FD-22 in DECISIONS.md (FD-02, FD-03, FD-04 superseded by UI-04; FD-20 is the responsive Task log table; FD-21 is Task detail and the document tile; FD-22 is the pager).
 
 ## Assumptions
 - To run the pages locally: `NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321 NEXT_PUBLIC_SUPABASE_ANON_KEY=dummy SUPABASE_SERVICE_ROLE_KEY=dummy npx next dev -p 3107`, then open `/family/client-margaret/tasks?as=family`.
 
 ## Next action
-- Task C (SESSION_STATE.md), tests first. Do not open the PR without approval (PD-056).
+- Task D (SESSION_STATE.md), tests first. Do not open the PR without approval (PD-056).
 
 ## Ready for PR
 - No: Tasks B to E outstanding; PR sequencing per FD-14.
