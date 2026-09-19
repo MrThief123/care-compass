@@ -2,50 +2,125 @@
  * Mock (fixture-backed) implementation of the `events` domain contract.
  * Read only by `src/server/events/queries.ts` / `actions.ts` — never
  * imported directly by `src/app` or `src/features`.
+ *
+ * The rules here (order, `total`, page size, client scoping) are the contract
+ * every data source follows; the Phase 3 Supabase implementations must match
+ * them (UI-04, CHG-004, CHG-005).
  */
 import { OCCURRENCES_BY_CLIENT_ID, REFERENCE_DATE } from "@/mocks/fixtures";
-import type { Occurrence, OccurrenceStatus, TaskLogResult } from "@/types/domain";
+import { melbourneDateKey } from "@/mocks/melbourne-time";
+import { TASK_LOG_PAGE_SIZE } from "@/types/domain";
+import type { Occurrence, TaskLogQuery, TaskLogResult } from "@/types/domain";
 
-function occurrencesFor(clientId: string): Occurrence[] {
-  return OCCURRENCES_BY_CLIENT_ID[clientId] ?? [];
+type OccurrencesByClient = Readonly<Record<string, readonly Occurrence[]>>;
+
+/**
+ * A client's rows. Own properties only, so a client id such as "constructor"
+ * or "__proto__" (it arrives from a URL) is simply an unknown client.
+ */
+function rowsFor(byClient: OccurrencesByClient, clientId: string): readonly Occurrence[] {
+  return Object.hasOwn(byClient, clientId) ? (byClient[clientId] ?? []) : [];
 }
 
-function isSameDay(isoA: string, isoB: string): boolean {
-  return isoA.slice(0, 10) === isoB.slice(0, 10);
+/** The instant an occurrence starts. An unparseable start sorts as the oldest possible. */
+function startInstant(occurrence: Occurrence): number {
+  const instant = Date.parse(occurrence.start);
+  return Number.isNaN(instant) ? Number.NEGATIVE_INFINITY : instant;
+}
+
+function byKeyAscending(a: Occurrence, b: Occurrence): number {
+  if (a.key === b.key) return 0;
+  return a.key < b.key ? -1 : 1;
+}
+
+/** Newest first by start instant (not by string); ties by key ascending. */
+function newestFirst(a: Occurrence, b: Occurrence): number {
+  const aStart = startInstant(a);
+  const bStart = startInstant(b);
+  if (aStart !== bStart) return aStart < bStart ? 1 : -1;
+  return byKeyAscending(a, b);
+}
+
+/** Oldest first by start instant; ties by key ascending. */
+function oldestFirst(a: Occurrence, b: Occurrence): number {
+  const aStart = startInstant(a);
+  const bStart = startInstant(b);
+  if (aStart !== bStart) return aStart < bStart ? -1 : 1;
+  return byKeyAscending(a, b);
+}
+
+/**
+ * The rows that start on the Melbourne calendar day of `referenceIso`, oldest
+ * first. Does not reorder the array it is given.
+ */
+export function occurrencesOnDay(
+  occurrences: readonly Occurrence[],
+  referenceIso: string,
+): Occurrence[] {
+  const day = melbourneDateKey(referenceIso);
+  return occurrences
+    .filter((occurrence) => melbourneDateKey(occurrence.start) === day)
+    .sort(oldestFirst);
 }
 
 export async function getTodayOccurrences(clientId: string): Promise<Occurrence[]> {
-  return occurrencesFor(clientId).filter((occurrence) =>
-    isSameDay(occurrence.start, REFERENCE_DATE),
-  );
+  return occurrencesOnDay(rowsFor(OCCURRENCES_BY_CLIENT_ID, clientId), REFERENCE_DATE);
 }
 
-export interface TaskLogQueryInput {
-  q?: string;
-  status?: OccurrenceStatus;
-  page?: number;
-}
+/**
+ * One page of a task log. `query` is already validated (`TaskLogQuerySchema`,
+ * done by the contract function): `page` is a positive integer. Filters first,
+ * then orders newest first, then slices; `total` is the count after filtering.
+ * Does not reorder the array it is given.
+ */
+export function queryTaskLog(
+  occurrences: readonly Occurrence[],
+  query: TaskLogQuery = {},
+): TaskLogResult {
+  const { q, status, page = 1 } = query;
+  const needle = q?.trim().toLowerCase();
 
-const DEFAULT_PAGE_SIZE = 20;
+  const matching = occurrences
+    .filter((occurrence) => {
+      const matchesStatus = !status || occurrence.status === status;
+      const matchesQuery = !needle || occurrence.title.toLowerCase().includes(needle);
+      return matchesStatus && matchesQuery;
+    })
+    .sort(newestFirst);
+
+  const offset = (page - 1) * TASK_LOG_PAGE_SIZE;
+  return {
+    items: matching.slice(offset, offset + TASK_LOG_PAGE_SIZE),
+    page,
+    pageSize: TASK_LOG_PAGE_SIZE,
+    total: matching.length,
+  };
+}
 
 export async function getTaskLog(
   clientId: string,
-  query: TaskLogQueryInput = {},
+  query: TaskLogQuery = {},
 ): Promise<TaskLogResult> {
-  const { q, status, page = 1 } = query;
-  const normalisedQuery = q?.trim().toLowerCase();
+  return queryTaskLog(rowsFor(OCCURRENCES_BY_CLIENT_ID, clientId), query);
+}
 
-  const filtered = occurrencesFor(clientId).filter((occurrence) => {
-    const matchesStatus = !status || occurrence.status === status;
-    const matchesQuery =
-      !normalisedQuery || occurrence.title.toLowerCase().includes(normalisedQuery);
-    return matchesStatus && matchesQuery;
-  });
+/**
+ * One occurrence of the given client's own rows, or `undefined`. Looks only
+ * inside `byClient[clientId]`, so another client's key can never match.
+ */
+export function findOccurrence(
+  byClient: OccurrencesByClient,
+  clientId: string,
+  key: string,
+): Occurrence | undefined {
+  return rowsFor(byClient, clientId).find((occurrence) => occurrence.key === key);
+}
 
-  const start = (page - 1) * DEFAULT_PAGE_SIZE;
-  const items = filtered.slice(start, start + DEFAULT_PAGE_SIZE);
-
-  return { items, page, pageSize: DEFAULT_PAGE_SIZE, total: filtered.length };
+export async function getOccurrence(
+  clientId: string,
+  key: string,
+): Promise<Occurrence | undefined> {
+  return findOccurrence(OCCURRENCES_BY_CLIENT_ID, clientId, key);
 }
 
 export interface SetOccurrenceDoneResult {

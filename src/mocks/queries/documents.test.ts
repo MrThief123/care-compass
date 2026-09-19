@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 
 import { selectEventDocuments } from "@/mocks/queries/documents";
 import { EventDocumentSchema } from "@/types/domain";
-
 import type { EventDocument } from "@/types/domain";
 
 function document(overrides: Partial<EventDocument>): EventDocument {

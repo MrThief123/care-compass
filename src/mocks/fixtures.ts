@@ -19,6 +19,7 @@ import type {
   CareEvent,
   Client,
   DocumentRef,
+  EventDocument,
   FundEntry,
   Occurrence,
   Organisation,
@@ -431,6 +432,9 @@ export const DOCUMENTS: DocumentRef[] = [
     uploadedBy: "Helen Doyle",
   },
 ];
+
+/** Documents attached to care events, read through `getEventDocuments` (UI-04). */
+export const EVENT_DOCUMENTS: EventDocument[] = [];
 
 // ---------------------------------------------------------------------------
 // Carer notifications

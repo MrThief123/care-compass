@@ -4,7 +4,6 @@ import { ZodError } from "zod";
 import { MARGARET_CLIENT_ID, REFERENCE_DATE } from "@/mocks/fixtures";
 import { getOccurrence, getTaskLog, getTodayOccurrences } from "@/server/events/queries";
 import { TASK_LOG_PAGE_SIZE } from "@/types/domain";
-
 import type { Occurrence, OccurrenceStatus, TaskLogQuery } from "@/types/domain";
 
 /**

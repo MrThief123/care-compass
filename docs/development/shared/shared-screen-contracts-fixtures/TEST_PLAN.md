@@ -13,17 +13,17 @@ Tests are written **before** production code (TESTING.md §2). Run them, confirm
 
 | Test ID | Covers | Level | Test description | Written first? | Result |
 |---|---|---|---|---|---|
-| T-01 | AC-01 | unit | Pure log query: newest first by instant across mixed offsets (`Z` and `+11:00`), ties by key ascending. | ☐ | NOT RUN |
-| T-02 | AC-01 | unit | Margaret's log read page by page equals the independently sorted fixture list; strictly ordered; no duplicate keys; stable across two reads. | ☐ | NOT RUN |
-| T-03 | AC-02 | unit | Synthetic logs of 0, 1, 20, 21 and 40 rows: items per page, `total`, `page`, `pageSize`; page beyond last is empty with the true total and requested page. | ☐ | NOT RUN |
+| T-01 | AC-01 | unit | Pure log query: newest first by instant across mixed offsets (`Z` and `+11:00`), ties by key ascending. | ☑ | PASS |
+| T-02 | AC-01 | unit | Margaret's log read page by page equals the independently sorted fixture list; strictly ordered; no duplicate keys; stable across two reads. | ☑ | PASS |
+| T-03 | AC-02 | unit | Synthetic logs of 0, 1, 20, 21 and 40 rows: items per page, `total`, `page`, `pageSize`; page beyond last is empty with the true total and requested page. | ☑ | PASS |
 | T-04 | AC-02 | unit | Margaret's log: 137 rows, pages 1 to 6 hold 20, page 7 holds 17, page 8 is empty with `total` 137. | ☐ | NOT RUN |
-| T-05 | AC-03 | unit | `page` 0, -1, 1.5, NaN, Infinity and `status` 'bogus' reject with a Zod error; omitted page is 1; `Number.MAX_SAFE_INTEGER` returns an empty page. | ☐ | NOT RUN |
-| T-06 | AC-04 | unit | `q` (case, trim, no match), `status`, and both together: `total` and pages describe the filtered set over the whole history. | ☐ | NOT RUN |
-| T-07 | AC-05 | unit | `getOccurrence` returns a done, an overdue and a planned (later than the reference time) occurrence, and an old history one. | ☐ | NOT RUN |
-| T-08 | AC-05 | unit | `getOccurrence` returns `undefined` for an unknown key, an unknown client, and another client's key in both directions. | ☐ | NOT RUN |
-| T-09 | AC-06 | unit | `getEventDocuments`: one document, several (oldest upload first), none. | ☐ | NOT RUN |
-| T-10 | AC-06 | unit | `getEventDocuments` with a mismatched client and event pair returns `[]` (no cross-client leakage). | ☐ | NOT RUN |
-| T-11 | AC-07 | unit | DATA_SOURCE=supabase: `getOccurrence` and `getEventDocuments` throw naming their domain and function. | ☐ | NOT RUN |
+| T-05 | AC-03 | unit | `page` 0, -1, 1.5, NaN, Infinity and `status` 'bogus' reject with a Zod error; omitted page is 1; `Number.MAX_SAFE_INTEGER` returns an empty page. | ☑ | PASS |
+| T-06 | AC-04 | unit | `q` (case, trim, no match), `status`, and both together: `total` and pages describe the filtered set over the whole history. | ☑ | PASS |
+| T-07 | AC-05 | unit | `getOccurrence` returns a done, an overdue and a planned (later than the reference time) occurrence, and an old history one. | ☑ | PASS |
+| T-08 | AC-05 | unit | `getOccurrence` returns `undefined` for an unknown key, an unknown client, and another client's key in both directions. | ☑ | PASS |
+| T-09 | AC-06 | unit | `getEventDocuments`: one document, several (oldest upload first), none. | ☑ | PASS |
+| T-10 | AC-06 | unit | `getEventDocuments` with a mismatched client and event pair returns `[]` (no cross-client leakage). | ☑ | PASS |
+| T-11 | AC-07 | unit | DATA_SOURCE=supabase: `getOccurrence` and `getEventDocuments` throw naming their domain and function. | ☑ | PASS |
 | T-12 | AC-08 | unit | Margaret's header summary: 78 years, 'Preston VIC', 'Banksia Home Care'. | ☐ | NOT RUN |
 | T-13 | AC-08 | unit | The Task log rows between 26 and 30 Nov 2026 are exactly the nine design rows with their statuses and nurses. | ☐ | NOT RUN |
 | T-14 | AC-08 | unit | Overdue filter returns exactly Weekly weigh-in and Medication review, no actor and no assignee. | ☐ | NOT RUN |
@@ -37,6 +37,8 @@ Tests are written **before** production code (TESTING.md §2). Run them, confirm
 | T-22 | AC-10 | unit | Every fixture record parses with its Zod schema; other clients and budgets unchanged. | ☐ | NOT RUN |
 
 Test titles must start with `[UI-04][AC-xx]`.
+
+Where the tests live: `src/mocks/queries/events.test.ts` (T-01, T-03, T-05 large page, T-06, T-07, T-08 pure logic over synthetic logs), `src/mocks/queries/documents.test.ts` (T-09, T-10 pure logic), `src/mocks/melbourne-time.test.ts` (day key, T-01 support), `src/server/events/queries.test.ts` and `src/server/documents/queries.test.ts` (contract rules that hold for any data set, T-02, T-05, T-06, T-08, T-10, T-11), `src/mocks/fixtures.test.ts` (fixture-specific T-04, T-12 to T-22, written in the fixtures phase).
 
 ## Regression scope
 

@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 
 import { findOccurrence, occurrencesOnDay, queryTaskLog } from "@/mocks/queries/events";
 import { TASK_LOG_PAGE_SIZE } from "@/types/domain";
-
 import type { Occurrence, OccurrenceStatus } from "@/types/domain";
 
 /**
