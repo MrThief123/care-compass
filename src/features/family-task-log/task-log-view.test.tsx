@@ -177,7 +177,10 @@ describe("[FAM-UI-07] TaskLogView", () => {
   it("[FAM-UI-07][PRD] clicking the task link does not also trigger the row's own navigation", async () => {
     const user = userEvent.setup();
     push.mockClear();
-    renderLog();
+    const { container } = renderLog();
+    // jsdom cannot navigate; cancel the link's default action so it does not log noise.
+    // (On the container, not the document: the link stops the click from bubbling that far.)
+    container.addEventListener("click", (event) => event.preventDefault(), { once: true });
 
     await user.click(screen.getAllByRole("link", { name: "Physiotherapy" })[0]!);
 
