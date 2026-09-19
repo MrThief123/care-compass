@@ -504,6 +504,42 @@ describe("[FAM-UI-07] TaskLogView: links keep the view (AC-08)", () => {
     expect(nurse).toHaveClass("truncate");
   });
 
+  it("[FAM-UI-07][PRD] lays the log out on fixed grid columns: every cell can shrink and the title clamps to two lines, so no long value can push into another column", async () => {
+    const page = await firstPage();
+    const long = page.items.find((item) => item.title.length > 100)!;
+    renderLog({ ...page, params: PLAIN });
+
+    const row = screen.getByRole("link", { name: long.title }).closest("tr")!;
+    expect(row).toHaveClass("grid");
+    for (const cell of within(row).getAllByRole("cell", { hidden: true })) {
+      expect(cell).toHaveClass("min-w-0");
+    }
+    expect(within(row).getByText(long.title)).toHaveClass("line-clamp-2");
+    expect(screen.getByRole("link", { name: long.title })).toHaveAttribute("title", long.title);
+  });
+
+  it("[FAM-UI-07][PRD] never lets the status pill outgrow its cell (max-w-full, a shrinking label, the full text on hover)", async () => {
+    const page = await firstPage();
+    const long = page.items.find((item) => item.actor && item.actor.length > 50)!;
+    renderLog({ ...page, params: PLAIN });
+
+    const row = screen.getByRole("link", { name: long.title }).closest("tr")!;
+    const pillText = `Done · ${long.actor!}`;
+    const pill = within(row).getByText(pillText);
+    expect(pill).toHaveClass("truncate");
+    expect(pill.parentElement).toHaveClass("max-w-full", "min-w-0");
+    expect(pill.parentElement!.parentElement).toHaveAttribute("title", pillText);
+  });
+
+  it("[FAM-UI-07][PRD] lets the search box and the Status select wrap onto two lines instead of squeezing each other on a narrow screen", () => {
+    renderLog({ items: makeHistory(3) });
+
+    const toolbar = searchBox().closest("form")!.parentElement!;
+    expect(toolbar).toHaveClass("flex-wrap");
+    expect(searchBox().closest("form")).toHaveClass("min-w-0", "flex-1");
+    expect(statusSelect().closest("[class*='w-[220px]']")).toHaveClass("max-w-full");
+  });
+
   it("[FAM-UI-07][PRD] has no axe violations with results and a pager, and with none", async () => {
     const view = renderLog({
       items: makeHistory(137).slice(20, 40),
