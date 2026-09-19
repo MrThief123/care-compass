@@ -167,7 +167,13 @@ beforeEach(() => {
 afterEach(() => {
   vi.useRealTimers();
   vi.resetAllMocks();
+  vi.restoreAllMocks();
 });
+
+/** The page logs a tagged line when the contract rejects; keep it out of the test output. */
+function captureErrorLog() {
+  return vi.spyOn(console, "error").mockImplementation(() => {});
+}
 
 async function renderHome() {
   const page = await FamilyHomePage({ params: Promise.resolve({ clientId: CLIENT_ID }) });
@@ -276,6 +282,7 @@ describe("[FAM-UI-01] Family Home", () => {
   ])(
     "[FAM-UI-01][AC-06] shows 'Something went wrong' with Retry when %s rejects",
     async (_contractFunction, rejectIt) => {
+      captureErrorLog();
       rejectIt();
       const user = userEvent.setup();
       await renderHome();
@@ -289,6 +296,19 @@ describe("[FAM-UI-01] Family Home", () => {
       expect(mocks.refresh).toHaveBeenCalledTimes(1);
     },
   );
+
+  it("[FAM-UI-01][AC-06] logs a feature-tagged line, without the error's message, when the contract rejects", async () => {
+    // ARCHITECTURE.md §12.5: log with a feature tag; never log PII or medical text.
+    const log = captureErrorLog();
+    mocks.getBudgetSummary.mockRejectedValue(new Error("no funding row for Margaret Doyle"));
+    await renderHome();
+
+    expect(log).toHaveBeenCalledTimes(1);
+    const logged = log.mock.calls[0]!.join(" ");
+    expect(logged).toContain("[family-home]");
+    expect(logged).not.toContain("Margaret");
+    expect(logged).not.toContain("no funding row");
+  });
 });
 
 describe("[FAM-UI-01] Family Home layout and navigation (PRD Scope, no AC)", () => {
@@ -426,6 +446,7 @@ describe("[FAM-UI-01] Family Home accessibility (REQ-N2)", () => {
   });
 
   it("[FAM-UI-01][Scope] error state has no axe violations", async () => {
+    captureErrorLog();
     mocks.getBudgetSummary.mockRejectedValue(new Error("x"));
     const { container } = await renderHome();
 
