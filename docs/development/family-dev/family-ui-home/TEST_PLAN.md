@@ -17,6 +17,17 @@ Tests are written **before** production code (TESTING.md §2). Run them, confirm
 | T-05 | AC-05 | component | Given no overdue fixtures, when rendered, then 'All caught up' is shown in the Overdue card. | ☑ | PASS |
 | T-06 | AC-06 | component | Given the contract query rejects, when rendered, then 'Something went wrong' with Retry is shown. | ☑ | PASS |
 
+### Volume and robustness tests (2026-09-20, all `[FAM-UI-01][PRD]` unless they carry an AC)
+| File | What it proves |
+|---|---|
+| `home-loader.test.ts` | Recent activity is the newest five for 500 done + 500 overdue, for planned rows newer than the whole history, for zero / one / exactly five, with ties by key and no duplicates; only `{ status: "done" }` and `{ status: "overdue" }` page one are ever asked for; the Overdue total is the contract's (40, or 500) and rows are capped; one rejected call rejects the load (AC-06). |
+| `today-layout.test.ts` | Pure layout: the design's day sits at the design's pixels, early and late events are reachable, events never overlap however crowded (32 and 100 occurrences), the hour scale stays in order, the current-time line follows it. |
+| `today-timeline.test.tsx` | Pill, assignee, duration at rest (AC-01), accessible names, "—" for no carer, 32 crowded occurrences with no "+N more", 120-character title and 60-character name truncate with `title`, non-ASCII text, axe. |
+| `activity-cards.test.tsx` | Overdue badge = total (3, 2, 40), "View all N overdue" only when rows are hidden, rows are links, two-line title and one-line name (102 and 51 characters from the mock data, 120 and 60), pill never squeezed, axe. |
+| `budget-strip.test.tsx` | $1,234,567.89 with cents, zero-dollar budget, over 100%, 0/1/3/8 buckets, duplicate kinds, 60-character names, status not by colour alone, axe. |
+| `home-format.test.ts` | Three-letter Melbourne dates ("Sep"), cent-accurate dollars. |
+| `responsive-layout.test.tsx` | The causes of a broken layout: stacking classes, `min-w-0` on every grid item, `title` on everything cut off, pills keep size, rows clipped, auto-fit budget grid. jsdom has no layout: the layout itself is the browser width sweep in PROGRESS.md. |
+
 ### Where the tests live and what else they cover
 - `src/features/family-home/family-home.test.tsx` renders the route's page (`await FamilyHomePage(...)` then `render`) with the `src/server/**` contract replaced by test-local fixtures that mirror the design (DECISIONS.md FD-08). T-01 to T-06 are the AC-01 to AC-06 tests. AC-06 also has a logging test and runs once per contract function (`getTodayOccurrences`, `getTaskLog`, `getBudgetSummary`).
 - `src/features/family-home/home-data.test.ts` covers the pure selectors behind AC-02 (oldest-first order) and AC-03 (aggregate budget line), plus the Recent activity selection.

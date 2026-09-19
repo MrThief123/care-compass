@@ -16,7 +16,10 @@ Record feature-level decisions here using the template below. Project-wide decis
 3. **"Recent activity" is defined here** (five latest done or overdue, newest first) because the PRD does not define it. FD-04.
 4. **Kit components differ from the design** in ways this feature cannot change. FD-09.
 5. **Local wrapper for a kit gap** (`RecentActivityRow`). FD-06.
-6. **The app's mock fixtures do not contain the design's Home data.** FD-08.
+6. **The app's mock fixtures did not contain the design's Home data.** FD-08. (Update 2026-09-20: UI-04 added the design week; on mock data the Overdue badge reads 2, by the human's decision, FD-19.)
+7. **Rework for real-world volumes (2026-09-20), design calls to review**: Today timeline stacks overlapping events and grows the page instead of scrolling (FD-14); Overdue card shows the five newest overdue, oldest first, with "View all N overdue" (FD-16); titles wrap to two lines and the carer name truncates on one (FD-15); hour labels use the secondary text token, not the design's pale teal, for contrast (FD-14); Budget tile writes an overspend as "over budget" and adds a status word for screen readers (FD-17); columns stack below 1280px (FD-18).
+8. **Test expectations changed** (register in FD-21): AC-01 test (hover card to at-rest link), the two chevron tests (button + `router.push` to link `href`), the contract-call assertion, the `answerTaskLog` helper.
+9. **PR order**: this branch contains UI-04's commits until UI-04 merges (FD-20).
 
 ## Feature decisions log
 
@@ -121,6 +124,83 @@ Record feature-level decisions here using the template below. Project-wide decis
 - `src/app/dev-preview-calendar-kit/` says (shared-calendar-kit FD-08) it should be deleted once a real screen renders the calendar kit against `src/server/**` data, naming "the Family Home calendar" as an expected trigger. This screen is the first to render `DayTimeline` that way, but the route also previews `WeekGrid` and `MonthGrid`, so its owner decides. Not touched here.
 - `src/app/(family)/family/[clientId]/layout.tsx`: no change was needed or made.
 - Human confirmation required: no.
+
+### FD-13 — Local formatters: three-letter dates and cent-accurate dollars (2026-09-20)
+- Date: 2026-09-20
+- Context: FD-09 item 7 ("Sept") and the requirement that a $1,234,567.89 amount reads correctly. `formatShortDate` (src/lib) writes September as "Sept"; `formatMoney` (src/lib) rounds to whole dollars, so `$1,234,567.89` reads `$1,234,568`. `src/lib` is not this lane's.
+- Decision: `src/features/family-home/home-format.ts`: `shortDate` (Melbourne time, weekday and month cut to three letters from a fixed month table) and `formatDollars` (whole cents, "$14,880" when there are no cents, "$1,234,567.89" when there are, "-$360", never "-$0"). Used by the caption, the cards, the budget line and the bucket tiles.
+- Kit request (shared PR): fix `formatShortDate` "Sept" and let `formatMoney` keep cents; then delete `home-format.ts`.
+- Human confirmation required: no (request recorded).
+
+### FD-14 — Today timeline: a local component that shows everything at rest, and stacks a crowded day (2026-09-20)
+- Date: 2026-09-20
+- Context: FD-09 items 1 to 3. The shared `DayTimeline` shows the status pill, assignee and duration only on a hover card at these heights (nothing for keyboard or touch), lays hour labels out differently from the design, and its scroller cuts the "18:00" label in half. The human's requirement: a real person will use the screen with whatever data builds up, so 30+ occurrences in a day (some overlapping) must not break it.
+- Decision: `today-layout.ts` (pure) and `today-timeline.tsx`. One full-width row per occurrence on the design's 44px-per-hour scale: title, assignee ("—" and "No carer assigned" for a screen reader when no shift covers it, PD-055), duration and status pill, all visible at rest; the whole row is a link to task detail (keyboard: Tab follows time order). Hours 07:00 to 18:00 by default, reaching earlier or later for early and late events, so nothing hides below a fold. A block is at least 36px tall. **Overlaps are stacked, not put side by side and not scrolled**: when two blocks would touch, the later one goes below the earlier one, full width, and the hours after it move down with it; on an ordinary day nothing is stretched and positions equal the design's. A 32-occurrence day makes the card about 1,300px tall and the page scrolls; there is no scroll box inside the card (nothing hidden, no scroll-in-scroll for keyboard users). The current-time line follows the stretched scale.
+- Design calls flagged for human review: (a) stacking and page growth, chosen over a fixed-height scroll box; (b) hour labels use `text-text-secondary` (dark on hours in which an event starts) instead of the design's pale teal, which is about 2.2:1 on white against REQ-N2's 4.5:1; (c) status is the pill's word and icon; the accent bar colour is only decoration.
+- Consequence: on a crowded day the Budget strip is a long way below the fold.
+- Human confirmation required: yes (a) and (b).
+- Test changes caused: `[FAM-UI-01][AC-01]` (see FD-21).
+
+### FD-15 — Card rows are links; long titles wrap to two lines, long names truncate (PD-038 call) (2026-09-20)
+- Date: 2026-09-20
+- Context: FD-01 (full names are wider than the design assumed), FD-06 (kit `ActivityRow` pill), FD-09 item 5 and 8 (rows are buttons calling `router.push`). The mock data has a 102-character title and a 51-character carer name; real data can have 120 and 60.
+- Decision (design call flagged for human review): `activity-link-row.tsx` replaces `recent-activity-row.tsx` and the kit's `AlertListCard` rows. The row is one `<a>` to task detail (open in new tab works; the accessible name holds title, date, status and carer). The title wraps to at most two lines and then ends in an ellipsis (`line-clamp-2`, full title in `title`). The status pill is never squeezed (`shrink-0`, capped at 55% of the row); a long carer name ends in an ellipsis inside it on one line, full "Done · name" in `title`. The Overdue card is built here from the kit's `CardShell`, `CountBadge` and `Icon` in the kit `AlertListCard`'s layout. Both cards are now server components (no router).
+- Kit request: let `ActivityRow` take an `href`, wrap the title and cap its pill; then delete the local row and card.
+- Human confirmation required: yes (the two-line title and one-line name rule).
+- Test changes caused: the two chevron tests (see FD-21).
+
+### FD-16 — Home reads any log size correctly; the Overdue card shows a count, a few rows and a link to all (2026-09-20)
+- Date: 2026-09-20
+- Context: the first Home read `getTaskLog(clientId)` page one and took the newest done or overdue rows from it. `getTaskLog` is newest first and 20 to a page (UI-04), so a client whose newest 20 rows are planned, or whose history is long, would get an empty or wrong Recent activity. FD-04's Overdue card also listed every row the page returned, so "40" could sit over a truncated list with no way to the rest. Supersedes FD-04's data composition.
+- Decision: `loadFamilyHomeData` asks the contract for `{ status: "done" }` and `{ status: "overdue" }` page one (never the unfiltered log, never planned). Recent activity is the newest five of the union (each list is newest first, so the top five of the union lies within the two top fives; the proof is in `home-data.ts`), each occurrence once, ties by key ascending like the contract. The Overdue card shows the contract's `total` (never the number of rows fetched) and the newest `OVERDUE_ROWS_SHOWN` (5) rows in date order, oldest first as the design draws them; when `total` exceeds the rows shown it offers "View all N overdue" to `/family/<id>/tasks?status=overdue`. A test pins `TASK_LOG_PAGE_SIZE` >= the rows taken from a page.
+- Design call flagged for human review: with more than five overdue the card lists the five most recent (in date order), not the five oldest. Fetching the oldest needs the last page (up to three calls); the count and "View all" keep the whole list one click away.
+- Human confirmation required: yes (which five).
+- Test changes caused: the contract-call assertion and the `answerTaskLog` helper (FD-21).
+
+### FD-17 — Budget tile: a local card for cents, long names, overspend and screen readers (2026-09-20)
+- Date: 2026-09-20
+- Context: FD-09 item 4 (upper-cased label) and volume cases: 0, 1, 3 and 8 buckets, $1,234,567.89, a zero-dollar budget, an over-100% bucket, 60-character names.
+- Decision: `budget-bucket-tile.tsx` in the kit `BudgetBucketCard`'s design with: the name as written (`normal-case`, two lines then an ellipsis, `title` holds it all), cents kept (FD-13), an amount too wide for its card wraps instead of losing digits, a status word for a screen reader beside the icon ("Budget warning", "Budget alert", "Budget exhausted"; the icon stays `aria-hidden`), "over budget" written out when `remaining` is negative and the remaining amount shown as "-$360" (the bar is capped at 100%), no division by zero anywhere. Cards flow into as many columns as fit (`auto-fit`, 15rem minimum: three side by side at the design's width, eight buckets make three rows). Keys are `index:kind:label`, because a client can hold several buckets of one kind. The aggregate line reads "$360 over budget of $3,000 · 112% used" when the sum is overspent.
+- Kit request: `BudgetBucketCard` to keep cents, stop upper-casing and give the icon a name; then delete the tile.
+- Human confirmation required: no (request recorded).
+
+### FD-18 — Breakpoints and stacking (2026-09-20, human addendum: nothing overlaps at any width)
+- Date: 2026-09-20
+- Context: the Task log sibling screen overlapped below about 1100px because one long value widened a column. Required: clean from 1920 to 1024, graceful (no overlap, no page scroll) to 768, information only at 640 and 375.
+- Decision (design call flagged for human review): the design's two columns (Today, 340px column) need about 1280px. From 1280px: as designed (`xl`). Below: one column in this order: Enter event, Today, Overdue, Recent activity, Budget; from 768px (`md`) Overdue and Recent activity sit side by side. Every grid item is `min-w-0`; the Today rows, card rows, pills, tiles and header lines are all cut with an ellipsis (full text in `title`) or wrap, never widen. The Budget cards use `auto-fit` columns. The shared header, rail and layout are not this feature's and were only observed in the sweep.
+- Verified in a real browser (PROGRESS.md, width sweep table).
+- Human confirmation required: yes (the 1280px breakpoint and the stacking order).
+
+### FD-19 — Human answers of 2026-09-20 (ANSWERED)
+- Date: 2026-09-20
+- UI-04 FD-04 (the Home design shows 3 overdue items, the Task log design shows 2; UI-04 chose 2). The human answered: "Doesn't matter". Applied: the fixtures and `src/mocks` are untouched; on mock data Home's Overdue badge reads 2; the badge always comes from the contract's `total`; AC-02's 3 is proven at component level with a three-item stub (`[FAM-UI-01][AC-02]` in `family-home.test.tsx` and `activity-cards.test.tsx`). AC-02's wording is not changed (see the note in ACCEPTANCE_CRITERIA.md).
+- UI-04 FD-05 (order of rows within a day). The human answered: "Based off time they were created in calendar". Read as: order strictly by the time the task holds on the calendar (its start instant). Nothing changes in the contract (newest first by start instant, ties by key). Home's Today panel is a day timeline and stays oldest first, as `getTodayOccurrences` returns it; the design's drawn within-day order is not followed.
+- Human confirmation required: no (answered).
+
+### FD-20 — Dependency on UI-04 and PR order (2026-09-20)
+- Date: 2026-09-20
+- Context: this branch merged `origin/feature/shared-screen-contracts-fixtures` (UI-04, commit 22f84e9): newest-first `getTaskLog` with filters and paging, Melbourne-day `getTodayOccurrences`, the design week and 137-row history in the mock fixtures.
+- Decision: PR order is UI-04 to `main`, then sync `main` into `family-dev`, then this PR. Until UI-04 merges, this branch's diff includes UI-04's commits.
+- Human confirmation required: no.
+
+### FD-21 — Register of existing tests whose expectation changed (2026-09-20)
+**HUMAN REVIEW: test expectation changed.** Nothing was skipped, `.only` or deleted; each row is a rewrite in `src/features/family-home/family-home.test.tsx`.
+| Test | Before | After | Reason |
+|---|---|---|---|
+| `[FAM-UI-01][AC-01]` Today panel shows Morning medication ... | Found each block as a `button`, read only its status word, hovered it and read the pill, assignee and "1 hr 30 min" from the hover card (`tooltip`). | Finds each block as a `link` and reads title, pill ("Done · Aisha Rahman", "Planned"), and duration ("1 hr", "1 hr 30 min") on the block itself; asserts no `tooltip` is needed. | FD-14: the local timeline shows everything at rest as the design does; the AC text is unchanged. |
+| `[FAM-UI-01][Scope] a Recent activity chevron opens that occurrence's task detail` (renamed "a Recent activity row is a link to ...") | Clicked a `button` and expected `router.push(url)`. | Expects a `link` with `href` = the encoded task-detail URL. | FD-15: rows are links (open in a new tab). Same URL is asserted. |
+| `[FAM-UI-01][Scope] an Overdue row chevron opens ...` (renamed "an Overdue row is a link to ...") | Same, for the Overdue row. | Same, `link` and `href`. | FD-15. |
+| `[FAM-UI-01][Scope] reads every panel through the contract for the route's client` | Expected `getTaskLog(CLIENT_ID)` (unfiltered) and `(CLIENT_ID, { status: "overdue" })`. | Expects `(CLIENT_ID, { status: "done" })` and `(CLIENT_ID, { status: "overdue" })`; the unfiltered call is gone. | FD-16: the unfiltered first page is wrong for a long or future-heavy log. |
+| helper `answerTaskLog` | Answered any non-overdue query with the whole test log. | Answers `status: "done"` with the done rows, as the contract does. | FD-16, keeps the fixture honest to the contract. No assertion changed. |
+New test files (not changes): `home-format.test.ts`, `today-layout.test.ts`, `today-timeline.test.tsx`, `home-loader.test.ts`, `activity-cards.test.tsx`, `budget-strip.test.tsx`, `responsive-layout.test.tsx`, `test-support.ts` (builders).
+
+### Updates to earlier entries (2026-09-20)
+- FD-01: the truncation consequence is now resolved by FD-15 (two-line titles, one-line names).
+- FD-04: data composition superseded by FD-16 (per-status page one; Overdue count and "View all").
+- FD-05 (Enter event link): **cannot be fixed locally beyond what exists.** The kit `Button` renders a `<button>` and does not export `buttonVariants`, so the local `<a>` cannot borrow its variants and repeats the primary button's classes. Needs a kit change (export `buttonVariants` or add an `href`/`asChild` form). Request stands.
+- FD-06: superseded by FD-15 (`RecentActivityRow` is replaced by `ActivityLinkRow`).
+- FD-08: fixtures now carry the design week (UI-04); the tests still use test-local fixtures and mocked contracts so they can build any volume.
+- FD-09 item by item: (1) fixed, FD-14. (2) hour labels left-aligned with full-width gridlines as designed; colour deliberately not the design's (FD-14b). (3) fixed, FD-14 (no scroller). (4) label case fixed, FD-17; the kit card's 114px against the design's 123px was not chased: the tile's height now depends on its content by design. (5) not changed: rows are 53px like the kit's (1px border) and now vary with wrapped titles. (6) unchanged: the card's height comes from its content. (7) fixed, FD-13. (8) fixed, FD-15.
 
 <!-- Template
 ### FD-01 — <title>

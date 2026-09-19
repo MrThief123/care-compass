@@ -12,3 +12,7 @@ Each criterion is observable and maps to at least one test in TEST_PLAN.md. Crit
 | AC-06 | US-01 | error | Given the contract query rejects, when rendered, then 'Something went wrong' with Retry is shown. | MET |
 
 Status values: NOT MET · MET (test passing) · BLOCKED (cite OQ/PD).
+
+## Notes (2026-09-20)
+- AC-02 is worded for the design's data (badge 3). On the mock fixtures (UI-04) the Overdue badge reads 2 (Medication review, Weekly weigh-in), by the human's decision ("Doesn't matter", DECISIONS.md FD-19). The badge always shows the contract's `total`; AC-02's 3 is proven at component level with a three-item stub. The AC text is not changed.
+- All six ACs also hold for real-world volumes (see TEST_PLAN.md): a log of 500+ occurrences, 30+ occurrences in one day, 40 overdue items, zero of everything, titles up to 120 characters, names up to 60, non-ASCII text, 0/1/3/8 buckets, $1,234,567.89, a zero-dollar budget and an over-100% bucket. These are tagged `[FAM-UI-01][PRD]`.
