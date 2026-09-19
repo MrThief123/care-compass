@@ -1,4 +1,7 @@
+// @vitest-environment node
 import { readFileSync } from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -21,7 +24,7 @@ import {
   STAFF_MEMBERS,
   TEMPORARY_CARERS,
 } from "@/mocks/fixtures";
-import { melbourneDateKey } from "@/mocks/melbourne-time";
+import { localToMelbourneIso, melbourneDateKey } from "@/mocks/melbourne-time";
 import { getClientHeaderSummary } from "@/server/clients/queries";
 import { getEventDocuments } from "@/server/documents/queries";
 import { getOccurrence, getTaskLog, getTodayOccurrences } from "@/server/events/queries";
@@ -48,6 +51,7 @@ import type { Occurrence, OccurrenceStatus, TaskLogQuery } from "@/types/domain"
  * screens use, except the integrity checks, which read the raw fixtures.
  */
 
+const mocksDir = path.dirname(fileURLToPath(import.meta.url));
 const ROBERT_CLIENT_ID = "client-robert";
 const MORNING_MEDICATION_KEY = "event-margaret-morning-meds:2026-11-30T09:00:00+11:00";
 
@@ -459,6 +463,18 @@ describe("[UI-04][AC-10] fixture integrity", () => {
     }
   });
 
+  it("[UI-04][AC-10] every written offset is the one Melbourne really has at that moment (daylight saving)", () => {
+    const stamps = [
+      ...CARE_EVENTS.map((event) => event.start),
+      ...allOccurrences().flatMap((row) => [row.start, row.completedAt ?? row.start]),
+      ...EVENT_DOCUMENTS.map((document) => document.uploadedAt),
+    ];
+
+    for (const stamp of stamps) {
+      expect(localToMelbourneIso(stamp.slice(0, 19))).toBe(stamp);
+    }
+  });
+
   it("[UI-04][AC-10] every document belongs to an existing event of its own client, with a unique id", () => {
     expect(new Set(EVENT_DOCUMENTS.map((document) => document.id)).size).toBe(
       EVENT_DOCUMENTS.length,
@@ -577,7 +593,7 @@ describe("[UI-04][AC-10] fixtures are deterministic", () => {
 
   it("[UI-04][AC-10] the fixture sources never read the clock or a random number", () => {
     for (const file of ["fixtures.ts", "history.ts", "melbourne-time.ts"]) {
-      const source = readFileSync(new URL(`./${file}`, import.meta.url), "utf8");
+      const source = readFileSync(path.join(mocksDir, file), "utf8");
 
       expect(source).not.toMatch(/Date\.now\s*\(|Math\.random\s*\(|new Date\(\s*\)/);
     }

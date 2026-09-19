@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { EVENT_DOCUMENTS, MARGARET_CLIENT_ID } from "@/mocks/fixtures";
