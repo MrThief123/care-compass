@@ -1,11 +1,11 @@
 # Progress — UI-02 Forms kit: fields, settings cards, side panels, chips, modal, event form
 
-Status: PR OPEN
+Status: MERGED TO DEV
 Owner: Dhruv Verma
 Lane: S — Shared kit
 Sprint: SPRINT · planned D3–D4
 Branch: `feature/shared-forms-kit` (created from `main` per OQ-01)
-PR target: `main` (per OQ-01 — shared work)
+PR target: `main` (per OQ-01 — shared work) — PR #41 merged 2026-09-19 (`b70b1d6`)
 Last updated: 2026-09-19
 
 ## Blockers
@@ -76,7 +76,7 @@ Two places where this build knowingly departs from the Edit event frame, both re
 No test expectation was changed after implementation began.
 
 ## Next action
-- PR open to `main`. Await review and merge by the human owner (CLAUDE.md §3 — Claude Code never merges).
+- None. UI-02 is merged to `main`. Downstream features (FAM-UI-03, FAM-UI-06, FAM-UI-07, CAR-UI-04, ADM-UI-02…ADM-UI-05, F0-07) may now start; the dashboard dev branches need `main` merged in before they pick the kit up.
 
 ## Ready for PR
-- Yes — approval given 2026-09-19; PR opened from `feature/shared-forms-kit` to `main`.
+- Merged. PR #41 opened 2026-09-19 with owner approval and merged the same day, with `commitlint`, `build` and `e2e` red by recorded decision (FD-07, FD-08).
