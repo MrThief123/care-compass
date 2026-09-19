@@ -1,12 +1,12 @@
 # Progress — FAM-UI-07 Family Task log and Task detail screens (UI)
 
-Status: NOT STARTED
-Owner: unclaimed
+Status: IN PROGRESS
+Owner: Dhruv Verma
 Lane: F — Family
 Sprint: SPRINT · planned D6–D7
-Branch: `feature/family-ui-task-log-detail` (not yet created)
+Branch: `feature/family-ui-task-log-detail` (created from `origin/family-dev`)
 PR target: `family-dev`
-Last updated: 2026-09-17 (planning pack generated)
+Last updated: 2026-09-19 (claimed)
 
 ## Blockers
 - None recorded at planning time
