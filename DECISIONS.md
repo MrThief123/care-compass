@@ -472,6 +472,15 @@ Docs updated: DECISIONS.md
 - Human confirmation: Dhruv Verma, 2026-09-17.
 - Docs updated: ARCHITECTURE.md §3.1, docs/AGENT_REFERENCE.md folder-ownership table, DECISIONS.md (this entry).
 
+### CHG-003 — commitlint `subject-case` conflicts with the project's feature-ID conventions
+- Date / requested by: 2026-09-19 / Dhruv Verma (human, project lead)
+- Type: architectural change (tooling/CI convention; no product behaviour change)
+- Description: CI's `commitlint` job rejects commit subjects that begin with a feature ID. The `subject-case` rule ("subject must not be sentence-case, start-case, pascal-case, upper-case") reads a leading `UI-02` as upper-case, so `feat(shared): UI-02 forms kit …` and `test(shared): UI-02 forms kit tests …` both fail, while `docs(shared-forms-kit): claim UI-02` passes because the ID is not leading. This sits against the project's own conventions, which put feature IDs at the front everywhere else: PR titles are `<ID> <Feature name>` (`docs/DEVELOPMENT_WORKFLOW.md` §8) and test titles start `[<ID>][AC-xx]` (CLAUDE.md §5). CLAUDE.md §8's commit examples (`feat(family): …`) neither require nor forbid a leading ID, so the convention is genuinely undefined for commit subjects.
+- Source / justification: found in CI on UI-02 (`feature/shared-forms-kit`, PR #41) — see FD-08 in `docs/development/shared/shared-forms-kit/DECISIONS.md`. The owner chose to merge UI-02 with `commitlint` red rather than rewrite pushed history (CLAUDE.md §3) or change another lane's config mid-feature.
+- Impact: needs a decision and a fix on **F0-03 (shared-ci-pipeline)** — either relax/configure `subject-case` to permit a leading feature ID, or state in CLAUDE.md §8 that commit subjects never lead with one and keep the rule as-is. Until then `commitlint` stays red wherever a subject leads with an ID. UI-02 merged with it red by decision; no AC, test or product behaviour is affected. Note `main` is independently red on `build` and `e2e` until F0-07 (see FD-07).
+- Human confirmation: Dhruv Verma, 2026-09-19.
+- Docs updated: DECISIONS.md (this entry). Pending on F0-03: `commitlint.config.mjs` and/or CLAUDE.md §8.
+
 Template for future entries:
 ```
 ### CHG-xxx — <title>
