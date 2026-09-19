@@ -1,14 +1,14 @@
 # Progress — FAM-UI-07 Family Task log and Task detail screens (UI)
 
-Status: IN PROGRESS (CHG-005 implemented and green; real-browser check, kit-gap pass and final verification remain)
+Status: IN PROGRESS (CHG-005 green and browser-checked by the reviewer; responsive Task log table (Task A) DONE, green and pushed; Tasks B to E remain)
 Owner: Dhruv Verma
 Lane: F — Family
 Sprint: SPRINT · planned D6–D7
 Branch: `feature/family-ui-task-log-detail` (created from `origin/family-dev`; merged `origin/feature/shared-screen-contracts-fixtures` = UI-04, see FD-14)
 PR target: `family-dev`
-Last updated: 2026-09-19
+Last updated: 2026-09-20
 
-**Not READY FOR PR.** Remaining before READY FOR PR: the real-browser check (SESSION_STATE.md, step 1), the FD-18 kit-gap pass, and re-running the verification below. PR order is fixed by FD-14: UI-04 to `main`, then `main` into `family-dev`, then this PR. Nothing has been opened or merged.
+**Not READY FOR PR.** The human's layout requirement (2026-09-20): "Things should fit into their tabs and if too big then should resize or get cutoff rather than overlap." Task A (Task log table) is done; Tasks B (Task detail and document tile), C (pager), D (visual polish and FD-18) and E (record answers, merge docs commit, final verification) remain: exact steps in SESSION_STATE.md. PR order is fixed by FD-14: UI-04 to `main`, then `main` into `family-dev`, then this PR. Nothing has been opened or merged.
 
 ## Blockers
 - None technical. The PR is sequenced behind UI-04 (FD-14).
@@ -18,6 +18,7 @@ Last updated: 2026-09-19
 - **HUMAN REVIEW: test expectation changed (FD-13):** 13 items with before, after and reason; client-side filter and sort tests, the `findOccurrence` tests and the Documents-empty test changed or were replaced. No test skipped, `.only`-ed or silently deleted.
 - **Design conflict (UI-04 FD-04):** Home's design shows 3 overdue, the Task log design 2; UI-04 chose 2. Human to confirm.
 - **Design gaps built from tokens (FD-08, PD-052)** and the pager, "No tasks to show", document tile type/size line: design owner to review.
+- **Design calls in FD-20 (Task A), please review:** the card layout below a 48rem-wide log (about a 920px window), its three lines and the middle-dot separator, long names and titles cut with an ellipsis (full text on hover and in the DOM) instead of shown whole, column headings visually hidden in card layout. Also the shared `DataTable` follow-up request (fixed widths, overflow handling, narrow layout) for Carer and Admin.
 - **Shared kit requests (FD-09, FD-18):** SearchField label prop, `DataTable` column widths, a 44px Clear-search target, vertical file tile, time/size formatters.
 - **Non-blocking OQs:** OQ-29 followed; OQ-31 and OQ-39 OPEN, defaults applied (OQ-31 is now the contract's newest-first order).
 
@@ -29,15 +30,17 @@ Last updated: 2026-09-19
 - Task log is the whole history, server-driven: `page.tsx` reads `searchParams`, `loadTaskLog` validates them (Zod), asks `getTaskLog(clientId, {q, status, page})` for that page, redirects a page past the last to the last page; `TaskLogView` shows rows in the contract's order, `TaskLogPager` ('Showing 21-40 of 137', Previous/Next, 7-slot page window, 44px classes), search (400 ms debounce, Enter, Clear) and Status update the URL via `router.replace` and reset the page; the box follows the URL; empty, no-results, loading and error states; live result count.
 - Task detail: `getOccurrence` (past or future, unknown or other-client key is 404), Documents card from `getEventDocuments` (tiles: name cut to two lines with the full name in `title`, type and size; empty state kept), 'Back to Task log' and task links carry the validated q/status/page.
 - Removed: `filterTaskLog`, `sortTaskLog`, `findOccurrence`, `design-fixtures.ts` and their tests.
-- Docs: AC statuses, TEST_PLAN, PRD Scope line (CHG-005), DECISIONS FD-13 to FD-19.
+- Docs: AC statuses, TEST_PLAN, PRD Scope line (CHG-005), DECISIONS FD-13 to FD-20.
+- Task A (2026-09-20, commits 77af56f red, 573c732 green): `src/features/family-task-log/task-log-table.tsx` replaces the shared `DataTable` in `TaskLogView`. Fixed grid tracks (DATE 7rem, TASK minmax(0,1fr), NURSE clamp(9rem,20%,14rem), STATUS clamp(12rem,26%,20rem), chevron 2.5rem), every cell `min-w-0`, title `line-clamp-2` + `overflow-wrap:anywhere` + `title`, nurse `truncate`, pill capped (`max-w-full`, label ellipsis, icon `shrink-0`, full text in `title` and DOM), a three-line card layout below a 48rem-wide log (container query `@3xl`), headings `sr-only` there, one DOM for both layouts, toolbar wraps. See FD-20.
 
 ## In progress
-- None (stopped at a context checkpoint).
+- None (stopped at a context checkpoint after Task A, at the reviewer's request).
 
-## Remaining
-1. Real-browser check at 1440x1024 (SESSION_STATE.md): pager, URL updates, Back button keeping context, deep links, invalid params, long-title and long-name rows on page 1, document tiles, console errors; then stop the dev server.
-2. FD-18: review the FD-09 item 5 visual differences and the 24px Clear-search button against the design PNGs; fix with local className overrides where safe, otherwise record the exact reason.
-3. Re-run the full verification below on the final commit; update this file; `END SESSION`.
+## Remaining (in this order; commit and push after each; details in SESSION_STATE.md)
+- **B. Task detail at narrow widths and the document tile**: tile minimum about 160px in a wrapping grid, name clamped to two lines with `title` and no mid-word break for normal names (`overflow-wrap:anywhere` only for a name with no spaces); one-line type and size; sweep the detail page (long assignee, Status card pill, description with 2,000 characters and an unbroken 300-character string, Back link) at 1920, 1440, 1280, 1024, 900, 768, 640, 375; tests first.
+- **C. Pager at narrow widths and at scale**: 25 and 250 pages (537 and 5,000 rows), windowed with ellipses, 44px targets, no overflow or overlap at 1024, 768, 640, 375; compact Previous / 'Page x of y' / Next under a recorded breakpoint if wrapping is not enough; tests first.
+- **D. Visual polish (capped)**: FD-18 differences via className overrides (search border, placeholder colour, focus ring, header colour and underline, row-separator inset, pill height, 4px label gap), the kit's 24px Clear-search button (44px rule), an accessible name for the search input (`SearchField` has no label prop: aria-label from our side, or state exactly why not); shared changes become recorded follow-ups. Design PNGs: `docs/design/screens/family-07-task-log.png`, `family-08-task-detail.png`.
+- **E. Record and finish**: (1) FD-21: FD-04 answered "Doesn't matter" (Task log's 2 overdue stays) and FD-05 answered "Based off time they were created in calendar" (read as strictly by calendar start time, the contract rule as built: newest first, ties by key ascending; AC-01 wording stands), both by the human on 2026-09-20; (2) the shared `DataTable` follow-up is already recorded in FD-20 (repeat it in the PR body); (3) merge `origin/feature/shared-screen-contracts-fixtures` once (docs-only commit 788cd6c) and keep the PR order note (FD-14); (4) update ACCEPTANCE_CRITERIA, TEST_PLAN, PROGRESS, SESSION_STATE, DECISIONS honestly; (5) final verification (below, plain `npx vitest run` included), `END SESSION`, report READY FOR PR.
 
 ## Acceptance criteria status
 - 8 / 8 MET at test level (AC-05 to AC-08 also await the real-browser check).
@@ -57,6 +60,27 @@ Last updated: 2026-09-19
 - Red first: commits 50f9fb5 (5 files failing to load) and a54fbc3 (6 files failing to load, 74 tests failing) before any implementation; green in 5f7c754 and ea21964. Details: TEST_PLAN.md.
 - The feature's folders: 17 files, 316 tests, all pass.
 
+## Task A evidence: width sweep of page 1 of Margaret's log (real Chromium against `next dev` on :3107, 2026-09-20)
+Page 1 holds the 102-character title and the 51-character carer name (Wed 25 Nov 16:30). Columns: layout | rows with text overlapping a neighbour | rows with the pill past the card edge | rows whose painted content is outside the card | page-level horizontal scroll | tallest row | pill height.
+
+| Window | Layout | Overlap | Pill past card | Content outside card | Page h-scroll | Tallest row | Pill h |
+|---|---|---|---|---|---|---|---|
+| 1920 | table | 0/20 | 0/20 | 0/20 | no | 50px | 26-28px |
+| 1440 | table | 0/20 | 0/20 | 0/20 | no | 50px | 26-28px |
+| 1280 | table | 0/20 | 0/20 | 0/20 | no | 50px | 26-28px |
+| 1024 | table | 0/20 | 0/20 | 0/20 | no | 50px | 26-28px |
+| 900 | cards | 0/20 | 0/20 | 0/20 | no | 101px | 26-28px |
+| 768 | cards | 0/20 | 0/20 | 0/20 | no | 101px | 26-28px |
+| 640 | cards | 0/20 | 0/20 | 0/20 | no | 101px | 26-28px |
+| 375 | cards | 0/20 | 0/20 | 0/20 | +57px | 101px | 26-28px |
+
+Before (reviewer, same page, old `DataTable`): 1440 0/0/no; 1100 1/0/no; 1024 18/0/no; 900 1/1/yes (110px); 768 18/1/yes (242px); 633 18/18/yes (377px); 375 18/20/yes (635px). No console errors. At 375 the page-level scroll (+57px) is the family layout's header (`PageHeader` date and user block, not this feature; `main` is exactly 287px wide and fits); phone views are parked (PL-17). Screenshots looked at: 1440 and 1024 (table, long title in two lines ending in an ellipsis, long name cut, pill icon full size) and 768 (cards, full names visible, dot separator). The icon in a cut pill shrank to a speck until `[&>svg]:shrink-0` (test added red first, then fixed).
+
+## Verification of Task A (commit 573c732, 2026-09-20)
+- `npx vitest run src` -> 74 files, 747 tests, all pass (was 73 / 730: `task-log-table.test.tsx` adds 14, `task-log-view.test.tsx` adds 3).
+- `npm run lint` -> 0 errors, 23 warnings (the same pre-existing ones). `npm run typecheck` -> clean. `npm run format:check` -> clean.
+- Plain `npx vitest run` not re-run this session yet (do it in Task E).
+
 ## Verification (final code of ea21964, 2026-09-19)
 - `npx vitest run src` → 73 files, 730 tests, all pass (UI-04's 414 baseline plus this feature).
 - `npx vitest run` (plain) → 77 files: 76 pass, 1 fails, 736 tests pass. The one failure is the known baseline `tests/integration/shared-supabase-environment.test.ts` (throws at import, no Supabase env vars).
@@ -65,19 +89,19 @@ Last updated: 2026-09-19
 - Not run: `supabase test db` (no schema change; Supabase CLI out of bounds), Playwright e2e (no e2e AC).
 
 ## Files changed
-- `src/features/family-task-log/`: `task-log-params.ts`, `pagination.ts`, `load-task-log.ts`, `task-log-pager.tsx`, `task-routes.ts`, `task-log-view.tsx` (+ tests, `fake-task-log.ts` test-support); deleted `task-log-query.ts`, `design-fixtures.ts`.
+- `src/features/family-task-log/`: `task-log-params.ts`, `pagination.ts`, `load-task-log.ts`, `task-log-pager.tsx`, `task-routes.ts`, `task-log-view.tsx`, `task-log-table.tsx` (+ tests, `fake-task-log.ts` test-support); deleted `task-log-query.ts`, `design-fixtures.ts`.
 - `src/features/family-task-detail/`: `document-format.ts`, `document-tile.tsx`, `back-to-task-log-link.tsx`, `task-detail-view.tsx` (+ tests); deleted `find-occurrence.ts`.
 - `src/app/(family)/family/[clientId]/tasks/`: `page.tsx`, `[occurrenceKey]/page.tsx` (+ tests).
 - `docs/development/family-dev/family-ui-task-log-detail/`: this feature's docs. The UI-04 merge brings `src/mocks`, `src/server`, `src/types` and its docs into the diff (not this feature's edits).
 
 ## Decisions
-- FD-01 to FD-19 in DECISIONS.md (FD-02, FD-03, FD-04 superseded by UI-04).
+- FD-01 to FD-20 in DECISIONS.md (FD-02, FD-03, FD-04 superseded by UI-04; FD-20 is the responsive Task log table).
 
 ## Assumptions
 - To run the pages locally: `NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321 NEXT_PUBLIC_SUPABASE_ANON_KEY=dummy SUPABASE_SERVICE_ROLE_KEY=dummy npx next dev -p 3107`, then open `/family/client-margaret/tasks?as=family`.
 
 ## Next action
-- Do the real-browser check and FD-18 pass (SESSION_STATE.md), then re-verify, then report READY FOR PR. Do not open the PR without approval (PD-056).
+- Task B (SESSION_STATE.md), tests first. Do not open the PR without approval (PD-056).
 
 ## Ready for PR
-- No — browser check and FD-18 pass outstanding; PR sequencing per FD-14.
+- No: Tasks B to E outstanding; PR sequencing per FD-14.
