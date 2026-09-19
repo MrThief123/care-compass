@@ -1,7 +1,7 @@
 # DEVELOPMENT PLAN — Care Compass
 
 Version 0.2 · 17 September 2026 · Status: DRAFT (controlled after planning freeze) · Supersedes v0.1 dashboard-by-dashboard phases
-Totals: **78 features** · **310 acceptance criteria** across 5 phases. Jira import: `docs/JIRA_BACKLOG.csv`.
+Totals: **79 features** · **320 acceptance criteria** across 5 phases (UI-04 and its 10 criteria added by CHG-004, 2026-09-19; the Jira import `docs/JIRA_BACKLOG.csv` predates it). Jira import: `docs/JIRA_BACKLOG.csv`.
 
 ---
 
@@ -112,6 +112,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 | 8 | UI-01 | Calendar kit: week/day/month grids, event blocks, date picker | S | D3 | SPRINT | F0-14, UI-00 | OQ-01 | `feature/shared-calendar-kit` | NOT STARTED |
 | 9 | UI-02 | Forms kit: fields, settings cards, side panels, chips, modal, event form | S | D3–D4 | SPRINT | F0-14, UI-00, UI-01 | OQ-01 | `feature/shared-forms-kit` | NOT STARTED |
 | 10 | UI-03 | Lists and cards kit: tables, rows, person/stat/budget/alert cards, client info view | S | D3 | SPRINT | F0-14, UI-00 | OQ-01 | `feature/shared-lists-cards-kit` | NOT STARTED |
+| 11 | UI-04 | Screen data contracts and fixtures: full-history Task log, single occurrence, event documents | S | D6 | SPRINT | UI-00 | OQ-01 | `feature/shared-screen-contracts-fixtures` | NOT STARTED |
 
 ### Phase 1 — Screens on fixtures (parallel: Family · Carer · Admin)
 
@@ -317,6 +318,17 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Testing summary:** 6 component
 - **Requirements:** REQ-17, REQ-19, REQ-27, REQ-10
 - **Docs:** `docs/development/shared/shared-lists-cards-kit/` · **Status:** NOT STARTED
+
+### UI-04 — Screen data contracts and fixtures: full-history Task log, single occurrence, event documents
+- **Dashboard / stream:** shared · **Lane:** S · **Days:** D6 · **Sprint:** SPRINT · **PR target:** `main (per OQ-01 — shared work)` · **Branch:** `feature/shared-screen-contracts-fixtures`
+- **Description:** Added by CHG-004. Extends the `events` contract (defined newest-first order, validated paging, `getOccurrence`), adds a `documents` read contract (`getEventDocuments`), and extends the mock fixtures with the design's data and a long deterministic history, so the Family screens work for whatever data builds up, not only for sample rows.
+- **User value:** A family member can search, filter and page the whole task history, open any task and see its documents.
+- **Dependencies:** UI-00 · **Blocking decisions:** OQ-01
+- **Jira summary:** getTaskLog ordering and paging, getOccurrence, getEventDocuments, design-matching and long-history fixtures
+- **Acceptance criteria summary:** 10 criteria — newest-first paging with an accurate total; a page beyond the last is empty; invalid page values are rejected; `getOccurrence` never leaks another client's row; documents are scoped to their client and event …
+- **Testing summary:** 22 unit
+- **Requirements:** REQ-19, REQ-N9
+- **Docs:** `docs/development/shared/shared-screen-contracts-fixtures/` · **Status:** NOT STARTED
 
 ## Phase 1 — Screens on fixtures (parallel: Family · Carer · Admin) — feature detail
 
