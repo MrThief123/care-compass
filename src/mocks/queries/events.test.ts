@@ -119,6 +119,19 @@ describe("[UI-04][AC-01] occurrencesOnDay", () => {
     expect(result.map((row) => row.key)).toEqual(["a", "c", "b"]);
   });
 
+  it("[UI-04][AC-01] reads the day in Melbourne time, whatever offset the start is written in", () => {
+    const rows = [
+      occurrence(0, { key: "late-utc", start: "2026-11-29T22:00:00Z" }),
+      occurrence(1, { key: "next-day-utc", start: "2026-11-30T13:30:00Z" }),
+      occurrence(2, { key: "local", start: "2026-11-30T12:00:00+11:00" }),
+    ];
+
+    const result = occurrencesOnDay(rows, "2026-11-30T09:00:00+11:00");
+
+    // 22:00Z on 29 Nov is 09:00 on 30 Nov; 13:30Z on 30 Nov is 00:30 on 1 Dec.
+    expect(result.map((row) => row.key)).toEqual(["late-utc", "local"]);
+  });
+
   it("[UI-04][AC-01] does not reorder the array it is given", () => {
     const rows = [
       occurrence(0, { key: "b", start: "2026-11-30T15:00:00+11:00" }),
