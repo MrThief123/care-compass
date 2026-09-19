@@ -24,6 +24,13 @@ const LINK = cn(CONTROL, "text-text-brand hover:bg-bg-inset hover:underline");
  * 'Showing 21-40 of 137', Previous / Next and a short window of page numbers
  * (CHG-005, AC-05). Real links, so Back/Forward, reload and sharing all work.
  * Renders nothing when everything fits on one page.
+ *
+ * A log of any length keeps a pager of one size (seven numbered slots: 27 pages
+ * or 250 pages read the same). The pager is a size container: while it is at
+ * least `@md` (28rem) wide the numbers, Previous and Next sit in a row that wraps
+ * if it must; below that the numbers give way to 'Page 125 of 250' between
+ * Previous and Next, so the three stay on one line and where you are stays
+ * visible (DECISIONS.md FD-22). Previous and Next never hide.
  */
 export function TaskLogPager({ clientId, params, total, pageSize }: TaskLogPagerProps) {
   const last = lastPageFor(total, pageSize);
@@ -36,38 +43,44 @@ export function TaskLogPager({ clientId, params, total, pageSize }: TaskLogPager
   return (
     <nav
       aria-label="Task log pages"
-      className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2"
+      className="@container flex flex-wrap items-center justify-between gap-x-6 gap-y-2"
     >
       <p className="text-body-small text-text-secondary">
         {from === to ? `Showing ${from} of ${total}` : `Showing ${from}-${to} of ${total}`}
       </p>
 
-      <div className="flex flex-wrap items-center gap-1">
+      <div className="flex w-full items-center gap-1 @md:w-auto @md:flex-wrap">
         {page > 1 && (
           <Link href={href(page - 1)} rel="prev" className={LINK}>
             Previous
           </Link>
         )}
 
-        {pageWindow(page, last).map((slot, index) =>
-          slot === "gap" ? (
-            <span key={`gap-${index}`} aria-hidden className="px-1 text-text-secondary">
-              …
-            </span>
-          ) : slot === page ? (
-            <span
-              key={slot}
-              aria-current="page"
-              className={cn(CONTROL, "bg-bg-inset text-text-primary")}
-            >
-              {slot}
-            </span>
-          ) : (
-            <Link key={slot} href={href(slot)} aria-label={`Page ${slot}`} className={LINK}>
-              {slot}
-            </Link>
-          ),
-        )}
+        <span className="min-w-0 flex-1 text-center text-body-small text-text-secondary @md:hidden">
+          {`Page ${page} of ${last}`}
+        </span>
+
+        <span className="hidden @md:contents">
+          {pageWindow(page, last).map((slot, index) =>
+            slot === "gap" ? (
+              <span key={`gap-${index}`} aria-hidden className="px-1 text-text-secondary">
+                …
+              </span>
+            ) : slot === page ? (
+              <span
+                key={slot}
+                aria-current="page"
+                className={cn(CONTROL, "bg-bg-inset text-text-primary")}
+              >
+                {slot}
+              </span>
+            ) : (
+              <Link key={slot} href={href(slot)} aria-label={`Page ${slot}`} className={LINK}>
+                {slot}
+              </Link>
+            ),
+          )}
+        </span>
 
         {page < last && (
           <Link href={href(page + 1)} rel="next" className={LINK}>
