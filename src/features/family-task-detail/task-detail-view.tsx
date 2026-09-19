@@ -4,6 +4,7 @@ import { StatusPill } from "@/components/shared/status-pill";
 import { CardShell } from "@/components/ui/card-shell";
 import { formatTimeOfDay } from "@/features/family-task-log/melbourne-time";
 import { occurrenceNurse } from "@/features/family-task-log/occurrence-display";
+import { statusPillClassName } from "@/features/family-task-log/status-pill-class";
 import type { TaskLogParams } from "@/features/family-task-log/task-log-params";
 import { editEventHref } from "@/features/family-task-log/task-routes";
 import { formatLongDate } from "@/lib/format/date";
@@ -62,7 +63,7 @@ export function TaskDetailView({
             <StatusPill
               status={occurrence.status}
               actorName={nurse}
-              className="min-w-0 [&>svg]:shrink-0"
+              className={statusPillClassName(occurrence.status)}
             />
           </span>
           {completedAt && (

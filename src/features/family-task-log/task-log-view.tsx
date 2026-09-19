@@ -18,6 +18,21 @@ import { taskDetailHref, taskLogHref } from "./task-routes";
 /** How long typing must pause before the search is put in the URL. */
 export const SEARCH_DEBOUNCE_MS = 400;
 
+/**
+ * Local overrides for the kit `SearchField`, reached through its root `className` because the kit
+ * is not lane F's to edit (DECISIONS.md FD-23): the design's brand-teal border (the Status select
+ * has it, the kit search box has a light one), and a 44px by 44px Clear search target. The kit
+ * draws that button 24px; its `::after` grows the hit area by 10px on every side while the circle
+ * stays as designed.
+ */
+const SEARCH_FIELD_TONE = [
+  "[&>div:first-child]:border-border-brand",
+  "[&_button]:relative",
+  "[&_button]:after:absolute",
+  "[&_button]:after:-inset-2.5",
+  "[&_button]:after:content-['']",
+].join(" ");
+
 export interface TaskLogViewProps {
   clientId: string;
   /** This page's rows, in the order the contract returned them (newest first). Never re-sorted. */
@@ -129,10 +144,11 @@ export function TaskLogView({ clientId, items, total, pageSize, params }: TaskLo
             loading={isPending}
             placeholder="Search tasks"
             noResultsFor={total === 0 && params.q ? params.q : undefined}
+            className={SEARCH_FIELD_TONE}
           />
         </form>
         <Field
-          className="w-[220px] max-w-full shrink-0"
+          className="w-[220px] max-w-full shrink-0 gap-2"
           label="Status"
           type="select"
           value={status}

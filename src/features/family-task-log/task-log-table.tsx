@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import type { Occurrence } from "@/types/domain";
 
 import { occurrenceNurse } from "./occurrence-display";
+import { statusPillClassName } from "./status-pill-class";
 import { taskDetailHref } from "./task-routes";
 
 import type { TaskLogParams } from "./task-log-params";
@@ -63,7 +64,7 @@ export function TaskLogTable({ clientId, items, params, onOpen }: TaskLogTablePr
       <table role="table" className="block w-full text-left">
         {/* Below the breakpoint the headings are visually hidden but stay in the accessibility tree. */}
         <thead role="rowgroup" className="sr-only @3xl:not-sr-only @3xl:block">
-          <tr role="row" className={cn(ROW_GRID, "border-b border-border-default @3xl:py-2")}>
+          <tr role="row" className={cn(ROW_GRID, "@3xl:py-2")}>
             <th role="columnheader" scope="col" className={cn(HEAD_CELL, "[grid-area:date]")}>
               Date
             </th>
@@ -150,7 +151,7 @@ export function TaskLogTable({ clientId, items, params, onOpen }: TaskLogTablePr
                     <StatusPill
                       status={occurrence.status}
                       actorName={nurse}
-                      className="min-w-0 [&>svg]:shrink-0"
+                      className={statusPillClassName(occurrence.status)}
                     />
                   </span>
                 </td>
