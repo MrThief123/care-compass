@@ -37,13 +37,16 @@ export function TaskDetailView({
 }: TaskDetailViewProps) {
   const nurse = occurrenceNurse(occurrence);
   const completedAt = occurrence.status === "done" ? occurrence.completedAt : undefined;
+  const pillText = occurrence.status === "done" ? `Done · ${nurse}` : undefined;
 
   return (
     <div className="flex flex-col gap-4 px-6 pb-6 pt-2">
       <div className="flex flex-col">
         <BackToTaskLogLink clientId={clientId} view={backParams} />
-        <h1 className="mt-1 break-words text-title-page text-text-primary">{occurrence.title}</h1>
-        <p className="mt-0.5 text-body-small text-text-secondary">
+        <h1 className="mt-1 text-title-page text-text-primary [overflow-wrap:anywhere]">
+          {occurrence.title}
+        </h1>
+        <p className="mt-0.5 text-body-small text-text-secondary [overflow-wrap:anywhere]">
           {`${formatLongDate(occurrence.start)} · Assigned to ${nurse}`}
         </p>
       </div>
@@ -53,7 +56,15 @@ export function TaskDetailView({
           Status
         </h2>
         <div className="flex flex-wrap items-center gap-3">
-          <StatusPill status={occurrence.status} actorName={nurse} />
+          {/* The pill may shrink below its text; its label then ends in an ellipsis and the
+              whole text stays in the DOM and in the title (FD-21). */}
+          <span title={pillText} className="flex min-w-0 max-w-full">
+            <StatusPill
+              status={occurrence.status}
+              actorName={nurse}
+              className="min-w-0 [&>svg]:shrink-0"
+            />
+          </span>
           {completedAt && (
             <p className="text-body-small text-text-secondary">
               {`Completed at ${formatTimeOfDay(completedAt)}`}
@@ -74,7 +85,7 @@ export function TaskDetailView({
             Edit
           </Link>
         </div>
-        <p className="whitespace-pre-line break-words text-body-default text-text-primary">
+        <p className="whitespace-pre-line text-body-default text-text-primary [overflow-wrap:anywhere]">
           {occurrence.description}
         </p>
       </CardShell>
@@ -84,9 +95,9 @@ export function TaskDetailView({
           Documents
         </h2>
         {documents.length > 0 ? (
-          <ul className="flex flex-wrap gap-3">
+          <ul className="grid grid-cols-[repeat(auto-fill,minmax(min(10rem,100%),12rem))] gap-3">
             {documents.map((document) => (
-              <li key={document.id}>
+              <li key={document.id} className="min-w-0">
                 <DocumentTile document={document} />
               </li>
             ))}
