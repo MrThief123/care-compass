@@ -69,11 +69,12 @@ export function TaskLogView({ clientId, items }: TaskLogViewProps) {
       render: (occurrence) => (
         // A real link gives keyboard and screen-reader users the row's action; the
         // row's own click handler serves the pointer. Stop the click here so it
-        // does not navigate twice. `-my-2 min-h-11` gives a 44px target inside the 50px row.
+        // does not navigate twice. `-my-2 min-h-11` gives a 44px target inside the 50px row;
+        // `w-fit` keeps the link (and its focus ring) to the text, not the whole column.
         <Link
           href={taskDetailHref(clientId, occurrence.key)}
           onClick={(event) => event.stopPropagation()}
-          className="-my-2 flex min-h-11 items-center break-words hover:underline"
+          className="-my-2 flex min-h-11 w-fit max-w-full items-center break-words hover:underline"
         >
           {occurrence.title}
         </Link>
@@ -82,9 +83,16 @@ export function TaskLogView({ clientId, items }: TaskLogViewProps) {
     {
       key: "nurse",
       header: "Nurse",
-      render: (occurrence) => (
-        <span className="text-text-secondary">{occurrenceNurse(occurrence)}</span>
-      ),
+      render: (occurrence) => {
+        // One line, so the wide TASK column cannot squeeze a name onto two lines and
+        // grow the row past 50px; a very long name truncates, its full text on hover.
+        const nurse = occurrenceNurse(occurrence);
+        return (
+          <span title={nurse} className="block max-w-48 truncate text-text-secondary">
+            {nurse}
+          </span>
+        );
+      },
     },
     {
       key: "status",

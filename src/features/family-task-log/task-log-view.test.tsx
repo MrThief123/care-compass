@@ -205,6 +205,23 @@ describe("[FAM-UI-07] TaskLogView", () => {
     expect(screen.queryByRole("table")).not.toBeInTheDocument();
   });
 
+  it("[FAM-UI-07][PRD] sizes the task link to its text, so its focus ring does not span the whole column", () => {
+    renderLog();
+
+    expect(within(dataRows()[0]!).getByRole("link", { name: "Morning medication" })).toHaveClass(
+      "w-fit",
+    );
+  });
+
+  it("[FAM-UI-07][PRD] keeps a nurse name on one line, so every row stays 50px, and exposes the full name on hover", () => {
+    renderLog();
+
+    const nurse = within(dataRows()[0]!).getByText("Aisha Rahman", { selector: "span" });
+
+    expect(nurse).toHaveClass("truncate");
+    expect(nurse).toHaveAttribute("title", "Aisha Rahman");
+  });
+
   it("[FAM-UI-07][PRD] renders a very long task title in full rather than dropping text", () => {
     const longTitle = `Medication ${"administration and observation ".repeat(8).trim()}`;
     renderLog([{ ...DESIGN_TASK_LOG[0]!, title: longTitle }]);
