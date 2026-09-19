@@ -146,11 +146,16 @@ const BUDGET: BudgetBucketSummary[] = [
   },
 ];
 
-/** Answers `getTaskLog` the way the contract does: filtered by `query.status`. */
+/**
+ * Answers `getTaskLog` the way the contract does: filtered by `query.status`
+ * (the overdue list is `overdue`, the done list is the done rows of `everything`).
+ */
 function answerTaskLog(overdue: Occurrence[], everything: Occurrence[]) {
-  mocks.getTaskLog.mockImplementation(async (_clientId: string, query?: { status?: string }) =>
-    query?.status === "overdue" ? taskLog(overdue) : taskLog(everything),
-  );
+  mocks.getTaskLog.mockImplementation(async (_clientId: string, query?: { status?: string }) => {
+    if (query?.status === "overdue") return taskLog(overdue);
+    if (query?.status === "done") return taskLog(everything.filter((row) => row.status === "done"));
+    return taskLog(everything);
+  });
 }
 
 beforeEach(() => {
@@ -307,7 +312,7 @@ describe("[FAM-UI-01] Family Home layout and navigation (PRD Scope, no AC)", () 
 
     expect(mocks.getTodayOccurrences).toHaveBeenCalledWith(CLIENT_ID);
     expect(mocks.getTaskLog).toHaveBeenCalledWith(CLIENT_ID, { status: "overdue" });
-    expect(mocks.getTaskLog).toHaveBeenCalledWith(CLIENT_ID);
+    expect(mocks.getTaskLog).toHaveBeenCalledWith(CLIENT_ID, { status: "done" });
     expect(mocks.getBudgetSummary).toHaveBeenCalledWith(CLIENT_ID);
   });
 
@@ -363,27 +368,23 @@ describe("[FAM-UI-01] Family Home layout and navigation (PRD Scope, no AC)", () 
     expect(within(recent).queryByText("Afternoon check-in")).not.toBeInTheDocument();
   });
 
-  it("[FAM-UI-01][Scope] a Recent activity chevron opens that occurrence's task detail", async () => {
-    const user = userEvent.setup();
+  it("[FAM-UI-01][Scope] a Recent activity row is a link to that occurrence's task detail", async () => {
     await renderHome();
     const recent = screen.getByRole("region", { name: "Recent activity" });
 
-    await user.click(within(recent).getByRole("button", { name: /Evening medication/ }));
-
     // The key holds ':' and '+', so it is encoded into the /tasks/[occurrenceKey] segment.
-    expect(mocks.push).toHaveBeenCalledWith(
+    expect(within(recent).getByRole("link", { name: /Evening medication/ })).toHaveAttribute(
+      "href",
       `/family/client-margaret/tasks/${encodeURIComponent(EVENING_MEDS.key)}`,
     );
   });
 
-  it("[FAM-UI-01][Scope] an Overdue row chevron opens that occurrence's task detail", async () => {
-    const user = userEvent.setup();
+  it("[FAM-UI-01][Scope] an Overdue row is a link to that occurrence's task detail", async () => {
     await renderHome();
     const overdue = screen.getByRole("region", { name: "Overdue" });
 
-    await user.click(within(overdue).getByRole("button", { name: /Wound dressing check/ }));
-
-    expect(mocks.push).toHaveBeenCalledWith(
+    expect(within(overdue).getByRole("link", { name: /Wound dressing check/ })).toHaveAttribute(
+      "href",
       `/family/client-margaret/tasks/${encodeURIComponent(WOUND_DRESSING.key)}`,
     );
   });

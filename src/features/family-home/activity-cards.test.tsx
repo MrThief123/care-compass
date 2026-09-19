@@ -1,6 +1,6 @@
 import { render, screen, within } from "@testing-library/react";
 import { axe } from "jest-axe";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 
 import type { Occurrence } from "@/types/domain";
 
@@ -16,9 +16,6 @@ import {
   occurrence,
   overdueNewestFirst,
 } from "./test-support";
-
-// RED-RUN ONLY: the cards' rows are router buttons today. Removed with the implementation, when rows are links.
-vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn(), refresh: vi.fn() }) }));
 
 /** The 102-character title and 51-character carer name in the mock data (UI-04 FD-08). */
 const MOCK_TITLE =

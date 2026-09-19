@@ -13,7 +13,6 @@
  * Pure, so the arithmetic is tested without rendering anything.
  */
 import { melbourneMinutesOfDay } from "@/components/shared/calendar/melbourne-time";
-
 import type { Occurrence } from "@/types/domain";
 
 /** Height of one hour on an unstretched scale (the design's 44px rows). */

@@ -1,6 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import type { Occurrence, OccurrenceStatus, TaskLogQuery, TaskLogResult } from "@/types/domain";
+import {
+  TASK_LOG_PAGE_SIZE,
+  type Occurrence,
+  type OccurrenceStatus,
+  type TaskLogQuery,
+  type TaskLogResult,
+} from "@/types/domain";
 
 import { OVERDUE_ROWS_SHOWN, RECENT_ACTIVITY_LIMIT, loadFamilyHomeData } from "./home-data";
 import { CLIENT_ID, melbourne, occurrence } from "./test-support";
@@ -196,6 +202,14 @@ describe("[FAM-UI-01][PRD] Recent activity is right for any length of history", 
     const { recent } = await loadFamilyHomeData(CLIENT_ID);
 
     expect(recent).toEqual([shared]);
+  });
+});
+
+describe("[FAM-UI-01][PRD] page one of each status is enough", () => {
+  it("[FAM-UI-01][PRD] the contract's page holds at least the rows the screen takes from it", () => {
+    // Recent activity and the Overdue card each read only page one of a status list.
+    expect(TASK_LOG_PAGE_SIZE).toBeGreaterThanOrEqual(RECENT_ACTIVITY_LIMIT);
+    expect(TASK_LOG_PAGE_SIZE).toBeGreaterThanOrEqual(OVERDUE_ROWS_SHOWN);
   });
 });
 

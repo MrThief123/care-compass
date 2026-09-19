@@ -1,15 +1,12 @@
-"use client";
-
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 
 import { EmptyState } from "@/components/shared/states";
 import { CardShell } from "@/components/ui/card-shell";
-import { formatShortDate } from "@/lib/format/date";
 import type { Occurrence } from "@/types/domain";
 
+import { ActivityLinkRow } from "./activity-link-row";
+import { shortDate } from "./home-format";
 import { homeRoutes } from "./home-routes";
-import { RecentActivityRow } from "./recent-activity-row";
 
 export interface RecentActivityCardProps {
   clientId: string;
@@ -19,8 +16,6 @@ export interface RecentActivityCardProps {
 
 /** Recent activity: the latest done and overdue occurrences, each opening its task detail. */
 export function RecentActivityCard({ clientId, occurrences }: RecentActivityCardProps) {
-  const router = useRouter();
-
   return (
     <section aria-labelledby="family-home-recent-activity">
       <CardShell className="flex flex-col gap-2">
@@ -45,13 +40,13 @@ export function RecentActivityCard({ clientId, occurrences }: RecentActivityCard
           <ul>
             {occurrences.map((occurrence) => (
               <li key={occurrence.key}>
-                <RecentActivityRow
+                <ActivityLinkRow
+                  href={homeRoutes.taskDetail(clientId, occurrence.key)}
                   title={occurrence.title}
-                  date={formatShortDate(occurrence.start)}
+                  date={shortDate(occurrence.start)}
                   status={occurrence.status}
                   // REQ-19: a Done pill always names who did it.
                   actorName={occurrence.actor ?? "—"}
-                  onClick={() => router.push(homeRoutes.taskDetail(clientId, occurrence.key))}
                 />
               </li>
             ))}
