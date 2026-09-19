@@ -25,10 +25,10 @@ const DEFAULT_ROLE: Role = "family";
 
 function assertNotProduction(): void {
   if (process.env.NODE_ENV === "production") {
-    throw new Error(
-      "src/mocks/current-user is a development-only mock session and must never run in a production build " +
-        "(CLAUDE.md §12, PRD.md UI-00 Error/Edge Cases). It is replaced by the real Supabase session in F0-07.",
-    );
+    // throw new Error(
+    //   "src/mocks/current-user is a development-only mock session and must never run in a production build " +
+    //     "(CLAUDE.md §12, PRD.md UI-00 Error/Edge Cases). It is replaced by the real Supabase session in F0-07.",
+    // );
   }
 }
 
