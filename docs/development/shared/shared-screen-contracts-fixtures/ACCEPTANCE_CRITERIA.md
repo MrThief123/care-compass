@@ -4,7 +4,7 @@ Each criterion is observable and maps to at least one test in TEST_PLAN.md. Crit
 
 | ID | Story | Type | Criterion (Given / When / Then) | Status |
 |---|---|---|---|---|
-| AC-01 | US-01 | happy | Given Margaret's occurrences, when `getTaskLog` is read page by page, then rows are newest first by `start` instant (instants, not strings), ties broken by `key` ascending; the pages concatenate into one strictly ordered list with no gaps or duplicates; two reads return the same order. | NOT MET |
+| AC-01 | US-01 | happy | Given Margaret's occurrences, when `getTaskLog` is read page by page, then rows are newest first by `start` instant (instants, not strings), ties broken by `key` ascending; the pages concatenate into one strictly ordered list with no gaps or duplicates; two reads return the same order; `getTodayOccurrences` returns the reference day's rows oldest first. | NOT MET |
 | AC-02 | US-01 | edge | Given page size 20, when the (filtered) log has 0, 1, exactly 20, 21 or 40 rows, or a page beyond the last is requested, then `items`, `page`, `pageSize` (20) and `total` are correct and nothing throws; a page beyond the last returns `items: []`, the true `total` and the requested `page`. | NOT MET |
 | AC-03 | US-01 | validation | Given `page` of 0, -1, 1.5, NaN or Infinity, or `status` of 'bogus', when `getTaskLog` is called, then it rejects with a Zod validation error; an omitted page means 1; a very large valid page returns an empty page. | NOT MET |
 | AC-04 | US-01 | happy | Given `q` and/or `status`, when applied, then `total` counts only rows matching both across the whole history (`q`: trimmed, case-insensitive substring of the title; `status`: exact) and pages are pages of the filtered set; a `q` with no match gives `total` 0. | NOT MET |

@@ -18,7 +18,7 @@ Last updated: 2026-09-19
 - Branch claimed; feature docs and plan card drafted.
 
 ## In progress
-- Tests first for the contract work (items 1 to 3), then implementation.
+- Contract phase (items 1 to 3): tests written and confirmed red; implementation next.
 
 ## Remaining
 - Contract: `getTaskLog` ordering and validation, `getOccurrence`, `getEventDocuments`.
@@ -29,11 +29,11 @@ Last updated: 2026-09-19
 - 0 / 10 MET
 
 ## Tests
-- Written: 0 / 22
-- Passing: 0
-- Failing: 0
-- Last run: not yet
-- Tests-first evidence: pending
+- Written: contract-phase tests only (T-01 to T-11 in TEST_PLAN.md; fixture-phase T-12 to T-22 come with item 4)
+- Passing: 8 of 58 (data-independent checks that hold on the old code)
+- Failing: 50 of 58, for the expected reasons
+- Last run: `npx vitest run src/mocks/queries src/server` → 4 files failed, 50 tests failed, 8 passed (58)
+- Tests-first evidence (contract phase, red before implementation): `queryTaskLog`, `occurrencesOnDay`, `findOccurrence` and `getOccurrence` are not functions; `TASK_LOG_PAGE_SIZE` is undefined; `getTaskLog` resolves for page 0, -1, 1.5, NaN, Infinity and status 'bogus' instead of rejecting; the old order is fixture order (first assertion: 1795989600000 >= 1795996800000 fails); object-prototype client ids throw `occurrencesFor(...).filter is not a function`; `@/mocks/queries/documents` and `@/server/documents/queries` do not resolve. Commit: the `test(server)` commit that follows the claim.
 
 ## Files changed
 - Docs only so far.
