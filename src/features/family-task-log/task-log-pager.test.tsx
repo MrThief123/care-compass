@@ -82,6 +82,12 @@ describe("TaskLogPager (CHG-005)", () => {
     expect(within(nav()).getAllByText("…")).toHaveLength(2);
   });
 
+  it("[FAM-UI-07][AC-05] a last page holding one row says 'Showing 21 of 21', not a one-number range", () => {
+    renderPager(2, 21);
+
+    expect(within(nav()).getByText("Showing 21 of 21")).toBeInTheDocument();
+  });
+
   it("[FAM-UI-07][AC-05] the last page of 537 shows the 17 remaining rows in its summary", () => {
     renderPager(27, 537);
 
