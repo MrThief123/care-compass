@@ -540,6 +540,37 @@ describe("[FAM-UI-07] TaskLogView: links keep the view (AC-08)", () => {
     expect(statusSelect().closest("[class*='w-[220px]']")).toHaveClass("max-w-full");
   });
 
+  it("[FAM-UI-07][PRD] draws the search box with the brand-teal border the design has, like the Status select", () => {
+    renderLog({ items: makeHistory(3) });
+
+    const field = searchBox().closest("form")!.firstElementChild!;
+    expect(field).toHaveClass("[&>div:first-child]:border-border-brand");
+  });
+
+  it("[FAM-UI-07][PRD] gives the Clear search button a 44px by 44px target (WCAG 2.5.8 and the 44px rule) although the kit draws it 24px", async () => {
+    const user = userEvent.setup();
+    renderLog({ items: makeHistory(3) });
+    await user.type(searchBox(), "zo");
+
+    const clear = screen.getByRole("button", { name: "Clear search" });
+    // The 24px circle stays as designed; its ::after grows the hit area by 10px on every side.
+    const field = searchBox().closest("form")!.firstElementChild!;
+    expect(field).toHaveClass(
+      "[&_button]:relative",
+      "[&_button]:after:absolute",
+      "[&_button]:after:-inset-2.5",
+    );
+    expect(field).toContainElement(clear);
+  });
+
+  it("[FAM-UI-07][PRD] puts 8px, not the kit's 4px, between the 'Status' label and its select, as the design does", () => {
+    renderLog({ items: makeHistory(3) });
+
+    const field = statusSelect().closest("div.flex-col")!;
+    expect(field).toHaveClass("gap-2");
+    expect(field).not.toHaveClass("gap-1");
+  });
+
   it("[FAM-UI-07][PRD] has no axe violations with results and a pager, and with none", async () => {
     const view = renderLog({
       items: makeHistory(137).slice(20, 40),

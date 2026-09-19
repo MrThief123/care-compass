@@ -1,4 +1,4 @@
-import { render, screen, within } from "@testing-library/react";
+import { cleanup, render, screen, within } from "@testing-library/react";
 import { axe } from "jest-axe";
 import { describe, expect, it } from "vitest";
 
@@ -271,6 +271,18 @@ describe("[FAM-UI-07] TaskDetailView: long text and narrow windows", () => {
     const wrapper = pill.parentElement!;
     expect(wrapper).toHaveAttribute("title", `Done · ${NAME_NO_SPACES}`);
     expect(classesOf(wrapper)).toEqual(expect.arrayContaining(["min-w-0", "max-w-full"]));
+  });
+
+  it("[FAM-UI-07][PRD] draws the Status pill 26px tall like the Task log's, Done with a transparent border so all three statuses match", async () => {
+    await renderDetail();
+    const done = screen.getByText("Done · Aisha Rahman").parentElement!;
+    expect(classesOf(done)).toEqual(expect.arrayContaining(["py-[3px]", "border-transparent"]));
+    cleanup();
+
+    await renderDetail(PLANNED_PHYSIO_KEY);
+    const planned = screen.getByText("Planned");
+    expect(classesOf(planned)).toContain("py-[3px]");
+    expect(classesOf(planned)).not.toContain("border-transparent");
   });
 
   it("[FAM-UI-07][PRD] shows a 2,000-character description and an unbroken 300-character string in full: wrapped, never cut off, line breaks kept", async () => {

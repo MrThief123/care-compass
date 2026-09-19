@@ -241,3 +241,27 @@ describe("[FAM-UI-07][PRD] TaskLogTable: one structure, every way in", () => {
     expect(links.map((link) => link.getAttribute("title"))).toEqual(rows.map((row) => row.title));
   });
 });
+
+/** Visual differences from the design (family-07-task-log.png) that a class can pin (DECISIONS.md FD-23). */
+describe("[FAM-UI-07][PRD] TaskLogTable: design fidelity", () => {
+  it("[FAM-UI-07][PRD] has no underline under the column headings (the design has none); rows keep their separators", async () => {
+    renderTable(await pageOne());
+
+    expect(classesOf(headerRow())).not.toContain("border-b");
+    for (const row of bodyRows()) expect(classesOf(row)).toContain("border-b");
+  });
+
+  it("[FAM-UI-07][PRD] gives Done, Planned and Overdue pills the same 26px height, so a row does not change height with its status", async () => {
+    renderTable(await pageOne());
+
+    for (const [text, done] of [
+      ["Planned", false],
+      ["Overdue", false],
+      ["Done · Aisha Rahman", true],
+    ] as const) {
+      const pill = screen.getAllByText(text)[0]!.closest("span[class*='rounded-pill']")!;
+      expect(classesOf(pill), text).toContain("py-[3px]");
+      expect(classesOf(pill).includes("border-transparent"), text).toBe(done);
+    }
+  });
+});
