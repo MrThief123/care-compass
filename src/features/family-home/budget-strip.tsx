@@ -27,14 +27,14 @@ export function BudgetStrip({ clientId, buckets }: BudgetStripProps) {
               Budget
             </h2>
             {buckets.length > 0 && (
-              <p className="text-body-default text-text-secondary">
+              <p className="text-body-small text-text-secondary">
                 {`${formatMoney(totals.remaining)} remaining of ${formatMoney(totals.total)} · ${totals.percentUsed}% used`}
               </p>
             )}
           </div>
           <Link
             href={homeRoutes.budget(clientId)}
-            className="inline-flex min-h-11 items-center px-4 text-body-emphasis text-text-brand hover:underline"
+            className="inline-flex min-h-11 items-center px-5 text-body-emphasis text-text-brand hover:underline"
           >
             View breakdown
           </Link>

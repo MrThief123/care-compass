@@ -14,7 +14,7 @@ export function TodayPanel({ occurrences, dateLabel }: TodayPanelProps) {
   return (
     <section aria-labelledby="family-home-today" className="flex min-w-0 flex-1">
       <CardShell className="min-w-0 flex-1 p-5">
-        <div className="flex items-baseline justify-between gap-4">
+        <div className="flex items-center justify-between gap-4">
           <h2 id="family-home-today" className="text-title-section text-text-primary">
             Today
           </h2>

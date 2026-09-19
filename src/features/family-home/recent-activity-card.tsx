@@ -3,13 +3,13 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-import { ActivityRow } from "@/components/shared/lists/activity-row";
 import { EmptyState } from "@/components/shared/states";
 import { CardShell } from "@/components/ui/card-shell";
 import { formatShortDate } from "@/lib/format/date";
 import type { Occurrence } from "@/types/domain";
 
 import { homeRoutes } from "./home-routes";
+import { RecentActivityRow } from "./recent-activity-row";
 
 export interface RecentActivityCardProps {
   clientId: string;
@@ -30,7 +30,7 @@ export function RecentActivityCard({ clientId, occurrences }: RecentActivityCard
           </h2>
           <Link
             href={homeRoutes.tasks(clientId)}
-            className="inline-flex min-h-11 items-center px-4 text-body-emphasis text-text-brand hover:underline"
+            className="inline-flex min-h-11 items-center px-5 text-body-emphasis text-text-brand hover:underline"
           >
             View all
           </Link>
@@ -45,7 +45,7 @@ export function RecentActivityCard({ clientId, occurrences }: RecentActivityCard
           <ul>
             {occurrences.map((occurrence) => (
               <li key={occurrence.key}>
-                <ActivityRow
+                <RecentActivityRow
                   title={occurrence.title}
                   date={formatShortDate(occurrence.start)}
                   status={occurrence.status}
