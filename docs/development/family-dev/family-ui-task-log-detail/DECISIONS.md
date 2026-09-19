@@ -217,6 +217,24 @@ Status verified against root `DECISIONS.md` on 2026-09-19 (`grep -n "OQ-xx" DECI
 - Human confirmation required: yes (the compact layout and the 28rem breakpoint).
 - Test changes caused: none to existing tests. New tests (run red first in 13a7a40): eight in `task-log-pager.test.tsx` (`[FAM-UI-07][AC-05]` and `[PRD]`): 250 pages in the middle, first and last page, never more than seven slots (7, 27, 250 pages and 100,000 rows), size container, compact line on every page, hidden numbers wrapper, Previous and Next never hidden and still 44px, wrapping controls, axe. Three of them pin behaviour that already held at scale; four failed first.
 
+### FD-23 — Visual polish against the design (FD-18 item 5 and the 24px Clear button): what was changed locally and what was not, with the reason. **HUMAN REVIEW: design fidelity calls**
+- Date: 2026-09-20
+- Context: FD-09 item 5 and FD-18 listed differences between the built Task log and `docs/design/screens/family-07-task-log.png` (the design is 1440px wide at 1.5x). Compared again in a real browser at 1440 (screenshots of both). Changes below are className overrides only (CLAUDE.md 4.2: `src/components/shared` is not lane F's); each is pinned by a class test and confirmed in Chromium.
+- Done (Chromium measurements in brackets):
+  1. Search box border is the brand teal, like the design and like the Status select (`SearchField`'s `className` with `[&>div:first-child]:border-border-brand`; computed border rgb(7,114,125) on both).
+  2. Clear search is a 44px by 44px target although the kit draws a 24px circle: the wrapper class adds a 44px `::after` (`[&_button]:relative`, `[&_button]:after:absolute`, `[&_button]:after:-inset-2.5`). The circle looks as designed; measured: button 24x24, `::after` 44x44; a click 19px left of the circle's centre and one 20px above it cleared the search, a click 27px to the right did not.
+  3. 8px, not 4px, between the 'Status' label and its select (`Field` with `gap-2`; measured 8px), which also puts the select and the table card about 4px lower, as drawn.
+  4. Done, Planned and Overdue pills are all 26px tall, as drawn (kit: Done 26px, Planned and Overdue 28px, because only those two have a border): `statusPillClassName(status)` in `status-pill-class.ts` gives every pill `py-[3px]` and the Done pill a transparent border; used by the Task log table and the Task detail Status card. Measured: 26px for all three; rows stay 50px.
+  5. No underline under the column headings (the design has none); row separators stay.
+- Not changed, with the reason (design owner to review):
+  - Placeholder and column-heading colour: the design's muted blue (about #8DB8C8) is about 2:1 on white, below the 4.5:1 that REQ-N2 requires, so the kit's `text-text-secondary` stays.
+  - Focus ring: `globals.css` has an unlayered `:focus-visible { outline: 2px solid brand; outline-offset: 2px }` (UI-§5.1) that beats the kit's `outline-none`, so the search input already shows a clear ring (WCAG 2.4.7). A second ring on the box would double it up, so nothing was added.
+  - Row-separator inset: the design's separators start at the text's left edge (about 20px from the card edge); ours run from 8px. Insetting the row would also shrink the hover highlight until it touches the text, and a separator-only inset needs a pseudo-element or gradient hack on every row for a 12px difference on a hairline. Left as is.
+  - Accessible name for the search input: the input's accessible name today is its placeholder, "Search tasks" (measured in Chromium), the form is a named `search` landmark, and axe is clean. `SearchField` has no label prop, so a real label cannot be given from here. Tried: wrapping the field in a `<label>` with a hidden "Search tasks": with the Clear button showing, Chromium computed the name "Search tasks Clear search", which is worse, so it was not kept. Request for lane S stays open: an `aria-label` (or label) prop on `SearchField`, and a `clearLabel`/size prop so the Clear target needs no override.
+- Follow-ups for lane S (shared, not done here): the kit `SearchField` border and Clear-target size, `StatusPill` height with and without a border, `Field` label gap, `DataTable` header underline and colour and the separator inset, plus FD-20's `DataTable` widths and overflow request.
+- Human confirmation required: yes (the not-changed items).
+- Test changes caused: none to existing tests. New tests (run red first in ae3e25d): `status-pill-class.test.ts` (4), two in `task-log-table.test.tsx`, three in `task-log-view.test.tsx`, one in `task-detail-view.test.tsx`.
+
 <!-- Template
 ### FD-01 — <title>
 - Date:

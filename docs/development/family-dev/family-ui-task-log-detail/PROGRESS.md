@@ -1,6 +1,6 @@
 # Progress — FAM-UI-07 Family Task log and Task detail screens (UI)
 
-Status: IN PROGRESS (CHG-005 green and browser-checked by the reviewer; responsive Task log table (Task A), Task detail / document tile (Task B) and pager (Task C) DONE, green and pushed; Tasks D and E remain)
+Status: IN PROGRESS (CHG-005 green and browser-checked by the reviewer; responsive Task log table (Task A), Task detail / document tile (Task B), pager (Task C) and visual polish (Task D) DONE, green and pushed; Task E remains)
 Owner: Dhruv Verma
 Lane: F — Family
 Sprint: SPRINT · planned D6–D7
@@ -8,7 +8,7 @@ Branch: `feature/family-ui-task-log-detail` (created from `origin/family-dev`; m
 PR target: `family-dev`
 Last updated: 2026-09-20
 
-**Not READY FOR PR.** The human's layout requirement (2026-09-20): "Things should fit into their tabs and if too big then should resize or get cutoff rather than overlap." Tasks A (Task log table) and B (Task detail and document tile) are done; C (pager), D (visual polish and FD-18) and E (record answers, merge docs commit, final verification) remain: exact steps in SESSION_STATE.md. PR order is fixed by FD-14: UI-04 to `main`, then `main` into `family-dev`, then this PR. Nothing has been opened or merged.
+**Not READY FOR PR.** The human's layout requirement (2026-09-20): "Things should fit into their tabs and if too big then should resize or get cutoff rather than overlap." Tasks A (Task log table), B (Task detail and document tile), C (pager) and D (visual polish, FD-18 and FD-23) are done; E (record answers, merge docs commit, final verification) remains: exact steps in SESSION_STATE.md. PR order is fixed by FD-14: UI-04 to `main`, then `main` into `family-dev`, then this PR. Nothing has been opened or merged.
 
 ## Blockers
 - None technical. The PR is sequenced behind UI-04 (FD-14).
@@ -18,6 +18,7 @@ Last updated: 2026-09-20
 - **HUMAN REVIEW: test expectation changed (FD-13):** 13 items with before, after and reason; client-side filter and sort tests, the `findOccurrence` tests and the Documents-empty test changed or were replaced. No test skipped, `.only`-ed or silently deleted.
 - **Design conflict (UI-04 FD-04):** Home's design shows 3 overdue, the Task log design 2; UI-04 chose 2. Human to confirm.
 - **Design gaps built from tokens (FD-08, PD-052)** and the pager, "No tasks to show", document tile type/size line: design owner to review.
+- **Design fidelity calls in FD-23 (Task D), please review:** what was matched to the design (teal search border, 8px label gap, 26px pills, no header underline, 44px Clear target) and what was deliberately not (placeholder and heading colour below 4.5:1, focus ring, separator inset, the search input's accessible name); shared-kit requests for lane S.
 - **Design call in FD-22 (Task C), please review:** below a 28rem-wide pager the numbers give way to Previous / 'Page x of y' / Next on one line.
 - **Design calls in FD-21 (Task B), please review:** the document tile is 160 to 192px wide in a wrapping grid where the design draws 104px (the added type and size line needs the room, and 104px broke ordinary names mid-word); long document names are cut at two lines with an ellipsis (whole name on hover and in the DOM). **HUMAN REVIEW: test expectation changed** (FD-21): one assertion in `document-tile.test.tsx` (`toHaveClass("break-all")` became `not.toHaveClass("break-all")`).
 - **Design calls in FD-20 (Task A), please review:** the card layout below a 48rem-wide log (about a 920px window), its three lines and the middle-dot separator, long names and titles cut with an ellipsis (full text on hover and in the DOM) instead of shown whole, column headings visually hidden in card layout. Also the shared `DataTable` follow-up request (fixed widths, overflow handling, narrow layout) for Carer and Admin.
@@ -37,13 +38,13 @@ Last updated: 2026-09-20
 
 - Task B (2026-09-20, commits 6f3d9ac red, then green): `document-tile.tsx` and `task-detail-view.tsx`. Documents are a wrapping grid (`minmax(min(10rem,100%),12rem)`), the tile fills its cell, the name is `line-clamp-2` with `[overflow-wrap:anywhere]` (no `break-all`), type and size are one line, the header, the Status pill (capped wrapper, full-size icon) and the description wrap or cut instead of spilling. See FD-21.
 - Task C (2026-09-20, commits 13a7a40 red, then green): `task-log-pager.tsx` is a size container; below `@md` (28rem) the numbered links give way to 'Page 125 of 250' between Previous and Next, one line; the 7-slot window already made 27 and 250 pages read the same. See FD-22.
+- Task D (2026-09-20, commits ae3e25d red, then green): brand-teal search border, 44px Clear-search hit area, 8px under the Status label, equal 26px pills (`status-pill-class.ts`), no header underline; the not-changed items (placeholder and heading colour, focus ring, separator inset, accessible name for the input) and why are in FD-23.
 
 ## In progress
 - None.
 
-## Remaining (in this order; commit and push after each; details in SESSION_STATE.md; Tasks B and C are done)
-- **D. Visual polish (capped)**: FD-18 differences via className overrides (search border, placeholder colour, focus ring, header colour and underline, row-separator inset, pill height, 4px label gap), the kit's 24px Clear-search button (44px rule), an accessible name for the search input (`SearchField` has no label prop: aria-label from our side, or state exactly why not); shared changes become recorded follow-ups. Design PNGs: `docs/design/screens/family-07-task-log.png`, `family-08-task-detail.png`.
-- **E. Record and finish**: (1) FD-21: FD-04 answered "Doesn't matter" (Task log's 2 overdue stays) and FD-05 answered "Based off time they were created in calendar" (read as strictly by calendar start time, the contract rule as built: newest first, ties by key ascending; AC-01 wording stands), both by the human on 2026-09-20; (2) the shared `DataTable` follow-up is already recorded in FD-20 (repeat it in the PR body); (3) merge `origin/feature/shared-screen-contracts-fixtures` once (docs-only commit 788cd6c) and keep the PR order note (FD-14); (4) update ACCEPTANCE_CRITERIA, TEST_PLAN, PROGRESS, SESSION_STATE, DECISIONS honestly; (5) final verification (below, plain `npx vitest run` included), `END SESSION`, report READY FOR PR.
+## Remaining (in this order; commit and push after each; details in SESSION_STATE.md; Tasks B, C and D are done)
+- **E. Record and finish**: (1) FD-24 (next free number): FD-04 answered "Doesn't matter" (Task log's 2 overdue stays) and FD-05 answered "Based off time they were created in calendar" (read as strictly by calendar start time, the contract rule as built: newest first, ties by key ascending; AC-01 wording stands), both by the human on 2026-09-20; (2) the shared `DataTable` follow-up is already recorded in FD-20 (repeat it in the PR body); (3) merge `origin/feature/shared-screen-contracts-fixtures` once (docs-only commit 788cd6c) and keep the PR order note (FD-14); (4) update ACCEPTANCE_CRITERIA, TEST_PLAN, PROGRESS, SESSION_STATE, DECISIONS honestly; (5) final verification (below, plain `npx vitest run` included), `END SESSION`, report READY FOR PR.
 
 ## Acceptance criteria status
 - 8 / 8 MET at test level (AC-05 to AC-08 also await the real-browser check).
@@ -126,13 +127,13 @@ Before (375, 5,000 rows, page 125): 2 rows of controls, nav 118px; the current p
 - `docs/development/family-dev/family-ui-task-log-detail/`: this feature's docs. The UI-04 merge brings `src/mocks`, `src/server`, `src/types` and its docs into the diff (not this feature's edits).
 
 ## Decisions
-- FD-01 to FD-22 in DECISIONS.md (FD-02, FD-03, FD-04 superseded by UI-04; FD-20 is the responsive Task log table; FD-21 is Task detail and the document tile; FD-22 is the pager).
+- FD-01 to FD-23 in DECISIONS.md (FD-02, FD-03, FD-04 superseded by UI-04; FD-20 is the responsive Task log table; FD-21 is Task detail and the document tile; FD-22 is the pager; FD-23 is the visual polish).
 
 ## Assumptions
 - To run the pages locally: `NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321 NEXT_PUBLIC_SUPABASE_ANON_KEY=dummy SUPABASE_SERVICE_ROLE_KEY=dummy npx next dev -p 3107`, then open `/family/client-margaret/tasks?as=family`.
 
 ## Next action
-- Task D (SESSION_STATE.md), tests first. Do not open the PR without approval (PD-056).
+- Task E (SESSION_STATE.md). Do not open the PR without approval (PD-056).
 
 ## Ready for PR
 - No: Tasks B to E outstanding; PR sequencing per FD-14.
