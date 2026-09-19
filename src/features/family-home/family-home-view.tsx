@@ -1,7 +1,6 @@
-import { formatShortDate } from "@/lib/format/date";
-
 import { BudgetStrip } from "./budget-strip";
 import { EnterEventLink } from "./enter-event-link";
+import { shortDate } from "./home-format";
 import { OverdueCard } from "./overdue-card";
 import { RecentActivityCard } from "./recent-activity-card";
 import { TodayPanel } from "./today-panel";
@@ -24,7 +23,7 @@ export function FamilyHomeView({ clientId, data, today }: FamilyHomeViewProps) {
   return (
     <div className="flex flex-col gap-4 px-6 py-5">
       <div className="flex items-stretch gap-4">
-        <TodayPanel occurrences={data.today} dateLabel={formatShortDate(today)} />
+        <TodayPanel clientId={clientId} occurrences={data.today} dateLabel={shortDate(today)} />
         <div className="flex w-[340px] shrink-0 flex-col gap-4">
           <EnterEventLink clientId={clientId} />
           <OverdueCard

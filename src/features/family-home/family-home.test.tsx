@@ -182,35 +182,25 @@ async function renderHome() {
 
 describe("[FAM-UI-01] Family Home", () => {
   it("[FAM-UI-01][AC-01] Today panel shows Morning medication (Done · Aisha Rahman), Physiotherapy (Planned, 1 hr 30 min) and Afternoon check-in (Planned)", async () => {
-    const user = userEvent.setup();
     await renderHome();
     const today = screen.getByRole("region", { name: "Today" });
 
-    // A block carries its status as an icon and a word for assistive tech; the
-    // detail a block has no room for is on the card it raises on hover.
-    const morning = within(today).getByRole("button", { name: /Morning medication/ });
-    expect(morning).toHaveTextContent("Done");
-    await user.hover(morning);
-    const morningCard = await screen.findByRole("tooltip", { name: /Morning medication/ });
-    expect(morningCard).toHaveTextContent("Morning medication");
-    expect(morningCard).toHaveTextContent("Done · Aisha Rahman");
-    await user.unhover(morning);
+    // Everything is on the block itself, at rest: no hover or focus is needed to read it.
+    const morning = within(today).getByRole("link", { name: /Morning medication/ });
+    expect(within(morning).getByText("Morning medication")).toBeInTheDocument();
+    expect(within(morning).getByText("Done · Aisha Rahman")).toBeInTheDocument();
+    expect(within(morning).getByText("1 hr")).toBeInTheDocument();
 
-    const physio = within(today).getByRole("button", { name: /Physiotherapy/ });
-    expect(physio).toHaveTextContent("Planned");
-    await user.hover(physio);
-    const physioCard = await screen.findByRole("tooltip", { name: /Physiotherapy/ });
-    expect(physioCard).toHaveTextContent("Physiotherapy");
-    expect(physioCard).toHaveTextContent("1 hr 30 min");
-    expect(physioCard).toHaveTextContent("Planned");
-    await user.unhover(physio);
+    const physio = within(today).getByRole("link", { name: /Physiotherapy/ });
+    expect(within(physio).getByText("Physiotherapy")).toBeInTheDocument();
+    expect(within(physio).getByText("1 hr 30 min")).toBeInTheDocument();
+    expect(within(physio).getByText("Planned")).toBeInTheDocument();
 
-    const checkIn = within(today).getByRole("button", { name: /Afternoon check-in/ });
-    expect(checkIn).toHaveTextContent("Planned");
-    await user.hover(checkIn);
-    const checkInCard = await screen.findByRole("tooltip", { name: /Afternoon check-in/ });
-    expect(checkInCard).toHaveTextContent("Afternoon check-in");
-    expect(checkInCard).toHaveTextContent("Planned");
+    const checkIn = within(today).getByRole("link", { name: /Afternoon check-in/ });
+    expect(within(checkIn).getByText("Afternoon check-in")).toBeInTheDocument();
+    expect(within(checkIn).getByText("Planned")).toBeInTheDocument();
+
+    expect(screen.queryByRole("tooltip")).not.toBeInTheDocument();
   });
 
   it("[FAM-UI-01][AC-02] Overdue card badge is 3 and lists Wound dressing check (Fri 27 Nov), Medication review (Sat 28 Nov), Weekly weigh-in (Sun 29 Nov), oldest first", async () => {

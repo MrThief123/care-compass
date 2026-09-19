@@ -1,16 +1,18 @@
-import { DayTimeline } from "@/components/shared/calendar/day-timeline";
 import { EmptyState } from "@/components/shared/states";
 import { CardShell } from "@/components/ui/card-shell";
 import type { Occurrence } from "@/types/domain";
 
+import { TodayTimeline } from "./today-timeline";
+
 export interface TodayPanelProps {
+  clientId: string;
   occurrences: Occurrence[];
   /** Short date for the caption, e.g. "Mon 30 Nov". */
   dateLabel: string;
 }
 
-/** The Today panel: today's occurrences on the shared day timeline. */
-export function TodayPanel({ occurrences, dateLabel }: TodayPanelProps) {
+/** The Today panel: today's occurrences on the day timeline, whatever their number. */
+export function TodayPanel({ clientId, occurrences, dateLabel }: TodayPanelProps) {
   return (
     <section aria-labelledby="family-home-today" className="flex min-w-0 flex-1">
       <CardShell className="min-w-0 flex-1 p-5">
@@ -27,7 +29,7 @@ export function TodayPanel({ occurrences, dateLabel }: TodayPanelProps) {
             body="Events scheduled for today will appear here."
           />
         ) : (
-          <DayTimeline occurrences={occurrences} className="mt-2" />
+          <TodayTimeline clientId={clientId} occurrences={occurrences} className="mt-2" />
         )}
       </CardShell>
     </section>
