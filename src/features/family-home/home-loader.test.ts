@@ -5,7 +5,6 @@ import type { Occurrence, OccurrenceStatus, TaskLogQuery, TaskLogResult } from "
 import { OVERDUE_ROWS_SHOWN, RECENT_ACTIVITY_LIMIT, loadFamilyHomeData } from "./home-data";
 import { CLIENT_ID, melbourne, occurrence } from "./test-support";
 
-
 const mocks = vi.hoisted(() => ({
   getTodayOccurrences: vi.fn(),
   getTaskLog: vi.fn(),

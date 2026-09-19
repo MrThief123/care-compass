@@ -17,7 +17,6 @@ import {
   overdueNewestFirst,
 } from "./test-support";
 
-
 // RED-RUN ONLY: the cards' rows are router buttons today. Removed with the implementation, when rows are links.
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn(), refresh: vi.fn() }) }));
 

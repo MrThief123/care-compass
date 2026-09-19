@@ -7,7 +7,6 @@ import type { BudgetBucketSummary } from "@/types/domain";
 import { BudgetStrip } from "./budget-strip";
 import { CLIENT_ID, LONG_LABEL, UNBROKEN_LABEL, bucket } from "./test-support";
 
-
 function renderStrip(buckets: BudgetBucketSummary[]) {
   const view = render(<BudgetStrip clientId={CLIENT_ID} buckets={buckets} />);
   return { ...view, budget: screen.getByRole("region", { name: "Budget" }) };

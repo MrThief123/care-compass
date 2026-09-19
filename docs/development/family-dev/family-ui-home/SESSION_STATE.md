@@ -18,3 +18,7 @@ Important decisions: FD-01 to FD-12 in DECISIONS.md. OQ-29 ANSWERED and followed
 Exact next action: human reviews the DECISIONS.md "HUMAN REVIEW summary". On explicit approval: set PROGRESS.md and this file to `PR OPEN`, commit `docs(family-ui-home): ...`, push, then open the PR to `family-dev` titled `FAM-UI-01 Family Home screen (UI)` using `docs/DEVELOPMENT_WORKFLOW.md` §8, with a side-by-side screenshot.
 Files likely to be touched next: none for the feature; only PROGRESS.md / SESSION_STATE.md when the PR opens, or fixes if review asks for changes.
 Warning for next session: do not open the PR without approval. Do not edit `src/components/shared/**`, `src/mocks/**` or `src/app/(family)/family/[clientId]/layout.tsx` from this feature; raise kit changes as shared PRs (FD-05, FD-06, FD-09). Screenshots and the throwaway scripts are in `/tmp/fam-shot/` on the working machine and are not committed.
+
+## Session 2026-09-20 (rework for real-world volumes) - running notes
+- M0 done and pushed (a29df9f): red tests committed with three empty stub modules (`home-format.ts`, `today-layout.ts`, `today-timeline.tsx`). Red run: 64 failed / 141 in the new files, all on behaviour.
+- Next step: implement task 6 formatting (`home-format.ts`) first, then `today-layout.ts` + `today-timeline.tsx` (task 1), then the loader/cards (tasks 2, 3, 4), then Budget strip (task 5). Commit and push after each. Remove the `RED-RUN ONLY` router mock in `activity-cards.test.tsx` when the rows become links.

@@ -16,7 +16,6 @@ import {
 } from "./test-support";
 import { TodayTimeline } from "./today-timeline";
 
-
 const MORNING = occurrence({
   title: "Morning medication",
   start: melbourne("09:00"),
