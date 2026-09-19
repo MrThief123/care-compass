@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { melbourneDateKey } from "@/mocks/melbourne-time";
+import { localToMelbourneIso, melbourneDateKey } from "@/mocks/melbourne-time";
 
 describe("[UI-04][AC-01] melbourneDateKey", () => {
   it("[UI-04][AC-01] returns the Melbourne calendar day of an ISO instant", () => {
@@ -23,5 +23,42 @@ describe("[UI-04][AC-01] melbourneDateKey", () => {
     expect(melbourneDateKey("2026-10-03T13:30:00Z")).toBe("2026-10-03");
     // 13:30Z on 4 Oct is 00:30 on 5 Oct (+11:00).
     expect(melbourneDateKey("2026-10-04T13:30:00Z")).toBe("2026-10-05");
+  });
+});
+
+describe("[UI-04][AC-09] localToMelbourneIso", () => {
+  it("[UI-04][AC-09] writes a Melbourne wall-clock time with +11:00 in summer and +10:00 in winter", () => {
+    expect(localToMelbourneIso("2026-11-30T09:00")).toBe("2026-11-30T09:00:00+11:00");
+    expect(localToMelbourneIso("2026-09-05T11:30")).toBe("2026-09-05T11:30:00+10:00");
+  });
+
+  it("[UI-04][AC-09] changes offset at the 4 Oct 2026 spring change: 01:59 is +10:00, 03:00 is +11:00", () => {
+    expect(localToMelbourneIso("2026-10-03T12:00")).toBe("2026-10-03T12:00:00+10:00");
+    expect(localToMelbourneIso("2026-10-04T01:59:00")).toBe("2026-10-04T01:59:00+10:00");
+    expect(localToMelbourneIso("2026-10-04T03:00:00")).toBe("2026-10-04T03:00:00+11:00");
+    expect(localToMelbourneIso("2026-10-05T12:00")).toBe("2026-10-05T12:00:00+11:00");
+  });
+
+  it("[UI-04][AC-09] changes back at the 4 Apr 2027 autumn change", () => {
+    expect(localToMelbourneIso("2027-04-03T12:00")).toBe("2027-04-03T12:00:00+11:00");
+    expect(localToMelbourneIso("2027-04-05T12:00")).toBe("2027-04-05T12:00:00+10:00");
+  });
+
+  it("[UI-04][AC-09] accepts a local time with or without seconds", () => {
+    expect(localToMelbourneIso("2026-11-30T09:00:30")).toBe("2026-11-30T09:00:30+11:00");
+    expect(localToMelbourneIso("2026-11-30T09:00")).toBe("2026-11-30T09:00:00+11:00");
+  });
+
+  it("[UI-04][AC-09] names the same instant as the local time it was given", () => {
+    const iso = localToMelbourneIso("2026-11-30T09:00");
+
+    expect(new Date(iso).toISOString()).toBe("2026-11-29T22:00:00.000Z");
+    expect(melbourneDateKey(iso)).toBe("2026-11-30");
+  });
+
+  it("[UI-04][AC-09] rejects a malformed value and a time that does not exist in the spring gap", () => {
+    expect(() => localToMelbourneIso("garbage")).toThrow(/Invalid local datetime/);
+    expect(() => localToMelbourneIso("2026-11-30 09:00")).toThrow(/Invalid local datetime/);
+    expect(() => localToMelbourneIso("2026-10-04T02:30:00")).toThrow(/does not exist/);
   });
 });

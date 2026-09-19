@@ -45,3 +45,11 @@ Authorisation: root DECISIONS.md CHG-004 (this feature) and CHG-005 (FAM-UI-07 T
 - Decision: follow the contract rule. Mon 30 Nov reads Afternoon check-in (15:00), Physiotherapy (11:30), Morning medication (09:00). Times on Sat 28 (Medication review 10:00, Physiotherapy 11:30) and Sun 29 (Evening medication 18:00, Weekly weigh-in 09:30) are chosen so the contract order equals the drawn order there, which also makes the Home Recent activity list identical to the design.
 - Consequences: FAM-UI-07 AC-01 ("9 rows starting Morning medication") cannot hold literally; page 1 also has 11 older rows and starts with Afternoon check-in. Family owners update their AC wording (CHG-005 already supersedes the client-side ordering).
 - Human confirmation required: yes.
+
+### FD-06 — Existing test expectation changed: Margaret's header (age and suburb). HUMAN REVIEW: test expectation changed.
+- Date: 2026-09-19
+- Test: `tests/integration/shared-app-shell-clients-contract.test.ts`, "[F0-15] getClientHeaderSummary via the mock data source > returns Margaret's age (computed from dob), suburb and organisation name" (owned by F0-15, merged).
+- Before: `age: 75`, `suburb: "Ringwood"`.
+- After: `age: 78`, `suburb: "Preston VIC"`.
+- Reason: recorded requirement change. `family-01-home.png`, `family-04-info.png`, `family-07-task-log.png`, `family-08-task-detail.png` and `carer-02-patients.png` all read "78 years · Preston VIC · Banksia Home Care"; UI-00 PRD says the fixtures match the design and CHG-004 (human, 2026-09-19) asked for the design match. No other assertion in that file changed (`firstName`, `lastName`, `organisationName`, and the unknown-client throw are as before). Margaret's `dob` moves from 1950-12-05 to 1948-04-12 (78 on the reference date); her `suburb` becomes "Preston VIC" because the shell header prints the suburb field verbatim and the design shows the state in the same string. The proper fix (a separate `state` field) belongs to the clients schema work (F0-06).
+- Flagged: yes, HUMAN REVIEW (PROGRESS.md and the PR).
