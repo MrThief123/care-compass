@@ -79,7 +79,8 @@ describe("[FAM-UI-07] DocumentTile", () => {
     const label = screen.getByText(name);
     expect(label).toHaveAttribute("title", name);
     expect(label).toHaveClass("line-clamp-2");
-    expect(label).toHaveClass("break-all");
+    // Changed under FD-21 (was `toHaveClass("break-all")`): break-all split ordinary words.
+    expect(label).not.toHaveClass("break-all");
     expect(label.textContent).toBe(name);
   });
 
@@ -115,5 +116,57 @@ describe("[FAM-UI-07] DocumentTile", () => {
     );
 
     expect(await axe(container)).toHaveNoViolations();
+  });
+});
+
+/**
+ * jsdom has no layout, so these pin the classes that make each cause impossible; the layout
+ * itself is proven by the real-browser width sweep in PROGRESS.md (DECISIONS.md FD-21).
+ */
+describe("[FAM-UI-07] DocumentTile: fits its tile at any window width", () => {
+  const classesOf = (element: Element) => [...element.classList];
+  const tileOf = (name: string) => screen.getByText(name).parentElement!;
+
+  it("[FAM-UI-07][PRD] wraps a normal name at its spaces and never in the middle of a word (no break-all: it read 'Medication ch / art.pdf')", () => {
+    render(<DocumentTile document={doc()} />);
+
+    const label = screen.getByText("Medication chart.pdf");
+    expect(classesOf(label)).not.toContain("break-all");
+    expect(classesOf(label)).not.toContain("break-words");
+    expect(classesOf(label)).not.toContain("[word-break:break-all]");
+  });
+
+  it("[FAM-UI-07][PRD] lets a name with no break point wrap anywhere only as a last resort, still cut at two lines, whole name in the title and the DOM", () => {
+    const name = `${"Ophthalmologist".repeat(6)}.pdf`.slice(0, 92);
+    expect(name).toHaveLength(92);
+    expect(name).not.toMatch(/\s/);
+    render(<DocumentTile document={doc({ name })} />);
+
+    const label = screen.getByText(name);
+    expect(classesOf(label)).toEqual(
+      expect.arrayContaining(["line-clamp-2", "max-w-full", "[overflow-wrap:anywhere]"]),
+    );
+    expect(label).toHaveAttribute("title", name);
+    expect(label.textContent).toBe(name);
+  });
+
+  it("[FAM-UI-07][PRD] keeps the type and size on one line, cut with an ellipsis if the tile is ever too narrow, the whole text in its title", () => {
+    render(
+      <DocumentTile
+        document={doc({ mimeType: "application/vnd.ms-excel", sizeBytes: 25 * 1024 ** 3 })}
+      />,
+    );
+
+    const line = screen.getByText("Excel · 25.0 GB");
+    expect(classesOf(line)).toEqual(expect.arrayContaining(["truncate", "max-w-full"]));
+    expect(line).toHaveAttribute("title", "Excel · 25.0 GB");
+  });
+
+  it("[FAM-UI-07][PRD] takes the width of its grid cell (min 10rem there) instead of a fixed 104px, and can shrink below its text", () => {
+    render(<DocumentTile document={doc()} />);
+
+    const tile = tileOf("Medication chart.pdf");
+    expect(classesOf(tile)).toEqual(expect.arrayContaining(["w-full", "min-w-0"]));
+    expect(classesOf(tile).filter((name) => /^w-\d+$/.test(name))).toEqual([]);
   });
 });
