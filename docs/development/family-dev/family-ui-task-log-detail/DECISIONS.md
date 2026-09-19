@@ -70,6 +70,43 @@ Status verified against root `DECISIONS.md` on 2026-09-19 (`grep -n "OQ-xx" DECI
 - Decision: the log is a real table, so NURSE and STATUS align on every row (the design image misaligns them on Planned rows; OQ-39 lists this). The Status filter is a select, as designed and as the PRD says, although the design brief prefers chips (OQ-39).
 - Human confirmation required: no (non-blocking).
 
+### FD-08 — Design gap, built from tokens — please review (PD-052)
+- Date: 2026-09-19
+- Context: the designs cover the populated Task log and Task detail only. The States sheet is not in `docs/design/screens/`, and the Phase 3 PRDs describe its skeleton only as "list rows with avatar; card grid".
+- Decision: built from Foundations tokens and existing app patterns, each flagged **design gap, built from tokens — please review**:
+  - Task log loading skeleton: real title, placeholder search and select, six kit `ListRowSkeleton` rows in a card.
+  - Task detail loading skeleton: placeholder heading block and three stacked kit `CardGridSkeleton` cards.
+  - Task log empty state "No tasks yet / Tasks will appear here once care events are scheduled." (copy PROPOSED).
+  - Task log no-results state "No tasks found / Try a different search or choose another status." (copy PROPOSED). The kit `SearchField` shows `No matches for "…".` (AC-03) once, above it, so the copy is not repeated (OQ-39 notes the States sheet repeats it).
+  - Task detail not-found page "Task not found / We couldn't find that task. It may have been removed." with a Back link (copy PROPOSED).
+  - Task detail for a task with no shift cover: "Assigned to —" (PD-055 says show `—`); for no documents: "No documents attached.".
+  - A visually hidden `role="status"` line "Showing N of M tasks" so filter results are announced (WCAG 4.1.3).
+  - The Edit link on Task detail goes to `/family/[clientId]/events/[eventId]/edit` with no occurrence parameter. Whether the edit screen needs the occurrence (for "this occurrence only" scope, PD-046) is FAM-UI-03 / FAM-07's call.
+- Human confirmation required: yes (design owner sanity-check of the copy and skeletons).
+
+### FD-09 — Shared kit and lib gaps found (not edited; workarounds are local)
+- Date: 2026-09-19
+- Context: CLAUDE.md §4.2 forbids editing `src/components/shared/**`, `src/components/ui/**` and `src/lib/**` from lane F.
+- Workarounds kept local, each needing a shared change to remove:
+  1. `FileTile` (filled) is a horizontal 44px chip, but both Task detail and Edit event draw a vertical 104px tile (icon above a centred, wrapping name). Local read-only `src/features/family-task-detail/document-tile.tsx`. **Request:** a vertical tile variant in the kit.
+  2. `DataTable` has no column-width API, so the TASK column would not take the leftover width. `task-log-view.tsx` targets the columns by position with arbitrary variants (`TABLE_LAYOUT`). **Request:** optional per-column width/alignment on `DataTableColumn`.
+  3. No time-of-day formatter in `src/lib/format` ("Completed at 09:14"), and no Melbourne day-key helper. Local `src/features/family-task-log/melbourne-time.ts` (`formatTimeOfDay`, `melbourneDateKey`). **Request:** promote into `src/lib/format`.
+  4. `SearchField` has no `aria-label` prop, so the input is named only by its placeholder. Acceptable to axe and browsers, but a label prop would be better.
+- Visual differences seen against the design PNGs that come from the kit (left as they are; see the visual check in PROGRESS.md): `SearchField` uses a light border and grey placeholder where the design has a teal border and muted-teal placeholder, and its focus ring is an inner outline on the input; `DataTable` header text is `text-secondary` where the design is muted blue (the design colour, #8DB8C8 on white, is below 4.5:1, so the kit choice is the safer one), has a header underline the design lacks, and pads cells `px-3` so row separators start slightly outside the text; `StatusPill` is 26px tall against about 24px in the design; `Field` puts 4px between label and control where the design has about 8px, so the Status select sits about 4px higher and the table card about 4px higher than drawn.
+- Human confirmation required: yes (lane S owner).
+
+### FD-10 — Next.js 16.3 conventions followed; rail and layout untouched
+- Date: 2026-09-19
+- Decision: read `node_modules/next/dist/docs/01-app` (page, error, loading, not-found, dynamic routes, useRouter) before writing route code. Applied: `params` is a `Promise` and is awaited; `error.tsx` uses the `retry` prop (Next 16 says use `retry()` to re-fetch, `reset()` only to clear the boundary without re-fetching); `loading.tsx` per level; `notFound()` plus a segment `not-found.tsx` (a streamed `notFound()` answers HTTP 200 by design). No conflict with ARCHITECTURE.md §12.5, which asks for `error.tsx` with the ErrorState design.
+- Layout: `src/app/(family)/family/[clientId]/layout.tsx` is unchanged. The family rail has no Task log item, so nothing is highlighted on `/tasks`, which matches the design (its rail shows no active item). The Phase 3 PRD's PROPOSED "Home active" would need a change to `nav-config.ts` or the layout, which are not lane F's; raise it with the shared owner if wanted. Seen while checking: the layout header shows the real date (`new Date()`), not the fixtures' reference date, and its client line reads "75 years · Ringwood" against the design's "78 years · Preston VIC" (fixture values); both are outside this feature.
+- Human confirmation required: no.
+
+### FD-11 — Tests added or adjusted after implementation began
+- Date: 2026-09-19
+- `[FAM-UI-07][PRD] clicking the task link does not also trigger the row's own navigation`: after it went green, its click listener moved from `document` to the render container so jsdom does not log "Not implemented: navigation". No assertion changed or removed (TESTING.md §6, infrastructure defect). Not flagged for HUMAN REVIEW.
+- Two tests added after a browser check found layout bugs jsdom cannot see, each run red before its fix: nurse name stays on one line so rows stay 50px (`truncate` plus `title`), and the task link is sized to its text so its focus ring does not span the column (`w-fit`). New tests, not changes to existing ones.
+- Human confirmation required: no.
+
 <!-- Template
 ### FD-01 — <title>
 - Date:
