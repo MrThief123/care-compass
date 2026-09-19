@@ -4,9 +4,10 @@ import { StatusPill } from "@/components/shared/status-pill";
 import { CardShell } from "@/components/ui/card-shell";
 import { formatTimeOfDay } from "@/features/family-task-log/melbourne-time";
 import { occurrenceNurse } from "@/features/family-task-log/occurrence-display";
+import type { TaskLogParams } from "@/features/family-task-log/task-log-params";
 import { editEventHref } from "@/features/family-task-log/task-routes";
 import { formatLongDate } from "@/lib/format/date";
-import type { DocumentRef, Occurrence } from "@/types/domain";
+import type { EventDocument, Occurrence } from "@/types/domain";
 
 import { BackToTaskLogLink } from "./back-to-task-log-link";
 import { DocumentTile } from "./document-tile";
@@ -15,7 +16,9 @@ export interface TaskDetailViewProps {
   clientId: string;
   occurrence: Occurrence;
   /** Documents attached to the task's event; read-only here. */
-  documents: Pick<DocumentRef, "id" | "name">[];
+  documents: EventDocument[];
+  /** The Task log view (q / status / page) this task was opened from, so Back returns to it. */
+  backParams?: Partial<TaskLogParams>;
 }
 
 const CARD = "flex flex-col gap-3";
@@ -26,14 +29,19 @@ const CARD_TITLE = "text-title-card text-text-primary";
  * then the Status, Description and Documents cards. No hooks, so it renders
  * on the server.
  */
-export function TaskDetailView({ clientId, occurrence, documents }: TaskDetailViewProps) {
+export function TaskDetailView({
+  clientId,
+  occurrence,
+  documents,
+  backParams,
+}: TaskDetailViewProps) {
   const nurse = occurrenceNurse(occurrence);
   const completedAt = occurrence.status === "done" ? occurrence.completedAt : undefined;
 
   return (
     <div className="flex flex-col gap-4 px-6 pb-6 pt-2">
       <div className="flex flex-col">
-        <BackToTaskLogLink clientId={clientId} />
+        <BackToTaskLogLink clientId={clientId} view={backParams} />
         <h1 className="mt-1 break-words text-title-page text-text-primary">{occurrence.title}</h1>
         <p className="mt-0.5 text-body-small text-text-secondary">
           {`${formatLongDate(occurrence.start)} · Assigned to ${nurse}`}
@@ -79,7 +87,7 @@ export function TaskDetailView({ clientId, occurrence, documents }: TaskDetailVi
           <ul className="flex flex-wrap gap-3">
             {documents.map((document) => (
               <li key={document.id}>
-                <DocumentTile name={document.name} />
+                <DocumentTile document={document} />
               </li>
             ))}
           </ul>

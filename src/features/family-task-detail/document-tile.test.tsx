@@ -4,8 +4,8 @@ import { describe, expect, it } from "vitest";
 
 import type { EventDocument } from "@/types/domain";
 
-import { DocumentTile } from "./document-tile";
 import { fileTypeLabel, formatFileSize } from "./document-format";
+import { DocumentTile } from "./document-tile";
 
 function doc(overrides: Partial<EventDocument> = {}): EventDocument {
   return {

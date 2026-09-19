@@ -3,8 +3,9 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 import { lastPageFor, pageRange, pageWindow } from "./pagination";
-import type { TaskLogParams } from "./task-log-params";
 import { taskLogHref } from "./task-routes";
+
+import type { TaskLogParams } from "./task-log-params";
 
 export interface TaskLogPagerProps {
   clientId: string;

@@ -1,6 +1,6 @@
 /**
  * Test-support only (never imported by production code; the same status as
- * `design-fixtures.ts`). Generates realistic, large task histories and a
+ * the retired design-fixtures). Generates realistic, large task histories and a
  * stand-in for the `getTaskLog` contract, so tests never rest on the handful
  * of sample rows in `src/mocks` (CHG-005, DECISIONS.md FD-12).
  *

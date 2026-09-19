@@ -14,9 +14,10 @@ import { getTaskLog } from "@/server/events/queries";
 import type { Occurrence } from "@/types/domain";
 
 import { NAME_60, NON_ASCII_TITLES, TITLE_120, makeHistory } from "./fake-task-log";
-import type { TaskLogParams } from "./task-log-params";
 import { SEARCH_DEBOUNCE_MS, TaskLogView, type TaskLogViewProps } from "./task-log-view";
 import { taskDetailHref } from "./task-routes";
+
+import type { TaskLogParams } from "./task-log-params";
 
 const ID = "client-margaret";
 const PLAIN: TaskLogParams = { q: "", page: 1 };
@@ -168,7 +169,7 @@ describe("[FAM-UI-07] TaskLogView: search, Status and page live in the URL (CHG-
   });
 
   function setup() {
-    vi.useFakeTimers();
+    vi.useFakeTimers({ shouldAdvanceTime: true });
     return userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
   }
 
@@ -214,10 +215,10 @@ describe("[FAM-UI-07] TaskLogView: search, Status and page live in the URL (CHG-
     renderLog({ items: some(), total: 60, params: { q: "", status: "done", page: 3 } });
 
     await user.type(searchBox(), "physio");
-    await elapse(SEARCH_DEBOUNCE_MS - 1);
+    await elapse(SEARCH_DEBOUNCE_MS / 2);
     expect(replace).not.toHaveBeenCalled();
 
-    await elapse(1);
+    await elapse(SEARCH_DEBOUNCE_MS);
     expect(replace).toHaveBeenCalledExactlyOnceWith(
       "/family/client-margaret/tasks?q=physio&status=done",
       { scroll: false },

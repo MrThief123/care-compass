@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useOptimistic, useRef, useState, useTransition } from "react";
 
 import { Field, type FieldOption } from "@/components/shared/forms/field";
 import { DataTable, type DataTableColumn } from "@/components/shared/lists/data-table";
@@ -11,26 +11,39 @@ import { EmptyState } from "@/components/shared/states";
 import { StatusPill } from "@/components/shared/status-pill";
 import { CardShell } from "@/components/ui/card-shell";
 import { formatShortDate } from "@/lib/format/date";
-import type { Occurrence } from "@/types/domain";
+import type { Occurrence, OccurrenceStatus } from "@/types/domain";
 
 import { occurrenceNurse } from "./occurrence-display";
-import { filterTaskLog, sortTaskLog, type StatusFilter } from "./task-log-query";
-import { taskDetailHref } from "./task-routes";
+import { pageRange } from "./pagination";
+import { TaskLogPager } from "./task-log-pager";
+import { clampQueryLength, normaliseQuery, type TaskLogParams } from "./task-log-params";
+import { taskDetailHref, taskLogHref } from "./task-routes";
+
+/** How long typing must pause before the search is put in the URL. */
+export const SEARCH_DEBOUNCE_MS = 400;
 
 export interface TaskLogViewProps {
   clientId: string;
+  /** This page's rows, in the order the contract returned them (newest first). Never re-sorted. */
   items: Occurrence[];
+  /** Rows across all pages, after the search and Status. */
+  total: number;
+  pageSize: number;
+  /** The validated URL state. */
+  params: TaskLogParams;
 }
 
-const STATUS_OPTIONS: (FieldOption & { value: StatusFilter })[] = [
+type StatusChoice = "all" | OccurrenceStatus;
+
+const STATUS_OPTIONS: (FieldOption & { value: StatusChoice })[] = [
   { value: "all", label: "All statuses" },
   { value: "planned", label: "Planned" },
   { value: "done", label: "Done" },
   { value: "overdue", label: "Overdue" },
 ];
 
-function isStatusFilter(value: string): value is StatusFilter {
-  return STATUS_OPTIONS.some((option) => option.value === value);
+function toStatusChoice(value: string): StatusChoice | undefined {
+  return STATUS_OPTIONS.find((option) => option.value === value)?.value;
 }
 
 /**
@@ -43,17 +56,67 @@ const TABLE_LAYOUT =
   "[&_th:nth-child(2)]:w-full [&_td:nth-child(2)]:w-full [&_td:nth-child(2)]:max-w-0";
 
 /**
- * Family · Task log (FAM-UI-07): title, search, Status select and the
- * DATE · TASK · NURSE · STATUS table. Search and filter act on the rows
- * client-side and reset on reload (PRD Scope).
+ * Family · Task log (FAM-UI-07): title, search, Status select, the
+ * DATE · TASK · NURSE · STATUS table and a pager. The page shows one page of
+ * the whole history: search, Status and page are the URL's `?q=&status=&page=`
+ * and the server answers them (CHG-005), so this component only shows what it
+ * is given and moves the URL.
  */
-export function TaskLogView({ clientId, items }: TaskLogViewProps) {
+export function TaskLogView({ clientId, items, total, pageSize, params }: TaskLogViewProps) {
   const router = useRouter();
-  const [query, setQuery] = useState("");
-  const [status, setStatus] = useState<StatusFilter>("all");
+  const [isPending, startTransition] = useTransition();
+  const [status, setOptimisticStatus] = useOptimistic<StatusChoice>(params.status ?? "all");
 
-  const visible = filterTaskLog(sortTaskLog(items), { query, status });
-  const searchTerm = query.trim();
+  // What is in the box (it runs ahead of the URL while someone types), the URL's search as of the
+  // last render, and the last search this component sent to the URL.
+  const [draft, setDraft] = useState(params.q);
+  const [seenQ, setSeenQ] = useState(params.q);
+  const [sentQ, setSentQ] = useState<string | null>(null);
+  const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const latest = useRef(params);
+
+  useEffect(() => {
+    latest.current = params;
+  });
+
+  // The URL moved. Follow it (Back, Forward, a shared link, a link from Home), except when it is
+  // only our own search arriving, which must not overwrite words typed since.
+  if (params.q !== seenQ) {
+    setSeenQ(params.q);
+    if (params.q !== sentQ) setDraft(params.q);
+  }
+
+  // A search that was still waiting when the URL moved somewhere else is stale: drop it.
+  useEffect(() => {
+    if (params.q !== sentQ) clearTimeout(timer.current);
+  }, [params.q, sentQ]);
+
+  useEffect(() => () => clearTimeout(timer.current), []);
+
+  /** Puts a search and Status in the URL on page 1 (changing either resets the page). */
+  function go(next: { q: string; status?: OccurrenceStatus }) {
+    clearTimeout(timer.current);
+    const current = latest.current;
+    if (next.q === current.q && next.status === current.status) return;
+    setSentQ(next.q);
+    startTransition(() => {
+      setOptimisticStatus(next.status ?? "all");
+      router.replace(taskLogHref(clientId, { ...next, page: 1 }), { scroll: false });
+    });
+  }
+
+  function handleType(value: string) {
+    const next = clampQueryLength(value);
+    setDraft(next);
+    clearTimeout(timer.current);
+    timer.current = setTimeout(
+      () => go({ q: normaliseQuery(next), status: latest.current.status }),
+      SEARCH_DEBOUNCE_MS,
+    );
+  }
+
+  const filtered = params.q !== "" || params.status !== undefined;
+  const { from, to } = pageRange(params.page, pageSize, total);
 
   const columns: DataTableColumn<Occurrence>[] = [
     {
@@ -72,7 +135,7 @@ export function TaskLogView({ clientId, items }: TaskLogViewProps) {
         // does not navigate twice. `-my-2 min-h-11` gives a 44px target inside the 50px row;
         // `w-fit` keeps the link (and its focus ring) to the text, not the whole column.
         <Link
-          href={taskDetailHref(clientId, occurrence.key)}
+          href={taskDetailHref(clientId, occurrence.key, params)}
           onClick={(event) => event.stopPropagation()}
           className="-my-2 flex min-h-11 w-fit max-w-full items-center break-words hover:underline"
         >
@@ -108,54 +171,73 @@ export function TaskLogView({ clientId, items }: TaskLogViewProps) {
       <h1 className="text-title-page text-text-primary">Task log</h1>
 
       <div className="flex items-start gap-3">
-        <SearchField
+        <form
+          role="search"
+          aria-label="Search tasks"
           className="min-w-0 flex-1"
-          value={query}
-          onChange={setQuery}
-          onClear={() => setQuery("")}
-          placeholder="Search tasks"
-          noResultsFor={
-            items.length > 0 && visible.length === 0 && searchTerm ? searchTerm : undefined
-          }
-        />
+          onSubmit={(event) => {
+            event.preventDefault();
+            go({ q: normaliseQuery(draft), status: latest.current.status });
+          }}
+        >
+          <SearchField
+            value={draft}
+            onChange={handleType}
+            onClear={() => {
+              setDraft("");
+              go({ q: "", status: latest.current.status });
+            }}
+            loading={isPending}
+            placeholder="Search tasks"
+            noResultsFor={total === 0 && params.q ? params.q : undefined}
+          />
+        </form>
         <Field
           className="w-[220px] shrink-0"
           label="Status"
           type="select"
           value={status}
           onChange={(value) => {
-            if (isStatusFilter(value)) setStatus(value);
+            const choice = toStatusChoice(value);
+            if (choice)
+              go({ q: normaliseQuery(draft), status: choice === "all" ? undefined : choice });
           }}
           options={STATUS_OPTIONS}
         />
       </div>
 
-      <CardShell className="px-2 py-3">
+      <CardShell className="px-2 py-3" aria-busy={isPending}>
         {items.length === 0 ? (
-          <EmptyState
-            title="No tasks yet"
-            body="Tasks will appear here once care events are scheduled."
-          />
-        ) : visible.length === 0 ? (
-          <EmptyState
-            icon="search"
-            title="No tasks found"
-            body="Try a different search or choose another status."
-          />
+          filtered ? (
+            <EmptyState
+              icon="search"
+              title="No tasks found"
+              body="Try a different search or choose another status."
+            />
+          ) : (
+            <EmptyState
+              title="No tasks yet"
+              body="Tasks will appear here once care events are scheduled."
+            />
+          )
         ) : (
           <DataTable
             className={TABLE_LAYOUT}
             columns={columns}
-            rows={visible}
+            rows={items}
             rowKey={(occurrence) => occurrence.key}
-            onRowClick={(occurrence) => router.push(taskDetailHref(clientId, occurrence.key))}
+            onRowClick={(occurrence) =>
+              router.push(taskDetailHref(clientId, occurrence.key, params))
+            }
           />
         )}
       </CardShell>
 
-      {/* Announces filter results (WCAG 4.1.3); the visible message lives in the search field. */}
+      <TaskLogPager clientId={clientId} params={params} total={total} pageSize={pageSize} />
+
+      {/* Announces what changed (WCAG 4.1.3); the visible message lives in the search field. */}
       <p role="status" className="sr-only">
-        Showing {visible.length} of {items.length} tasks
+        {items.length === 0 ? "No tasks to show" : `Showing ${from}-${to} of ${total} tasks`}
       </p>
     </div>
   );
