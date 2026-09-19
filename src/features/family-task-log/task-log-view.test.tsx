@@ -536,7 +536,7 @@ describe("[FAM-UI-07] TaskLogView: links keep the view (AC-08)", () => {
 
     const toolbar = searchBox().closest("form")!.parentElement!;
     expect(toolbar).toHaveClass("flex-wrap");
-    expect(searchBox().closest("form")).toHaveClass("min-w-0", "flex-1");
+    expect(searchBox().closest("form")).toHaveClass("min-w-0", "flex-[1_1_16rem]");
     expect(statusSelect().closest("[class*='w-[220px]']")).toHaveClass("max-w-full");
   });
 

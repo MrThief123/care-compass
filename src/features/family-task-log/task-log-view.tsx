@@ -1,22 +1,18 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useOptimistic, useRef, useState, useTransition } from "react";
 
 import { Field, type FieldOption } from "@/components/shared/forms/field";
-import { DataTable, type DataTableColumn } from "@/components/shared/lists/data-table";
 import { SearchField } from "@/components/shared/search-field";
 import { EmptyState } from "@/components/shared/states";
-import { StatusPill } from "@/components/shared/status-pill";
 import { CardShell } from "@/components/ui/card-shell";
-import { formatShortDate } from "@/lib/format/date";
 import type { Occurrence, OccurrenceStatus } from "@/types/domain";
 
-import { occurrenceNurse } from "./occurrence-display";
 import { pageRange } from "./pagination";
 import { TaskLogPager } from "./task-log-pager";
 import { clampQueryLength, normaliseQuery, type TaskLogParams } from "./task-log-params";
+import { TaskLogTable } from "./task-log-table";
 import { taskDetailHref, taskLogHref } from "./task-routes";
 
 /** How long typing must pause before the search is put in the URL. */
@@ -45,15 +41,6 @@ const STATUS_OPTIONS: (FieldOption & { value: StatusChoice })[] = [
 function toStatusChoice(value: string): StatusChoice | undefined {
   return STATUS_OPTIONS.find((option) => option.value === value)?.value;
 }
-
-/**
- * Column widths come from the cell content, so the TASK column takes all the
- * leftover width (`w-full`) and may shrink and wrap (`max-w-0`), while DATE,
- * NURSE and STATUS hug their content, as in the design. `DataTable` has no
- * width API, so this targets its columns by position (DECISIONS.md FD-09).
- */
-const TABLE_LAYOUT =
-  "[&_th:nth-child(2)]:w-full [&_td:nth-child(2)]:w-full [&_td:nth-child(2)]:max-w-0";
 
 /**
  * Family · Task log (FAM-UI-07): title, search, Status select, the
@@ -118,63 +105,15 @@ export function TaskLogView({ clientId, items, total, pageSize, params }: TaskLo
   const filtered = params.q !== "" || params.status !== undefined;
   const { from, to } = pageRange(params.page, pageSize, total);
 
-  const columns: DataTableColumn<Occurrence>[] = [
-    {
-      key: "date",
-      header: "Date",
-      render: (occurrence) => (
-        <span className="block w-28 text-text-secondary">{formatShortDate(occurrence.start)}</span>
-      ),
-    },
-    {
-      key: "task",
-      header: "Task",
-      render: (occurrence) => (
-        // A real link gives keyboard and screen-reader users the row's action; the
-        // row's own click handler serves the pointer. Stop the click here so it
-        // does not navigate twice. `-my-2 min-h-11` gives a 44px target inside the 50px row;
-        // `w-fit` keeps the link (and its focus ring) to the text, not the whole column.
-        <Link
-          href={taskDetailHref(clientId, occurrence.key, params)}
-          onClick={(event) => event.stopPropagation()}
-          className="-my-2 flex min-h-11 w-fit max-w-full items-center break-words hover:underline"
-        >
-          {occurrence.title}
-        </Link>
-      ),
-    },
-    {
-      key: "nurse",
-      header: "Nurse",
-      render: (occurrence) => {
-        // One line, so the wide TASK column cannot squeeze a name onto two lines and
-        // grow the row past 50px; a very long name truncates, its full text on hover.
-        const nurse = occurrenceNurse(occurrence);
-        return (
-          <span title={nurse} className="block max-w-48 truncate text-text-secondary">
-            {nurse}
-          </span>
-        );
-      },
-    },
-    {
-      key: "status",
-      header: "Status",
-      render: (occurrence) => (
-        <StatusPill status={occurrence.status} actorName={occurrenceNurse(occurrence)} />
-      ),
-    },
-  ];
-
   return (
     <div className="flex flex-col gap-5 px-6 pb-6 pt-5">
       <h1 className="text-title-page text-text-primary">Task log</h1>
 
-      <div className="flex items-start gap-3">
+      <div className="flex flex-wrap items-start gap-3">
         <form
           role="search"
           aria-label="Search tasks"
-          className="min-w-0 flex-1"
+          className="min-w-0 flex-[1_1_16rem]"
           onSubmit={(event) => {
             event.preventDefault();
             go({ q: normaliseQuery(draft), status: latest.current.status });
@@ -193,7 +132,7 @@ export function TaskLogView({ clientId, items, total, pageSize, params }: TaskLo
           />
         </form>
         <Field
-          className="w-[220px] shrink-0"
+          className="w-[220px] max-w-full shrink-0"
           label="Status"
           type="select"
           value={status}
@@ -221,14 +160,11 @@ export function TaskLogView({ clientId, items, total, pageSize, params }: TaskLo
             />
           )
         ) : (
-          <DataTable
-            className={TABLE_LAYOUT}
-            columns={columns}
-            rows={items}
-            rowKey={(occurrence) => occurrence.key}
-            onRowClick={(occurrence) =>
-              router.push(taskDetailHref(clientId, occurrence.key, params))
-            }
+          <TaskLogTable
+            clientId={clientId}
+            items={items}
+            params={params}
+            onOpen={(occurrence) => router.push(taskDetailHref(clientId, occurrence.key, params))}
           />
         )}
       </CardShell>

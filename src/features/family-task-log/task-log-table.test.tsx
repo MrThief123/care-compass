@@ -11,7 +11,7 @@ import { TaskLogTable } from "./task-log-table";
 
 const ID = "client-margaret";
 
-function renderTable(items: Occurrence[], onOpen: (occurrence: Occurrence) => void = vi.fn()) {
+function renderTable(items: Occurrence[], onOpen = vi.fn<(occurrence: Occurrence) => void>()) {
   return {
     onOpen,
     ...render(
@@ -81,6 +81,7 @@ describe("[FAM-UI-07][PRD] TaskLogTable: columns that cannot push each other aro
       "[grid-area:task]",
       "[grid-area:nurse]",
       "[grid-area:status]",
+      "[grid-area:chev]",
     ]);
   });
 
@@ -144,6 +145,8 @@ describe("[FAM-UI-07][PRD] TaskLogTable: text is wrapped or cut, never overlappe
     expect(cell).toHaveTextContent(`Done · ${NAME_60}`);
     const pill = label.parentElement!;
     expect(classesOf(pill)).toEqual(expect.arrayContaining(["max-w-full", "min-w-0"]));
+    // The check icon keeps its size while the label shrinks (seen shrinking to a speck in Chromium).
+    expect(classesOf(pill)).toContain("[&>svg]:shrink-0");
   });
 
   it("[FAM-UI-07][PRD] keeps Overdue and Planned readable by word and icon, not colour alone", async () => {
@@ -209,13 +212,16 @@ describe("[FAM-UI-07][PRD] TaskLogTable: one structure, every way in", () => {
   it("[FAM-UI-07][PRD] opens a task from the row and from its link without navigating twice", async () => {
     const user = userEvent.setup();
     const items = await pageOne();
-    const { onOpen } = renderTable(items);
+    const { onOpen, container } = renderTable(items);
 
-    await user.click(within(bodyRows()[1]!).getByText(items[1]!.title));
+    // A click anywhere on the row (here the date) opens the task once.
+    await user.click(within(bodyRows()[1]!).getByText("Mon 30 Nov"));
     expect(onOpen).toHaveBeenCalledTimes(1);
     expect(onOpen).toHaveBeenCalledWith(items[1]);
 
     onOpen.mockClear();
+    // jsdom cannot navigate; cancel the link's default action so it does not log noise.
+    container.addEventListener("click", (event) => event.preventDefault(), { once: true });
     await user.click(within(bodyRows()[1]!).getByRole("link"));
     expect(onOpen).not.toHaveBeenCalled();
   });
