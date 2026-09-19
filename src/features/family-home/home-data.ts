@@ -10,6 +10,9 @@ import type { BudgetBucketSummary, Occurrence } from "@/types/domain";
 /** Rows in the Recent activity card (the design shows five). */
 export const RECENT_ACTIVITY_LIMIT = 5;
 
+/** Rows the Overdue card lists; the badge and "View all" carry the full count. */
+export const OVERDUE_ROWS_SHOWN = 5;
+
 export interface BudgetTotals {
   total: number;
   used: number;
