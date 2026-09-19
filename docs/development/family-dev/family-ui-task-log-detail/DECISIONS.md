@@ -26,6 +26,7 @@ Status verified against root `DECISIONS.md` on 2026-09-19 (`grep -n "OQ-xx" DECI
 - Test changes caused: none. The tests were written after PD-038 was read, so no existing assertion was changed.
 
 ### FD-02 — Shared mock fixtures do not hold the design's Task log data; ACs 01, 02 and 04 are BLOCKED at screen level
+- **Superseded 2026-09-19 by UI-04 (merged into this branch): the shared fixtures now hold the design week, so AC-01, AC-02 and AC-04 are MET on the real contract, and `design-fixtures.ts` is deleted.** Kept below as history.
 - Date: 2026-09-19
 - Context: `getTaskLog("client-margaret")` on the shared fixtures (`src/mocks/fixtures.ts`, UI-00) returns three occurrences, all on 30 Nov: Morning medication (Done, Aisha Rahman, `completedAt` 09:05), Collect prescription (Overdue), Afternoon walk (Planned, Sarah Nguyen). The design and the ACs need nine rows over 26–30 Nov (Physiotherapy, Afternoon check-in, Evening medication, Weekly weigh-in, Medication review, Wound dressing check…), Overdue = Weekly weigh-in + Medication review, "Completed at 09:14", a different Morning medication description, and a "Medication chart.pdf" document on that task. `DOCUMENTS` holds only "Care plan 2026.pdf", linked to no event. UI-00's PRD says the fixtures match the design; they do not. `src/mocks/**` is outside lane F.
 - Decision: did not edit `src/mocks/**`. The view components take their rows as props, so their tests feed them `src/features/family-task-log/design-fixtures.ts` (test-support data that mirrors the two design PNGs). The route-page tests use the real mock contract and assert data-driven ("one row per occurrence `getTaskLog` returns"), so they stay green when the fixtures are extended.
@@ -36,6 +37,7 @@ Status verified against root `DECISIONS.md` on 2026-09-19 (`grep -n "OQ-xx" DECI
 - Test changes caused: none.
 
 ### FD-03 — No single-occurrence contract function: Task detail is derived from `getTaskLog`
+- **Superseded 2026-09-19: UI-04 added `getOccurrence`; `findOccurrence` and its tests are deleted (FD-13).** Kept below as history.
 - Date: 2026-09-19
 - Context: the Task detail needs one occurrence by `key`. Existing contract functions are `getTodayOccurrences`, `getTaskLog(clientId, {q, status, page})`, `setOccurrenceDone`. There is no `getOccurrence`.
 - Decision: `src/features/family-task-detail/find-occurrence.ts` pages through `getTaskLog(clientId, { page })` until it finds the key (stops at the last page or an empty page) and the route calls `notFound()` when it is absent. I did not add a function to `src/server/**`.
@@ -45,6 +47,7 @@ Status verified against root `DECISIONS.md` on 2026-09-19 (`grep -n "OQ-xx" DECI
 - Test changes caused: none.
 
 ### FD-04 — No documents contract function: the Documents card shows its empty state
+- **Superseded 2026-09-19: UI-04 added `getEventDocuments`; the Documents card now lists real tiles (FD-13, FD-19).** Kept below as history.
 - Date: 2026-09-19
 - Context: the Documents card needs the documents attached to the task's event. `DocumentRef` has an optional `eventId`, but no `src/server/documents` (or any) contract function returns documents, and the shared fixtures link none to an event.
 - Decision: `TaskDetailView` takes a `documents` prop (renders a tile each, read-only) and the route passes `[]`, so the card shows "No documents attached." The filled state is covered by component tests.
@@ -120,6 +123,60 @@ Status verified against root `DECISIONS.md` on 2026-09-19 (`grep -n "OQ-xx" DECI
 - Consequences: tests that asserted client-side filtering or re-sorting are changed or removed (FD-13, **HUMAN REVIEW: test expectation changed**). AC-05 to AC-08 are new (**HUMAN REVIEW: ACs added under CHG-005**). AC-01, AC-02 and AC-04 stay BLOCKED until the shared fixtures land (FD-02).
 - Human confirmation required: yes, already given in-session for the requirement (2026-09-19); please confirm the AC additions and FD-13.
 - Test changes caused: see FD-13.
+
+### FD-13 — Existing tests whose expectation changed, and tests removed (CHG-005). **HUMAN REVIEW: test expectation changed**
+- Date: 2026-09-19
+- Context: search, Status and paging moved from the browser to the contract, and UI-04 supplied the real data. Every change below is a recorded requirement change (CLAUDE.md §5); no test was skipped, `.only`-ed or deleted to get green, and each removed assertion has a replacement named here.
+- Changes (test, before, after, reason):
+  1. `task-log-query.test.ts` (T-06, `filterTaskLog` and `sortTaskLog`): before, client-side title search, status filter and newest-day sort over the rows on screen; after, deleted with the code. Replaced by `load-task-log.test.ts` (search, Status and paging answered by the contract over 137 to 537 rows), `task-log-params.test.ts`, `pagination.test.ts`, and the page tests. Reason: client-side filtering silently covers only one page.
+  2. `task-log-view.test.tsx`, `[AC-01] renders 9 rows starting Mon 30 Nov · Morning medication…` and `…lists every design row…`: before, 9 design-fixture rows in the design's drawn order (Morning medication first, then Physiotherapy, Afternoon check-in); after, page 1 of the real contract has 20 rows and starts Afternoon check-in, Physiotherapy, Morning medication, and the nine design-week rows come first in strict newest-first order. Reason: UI-04 FD-05 (the mandated order reverses the drawn order on Mon 30 Nov). Flagged with AC-01's rewording.
+  3. `[AC-01] orders rows newest day first whatever order they arrive in (OQ-31 default)`: before, asserted the browser re-sorts a page; after, `keeps the order the contract returned and never re-sorts a page` asserts the opposite. Reason: re-sorting one page can never surface rows from other pages; ordering is the contract's job.
+  4. `[AC-02] shows only Weekly weigh-in and Medication review… when Status is Overdue` and `shows the planned rows…`: before, chose the option and the rows filtered locally; after, `?status=overdue` rendered from the real contract shows the same two rows, and choosing a Status now asserts the URL (`router.replace`, page reset). Reason: filtering is server-side.
+  5. `[AC-03] shows 'No matches for "Zoe"'` (typed), `matches task titles case-insensitively and combines…`, `brings every row back when the search is cleared`: before, typing filtered rows locally; after, `?q=Zoe` from the real contract shows the message, typing sends the search to the URL after a pause or Enter, and Clear removes q from the URL. Case-insensitive matching is the contract's (UI-04 tests). Reason: search is server-side.
+  6. `[PRD] announces how many tasks are shown…`: before, "Showing 9 of 9 tasks"; after, "Showing 21-40 of 537 tasks" and "No tasks to show". Reason: paging.
+  7. `[PRD] shows a no-tasks-found state when the status filter alone matches nothing`: before, produced by choosing a status; after, by `params.status` with a zero total. Same assertion text.
+  8. `task-log-view.test.tsx` `[PRD] renders a very long task title in full`: before, one 245-character title; after, 120-character titles, 60-character names and non-ASCII text at volume. Strengthened, nothing removed.
+  9. `find-occurrence.test.ts` (T-11): deleted with `findOccurrence`; replaced by `[occurrenceKey]/page.test.tsx` and `page.edge.test.tsx` (every one of the 137 tasks opens, the oldest row opens, a future task opens without the log, an unknown or other client's key is 404).
+  10. `[occurrenceKey]/page.test.tsx` `shows the Documents card's empty state until a documents contract exists (FD-04)`: before, the Morning medication key expected "No documents attached."; after, it expects "Medication chart.pdf" with "PDF · 82.3 KB", and the empty state is asserted at the Evening medication key (an event with no document). Reason: UI-04 gave that event a document.
+  11. `task-detail-view.test.tsx`: documents prop was `{id, name}` fixtures, now `EventDocument` from the real contract; design-fixtures replaced by `getOccurrence` rows. Assertions on Done · Aisha Rahman, Completed at 09:14, Assigned to, cards and axe are unchanged.
+  12. `page.test.tsx` (T-12): still one row per occurrence the contract returns, now driven by `searchParams`; `page.error.test.tsx` passes `searchParams`.
+  13. `task-log-view.test.tsx` fake-timer tests (mine, same session): first written with plain `vi.useFakeTimers()`, which hangs Testing Library; now `shouldAdvanceTime: true` and a half-debounce "not yet" check. Infrastructure defect, no assertion lost.
+- Human confirmation required: yes (flag in the PR).
+
+### FD-14 — This branch depends on unmerged UI-04; PR order
+- Date: 2026-09-19
+- Decision: `feature/shared-screen-contracts-fixtures` (UI-04, pushed, HEAD 22f84e9, PR to `main` not opened) is merged into this branch (commit 9a2b4c9) because the Task log needs `getTaskLog` paging and ordering, `getOccurrence` and `getEventDocuments`. Until UI-04 reaches `main`, this branch's diff includes UI-04's commits.
+- PR order: (1) UI-04 to `main`, (2) `main` synced into `family-dev`, (3) then this feature's PR to `family-dev`. Do not merge this PR first.
+- Human confirmation required: yes (sequencing).
+
+### FD-15 — URL params are validated with Zod before the contract is called; a page past the last redirects to the last page
+- Date: 2026-09-19
+- Decision: `parseTaskLogParams` (Zod) reads `?q=&status=&page=` from the URL: bad or unknown status becomes all statuses; page must be ASCII digits, else 1, clamped to 1,000,000 (a 400-digit page would parse to Infinity); q takes the first of repeated values, drops lone surrogates (they break `encodeURIComponent`), normalises to NFC, turns control characters into spaces, is trimmed and capped at 200 characters (by code points, so an emoji is not split). Only the cleaned values reach `getTaskLog` and every href (`taskLogHref` / `taskDetailHref` re-validate, so a hostile caller cannot echo raw input or change the path; the client id is always one encoded segment).
+- Page past the last (`page=99999`, or a shared link after tasks were removed): `loadTaskLog` computes the last page from the contract's `total` and `pageSize` and the page calls Next's `redirect()` (replace, so no history entry) to that page, keeping q and status. Chosen over re-fetching in place because the URL then always names the page shown. An empty result with `page > 1` redirects to page 1.
+- Note: `task-log-params.ts` imports `zod` and is also used by the client view, so `zod` is now in the Task log's client chunk (about the same weight forms screens already carry). If bundle size matters, split the pure text helpers from the schema.
+- Human confirmation required: no.
+
+### FD-16 — Search interaction: debounce 400 ms, Enter and Clear act at once, the URL is the state
+- Date: 2026-09-19
+- Decision: typing waits for a 400 ms pause, then `router.replace` (no history entry, `scroll: false`) puts q on page 1; Enter (the field sits in a `form role="search"`) and Clear act at once; the Status select acts at once and carries the text in the box; changing q or status resets page to 1. Pager links are real `Link`s (push, so Back and Forward step through pages). The box follows the URL when it changes underneath (Back, Forward, a link from Home) but ignores the echo of its own search so words typed meanwhile are not overwritten, and a search still waiting when the URL moves elsewhere is cancelled. Next 16.3's router discards a pending navigation when a newer one is dispatched (checked in `app-router-instance.js`), so a stale echo cannot arrive after a newer search. `useTransition` shows the kit search spinner and `aria-busy`; `useOptimistic` keeps the Status select from snapping back.
+- Human confirmation required: no (design has no search button; if users need one it is a design change).
+
+### FD-17 — AC-01 reworded (UI-04 FD-05); Home vs Task log overdue count (UI-04 FD-04) noted. **HUMAN REVIEW**
+- Date: 2026-09-19
+- Decision: AC-01 now reads page 1 newest first, starting Afternoon check-in, Physiotherapy, Morning medication on Mon 30 Nov, with the nine design-week rows first. The design draws Morning medication first; the contract's strict newest-first rule cannot reproduce that, and re-sorting one page in the browser is not allowed (same precedent as PD-038 wording). UI-04 FD-04: Home's design shows 3 overdue, the Task log design 2; UI-04 chose 2, so Home on mock data shows a badge of 2. Human to confirm both.
+- Human confirmation required: yes.
+
+### FD-18 — Kit gaps: disposition (FD-08 and FD-09 revisited)
+- Date: 2026-09-19
+- Fixed locally, done: FD-09 item 1 (vertical document tile, now with type and size), item 2 (column widths via `TABLE_LAYOUT` arbitrary variants; a proper `DataTable` width API remains a nice-to-have, not a defect), item 3 (`melbourne-time.ts`, plus `document-format.ts` for size and type text).
+- Improved locally: item 4 (SearchField has no label prop): the field now sits in a `form role="search" aria-label="Search tasks"`, so the landmark is named. The input itself is still named only by its placeholder. It cannot be labelled locally without duplicating the kit's SearchField or writing to its DOM from an effect; both are worse than a one-prop kit change. Request stays open (lane S).
+- NOT yet reviewed in this session (context limit): the FD-09 item 5 visual differences (search border and placeholder colour, focus ring, table header colour and underline, row-separator inset, status pill height, 4px label gap) and the kit's 24px Clear-search button (below the 44px target rule). Next session: compare against `docs/design/screens/family-07-task-log.png` in the browser check; for each, apply a className override (SearchField root and `Field` accept `className`; tailwind-merge lets `gap-2` beat `gap-1`) if it is safe and testable, otherwise record the exact reason. FD-08 (design-gap copy and skeletons) is unchanged and still needs design review.
+- Human confirmation required: yes (lane S owner for the kit requests).
+
+### FD-19 — Documents: metadata tiles, not links
+- Date: 2026-09-19
+- Decision: `EventDocument` has no URL, so tiles are information only (no link or button): file name (two lines, `break-all`, full name in `title`), then "PDF · 82.3 KB". `fileTypeLabel` maps common MIME types (PDF, image subtype upper-cased, Word, Excel, Text) and says "File" otherwise; `formatFileSize` uses 1024 units, rounds up across a unit boundary and reads "0 B" for a broken size. A failing `getEventDocuments` rejects to the route's error state rather than claiming there are no documents. Opening a document (signed URL) is Phase 3 (F0-13).
+- Human confirmation required: no.
 
 <!-- Template
 ### FD-01 — <title>

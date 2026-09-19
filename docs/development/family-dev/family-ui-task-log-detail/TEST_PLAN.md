@@ -9,32 +9,33 @@ Tests are written **before** production code (TESTING.md §2). Run them, confirm
 
 ## Test cases
 
-`T-01`–`T-04` are the planned cases, one per AC. Their AC/description wording was updated to full staff names per PD-038 (see DECISIONS.md FD-01). `T-05` onwards cover PRD Scope lines that no AC pins down (routes, states, accessibility, edge cases); their titles use `[FAM-UI-07][PRD]`.
+Test titles start `[FAM-UI-07][AC-xx]` or `[FAM-UI-07][PRD]`. After CHG-005 the ACs are proven through the real contract (`src/server/**` in mock mode, UI-04 fixtures) and, for volume, through a generated 537 and 5,000 row history behind a `vi.mock` of the contract module (`fake-task-log.ts`, test-support only). Never only the sample rows. Changed or removed tests: DECISIONS.md FD-13.
 
-| Test ID | Covers | Level | Test description | Written first? | Result |
-|---|---|---|---|---|---|
-| T-01 | AC-01 | component | Given fixtures, when Task log renders, then 9 rows appear starting 'Mon 30 Nov · Morning medication · Aisha Rahman · Done · Aisha Rahman'. | ☑ | GREEN 2026-09-19 (red first: missing module) |
-| T-02 | AC-02 | component | Given status filter Overdue, when applied, then only Weekly weigh-in and Medication review remain, each with nurse '—'. | ☑ | GREEN 2026-09-19 (red first: missing module) |
-| T-03 | AC-03 | component | Given search 'Zoe', when applied, then 'No matches for "Zoe".' is shown. | ☑ | GREEN 2026-09-19 (red first: missing module) |
-| T-04 | AC-04 | component | Given the Morning medication detail, when rendered, then 'Done · Aisha Rahman' and 'Completed at 09:14' are shown. | ☑ | GREEN 2026-09-19 (red first: missing module) |
-| T-05 | PRD | unit | Nurse label rules (OQ-29 / PD-055 / PD-038): actor once Done, shift-derived assignee otherwise, '—' if none. | ☑ | GREEN 2026-09-19 (red first: missing module) |
-| T-06 | PRD | unit | Client-side search (title, case-insensitive) and status filter combine; newest day first (OQ-31 default), contract order kept within a day. | ☑ | GREEN 2026-09-19 (red first: missing module) |
-| T-07 | PRD | unit | Routes and occurrence-key encoding: `/family/[clientId]/tasks`, `/tasks/[occurrenceKey]`, edit-event link; decode tolerates encoded, decoded and malformed keys. | ☑ | GREEN 2026-09-19 (red first: missing module) |
-| T-08 | AC-04 | unit | Melbourne wall-clock helpers: 'Completed at' `HH:mm`, Melbourne day key. | ☑ | GREEN 2026-09-19 (red first: missing module) |
-| T-09 | PRD | component | Task log interactions and states: row/link navigation, live result count, empty state, no-results state, long titles, axe. | ☑ | GREEN 2026-09-19 (red first: missing module) |
-| T-10 | PRD | component | Task detail: Back link, subline, Status/Description/Documents cards, Edit link, planned/overdue/actor variants, empty documents, long text, axe. | ☑ | GREEN 2026-09-19 (red first: missing module) |
-| T-11 | AC-04 | unit | `findOccurrence` derives one occurrence from `getTaskLog` (pages until found, stops at the end, rejects on query failure) — FD-03. | ☑ | GREEN 2026-09-19 (red first: missing module) |
-| T-12 | AC-01, AC-03, AC-04 | component | Route pages call the real mock contract (`DATA_SOURCE=mock`): rows equal what `getTaskLog` returns; empty client; detail by key; unknown/other-client key is a 404; rejected query propagates to the error boundary. | ☑ | GREEN 2026-09-19 (red first: missing module) |
-| T-13 | PRD | component | Route states: Task log loading skeleton and error state with Retry; Task detail loading skeleton and not-found page; axe on each. | ☑ | GREEN 2026-09-19 (red first: missing module) |
-| T-14 | PRD | component | Added after a browser check (each run red first): a nurse name stays on one line so rows stay 50px and its full text is on hover; the task link is sized to its text so its focus ring does not span the column. | ☑ | GREEN 2026-09-19 (red first) |
+| Test ID | Covers | Level | Test description | Result |
+|---|---|---|---|---|
+| T-01 | AC-01 | component + page | Page 1 of the real contract: 20 rows, newest first, Afternoon check-in / Physiotherapy / Morning medication on Mon 30 Nov, the nine design-week rows first, 102-char title and 51-char carer name in full, never re-sorted (`task-log-view.test.tsx`, `page.test.tsx`). | GREEN |
+| T-02 | AC-02 | component + page | `?status=overdue` from the real contract: Weekly weigh-in and Medication review, nurse '—'. | GREEN |
+| T-03 | AC-03 | component + page | `?q=Zoe`: 'No matches for "Zoe".', box shows Zoe, no rows, no pager. | GREEN |
+| T-04 | AC-04 | component + page | Morning medication detail from `getOccurrence`: 'Done · Aisha Rahman', 'Completed at 09:14'; every one of the 137 tasks and the oldest row open; a future task opens without the log (`page.edge.test.tsx`). | GREEN |
+| T-05 | PRD | unit | Nurse label rules (OQ-29 / PD-055 / PD-038). | GREEN (unchanged) |
+| T-06 | AC-05..07 | unit | REPLACED (was client-side filter/sort): `task-log-params.test.ts`, `pagination.test.ts`, `load-task-log.test.ts` (search, Status, paging over 137 to 537 rows; 0, 1, 19, 20, 21, 40, 41 rows; hostile params; redirect past the last page; page size 0). | GREEN |
+| T-07 | PRD, AC-07, AC-08 | unit | Routes, key encoding, and the shared URL contract `?q=&status=&page=` (defaults omitted, validated, round-trips awkward text, hostile client ids stay one segment). | GREEN |
+| T-08 | AC-04 | unit | Melbourne wall-clock helpers. | GREEN (unchanged) |
+| T-09 | PRD, AC-05, AC-07 | component | View: URL is the state (Status at once, debounce, Enter, Clear, follows the URL, echo not clobbering, cancel on Back and unmount, 200-char paste), states, live count, row and link navigation carrying q/status/page, 120/60/non-ASCII text, axe. | GREEN |
+| T-10 | PRD, AC-08 | component | Detail: Back link with view, cards, Edit link, variants, documents (name, type, size), long and non-ASCII text, axe. | GREEN |
+| T-11 | AC-04 | page | REPLACED (was `findOccurrence`): detail pages through `getOccurrence` (see T-04, FD-13). | GREEN |
+| T-12 | AC-01..08 | page | Route pages on the real mock contract and on the generated history (`page.test.tsx`, `page.volume.test.tsx`, `[occurrenceKey]/page.test.tsx`, `page.edge.test.tsx`). | GREEN |
+| T-13 | PRD | component | Route states: loading skeleton, error with Retry, not-found; failing queries reject. | GREEN (unchanged, plus `page.error.test.tsx` with searchParams) |
+| T-14 | PRD | component | Nurse name on one line with title; task link sized to its text. | GREEN (unchanged) |
+| T-15 | AC-05 | component | Pager: 'Showing 21-40 of 137', Previous/Next, one current page, 7-slot window for 27 pages, 44px classes, rel prev/next, none for one page, axe. | GREEN |
+| T-16 | PRD | unit + component | Document tile and `formatFileSize` / `fileTypeLabel` (92-char name cut with title, non-ASCII, unknown type, 0 bytes). | GREEN |
 
-
-**Requirement change (CHG-005, FD-12):** search, Status filter and paging are now server-driven across the whole history, so the client-side filter/sort tests (T-06 and the filtering assertions in T-01, T-02, T-03, T-09) change or move to the page and loader level. Each changed or removed test is listed with before, after and reason in DECISIONS.md FD-13. New tests use `[FAM-UI-07][AC-05]` to `[AC-08]` and `[FAM-UI-07][PRD]`, and run against generated data at realistic volumes (537 rows, exactly one page, exactly 20, 21, none; 120-character titles, 60-character names, non-ASCII), never only the sample rows.
+**Red-first evidence.** Commit 50f9fb5 (inherited tests, reviewed): 5 files failed to load (missing `task-log-params`, `pagination`, `load-task-log`, `task-log-pager`, and `taskLogHref` params). Commit a54fbc3 (rewritten tests): 6 files failed to load (those four modules, `task-log-params` from the routes test, and `document-format`) and 74 tests failed (no `searchParams`, pager, redirect, `getOccurrence`, documents, back-link params, search landmark, debounce). Implementation followed in 5f7c754 and ea21964.
 
 ### Test files
-- `src/features/family-task-log/`: `occurrence-display.test.ts` (T-05), `task-log-query.test.ts` (T-06), `task-routes.test.ts` (T-07), `melbourne-time.test.ts` (T-08), `task-log-view.test.tsx` (T-01, T-02, T-03, T-09, T-14); `design-fixtures.ts` is test-support data (FD-02).
-- `src/features/family-task-detail/`: `task-detail-view.test.tsx` (T-04, T-10), `find-occurrence.test.ts` (T-11).
-- `src/app/(family)/family/[clientId]/tasks/`: `page.test.tsx`, `page.error.test.tsx`, `states.test.tsx`, `[occurrenceKey]/page.test.tsx`, `[occurrenceKey]/states.test.tsx` (T-12, T-13).
+- `src/features/family-task-log/`: `occurrence-display.test.ts`, `melbourne-time.test.ts`, `task-routes.test.ts`, `task-log-params.test.ts`, `pagination.test.ts`, `load-task-log.test.ts`, `task-log-pager.test.tsx`, `task-log-view.test.tsx`; `fake-task-log.ts` is test-support (a `getTaskLog` double for 500+ rows that throws on an invalid page).
+- `src/features/family-task-detail/`: `task-detail-view.test.tsx`, `document-tile.test.tsx` (with `document-format`).
+- `src/app/(family)/family/[clientId]/tasks/`: `page.test.tsx`, `page.volume.test.tsx`, `page.error.test.tsx`, `states.test.tsx`, `[occurrenceKey]/page.test.tsx`, `[occurrenceKey]/page.edge.test.tsx`, `[occurrenceKey]/states.test.tsx`.
 
 ## Regression scope
 - Full unit/component suite: `npx vitest run src` (run, green). `npm run verify` is red on a fresh worktree only because `tests/integration/shared-supabase-environment.test.ts` needs Supabase env vars (known baseline, not this feature); the individual verify steps were run instead (see PROGRESS.md).
@@ -43,7 +44,7 @@ Tests are written **before** production code (TESTING.md §2). Run them, confirm
 
 ## Test data
 - Use `F0-16` seed data (Banksia Home Care, Margaret, Helen, Aisha Rahman, Priya) unless a test creates its own fixtures.
-- The shared mock fixtures do not yet hold the design's nine Task log rows (FD-02), so the component tests create their own design-matching rows in `src/features/family-task-log/design-fixtures.ts`; the route-page tests use the real mock contract.
+- The shared mock fixtures (UI-04) hold Margaret's 137 log rows, the design week, six documents and Robert's 3 rows; tests read them through `src/server/**`. Volume tests use `fake-task-log.ts` (537 and 5,000 generated rows).
 
 ## Coverage mapping rule
 Every AC must have ≥1 test. Tests may only be modified after implementation begins for reasons in TESTING.md §6, recorded in DECISIONS.md.
