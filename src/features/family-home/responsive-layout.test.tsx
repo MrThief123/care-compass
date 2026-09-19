@@ -51,11 +51,11 @@ function renderHome() {
 }
 
 describe("[FAM-UI-01][PRD] Home layout adapts to the width", () => {
-  it("[FAM-UI-01][PRD] is one column, then two columns from 768px, then the design's 340px column from 1280px", () => {
+  it("[FAM-UI-01][PRD] is one column, then two columns from 1024px, then the design's 340px column from 1280px", () => {
     const { container } = renderHome();
     const grid = container.querySelector(".grid")!;
 
-    expect(grid).toHaveClass("grid-cols-1", "md:grid-cols-2");
+    expect(grid).toHaveClass("grid-cols-1", "lg:grid-cols-2");
     expect(grid.className).toContain("xl:grid-cols-[minmax(0,1fr)_340px]");
   });
 
