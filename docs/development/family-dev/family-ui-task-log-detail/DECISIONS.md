@@ -163,8 +163,8 @@ Status verified against root `DECISIONS.md` on 2026-09-19 (`grep -n "OQ-xx" DECI
 
 ### FD-17 — AC-01 reworded (UI-04 FD-05); Home vs Task log overdue count (UI-04 FD-04) noted. **HUMAN REVIEW**
 - Date: 2026-09-19
-- Decision: AC-01 now reads page 1 newest first, starting Afternoon check-in, Physiotherapy, Morning medication on Mon 30 Nov, with the nine design-week rows first. The design draws Morning medication first; the contract's strict newest-first rule cannot reproduce that, and re-sorting one page in the browser is not allowed (same precedent as PD-038 wording). UI-04 FD-04: Home's design shows 3 overdue, the Task log design 2; UI-04 chose 2, so Home on mock data shows a badge of 2. Human to confirm both.
-- Human confirmation required: yes.
+- Decision: AC-01 now reads page 1 newest first, starting Afternoon check-in, Physiotherapy, Morning medication on Mon 30 Nov, with the nine design-week rows first. The design draws Morning medication first; the contract's strict newest-first rule cannot reproduce that, and re-sorting one page in the browser is not allowed (same precedent as PD-038 wording). UI-04 FD-04: Home's design shows 3 overdue, the Task log design 2; UI-04 chose 2, so Home on mock data shows a badge of 2. Human to confirm both. **Both now ANSWERED by the human on 2026-09-20: see FD-24.**
+- Human confirmation: ANSWERED (FD-24).
 
 ### FD-18 — Kit gaps: disposition (FD-08 and FD-09 revisited)
 - Date: 2026-09-19
@@ -234,6 +234,14 @@ Status verified against root `DECISIONS.md` on 2026-09-19 (`grep -n "OQ-xx" DECI
 - Follow-ups for lane S (shared, not done here): the kit `SearchField` border and Clear-target size, `StatusPill` height with and without a border, `Field` label gap, `DataTable` header underline and colour and the separator inset, plus FD-20's `DataTable` widths and overflow request.
 - Human confirmation required: yes (the not-changed items).
 - Test changes caused: none to existing tests. New tests (run red first in ae3e25d): `status-pill-class.test.ts` (4), two in `task-log-table.test.tsx`, three in `task-log-view.test.tsx`, one in `task-detail-view.test.tsx`.
+
+### FD-24 — The human's answers to UI-04 FD-04 and FD-05 (2026-09-20). ANSWERED
+- Date: 2026-09-20
+- Context: two questions raised in FD-17 (from UI-04's DECISIONS.md FD-04 and FD-05) that this feature depended on. The human answered them in the session; UI-04 recorded the answers in its docs commit 788cd6c, merged into this branch in d49b4e2 (the only thing that merge adds; docs only).
+- FD-04, Home's design shows 3 overdue tasks and the Task log design shows 2. The human (Dhruv Verma, 2026-09-20): "Doesn't matter". Consequence: the Task log's reading (two overdue: Weekly weigh-in and Medication review) stays and the fixtures are unchanged, so AC-02 stands as written; Home on the mock data shows an Overdue badge of 2. Status: ANSWERED.
+- FD-05, within-day order (the design draws Morning medication first on Mon 30 Nov, the contract's newest-first rule gives Afternoon check-in, Physiotherapy, Morning medication). The human (2026-09-20): "Based off time they were created in calendar". Read as: order strictly by the time the task holds on the calendar (its start instant), newest first, ties by key ascending, which is the contract rule as built, so nothing changes in this feature: the drawn within-day order is not followed and AC-01's wording (Afternoon check-in, Physiotherapy, Morning medication, then the nine design-week rows) stands. If the human meant something else (for example earliest first within a day), it is one comparator in `src/mocks/queries/events.ts` plus the contract tests, not a screen change. Status: ANSWERED; the AC-01 HUMAN REVIEW note now only concerns the reworded criterion itself (FD-17, FD-01), which stays flagged for the PR.
+- No open decision blocks this feature. OQ-31 and OQ-39 stay OPEN, with their proposed defaults applied and noted (FD-06, FD-07).
+- Human confirmation required: no (this records answers already given).
 
 <!-- Template
 ### FD-01 — <title>

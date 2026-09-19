@@ -1,6 +1,6 @@
 # Progress — FAM-UI-07 Family Task log and Task detail screens (UI)
 
-Status: IN PROGRESS (CHG-005 green and browser-checked by the reviewer; responsive Task log table (Task A), Task detail / document tile (Task B), pager (Task C) and visual polish (Task D) DONE, green and pushed; Task E remains)
+Status: READY FOR PR (all in-scope ACs MET, Tasks A to E done, verified; the PR is NOT opened: it needs the human's yes and UI-04 on `main` first, FD-14)
 Owner: Dhruv Verma
 Lane: F — Family
 Sprint: SPRINT · planned D6–D7
@@ -8,15 +8,15 @@ Branch: `feature/family-ui-task-log-detail` (created from `origin/family-dev`; m
 PR target: `family-dev`
 Last updated: 2026-09-20
 
-**Not READY FOR PR.** The human's layout requirement (2026-09-20): "Things should fit into their tabs and if too big then should resize or get cutoff rather than overlap." Tasks A (Task log table), B (Task detail and document tile), C (pager) and D (visual polish, FD-18 and FD-23) are done; E (record answers, merge docs commit, final verification) remains: exact steps in SESSION_STATE.md. PR order is fixed by FD-14: UI-04 to `main`, then `main` into `family-dev`, then this PR. Nothing has been opened or merged.
+**READY FOR PR, not opened.** The human's layout requirement (2026-09-20): "Things should fit into their tabs and if too big then should resize or get cutoff rather than overlap." is met on the Task log (Task A, FD-20), Task detail and the document tile (Task B, FD-21) and the pager (Task C, FD-22); the visual polish against the design (Task D, FD-23) is done with the not-changed items recorded; the human's answers to UI-04 FD-04 and FD-05 are recorded (Task E, FD-24) and UI-04's docs commit is merged (d49b4e2). PR order is fixed by FD-14: UI-04 to `main`, then `main` into `family-dev`, then this PR. Nothing has been opened or merged to another branch; wait for the human's yes (PD-056).
 
 ## Blockers
 - None technical. The PR is sequenced behind UI-04 (FD-14).
 
 ## HUMAN REVIEW
-- **AC-01 wording changed (FD-17, UI-04 FD-05):** strict newest-first replaces the design's drawn order; page 1 starts Afternoon check-in, Physiotherapy, Morning medication. Also AC-01/AC-04 use full names (FD-01, PD-038). AC-05 to AC-08 were added under CHG-005.
+- **AC-01 wording changed (FD-17, UI-04 FD-05; the order itself was answered, FD-24):** strict newest-first replaces the design's drawn order; page 1 starts Afternoon check-in, Physiotherapy, Morning medication. Also AC-01/AC-04 use full names (FD-01, PD-038). AC-05 to AC-08 were added under CHG-005.
 - **HUMAN REVIEW: test expectation changed (FD-13):** 13 items with before, after and reason; client-side filter and sort tests, the `findOccurrence` tests and the Documents-empty test changed or were replaced. No test skipped, `.only`-ed or silently deleted.
-- **Design conflict (UI-04 FD-04):** Home's design shows 3 overdue, the Task log design 2; UI-04 chose 2. Human to confirm.
+- **Answered by the human on 2026-09-20 (FD-24):** UI-04 FD-04 (Home's design shows 3 overdue, the Task log 2): "Doesn't matter", so 2 stays; UI-04 FD-05 (within-day order): "Based off time they were created in calendar", read as strictly by calendar start time (the contract rule as built), so AC-01's wording stands. Nothing further to confirm on these two.
 - **Design gaps built from tokens (FD-08, PD-052)** and the pager, "No tasks to show", document tile type/size line: design owner to review.
 - **Design fidelity calls in FD-23 (Task D), please review:** what was matched to the design (teal search border, 8px label gap, 26px pills, no header underline, 44px Clear target) and what was deliberately not (placeholder and heading colour below 4.5:1, focus ring, separator inset, the search input's accessible name); shared-kit requests for lane S.
 - **Design call in FD-22 (Task C), please review:** below a 28rem-wide pager the numbers give way to Previous / 'Page x of y' / Next on one line.
@@ -43,11 +43,11 @@ Last updated: 2026-09-20
 ## In progress
 - None.
 
-## Remaining (in this order; commit and push after each; details in SESSION_STATE.md; Tasks B, C and D are done)
-- **E. Record and finish**: (1) FD-24 (next free number): FD-04 answered "Doesn't matter" (Task log's 2 overdue stays) and FD-05 answered "Based off time they were created in calendar" (read as strictly by calendar start time, the contract rule as built: newest first, ties by key ascending; AC-01 wording stands), both by the human on 2026-09-20; (2) the shared `DataTable` follow-up is already recorded in FD-20 (repeat it in the PR body); (3) merge `origin/feature/shared-screen-contracts-fixtures` once (docs-only commit 788cd6c) and keep the PR order note (FD-14); (4) update ACCEPTANCE_CRITERIA, TEST_PLAN, PROGRESS, SESSION_STATE, DECISIONS honestly; (5) final verification (below, plain `npx vitest run` included), `END SESSION`, report READY FOR PR.
+## Remaining
+- Nothing to build. Wait for the human's yes to open the PR (PD-056), and for UI-04 to reach `main` and be synced into `family-dev` (FD-14).
 
 ## Acceptance criteria status
-- 8 / 8 MET at test level (AC-05 to AC-08 also await the real-browser check).
+- 8 / 8 MET at test level, and driven in a real browser (paging, hostile params, Back with q/status/page, search in the URL; see the final sweep).
 
 | AC | Status | Proven by |
 |---|---|---|
@@ -55,10 +55,10 @@ Last updated: 2026-09-20
 | AC-02 | MET | `[AC-02]` view and page tests (`?status=overdue`: 2 rows, nurse '—') |
 | AC-03 | MET | `[AC-03]` view and page tests (`?q=Zoe`) |
 | AC-04 | MET | `[AC-04]` tests: detail view, page, all 137 keys open, oldest row opens, future task via `page.edge.test.tsx` |
-| AC-05 | MET (tests) | pager tests, `page.test.tsx` (7 pages, 137 rows once each), `page.volume.test.tsx` (537 and 5,000 rows, 0/1/19/20/21/40/41) |
-| AC-06 | MET (tests) | `task-log-params.test.ts`, `load-task-log.test.ts`, page tests (page 0, -3, abc, 1.5, 99999, status=bogus, 5,000-char q) |
-| AC-07 | MET (tests) | view tests with a mocked router (debounce, Enter, Clear, Status, follows URL, echo, cancel) |
-| AC-08 | MET (tests) | routes, view, detail view and page tests |
+| AC-05 | MET (tests + browser) | pager tests, `page.test.tsx` (7 pages, 137 rows once each), `page.volume.test.tsx` (537 and 5,000 rows, 0/1/19/20/21/40/41) |
+| AC-06 | MET (tests + browser: page 0, -3, abc and 1.5 give page 1, 99999 gives the last page, status=bogus gives all, a 5,000-character q is cut to 200; HTTP 200, no console errors) | `task-log-params.test.ts`, `load-task-log.test.ts`, page tests (page 0, -3, abc, 1.5, 99999, status=bogus, 5,000-char q) |
+| AC-07 | MET (tests + browser: search and Status put q and status in the URL; they use `router.replace`, so they add no history entries, by design FD-16; paging links and 'Back to Task log' do navigate) | view tests with a mocked router (debounce, Enter, Clear, Status, follows URL, echo, cancel) |
+| AC-08 | MET (tests + browser: from `?q=medication&status=done&page=2` a task opens and Back returns to the same URL, first row, box text and Status) | routes, view, detail view and page tests |
 
 ## Tests
 - Red first: commits 50f9fb5 (5 files failing to load) and a54fbc3 (6 files failing to load, 74 tests failing) before any implementation; green in 5f7c754 and ea21964. Details: TEST_PLAN.md.
@@ -108,6 +108,25 @@ Page-level scroll from the pager was 0 at every width (the +57px at 375 is the f
 
 Before (375, 5,000 rows, page 125): 2 rows of controls, nav 118px; the current page was on the second row. Screenshots looked at: 5,000 rows at 768 and 640 (numbers, one row) and 375 (before: two rows; after: "Previous  Page 125 of 250  Next").
 
+## Final verification (2026-09-20, after Tasks A to E; code of 0ed2294 plus docs)
+- `npx vitest run src` -> 75 files, 776 tests, all pass (was 74 / 747 after Task A: Tasks B to D add 29 tests: 4+7 detail and tile, 8 pager, 10 polish).
+- `npx vitest run` (plain) -> 79 files: 78 pass, 1 fails; 782 tests pass. The one failure is the known baseline `tests/integration/shared-supabase-environment.test.ts` (throws at import: no Supabase env vars). `mocks-import-boundary.test.ts` and `day-timeline.test.tsx` passed this time.
+- `npm run lint` -> 0 errors, 23 warnings (the same pre-existing ones). `npm run typecheck` -> clean. `npm run format:check` -> clean.
+- Throwaway preview routes (`zz-preview`, `zz-pager`) deleted before the final runs; not committed.
+
+### Final real-browser sweep (Chromium against `next dev` on :3107, throwaway scripts outside the repo)
+Each cell: page-level horizontal scroll in px / rows of text overlapping a neighbour / boxes painted past their container. Identical for all five pages:
+
+| Page | 1920 | 1440 | 1280 | 1024 | 900 | 768 | 640 | 375 |
+|---|---|---|---|---|---|---|---|---|
+| `/family/client-margaret/tasks?as=family` | 0/0/0 | 0/0/0 | 0/0/0 | 0/0/0 | 0/0/0 | 0/0/0 | 0/0/0 | 57/0/0 |
+| `...?as=family&page=7` | 0/0/0 | 0/0/0 | 0/0/0 | 0/0/0 | 0/0/0 | 0/0/0 | 0/0/0 | 57/0/0 |
+| `...?as=family&status=overdue` | 0/0/0 | 0/0/0 | 0/0/0 | 0/0/0 | 0/0/0 | 0/0/0 | 0/0/0 | 57/0/0 |
+| detail: eye-drops (102-char title, 51-char carer, 92-char document) | 0/0/0 | 0/0/0 | 0/0/0 | 0/0/0 | 0/0/0 | 0/0/0 | 0/0/0 | 57/0/0 |
+| detail: physio (2 documents) | 0/0/0 | 0/0/0 | 0/0/0 | 0/0/0 | 0/0/0 | 0/0/0 | 0/0/0 | 57/0/0 |
+
+The +57px at 375 is the family layout header (out of scope; phone views are parked, PL-17). No console errors on any page. Behaviour also driven in the browser: Next and a page-number link change the page (`?page=2`, `?page=7`, 'Showing 121-137 of 137', 17 rows); at 375 the pager reads Previous / 'Page 7 of 7' (numbers hidden) and Previous goes to `?page=6`; a task opened from `?q=medication&status=done&page=2` carries those params and 'Back to Task log' returns to the same URL with the same first row, box text and Status; typing 'physio' puts `?q=physio` in the URL (14 rows).
+
 ## Verification of Task A (commit 573c732, 2026-09-20)
 - `npx vitest run src` -> 74 files, 747 tests, all pass (was 73 / 730: `task-log-table.test.tsx` adds 14, `task-log-view.test.tsx` adds 3).
 - `npm run lint` -> 0 errors, 23 warnings (the same pre-existing ones). `npm run typecheck` -> clean. `npm run format:check` -> clean.
@@ -133,7 +152,7 @@ Before (375, 5,000 rows, page 125): 2 rows of controls, nav 118px; the current p
 - To run the pages locally: `NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321 NEXT_PUBLIC_SUPABASE_ANON_KEY=dummy SUPABASE_SERVICE_ROLE_KEY=dummy npx next dev -p 3107`, then open `/family/client-margaret/tasks?as=family`.
 
 ## Next action
-- Task E (SESSION_STATE.md). Do not open the PR without approval (PD-056).
+- None for code. On the human's yes and once UI-04 is on `main` and synced into `family-dev` (FD-14): re-run `git fetch origin`, merge `origin/family-dev` into this branch, re-run the verification below, then open the PR to `family-dev` with the PR body from `docs/development/family-dev/family-ui-task-log-detail/` (mention the FD-20 shared `DataTable` follow-up and the FD-23 kit requests). Do not open it without approval.
 
 ## Ready for PR
-- No: Tasks B to E outstanding; PR sequencing per FD-14.
+- Yes, pending the human's approval and FD-14 sequencing (the ACs are MET, the relevant suites are green, only owned folders changed, docs are current).

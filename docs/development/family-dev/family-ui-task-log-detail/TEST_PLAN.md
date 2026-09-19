@@ -41,9 +41,9 @@ Test titles start `[FAM-UI-07][AC-xx]` or `[FAM-UI-07][PRD]`. After CHG-005 the 
 - `src/app/(family)/family/[clientId]/tasks/`: `page.test.tsx`, `page.volume.test.tsx`, `page.error.test.tsx`, `states.test.tsx`, `[occurrenceKey]/page.test.tsx`, `[occurrenceKey]/page.edge.test.tsx`, `[occurrenceKey]/states.test.tsx`.
 
 ## Regression scope
-- Full unit/component suite: `npx vitest run src` (run, green). `npm run verify` is red on a fresh worktree only because `tests/integration/shared-supabase-environment.test.ts` needs Supabase env vars (known baseline, not this feature); the individual verify steps were run instead (see PROGRESS.md).
+- Full unit/component suite: `npx vitest run src` (run, green: 75 files, 776 tests; plain `npx vitest run`: 78 of 79 files pass, only the known baseline `shared-supabase-environment.test.ts` fails, 782 tests pass). `npm run verify` is red on a fresh worktree only because `tests/integration/shared-supabase-environment.test.ts` needs Supabase env vars (known baseline, not this feature); the individual verify steps were run instead (see PROGRESS.md).
 - `supabase test db`: not run and not applicable. This feature changes no schema, and running the Supabase CLI is out of bounds for this session.
-- Playwright e2e: not run. This feature has no e2e AC (TESTING.md §5: only for features with e2e ACs and before checkpoints D10/D12); the pages were driven in headless Chromium against `next dev` instead (see PROGRESS.md).
+- Playwright e2e: not run. This feature has no e2e AC (TESTING.md §5: only for features with e2e ACs and before checkpoints D10/D12); the pages were driven in headless Chromium against `next dev` instead: width sweeps, paging, hostile params, search, and Back (see PROGRESS.md).
 
 ## Test data
 - Use `F0-16` seed data (Banksia Home Care, Margaret, Helen, Aisha Rahman, Priya) unless a test creates its own fixtures.
