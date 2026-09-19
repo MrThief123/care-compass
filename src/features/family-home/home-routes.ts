@@ -1,6 +1,6 @@
 /**
  * Where the Family · Home screen sends people. Task detail lives at
- * `/family/[clientId]/tasks/[occurrenceKey]` (ARCHITECTURE.md §3); an
+ * `/family/[clientId]/tasks/[occurrenceKey]` (ARCHITECTURE.md §3.1); an
  * occurrence key is `${eventId}:${originalStartISO}` and holds ':' and '+',
  * so it is encoded into the path segment.
  */
