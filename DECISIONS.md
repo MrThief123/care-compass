@@ -481,6 +481,24 @@ Docs updated: DECISIONS.md
 - Human confirmation: Dhruv Verma, 2026-09-19.
 - Docs updated: DECISIONS.md (this entry). Pending on F0-03: `commitlint.config.mjs` and/or CLAUDE.md §8.
 
+### CHG-004 — Extend events contract and add documents read; extend mock fixtures
+- Date / requested by: 2026-09-19 / Dhruv Verma (human, project lead)
+- Type: new feature (shared, Lane S) and architectural change (contract extension)
+- Description: a new shared feature, **UI-04** (`feature/shared-screen-contracts-fixtures`, PR → `main`), (1) defines `getTaskLog` as newest first by `start` instant, ties by `key` ascending, `total` = count after `q`/`status`, page size 20, a page past the last returns no items with the right `total`, and validates its input with the existing Zod `TaskLogQuerySchema`; (2) adds `getOccurrence(clientId, key): Promise<Occurrence | undefined>` to `src/server/events/queries.ts`; (3) adds a new domain `src/server/documents/queries.ts` with `getEventDocuments(clientId, eventId): Promise<EventDocument[]>` (metadata only, no signed URL or download); (4) extends `src/mocks/**` so Margaret's fixtures match the design (26–30 Nov 2026, header 78 years · Preston VIC), add a deterministic long history (over 120 completed occurrences), long text (about 100-character task title, about 50-character carer name), event-attached documents, and a second client's occurrences for isolation tests. Mock-only, no database.
+- Source / justification: FAM-UI-01 (Home) and FAM-UI-07 (Task log and detail) found gaps they cannot fix from lane F (their DECISIONS.md FD-02, FD-03, FD-04, FD-08 and FD-12): no defined order or bounded paging, no way to open an occurrence outside the first page, no documents contract, and fixtures that do not carry the design's data. Human instruction in-session, 2026-09-19: "it should be able to do everything like getting logs in full without limitations", open any task, and see attached documents.
+- Impact: `src/server/events/queries.ts` (extended, not recreated, per CHG-002), `src/server/documents/queries.ts` (new; per CHG-002 every other domain's contract files are authored from scratch, here by Lane S by human decision), `src/types/domain.ts`, `src/mocks/**`; DEVELOPMENT_PLAN.md gains the UI-04 row and card. Existing test expectation changed: `tests/integration/shared-app-shell-clients-contract.test.ts` (Margaret's age and suburb, now matching the design), recorded in the feature DECISIONS.md. FAM-14, FAM-15 and F0-11 must implement the same ordering, `total` and validation semantics against Supabase. No family feature PRD is edited by this change.
+- Human confirmation: Dhruv Verma, 2026-09-19 (in-session).
+- Docs updated: DECISIONS.md (this entry), DEVELOPMENT_PLAN.md (UI-04 row, card, totals), `docs/development/shared/shared-screen-contracts-fixtures/`.
+
+### CHG-005 — FAM-UI-07 Task log scope: full-history server-driven search, filter and pagination (supersedes the PRD line "client-side over fixtures")
+- Date / requested by: 2026-09-19 / Dhruv Verma (human, project lead)
+- Type: scope change
+- Description: the FAM-UI-07 PRD Scope says search and filter act on fixtures client-side (server search comes with wiring). That is replaced: the Task log is the whole, server-driven history. The screen reads `q`, `status` and `page` from the URL, validates them, calls `getTaskLog(clientId, {q, status, page})`, shows `total`/`pageSize` and a pager, and never filters or re-sorts in the browser; Task detail opens any occurrence, past or future, through `getOccurrence`; its Documents card reads `getEventDocuments`. The contract these need is delivered by UI-04 (CHG-004).
+- Source / justification: human instruction in-session, 2026-09-19: "it should be able to do everything like getting logs in full without limitations". A real person will use and add to the app, so every screen must work for whatever data builds up, not only for sample rows.
+- Impact: FAM-UI-07 PRD Scope and Functional Requirements, AC wording (its AC-02 and AC-03 already reworded and AC-05 to AC-08 added on its branch, FD-12) and TEST_PLAN, updated by the family agents in their own lane; FAM-14 (Task log wiring) and FAM-15 (Task detail wiring) implement the same contract on Supabase. FAM-UI-01 (Home) reads the same contract and its Recent activity and Overdue composition follow the newest-first order. No family feature document is edited by this shared feature.
+- Human confirmation: Dhruv Verma, 2026-09-19 (in-session).
+- Docs updated: DECISIONS.md (this entry). The family features record it in their own DECISIONS.md.
+
 Template for future entries:
 ```
 ### CHG-xxx — <title>

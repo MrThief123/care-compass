@@ -26,6 +26,7 @@
 
 import { useState } from "react";
 
+import { DevPreviewNav } from "@/components/shared/dev-preview-nav";
 import { FileTile } from "@/components/shared/file-tile";
 import { ChipGroup } from "@/components/shared/forms/chip-group";
 import { ConfirmationModal } from "@/components/shared/forms/confirmation-modal";
@@ -68,6 +69,7 @@ export default function DevPreviewFormsKitPage() {
 
   return (
     <main className="mx-auto flex max-w-5xl flex-col gap-8 bg-bg-canvas p-6">
+      <DevPreviewNav />
       <h1 className="text-title-page text-text-primary">UI-02 forms kit — dev preview</h1>
 
       <Section title="Event form (Edit event)">
