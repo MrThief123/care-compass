@@ -221,6 +221,29 @@ export const DocumentRefSchema = z.object({
 });
 export type DocumentRef = z.infer<typeof DocumentRefSchema>;
 
+/**
+ * A document attached to a care event, as a screen reads it (UI-04, CHG-004).
+ * Metadata only, mirroring the F0-13 `documents` row (`filename`, `mime_type`,
+ * `size_bytes`, `uploaded_by`, `uploaded_at`, `event_id`). There is
+ * deliberately no `url`: the bucket is private and a document is opened
+ * through a short-lived signed URL (F0-13), never a stored link.
+ */
+export const EventDocumentSchema = z.object({
+  id: z.string(),
+  clientId: z.string(),
+  eventId: z.string(),
+  /** File name as shown on the tile, e.g. "Medication chart.pdf". */
+  name: z.string(),
+  /** MIME type, e.g. "application/pdf". */
+  mimeType: z.string(),
+  /** Size in bytes. */
+  sizeBytes: z.number().int().nonnegative(),
+  /** ISO datetime. */
+  uploadedAt: z.string(),
+  uploadedBy: z.string().optional(),
+});
+export type EventDocument = z.infer<typeof EventDocumentSchema>;
+
 // ---------------------------------------------------------------------------
 // Carer notifications
 // ---------------------------------------------------------------------------
@@ -263,6 +286,15 @@ export type StaffMember = z.infer<typeof StaffMemberSchema>;
 // Query parameter / result shapes referenced by PRD.md Scope examples
 // ---------------------------------------------------------------------------
 
+/** Rows per Task log page, one number for every data source (UI-04). */
+export const TASK_LOG_PAGE_SIZE = 20;
+
+/**
+ * Input to `getTaskLog`. `page` is 1-based and must be a positive integer
+ * (0, negatives, fractions, NaN and Infinity are rejected); a page past the
+ * last is valid and returns no items. `q` is a trimmed, case-insensitive
+ * substring of the task title; `status` is an exact match.
+ */
 export const TaskLogQuerySchema = z.object({
   q: z.string().optional(),
   status: OccurrenceStatusSchema.optional(),
@@ -270,6 +302,17 @@ export const TaskLogQuerySchema = z.object({
 });
 export type TaskLogQuery = z.infer<typeof TaskLogQuerySchema>;
 
+/**
+ * One page of a client's task history, the whole history and not a window of
+ * it (UI-04, CHG-004, CHG-005).
+ *
+ * Ordering, for every data source: newest first by `start` (instants, not
+ * strings), ties broken by `key` ascending, so the order is deterministic and
+ * pages never overlap or skip. `total` is the number of rows after the `q` and
+ * `status` filters, across all pages. `page` echoes the requested page and
+ * `pageSize` is `TASK_LOG_PAGE_SIZE`. A page beyond the last has an empty
+ * `items` array and the same `total`.
+ */
 export interface TaskLogResult {
   items: Occurrence[];
   page: number;
