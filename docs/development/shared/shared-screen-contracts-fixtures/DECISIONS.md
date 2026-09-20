@@ -37,14 +37,14 @@ Authorisation: root DECISIONS.md CHG-004 (this feature) and CHG-005 (FAM-UI-07 T
 - Context: `family-01-home.png` lists three overdue items (Wound dressing check Fri 27 Nov, Medication review Sat 28, Weekly weigh-in Sun 29; badge 3). `family-07-task-log.png` shows nine rows in which only Medication review and Weekly weigh-in are Overdue and Wound dressing check appears once, Done, on Thu 26 Nov. Home and the Task log read the same `getTaskLog(..., {status: 'overdue'})`, so one dataset cannot satisfy FAM-UI-01 AC-02 (badge 3) and FAM-UI-07 AC-02 (only two remain).
 - Decision: follow the Task log (two overdue). This unblocks FAM-UI-07 AC-01, AC-02 and AC-04, which are BLOCKED on the fixtures, and does not break FAM-UI-01, whose tests use test-local fixtures. Home on the running app therefore shows an Overdue badge of 2 (Medication review, Weekly weigh-in). The former overdue "Collect prescription" is removed.
 - Alternatives considered: add an overdue Wound dressing check on Fri 27 Nov (Home exact, Task log shows 3 overdue and a tenth row). To switch, add one occurrence of `event-margaret-wound-dressing` starting 2026-11-27T10:00:00+11:00 with status `overdue` to `MARGARET_DESIGN_WEEK` in `src/mocks/fixtures.ts`, then update the tests that count the design week, the overdue total and the status split.
-- Human confirmation required: yes (design owner to say which screen is right).
+- Human confirmation: ANSWERED 2026-09-20 by the human (Dhruv Verma, in-session): "Doesn't matter". The Task log reading (two overdue) stays and the fixtures are not changed; Home on the mock data shows an Overdue badge of 2.
 
 ### FD-05 — Within-day order of the design rows differs from the drawn order on Mon 30 Nov
 - Date: 2026-09-19
 - Context: the mandated order is strictly newest first by `start`. The design draws Mon 30 Nov as 09:00, 11:30, 15:00 (chronological within the day) although the days run newest first. No time rule reproduces the drawing (Sun 29 draws 18:00 before 09:30).
 - Decision: follow the contract rule. Mon 30 Nov reads Afternoon check-in (15:00), Physiotherapy (11:30), Morning medication (09:00). Times on Sat 28 (Medication review 10:00, Physiotherapy 11:30) and Sun 29 (Evening medication 18:00, Weekly weigh-in 09:30) are chosen so the contract order equals the drawn order there, which also makes the Home Recent activity list identical to the design.
 - Consequences: FAM-UI-07 AC-01 ("9 rows starting Morning medication") cannot hold literally; page 1 also has 11 older rows and starts with Afternoon check-in. Family owners update their AC wording (CHG-005 already supersedes the client-side ordering).
-- Human confirmation required: yes.
+- Human confirmation: ANSWERED 2026-09-20 by the human (Dhruv Verma, in-session): "Based off time they were created in calendar". Read as: order strictly by the time a task holds on the calendar (its start instant), which is the contract rule chosen above, so nothing changes; the drawn within-day order is not followed. If the human meant something else (for example earliest first within a day), it is one comparator in `src/mocks/queries/events.ts` plus the contract tests.
 
 ### FD-06 — Existing test expectation changed: Margaret's header (age and suburb). HUMAN REVIEW: test expectation changed.
 - Date: 2026-09-19

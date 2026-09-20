@@ -17,4 +17,4 @@ Each criterion is observable and maps to at least one test in TEST_PLAN.md. Crit
 
 Status values: NOT MET · MET (test passing) · BLOCKED (cite OQ/PD).
 
-All ten are MET: 127 tests titled `[UI-04][AC-xx]` pass (AC-01 15, AC-02 13, AC-03 12, AC-04 15, AC-05 15, AC-06 16, AC-07 2, AC-08 7, AC-09 17, AC-10 15). AC-08 rests on the design conflict and ordering choices in DECISIONS.md FD-04 and FD-05 (HUMAN REVIEW).
+All ten are MET: 127 tests titled `[UI-04][AC-xx]` pass (AC-01 15, AC-02 13, AC-03 12, AC-04 15, AC-05 15, AC-06 16, AC-07 2, AC-08 7, AC-09 17, AC-10 15). AC-08 rests on the design conflict and ordering choices in DECISIONS.md FD-04 and FD-05, both answered by the human on 2026-09-20.

@@ -15,8 +15,8 @@ The PR is not opened: CLAUDE.md §8 needs the human's approval first.
 
 **HUMAN REVIEW requested:**
 1. **HUMAN REVIEW: test expectation changed.** `tests/integration/shared-app-shell-clients-contract.test.ts` (F0-15): Margaret's `age` 75 to 78 and `suburb` "Ringwood" to "Preston VIC", to match the design (DECISIONS.md FD-06).
-2. **Design conflict (FD-04).** `family-01-home.png` draws three overdue items (badge 3), `family-07-task-log.png` two. One dataset cannot satisfy both FAM-UI-01 AC-02 and FAM-UI-07 AC-02. The Task log reading was chosen, so Home on the mock data shows an Overdue badge of 2. The one-row change to switch is in FD-04.
-3. **Within-day order (FD-05).** The mandated newest-first rule reverses the drawn order on Mon 30 Nov (Afternoon check-in, Physiotherapy, Morning medication). FAM-UI-07 AC-01 ("starting Morning medication") needs new wording.
+2. **Design conflict (FD-04).** `family-01-home.png` draws three overdue items (badge 3), `family-07-task-log.png` two. One dataset cannot satisfy both FAM-UI-01 AC-02 and FAM-UI-07 AC-02. The Task log reading was chosen, so Home on the mock data shows an Overdue badge of 2. The one-row change to switch is in FD-04. **ANSWERED 2026-09-20 (human): "Doesn't matter"; the two-overdue reading stays, fixtures unchanged.**
+3. **Within-day order (FD-05).** The mandated newest-first rule reverses the drawn order on Mon 30 Nov (Afternoon check-in, Physiotherapy, Morning medication). FAM-UI-07 AC-01 ("starting Morning medication") needs new wording. **ANSWERED 2026-09-20 (human): "Based off time they were created in calendar"; read as strictly by the start time on the calendar, i.e. the rule as built, so no change.**
 4. **Contract behaviour (FD-02).** `getTaskLog` rejects `page` 0, negative, fractional, NaN, Infinity and an unknown `status` with a `ZodError`. Screens must sanitise URL params first (FAM-UI-07 AC-06 already does).
 5. **Plan and docs.** New feature `UI-04` and its card added to DEVELOPMENT_PLAN.md (totals now 79 features, 320 criteria); `docs/JIRA_TICKETS.md`, `docs/JIRA_BACKLOG.csv` and the team-level root `SESSION_STATE.md` ("78 features") are not updated.
 6. **Judgement calls to confirm:** the temporary 51-character carer is not on the staff list (FD-08); shifts, notifications and the other six clients are untouched, with two known wrinkles (FD-09); Collect prescription and Afternoon walk events kept but moved after the reference week (FD-13).
@@ -60,7 +60,7 @@ The PR is not opened: CLAUDE.md §8 needs the human's approval first.
 - The new jsdom test files made the load-sensitive ESLint boundary test time out in the plain full run; fixed by running the pure new tests in the node environment (FD-12).
 
 ## Assumptions
-- See DECISIONS.md; the open ones are FD-04, FD-05, FD-08, FD-09 and FD-13.
+- See DECISIONS.md; the open ones are FD-08, FD-09 and FD-13 (FD-04 and FD-05 were answered by the human on 2026-09-20).
 
 ## Notes for the family lane (not edited here)
 - Task detail: replace `findOccurrence` with `getOccurrence(clientId, key)` and pass the documents card `getEventDocuments(clientId, occurrence.eventId)`. Its test that expects "No documents attached." at the Morning medication key must change: that event now has "Medication chart.pdf".
