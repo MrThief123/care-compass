@@ -16,8 +16,8 @@ describe("[F0-15] getClientHeaderSummary via the mock data source", () => {
     expect(summary).toMatchObject({
       firstName: "Margaret",
       lastName: "Doyle",
-      age: 75,
-      suburb: "Ringwood",
+      age: 78,
+      suburb: "Preston VIC",
       organisationName: "Banksia Home Care",
     });
   });
