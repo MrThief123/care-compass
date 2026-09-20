@@ -26,6 +26,7 @@
 
 import { useState } from "react";
 
+import { DevPreviewNav } from "@/components/shared/dev-preview-nav";
 import { FileTile } from "@/components/shared/file-tile";
 import { ChipGroup } from "@/components/shared/forms/chip-group";
 import { ConfirmationModal } from "@/components/shared/forms/confirmation-modal";
@@ -36,7 +37,6 @@ import { InlineAlert } from "@/components/shared/forms/inline-alert";
 import { SettingsActionCard } from "@/components/shared/forms/settings-action-card";
 import { SidePanelForm } from "@/components/shared/forms/side-panel-form";
 import { TimeSlotChips, type TimeSlotValue } from "@/components/shared/forms/time-slot-chips";
-import { DevPreviewNav } from "@/components/shared/dev-preview-nav";
 
 const PHYSIOTHERAPY: EventFormValues = {
   date: "2026-11-30",

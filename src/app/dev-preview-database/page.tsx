@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+
 import { DevPreviewNav } from "@/components/shared/dev-preview-nav";
 
 export default function DatabasePreviewPage() {

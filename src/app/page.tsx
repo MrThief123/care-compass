@@ -2,68 +2,68 @@
 
 import { useState } from "react";
 
+import { CalendarHeader } from "../components/shared/calendar/calendar-header";
+import { CurrentTimeLine } from "../components/shared/calendar/current-time-line";
+import { DatePickerGrid } from "../components/shared/calendar/date-picker-grid";
+import { DayTimeline } from "../components/shared/calendar/day-timeline";
+import { EventPopover } from "../components/shared/calendar/event-popover";
+import { MonthGrid } from "../components/shared/calendar/month-grid";
+import { TimeGridScroller } from "../components/shared/calendar/time-grid-scroller";
+import { WeekGrid } from "../components/shared/calendar/week-grid";
+import { BudgetBucketCard } from "../components/shared/cards/budget-bucket-card";
+import { PersonCard } from "../components/shared/cards/person-card";
+import { StatCard } from "../components/shared/cards/stat-card";
+import { ClientInfoView } from "../components/shared/client-info-view";
 import { DevPreviewNav } from "../components/shared/dev-preview-nav";
 
 // ============================================================
 // UI
 // ============================================================
 
-import { Button } from "../components/ui/button";
-import { SegmentedControl } from "../components/ui/segmented-control";
-import { Icon } from "../components/ui/icon";
-import { Avatar } from "../components/ui/avatar";
-import { CountBadge } from "../components/ui/count-badge";
-import { ProgressBar } from "../components/ui/progress-bar";
-import { Checkbox } from "../components/ui/checkbox";
-import { CardShell } from "../components/ui/card-shell";
 
 // ============================================================
 // Shared - Existing
 // ============================================================
 
-import { RailNav } from "../components/shared/rail-nav";
-import { StatusPill } from "../components/shared/status-pill";
+import { ChipGroup } from "../components/shared/forms/chip-group";
+import { ConfirmationModal } from "../components/shared/forms/confirmation-modal";
+import { DetailsFormCard } from "../components/shared/forms/details-form-card";
+import { EventForm } from "../components/shared/forms/event-form";
+import { Field } from "../components/shared/forms/field";
+import { InlineAlert } from "../components/shared/forms/inline-alert";
+import { ActivityRow } from "../components/shared/lists/activity-row";
+import { AlertListCard } from "../components/shared/lists/alert-list-card";
 import { DataTable } from "../components/shared/lists/data-table";
 import { NotificationRow } from "../components/shared/lists/notification-row";
-import { AlertListCard } from "../components/shared/lists/alert-list-card";
 import { SelectableListRow } from "../components/shared/lists/selectable-list-row";
 import { TaskChecklist } from "../components/shared/lists/task-checklist";
-import { ActivityRow } from "../components/shared/lists/activity-row";
-import { ScreenTitle } from "../components/shared/screen-title";
-import { ClientInfoView } from "../components/shared/client-info-view";
-import { PersonCard } from "../components/shared/cards/person-card";
-import { BudgetBucketCard } from "../components/shared/cards/budget-bucket-card";
-import { StatCard } from "../components/shared/cards/stat-card";
-import { SearchField } from "../components/shared/search-field";
 import { Rail } from "../components/shared/rail";
+import { RailNav } from "../components/shared/rail-nav";
+import { ScreenTitle } from "../components/shared/screen-title";
+import { SearchField } from "../components/shared/search-field";
 import { PageHeader } from "../components/shared/page-header";
 
 // ============================================================
 // Shared - Forms
 // ============================================================
 
-import { DetailsFormCard } from "../components/shared/forms/details-form-card";
-import { InlineAlert } from "../components/shared/forms/inline-alert";
-import { Field } from "../components/shared/forms/field";
-import { ChipGroup } from "../components/shared/forms/chip-group";
 import { TimeSlotChips } from "../components/shared/forms/time-slot-chips";
 import { SidePanelForm } from "../components/shared/forms/side-panel-form";
 import { SettingsActionCard } from "../components/shared/forms/settings-action-card";
-import { ConfirmationModal } from "../components/shared/forms/confirmation-modal";
-import { EventForm } from "../components/shared/forms/event-form";
+import { StatusPill } from "../components/shared/status-pill";
+import { Avatar } from "../components/ui/avatar";
+import { Button } from "../components/ui/button";
+import { CardShell } from "../components/ui/card-shell";
+import { Checkbox } from "../components/ui/checkbox";
+import { CountBadge } from "../components/ui/count-badge";
+import { Icon } from "../components/ui/icon";
+import { ProgressBar } from "../components/ui/progress-bar";
+import { SegmentedControl } from "../components/ui/segmented-control";
 
 // ============================================================
 // Shared - Calendar
 // ============================================================
 
-import { TimeGridScroller } from "../components/shared/calendar/time-grid-scroller";
-import { DatePickerGrid } from "../components/shared/calendar/date-picker-grid";
-import { MonthGrid } from "../components/shared/calendar/month-grid";
-import { CurrentTimeLine } from "../components/shared/calendar/current-time-line";
-import { CalendarHeader } from "../components/shared/calendar/calendar-header";
-import { EventPopover } from "../components/shared/calendar/event-popover";
-import { DayTimeline } from "../components/shared/calendar/day-timeline";
-import { WeekGrid } from "../components/shared/calendar/week-grid";
 
 function App() {
   // ------------------------------------------------------------
