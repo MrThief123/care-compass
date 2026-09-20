@@ -38,6 +38,16 @@ Record feature-level decisions here using the template below. Project-wide decis
 - Consequences: **any** Phase-1 screen with a role layout will hit this same `next build` failure — the e2e pipeline (`pretest:e2e` → `next build`) cannot currently produce a runnable build until either F0-07 replaces the mock session, or someone decides how Phase-1 e2e should run (e.g. against `next dev`, or a distinct env flag the guard also checks).
 - Human confirmation required: **yes** — this blocks CI e2e for every future dashboard feature, not just F0-15, and needs a decision on which lane/feature owns the fix.
 
+### FD-04 — Sticky rail and wrapping header (post-merge fix, branch `fix/shared-app-shell-nav-header`)
+- Date: 2026-09-20
+- Context: the human, reviewing the Family screens, reported that (1) the rail ended one screen-height down when a long page scrolled, so its buttons disappeared, and (2) when the window is narrow the Family header spilled: the name clipped at the top, the subline and date wrapped past the fixed 76px bar. Both reproduced in a real browser before any change: with the page scrolled 1500px the rail sat at y=-1500; at 480px and 338px wide the name and subline lay outside the bar, and at 320px the header alone added 112px of horizontal page scroll. This PRD's Scope calls the rail persistent chrome and the header 76px.
+- Decision: `Rail` is `sticky top-0 self-start` at `h-screen` and scrolls inside itself (`overflow-y-auto`) when the window is shorter than its buttons, replacing `overflow-clip`. `PageHeader`'s 76px is now a minimum (`min-h-[76px]`) with `flex-wrap`: the subject is `min-w-0 flex-[1_1_14rem]`; the date, divider and user sit in a right-aligned cluster that drops to a second row when the row is too narrow, so the bar grows to hold them; the divider is hidden below 768px. The Family layout's name is `truncate` and its subline `line-clamp-2`, each with the full text in `title`. At 700px wide and above the bar is still exactly 76px.
+- Reason: every F0-15 figure at desktop widths (88px rail, 76px bar) is unchanged; the bar grows only when it must, per the human's rule that nothing overlaps or spills at any width.
+- Alternatives considered: a sticky wrapper in each dashboard layout (rejected: three copies that drift, and Carer/Admin would need their own fix); a single-line ellipsis header that stays 76px at every width (rejected: cuts the patient's details at about 700px, where a second line fits); making the header sticky too (not asked for).
+- Consequences: Carer and Admin headers get the same wrapping. The Family layout is a Lane F file; it is edited here because it composes this shell's header and `PageHeader` receives `subject` as opaque content, so the text-shrinking rules have to live where the text is. Below 700px the header is 99–139px tall on Family (phone widths are parked as PL-17).
+- Human confirmation required: no — requested by the human on 2026-09-20.
+- Test changes caused: none to existing tests. Added four real-browser specs in `tests/e2e/shared-app-shell.spec.ts`, titled `[F0-15][PRD]`: rail stays in view after scrolling; header text stays inside the bar with no overlap or page overflow at 768, 480 and 338px. They ran red first (rail at y=-1500; text outside the bar at 480 and 338) and pass now.
+
 <!-- Template
 ### FD-01 — <title>
 - Date:
