@@ -1,14 +1,19 @@
 # Session State — FAM-UI-07 Family Task log and Task detail screens (UI)
 
-Last session date: none (no implementation session yet)
-Current branch: n/a — `feature/family-ui-task-log-detail` not created
-Worked on: n/a
-What changed: n/a
-Tests run: none
-Test results: n/a
-Current blocker: None
-Important discoveries: none
-Important decisions: none
-Exact next action: Run `START FEATURE FAM-UI-07` once dependencies are MERGED TO DEV (or COMPLETE) and blocking decisions are answered.
-Files likely to be touched next: `src/app/(family)/family/[clientId]/tasks/page.tsx`, `src/app/(family)/family/[clientId]/tasks/[occurrenceKey]/page.tsx`
-Warning for next session: Read PRD.md, ACCEPTANCE_CRITERIA.md and TEST_PLAN.md before writing any code. Do not create the branch from the wrong parent (`family-dev`).
+Last session date: 2026-09-20 (fourth session: sync merged, PR #55 opened)
+Current branch: `feature/family-ui-task-log-detail` (parent `family-dev`; UI-04 `feature/shared-screen-contracts-fixtures` merged in, FD-14, d49b4e2; shared shell fix `fix/shared-app-shell-nav-header` merged in, FD-26, b27c2e6; `origin/family-dev` merged in after the sync #56, b74bf10). Worktree: `/Users/dhruv/Documents/Dev/care-compass/.claude/worktrees/agent-a1cf1306432fc6abb`.
+Status: **PR OPEN (#55 to `family-dev`).** All Tasks A to F are done. UI-04 and the shell fix are on `main` and synced into `family-dev` (FD-14, FD-26).
+Worked on the fourth session: after #52, #53 and the sync #56 were merged by the human, merged `origin/family-dev` into this branch (b74bf10), re-ran the checks (below) and opened PR #55.
+Worked on the third session: Task F. The human's review asked for the search box and Status select to line up (FD-25, `FILTER_ROW_SEARCH` in `task-log-view.tsx`, e2e spec `tests/e2e/family-task-log-filters.spec.ts`, jsdom test) and for a sticky rail and a non-overlapping header on all screens (built on the shared branch `fix/shared-app-shell-nav-header`, F0-15 FD-04, merged here as FD-26). Environment finding in FD-25: `next dev` 403s the client bundle to the `127.0.0.1` origin, so e2e specs here cannot type or click client-side.
+Worked on the second session: Task B (Task detail and the document tile, FD-21), Task C (pager, FD-22), Task D (visual polish, FD-23) and Task E (the human's answers to UI-04 FD-04 and FD-05 recorded as FD-24, UI-04's docs commit merged, final verification). Task A (FD-20) was done earlier.
+Tests run (final, after Task F): `npx vitest run src` 75 files / 777 tests pass; plain `npx vitest run` 78 of 79 files pass, 783 tests pass; e2e `family-task-log-filters.spec.ts` 3 of 3 (45 of 45 repeated) (only the known baseline `tests/integration/shared-supabase-environment.test.ts` fails: no Supabase env vars); lint 0 errors / 23 baseline warnings; typecheck and format clean. Known flakes not ours: `tests/integration/mocks-import-boundary.test.ts` (5 s timeout under load) and `day-timeline.test.tsx` (near an hour boundary); re-run them alone if they fail. After merging `origin/family-dev` (b74bf10) and `npm ci` (`@types/node` 26.5.1, `@testing-library/react` 16.3.3): typecheck, lint (0 errors, 23 warnings) and format:check clean; `vitest run src` 75 files / 777 pass twice with `--maxWorkers=4`; at default parallelism on a machine at load 20 to 35 it had 5 s timeouts in 2 of 3 runs (the 137-row paging test in `tasks/page.test.tsx` and two other heavy render tests; the paging test takes 2.4 s alone and the three test files pass alone, 85 of 85); plain `vitest run` 77 of 79 files pass, the two failures being the known baseline and `mocks-import-boundary.test.ts`; the e2e spec was not re-run locally (CI runs it).
+Current blocker: none. PR #55 is open (approved by the human, 2026-09-20); waiting for review and merge by the human.
+
+## Exact next actions
+1. Nothing to build. PR #55 is open; review and merge by the human.
+2. If review asks for changes: `git fetch origin`, `git merge origin/family-dev` into this branch, re-run the verification above, push to this branch. The FD-20 shared `DataTable` follow-up, the FD-23 kit requests and the HUMAN REVIEW items in PROGRESS.md are already listed in the PR body.
+3. No AI attribution in the commits or the PR (CLAUDE.md section 8).
+
+## How the layout was proved (repeat if anything under `src/features/family-task-*` changes)
+The dev server for this worktree is on http://localhost:3107 (`NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321 NEXT_PUBLIC_SUPABASE_ANON_KEY=dummy SUPABASE_SERVICE_ROLE_KEY=dummy nohup npx next dev -p 3107 > /Users/dhruv/.claude/jobs/18b629ff/tmp/preview-tasks.log 2>&1 &` if it died; never start a second one). Throwaway scripts (outside the repo, never commit; recreate if missing) in `/Users/dhruv/.claude/jobs/18b629ff/tmp/`: `overlap.mjs "<full url>" 1920,1440,1280,1024,900,768,640,375 <shotWidths> <label>` (page h-scroll, overlapping text boxes, boxes past their container; Playwright from this worktree's `node_modules/playwright-core`), `pager-sweep.mjs`, `polish-check.mjs`, `fullshot.mjs`. To test data the fixtures do not hold (2,000-character descriptions, 250-page pagers), add a throwaway route under `src/app/(family)/family/[clientId]/zz-*` that renders the component with fake props, and DELETE it before committing (both were deleted).
+Preview URLs (dev server on :3107): `/family/client-margaret/tasks?as=family`, `...?as=family&page=7`, `...?as=family&status=overdue`, `/family/client-margaret/tasks/event-margaret-eye-drops%3A2026-11-25T16%3A30%3A00%2B11%3A00?as=family` (51-character carer, 92-character document name), `/family/client-margaret/tasks/event-margaret-physio%3A2026-11-30T11%3A30%3A00%2B11%3A00?as=family` (2 documents).
