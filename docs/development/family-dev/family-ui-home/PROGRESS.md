@@ -1,18 +1,18 @@
 # Progress — FAM-UI-01 Family Home screen (UI)
 
-Status: READY FOR PR (PR not opened: waiting for explicit human approval)
+Status: PR OPEN (#54 to family-dev, opened 2026-09-20 on the human's approval)
 Owner: Dhruv Verma
 Lane: F — Family
 Sprint: SPRINT · planned D4
 Branch: `feature/family-ui-home` (created from `origin/family-dev`)
 PR target: `family-dev`
-Last updated: 2026-09-20 (rework for real-world volumes and widths, END SESSION)
+Last updated: 2026-09-20 (PR #54 opened; family-dev merged into this branch after the sync)
 
 ## Blockers
-- None. Dependencies: this branch contains UI-04 (`feature/shared-screen-contracts-fixtures`, unmerged) and the shared shell fix (`fix/shared-app-shell-nav-header`, unmerged; FD-22). PR order: UI-04 to `main`, the shell fix to `main`, sync `main` into `family-dev`, then this PR (DECISIONS.md FD-20, FD-22).
+- None. UI-04 (#52) and the shared shell fix (#53) are merged to `main` and, since the sync (#56), on `family-dev`; this branch merged `origin/family-dev` afterwards (cd02d17). The PR order in DECISIONS.md FD-20 and FD-22 was followed.
 
 ## Dependencies status
-- F0-15, UI-01, UI-03 merged to `family-dev`. UI-04 merged into this branch (commit a4a7d4e); not yet on `main`.
+- F0-15, UI-01, UI-03 merged to `family-dev`. UI-04 and the F0-15 shell fix are on `main` and on `family-dev`. UI-04 was first merged into this branch as a4a7d4e.
 
 ## Human decisions received 2026-09-20 (ANSWERED, DECISIONS.md FD-19)
 - UI-04 FD-04, Overdue 3 (Home design) or 2 (Task log design): "Doesn't matter". Fixtures and `src/mocks` untouched; on mock data the Overdue badge reads 2; the badge always follows the contract's `total`; AC-02's 3 is proven with a three-item stub.
@@ -33,8 +33,8 @@ Last updated: 2026-09-20 (rework for real-world volumes and widths, END SESSION)
 - None.
 
 ## Remaining
-- Human review of DECISIONS.md "HUMAN REVIEW summary", then explicit approval to open the PR.
-- PR must attach a side-by-side screenshot of the render and `docs/design/screens/family-01-home.png` (PRD UI/UX Requirements). Screenshots are not committed; regenerate (dev server on a spare port with inline dummy Supabase env, headless screenshot at 1440x1024).
+- Review and merge of PR #54 by the human, starting with the DECISIONS.md "HUMAN REVIEW summary".
+- The PRD (UI/UX Requirements) asks for a side-by-side screenshot in the PR. The human chose not to attach images (2026-09-20), so the PR text lists the differences from `docs/design/screens/family-01-home.png` instead.
 
 ## Acceptance criteria status
 - 6 / 6 MET. AC text unchanged; on mock fixtures AC-02's badge reads 2 by the human's decision (ACCEPTANCE_CRITERIA.md note).
@@ -91,7 +91,7 @@ Routes: `/family/client-margaret/home?as=family` (mock data) and a throwaway pre
 - Recent activity = the five latest done or overdue occurrences (FD-16). Empty-state copy other than "All caught up" is proposed copy under OQ-24 (OPEN).
 
 ## Next action
-- Human reviews DECISIONS.md "HUMAN REVIEW summary" and approves. On approval (and once UI-04 and the shell fix are on `main` and synced into `family-dev`, FD-22): mark `PR OPEN`, commit, push, open the PR to `family-dev` titled `FAM-UI-01 Family Home screen (UI)` with the side-by-side screenshot, after UI-04 has merged (or noting that UI-04's commits are in the diff).
+- Review and merge of PR #54 to `family-dev` by the human.
 
 ## Ready for PR
-- Yes, pending explicit human approval. The PR has not been opened.
+- PR open: #54 to `family-dev` (opened on the human's approval, 2026-09-20).
