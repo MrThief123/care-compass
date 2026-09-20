@@ -20,9 +20,7 @@ export default function DatabasePreviewPage() {
 
         setData(result);
       } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "Unknown error",
-        );
+        setError(err instanceof Error ? err.message : "Unknown error");
       } finally {
         setLoading(false);
       }
@@ -38,11 +36,7 @@ export default function DatabasePreviewPage() {
 
       {loading && <p className="mt-4">Loading...</p>}
 
-      {error && (
-        <p className="mt-4">
-          Error: {error}
-        </p>
-      )}
+      {error && <p className="mt-4">Error: {error}</p>}
 
       {!loading && !error && (
         <pre className="mt-4 overflow-auto rounded-card border border-border-default p-4">
