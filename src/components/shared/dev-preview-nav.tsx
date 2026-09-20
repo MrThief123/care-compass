@@ -30,13 +30,13 @@ export function DevPreviewNav() {
   return (
     <nav className="flex items-center gap-2 border-b border-border-default p-4">
       {navigation.map((item) => (
-        <Button
-          key={item.href}
-          asChild
-          variant={pathname === item.href ? "primary" : "secondary"}
-        >
-          <Link href={item.href}>{item.label}</Link>
-        </Button>
+        <Link key={item.href} href={item.href}>
+          <Button
+            variant={pathname === item.href ? "primary" : "secondary"}
+          >
+            {item.label}
+          </Button>
+        </Link>
       ))}
     </nav>
   );
