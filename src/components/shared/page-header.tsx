@@ -13,14 +13,20 @@ export interface PageHeaderProps {
   bell?: boolean;
 }
 
-/** 76px chrome bar beside the rail (F0-15 PRD.md Scope). */
+/**
+ * 76px chrome bar beside the rail (F0-15 PRD.md Scope). 76px is the minimum:
+ * when the window is too narrow for everything on one row, the date and user
+ * drop to a second row and the bar grows to hold them, so nothing spills out of
+ * the bar or overlaps. `subject` must let its own text shrink (`min-w-0` plus
+ * `truncate` or `line-clamp-*`).
+ */
 export function PageHeader({ subject, date, userFirstName, bell = false }: PageHeaderProps) {
   return (
-    <header className="flex h-[76px] shrink-0 items-center justify-between border-b border-border-default bg-bg-surface px-6">
-      <div className="flex items-center gap-3">{subject}</div>
-      <div className="flex items-center gap-4">
+    <header className="flex min-h-[76px] shrink-0 flex-wrap items-center gap-x-4 gap-y-2 border-b border-border-default bg-bg-surface px-6 py-1.5">
+      <div className="flex min-w-0 flex-[1_1_14rem] items-center gap-3">{subject}</div>
+      <div className="ml-auto flex max-w-full flex-wrap items-center justify-end gap-x-4 gap-y-1">
         <p className="text-body-default tabular-nums text-text-secondary">{date}</p>
-        <div aria-hidden="true" className="h-6 w-px bg-border-default" />
+        <div aria-hidden="true" className="h-6 w-px bg-border-default max-md:hidden" />
         {bell && (
           <button type="button" aria-label="Notifications" className="text-text-secondary">
             <Icon name="bell" size={20} />

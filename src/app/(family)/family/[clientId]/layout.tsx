@@ -32,9 +32,16 @@ export default async function FamilyLayout({
           subject={
             <>
               <Avatar name={client.firstName} size="lg" />
-              <div className="flex flex-col">
-                <p className="text-title-page text-text-primary">{client.firstName}</p>
-                <p className="text-body-small text-text-secondary">{meta}</p>
+              <div className="flex min-w-0 flex-col">
+                <p className="truncate text-title-page text-text-primary" title={client.firstName}>
+                  {client.firstName}
+                </p>
+                <p
+                  className="line-clamp-2 text-body-small text-text-secondary [overflow-wrap:anywhere]"
+                  title={meta}
+                >
+                  {meta}
+                </p>
               </div>
             </>
           }
