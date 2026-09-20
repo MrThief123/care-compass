@@ -1,19 +1,19 @@
 # Progress — FAM-UI-07 Family Task log and Task detail screens (UI)
 
-Status: READY FOR PR (all in-scope ACs MET, Tasks A to E done, verified; the PR is NOT opened: it needs the human's yes and UI-04 on `main` first, FD-14)
+Status: PR OPEN (#55 to family-dev, opened 2026-09-20 on the human's approval; all in-scope ACs MET, Tasks A to F done, verified)
 Owner: Dhruv Verma
 Lane: F — Family
 Sprint: SPRINT · planned D6–D7
 Branch: `feature/family-ui-task-log-detail` (created from `origin/family-dev`; merged `origin/feature/shared-screen-contracts-fixtures` = UI-04, see FD-14)
 PR target: `family-dev`
-Last updated: 2026-09-20
+Last updated: 2026-09-20 (PR #55 opened; family-dev merged into this branch after the sync)
 
-**READY FOR PR, not opened.** The human's layout requirement (2026-09-20): "Things should fit into their tabs and if too big then should resize or get cutoff rather than overlap." is met on the Task log (Task A, FD-20), Task detail and the document tile (Task B, FD-21) and the pager (Task C, FD-22); the visual polish against the design (Task D, FD-23) is done with the not-changed items recorded; the human's answers to UI-04 FD-04 and FD-05 are recorded (Task E, FD-24) and UI-04's docs commit is merged (d49b4e2). PR order (FD-14, FD-26): UI-04 to `main`, then the shared shell fix (`fix/shared-app-shell-nav-header`) to `main`, then `main` into `family-dev`, then this PR. Nothing has been opened or merged to another branch; wait for the human's yes (PD-056).
+**PR OPEN (#55).** The human's layout requirement (2026-09-20): "Things should fit into their tabs and if too big then should resize or get cutoff rather than overlap." is met on the Task log (Task A, FD-20), Task detail and the document tile (Task B, FD-21) and the pager (Task C, FD-22); the visual polish against the design (Task D, FD-23) is done with the not-changed items recorded; the human's answers to UI-04 FD-04 and FD-05 are recorded (Task E, FD-24) and UI-04's docs commit is merged (d49b4e2). PR order (FD-14, FD-26), followed: UI-04 (#52) to `main`, then the shared shell fix (`fix/shared-app-shell-nav-header`, #53) to `main`, then `main` into `family-dev` (#56), then this PR (#55, opened on the human's yes, PD-056). This branch then merged `origin/family-dev` (b74bf10).
 
 **Human review round 2 (2026-09-20), Task F:** the human asked for the search box and the Status select to line up (FD-25, done here) and, on all screens, for a sticky rail and a header that does not overlap or spill when narrow (built as a shared fix, merged into this branch, FD-26).
 
 ## Blockers
-- None technical. The PR is sequenced behind UI-04 (FD-14).
+- None. UI-04 and the shell fix are on `main` and `family-dev` (the FD-14 sequencing is done).
 
 ## HUMAN REVIEW
 - **AC-01 wording changed (FD-17, UI-04 FD-05; the order itself was answered, FD-24):** strict newest-first replaces the design's drawn order; page 1 starts Afternoon check-in, Physiotherapy, Morning medication. Also AC-01/AC-04 use full names (FD-01, PD-038). AC-05 to AC-08 were added under CHG-005.
@@ -22,7 +22,7 @@ Last updated: 2026-09-20
 - **Design gaps built from tokens (FD-08, PD-052)** and the pager, "No tasks to show", document tile type/size line: design owner to review.
 - **Design fidelity calls in FD-23 (Task D), please review:** what was matched to the design (teal search border, 8px label gap, 26px pills, no header underline, 44px Clear target) and what was deliberately not (placeholder and heading colour below 4.5:1, focus ring, separator inset, the search input's accessible name); shared-kit requests for lane S.
 - **Design deviation in FD-25 (Task F), please review:** the Status select is level with the search box, as the human asked; `family-07-task-log.png` draws the select one label lower. The offset is `@min-[30.5rem]:mt-[calc(1lh+0.5rem)]` on the search form, tied to the search's 16rem basis, the 12px gap and the select's 220px.
-- **Shared shell fix merged in (FD-26):** sticky rail and wrapping header come from F0-15 FD-04 on `fix/shared-app-shell-nav-header` (a shared branch, F0-15's owner is MrThief123; the family `layout.tsx`, a lane F file, is edited inside that shared branch). Until it reaches `family-dev` this PR's diff shows those three commits.
+- **Shared shell fix merged in (FD-26):** sticky rail and wrapping header come from F0-15 FD-04 on `fix/shared-app-shell-nav-header` (a shared branch, F0-15's owner is MrThief123; the family `layout.tsx`, a lane F file, is edited inside that shared branch). It reached `main` as #53 and `family-dev` with the sync #56.
 - **Environment finding (FD-25):** `next dev` returns 403 for `/_next/static/chunks/*` to the `127.0.0.1` origin in `playwright.config.ts` (Next 16 `allowedDevOrigins`), so the client bundle does not load in an e2e run and any spec that types or clicks client-side cannot work against `next dev`. Needs a human call: add `allowedDevOrigins: ["127.0.0.1"]` to `next.config.ts` (not this lane's file), or use `localhost` in the config.
 - **Design call in FD-22 (Task C), please review:** below a 28rem-wide pager the numbers give way to Previous / 'Page x of y' / Next on one line.
 - **Design calls in FD-21 (Task B), please review:** the document tile is 160 to 192px wide in a wrapping grid where the design draws 104px (the added type and size line needs the room, and 104px broke ordinary names mid-word); long document names are cut at two lines with an ellipsis (whole name on hover and in the DOM). **HUMAN REVIEW: test expectation changed** (FD-21): one assertion in `document-tile.test.tsx` (`toHaveClass("break-all")` became `not.toHaveClass("break-all")`).
@@ -32,7 +32,8 @@ Last updated: 2026-09-20
 
 ## Dependencies status
 - F0-15, UI-03, UI-02 — merged to `family-dev`.
-- UI-04 (shared screen contracts and fixtures) — pushed, PR NOT opened; merged into this branch (FD-14).
+- UI-04 (shared screen contracts and fixtures) — merged to `main` (#52) and, with the sync (#56), to `family-dev`; first merged into this branch as FD-14.
+- F0-15 shell fix (sticky rail, wrapping header) — merged to `main` (#53) and to `family-dev` with the sync (#56); first merged into this branch as FD-26.
 
 ## Completed
 - Task log is the whole history, server-driven: `page.tsx` reads `searchParams`, `loadTaskLog` validates them (Zod), asks `getTaskLog(clientId, {q, status, page})` for that page, redirects a page past the last to the last page; `TaskLogView` shows rows in the contract's order, `TaskLogPager` ('Showing 21-40 of 137', Previous/Next, 7-slot page window, 44px classes), search (400 ms debounce, Enter, Clear) and Status update the URL via `router.replace` and reset the page; the box follows the URL; empty, no-results, loading and error states; live result count.
@@ -50,7 +51,8 @@ Last updated: 2026-09-20
 - None.
 
 ## Remaining
-- Nothing to build. Wait for the human's yes to open the PR (PD-056), and for UI-04 to reach `main` and be synced into `family-dev` (FD-14).
+- Nothing to build. Review and merge of PR #55 by the human.
+- The PRD asks for side-by-side screenshots in the PR. The human chose not to attach images (2026-09-20), so the PR text lists the differences from `docs/design/screens/family-07-task-log.png` and `family-08-task-detail.png` instead.
 
 ## Acceptance criteria status
 - 8 / 8 MET at test level, and driven in a real browser (paging, hostile params, Back with q/status/page, search in the URL; see the final sweep).
@@ -167,7 +169,7 @@ The +57px at 375 is the family layout header (out of scope; phone views are park
 - To run the pages locally: `NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321 NEXT_PUBLIC_SUPABASE_ANON_KEY=dummy SUPABASE_SERVICE_ROLE_KEY=dummy npx next dev -p 3107`, then open `/family/client-margaret/tasks?as=family`.
 
 ## Next action
-- None for code. On the human's yes and once UI-04 is on `main` and synced into `family-dev` (FD-14): re-run `git fetch origin` (the shared shell fix, FD-26, goes to `main` and reaches `family-dev` before this PR), merge `origin/family-dev` into this branch, re-run the verification below, then open the PR to `family-dev` with the PR body from `docs/development/family-dev/family-ui-task-log-detail/` (mention the FD-20 shared `DataTable` follow-up and the FD-23 kit requests). Do not open it without approval.
+- None for code. Review and merge of PR #55 to `family-dev` by the human.
 
 ## Ready for PR
-- Yes, pending the human's approval and FD-14 sequencing (the ACs are MET, the relevant suites are green, only owned folders changed, docs are current).
+- PR open: #55 to `family-dev` (the ACs are MET, the relevant suites are green, only owned folders changed, docs are current).
