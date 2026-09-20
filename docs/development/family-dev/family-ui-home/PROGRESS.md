@@ -9,7 +9,7 @@ PR target: `family-dev`
 Last updated: 2026-09-20 (rework for real-world volumes and widths, END SESSION)
 
 ## Blockers
-- None. Dependency: this branch contains UI-04 (`feature/shared-screen-contracts-fixtures`, unmerged). PR order: UI-04 to `main`, sync into `family-dev`, then this PR (DECISIONS.md FD-20).
+- None. Dependencies: this branch contains UI-04 (`feature/shared-screen-contracts-fixtures`, unmerged) and the shared shell fix (`fix/shared-app-shell-nav-header`, unmerged; FD-22). PR order: UI-04 to `main`, the shell fix to `main`, sync `main` into `family-dev`, then this PR (DECISIONS.md FD-20, FD-22).
 
 ## Dependencies status
 - F0-15, UI-01, UI-03 merged to `family-dev`. UI-04 merged into this branch (commit a4a7d4e); not yet on `main`.
@@ -73,6 +73,7 @@ Routes: `/family/client-margaret/home?as=family` (mock data) and a throwaway pre
 - 375 (below the 768 requirement): the page scroll comes from the shared header (date and user chip, 180px wide, right edge at 432), not from Home. Home's own content: the Today rows' fixed parts (duration, pill) are wider than a 135px row, so the pill label spills out of its pill; the row is clipped, nothing paints over a neighbour.
 - Long text in the 340px column at 1440 (measured): a 102 or 120-character title is clamped to two lines (title 40px, row 73px against 53px for short rows); the pill stays 26 to 28px tall and no wider than 168px (55% cap), inside its row, with the full name in its `title`.
 - Viewed in screenshots at 1440 (mock), 1024 (volume), 768 (mock): matches the design's structure; the crowded 1024 view shows stacked rows, ellipses, "View all 40 overdue", the "-$400 · 108% used · over budget" tile and eight buckets in three rows.
+- Update after merging the shell fix (FD-22): the header no longer adds page scroll at 375. Re-swept 1920, 1440, 1280, 1024, 900, 768, 640, 480, 375 and 320 on `/family/client-margaret/home?as=family`: page scroll 0, text overlaps 0 and boxes crossing their container 0 at every width except 320px, where the Budget "View breakdown" link overshoots its row's inner box by 5px but stays inside the card (screenshot; it fits from 338px). No console errors.
 - A first 768px two-column setting for the cards broke "Physiotherapy" mid-word in a 308px card; the breakpoint moved to 1024px (FD-18).
 
 ## Files changed (this session)
@@ -80,7 +81,7 @@ Routes: `/family/client-margaret/home?as=family` (mock data) and a throwaway pre
 - Feature docs. Nothing in `src/server`, `src/mocks`, `src/types`, `src/lib`, `src/components/{ui,shared}` or the family `layout.tsx`.
 
 ## Decisions
-- DECISIONS.md FD-13 to FD-21 (this session) and updates to FD-01, 04, 05, 06, 08, 09. OQ-29 ANSWERED followed; OQ-24 OPEN, proposed default applied; no blocking OQ.
+- DECISIONS.md FD-13 to FD-22 (FD-22: the shared shell fix merged in; FD-13 to FD-21 the rework session) and updates to FD-01, 04, 05, 06, 08, 09. OQ-29 ANSWERED followed; OQ-24 OPEN, proposed default applied; no blocking OQ.
 
 ## Problems encountered
 - The previous agent was killed by an account usage limit with nothing committed; its draft tests were reviewed, made red for the right reason (stubs), and kept.
@@ -90,7 +91,7 @@ Routes: `/family/client-margaret/home?as=family` (mock data) and a throwaway pre
 - Recent activity = the five latest done or overdue occurrences (FD-16). Empty-state copy other than "All caught up" is proposed copy under OQ-24 (OPEN).
 
 ## Next action
-- Human reviews DECISIONS.md "HUMAN REVIEW summary" and approves. On approval: mark `PR OPEN`, commit, push, open the PR to `family-dev` titled `FAM-UI-01 Family Home screen (UI)` with the side-by-side screenshot, after UI-04 has merged (or noting that UI-04's commits are in the diff).
+- Human reviews DECISIONS.md "HUMAN REVIEW summary" and approves. On approval (and once UI-04 and the shell fix are on `main` and synced into `family-dev`, FD-22): mark `PR OPEN`, commit, push, open the PR to `family-dev` titled `FAM-UI-01 Family Home screen (UI)` with the side-by-side screenshot, after UI-04 has merged (or noting that UI-04's commits are in the diff).
 
 ## Ready for PR
 - Yes, pending explicit human approval. The PR has not been opened.

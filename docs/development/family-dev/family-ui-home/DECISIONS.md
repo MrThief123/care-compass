@@ -202,6 +202,15 @@ New test files (not changes): `home-format.test.ts`, `today-layout.test.ts`, `to
 - FD-08: fixtures now carry the design week (UI-04); the tests still use test-local fixtures and mocked contracts so they can build any volume.
 - FD-09 item by item: (1) fixed, FD-14. (2) hour labels left-aligned with full-width gridlines as designed; colour deliberately not the design's (FD-14b). (3) fixed, FD-14 (no scroller). (4) label case fixed, FD-17; the kit card's 114px against the design's 123px was not chased: the tile's height now depends on its content by design. (5) not changed: rows are 53px like the kit's (1px border) and now vary with wrapped titles. (6) unchanged: the card's height comes from its content. (7) fixed, FD-13. (8) fixed, FD-15.
 
+### FD-22 — The shared shell fix (sticky rail, wrapping header) is merged into this branch (2026-09-20)
+- Date: 2026-09-20
+- Context: the human, reviewing the previews, asked for (1) the rail to stay in view while a long screen scrolls and (2) no overlap or spill in the header row with the patient's details when the window is narrow, on all screens. That is a change to `Rail`, `PageHeader` and the family `layout.tsx`, none of which this lane may edit (CLAUDE.md 4.2), so it was built as its own shared branch, `fix/shared-app-shell-nav-header`, and recorded as FD-04 in `docs/development/shared/shared-app-shell/DECISIONS.md` (F0-15 is owned by MrThief123; the family `layout.tsx` is a lane F file edited inside that shared branch).
+- Decision: this branch merges `origin/fix/shared-app-shell-nav-header` (3a8978a; commits 4f4dad0, 197d428, 41fec21) so the preview and the sweeps here show the fix. No file of this feature's changed; the merge added no conflicts.
+- Consequences: until the shell fix reaches `family-dev`, this PR's diff also shows those three commits (as it shows UI-04's, FD-20). PR order: UI-04 to `main`, then the shell fix to `main`, then `main` into `family-dev`, then this PR (nothing is opened without the human's yes). The 375px page scroll noted in the width sweep (the header's date and user chip, right edge at 432) is gone.
+- Verified after the merge: `npx vitest run src` 65 files / 544 tests pass; plain `npx vitest run` 67 pass and 2 fail: the known baseline `shared-supabase-environment` and `mocks-import-boundary` (its 5 s ESLint timeout under load; it passes alone, 3 of 3); lint 0 errors / 23 warnings; typecheck and format clean. Real browser on the preview (:3101, 1920 to 320): rail sticky (top 0, bottom 800 in an 800px window after scrolling 1200px), header 76px from 700px up and 99 to 139px below with no text outside the bar, page scroll 0 and no overlaps at every width including 375 and 320, no console errors. At 320px the Budget "View breakdown" link overshoots its row's inner box by 5px but stays inside the card (screenshot); at 338px and above it fits.
+- Human confirmation required: no (requested by the human, 2026-09-20).
+- Test changes caused: none.
+
 <!-- Template
 ### FD-01 — <title>
 - Date:
