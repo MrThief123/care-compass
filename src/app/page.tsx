@@ -31,25 +31,25 @@ import { DetailsFormCard } from "../components/shared/forms/details-form-card";
 import { EventForm } from "../components/shared/forms/event-form";
 import { Field } from "../components/shared/forms/field";
 import { InlineAlert } from "../components/shared/forms/inline-alert";
+import { SettingsActionCard } from "../components/shared/forms/settings-action-card";
+import { SidePanelForm } from "../components/shared/forms/side-panel-form";
+import { TimeSlotChips } from "../components/shared/forms/time-slot-chips";
 import { ActivityRow } from "../components/shared/lists/activity-row";
 import { AlertListCard } from "../components/shared/lists/alert-list-card";
 import { DataTable } from "../components/shared/lists/data-table";
 import { NotificationRow } from "../components/shared/lists/notification-row";
 import { SelectableListRow } from "../components/shared/lists/selectable-list-row";
 import { TaskChecklist } from "../components/shared/lists/task-checklist";
+import { PageHeader } from "../components/shared/page-header";
 import { Rail } from "../components/shared/rail";
 import { RailNav } from "../components/shared/rail-nav";
 import { ScreenTitle } from "../components/shared/screen-title";
 import { SearchField } from "../components/shared/search-field";
-import { PageHeader } from "../components/shared/page-header";
 
 // ============================================================
 // Shared - Forms
 // ============================================================
 
-import { TimeSlotChips } from "../components/shared/forms/time-slot-chips";
-import { SidePanelForm } from "../components/shared/forms/side-panel-form";
-import { SettingsActionCard } from "../components/shared/forms/settings-action-card";
 import { StatusPill } from "../components/shared/status-pill";
 import { Avatar } from "../components/ui/avatar";
 import { Button } from "../components/ui/button";
@@ -521,7 +521,12 @@ function App() {
           <h3>Event Form</h3>
 
           <EventForm
-            values={{} as any}
+            values={{
+              date: "2026-09-18",
+              recurrence: "none",
+              status: "planned",
+              description: "",
+            }}
             onChange={() => {}}
             onSubmit={() => {}}
             onCancel={() => {}}
@@ -598,18 +603,18 @@ function App() {
           <h3>Event Popover</h3>
 
           <EventPopover
-            occurrence={
-              {
-                key: "showcase-event",
-                title: "Client Support Meeting",
-                start: "2026-09-18T09:00:00+10:00",
-                durationMinutes: 60,
-                status: "confirmed",
-                actor: "Support Coordinator",
-                assignee: "Sarah Johnson",
-                description: "Example calendar event.",
-              } as any
-            }
+            occurrence={{
+              key: "showcase-event",
+              eventId: "showcase-event",
+              clientId: "10482",
+              title: "Client Support Meeting",
+              start: "2026-09-18T09:00:00+10:00",
+              durationMinutes: 60,
+              status: "planned",
+              actor: "Support Coordinator",
+              assignee: "Sarah Johnson",
+              description: "Example calendar event.",
+            }}
             anchor={null}
             onClose={() => {}}
           />
