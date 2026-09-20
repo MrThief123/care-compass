@@ -1,12 +1,12 @@
 # Progress — FAM-UI-01 Family Home screen (UI)
 
-Status: PR OPEN (#54 to family-dev, opened 2026-09-20 on the human's approval)
+Status: MERGED TO DEV
 Owner: Dhruv Verma
 Lane: F — Family
 Sprint: SPRINT · planned D4
 Branch: `feature/family-ui-home` (created from `origin/family-dev`)
 PR target: `family-dev`
-Last updated: 2026-09-20 (PR #54 opened; family-dev merged into this branch after the sync)
+Last updated: 2026-09-20 (PR #54 merged to family-dev)
 
 ## Blockers
 - None. UI-04 (#52) and the shared shell fix (#53) are merged to `main` and, since the sync (#56), on `family-dev`; this branch merged `origin/family-dev` afterwards (cd02d17). The PR order in DECISIONS.md FD-20 and FD-22 was followed.
@@ -33,7 +33,7 @@ Last updated: 2026-09-20 (PR #54 opened; family-dev merged into this branch afte
 - None.
 
 ## Remaining
-- Review and merge of PR #54 by the human, starting with the DECISIONS.md "HUMAN REVIEW summary".
+- Nothing. PR #54 is merged. The DECISIONS.md "HUMAN REVIEW summary" items stay recorded for the design owner.
 - The PRD (UI/UX Requirements) asks for a side-by-side screenshot in the PR. The human chose not to attach images (2026-09-20), so the PR text lists the differences from `docs/design/screens/family-01-home.png` instead.
 
 ## Acceptance criteria status
@@ -91,7 +91,7 @@ Routes: `/family/client-margaret/home?as=family` (mock data) and a throwaway pre
 - Recent activity = the five latest done or overdue occurrences (FD-16). Empty-state copy other than "All caught up" is proposed copy under OQ-24 (OPEN).
 
 ## Next action
-- Review and merge of PR #54 to `family-dev` by the human.
+- None. The feature is merged to `family-dev`.
 
 ## Ready for PR
-- PR open: #54 to `family-dev` (opened on the human's approval, 2026-09-20).
+- Merged: #54 to `family-dev` (2026-09-20).

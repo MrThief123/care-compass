@@ -1,14 +1,14 @@
 # Progress — FAM-UI-07 Family Task log and Task detail screens (UI)
 
-Status: PR OPEN (#55 to family-dev, opened 2026-09-20 on the human's approval; all in-scope ACs MET, Tasks A to F done, verified)
+Status: MERGED TO DEV
 Owner: Dhruv Verma
 Lane: F — Family
 Sprint: SPRINT · planned D6–D7
 Branch: `feature/family-ui-task-log-detail` (created from `origin/family-dev`; merged `origin/feature/shared-screen-contracts-fixtures` = UI-04, see FD-14)
 PR target: `family-dev`
-Last updated: 2026-09-20 (PR #55 opened; family-dev merged into this branch after the sync)
+Last updated: 2026-09-20 (PR #55 merged to family-dev; all in-scope ACs MET, Tasks A to F done, verified)
 
-**PR OPEN (#55).** The human's layout requirement (2026-09-20): "Things should fit into their tabs and if too big then should resize or get cutoff rather than overlap." is met on the Task log (Task A, FD-20), Task detail and the document tile (Task B, FD-21) and the pager (Task C, FD-22); the visual polish against the design (Task D, FD-23) is done with the not-changed items recorded; the human's answers to UI-04 FD-04 and FD-05 are recorded (Task E, FD-24) and UI-04's docs commit is merged (d49b4e2). PR order (FD-14, FD-26), followed: UI-04 (#52) to `main`, then the shared shell fix (`fix/shared-app-shell-nav-header`, #53) to `main`, then `main` into `family-dev` (#56), then this PR (#55, opened on the human's yes, PD-056). This branch then merged `origin/family-dev` (b74bf10).
+**MERGED TO DEV (#55).** The human's layout requirement (2026-09-20): "Things should fit into their tabs and if too big then should resize or get cutoff rather than overlap." is met on the Task log (Task A, FD-20), Task detail and the document tile (Task B, FD-21) and the pager (Task C, FD-22); the visual polish against the design (Task D, FD-23) is done with the not-changed items recorded; the human's answers to UI-04 FD-04 and FD-05 are recorded (Task E, FD-24) and UI-04's docs commit is merged (d49b4e2). PR order (FD-14, FD-26), followed: UI-04 (#52) to `main`, then the shared shell fix (`fix/shared-app-shell-nav-header`, #53) to `main`, then `main` into `family-dev` (#56), then this PR (#55, opened on the human's yes, PD-056). This branch then merged `origin/family-dev` (b74bf10).
 
 **Human review round 2 (2026-09-20), Task F:** the human asked for the search box and the Status select to line up (FD-25, done here) and, on all screens, for a sticky rail and a header that does not overlap or spill when narrow (built as a shared fix, merged into this branch, FD-26).
 
@@ -51,7 +51,7 @@ Last updated: 2026-09-20 (PR #55 opened; family-dev merged into this branch afte
 - None.
 
 ## Remaining
-- Nothing to build. Review and merge of PR #55 by the human.
+- Nothing. PR #55 is merged.
 - The PRD asks for side-by-side screenshots in the PR. The human chose not to attach images (2026-09-20), so the PR text lists the differences from `docs/design/screens/family-07-task-log.png` and `family-08-task-detail.png` instead.
 
 ## Acceptance criteria status
@@ -169,7 +169,7 @@ The +57px at 375 is the family layout header (out of scope; phone views are park
 - To run the pages locally: `NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321 NEXT_PUBLIC_SUPABASE_ANON_KEY=dummy SUPABASE_SERVICE_ROLE_KEY=dummy npx next dev -p 3107`, then open `/family/client-margaret/tasks?as=family`.
 
 ## Next action
-- None for code. Review and merge of PR #55 to `family-dev` by the human.
+- None. The feature is merged to `family-dev`.
 
 ## Ready for PR
-- PR open: #55 to `family-dev` (the ACs are MET, the relevant suites are green, only owned folders changed, docs are current).
+- Merged: #55 to `family-dev` (2026-09-20).
