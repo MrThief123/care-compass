@@ -540,6 +540,18 @@ describe("[FAM-UI-07] TaskLogView: links keep the view (AC-08)", () => {
     expect(statusSelect().closest("[class*='w-[220px]']")).toHaveClass("max-w-full");
   });
 
+  it("[FAM-UI-07][PRD] lines the search box up with the Status select when they share a line, and adds no gap above it when they stack (FD-25)", () => {
+    renderLog({ items: makeHistory(3) });
+
+    // The select draws its label above itself, so side by side the search box is pushed down by
+    // that label's height (1lh) and the 8px gap. The offset applies only from the row width where
+    // the two share a line (16rem + 12px + 220px), which is why the row is a size container.
+    const form = searchBox().closest("form")!;
+    expect(form.parentElement).toHaveClass("@container", "items-start");
+    expect(form).toHaveClass("text-body-default", "@min-[30.5rem]:mt-[calc(1lh+0.5rem)]");
+    expect(form).not.toHaveClass("mt-[calc(1lh+0.5rem)]");
+  });
+
   it("[FAM-UI-07][PRD] draws the search box with the brand-teal border the design has, like the Status select", () => {
     renderLog({ items: makeHistory(3) });
 

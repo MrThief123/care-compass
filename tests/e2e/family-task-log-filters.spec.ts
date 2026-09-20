@@ -1,12 +1,24 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 
 const TASK_LOG = "/family/client-margaret/tasks?as=family";
 
-async function filterBoxes(page: import("@playwright/test").Page) {
+async function filterBoxes(page: Page) {
   // The search box is the bordered wrapper around the input; the select carries its own border.
-  const search = await page.getByPlaceholder("Search tasks").locator("..").boundingBox();
-  const status = await page.getByLabel("Status").boundingBox();
-  return { search: search!, status: status! };
+  const search = page.getByPlaceholder("Search tasks").locator("..");
+  const status = page.getByLabel("Status", { exact: true });
+  await expect(search).toBeVisible();
+  await expect(status).toBeVisible();
+  return { search: (await search.boundingBox())!, status: (await status.boundingBox())! };
+}
+
+/** Polls until the two boxes share a top edge and a height, so a late layout shift cannot fail it. */
+async function expectAligned(page: Page) {
+  await expect
+    .poll(async () => {
+      const { search, status } = await filterBoxes(page);
+      return Math.max(Math.abs(status.y - search.y), Math.abs(status.height - search.height));
+    })
+    .toBeLessThan(0.5);
 }
 
 for (const width of [1280, 640]) {
@@ -16,15 +28,14 @@ for (const width of [1280, 640]) {
     await page.setViewportSize({ width, height: 800 });
     await page.goto(TASK_LOG);
 
-    const initial = await filterBoxes(page);
-    expect(initial.status.y).toBeCloseTo(initial.search.y, 0);
-    expect(initial.status.height).toBeCloseTo(initial.search.height, 0);
+    await expectAligned(page);
 
-    // The "No matches" line under the search box must not push the box out of line.
-    await page.getByPlaceholder("Search tasks").fill("zzzz");
+    // The "No matches" line under the search box must not push the box out of line. The search is
+    // the URL's `?q=`, so the page renders that state itself: no typing, which would need the client
+    // bundle (`next dev` refuses it to the 127.0.0.1 origin these tests use).
+    await page.goto(`${TASK_LOG}&q=zzzz`);
     await expect(page.getByText(/No matches for/)).toBeVisible();
-    const noMatches = await filterBoxes(page);
-    expect(noMatches.status.y).toBeCloseTo(noMatches.search.y, 0);
+    await expectAligned(page);
   });
 }
 
