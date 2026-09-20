@@ -1,14 +1,14 @@
 # Progress — UI-04 Screen data contracts and fixtures: full-history Task log, single occurrence, event documents
 
-Status: READY FOR PR
+Status: MERGED TO DEV
 Owner: Dhruv Verma
 Lane: S — Shared kit
 Sprint: SPRINT · planned D6
 Branch: `feature/shared-screen-contracts-fixtures`
 PR target: `main (per OQ-01 — shared work, ANSWERED PD-030)`
-Last updated: 2026-09-19
+Last updated: 2026-09-20
 
-The PR is not opened: CLAUDE.md §8 needs the human's approval first.
+PR #52 was merged to `main` on 2026-09-20.
 
 ## Blockers
 - None. OQ-01 ANSWERED (PD-030). Work authorised by CHG-004 and CHG-005 (human, in-session 2026-09-19).
@@ -35,7 +35,7 @@ The PR is not opened: CLAUDE.md §8 needs the human's approval first.
 - Nothing.
 
 ## Remaining
-- Human approval to open the PR to `main`; then the human merges. FAM-UI-01 and FAM-UI-07 owners adopt the contract (notes below).
+- Nothing. PR #52 is merged. FAM-UI-01 (#54) and FAM-UI-07 (#55), which build on this contract, have since merged to `family-dev` (adoption notes below).
 
 ## Acceptance criteria status
 - 10 / 10 MET
@@ -68,7 +68,7 @@ The PR is not opened: CLAUDE.md §8 needs the human's approval first.
 - Home: Overdue reads 2 on the mock data (FD-04). Recent activity from page 1 matches the design row for row. Overdue items come from page 1 of the overdue rows only (20 at most) while the badge is the true total.
 
 ## Next action
-- Ask the human for approval to open the PR to `main`.
+- None. The feature is merged.
 
 ## Ready for PR
-- Yes, awaiting human approval (CLAUDE.md §8).
+- Merged (PR #52, 2026-09-20).

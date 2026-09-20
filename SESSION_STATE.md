@@ -83,3 +83,26 @@ Root session state is a **team-level log**. Update it only in daily sync PRs or 
 
 **Warnings**
 - This is the second time a merged PR left its feature's `Status:` field stale — consider adding "update PROGRESS.md to MERGED TO DEV" as an explicit post-merge step in `docs/DEVELOPMENT_WORKFLOW.md` if it recurs a third time.
+
+---
+
+### 2026-09-20 — Post-merge sync after UI-04, the F0-15 fix, FAM-UI-01 and FAM-UI-07 (Claude Code, repository access)
+**Worked on**
+- PRs #52 (UI-04) and #53 (F0-15 sticky rail and wrapping header fix) merged to `main`; #56 synced `main` into `family-dev`; #54 (FAM-UI-01) and #55 (FAM-UI-07) merged to `family-dev`. Status left stale by those merges: UI-04 still said `READY FOR PR` on `main`; FAM-UI-01 and FAM-UI-07 still said `PR OPEN` on `family-dev`; the root `PROGRESS.md` Overall table listed six merged features and the generated Status block predated the merges. This is the third time a merged PR has left its feature's `Status:` field stale (see the 2026-09-18 warning above).
+- `carer-dev` and `admin-dev` were 18 commits behind `main` (last synced by #50 and #51 on 2026-09-19, before UI-04 and the F0-15 fix).
+
+**What changed**
+- `docs/development/shared/shared-screen-contracts-fixtures/PROGRESS.md` and `SESSION_STATE.md`: `READY FOR PR` → `MERGED TO DEV`; the "PR not opened" and "ask for approval" lines and the stale FD-04 switch warning replaced (the human answered FD-04 and FD-05 on 2026-09-20; fixtures unchanged).
+- Root `PROGRESS.md`: regenerated Status block via `node scripts/plan-status.mjs --write`; hand-updated the `## Overall` merged list and next human actions.
+- This entry.
+
+**Tests run**
+- None — docs-only changes. `node scripts/plan-status.mjs` re-run to confirm UI-04 now counts as merged (lane S 11 of 11).
+
+**Exact next action**
+- Human: merge this PR, then the three `main` → dev-branch sync PRs (`carer-dev`, `admin-dev`, `family-dev`). The `family-dev` sync also flips FAM-UI-01 and FAM-UI-07 to `MERGED TO DEV`, since `main` must not edit lane F docs.
+- Human: delete the merged branches (CLAUDE.md §3 keeps branch deletion with the human).
+
+**Warnings**
+- `plan-status.mjs` reads the working tree only, so on `main` FAM-UI-01 and FAM-UI-07 still read "ready to start" until Checkpoint 1 merges `family-dev`. Lane F sessions read it on `family-dev`. Starting FAM-UI-01 or FAM-UI-07 from `main` would collide with the merged branches.
+- The stale-`Status:` problem has now recurred three times: add the explicit post-merge step to `docs/DEVELOPMENT_WORKFLOW.md` (a controlled-workflow change, so the human decides).
