@@ -2,7 +2,12 @@
 
 import { useState } from "react";
 
+import { DevPreviewNav } from "../components/shared/dev-preview-nav";
+
+// ============================================================
 // UI
+// ============================================================
+
 import { Button } from "../components/ui/button";
 import { SegmentedControl } from "../components/ui/segmented-control";
 import { Icon } from "../components/ui/icon";
@@ -12,7 +17,10 @@ import { ProgressBar } from "../components/ui/progress-bar";
 import { Checkbox } from "../components/ui/checkbox";
 import { CardShell } from "../components/ui/card-shell";
 
-// Shared
+// ============================================================
+// Shared - Existing
+// ============================================================
+
 import { RailNav } from "../components/shared/rail-nav";
 import { StatusPill } from "../components/shared/status-pill";
 import { DataTable } from "../components/shared/lists/data-table";
@@ -29,6 +37,33 @@ import { StatCard } from "../components/shared/cards/stat-card";
 import { SearchField } from "../components/shared/search-field";
 import { Rail } from "../components/shared/rail";
 import { PageHeader } from "../components/shared/page-header";
+
+// ============================================================
+// Shared - Forms
+// ============================================================
+
+import { DetailsFormCard } from "../components/shared/forms/details-form-card";
+import { InlineAlert } from "../components/shared/forms/inline-alert";
+import { Field } from "../components/shared/forms/field";
+import { ChipGroup } from "../components/shared/forms/chip-group";
+import { TimeSlotChips } from "../components/shared/forms/time-slot-chips";
+import { SidePanelForm } from "../components/shared/forms/side-panel-form";
+import { SettingsActionCard } from "../components/shared/forms/settings-action-card";
+import { ConfirmationModal } from "../components/shared/forms/confirmation-modal";
+import { EventForm } from "../components/shared/forms/event-form";
+
+// ============================================================
+// Shared - Calendar
+// ============================================================
+
+import { TimeGridScroller } from "../components/shared/calendar/time-grid-scroller";
+import { DatePickerGrid } from "../components/shared/calendar/date-picker-grid";
+import { MonthGrid } from "../components/shared/calendar/month-grid";
+import { CurrentTimeLine } from "../components/shared/calendar/current-time-line";
+import { CalendarHeader } from "../components/shared/calendar/calendar-header";
+import { EventPopover } from "../components/shared/calendar/event-popover";
+import { DayTimeline } from "../components/shared/calendar/day-timeline";
+import { WeekGrid } from "../components/shared/calendar/week-grid";
 
 function App() {
   // ------------------------------------------------------------
@@ -72,6 +107,8 @@ function App() {
         gap: "48px",
       }}
     >
+      <DevPreviewNav />
+
       {/* ========================================================
           HEADER
           ======================================================== */}
@@ -91,50 +128,41 @@ function App() {
       <section>
         <h2>UI Components</h2>
 
-        {/* Button */}
         <div>
           <h3>Button</h3>
           <Button />
         </div>
 
-        {/* Segmented Control */}
         <div>
           <h3>Segmented Control</h3>
           <SegmentedControl />
         </div>
 
-        {/* Icon */}
         <div>
           <h3>Icon</h3>
           <Icon name="home" />
         </div>
 
-        {/* Avatar */}
         <div>
           <h3>Avatar</h3>
           <Avatar name="Sarah Johnson" />
         </div>
 
-        {/* Count Badge */}
         <div>
           <h3>Count Badge</h3>
           <CountBadge count={7} />
         </div>
 
-        {/* Progress Bar */}
         <div>
           <h3>Progress Bar</h3>
           <ProgressBar value={65} label="Care plan completion" />
         </div>
 
-        {/* Checkbox */}
         <div>
           <h3>Checkbox</h3>
-
           <Checkbox label="Example checkbox" checked={checked} onChange={setChecked} />
         </div>
 
-        {/* Card Shell */}
         <div>
           <h3>Card Shell</h3>
           <CardShell />
@@ -148,31 +176,23 @@ function App() {
       <section>
         <h2>Navigation</h2>
 
-        {/* Rail */}
         <div>
           <h3>Rail</h3>
-
           <Rail role="family" basePath="/" />
         </div>
 
-        {/* Rail Navigation */}
         <div>
           <h3>Rail Navigation</h3>
-
           <RailNav role="family" basePath="/" />
         </div>
 
-        {/* Page Header */}
         <div>
           <h3>Page Header</h3>
-
           <PageHeader subject="Client Care Plan" date="18 September 2026" userFirstName="Sarah" />
         </div>
 
-        {/* Screen Title */}
         <div>
           <h3>Screen Title</h3>
-
           <ScreenTitle role="carer" basePath="/" />
         </div>
       </section>
@@ -184,7 +204,6 @@ function App() {
       <section>
         <h2>Shared Components</h2>
 
-        {/* Status Pill */}
         <div>
           <h3>Status Pill</h3>
 
@@ -193,7 +212,6 @@ function App() {
           <StatusPill status="overdue" />
         </div>
 
-        {/* Notification Row */}
         <div>
           <h3>Notification Row</h3>
 
@@ -203,7 +221,6 @@ function App() {
           />
         </div>
 
-        {/* Selectable List Row */}
         <div>
           <h3>Selectable List Row</h3>
 
@@ -214,14 +231,12 @@ function App() {
           />
         </div>
 
-        {/* Activity Row */}
         <div>
           <h3>Activity Row</h3>
 
           <ActivityRow title="Care plan updated" date="18 September 2026" status="done" />
         </div>
 
-        {/* Search Field */}
         <div>
           <h3>Search Field</h3>
 
@@ -236,14 +251,12 @@ function App() {
       <section>
         <h2>List Components</h2>
 
-        {/* Task Checklist */}
         <div>
           <h3>Task Checklist</h3>
 
           <TaskChecklist items={tasks} onToggle={toggleTask} />
         </div>
 
-        {/* Data Table */}
         <div>
           <h3>Data Table</h3>
 
@@ -289,7 +302,6 @@ function App() {
           />
         </div>
 
-        {/* Alert List Card */}
         <div>
           <h3>Alert List Card</h3>
 
@@ -324,14 +336,12 @@ function App() {
       <section>
         <h2>Card Components</h2>
 
-        {/* Person Card */}
         <div>
           <h3>Person Card</h3>
 
           <PersonCard name="Sarah Johnson" meta="NDIS Participant · Melbourne" />
         </div>
 
-        {/* Budget Bucket Card */}
         <div>
           <h3>Budget Bucket Card</h3>
 
@@ -348,7 +358,6 @@ function App() {
           />
         </div>
 
-        {/* Stat Card */}
         <div>
           <h3>Stat Card</h3>
 
@@ -363,7 +372,6 @@ function App() {
       <section>
         <h2>Client Information</h2>
 
-        {/* Client Info View */}
         <div>
           <h3>Client Info View</h3>
 
@@ -416,6 +424,194 @@ function App() {
               },
             ]}
             canEdit={true}
+          />
+        </div>
+      </section>
+      {/* ========================================================
+          FORM COMPONENTS
+          ======================================================== */}
+
+      <section>
+        <h2>Form Components</h2>
+
+        {/* Details Form Card */}
+        <div>
+          <h3>Details Form Card</h3>
+
+          <DetailsFormCard title="Client Details">
+            <p>Example form content</p>
+          </DetailsFormCard>
+        </div>
+
+        {/* Inline Alert */}
+        <div>
+          <h3>Inline Alert</h3>
+
+          <InlineAlert>Example inline alert message.</InlineAlert>
+        </div>
+
+        {/* Field */}
+        <div>
+          <h3>Field</h3>
+
+          <Field label="Client Name" value="Sarah Johnson" onChange={() => {}} />
+        </div>
+
+        {/* Chip Group */}
+        <div>
+          <h3>Chip Group</h3>
+
+          <ChipGroup
+            legend="Support Type"
+            options={[
+              { label: "Personal Care", value: "personal-care" },
+              { label: "Community Access", value: "community-access" },
+              { label: "Transport", value: "transport" },
+            ]}
+            value="personal-care"
+            onChange={() => {}}
+          />
+        </div>
+
+        {/* Time Slot Chips */}
+        <div>
+          <h3>Time Slot Chips</h3>
+
+          <TimeSlotChips value={{ slot: "07:00-11:00" }} onChange={() => {}} />
+        </div>
+
+        {/* Side Panel Form */}
+        <div>
+          <h3>Side Panel Form</h3>
+
+          <SidePanelForm title="Edit Client" submitLabel="Save" onSubmit={() => {}}>
+            <Field label="Client Name" value="Sarah Johnson" onChange={() => {}} />
+          </SidePanelForm>
+        </div>
+
+        {/* Settings Action Card */}
+        <div>
+          <h3>Settings Action Card</h3>
+
+          <SettingsActionCard
+            title="Account Settings"
+            description="Manage your account settings."
+            actionLabel="Manage"
+            onAction={() => {}}
+          />
+        </div>
+
+        {/* Confirmation Modal */}
+        <div>
+          <h3>Confirmation Modal</h3>
+
+          <ConfirmationModal
+            open={false}
+            title="Delete Client"
+            body="Are you sure you want to delete this client?"
+            confirmLabel="Delete"
+            cancelLabel="Cancel"
+            onConfirm={() => {}}
+            onCancel={() => {}}
+          />
+        </div>
+
+        {/* Event Form */}
+        <div>
+          <h3>Event Form</h3>
+
+          <EventForm
+            values={{} as any}
+            onChange={() => {}}
+            onSubmit={() => {}}
+            onCancel={() => {}}
+            month="2026-09-01"
+          />
+        </div>
+      </section>
+
+      {/* ========================================================
+          CALENDAR COMPONENTS
+          ======================================================== */}
+
+      <section>
+        <h2>Calendar Components</h2>
+
+        {/* Calendar Header */}
+        <div>
+          <h3>Calendar Header</h3>
+
+          <CalendarHeader
+            range={{
+              start: "2026-09-14",
+              end: "2026-09-20",
+            }}
+          />
+        </div>
+
+        {/* Date Picker Grid */}
+        <div>
+          <h3>Date Picker Grid</h3>
+
+          <DatePickerGrid month="2026-09-01" />
+        </div>
+
+        {/* Month Grid */}
+        <div>
+          <h3>Month Grid</h3>
+
+          <MonthGrid month="2026-09-01" />
+        </div>
+
+        {/* Week Grid */}
+        <div>
+          <h3>Week Grid</h3>
+
+          <WeekGrid weekStart="2026-09-14" occurrences={[]} />
+        </div>
+
+        {/* Day Timeline */}
+        <div>
+          <h3>Day Timeline</h3>
+
+          <DayTimeline occurrences={[]} />
+        </div>
+
+        {/* Time Grid Scroller */}
+        <div>
+          <h3>Time Grid Scroller</h3>
+
+          <TimeGridScroller>
+            <div style={{ height: "600px" }}>Example calendar content</div>
+          </TimeGridScroller>
+        </div>
+
+        {/* Current Time Line */}
+        <div>
+          <h3>Current Time Line</h3>
+
+          <CurrentTimeLine />
+        </div>
+
+        {/* Event Popover */}
+        <div>
+          <h3>Event Popover</h3>
+
+          <EventPopover
+            occurrence={
+              {
+                key: "showcase-event",
+                title: "Client Support Meeting",
+                start: "2026-09-18T09:00:00+10:00",
+                durationMinutes: 60,
+                status: "confirmed",
+                actor: "Support Coordinator",
+                assignee: "Sarah Johnson",
+                description: "Example calendar event.",
+              } as any
+            }
+            anchor={null}
+            onClose={() => {}}
           />
         </div>
       </section>
