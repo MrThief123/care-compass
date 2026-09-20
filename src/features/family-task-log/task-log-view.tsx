@@ -33,6 +33,18 @@ const SEARCH_FIELD_TONE = [
   "[&_button]:after:content-['']",
 ].join(" ");
 
+/**
+ * The search form. The Status `Field` draws its label above its select, so side by side the select
+ * sits one label lower than the search box (DECISIONS.md FD-25). From the row width where the two
+ * share a line (16rem search + 12px gap + 220px select = 30.5rem) the form is pushed down by the
+ * label's line height plus the field's `gap-2`, which puts both boxes on the same top and bottom
+ * edges. Pushing the box down, rather than bottom-aligning the row, keeps them level when the "No
+ * matches" line lengthens the form below its box. `text-body-default` is the label's type token,
+ * so `1lh` is the label's height. Stacked, in a narrower row, the search box has no offset.
+ */
+const FILTER_ROW_SEARCH =
+  "min-w-0 flex-[1_1_16rem] text-body-default @min-[30.5rem]:mt-[calc(1lh+0.5rem)]";
+
 export interface TaskLogViewProps {
   clientId: string;
   /** This page's rows, in the order the contract returned them (newest first). Never re-sorted. */
@@ -124,11 +136,11 @@ export function TaskLogView({ clientId, items, total, pageSize, params }: TaskLo
     <div className="flex flex-col gap-5 px-6 pb-6 pt-5">
       <h1 className="text-title-page text-text-primary">Task log</h1>
 
-      <div className="flex flex-wrap items-start gap-3">
+      <div className="@container flex flex-wrap items-start gap-3">
         <form
           role="search"
           aria-label="Search tasks"
-          className="min-w-0 flex-[1_1_16rem]"
+          className={FILTER_ROW_SEARCH}
           onSubmit={(event) => {
             event.preventDefault();
             go({ q: normaliseQuery(draft), status: latest.current.status });
