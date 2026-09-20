@@ -30,6 +30,7 @@ import { DayTimeline } from "@/components/shared/calendar/day-timeline";
 import { MonthGrid } from "@/components/shared/calendar/month-grid";
 import { WeekGrid } from "@/components/shared/calendar/week-grid";
 import { weekRange } from "@/lib/dates/week-range";
+import { DevPreviewNav } from "@/components/shared/dev-preview-nav";
 
 import {
   DAY_OCCURRENCES,
@@ -54,6 +55,7 @@ export default function CalendarKitPreviewPage() {
 
   return (
     <div className="mx-auto flex w-full max-w-[1400px] flex-col gap-4 p-6">
+      <DevPreviewNav />
       <header className="flex items-center justify-between gap-4">
         <h1 className="text-title-page">Calendar kit preview (UI-01, dev only)</h1>
         <div className="flex gap-1 rounded-control bg-bg-inset p-1">

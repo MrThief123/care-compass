@@ -36,6 +36,7 @@ import { InlineAlert } from "@/components/shared/forms/inline-alert";
 import { SettingsActionCard } from "@/components/shared/forms/settings-action-card";
 import { SidePanelForm } from "@/components/shared/forms/side-panel-form";
 import { TimeSlotChips, type TimeSlotValue } from "@/components/shared/forms/time-slot-chips";
+import { DevPreviewNav } from "@/components/shared/dev-preview-nav";
 
 const PHYSIOTHERAPY: EventFormValues = {
   date: "2026-11-30",
@@ -68,6 +69,7 @@ export default function DevPreviewFormsKitPage() {
 
   return (
     <main className="mx-auto flex max-w-5xl flex-col gap-8 bg-bg-canvas p-6">
+      <DevPreviewNav />
       <h1 className="text-title-page text-text-primary">UI-02 forms kit — dev preview</h1>
 
       <Section title="Event form (Edit event)">

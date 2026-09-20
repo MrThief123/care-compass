@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { DevPreviewNav } from "@/components/shared/dev-preview-nav";
 
 export default function DatabasePreviewPage() {
   const [data, setData] = useState<unknown[]>([]);
@@ -32,6 +33,7 @@ export default function DatabasePreviewPage() {
 
   return (
     <main className="p-6">
+      <DevPreviewNav />
       <h1 className="text-2xl font-semibold">Database Connection</h1>
 
       {loading && <p className="mt-4">Loading...</p>}
