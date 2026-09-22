@@ -1,6 +1,6 @@
 # Progress — F0-06 Identity, organisation and client access schema with RLS
 
-Status: IN PROGRESS
+Status: MERGED TO DEV
 Owner: Prajeet
 Lane: B — Backend
 Sprint: SPRINT · planned D3–D4
@@ -59,8 +59,7 @@ Last updated: 2026-09-22
 - PROPOSED items in PRD.md are unconfirmed until validated in F0-01 or answered in DECISIONS.md. The one PROPOSED item left unimplemented (cross-org profile display-name view) is listed under Remaining.
 
 ## Next action
-- Human: review and, if approved, this branch is ready to open a PR to `main` (OQ-01, shared work).
-- Once merged: F0-07, F0-08, F0-10 unblock (all depend only on F0-06 among lane-B features).
+- Merged to `main` via PR #65. F0-07, F0-08, F0-10 now unblocked (all depend only on F0-06 among lane-B features).
 
 ## Ready for PR
 - Yes
