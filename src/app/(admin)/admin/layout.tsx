@@ -1,6 +1,7 @@
 import { PageHeader } from "@/components/shared/page-header";
 import { Rail } from "@/components/shared/rail";
 import { ScreenTitle } from "@/components/shared/screen-title";
+import { SignOutButton } from "@/components/shared/sign-out-button";
 import { formatLongDate } from "@/lib/format/date";
 import { getCurrentUser } from "@/server/auth/queries";
 
@@ -17,6 +18,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
           subject={<ScreenTitle role="admin" basePath="/admin" />}
           date={formatLongDate(new Date())}
           userFirstName={user.firstName}
+          signOutSlot={<SignOutButton />}
         />
         <main className="flex-1">{children}</main>
       </div>

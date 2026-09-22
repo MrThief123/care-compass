@@ -8,7 +8,7 @@ import { Icon } from "../../ui/icon";
 
 import type { ReactNode } from "react";
 
-export type FieldType = "text" | "email" | "tel" | "date" | "textarea" | "select";
+export type FieldType = "text" | "email" | "tel" | "date" | "password" | "textarea" | "select";
 
 export interface FieldOption {
   value: string;
