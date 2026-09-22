@@ -105,4 +105,31 @@ Root session state is a **team-level log**. Update it only in daily sync PRs or 
 
 **Warnings**
 - `plan-status.mjs` reads the working tree only, so on `main` FAM-UI-01 and FAM-UI-07 still read "ready to start" until Checkpoint 1 merges `family-dev`. Lane F sessions read it on `family-dev`. Starting FAM-UI-01 or FAM-UI-07 from `main` would collide with the merged branches.
-- The stale-`Status:` problem has now recurred three times: add the explicit post-merge step to `docs/DEVELOPMENT_WORKFLOW.md` (a controlled-workflow change, so the human decides).
+- The stale-`Status:` problem has now recurred three times: add the explicit post-workflow step to `docs/DEVELOPMENT_WORKFLOW.md` (a controlled-workflow change, so the human decides).
+
+---
+
+### 2026-09-22 — GitHub status audit (Claude Code, repository access, gh CLI)
+**Worked on**
+- Checked GitHub (`gh pr list`, `gh pr view --json mergeable,statusCheckRollup`) against `main` and re-ran `node scripts/plan-status.mjs --write` to confirm nothing else had drifted.
+
+**What changed**
+- Root `PROGRESS.md`: regenerated Status block (date stamp only — feature counts and lane summary were already accurate, no repository content had drifted since the 2026-09-20 sync).
+- This entry.
+
+**Findings (nothing else changed on disk — flagging for the human)**
+- The three checkpoint sync PRs from 2026-09-20 are still **open and unmerged**: #62 `main`→`family-dev`, #63 `main`→`admin-dev`, #64 `main`→`carer-dev`. All three are `MERGEABLE`/`CLEAN` with passing checks, just waiting on a human merge. Until they land, `admin-dev`/`carer-dev` stay 18+ commits behind `main`, and FAM-UI-01/FAM-UI-07 stay unreflected as merged outside `family-dev`.
+- 7 open Dependabot PRs (#20, #21, #22, #23, #25, #27, #28 — actions/checkout, actions/setup-node, supabase/setup-cli, actions/upload-artifact, typescript 7.0.2, jest-dom 7.0.1, eslint 10.10.0), open 2–4 days, **all showing a FAILURE check** (`mergeStateStatus: UNKNOWN`). None are auto-mergeable as-is; each needs its CI failure triaged before merge.
+- `feature/admin-ui-home` (ADM-UI-01) has real, current work on it — `Owner: Kav1sh-11`, `Status: IN PROGRESS`, `PROGRESS.md` last updated 2026-09-22, screen/tests/mocks implemented — but since it isn't merged, `plan-status.mjs` run on `main` still lists ADM-UI-01 as unclaimed/"Ready to start." This is expected (the script only reads `main`), not a bug, but anyone picking a lane-A feature from `main`'s status should check that branch first before claiming ADM-UI-01.
+- No other stale branches found beyond normal history: all `feature/*` and `chore/*` branches not listed above correspond to a merged PR; none are open-and-abandoned.
+
+**Tests run**
+- None — docs-only change (status regeneration).
+
+**Exact next action**
+- Human: merge PRs #62, #63, #64 (the three sync PRs), then re-run `node scripts/plan-status.mjs --write` per checkpoint procedure (§10.5).
+- Human: triage the 7 failing Dependabot PRs (likely a CI config or lockfile issue since several unrelated bumps all fail the same way) or close them if not wanted this sprint.
+- Human: confirm with Kav1sh-11 whether `feature/admin-ui-home` should have a PR opened to `admin-dev` — the branch has completed work sitting unopened.
+
+**Warnings**
+- None new.
