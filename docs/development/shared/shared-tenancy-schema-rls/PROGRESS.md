@@ -16,41 +16,51 @@ Last updated: 2026-09-22
 
 ## Completed
 - Feature documentation drafted (Claude Chat planning pack)
+- Enum `app_role` (family, carer, admin).
+- Tables: `organisations`, `profiles` (1:1 `auth.users`), `clients`, `client_family_members`, `carer_client_assignments`, `client_info_sections` — all with RLS enabled in the same migration (`supabase/migrations/20260922053821_tenancy.sql`).
+- SQL helper functions (SECURITY DEFINER, stable, `search_path = public`): `current_profile()`, `is_family_of(client_id)`, `is_admin_of_client(client_id)`, `is_assigned_carer(client_id)`, plus `current_organisation_id()` (used by the `profiles`/`organisations` policies so they don't self-reference `profiles` under its own RLS).
+- RLS policies: family reads own linked clients; admin reads clients whose current organisation is theirs; carer reads clients with an active (not-yet-started/not-yet-ended) assignment; inactive profiles (`is_active = false`) match no policy on any table.
+- `client_info_sections`: family read/write, assigned carer read, admin none (per OQ-09).
+- pgTAP suite `supabase/tests/tenancy_rls.test.sql` covering AC-01..AC-08 (family/admin/carer allow and deny cases, ended-assignment and deactivated-profile edge cases).
+- `src/lib/supabase/database.types.ts` regenerated from the local schema (`npm run db:types`).
 
 ## In progress
 - None
 
 ## Remaining
-- Enums: `app_role` (family, carer, admin).
-- Tables: `organisations`, `profiles` (1:1 auth.users; role, organisation_id nullable for family, first_name, last_name, phone, job_title, is_active), `clients` (current organisation_id, name, date_of_birth, suburb, avatar_path), `client_family_members` (client_id, profile_id, relationship_label), `carer_client_assignments` (carer profile, client, organisation, started_at, ended_at).
-- SQL helper functions (SECURITY DEFINER, stable, search_path fixed): `current_profile()`, `is_family_of(client_id)`, `is_admin_of_client(client_id)`, `is_assigned_carer(client_id)`.
-- RLS enabled on every table with policies: family reads own linked clients; admin reads clients whose current organisation is theirs; carer reads clients with an active assignment; nobody reads other organisations' profiles except display names needed on shared records (PROPOSED view).
-- Inactive profiles (is_active = false) match no policy.
-- pgTAP tests in `supabase/tests/` covering every role × table × allowed/denied case.
-- `client_info_sections` table (client_id, key description|habits|medical_history, body, updated_by, updated_at) with RLS: family read/write, assigned carer read (write per OQ-09), admin none. Moved here from FAM-09 in plan v0.2 so Family and Carer wiring can run in parallel.
+- `nobody reads other organisations' profiles except display names needed on shared records` (PROPOSED view in PRD scope) — not implemented; no AC or TEST_PLAN case currently requires it, so left out per CLAUDE.md §6 (build only the PRD Scope backed by an AC). Flagging for the human: confirm whether this view is needed before another feature (e.g. shift assignment UI showing a carer's name) depends on it.
 
 ## Acceptance criteria status
-- 0 / 8 MET
+- 8 / 8 MET
 
 ## Tests
-- Written: 0 / 8
-- Passing: 0
+- Written: 8 / 8 (all db-level, per TEST_PLAN.md's coverage mapping)
+- Passing: 8
 - Failing: 0
 
+## Suite results
+- `supabase test db`: PASS (8/8, `tenancy_rls.test.sql`)
+- `npm run verify` (lint, typecheck, format:check, vitest): PASS — 421/421 tests, 60/60 suites. Pre-existing lint warnings in `scripts/plan-status.mjs` and `src/app/page.tsx` are unrelated to this feature and untouched.
+- `npm run db:types`: regenerated and reformatted with prettier (was previously never generated against a real schema).
+
 ## Files changed
-- None yet. Likely files: `supabase/migrations/*_tenancy.sql`, `supabase/tests/tenancy_rls.test.sql`, `src/lib/supabase/database.types.ts`
+- `supabase/migrations/20260922053821_tenancy.sql` (new)
+- `supabase/tests/tenancy_rls.test.sql` (new)
+- `src/lib/supabase/database.types.ts` (regenerated)
 
 ## Decisions
 - See DECISIONS.md
 
 ## Problems encountered
-- None
+- Local Docker Desktop initially failed to mount the repo (`operation not permitted` creating `/host_mnt/Users/user/Documents`) until file-sharing access was granted in Docker Desktop settings (human action, one-time, machine-local — not a repo issue).
+- `node_modules` was not installed in this worktree; ran `npm ci` before `npm run verify` would work.
 
 ## Assumptions
-- PROPOSED items in PRD.md are unconfirmed until validated in F0-01 or answered in DECISIONS.md.
+- PROPOSED items in PRD.md are unconfirmed until validated in F0-01 or answered in DECISIONS.md. The one PROPOSED item left unimplemented (cross-org profile display-name view) is listed under Remaining.
 
 ## Next action
-- Wait for answers to OQ-01, OQ-07, OQ-09, OQ-16; then complete dependencies, run START FEATURE F0-06, and write the tests in TEST_PLAN.md first.
+- Human: review and, if approved, this branch is ready to open a PR to `main` (OQ-01, shared work).
+- Once merged: F0-07, F0-08, F0-10 unblock (all depend only on F0-06 among lane-B features).
 
 ## Ready for PR
-- No
+- Yes
