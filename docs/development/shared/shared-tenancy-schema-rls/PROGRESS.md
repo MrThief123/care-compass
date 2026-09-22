@@ -28,7 +28,7 @@ Last updated: 2026-09-22
 - None
 
 ## Remaining
-- `nobody reads other organisations' profiles except display names needed on shared records` (PROPOSED view in PRD scope) — not implemented; no AC or TEST_PLAN case currently requires it, so left out per CLAUDE.md §6 (build only the PRD Scope backed by an AC). Flagging for the human: confirm whether this view is needed before another feature (e.g. shift assignment UI showing a carer's name) depends on it.
+- None. The cross-organisation profile display-name view (PROPOSED in PRD scope) was confirmed by the human as not needed — see DECISIONS.md FD-01.
 
 ## Acceptance criteria status
 - 8 / 8 MET
