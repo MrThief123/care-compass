@@ -1,27 +1,35 @@
-# Decisions — ADM-UI-02 Admin Manage screen (UI)
+﻿# Decisions — ADM-UI-02 Admin Manage
 
-Record feature-level decisions here using the template below. Project-wide decisions belong in root DECISIONS.md.
+## FD-01 — Isolated preview and data contract
+- Human requested Manage after the Admin Home preview workflow; use an isolated worktree from admin-dev and keep changes local for visual review before committing.
+- Human explicitly approved adding Manage's query and fixtures in shared/backend folders on 2026-09-22.
+- Added src/server/admin/manage-queries.ts and src/mocks/admin-manage.ts. Separate filenames avoid collisions with the unmerged Admin Home query.
+- Reuse the existing mock/Supabase data-source switch. Supabase mode remains unimplemented for this Phase 1 screen.
 
-## Open decisions affecting this feature
+## FD-02 — Non-blocking defaults and conflict copy
+- OQ-09 is ANSWERED in root DECISIONS.md; this fixture screen performs no real access-control writes.
+- OQ-21 remains OPEN/non-blocking: use its documented fixed-slot MVP default, with Custom; no recurring shift control.
+- OQ-39 remains OPEN/non-blocking: calculate warning text from actual fixture shifts. The design's selected 07:00–11:00 does not overlap 11:30–13:00, so no warning appears initially. Selecting 11:00–15:00 produces the warning.
+- All shift intervals are same-day Melbourne wall times. Custom end must follow start; adjacent boundaries do not overlap. No recurrence engine is needed for single local shifts.
 
-| ID | Decision needed | Blocking? | Proposed default |
-|---|---|---|---|
-| OQ-09 | Carer access model | no | Assignment created automatically on first shift and ended by admin or transfer; edits allowed only within [shift start, shift end); carers may create/edit events and client info only during shift. |
-| OQ-21 | Rostering scope and shift patterns | no | Shift assignment in scope per later sources; fixed chips for MVP, configurable patterns parked (PL-19). |
-| OQ-39 | Design copy and visual inconsistencies | no | Follow tokens and the rules in UI-§5; generate warning text from real data; confirm copy. |
+## FD-03 — Local state and accessibility
+- Assign adds a shift only to component state and announces confirmation. Clear removes both selections; Cancel also resets date/time inputs. Completed local assignments remain until reload.
+- Calendar dots reflect the selected staff member's shifts, including local additions.
+- Reuse SelectableListRow, DatePickerGrid, ChipGroup, Field, InlineAlert and other primitives.
+- Screen-local search controls supply explicit labels and searchbox roles. The existing SearchField lacks a label prop, so shared code is unchanged.
+- Enlarge date picker targets locally to 44px and allow its container to scroll at narrow widths.
 
-## Feature decisions log
+## FD-04 — Test helper correction
+- T-02/T-03 and assignment tests originally passed an unsupported exact option to Testing Library getByRole.
+- Removed that option; string name queries already match exactly. No expectation or assertion changed; this was a test typing defect.
+- No dependencies added.
 
-_No decisions recorded yet._
+## FD-05 — Next.js conventions
+- Follow installed Next.js 16.3.3 page/loading/error guides. Error boundary recovery uses retry.
+- No architecture or controlled requirement changes needed.
 
-<!-- Template
-### FD-01 — <title>
-- Date:
-- Context:
-- Decision:
-- Reason:
-- Alternatives considered:
-- Consequences:
-- Human confirmation required: yes/no (who, when)
-- Test changes caused (if any): test ID, reason, flagged for review yes/no
--->
+## FD-06 — Human-requested display copy, 2026-09-23
+- Show full names throughout Manage. Existing synthetic client surnames are Doyle, Hale, Marsh, Novak and Petrov. Daniel Kelly is a synthetic expansion of the abbreviated Daniel K.; existing shared fixtures remain unchanged.
+- Remove the standing preview/reset notice and reset wording from the assignment confirmation, as requested. Assignment behavior remains local-only.
+- Use ASCII hyphens with spaces in displayed time ranges (slots, overlap warnings, confirmation).
+- HUMAN REVIEW: test expectation changed. T-01/T-03 and query/display assertions now expect full names and ASCII time separators, per the explicit human request. No behavioral assertion removed.
