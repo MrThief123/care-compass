@@ -1,21 +1,20 @@
 # Progress — F0-07 Sign-in, sign-out, password reset and role-based routing
 
-Status: NOT STARTED
-Owner: unclaimed
+Status: IN PROGRESS
+Owner: Prajeet
 Lane: B — Backend
 Sprint: SPRINT · planned D5
-Branch: `feature/shared-authentication` (not yet created)
+Branch: `feature/shared-authentication`
 PR target: `main (per OQ-01 — shared work)`
-Last updated: 2026-09-17 (planning pack generated)
+Last updated: 2026-09-22
 
 ## Blockers
-- OQ-01 — Branch parent and naming for shared (foundation and cross-cutting) work
-- OQ-08 — Account provisioning, sign-in method and MFA
+- None — OQ-01, OQ-08 both ANSWERED (see DECISIONS.md)
 
 ## Dependencies status
-- F0-06 — NOT STARTED
-- F0-15 — NOT STARTED
-- UI-02 — NOT STARTED
+- F0-06 — MERGED TO DEV
+- F0-15 — MERGED TO DEV
+- UI-02 — MERGED TO DEV
 
 ## Completed
 - Feature documentation drafted (Claude Chat planning pack)
@@ -55,7 +54,7 @@ Last updated: 2026-09-17 (planning pack generated)
 - PROPOSED items in PRD.md are unconfirmed until validated in F0-01 or answered in DECISIONS.md.
 
 ## Next action
-- Wait for answers to OQ-01, OQ-08; then complete dependencies, run START FEATURE F0-07, and write the tests in TEST_PLAN.md first.
+- Write the tests in TEST_PLAN.md first, then implement.
 
 ## Ready for PR
 - No
