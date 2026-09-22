@@ -30,9 +30,11 @@ A clickable, reviewable screen that matches the design, ready for data wiring in
 ## Scope
 - Route `/admin/home` inside the admin layout.
 - `StatCard`s 'Clients 42' and 'Staff 17'.
-- `AlertListCard` 'Overdue events' with caption 'across all clients', rows Client · Event · Nurse · Overdue pill (chevron without navigation, OQ-37).
+- `AlertListCard` 'Overdue events' with caption 'Across all Clients', rows Client · Event · Nurse · Overdue pill (chevron without navigation, OQ-37).
 - Loading skeleton, empty state and error state (States sheet) wired to the query contract's states.
 - Data only via `src/server/**` contract functions (mock data source).
+
+- CHG-006 (human requested 2026-09-22): Upcoming shifts card with Client, Carer, Date and Time columns using four synthetic entries from the supplied screenshot; empty state when no shifts. Overdue rows have equal left/right padding.
 
 ## Out of Scope
 - Real data, permissions and persistence (Phase 3 wiring features)
