@@ -1,21 +1,18 @@
 # Progress — F0-06 Identity, organisation and client access schema with RLS
 
-Status: NOT STARTED
-Owner: unclaimed
+Status: IN PROGRESS
+Owner: Prajeet
 Lane: B — Backend
 Sprint: SPRINT · planned D3–D4
-Branch: `feature/shared-tenancy-schema-rls` (not yet created)
+Branch: `feature/shared-tenancy-schema-rls`
 PR target: `main (per OQ-01 — shared work)`
-Last updated: 2026-09-17 (planning pack generated)
+Last updated: 2026-09-22
 
 ## Blockers
-- OQ-01 — Branch parent and naming for shared (foundation and cross-cutting) work
-- OQ-07 — Client record creation and family linking
-- OQ-09 — Carer access model
-- OQ-16 — Family role granularity
+- None — OQ-01, OQ-07, OQ-09, OQ-16 all ANSWERED (see DECISIONS.md)
 
 ## Dependencies status
-- F0-04 — NOT STARTED
+- F0-04 — MERGED TO DEV
 
 ## Completed
 - Feature documentation drafted (Claude Chat planning pack)
