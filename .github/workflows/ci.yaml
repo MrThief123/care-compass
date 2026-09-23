@@ -161,16 +161,6 @@ jobs:
 
   docker-build-push:
     name: Build and Push Docker Image
-    # if: github.ref == 'refs/heads/main'
-    # needs:
-    #   - lint
-    #   - typecheck
-    #   - format
-    #   - unit
-    #   - build
-    #   - audit
-    #   - db-test
-    #   - e2e
 
     runs-on: ubuntu-latest
 
@@ -193,7 +183,6 @@ jobs:
           push: true
           platforms: linux/amd64
 
-          # FIX:
           # These variables are required by Next.js during
           # "npm run build" inside the Dockerfile.
           build-args: |
@@ -206,7 +195,6 @@ jobs:
 
   deploy:
     name: Deploy to EC2
-    # if: github.ref == 'refs/heads/main'
     needs: docker-build-push
 
     runs-on: ubuntu-latest
@@ -273,9 +261,6 @@ jobs:
             -i ~/.ssh/care-compass.pem \
             "${{ secrets.EC2_SSH_USER }}@${{ steps.ec2.outputs.ip }}" << 'EOF'
 
-            # FIX:
-            # If any Docker command fails, stop the deployment
-            # instead of continuing with a broken/stale container.
             set -e
 
             echo "Pulling latest Docker image..."
