@@ -1,0 +1,124 @@
+name: Deploy Care Compass
+
+on:
+  workflow_dispatch:
+
+jobs:
+  docker-build-push:
+    name: Build and Push Docker Image
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          platforms: linux/amd64
+          tags: |
+            mrthief123/care-compass:latest
+            mrthief123/care-compass:${{ github.sha }}
+  deploy:
+    name: Deploy to EC2
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/test'
+
+    runs-on: ubuntu-latest
+
+    environment:
+      name: production
+
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Start EC2 instance
+        run: |
+          echo "Starting EC2 instance..."
+
+          aws ec2 start-instances \
+            --instance-ids "${{ secrets.EC2_INSTANCE_ID }}"
+
+      - name: Wait for EC2 to start
+        run: |
+          echo "Waiting for EC2 to reach running state..."
+
+          aws ec2 wait instance-running \
+            --instance-ids "${{ secrets.EC2_INSTANCE_ID }}"
+
+          echo "EC2 is running."
+
+      - name: Get EC2 public IP
+        id: ec2
+        run: |
+          IP=$(aws ec2 describe-instances \
+            --instance-ids "${{ secrets.EC2_INSTANCE_ID }}" \
+            --query 'Reservations[0].Instances[0].PublicIpAddress' \
+            --output text)
+
+          echo "EC2 public IP: $IP"
+          echo "ip=$IP" >> "$GITHUB_OUTPUT"
+
+      - name: Wait for SSH
+        run: |
+          echo "Waiting for SSH..."
+
+          until ssh \
+            -o StrictHostKeyChecking=no \
+            -o ConnectTimeout=5 \
+            -i <(echo "${{ secrets.EC2_SSH_PRIVATE_KEY }}") \
+            "${{ secrets.EC2_SSH_USER }}@${{ steps.ec2.outputs.ip }}" \
+            "echo SSH ready"
+          do
+            sleep 5
+          done
+
+          echo "SSH is ready."
+
+      - name: Deploy Docker container
+        run: |
+          echo "Deploying Care Compass..."
+
+          ssh \
+            -o StrictHostKeyChecking=no \
+            -i <(echo "${{ secrets.EC2_SSH_PRIVATE_KEY }}") \
+            "${{ secrets.EC2_SSH_USER }}@${{ steps.ec2.outputs.ip }}" << 'EOF'
+
+            set -e
+
+            echo "Pulling latest Docker image..."
+            docker pull mrthief123/care-compass:latest
+
+            echo "Stopping old container..."
+            docker stop care-compass || true
+
+            echo "Removing old container..."
+            docker rm care-compass || true
+
+            echo "Starting new container..."
+            docker run -d \
+              --name care-compass \
+              --restart unless-stopped \
+              -p 8080:3000 \
+              mrthief123/care-compass:latest
+
+            echo "Checking container..."
+            docker ps
+
+            echo "Deployment complete."
+
+          EOF
