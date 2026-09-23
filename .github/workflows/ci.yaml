@@ -264,6 +264,8 @@ jobs:
             -i ~/.ssh/care-compass.pem \
             "${{ secrets.EC2_SSH_USER }}@${{ steps.ec2.outputs.ip }}" << 'EOF'
 
+            set -e
+
             echo "Pulling latest Docker image..."
             docker pull mrthief123/care-compass:latest
 
@@ -281,14 +283,13 @@ jobs:
               mrthief123/care-compass:latest
 
             echo "Deployment complete."
-
             docker ps
 
           EOF
 
   destroy:
     name: Stop EC2
-    # if: github.ref == 'refs/heads/main'
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
 
     steps:
