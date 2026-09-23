@@ -93,7 +93,8 @@ function blockFor(occurrence: Occurrence): HTMLElement {
 
 describe("[UI-01] DayTimeline", () => {
   it("renders the whole day so any hour can be scrolled to", () => {
-    render(<DayTimeline occurrences={[]} />);
+    // Static hour labels must not depend on the live current-time label.
+    render(<DayTimeline occurrences={[]} now={null} />);
     expect(screen.getByText("00:00")).toBeInTheDocument();
     expect(screen.getByText("06:00")).toBeInTheDocument();
     expect(screen.getByText("07:00")).toBeInTheDocument();

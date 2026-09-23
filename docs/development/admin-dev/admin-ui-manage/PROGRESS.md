@@ -44,3 +44,8 @@ Last updated: 2026-09-23
 
 ## Commit/push authorization — 2026-09-23
 Human approved committing and pushing the reviewed Manage implementation and display revisions. Latest checks: all 14 feature tests and TypeScript passed; served preview returned HTTP 200 with full names, hyphenated time slots and the notice removed. Commit to feature/admin-ui-manage and push to its matching origin branch. Full-repository limitations remain recorded above; no PR authorized.
+
+## Calendar CI fix — 2026-09-23
+- Fixed the two clock-dependent shared calendar layout tests with explicit now={null}, under human authorization.
+- All 109 calendar/Manage regression tests and TypeScript pass. No production code or assertion changes.
+- Human authorized commit and push to feature/admin-ui-manage.

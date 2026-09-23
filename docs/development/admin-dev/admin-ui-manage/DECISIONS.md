@@ -33,3 +33,11 @@
 - Remove the standing preview/reset notice and reset wording from the assignment confirmation, as requested. Assignment behavior remains local-only.
 - Use ASCII hyphens with spaces in displayed time ranges (slots, overlap warnings, confirmation).
 - HUMAN REVIEW: test expectation changed. T-01/T-03 and query/display assertions now expect full names and ASCII time separators, per the explicit human request. No behavioral assertion removed.
+
+## FD-07 — Deterministic calendar layout tests (2026-09-23)
+- Human approved editing the shared calendar tests on this branch and pushing the fix.
+- Affected tests: DayTimeline 'renders the whole day so any hour can be scrolled to'; WeekGrid '[AC-02] renders the whole day and opens on the 07:00–18:00 focus window'.
+- Before: omitted now, so the live clock could suppress hour labels near the current-time label; assertions intermittently failed on 00:00.
+- After: pass now={null} for these static-layout tests. All hour-label and viewport assertions retained verbatim. Existing current-time tests still cover clock rendering.
+- Reason: test isolation bug, not a requirement or production behavior change. No assertion weakened or removed.
+- Validation: all 109 tests across the calendar and Manage regression suites pass; TypeScript passes.

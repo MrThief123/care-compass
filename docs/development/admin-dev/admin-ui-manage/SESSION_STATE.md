@@ -29,3 +29,6 @@ Latest human revision: full names, no preview/reset notice, ASCII hyphens for ti
 
 ## Commit handoff — 2026-09-23
 Human authorized commit and push of this Manage feature. All 14 feature tests and TypeScript pass after the final display edits. Next action: collect further feedback or open a PR to admin-dev only after human approval. No Family or Admin Home changes are included.
+
+## Latest CI fix — 2026-09-23
+The shared DayTimeline/WeekGrid layout tests now pass now={null}, preserving all assertions while isolating them from live time. Human approved the shared-folder exception and push. Calendar/Manage: 109 tests pass; TypeScript passes. Next: confirm the GitHub check after push; no PR creation authorized.
