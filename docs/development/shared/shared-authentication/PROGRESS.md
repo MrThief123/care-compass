@@ -1,12 +1,12 @@
 # Progress — F0-07 Sign-in, sign-out, password reset and role-based routing
 
-Status: READY FOR PR
+Status: MERGED TO DEV (merged to `main`, PR #67)
 Owner: Prajeet
 Lane: B — Backend
 Sprint: SPRINT · planned D5
 Branch: `feature/shared-authentication`
 PR target: `main (per OQ-01 — shared work)`
-Last updated: 2026-09-22
+Last updated: 2026-09-23
 
 ## Blockers
 - None — OQ-01, OQ-08 both ANSWERED (see DECISIONS.md)
@@ -69,8 +69,7 @@ Last updated: 2026-09-22
 - Sign-in/sign-out/password-reset Server Actions always call real Supabase Auth regardless of `DATA_SOURCE` — there's no meaningful "mock sign-in" concept (Phase 1 screens already pick a role via `?as=`); only `getCurrentUser`'s guard behaviour is mode-gated, matching every other domain's contract-function pattern.
 
 ## Next action
-- Human: review and, if approved, open the PR to `main` (OQ-01, shared work).
-- Once merged: F0-08, F0-10, ADM-02, FAM-12, CAR-09, ADM-10 unblock (all depend on F0-07 among not-yet-started features).
+- None — merged to `main` via PR #67 (2026-09-23). F0-08, F0-10, ADM-02, FAM-12, CAR-09, ADM-10 are now unblocked on this dependency (still check their other dependencies before starting).
 
 ## Ready for PR
-- Yes
+- Merged (PR #67)
