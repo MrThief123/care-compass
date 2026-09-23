@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { DevPreviewNav } from "@/components/shared/dev-preview-nav";
 
 export default function DatabasePreviewPage() {
-  const [data, setData] = useState<unknown[]>([]);
+  const [data, setData] = useState<unknown>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -13,6 +13,7 @@ export default function DatabasePreviewPage() {
     const loadTestData = async () => {
       try {
         const response = await fetch("/api/test");
+
         const result = await response.json();
 
         if (!response.ok) {
@@ -21,7 +22,9 @@ export default function DatabasePreviewPage() {
 
         setData(result);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Unknown error");
+        setError(
+          err instanceof Error ? err.message : "Unknown error"
+        );
       } finally {
         setLoading(false);
       }
@@ -33,11 +36,18 @@ export default function DatabasePreviewPage() {
   return (
     <main className="p-6">
       <DevPreviewNav />
-      <h1 className="text-2xl font-semibold">Database Connection</h1>
+
+      <h1 className="text-2xl font-semibold">
+        Database Connection
+      </h1>
 
       {loading && <p className="mt-4">Loading...</p>}
 
-      {error && <p className="mt-4">Error: {error}</p>}
+      {error && (
+        <p className="mt-4 text-red-500">
+          Error: {error}
+        </p>
+      )}
 
       {!loading && !error && (
         <pre className="mt-4 overflow-auto rounded-card border border-border-default p-4">
