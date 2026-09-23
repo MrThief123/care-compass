@@ -1,0 +1,168 @@
+name: Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: "Choose deployment action"
+        required: true
+        type: choice
+        options:
+          - deploy
+          - stop
+
+env:
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+
+jobs:
+  deploy:
+    name: Deploy to EC2
+    if: inputs.action == 'deploy'
+    runs-on: ubuntu-latest
+
+    environment:
+      name: production
+
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Start EC2 instance
+        run: |
+          echo "Starting EC2..."
+
+          aws ec2 start-instances \
+            --instance-ids "${{ secrets.EC2_INSTANCE_ID }}"
+
+      - name: Wait for EC2 to start
+        run: |
+          echo "Waiting for EC2..."
+
+          aws ec2 wait instance-running \
+            --instance-ids "${{ secrets.EC2_INSTANCE_ID }}"
+
+          echo "EC2 is running."
+
+      - name: Get EC2 public IP
+        id: ec2
+        run: |
+          IP=$(aws ec2 describe-instances \
+            --instance-ids "${{ secrets.EC2_INSTANCE_ID }}" \
+            --query 'Reservations[0].Instances[0].PublicIpAddress' \
+            --output text)
+
+          echo "ip=$IP" >> "$GITHUB_OUTPUT"
+
+          echo "EC2 IP: $IP"
+
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh
+
+          echo "${{ secrets.EC2_SSH_PRIVATE_KEY }}" \
+            > ~/.ssh/care-compass.pem
+
+          chmod 600 ~/.ssh/care-compass.pem
+
+      - name: Wait for SSH
+        run: |
+          echo "Waiting for SSH..."
+
+          until ssh \
+            -o StrictHostKeyChecking=no \
+            -o ConnectTimeout=5 \
+            -i ~/.ssh/care-compass.pem \
+            "${{ secrets.EC2_SSH_USER }}@${{ steps.ec2.outputs.ip }}" \
+            "echo SSH ready"
+          do
+            sleep 5
+          done
+
+      - name: Deploy Docker container
+        run: |
+          ssh \
+            -o StrictHostKeyChecking=no \
+            -i ~/.ssh/care-compass.pem \
+            "${{ secrets.EC2_SSH_USER }}@${{ steps.ec2.outputs.ip }}" << 'EOF'
+
+            set -e
+
+            echo "Disk usage before deployment..."
+            df -h
+
+            echo "Docker disk usage..."
+            docker system df
+
+            echo "Removing unused Docker images..."
+            docker image prune -af
+
+            echo "Pulling latest Docker image..."
+            docker pull mrthief123/care-compass:latest
+
+            echo "Stopping old container..."
+            docker stop care-compass || true
+
+            echo "Removing old container..."
+            docker rm care-compass || true
+
+            echo "Starting new container..."
+            docker run -d \
+              --name care-compass \
+              --restart unless-stopped \
+              -p 8080:3000 \
+              mrthief123/care-compass:latest
+
+            echo "Removing unused Docker images after deployment..."
+            docker image prune -af
+
+            echo "Deployment complete."
+
+            echo "Container status:"
+            docker ps
+
+            echo "Final disk usage:"
+            df -h
+
+          EOF
+
+      - name: Deployment complete
+        run: |
+          echo "================================"
+          echo "Deployment successful!"
+          echo "================================"
+          echo "EC2 IP: ${{ steps.ec2.outputs.ip }}"
+          echo "Application: http://${{ steps.ec2.outputs.ip }}:8080"
+
+
+  stop:
+    name: Stop EC2
+    if: inputs.action == 'stop'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Stop EC2 instance
+        run: |
+          echo "Stopping EC2..."
+
+          aws ec2 stop-instances \
+            --instance-ids "${{ secrets.EC2_INSTANCE_ID }}"
+
+      - name: Wait for EC2 to stop
+        run: |
+          echo "Waiting for EC2 to stop..."
+
+          aws ec2 wait instance-stopped \
+            --instance-ids "${{ secrets.EC2_INSTANCE_ID }}"
+
+          echo "EC2 stopped."
