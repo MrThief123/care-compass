@@ -11,156 +11,156 @@ env:
   SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
 
 jobs:
-  # lint:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v4
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
 
-  #     - uses: actions/setup-node@v4
-  #       with:
-  #         node-version: 22
-  #         cache: npm
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
 
-  #     - run: npm ci
-  #     - run: npm run lint
+      - run: npm ci
+      - run: npm run lint
 
-  # typecheck:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v4
+  typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
 
-  #     - uses: actions/setup-node@v4
-  #       with:
-  #         node-version: 22
-  #         cache: npm
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
 
-  #     - run: npm ci
-  #     - run: npm run typecheck
+      - run: npm ci
+      - run: npm run typecheck
 
-  # format:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v4
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
 
-  #     - uses: actions/setup-node@v4
-  #       with:
-  #         node-version: 22
-  #         cache: npm
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
 
-  #     - run: npm ci
-  #     - run: npm run format:check
+      - run: npm ci
+      - run: npm run format:check
 
-  # unit:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v4
+  unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
 
-  #     - uses: actions/setup-node@v4
-  #       with:
-  #         node-version: 22
-  #         cache: npm
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
 
-  #     - run: npm ci
+      - run: npm ci
 
-  #     - name: Run tests
-  #       run: npm test
+      - name: Run tests
+        run: npm test
 
-  # build:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v4
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
 
-  #     - uses: actions/setup-node@v4
-  #       with:
-  #         node-version: 22
-  #         cache: npm
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
 
-  #     - run: npm ci
+      - run: npm ci
 
-  #     - run: npm run build
+      - run: npm run build
 
-  #     - name: Check service-role key never reaches the client bundle
-  #       run: npm run check:client-bundle-secrets
+      - name: Check service-role key never reaches the client bundle
+        run: npm run check:client-bundle-secrets
 
-  #     - name: Upload build artifact
-  #       uses: actions/upload-artifact@v4
-  #       with:
-  #         name: build-${{ github.sha }}
-  #         path: |
-  #           dist/
-  #           build/
-  #           .next/
-  #         if-no-files-found: ignore
-  #         retention-days: 7
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-${{ github.sha }}
+          path: |
+            dist/
+            build/
+            .next/
+          if-no-files-found: ignore
+          retention-days: 7
 
-  # audit:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v4
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
 
-  #     - uses: actions/setup-node@v4
-  #       with:
-  #         node-version: 22
-  #         cache: npm
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
 
-  #     - run: npm ci
+      - run: npm ci
 
-  #     - name: Security audit
-  #       run: npm audit --audit-level=high
+      - name: Security audit
+        run: npm audit --audit-level=high
 
-  #     - name: Check outdated dependencies
-  #       run: |
-  #         echo "Checking for outdated dependencies..."
-  #         npm outdated || true
+      - name: Check outdated dependencies
+        run: |
+          echo "Checking for outdated dependencies..."
+          npm outdated || true
 
-  # db-test:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v4
+  db-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
 
-  #     - name: Check for database tests
-  #       id: check
-  #       run: |
-  #         if [ -d supabase/tests ]; then
-  #           echo "exists=true" >> "$GITHUB_OUTPUT"
-  #         else
-  #           echo "exists=false" >> "$GITHUB_OUTPUT"
-  #         fi
+      - name: Check for database tests
+        id: check
+        run: |
+          if [ -d supabase/tests ]; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
 
-  #     # Placeholder until F0-06 adds supabase/tests.
-  #     # Once that directory exists, a missing/broken Supabase CLI
-  #     # must fail this job rather than being silently skipped.
-  #     - name: Set up Supabase CLI
-  #       if: steps.check.outputs.exists == 'true'
-  #       uses: supabase/setup-cli@v1
-  #       with:
-  #         version: latest
+      - name: Set up Supabase CLI
+        if: steps.check.outputs.exists == 'true'
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
 
-  #     - name: Run database tests
-  #       if: steps.check.outputs.exists == 'true'
-  #       run: supabase test db
+      - name: Run database tests
+        if: steps.check.outputs.exists == 'true'
+        run: supabase test db
 
-  # e2e:
-  #   if: github.event_name == 'pull_request'
-  #   runs-on: ubuntu-latest
+  e2e:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
 
-  #   steps:
-  #     - uses: actions/checkout@v4
+    steps:
+      - uses: actions/checkout@v4
 
-  #     - uses: actions/setup-node@v4
-  #       with:
-  #         node-version: 22
-  #         cache: npm
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
 
-  #     - run: npm ci
+      - run: npm ci
 
-  #     - run: npx playwright install --with-deps chromium
+      - run: npx playwright install --with-deps chromium
 
-  #     - name: Run E2E tests
-  #       run: npm run test:e2e
+      - name: Run E2E tests
+        run: npm run test:e2e
 
   docker-build-push:
     name: Build and Push Docker Image
+
+    # Only build/push the Docker image from main.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
     runs-on: ubuntu-latest
 
@@ -183,8 +183,8 @@ jobs:
           push: true
           platforms: linux/amd64
 
-          # These variables are required by Next.js during
-          # "npm run build" inside the Dockerfile.
+          # Required by Next.js during "npm run build"
+          # inside the Dockerfile.
           build-args: |
             NEXT_PUBLIC_SUPABASE_URL=${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
             NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
@@ -195,6 +195,10 @@ jobs:
 
   deploy:
     name: Deploy to EC2
+
+    # Only deploy when code is pushed directly to main.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
     needs: docker-build-push
 
     runs-on: ubuntu-latest
@@ -218,6 +222,7 @@ jobs:
       - name: Wait for EC2 to start
         run: |
           echo "Waiting for EC2..."
+
           aws ec2 wait instance-running \
             --instance-ids "${{ secrets.EC2_INSTANCE_ID }}"
 
@@ -237,7 +242,10 @@ jobs:
       - name: Configure SSH
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.EC2_SSH_PRIVATE_KEY }}" > ~/.ssh/care-compass.pem
+
+          echo "${{ secrets.EC2_SSH_PRIVATE_KEY }}" \
+            > ~/.ssh/care-compass.pem
+
           chmod 600 ~/.ssh/care-compass.pem
 
       - name: Wait for SSH
@@ -263,6 +271,13 @@ jobs:
 
             set -e
 
+            echo "Disk usage before deployment..."
+            df -h
+            docker system df
+
+            echo "Removing unused Docker images..."
+            docker image prune -af
+
             echo "Pulling latest Docker image..."
             docker pull mrthief123/care-compass:latest
 
@@ -279,14 +294,25 @@ jobs:
               -p 8080:3000 \
               mrthief123/care-compass:latest
 
+            echo "Removing unused Docker images after deployment..."
+            docker image prune -af
+
             echo "Deployment complete."
+
+            echo "Final container status:"
             docker ps
+
+            echo "Final disk usage:"
+            df -h
 
           EOF
 
   destroy:
     name: Stop EC2
+
+    # Only run when manually triggered.
     if: github.event_name == 'workflow_dispatch'
+
     runs-on: ubuntu-latest
 
     steps:
