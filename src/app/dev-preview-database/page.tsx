@@ -22,9 +22,7 @@ export default function DatabasePreviewPage() {
 
         setData(result);
       } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "Unknown error"
-        );
+        setError(err instanceof Error ? err.message : "Unknown error");
       } finally {
         setLoading(false);
       }
@@ -37,17 +35,11 @@ export default function DatabasePreviewPage() {
     <main className="p-6">
       <DevPreviewNav />
 
-      <h1 className="text-2xl font-semibold">
-        Database Connection
-      </h1>
+      <h1 className="text-2xl font-semibold">Database Connection</h1>
 
       {loading && <p className="mt-4">Loading...</p>}
 
-      {error && (
-        <p className="mt-4 text-red-500">
-          Error: {error}
-        </p>
-      )}
+      {error && <p className="mt-4 text-red-500">Error: {error}</p>}
 
       {!loading && !error && (
         <pre className="mt-4 overflow-auto rounded-card border border-border-default p-4">
