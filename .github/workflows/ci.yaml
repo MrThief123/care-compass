@@ -192,6 +192,14 @@ jobs:
           context: .
           push: true
           platforms: linux/amd64
+
+          # FIX:
+          # These variables are required by Next.js during
+          # "npm run build" inside the Dockerfile.
+          build-args: |
+            NEXT_PUBLIC_SUPABASE_URL=${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+            NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/care-compass:latest
             ${{ secrets.DOCKERHUB_USERNAME }}/care-compass:${{ github.sha }}
@@ -265,6 +273,9 @@ jobs:
             -i ~/.ssh/care-compass.pem \
             "${{ secrets.EC2_SSH_USER }}@${{ steps.ec2.outputs.ip }}" << 'EOF'
 
+            # FIX:
+            # If any Docker command fails, stop the deployment
+            # instead of continuing with a broken/stale container.
             set -e
 
             echo "Pulling latest Docker image..."
