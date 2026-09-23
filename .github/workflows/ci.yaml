@@ -282,11 +282,8 @@ jobs:
 
   destroy:
     name: Stop EC2
-    if: github.ref == 'refs/heads/main'
+    # if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-
-    environment:
-      name: production
 
     steps:
       - name: Configure AWS credentials
