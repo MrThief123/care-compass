@@ -237,6 +237,12 @@ jobs:
           echo "ip=$IP" >> "$GITHUB_OUTPUT"
           echo "EC2 IP: $IP"
 
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_SSH_PRIVATE_KEY }}" > ~/.ssh/care-compass.pem
+          chmod 600 ~/.ssh/care-compass.pem
+
       - name: Wait for SSH
         run: |
           echo "Waiting for SSH..."
@@ -244,7 +250,7 @@ jobs:
           until ssh \
             -o StrictHostKeyChecking=no \
             -o ConnectTimeout=5 \
-            -i <(echo "${{ secrets.EC2_SSH_PRIVATE_KEY }}") \
+            -i ~/.ssh/care-compass.pem \
             "${{ secrets.EC2_SSH_USER }}@${{ steps.ec2.outputs.ip }}" \
             "echo SSH ready"
           do
@@ -255,7 +261,7 @@ jobs:
         run: |
           ssh \
             -o StrictHostKeyChecking=no \
-            -i <(echo "${{ secrets.EC2_SSH_PRIVATE_KEY }}") \
+            -i ~/.ssh/care-compass.pem \
             "${{ secrets.EC2_SSH_USER }}@${{ steps.ec2.outputs.ip }}" << 'EOF'
 
             echo "Pulling latest Docker image..."
