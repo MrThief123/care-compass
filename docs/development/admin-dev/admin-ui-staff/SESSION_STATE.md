@@ -1,14 +1,17 @@
-# Session State — ADM-UI-03 Admin Staff screen (UI)
+# Session State - ADM-UI-03 Admin Staff screen (UI)
 
-Last session date: none (no implementation session yet)
-Current branch: n/a — `feature/admin-ui-staff` not created
-Worked on: n/a
-What changed: n/a
-Tests run: none
-Test results: n/a
-Current blocker: None
-Important discoveries: none
-Important decisions: none
-Exact next action: Run `START FEATURE ADM-UI-03` once dependencies are MERGED TO DEV (or COMPLETE) and blocking decisions are answered.
-Files likely to be touched next: `src/app/(admin)/admin/staff/page.tsx`
-Warning for next session: Read PRD.md, ACCEPTANCE_CRITERIA.md and TEST_PLAN.md before writing any code. Do not create the branch from the wrong parent (`admin-dev`).
+Last session date: 2026-09-23
+Current branch: feature/admin-ui-staff
+Worktree: C:/Users/kavis/OneDrive/Documents/IT project/care-compass-admin-staff
+Parent: origin/admin-dev (322523b); parentage verified, tracker Ready to start.
+Worked on: Staff UI, approved mock query/fixture, tests, full-name Admin header.
+Tests: 81 relevant tests pass; targeted ESLint and TypeScript pass; route HTTP 200.
+Preview: http://localhost:3102/admin/staff (mock data, local-only changes).
+Current blocker: None for implementation. Human reviewed and authorized commit/push.
+Exact next action: Push the approved Staff commit; open no PR without approval. Baseline verification failures are recorded in PROGRESS.md.
+Warnings: Human authorized committing and pushing the reviewed Staff work. Preview-first preference deferred earlier checkpoint commits. Do not touch the original Family worktree or other Admin branches.
+Local environment: Google Fonts certificate validation fails, so the preview uses fallback font. Browser visual inspection was unavailable; do not claim pixel-perfect verification.
+Design: C:/Users/kavis/OneDrive/Pictures/Screenshots/Screenshot 2026-09-23 122747.png.
+
+Latest review change: capitalized Staff List, Add Staff and Add / Edit Staff. Reviewed; commit/push authorized.
+- Removed Edit column heading; row buttons unchanged. Validation: 10 Staff tests passed.
