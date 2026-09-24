@@ -38,7 +38,7 @@ Record feature-level decisions here using the template below. Project-wide decis
 - Decision: a local table in `src/features/family-budget/` built on the Task log's pattern (container queries, explicit ARIA roles, fixed tracks): DATE and AMOUNT are fixed-width tracks, DESCRIPTION takes the rest (`minmax(0,1fr)`) and is cut to two lines by CSS with the whole text in the DOM and in `title`; the amount is right-aligned and never wraps or loses digits. The description cell holds the description and, below it, the optional "Recorded by" line (FD-05). On a narrow card the row becomes two lines (description with its recorder line, then date and amount). One DOM serves both layouts; the column headings stay in the accessibility tree at any width.
 - Reason: a table whose cells have no size limits cannot be made safe from outside, and `src/components/shared` is not Lane F's to edit (CLAUDE.md §4.2).
 - Alternatives considered: the shared `DataTable` as is (fails the edge case above); asking for a kit change first (slower, and the Task log already took this route).
-- Consequences: the PRD's "`DataTable`" wording is met by composition, not by the shared component; flag it in the PR. A shared responsive table is a candidate for a shared PR (three screens now need one).
+- Consequences: the PRD's "`DataTable`" wording is met by composition, not by the shared component; flag it in the PR. A shared responsive table is a candidate for a shared PR (three screens now need one). The column sizes, and what an amount too large for its column does, are in FD-10.
 - Human confirmation required: no (the route is prescribed by CLAUDE.md §4.2).
 - Test changes caused: none.
 
@@ -103,6 +103,16 @@ Record feature-level decisions here using the template below. Project-wide decis
 - Alternatives considered: an empty cell (looks broken); a dash (read aloud as "dash" or not at all).
 - Consequences: wording undesigned, please review with FD-07's copy.
 - Human confirmation required: yes (copy), flagged in the PR.
+- Test changes caused: none.
+
+### FD-10 — History column sizes, and what an amount too big for its column does
+- Date: 2026-09-25
+- Context: FD-03 says DATE and AMOUNT are fixed tracks and the amount "never wraps or loses digits". In the real-browser stress check (`+$9,999,999,999.99` at a 768px window) an amount broke in the middle of the number, because the first amount track (7rem) was narrower than it.
+- Decision: on a wide card the tracks are DATE `7.5rem`, AMOUNT `clamp(9rem, 18%, 12rem)`, DESCRIPTION the rest. 9rem held that stress amount on one line at 768, where the failure showed; a wider window only gives the track more room. An amount that still cannot fit its track wraps at a digit group (`overflow-wrap: anywhere`) inside its own cell: it never overflows the card or overlaps the description, and no digit is dropped. That refines FD-03's "never wraps": true for any amount the app can realistically hold, and safe beyond that.
+- Reason: a number split across two lines is hard to read and looks broken; a track wide enough for a ten-billion-dollar figure costs the description almost nothing (about 2rem more than the first try).
+- Alternatives considered: `white-space: nowrap` on the amount (guarantees one line, but an even larger amount would push past the card edge, the failure this table exists to avoid); a wider DATE track (nothing needs it).
+- Consequences: none for the tests, which check content, roles and clamping, not track widths.
+- Human confirmation required: no.
 - Test changes caused: none.
 
 <!-- Template

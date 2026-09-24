@@ -1,6 +1,6 @@
 # Progress — FAM-UI-05 Family Budget screen (UI)
 
-Status: IN PROGRESS
+Status: READY FOR PR
 Owner: Dhruv Verma
 Lane: F — Family
 Sprint: SPRINT · planned D6
@@ -9,7 +9,7 @@ PR target: `family-dev`
 Last updated: 2026-09-25
 
 ## Blockers
-- None. Tests-first is done and the tests are red; the implementation is ready to start in a fresh session (SESSION_STATE.md has the plan). No open human decision blocks it.
+- None. Built and green; waiting only for the human's "yes" to open the PR. No open human decision blocks it (OQ-24, empty-state wording, stays open and uses the documented defaults, FD-07).
 - FD-05 is answered: the human chose to show who recorded each entry (2026-09-25).
 
 ## Dependencies status
@@ -23,31 +23,24 @@ Last updated: 2026-09-25
 - Feature `DECISIONS.md` written: FD-01 to FD-09 and the open-question table.
 - Tests written first (84 tests in 5 files), run red for the right reasons (TEST_PLAN.md Results).
 - FD-05 answered by the human: History shows "Recorded by <name>" under each description (PD-034). Tests, fixtures expectations, CHG-019 and the docs updated to match; re-run red (92 tests in 5 files).
-- Implementation plan and interface contract written into SESSION_STATE.md, so the build can start cold.
+- Implementation plan and interface contract written into SESSION_STATE.md, so the build could start cold.
+- Implemented (commits `68e7e9c`, `8732005`, `7ecd0c2`, `4cc8aec`): `getFundHistory` contract read, mock and design fixtures (CHG-019); `budget-format.ts` and `budget-data.ts`; `family-budget-view`, local `history-table`, `update-funds-button`, `budget-error-state`, `budget-skeleton`; the route `page.tsx` and `loading.tsx` replacing the placeholder. Data only through `src/server/**`.
+- Real-browser design check against `family-06-budget.png` and a width sweep (1920 to 600, normal and stress content): clean. One defect found and fixed on the way (a very large amount broke mid-number at 768; FD-10).
+- Full local checks run (CI is down): all green except two shell e2e tests that fail the same way on a clean `origin/family-dev` (TEST_PLAN.md Results).
 
 ## In progress
-- Nothing. Paused at the human's request; the human will start the implementation in a new session.
+- Nothing. Waiting for the human's "yes" to open the PR.
 
 ## Remaining
-- Route `/family/[clientId]/budget` inside the family layout: async page, `loading.tsx`.
-- 'Funds by source' card with 'Update' primary button (no flow; says it is not available yet, FD-06).
-- History rows show "Recorded by <name>" under the description when the entry has a recorder (FD-05).
-- Three bucket cards from Home's `BudgetBucketTile` in an auto-fit grid (FD-01).
-- History as a local container-query table: DATE · DESCRIPTION · AMOUNT (FD-03).
-- `budget-format.ts` (`formatFundDate`, `formatSignedDollars`, FD-04) and `budget-data.ts` (`loadFamilyBudgetData`).
-- Loading skeleton, empty states and error state (States sheet, OQ-24 defaults, FD-07).
-- `getFundHistory` contract, mock and design-matching `FUND_ENTRIES` fixtures (CHG-019).
-- Data only via `src/server/**` contract functions (mock data source).
-- Read `node_modules/next/dist/docs/` for the pages, `loading.tsx` and `params` conventions first (CLAUDE.md §14).
-- After the build: full local checks, real-browser design and width check, docs, then announce READY FOR PR and wait for "yes".
+- The human's "yes", then open the PR to `family-dev` (the docs update ships in it).
 
 ## Acceptance criteria status
-- 0 / 3 MET (tests written and red; no production code yet)
+- 3 / 3 MET (AC-01 the three bucket cards, AC-02 the first History row, AC-03 the empty state), each with tests passing.
 
 ## Tests
 - Written: 92 (T-01..T-03 and the tests beyond them, TEST_PLAN.md)
-- Passing: 7 (2 `getBudgetSummary` tests that already pass because that read is unchanged, and 5 fixture-shape tests that hold on today's fixtures)
-- Failing: 12 run and fail, 73 fail at import because the modules they test do not exist yet
+- Passing: 92 of 92 in this feature's five files; 1270 of 1270 in the full unit run (`src`, `tests/unit`)
+- e2e (production build, `--grep-invert "F0-07"`): 34 pass, 2 fail. Both are `[F0-15]` header tests at 480px and 338px on Home, not this feature's page; they fail the same way on a clean `origin/family-dev` (480px always, 338px intermittently)
 
 ## Files changed
 - `DECISIONS.md` — CHG-019
@@ -58,16 +51,19 @@ Last updated: 2026-09-25
 - `src/server/budget/queries.test.ts` (new)
 - `src/mocks/queries/budget.test.ts` (new)
 - Tests amended for FD-05 (2026-09-25): the five test files above.
-- No production code changed. Planned, after the greenlight: `src/app/(family)/family/[clientId]/budget/page.tsx` and `loading.tsx`, `src/features/family-budget/*`, `src/server/budget/queries.ts` (Lane B, CHG-019), `src/mocks/queries/budget.ts` and `src/mocks/fixtures.ts` (Lane S, CHG-019).
+- Production code (this session): `src/app/(family)/family/[clientId]/budget/page.tsx` (placeholder replaced) and `loading.tsx` (new); `src/features/family-budget/` new: `budget-format.ts`, `budget-data.ts`, `family-budget-view.tsx`, `history-table.tsx`, `update-funds-button.tsx`, `budget-error-state.tsx`, `budget-skeleton.tsx`; `src/server/budget/queries.ts` (Lane B, CHG-019: `getFundHistory`); `src/mocks/queries/budget.ts` and `src/mocks/fixtures.ts` (Lane S, CHG-019: the read, and Margaret's three design rows plus one for Robert).
+- No test file changed in this session.
 
 ## Decisions
-- See DECISIONS.md (FD-01 to FD-09). Root `DECISIONS.md`: CHG-019 (amended 2026-09-25: entries name their recorder).
+- See DECISIONS.md (FD-01 to FD-10; FD-10 is new in the build: History column sizes). Root `DECISIONS.md`: CHG-019 (amended 2026-09-25: entries name their recorder).
 
 ## HUMAN REVIEW: test expectation changed
 - `[FAM-UI-05][PRD] FD-05: a row is date, description and amount only, with no 'recorded by' text drawn` asserted the opposite of the human's decision of 2026-09-25 (show who recorded each entry), so it was replaced by attribution tests before any implementation began. No other assertion changed. Before and after: DECISIONS.md FD-05, TEST_PLAN.md.
 - The design (`family-06-budget.png`) does not draw the "Recorded by" line: flag for design review in the PR.
 
 ## Problems encountered
+- Real-browser stress check: at a 768px window `+$9,999,999,999.99` broke mid-number, because the History amount column was too narrow. Fixed by widening its floor (FD-10, `4cc8aec`); the full width sweep was re-run clean.
+- Two shell e2e tests (`[F0-15]` header, 480px and 338px, page loads Home) fail on the production build. Reproduced on a clean build of `origin/family-dev`, so not caused by this feature; the shell is not lane F's. To raise with the shell owner.
 - CHG-018 (Info's contracts) is on unmerged PR #89, so this branch's contract change is numbered CHG-019.
 - A test file that imports a module that does not exist fails at load in Vite, even for a dynamic `import()` with a literal path. `family-budget.test.tsx` therefore imports `budget/loading` and the page statically (the Info precedent), and its red state is "module does not exist". Its per-test red state was checked once with that import stubbed (TEST_PLAN.md Results).
 
@@ -76,7 +72,7 @@ Last updated: 2026-09-25
 - OQ-24 (empty-state wording) is open; the default wording in use is flagged in FD-07.
 
 ## Next action
-- Start the implementation session (the human's go is given by starting it). Follow SESSION_STATE.md: pre-flight, then the minimum to turn the tests green, in this order: `getFundHistory` and the fixtures (CHG-019), `budget-format.ts`, `budget-data.ts`, the view components, `page.tsx` and `loading.tsx`.
+- Wait for the human's "yes", then open the PR to `family-dev` titled `FAM-UI-05 Family Budget screen (UI)`.
 
 ## Ready for PR
-- No
+- Yes, pending the human's "yes". PR body flags: local `BudgetBucketTile` and local History table instead of the kit's `BudgetBucketCard` and `DataTable` (FD-01, FD-03); the "Recorded by" line the design does not draw (FD-05); copy needing review (FD-06 Update message, FD-07 empty and error wording, FD-09 "No description"; OQ-24 stays open); CHG-019 touching `src/server/**` and `src/mocks/**`; the checks ran locally because CI is down; the two shell e2e failures that also fail on `family-dev`.

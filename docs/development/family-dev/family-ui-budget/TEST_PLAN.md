@@ -54,8 +54,21 @@ Not tested here, by design: the Update funds flow and recording an entry with it
 
 The failing tests fail for the right reason: the code they test does not exist yet. No test was skipped, marked `.only`, or weakened. The throwaway stubbed copy of the screen test used for the per-test check was deleted, not committed.
 
-### After implementation
-Not run yet. To be filled in at READY FOR PR: the same command to green, then the full local checks (`npx vitest run src tests/unit`, `npx tsc --noEmit`, `npx eslint .`, `npx prettier --check .`, Playwright e2e on the production build with `--grep-invert "F0-07"`), the real-browser design and width check, and a note that CI is down so the checks ran locally.
+### After implementation (2026-09-25)
+**CI is down (GitHub Actions limits), so every check below ran locally.** No test was changed, skipped, marked `.only` or deleted: the 92 tests are the ones written first (FD-05 amendment aside, above).
+
+- `npx vitest run src/features/family-budget src/server/budget src/mocks/queries/budget.test.ts`: 5 files, **92 of 92 pass** (43 screen, 24 formatters, 6 data loader, 12 contract, 7 fixtures).
+- `npx vitest run src tests/unit`: 105 files, **1270 of 1270 pass**.
+- `npx tsc --noEmit`: clean. `npx eslint .`: 0 errors, 3 warnings, none in this feature's files (`scripts/plan-status.mjs` unused `statusOrder`; `src/app/page.tsx` two `import/order`). `npx prettier --check .`: clean.
+- `next build`: succeeds; `/family/[clientId]/budget` is a dynamic route.
+- Playwright e2e on the production build (`next start`), `--grep-invert "F0-07"` (those specs write orphan rows to the hosted Supabase): **34 pass, 2 fail**, both `[F0-15][PRD] keeps header text inside the header bar, without overlap` at 480px and 338px. Neither is caused by this feature: they load `/family/client-margaret/home`, no file this branch changes is on that page, and both were reproduced on a clean build of `origin/family-dev` (02c7fa7). 480px fails there every time with the same 30px page overflow. 338px is a timing flake there too: 2 failures in 30 runs, same 172px overflow (on this branch 2 in 39 runs). Not fixed here: the shell is not lane F's (CLAUDE.md §4.2). Flag for the shell owner.
+- `supabase test db`: not run. This feature changes no migration or SQL.
+
+**Real-browser design and width check** (Playwright, Chromium against the dev server on :3000; the Chrome extension was not connected):
+- Against `docs/design/screens/family-06-budget.png` at 1440: same page. Differences, all deliberate: the "Recorded by Helen Doyle" line under each description (FD-05, not drawn in the design); the History column headings are grey small caps as in the Task log table.
+- Widths 1920, 1600, 1440, 1280, 1024, 768, 700 and 600, each with the normal fixtures and a stress set (a 300-character description and recorder name, 40 rows, five buckets, `+$9,999,999,999.99`): no horizontal page scroll, nothing outside its card, no overlapping cells or tiles. One defect found and fixed: at 768 the huge amount broke mid-number because the amount column was too narrow, so its floor went from 7rem to 9rem (commit 4cc8aec, FD-10). The table switches to two-line rows below a 36rem card; long descriptions and recorder names are cut at two lines with the full text in `title`.
+- Update pressed: "Updating funds is not available yet." appears on its own line under the card header, and nothing else moves.
+- Not viewed by eye: the loading skeleton (covered by its unit and axe tests).
 
 ## Regression scope
 - Run the full unit/component suite and `supabase test db` before marking READY FOR PR.
