@@ -12,7 +12,7 @@ Last updated: 2026-09-24
 - None. OQ-01 ANSWERED (PD-030); authorised by CHG-009; feature and plan card approved by the human in-session (2026-09-24).
 
 **HUMAN REVIEW requested:**
-1. FD-01 — new contract options default to the current behaviour (tasks only), so existing callers and tests are unchanged.
+1. FD-01 — ANSWERED 2026-09-24 (Option A): with no `type`, the contracts return tasks only, so existing callers and tests are unchanged. Constraint from the human: the log and any export must show tasks and plain events together, so those callers pass `type: "all"`.
 2. FD-02 — may the two shared `src/app/dev-preview-*` pages be edited to show plain events and the switch?
 
 ## Dependencies status
@@ -50,13 +50,16 @@ Last updated: 2026-09-24
 - `DEVELOPMENT_PLAN.md`, `PRD.md`, `docs/development/shared/shared-plain-events/*`
 
 ## Decisions
-- FD-01 (proposed), FD-02 (pending)
+- FD-01 (answered, Option A), FD-02 (pending)
 
 ## Problems encountered
 - None.
 
 ## Assumptions
 - `docs/JIRA_TICKETS.md`, `docs/JIRA_BACKLOG.csv` and root `SESSION_STATE.md` are not updated (as with UI-04).
+
+## Notes for the dashboard lanes (not edited here)
+- Care log (FAM-UI-07, FAM-14, FAM-15) and any log export (PL-06, PL-08): call `getTaskLog` with `type: "all"` so tasks and plain events appear together (FD-01). Today timelines that show both pass the same option to `getTodayOccurrences`.
 
 ## Next action
 - Task 2: list every file on `main` that assumes every occurrence has a status and report it before changing `src/types/domain.ts`.
