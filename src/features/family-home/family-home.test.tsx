@@ -375,7 +375,7 @@ describe("[FAM-UI-01] Family Home layout and navigation (PRD Scope, no AC)", () 
     // The key holds ':' and '+', so it is encoded into the /tasks/[occurrenceKey] segment.
     expect(within(recent).getByRole("link", { name: /Evening medication/ })).toHaveAttribute(
       "href",
-      `/family/client-margaret/tasks/${encodeURIComponent(EVENING_MEDS.key)}`,
+      `/family/client-margaret/tasks/${encodeURIComponent(EVENING_MEDS.key)}?from=home`,
     );
   });
 
@@ -385,7 +385,7 @@ describe("[FAM-UI-01] Family Home layout and navigation (PRD Scope, no AC)", () 
 
     expect(within(overdue).getByRole("link", { name: /Wound dressing check/ })).toHaveAttribute(
       "href",
-      `/family/client-margaret/tasks/${encodeURIComponent(WOUND_DRESSING.key)}`,
+      `/family/client-margaret/tasks/${encodeURIComponent(WOUND_DRESSING.key)}?from=home`,
     );
   });
 });

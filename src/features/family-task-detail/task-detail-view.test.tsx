@@ -7,6 +7,7 @@ import { getEventDocuments } from "@/server/documents/queries";
 import { getOccurrence } from "@/server/events/queries";
 import type { EventDocument, Occurrence } from "@/types/domain";
 
+import type { TaskDetailOrigin } from "./task-detail-origin";
 import { TaskDetailView } from "./task-detail-view";
 
 const ID = "client-margaret";
@@ -27,6 +28,7 @@ async function renderDetail(
     occurrence?: Partial<Occurrence>;
     documents?: EventDocument[];
     backParams?: TaskLogParams;
+    origin?: TaskDetailOrigin;
   } = {},
 ) {
   const loaded = await load(key);
@@ -35,7 +37,7 @@ async function renderDetail(
       clientId={ID}
       occurrence={{ ...loaded.occurrence, ...extra.occurrence }}
       documents={extra.documents ?? loaded.documents}
-      backParams={extra.backParams}
+      origin={extra.origin ?? (extra.backParams && { from: "tasks", view: extra.backParams })}
     />,
   );
 }
@@ -80,7 +82,7 @@ describe("[FAM-UI-07] TaskDetailView", () => {
     );
   });
 
-  it("[FAM-UI-07][PRD] shows the Description card with an Edit link to the event's edit route", async () => {
+  it("[FAM-UI-07][PRD] shows the Description card, which no longer holds an Edit link (CHG-014: Edit event sits by the title)", async () => {
     await renderDetail();
 
     const card = screen.getByRole("region", { name: "Description" });
@@ -89,7 +91,8 @@ describe("[FAM-UI-07] TaskDetailView", () => {
         "Administer morning medication as per the current care plan. Confirm with Margaret before administering and record any side effects.",
       ),
     ).toBeInTheDocument();
-    expect(within(card).getByRole("link", { name: "Edit" })).toHaveAttribute(
+    expect(within(card).queryByRole("link")).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Edit event" })).toHaveAttribute(
       "href",
       "/family/client-margaret/events/event-margaret-morning-meds/edit",
     );
@@ -301,13 +304,13 @@ describe("[FAM-UI-07] TaskDetailView: long text and narrow windows", () => {
     ).toBe(false);
   });
 
-  it("[FAM-UI-07][PRD] keeps the Back link and the Edit link when the text is long", async () => {
+  it("[FAM-UI-07][PRD] keeps the Back link and the Edit event button when the text is long", async () => {
     await renderDetail(MORNING_MEDICATION_KEY, {
       occurrence: { title: "T".repeat(120), description: UNBROKEN_300, actor: NAME_NO_SPACES },
     });
 
     expect(screen.getByRole("link", { name: "Back to Task log" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Edit" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Edit event" })).toBeInTheDocument();
   });
 
   it("[FAM-UI-07][PRD] has no axe violations with the longest text and six documents", async () => {
@@ -321,6 +324,78 @@ describe("[FAM-UI-07] TaskDetailView: long text and narrow windows", () => {
       documents: documentsNamed(["A.pdf", "B.pdf", "C.pdf", "D.pdf", "E.pdf", "F.pdf"]),
     });
 
+    expect(await axe(container)).toHaveNoViolations();
+  });
+});
+
+describe("[FAM-UI-07] TaskDetailView: Edit event button and Back to the origin (CHG-014)", () => {
+  const classesOf = (element: Element) => [...element.classList];
+
+  it("[FAM-UI-07][AC-09] shows one 'Edit event' button in the title row, linking to the event's edit route", async () => {
+    await renderDetail();
+
+    const edit = screen.getByRole("link", { name: "Edit event" });
+    expect(edit).toHaveAttribute(
+      "href",
+      "/family/client-margaret/events/event-margaret-morning-meds/edit",
+    );
+    // One edit control on the page: the old Description 'Edit' link is gone.
+    expect(screen.getAllByRole("link", { name: /edit/i })).toHaveLength(1);
+    // It sits in the same row as the page title, after it.
+    const heading = screen.getByRole("heading", { level: 1, name: "Morning medication" });
+    const row = screen.getByTestId("task-detail-title-row");
+    expect(row).toContainElement(heading);
+    expect(row).toContainElement(edit);
+    expect(heading.compareDocumentPosition(edit) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it("[FAM-UI-07][AC-09] the Edit event button is an outlined kit-style button: 44px target, tokens only, never white text on teal", async () => {
+    await renderDetail();
+
+    const edit = screen.getByRole("link", { name: "Edit event" });
+    const classes = classesOf(edit);
+    expect(classes).toEqual(
+      expect.arrayContaining(["h-11", "min-w-11", "border", "border-border-brand", "shrink-0"]),
+    );
+    expect(classes.some((name) => /^bg-(primary|brand)|text-white|#|\[#/.test(name))).toBe(false);
+    // The title row wraps, so the button drops below a long title instead of overlapping it.
+    expect(screen.getByTestId("task-detail-title-row")).toHaveClass("flex-wrap");
+    expect(screen.getByRole("heading", { level: 1 })).toHaveClass("min-w-0");
+  });
+
+  it("[FAM-UI-07][AC-09] a 120-character unbroken title and the Edit event button both stay, the title wrapping", async () => {
+    await renderDetail(MORNING_MEDICATION_KEY, { occurrence: { title: "T".repeat(120) } });
+
+    expect(screen.getByRole("heading", { level: 1 })).toHaveClass("[overflow-wrap:anywhere]");
+    expect(screen.getByRole("link", { name: "Edit event" })).toBeInTheDocument();
+  });
+
+  it.each([
+    [
+      { from: "calendar", view: { view: "week", date: "2026-12-02", month: "2026-12" } },
+      "Back to Calendar",
+      "/family/client-margaret/calendar?view=week&date=2026-12-02",
+    ],
+    [{ from: "home" }, "Back to Home", "/family/client-margaret/home"],
+    [
+      { from: "tasks", view: { q: "meds", status: "done", page: 2 } },
+      "Back to Task log",
+      "/family/client-margaret/tasks?q=meds&status=done&page=2",
+    ],
+  ] as [TaskDetailOrigin, string, string][])(
+    "[FAM-UI-07][AC-10] opened from %j, Back reads %j and returns to %j",
+    async (origin, label, href) => {
+      await renderDetail(MORNING_MEDICATION_KEY, { origin });
+
+      expect(screen.getByRole("link", { name: label })).toHaveAttribute("href", href);
+      expect(screen.getAllByRole("link", { name: /^Back to/ })).toHaveLength(1);
+    },
+  );
+
+  it("[FAM-UI-07][AC-10] has no axe violations when opened from the Calendar", async () => {
+    const { container } = await renderDetail(MORNING_MEDICATION_KEY, {
+      origin: { from: "calendar", view: { view: "month", date: "2026-12-01", month: "2026-12" } },
+    });
     expect(await axe(container)).toHaveNoViolations();
   });
 });

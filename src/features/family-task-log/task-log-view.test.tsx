@@ -138,7 +138,7 @@ describe("[FAM-UI-07] TaskLogView on the shared fixtures (real contract, first p
     renderLog({ ...page, items: reversed, params: PLAIN });
 
     const linkKeys = dataRows().map((row) => within(row).getByRole("link").getAttribute("href"));
-    expect(linkKeys).toEqual(reversed.map((item) => taskDetailHref(ID, item.key)));
+    expect(linkKeys).toEqual(reversed.map((item) => taskDetailHref(ID, item.key, PLAIN)));
   });
 
   it("[FAM-UI-07][AC-02] shows only Weekly weigh-in and Medication review, each with nurse '—', for ?status=overdue", async () => {
@@ -459,7 +459,7 @@ describe("[FAM-UI-07] TaskLogView: links keep the view (AC-08)", () => {
     renderLog({ items, total: 60, params });
 
     const href = taskDetailHref(ID, items[0]!.key, params);
-    expect(href).toContain("?q=phys&status=done&page=3");
+    expect(href).toContain("?from=tasks&q=phys&status=done&page=3");
     const first = dataRows()[0]!;
     expect(within(first).getByRole("link")).toHaveAttribute("href", href);
 
@@ -467,13 +467,13 @@ describe("[FAM-UI-07] TaskLogView: links keep the view (AC-08)", () => {
     expect(push).toHaveBeenCalledExactlyOnceWith(href);
   });
 
-  it("[FAM-UI-07][AC-08] a plain first page links to the plain detail route, with no query string", () => {
+  it("[FAM-UI-07][AC-08] a plain first page links to the detail route with only its origin, from=tasks", () => {
     const items = makeHistory(20);
     renderLog({ items, total: 20 });
 
     expect(within(dataRows()[0]!).getByRole("link")).toHaveAttribute(
       "href",
-      taskDetailHref(ID, items[0]!.key),
+      `${taskDetailHref(ID, items[0]!.key)}?from=tasks`,
     );
   });
 

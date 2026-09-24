@@ -59,11 +59,11 @@ describe("the shared URL contract: /family/{clientId}/tasks?q=&status=&page=", (
     expect(taskLogHref(ID, { page: 2 })).toBe("/family/client-margaret/tasks?page=2");
   });
 
-  it("[FAM-UI-07][AC-08] a Task detail carries the same three params after the encoded key", () => {
+  it("[FAM-UI-07][AC-08] a Task detail carries from=tasks and the same three params after the encoded key", () => {
     expect(taskDetailHref(ID, KEY, { q: "physio", status: "done", page: 3 })).toBe(
-      "/family/client-margaret/tasks/event-margaret-morning-meds%3A2026-11-30T09%3A00%3A00%2B11%3A00?q=physio&status=done&page=3",
+      "/family/client-margaret/tasks/event-margaret-morning-meds%3A2026-11-30T09%3A00%3A00%2B11%3A00?from=tasks&q=physio&status=done&page=3",
     );
-    expect(taskDetailHref(ID, KEY, { page: 1 })).toBe(taskDetailHref(ID, KEY));
+    expect(taskDetailHref(ID, KEY, { page: 1 })).toBe(`${taskDetailHref(ID, KEY)}?from=tasks`);
   });
 
   it("[FAM-UI-07][AC-08] builds hrefs only from validated params, whatever a caller hands in", () => {

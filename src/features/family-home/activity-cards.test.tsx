@@ -99,7 +99,7 @@ describe("[FAM-UI-01][AC-02] Overdue card", () => {
 
     expect(within(card).getByRole("link", { name: /Wound dressing check/ })).toHaveAttribute(
       "href",
-      `/family/client-margaret/tasks/${encodeURIComponent(WOUND.key)}`,
+      `/family/client-margaret/tasks/${encodeURIComponent(WOUND.key)}?from=home`,
     );
   });
 
@@ -194,7 +194,7 @@ describe("[FAM-UI-01][PRD] Recent activity rows with long and awkward text", () 
     const row = within(card).getByRole("link", { name: new RegExp(MOCK_CARER) });
     expect(row).toHaveAttribute(
       "href",
-      `/family/client-margaret/tasks/${encodeURIComponent(LONG_ROW.key)}`,
+      `/family/client-margaret/tasks/${encodeURIComponent(LONG_ROW.key)}?from=home`,
     );
     expect(row).toHaveAccessibleName(new RegExp(MOCK_TITLE));
   });

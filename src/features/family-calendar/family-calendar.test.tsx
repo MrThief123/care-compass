@@ -208,7 +208,30 @@ describe("[FAM-UI-02][AC-02] week grid", () => {
     await user.click(within(column).getByText("Physiotherapy"));
 
     expect(mocks.push).toHaveBeenCalledWith(
-      `/family/${CLIENT_ID}/tasks/${encodeURIComponent(DESIGN_WEEK[6]!.key)}`,
+      `/family/${CLIENT_ID}/tasks/${encodeURIComponent(DESIGN_WEEK[6]!.key)}?from=calendar&view=week&date=2026-11-30`,
+    );
+  });
+
+  it("[FAM-UI-07][AC-10] a block carries the calendar's view and selected day, so Task detail's Back returns to them", async () => {
+    const user = userEvent.setup();
+    await renderCalendar({ view: "week", date: "2026-12-02" });
+
+    await user.click(screen.getByTestId("week-grid-header-2026-12-03"));
+    const column = screen.getByTestId("week-grid-day-2026-12-04");
+    await user.click(within(column).getByText("Physiotherapy"));
+
+    expect(mocks.push).toHaveBeenLastCalledWith(
+      `/family/${CLIENT_ID}/tasks/${encodeURIComponent(DESIGN_WEEK[6]!.key)}?from=calendar&view=week&date=2026-12-03`,
+    );
+  });
+
+  it("[FAM-UI-07][AC-10] a Log row carries the calendar's month view, selected day and month", async () => {
+    await renderCalendar({ view: "month", date: "2026-11-29", month: "2026-12" });
+
+    const rows = within(logPanel()).getAllByRole("listitem");
+    expect(within(rows[0]!).getByRole("link")).toHaveAttribute(
+      "href",
+      `/family/${CLIENT_ID}/tasks/${encodeURIComponent(DESIGN_WEEK[0]!.key)}?from=calendar&view=month&date=2026-11-29&month=2026-12`,
     );
   });
 });
@@ -325,7 +348,7 @@ describe("[FAM-UI-02] Log panel", () => {
     ]);
     expect(within(rows[0]!).getByRole("link")).toHaveAttribute(
       "href",
-      `/family/${CLIENT_ID}/tasks/${encodeURIComponent(DESIGN_WEEK[0]!.key)}`,
+      `/family/${CLIENT_ID}/tasks/${encodeURIComponent(DESIGN_WEEK[0]!.key)}?from=calendar&view=week&date=2026-11-30`,
     );
   });
 
