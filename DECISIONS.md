@@ -509,6 +509,16 @@ Docs updated: DECISIONS.md
 - Human confirmation: Dhruv Verma, 2026-09-24 (in-session).
 - Docs updated: DECISIONS.md (this entry); `docs/development/family-dev/family-ui-calendar/DECISIONS.md` FD-01, FD-02.
 
+### CHG-007 — FAM-UI-02: keyboard shortcuts and a Today button on the Family Calendar
+- Date / requested by: 2026-09-24 / Dhruv Verma (human, project lead)
+- Type: scope change (new ACs on an in-flight feature)
+- Description: FAM-UI-02 gains AC-06 (D / W / M switch the view; ← / → step one day, week or month by view) and AC-07 (a Today button beside the range heading, also on T, returns to today in the current view). Shortcuts are ignored while typing in a text field, with Ctrl/Cmd/Alt held, and on key repeat. The arrows and Today expose `aria-keyshortcuts` and a tooltip.
+- Source / justification: human instruction in-session, 2026-09-24. Not in the design (`family-02-calendar.png`).
+- Impact: FAM-UI-02 only (ACCEPTANCE_CRITERIA AC-06, AC-07; TEST_PLAN T-06, T-07; feature DECISIONS FD-12). No shared folders changed. CAR-UI-03 may want the same behaviour for consistency.
+- Numbering: may clash with other unmerged branches (see CHG-006). Whichever merges second renumbers.
+- Human confirmation: Dhruv Verma, 2026-09-24 (in-session).
+- Docs updated: DECISIONS.md (this entry); FAM-UI-02 ACCEPTANCE_CRITERIA.md, TEST_PLAN.md, DECISIONS.md, PROGRESS.md, SESSION_STATE.md.
+
 Template for future entries:
 ```
 ### CHG-xxx — <title>

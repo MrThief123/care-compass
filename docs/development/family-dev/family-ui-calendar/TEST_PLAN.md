@@ -16,10 +16,13 @@ Tests are written **before** production code (TESTING.md §2). Run them, confirm
 | T-03 | AC-03 | component | Given a user selects TUE 1, when the Tasks panel updates, then its subtitle reads 'Tuesday 1 December'. | ☑ | PASS |
 | T-04 | AC-04 | component | Given Physiotherapy unticked, when ticked, then its label is struck through (local state). | ☑ | PASS |
 | T-05 | AC-05 | e2e | Given the week view, when M is pressed, then a December 2026 month grid is shown. | ☑ | PASS |
+| T-06 | AC-06 | component + e2e | D/W/M switch the view; ←/→ step a day, week or month; ignored with a modifier or in a text field; the controls name their keys. | ☑ | PASS |
+| T-07 | AC-07 | component + e2e | Today and T return each view to today (month: today's month); already on today, it reselects without navigating. | ☑ | PASS |
 
 ## Where the tests live
 - T-01 to T-04: `src/features/family-calendar/family-calendar.test.tsx` (titles `[FAM-UI-02][AC-xx] T-0x …`).
 - T-05: `tests/e2e/family-calendar.spec.ts`.
+- T-06, T-07 (CHG-007): `family-calendar.test.tsx` (`[AC-06]` keyboard shortcuts, `[AC-07]` Today, 13 tests), `calendar-params.test.ts` (`goToToday`, 3 tests), and one e2e walk through every key in `tests/e2e/family-calendar.spec.ts`.
 
 ## Additional tests (written first, same session)
 - `src/features/family-calendar/family-calendar.test.tsx`: today from the contract, fallback for bad params, a block opens Task detail, the Tasks panel on the default, empty and URL-selected day, the URL kept on selection, a Done task ticked and untickable (OQ-10 default), ticks surviving day changes, the Log panel (three rows, View all, empty), the month and day views, Previous/Next, loading, error and Retry, empty week, a long title wraps, and axe on the week and month views. 26 tests.

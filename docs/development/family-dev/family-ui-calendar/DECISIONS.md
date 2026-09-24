@@ -81,3 +81,10 @@ Record feature-level decisions here using the template below. Project-wide decis
 - Context: that route's comment says to delete it once a real screen renders the three grids against `src/server/**` data, which this screen now does.
 - Decision: left in place. It is outside Lane F's folders. Raise with Lane S.
 - Human confirmation required: no.
+
+### FD-12 — Keyboard shortcuts and Today (CHG-007)
+- Date: 2026-09-24
+- Decision: a window `keydown` listener (`use-calendar-shortcuts.ts`, no new dependency). D/W/M change view (pressing the current view's key does nothing), ←/→ step, T goes to today. Skipped when a modifier is held (so Cmd+← and browser shortcuts still work), on key repeat (each step is a server navigation), and when focus is in a text input, textarea, select or contenteditable; checkboxes and buttons do not block them. Keys act on the day picked on screen, not only the URL's first date.
+- Today uses the contract's `getToday()` (the fixtures' 30 Nov in mock mode, the real Melbourne day once wired), so in mock mode it disagrees with the shell's header date, as FD-07 already notes. In the month view Today opens today's own month (30 Nov → November), unlike M, which opens the month of the selected week's Thursday (FD-08). If today is already in the visible range, Today selects it locally with no navigation.
+- The Today button is the kit `Button` (secondary, 44px) after the Next arrow. The arrows and Today carry `aria-keyshortcuts` and a `title` tooltip. The kit `SegmentedControl` does not accept `aria-keyshortcuts` on its radios; not edited (shared folder).
+- Human confirmation required: no. Flagged in the PR.

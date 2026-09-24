@@ -23,6 +23,7 @@ Last updated: 2026-09-24
 - Tasks panel: 'Tasks', the selected-date subtitle, `TaskChecklist` with local ticks (a Done task starts ticked; OQ-10 default).
 - Log panel: 'Log', 'View all' → Task log, three `ActivityLinkRow`s (FD-05).
 - Empty states: "No tasks on this day", "No activity yet".
+- CHG-007 (human request, 2026-09-24): D/W/M and ←/→ keyboard shortcuts, and a Today button (T) beside the range heading (FD-12).
 - Real-browser check (Playwright, production build) at 1920, 1440, 1024 and 768 px, against `docs/design/screens/family-02-calendar.png`. Fixed a stray current-time label (FD-07) and the checkbox colour and spacing.
 
 ## In progress
@@ -32,12 +33,12 @@ Last updated: 2026-09-24
 - Open the PR to `family-dev` after the human approves, with the side-by-side screenshot.
 
 ## Acceptance criteria status
-- 5 / 5 MET
+- 7 / 7 MET (AC-06, AC-07 added by CHG-007)
 
 ## Tests
 - Written first: T-01 to T-05 plus 60 more (see TEST_PLAN.md "Additional tests"). All failed before implementation for the right reason: missing modules/functions.
-- Passing: `src/features/family-calendar` 48/48, `src/server/events/occurrences.test.ts` 17/17, `tests/e2e/family-calendar.spec.ts` 6/6.
-- Suite: `vitest run src tests/unit` passes 972/972. Lint has 0 errors (3 old warnings in other files). Typecheck and Prettier are clean.
+- Passing: `src/features/family-calendar` 65/65, `src/server/events/occurrences.test.ts` 17/17, `tests/e2e/family-calendar.spec.ts` 7/7 (run on `next dev` at localhost:3100, since a production server was already on 3000).
+- Suite: `vitest run src tests/unit` passes 989/989. Lint has 0 errors (3 old warnings in other files). Typecheck and Prettier are clean.
 - Not green, environment only: `tests/integration/shared-authentication.test.ts` and `shared-supabase-environment.test.ts` (5 tests), plus e2e `auth.spec.ts` (2 tests). They need the local Supabase stack, and Docker is not installed on this machine ("Invalid API key"). `supabase test db` could not run for the same reason. This feature touches no auth or database code.
 
 ## Files changed
@@ -48,7 +49,7 @@ Last updated: 2026-09-24
 - `DECISIONS.md` (CHG-006), feature docs
 
 ## Decisions
-- See DECISIONS.md FD-01 to FD-11. HUMAN REVIEW: FD-01 (shared folders edited from a family branch, approved), FD-08 (M-month rule), FD-09 (block click → Task detail).
+- See DECISIONS.md FD-01 to FD-12. HUMAN REVIEW: FD-01 (shared folders edited from a family branch, approved), FD-08 (M-month rule), FD-09 (block click → Task detail).
 - CHG number clash: `feature/admin-ui-home` also has a CHG-006. Whichever merges second renumbers.
 
 ## Problems encountered
