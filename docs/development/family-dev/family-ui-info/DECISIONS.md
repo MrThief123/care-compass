@@ -64,7 +64,7 @@ Record feature-level decisions here using the template below. Project-wide decis
 ### FD-06 — Empty, loading and error states
 - Date: 2026-09-25
 - Context: the PRD asks for a loading skeleton, an empty state and an error state "(States sheet)". The Info screen has no state of its own drawn.
-- Decision: loading is the route's `loading.tsx`, a skeleton of the screen's own shape (name line, three text cards, the Documentation card with three tiles) with one labelled status for the whole screen. Empty (no sections and no documents) is one `EmptyState` "No information yet" in a card, with no Edit and no Add file. A rejected contract read shows the shared `ErrorState` with Retry (`router.refresh()`), and logs `[family-info] could not load info data:` plus the error's class only, never its message (ARCHITECTURE.md §12.5, no PII in logs). A client with documents but no text sections still shows the Documentation card.
+- Decision: loading is the route's `loading.tsx`, a skeleton of the screen's own shape (three text cards, the Documentation card with three tiles) with one labelled status for the whole screen. Empty (no sections and no documents) is one `EmptyState` "No information yet" in a card, with no Edit and no Add file. A rejected contract read shows the shared `ErrorState` with Retry (`router.refresh()`), and logs `[family-info] could not load info data:` plus the error's class only, never its message (ARCHITECTURE.md §12.5, no PII in logs). A client with documents but no text sections still shows the Documentation card.
 - Reason: PRD Scope; the same pattern as Family Home.
 - Alternatives considered: a per-card skeleton and per-card errors (the three reads are one screen; a partial screen is worse than a clear retry).
 - Consequences: the empty-state wording is undesigned, built from tokens, please review.
@@ -80,6 +80,23 @@ Record feature-level decisions here using the template below. Project-wide decis
 - Consequences: the hairline is the kit's, not the design's. Built from tokens, please review.
 - Human confirmation required: yes (design owner), as part of the kit review.
 - Test changes caused: none.
+
+### FD-08 — The client's name and summary line are shown once, in the shell header
+- Date: 2026-09-25
+- Context: `family-04-info.png` draws the avatar, "Margaret" and "78 years · Preston VIC · Banksia Home Care" twice: in the shell header bar, and again as a block at the top of the page body. Built as drawn, the page showed the same client twice, one above the other. The PRD and ACCEPTANCE_CRITERIA.md do not ask for the body block.
+- Decision: the human asked for the duplication to be removed (in-session, with a screenshot). The body block is removed; the shell header (Lane S, on every Family screen) keeps the client's name. The screen no longer reads `getClientHeaderSummary`, so `FamilyInfoData` is `{ sections, documents }` and `clientMetaLine` is deleted. The loading skeleton loses its name line too. The first card now sits 20px under the header bar.
+- Reason: the human's instruction; one copy of the client's name per screen.
+- Alternatives considered: hide the shell header's copy (not ours to change, and every other Family screen relies on it); keep the body block and drop the header's (same problem, in Lane S's file).
+- Consequences: this is a deliberate departure from `family-04-info.png`, and the PR's side-by-side image will differ from the design by that block. The page has no `h1`, as on Family Home; the shell header carries the client's name. If the design owner wants the block back, it is one component and one contract read to restore.
+- Human confirmation required: yes — given, Dhruv Verma, 2026-09-25 (in-session).
+- Test changes caused (HUMAN REVIEW: test expectation changed, CLAUDE.md §5). The requirement changed at the human's direction; nothing was skipped or deleted to get green, and the new tests were run red first:
+  - `family-info.test.tsx` "[AC-01] puts the client's name and summary line above the cards": before, asserted an `h1` "Margaret" and the summary line are on the page; after, "[PRD] does not repeat the client's name and summary line, which the shell header already shows" asserts there is no `h1`, no name heading, no summary line and no avatar initial.
+  - `family-info.test.tsx` "asks the contract for the route's client": the `getClientHeaderSummary` call assertion is removed from it and moved into a new "[PRD] does not read the client's header summary" test that asserts it is not called.
+  - `family-info.test.tsx` "error state … when %s rejects": the `getClientHeaderSummary` row is removed (the screen no longer reads it).
+  - `info-data.test.ts` "[AC-01] gathers the client's name and summary line, sections and documents": before, expected `{ client, sections, documents }`; after, "gathers the sections and documents, and nothing else" expects `{ sections, documents }`.
+  - `info-data.test.ts` "reads all three through the contract": now reads two, and asserts the header summary is not read.
+  - `info-data.test.ts` "[PRD] clientMetaLine" (2 tests) and "does not put the client's last name or date of birth into what the screen is given" are removed with the function and the field they tested. The last-name assertion is covered by the exact `toEqual` on the data, which has no client field.
+  - `info-data.test.ts` "rejects as a whole": the `getClientHeaderSummary` row is removed.
 
 <!-- Template
 ### FD-01 — <title>

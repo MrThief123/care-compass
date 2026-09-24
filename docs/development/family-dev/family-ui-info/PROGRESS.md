@@ -29,6 +29,7 @@ Last updated: 2026-09-25
 - Data only through `src/server/**` contract functions (mock data source); nothing imports `src/mocks` from `src/app` or `src/features`
 - Real-browser checks: geometry against `family-04-info.png`, width sweep 1920 to 768, edit, empty and loading states, no console errors
 - Design-match pass on card padding and spacing (FD-07)
+- Duplicate client name and summary block removed from the page body at the human's request (FD-08)
 
 ## In progress
 - Nothing. Waiting for the human's "yes" to open the PR.
@@ -41,19 +42,19 @@ Last updated: 2026-09-25
 
 ## Tests
 - Written first: 3 / 3 acceptance criteria, plus the PRD cases (inline edit, states, wrapping, a11y, contracts) — see TEST_PLAN.md
-- Passing: all. `npx vitest run src tests/unit`: 104 files, 1234 tests
+- Passing: all. `npx vitest run src tests/unit`: 104 files, 1230 tests
 - Failing: none of this feature's. One e2e spec fails intermittently on `family-dev` itself (see TEST_PLAN.md Results)
-- Files: `src/features/family-info/family-info.test.tsx`, `src/features/family-info/info-data.test.ts`, `src/server/clients/queries.test.ts`, `src/mocks/queries/clients.test.ts`, additions to `src/server/documents/queries.test.ts` and `src/features/family-task-detail/document-tile.test.tsx` (additive; no existing test changed)
+- Files: `src/features/family-info/family-info.test.tsx`, `src/features/family-info/info-data.test.ts`, `src/server/clients/queries.test.ts`, `src/mocks/queries/clients.test.ts`, additions to `src/server/documents/queries.test.ts` and `src/features/family-task-detail/document-tile.test.tsx` (additive outside this feature; inside it, FD-08 changed or removed the tests of the removed summary block)
 
 ## Files changed
-- Docs: root `DECISIONS.md` (CHG-018), this feature's `DECISIONS.md` (FD-01 to FD-07), `ACCEPTANCE_CRITERIA.md`, `TEST_PLAN.md`, `PROGRESS.md`, `SESSION_STATE.md`
+- Docs: root `DECISIONS.md` (CHG-018), this feature's `DECISIONS.md` (FD-01 to FD-08), `ACCEPTANCE_CRITERIA.md`, `TEST_PLAN.md`, `PROGRESS.md`, `SESSION_STATE.md`
 - Tests: as listed above
 - Contracts and mocks (CHG-018): `src/mocks/fixtures.ts`, `src/mocks/queries/{clients,documents}.ts`, `src/server/{clients,documents}/queries.ts`
 - Shared within Lane F: `src/features/family-task-detail/document-tile.tsx` (prop type widened, FD-03)
 - New: `src/features/family-info/{documentation-card,family-info-view,info-data,info-error-state,info-section-card,info-skeleton}.ts(x)`, `src/app/(family)/family/[clientId]/info/{page,loading}.tsx`
 
 ## Decisions
-- See DECISIONS.md (FD-01 to FD-07) and root DECISIONS.md CHG-018
+- See DECISIONS.md (FD-01 to FD-08) and root DECISIONS.md CHG-018
 
 ## Problems encountered
 - I told the human the renamed fixture "Care plan 2026.pdf" had only a schema check as its consumer. That was wrong: the name also appears in a carer notification fixture (`notif-aisha-2`) and as an unrelated test's own literal. Corrected in-session; the notification is left as its design draws it (CHG-018 Impact, FD-02).
@@ -66,10 +67,10 @@ Last updated: 2026-09-25
 - OQ-38 and OQ-26 are non-blocking; their proposed defaults are used (OQ-38: the design as drawn; OQ-26 is not exercised, nothing is uploaded).
 
 ## HUMAN REVIEW
+- **Test expectation changed** (FD-08): the client summary block was removed from the body at the human's request, so the tests that asserted it were changed or removed; each is listed in FD-08 with before and after. It departs from `family-04-info.png`, which draws the block; the PR's side-by-side will differ by it.
 - Design gaps built from tokens, please review: FD-03 (tile border thickness), FD-04 (editing state, Save/Cancel layout, "Nothing added yet."), FD-05 ('Add file' notice), FD-06 (empty-state wording), FD-07 (kit hairline border, 15px padding).
 - The PRD says "`ClientInfoView`"; the screen is a local composition instead (FD-01).
 - Notification `notif-aisha-2` says "Care plan 2026.pdf" while Family · Info says "Care plan.pdf" (FD-02).
-- No test expectation was changed.
 
 ## Next action
 - Announce readiness to the human; open the PR to `family-dev` only after their "yes".
