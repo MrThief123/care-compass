@@ -10,6 +10,7 @@ import { Field } from "./field";
 import { InlineAlert } from "./inline-alert";
 import { SettingsActionCard } from "./settings-action-card";
 import { SidePanelForm } from "./side-panel-form";
+import { Switch } from "./switch";
 import { TimeSlotChips } from "./time-slot-chips";
 
 describe("[UI-02][AC-06] forms kit accessibility", () => {
@@ -146,6 +147,44 @@ describe("[UI-02][AC-06] forms kit accessibility", () => {
         onSubmit={() => {}}
         onCancel={() => {}}
         month="2026-11-15"
+      />,
+    );
+    expect(await axe(container)).toHaveNoViolations();
+  });
+});
+
+describe("[UI-05][AC-12] forms kit accessibility with plain events", () => {
+  it("[UI-05][AC-12] the switch has no axe violations, on and off", async () => {
+    const { container } = render(
+      <div>
+        <Switch label="This is a task — must be ticked off" checked onChange={() => {}} />
+        <Switch label="Send reminders" checked={false} onChange={() => {}} />
+      </div>,
+    );
+    expect(await axe(container)).toHaveNoViolations();
+  });
+
+  it("[UI-05][AC-12] EventForm with the switch and hideStatus has no axe violations", async () => {
+    const { container } = render(
+      <EventForm
+        values={{
+          date: "2026-11-26",
+          recurrence: "daily",
+          status: "planned",
+          description: "Around the block with Aisha.",
+        }}
+        onChange={() => {}}
+        onSubmit={() => {}}
+        onCancel={() => {}}
+        month="2026-11-15"
+        hideStatus
+        extraFields={
+          <Switch
+            label="This is a task — must be ticked off"
+            checked={false}
+            onChange={() => {}}
+          />
+        }
       />,
     );
     expect(await axe(container)).toHaveNoViolations();
