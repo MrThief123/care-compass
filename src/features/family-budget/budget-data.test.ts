@@ -38,6 +38,7 @@ const ENTRY: FundEntry = {
   amount: 6000,
   date: "2026-11-03",
   description: "NDIS quarterly plan top-up",
+  recordedBy: "Helen Doyle",
 };
 
 beforeEach(() => {

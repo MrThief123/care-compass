@@ -64,14 +64,23 @@ function entry(
   amount: number,
   date: string,
   description?: string,
+  recordedBy?: string,
 ): FundEntry {
-  return { id, clientId: CLIENT_ID, bucketKind, type, amount, date, description };
+  return { id, clientId: CLIENT_ID, bucketKind, type, amount, date, description, recordedBy };
 }
 
 const HISTORY = [
-  entry("fund-1", "ndis", "topup", 6000, "2026-11-03", "NDIS quarterly plan top-up"),
-  entry("fund-2", "fixed", "topup", 1000, "2026-10-15", "Fixed funding top-up"),
-  entry("fund-3", "government", "topup", 750, "2026-10-01", "Government subsidy payment"),
+  entry("fund-1", "ndis", "topup", 6000, "2026-11-03", "NDIS quarterly plan top-up", "Helen Doyle"),
+  entry("fund-2", "fixed", "topup", 1000, "2026-10-15", "Fixed funding top-up", "Helen Doyle"),
+  entry(
+    "fund-3",
+    "government",
+    "topup",
+    750,
+    "2026-10-01",
+    "Government subsidy payment",
+    "Helen Doyle",
+  ),
 ];
 
 beforeEach(() => {
@@ -114,16 +123,30 @@ function historyTable() {
   return within(historyCard()).getByRole("table", { name: "History" });
 }
 
-/** The History's data rows as their cell texts, the heading row left out. */
+/** The History's data rows, the heading row left out. */
+function dataRows() {
+  return within(historyTable()).getAllByRole("row").slice(1);
+}
+
+/**
+ * The History's data rows as [date, description, amount]. The description cell
+ * holds the description as its first element and, when the entry says who
+ * recorded it, the "Recorded by …" line as its second (FD-05).
+ */
 function historyRows() {
-  return within(historyTable())
-    .getAllByRole("row")
-    .slice(1)
-    .map((row) =>
-      within(row)
-        .getAllByRole("cell")
-        .map((cell) => cell.textContent),
-    );
+  return dataRows().map((row) => {
+    const [date, description, amount] = within(row).getAllByRole("cell");
+    return [
+      date!.textContent,
+      description!.firstElementChild?.textContent ?? "",
+      amount!.textContent,
+    ];
+  });
+}
+
+/** Each row's "Recorded by …" element, or null when the row has none. */
+function historyAttributions() {
+  return dataRows().map((row) => within(row).getAllByRole("cell")[1]!.children[1] ?? null);
 }
 
 describe("[FAM-UI-05] Family Budget", () => {
@@ -236,15 +259,80 @@ describe("[FAM-UI-05] History rows (PD-034: top-ups and expenses)", () => {
     expect(historyRows()[1]).toEqual(["3 Nov 2026", "NDIS quarterly plan top-up", "+$6,000"]);
   });
 
-  it("[FAM-UI-05][PRD] FD-05: a row is date, description and amount only, with no 'recorded by' text drawn", async () => {
+  it("[FAM-UI-05][PRD] FD-05 (PD-034): each row says who recorded the entry, as 'Recorded by <name>'", async () => {
+    await renderBudget();
+
+    expect(historyAttributions().map((line) => line?.textContent)).toEqual([
+      "Recorded by Helen Doyle",
+      "Recorded by Helen Doyle",
+      "Recorded by Helen Doyle",
+    ]);
+  });
+
+  it("[FAM-UI-05][PRD] FD-05: the line sits in the description cell under the description, so the table keeps its three columns", async () => {
+    await renderBudget();
+
+    expect(within(historyTable()).getAllByRole("columnheader")).toHaveLength(3);
+    for (const row of dataRows()) {
+      expect(within(row).getAllByRole("cell")).toHaveLength(3);
+    }
+    // The description comes first, so it is read first.
+    const cell = within(dataRows()[0]!).getAllByRole("cell")[1]!;
+    expect(Array.from(cell.children).map((child) => child.textContent)).toEqual([
+      "NDIS quarterly plan top-up",
+      "Recorded by Helen Doyle",
+    ]);
+  });
+
+  it("[FAM-UI-05][PRD] FD-05: an expense recorded by a carer names the carer, and reads '-$320' in the same columns", async () => {
     mocks.getFundHistory.mockResolvedValue([
-      { ...HISTORY[0]!, recordedBy: "Helen Doyle" },
-      HISTORY[1]!,
+      entry(
+        "fund-4",
+        "ndis",
+        "expense",
+        -320,
+        "2026-11-15",
+        "Physiotherapy session",
+        "Aisha Rahman",
+      ),
+      ...HISTORY,
     ]);
     await renderBudget();
 
-    expect(historyRows().every((cells) => cells.length === 3)).toBe(true);
-    expect(within(historyCard()).queryByText(/Helen|recorded/i)).not.toBeInTheDocument();
+    expect(historyRows()[0]).toEqual(["15 Nov 2026", "Physiotherapy session", "-$320"]);
+    expect(historyAttributions().map((line) => line?.textContent)).toEqual([
+      "Recorded by Aisha Rahman",
+      "Recorded by Helen Doyle",
+      "Recorded by Helen Doyle",
+      "Recorded by Helen Doyle",
+    ]);
+  });
+
+  it("[FAM-UI-05][PRD] FD-05: an entry that does not say who recorded it has no line, not 'unknown' or an empty 'Recorded by'", async () => {
+    mocks.getFundHistory.mockResolvedValue([
+      entry("fund-5", "ndis", "topup", 500, "2026-10-20", "No recorder"),
+      entry("fund-6", "ndis", "topup", 400, "2026-10-19", "Blank recorder", "   "),
+      entry("fund-7", "ndis", "topup", 300, "2026-10-18", "Padded recorder", "  Helen Doyle  "),
+    ]);
+    await renderBudget();
+
+    expect(historyAttributions().map((line) => line?.textContent ?? null)).toEqual([
+      null,
+      null,
+      "Recorded by Helen Doyle",
+    ]);
+    expect(within(historyCard()).queryByText(/unknown/i)).not.toBeInTheDocument();
+    expect(historyRows().map((row) => row[1])).toEqual([
+      "No recorder",
+      "Blank recorder",
+      "Padded recorder",
+    ]);
+  });
+
+  it("[FAM-UI-05][PRD] FD-05: the recorder is named in History only, not in the bucket cards", async () => {
+    await renderBudget();
+
+    expect(within(fundsCard()).queryByText(/recorded by|Helen/i)).not.toBeInTheDocument();
   });
 
   it("[FAM-UI-05][PRD] cents are kept when there are cents, and a September date says 'Sep'", async () => {
@@ -465,6 +553,29 @@ describe("[FAM-UI-05] long and unusual content stays inside its card (no overlap
     await renderBudget();
 
     expect(historyRows().map((row) => row[1])).toEqual([long, "朝の薬 💊 — Zoë's top-up"]);
+  });
+
+  it("[FAM-UI-05][PRD] a long unbroken recorder name is cut to two lines, with the whole line in the DOM and in its title", async () => {
+    const unbroken = "Q".repeat(300);
+    mocks.getFundHistory.mockResolvedValue([
+      entry("fund-14", "ndis", "topup", 100, "2026-10-20", "Top-up", unbroken),
+    ]);
+    await renderBudget();
+
+    const line = historyAttributions()[0]!;
+    expect(line.textContent).toBe(`Recorded by ${unbroken}`);
+    expect(line).toHaveAttribute("title", `Recorded by ${unbroken}`);
+    expect(line.className).toContain("line-clamp-2");
+    expect(line.className).toContain("[overflow-wrap:anywhere]");
+  });
+
+  it("[FAM-UI-05][PRD] a non-ASCII recorder name keeps every character", async () => {
+    mocks.getFundHistory.mockResolvedValue([
+      entry("fund-15", "ndis", "topup", 100, "2026-10-20", "Top-up", "Zoë Ñuñez 朝子"),
+    ]);
+    await renderBudget();
+
+    expect(historyAttributions()[0]!.textContent).toBe("Recorded by Zoë Ñuñez 朝子");
   });
 
   it("[FAM-UI-05][PRD] a very large amount keeps every digit", async () => {

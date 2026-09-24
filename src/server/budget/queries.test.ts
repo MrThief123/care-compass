@@ -42,6 +42,7 @@ describe("[FAM-UI-05][AC-02] getFundHistory (CHG-019)", () => {
       amount: 6000,
       type: "topup",
       bucketKind: "ndis",
+      recordedBy: "Helen Doyle",
     });
   });
 
@@ -54,6 +55,22 @@ describe("[FAM-UI-05][AC-02] getFundHistory (CHG-019)", () => {
       ["2026-10-01", "Government subsidy payment", 750],
     ]);
     expect(history.map((entry) => entry.bucketKind)).toEqual(["ndis", "fixed", "government"]);
+  });
+
+  it("[FAM-UI-05][AC-02] names who recorded each entry, for the screen's 'Recorded by' line (PD-034, FD-05)", async () => {
+    for (const clientId of [MARGARET_CLIENT_ID, ROBERT_CLIENT_ID]) {
+      const history = await getFundHistory(clientId);
+
+      expect(history.length).toBeGreaterThan(0);
+      for (const entry of history) expect(entry.recordedBy?.trim()).toBeTruthy();
+    }
+
+    const margaret = await getFundHistory(MARGARET_CLIENT_ID);
+    expect(margaret.map((entry) => entry.recordedBy)).toEqual([
+      "Helen Doyle",
+      "Helen Doyle",
+      "Helen Doyle",
+    ]);
   });
 
   it("[FAM-UI-05][PRD] is ordered newest date first, whatever the fixtures' own order", async () => {
