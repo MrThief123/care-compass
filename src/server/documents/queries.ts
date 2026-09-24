@@ -11,7 +11,7 @@
  */
 import * as mock from "@/mocks/queries/documents";
 import { getDataSourceMode, notImplementedForSupabase } from "@/server/data-source";
-import type { EventDocument } from "@/types/domain";
+import type { DocumentRef, EventDocument } from "@/types/domain";
 
 /**
  * The documents attached to one care event of one client, oldest upload first
@@ -29,4 +29,19 @@ export async function getEventDocuments(
     return mock.getEventDocuments(clientId, eventId);
   }
   notImplementedForSupabase("documents", "getEventDocuments");
+}
+
+/**
+ * The documents that belong to a client as a whole, not to one care event
+ * (Family · Info's Documentation card, FAM-UI-04, CHG-018). Oldest upload
+ * first (ties by id). A client with none, or an unknown client, returns `[]`,
+ * and a document is only ever returned to the client it belongs to. Metadata
+ * only, like `getEventDocuments`.
+ */
+export async function getClientDocuments(clientId: string): Promise<DocumentRef[]> {
+  const mode = getDataSourceMode();
+  if (mode === "mock") {
+    return mock.getClientDocuments(clientId);
+  }
+  notImplementedForSupabase("documents", "getClientDocuments");
 }
