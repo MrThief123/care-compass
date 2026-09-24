@@ -1,6 +1,6 @@
 # Progress — FAM-UI-03 Family Add / Edit event screens (UI)
 
-Status: READY FOR PR
+Status: PR OPEN
 Owner: Dhruv Verma
 Lane: F — Family
 Sprint: SPRINT · planned D5
@@ -31,7 +31,7 @@ Last updated: 2026-09-24
 - None
 
 ## Remaining
-- Human approval to open the PR to `family-dev`.
+- Review and merge of the PR to `family-dev` (human).
 
 ## Acceptance criteria status
 - 6 / 6 MET
@@ -60,7 +60,7 @@ Last updated: 2026-09-24
 - The task switch has no Figma design; its look is PROPOSED (FD-08).
 
 ## Next action
-- Get human approval, then open PR "FAM-UI-03 Family Add / Edit event screens (UI)" to `family-dev`.
+- Wait for review of PR "FAM-UI-03 Family Add / Edit event screens (UI)" to `family-dev`; address review comments on this branch.
 
 ## Ready for PR
-- Yes, pending human approval
+- Yes; PR opened to `family-dev` on 2026-09-24 after human approval.
