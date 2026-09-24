@@ -1,6 +1,6 @@
 # Progress — FAM-UI-02 Family Calendar screen (UI)
 
-Status: IN PROGRESS
+Status: READY FOR PR
 Owner: Dhruv Verma
 Lane: F — Family
 Sprint: SPRINT · planned D4–D5
@@ -8,7 +8,10 @@ Branch: `feature/family-ui-calendar-add-event` (CHG-017 follow-up, created from 
 PR target: `family-dev`
 Last updated: 2026-09-24
 
-**CHG-017 (2026-09-24): IN PROGRESS.** An "Enter event" button on the Calendar toolbar, left of D/W/M; Add event's Save and Cancel return to that Calendar view (AC-09, FD-14; FAM-UI-03 AC-10).
+**CHG-017 (2026-09-24): READY FOR PR** (to `family-dev`). A primary "Enter event" link on the Calendar toolbar, just left of D/W/M, 44px tall, the same wording and style as Home's. It opens Add event with the Calendar's origin (`from=calendar&view=…&date=…[&month=…]`), and Add event's Save and Cancel return to that view (FAM-UI-03 AC-10, FD-11). No prefill. Not in Figma: design review. New AC-09 (MET), T-09 (PASS), FD-14. Files: `src/features/family-calendar/{calendar-toolbar.tsx, family-calendar-view.tsx}`, `src/features/family-event-form/event-form-return.ts`, `src/app/(family)/family/[clientId]/events/new/page.tsx`, tests.
+- Red first: 2977ff8 (10 new tests failing for the expected reason: no "Enter event" link, `addEventHrefFrom` missing, Cancel still going Home). Green: see the next commit.
+- Checks (2026-09-24, local; CI is off): `npx tsc --noEmit` clean; `npx eslint .` 0 errors, the 3 known warnings in other files; `npx prettier --check .` only `.claude/settings.json`; `npx vitest run src tests/unit` 1,176 of 1,178 pass (the 2 failures are the known lane S kit tests `day-timeline` / `week-grid` expecting "23:00", which the kit hides next to the now label after about 22:40; run at 22:49); `npx next build`, then Playwright on `npm run start` (port 3100), all four `family-*.spec.ts`: 30 of 30 pass.
+- Browser check (production build, Chromium): week, day and month at 1920/1440/1280/1024/768: the button is 44px tall, 12px before D/W/M, overlaps nothing (range heading, Today, D/W/M), horizontal scroll 0, no console errors. Enter event then Cancel returns to the same month view (e2e).
 
 **CHG-016 (2026-09-24): MERGED TO DEV** (#87 to `family-dev`). A tick in the Tasks panel shows on the week, day and month grids at once: the block reads Done with a check, and its detail card reads "Done · Helen Doyle" (the signed-in person, `getCurrentUser("family")`). Unticking restores Planned or Overdue; a task that was Done shows Planned without its old name (PROPOSED). Display only: nothing saved, Log unchanged (FD-13). New AC-08 (MET), T-08 (PASS). Files: `src/features/family-calendar/{apply-ticks.ts (new), family-calendar-view.tsx, load-calendar.ts}`, `src/app/(family)/family/[clientId]/calendar/page.tsx`, tests.
 - Red first: 8273315 (6 new tests failing for the expected reason: the block still Planned after a tick). Green: bf6c9fc (two of the new tests corrected before first passing, FD-13).

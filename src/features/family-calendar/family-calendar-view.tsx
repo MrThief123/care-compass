@@ -8,6 +8,7 @@ import { DayTimeline } from "@/components/shared/calendar/day-timeline";
 import { MonthGrid } from "@/components/shared/calendar/month-grid";
 import { WeekGrid } from "@/components/shared/calendar/week-grid";
 import { CardShell } from "@/components/ui/card-shell";
+import { addEventHrefFrom } from "@/features/family-event-form/event-form-return";
 import { taskDetailHrefFrom } from "@/features/family-task-detail/task-detail-origin";
 import type { LocalDate } from "@/lib/dates/week-range";
 import type { Occurrence } from "@/types/domain";
@@ -118,6 +119,7 @@ export function FamilyCalendarView({
         onViewChange={changeView}
         onStep={step}
         onToday={goToday}
+        enterEventHref={addEventHrefFrom(clientId, { from: "calendar", view: current })}
       />
 
       <CardShell className="flex min-w-0 flex-col overflow-hidden p-0">

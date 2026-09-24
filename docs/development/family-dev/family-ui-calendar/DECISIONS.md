@@ -100,3 +100,13 @@ Record feature-level decisions here using the template below. Project-wide decis
 - Consequences: the ticks are still lost on reload or on moving to another range. When FAM-05 wires saving, the server's `actor` replaces the local one.
 - Human confirmation required: done (Dhruv Verma, 2026-09-24, CHG-016); the untick rule (fixture-Done to Planned) is PROPOSED.
 - Test changes caused: none to existing assertions. The calendar test file gained mocks for `getCurrentUser` (Helen Doyle) and `setOccurrenceDone` (to assert it is never called). Two of the new AC-08 tests were corrected before they first passed: jsdom has no layout, so the day block renders compact and the name is read from its detail card (opened by focus); the e2e day test reads the name from the hover card for the same reason at 1440px.
+
+### FD-14 — CHG-017: 'Enter event' on the Calendar toolbar
+- Date: 2026-09-24
+- Context: root CHG-017 (human-confirmed in-session). Home has a primary 'Enter event' action; the Calendar had no way to add an event. `family-02-calendar.png` has no such button.
+- Decision: `calendar-toolbar.tsx` renders a `next/link` 'Enter event' in a right-hand group just before the D/W/M `SegmentedControl` (12px gap), 44px tall (`h-11`), with the kit primary Button's classes (`bg-primary text-primary-foreground`, `text-sm font-medium`, the same focus ring), the same pattern as Home's `EnterEventLink` (FAM-UI-01 FD-05: the kit Button renders a `<button>` and cannot wrap a link; `buttonVariants` is not exported and is lane S). Its href is `addEventHrefFrom(clientId, { from: "calendar", view: current })` (FAM-UI-03 FD-11), so it carries the view, the selected day (including one picked in the range) and the month. The form is not prefilled (the human chose no prefill).
+- Reason: the wording and style the human chose ("Enter event", primary), one origin pattern with Task detail (CHG-014 / CHG-015), lane F only.
+- Alternatives considered: "Add event" as the label (not chosen); prefill the selected date (not chosen, would need an event-form AC); export `buttonVariants` from the kit (a lane S change).
+- Consequences: the toolbar's right side is wider by the button; the width sweep 1920–768 in each view shows no overlap and no horizontal scroll. Design review: the button is not in Figma.
+- Human confirmation required: done (Dhruv Verma, 2026-09-24, CHG-017).
+- Test changes caused: none to existing assertions. Four T-09 component tests; one T-09 e2e; the existing overflow sweep now also asserts the button is visible.

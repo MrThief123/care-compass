@@ -42,7 +42,18 @@ export function editEventReturnHref(
     : backLinkFor(clientId, origin).href;
 }
 
-/** Save event and Cancel on Add event: Family Home, its only opener. */
-export function addEventReturnHref(clientId: string): string {
-  return backLinkFor(clientId, { from: "home" }).href;
+/** Where Add event can be opened from with a way back: the Calendar, with its view (CHG-017). */
+export type AddEventOrigin = Extract<TaskDetailOrigin, { from: "calendar" }>;
+
+/** The Calendar's 'Enter event' link: Add event plus the Calendar's origin (CHG-017). */
+export function addEventHrefFrom(clientId: string, origin: AddEventOrigin): string {
+  return `/family/${encodeURIComponent(clientId)}/events/new?${taskDetailOriginQuery(origin)}`;
+}
+
+/**
+ * Save event and Cancel on Add event: the Calendar view it was opened from (CHG-017), else
+ * Family Home (CHG-015). The Task log does not open Add event, so its origin is Home too.
+ */
+export function addEventReturnHref(clientId: string, origin?: TaskDetailOrigin): string {
+  return backLinkFor(clientId, origin?.from === "calendar" ? origin : { from: "home" }).href;
 }
