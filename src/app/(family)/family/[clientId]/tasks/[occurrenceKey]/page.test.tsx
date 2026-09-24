@@ -134,12 +134,13 @@ describe("[FAM-UI-07] /family/[clientId]/tasks/[occurrenceKey] page (real mock c
     );
   });
 
-  it("[FAM-UI-07][AC-09] shows the Edit event button linking to the event's edit route", async () => {
+  it("[FAM-UI-07][AC-09] shows the Edit event button linking to the event's edit route, with the occurrence and origin (CHG-015)", async () => {
+    const today = await getToday();
     await renderDetail(MORNING_MEDICATION_KEY, { from: "calendar" });
 
     expect(screen.getByRole("link", { name: "Edit event" })).toHaveAttribute(
       "href",
-      "/family/client-margaret/events/event-margaret-morning-meds/edit",
+      `/family/client-margaret/events/event-margaret-morning-meds/edit?occurrence=event-margaret-morning-meds%3A2026-11-30T09%3A00%3A00%2B11%3A00&from=calendar&view=week&date=${today}`,
     );
   });
 

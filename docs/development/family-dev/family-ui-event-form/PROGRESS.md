@@ -1,12 +1,19 @@
 # Progress — FAM-UI-03 Family Add / Edit event screens (UI)
 
-Status: PR OPEN
+Status: READY FOR PR
 Owner: Dhruv Verma
 Lane: F — Family
 Sprint: SPRINT · planned D5
-Branch: `feature/family-ui-event-form` (created from `origin/family-dev` at 9053abd)
+Branch: `feature/family-ui-event-form-origin` (CHG-015 follow-up, created from `origin/family-dev` at d7ccf71). The original build, `feature/family-ui-event-form`, was merged to `family-dev` in PR #79 on 2026-09-24.
 PR target: `family-dev`
 Last updated: 2026-09-24
+
+**CHG-015 (2026-09-24): READY FOR PR** (PR to `family-dev` not opened; awaits the human's yes). Task detail's "Edit event" link carries `?occurrence=<key>` and Task detail's own origin, so the form opens on the occurrence being viewed. On Edit event, Save event and Cancel go to that occurrence's Task detail with the origin kept (Back from there still reaches the Calendar / Home / Task log view it started on); with no valid occurrence, to the origin screen; with no origin, the Task log. Add event's go to Home. Built only from whitelisted, re-validated values; `router.back()` is gone (FD-09). New AC-07 to AC-09 (MET), T-07 to T-09 (PASS). Closes FAM-UI-07 FD-29. Files: `src/features/family-event-form/{event-form-return.ts (new), event-form-screen.tsx}`, `src/app/(family)/family/[clientId]/events/{[eventId]/edit/page.tsx, new/page.tsx}`, `src/features/family-task-detail/{task-detail-origin.ts, task-detail-view.tsx}`, `src/features/family-task-log/task-routes.ts` (exports `taskLogQuery`).
+- Red first: c00ee68 (`event-form-return.test.ts` failed to load, module absent; 11 tests failed for the expected reasons: `router.push` not called, hrefs without `occurrence` / origin). The new e2e tests were not run red (a production build per run); green: b451d3f.
+- Checks (2026-09-24, local; CI is off): `npx tsc --noEmit` clean; `npx eslint .` 0 errors, the 3 known warnings in other files; `npx prettier --check .` only `.claude/settings.json`; `npx vitest run src tests/unit` 100 files / 1,160 tests pass (1,144 + 16 new); `npx next build`, then Playwright on `npm run start`: 31 of 32 pass (`family-event-form` 6, `family-task-detail-nav` 11, `family-calendar` 7, `family-task-log-filters` 3, `shared-app-shell` 4 of 5).
+- **Pre-existing failure, not this branch:** `shared-app-shell.spec.ts` `[F0-15][PRD] keeps header text inside the header bar… at 480px wide` fails with 30px page overflow (once 172px). It fails the same way on a clean production build of `origin/family-dev` (d7ccf71), 3 of 3 runs, so it is not caused by CHG-015. Lane S's spec and shell; not touched here. It passed in the CHG-014 run earlier today; the header shows today's date, so it may depend on the date string's length (not investigated).
+- Browser check (production server, Chromium): Task detail (from the Calendar month view) → Edit event opens on Saturday 28 November 2026, Done → Cancel returns to that Task detail with `from=calendar&view=month&date=2026-11-28&month=2026-11` → Back to Calendar returns to the month. Width sweep 1920/1440/1280/1024/768 on Task detail, Edit event and Add event: horizontal scroll 0, no overlapping controls, no console errors.
+- **HUMAN REVIEW: test expectation changed (FD-10):** 6 items; `router.back` assertions became `router.push` to the validated href, and Task detail's Edit event hrefs gained the occurrence and origin. No test skipped, `.only`-ed or deleted.
 
 ## Blockers
 - None.
@@ -31,10 +38,10 @@ Last updated: 2026-09-24
 - None
 
 ## Remaining
-- Review and merge of the PR to `family-dev` (human).
+- CHG-015: human approval to open the PR to `family-dev`, then review and merge (human).
 
 ## Acceptance criteria status
-- 6 / 6 MET
+- 9 / 9 MET (AC-07 to AC-09 added by CHG-015)
 
 ## Tests
 - Written: 6 / 6 plan tests (T-01 to T-06), plus 15 more for PRD states, axe and the CHG-008 contract
@@ -60,7 +67,8 @@ Last updated: 2026-09-24
 - The task switch has no Figma design; its look is PROPOSED (FD-08).
 
 ## Next action
-- Wait for review of PR "FAM-UI-03 Family Add / Edit event screens (UI)" to `family-dev`; address review comments on this branch.
+- CHG-015: show the PR draft to the human and open it to `family-dev` only after their yes.
 
 ## Ready for PR
-- Yes; PR opened to `family-dev` on 2026-09-24 after human approval.
+- Original build: merged to `family-dev` (PR #79, 2026-09-24).
+- CHG-015: yes, on `feature/family-ui-event-form-origin`; not opened (awaits the human's yes).

@@ -18,6 +18,8 @@ export interface EventFormScreenProps {
   /** Any date in the month the picker opens on. */
   month: string;
   documents: EventDocument[];
+  /** Where Save event and Cancel go (CHG-015, `event-form-return.ts`); already validated. */
+  returnHref: string;
 }
 
 const TITLES = { add: "Add event", edit: "Edit event" } as const;
@@ -25,8 +27,8 @@ const TITLES = { add: "Add event", edit: "Edit event" } as const;
 /**
  * Family · Add event and Edit event (FAM-UI-03). Phase 1: every change is
  * local state and is gone on reload. Save event validates (EventForm) and then
- * returns to the previous screen without saving; Cancel returns without
- * changes (FD-04). Persisting is FAM-06 / FAM-07.
+ * goes to `returnHref` without saving; Cancel goes there without changes
+ * (FD-04, CHG-015). Persisting is FAM-06 / FAM-07.
  */
 export function EventFormScreen({
   mode,
@@ -34,6 +36,7 @@ export function EventFormScreen({
   initialIsTask,
   month,
   documents,
+  returnHref,
 }: EventFormScreenProps) {
   const router = useRouter();
   const [values, setValues] = useState(initialValues);
@@ -48,8 +51,8 @@ export function EventFormScreen({
       <EventForm
         values={values}
         onChange={setValues}
-        onSubmit={() => router.back()}
-        onCancel={() => router.back()}
+        onSubmit={() => router.push(returnHref)}
+        onCancel={() => router.push(returnHref)}
         month={month}
         className="lg:grid-cols-[minmax(0,1fr)_21rem] lg:gap-10"
         extraFields={<TaskSwitch checked={isTask} onChange={setIsTask} />}

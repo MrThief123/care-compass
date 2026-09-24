@@ -12,8 +12,10 @@ vi.mock("next/navigation", async (importOriginal) => ({
 
 import NewEventPage from "./page";
 
-function renderNew() {
-  return render(NewEventPage());
+const ID = "client-margaret";
+
+async function renderNew(clientId = ID) {
+  return render(await NewEventPage({ params: Promise.resolve({ clientId }) }));
 }
 
 afterEach(() => {
@@ -63,7 +65,7 @@ describe("[FAM-UI-03] /family/[clientId]/events/new (real mock contract, DATA_SO
     expect(router.push).not.toHaveBeenCalled();
   });
 
-  it("[FAM-UI-03][AC-02] once a date is picked, Save event returns to the previous screen", async () => {
+  it("[FAM-UI-03][AC-09] once a date is picked, Save event goes to Family Home, never router.back (CHG-015)", async () => {
     const user = userEvent.setup();
     await renderNew();
 
@@ -72,12 +74,32 @@ describe("[FAM-UI-03] /family/[clientId]/events/new (real mock contract, DATA_SO
     expect(screen.getByLabelText("Date")).not.toHaveValue("");
     await user.click(screen.getByRole("button", { name: "Save event" }));
 
-    expect(router.back).toHaveBeenCalledTimes(1);
+    expect(router.push).toHaveBeenCalledExactlyOnceWith("/family/client-margaret/home");
+    expect(router.back).not.toHaveBeenCalled();
+  });
+
+  it("[FAM-UI-03][AC-09] Cancel goes to Family Home, never router.back (CHG-015)", async () => {
+    const user = userEvent.setup();
+    await renderNew();
+
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
+
+    expect(router.push).toHaveBeenCalledExactlyOnceWith("/family/client-margaret/home");
+    expect(router.back).not.toHaveBeenCalled();
+  });
+
+  it("[FAM-UI-03][AC-09] a hostile client id stays one path segment in the Home link", async () => {
+    const user = userEvent.setup();
+    await renderNew("../admin?x=1");
+
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
+
+    expect(router.push).toHaveBeenCalledExactlyOnceWith("/family/..%2Fadmin%3Fx%3D1/home");
   });
 
   it("[FAM-UI-03][PRD] the Add event page has no axe violations, including with the Date error shown", async () => {
     const user = userEvent.setup();
-    const { container } = renderNew();
+    const { container } = await renderNew();
     await user.click(screen.getByRole("button", { name: "Save event" }));
 
     expect(await axe(container)).toHaveNoViolations();

@@ -1,4 +1,4 @@
-import { render, screen, within } from "@testing-library/react";
+import { cleanup, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { axe } from "jest-axe";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -14,6 +14,7 @@ import EditEventPage from "./page";
 
 const ID = "client-margaret";
 const PHYSIO = "event-margaret-physio";
+const PHYSIO_28_NOV = `${PHYSIO}:2026-11-28T11:30:00+11:00`;
 const PHYSIO_DESCRIPTION =
   "Mobility and strength session with the physiotherapist. Focus on balance exercises per the current care plan.";
 
@@ -99,15 +100,79 @@ describe("[FAM-UI-03] /family/[clientId]/events/[eventId]/edit (real mock contra
     expect(screen.getAllByRole("listitem")).toHaveLength(3);
   });
 
-  it("[FAM-UI-03][PRD] Save event returns to the previous screen without persisting; Cancel returns too", async () => {
+  it("[FAM-UI-03][AC-08] Save event (without persisting) and Cancel go to the occurrence's Task detail with its origin, never router.back (CHG-015)", async () => {
+    const user = userEvent.setup();
+    await renderEdit(PHYSIO, {
+      occurrence: PHYSIO_28_NOV,
+      from: "calendar",
+      view: "month",
+      date: "2026-11-28",
+      month: "2026-11",
+    });
+    const detail = `/family/client-margaret/tasks/${encodeURIComponent(PHYSIO_28_NOV)}?from=calendar&view=month&date=2026-11-28&month=2026-11`;
+
+    await user.click(screen.getByRole("button", { name: "Save event" }));
+    expect(router.push).toHaveBeenLastCalledWith(detail);
+
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
+    expect(router.push).toHaveBeenLastCalledWith(detail);
+    expect(router.push).toHaveBeenCalledTimes(2);
+    expect(router.back).not.toHaveBeenCalled();
+  });
+
+  it("[FAM-UI-03][AC-08] with no valid occurrence, Cancel goes to the origin screen itself", async () => {
+    const user = userEvent.setup();
+    await renderEdit(PHYSIO, { from: "home" });
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
+    expect(router.push).toHaveBeenLastCalledWith("/family/client-margaret/home");
+
+    cleanup();
+    await renderEdit(PHYSIO, {
+      occurrence: "event-margaret-morning-meds:2026-11-30T09:00:00+11:00",
+      from: "calendar",
+      view: "day",
+      date: "2026-12-04",
+    });
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
+    expect(router.push).toHaveBeenLastCalledWith(
+      "/family/client-margaret/calendar?view=day&date=2026-12-04",
+    );
+
+    cleanup();
+    await renderEdit(PHYSIO, { occurrence: "event-margaret-physio:not-a-real-key" });
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
+    expect(router.push).toHaveBeenLastCalledWith("/family/client-margaret/tasks");
+  });
+
+  it("[FAM-UI-03][AC-08] opened with no params at all (a reload of a bare link), Cancel goes to the Task log", async () => {
     const user = userEvent.setup();
     await renderEdit();
 
-    await user.click(screen.getByRole("button", { name: "Save event" }));
-    expect(router.back).toHaveBeenCalledTimes(1);
-
     await user.click(screen.getByRole("button", { name: "Cancel" }));
-    expect(router.back).toHaveBeenCalledTimes(2);
+
+    expect(router.push).toHaveBeenCalledWith("/family/client-margaret/tasks");
+    expect(router.back).not.toHaveBeenCalled();
+  });
+
+  it("[FAM-UI-03][AC-08] a hostile origin is never echoed: Cancel goes to the Task detail via the Task log origin", async () => {
+    const user = userEvent.setup();
+    for (const from of [
+      "https://evil.example",
+      "//evil.example",
+      "javascript:alert(1)",
+      "/admin",
+    ]) {
+      cleanup();
+      router.push.mockClear();
+      await renderEdit(PHYSIO, { occurrence: PHYSIO_28_NOV, from, q: "physio" });
+      await user.click(screen.getByRole("button", { name: "Cancel" }));
+
+      const [href] = router.push.mock.calls[0]!;
+      expect(href).toBe(
+        `/family/client-margaret/tasks/${encodeURIComponent(PHYSIO_28_NOV)}?from=tasks&q=physio`,
+      );
+      expect(href).not.toMatch(/evil|javascript|admin/);
+    }
   });
 
   it("[FAM-UI-03][PRD] edits change local state only", async () => {

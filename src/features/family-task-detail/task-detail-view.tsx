@@ -2,10 +2,10 @@ import Link from "next/link";
 
 import { StatusPill } from "@/components/shared/status-pill";
 import { CardShell } from "@/components/ui/card-shell";
+import { editEventHrefFrom } from "@/features/family-event-form/event-form-return";
 import { formatTimeOfDay } from "@/features/family-task-log/melbourne-time";
 import { occurrenceNurse } from "@/features/family-task-log/occurrence-display";
 import { statusPillClassName } from "@/features/family-task-log/status-pill-class";
-import { editEventHref } from "@/features/family-task-log/task-routes";
 import { formatLongDate } from "@/lib/format/date";
 import type { EventDocument, Occurrence } from "@/types/domain";
 
@@ -65,7 +65,10 @@ export function TaskDetailView({ clientId, occurrence, documents, origin }: Task
               {`${formatLongDate(occurrence.start)} · Assigned to ${nurse}`}
             </p>
           </div>
-          <Link href={editEventHref(clientId, occurrence.eventId)} className={EDIT_EVENT_BUTTON}>
+          <Link
+            href={editEventHrefFrom(clientId, occurrence, origin)}
+            className={EDIT_EVENT_BUTTON}
+          >
             Edit event
           </Link>
         </div>
