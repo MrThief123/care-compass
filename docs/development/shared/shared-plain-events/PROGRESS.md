@@ -29,6 +29,7 @@ Last updated: 2026-09-24
 7. Full verification
 
 ## Completed
+- Bug fix (FD-07, approved): `EventPopover` no longer causes a hydration mismatch on `/`; renders after hydration. Pre-existing on `main`.
 - Task 5: lists kit. `ActivityRow` takes `kind: "event"` (no status) and shows `EventPill` where `StatusPill` goes; task rows unchanged. Axe and token tests extended. FD-06.
 - Task 4: calendar kit. `EVENT_CUE` (solid neutral stripe per CHG-010, no icon, "Event") and `occurrenceCue()` in `status-cue.ts`; new `EventPill`; `DayTimeline` / `WeekGrid` / `MonthGrid` generic over the occurrence type (default `Occurrence`); `EventPopover` shows `EventPill` for a plain event; month chips get a test id. Preview `src/app/dev-preview-calendar-kit/` shows Short walk, Garden walk, Music in the lounge and Picnic in the park as plain events (FD-02). FD-05.
 - Task 3: fixtures: Afternoon walk starts Thu 26 Nov 14:00; `PLAIN_EVENT_OCCURRENCES_BY_CLIENT_ID` (5 walk rows, 26–30 Nov, assignee Aisha) via `generatePlainEventOccurrences` in `src/mocks/history.ts`. Mock adapter: `type` filter in `queryTaskLog` (status filter keeps tasks only), `getTodayOccurrences` / `getOccurrence` options. Contracts: `OccurrenceTypeOption`, overloads on `getTaskLog` / `getTodayOccurrences` / `getOccurrence`, JSDoc says the log and exports read with `type: "all"`. FD-04 (`TaskLogQuery` keeps its shape). `family-dev` compatibility checked in a scratch merge.
@@ -46,7 +47,7 @@ Last updated: 2026-09-24
 
 ## Tests
 - Written: 14 / 19 + calendar and lists parts of T-17 / T-18 (T-14: `src/components/shared/lists/activity-row.plain-events.test.tsx`, axe in `lists-cards-kit.axe.test.tsx`; T-11 to T-13: `src/components/shared/calendar/plain-events.test.tsx`; axe: `calendar.axe.test.tsx`; tokens: `src/components/shared/plain-events.tokens.test.ts`. T-01 to T-10: `src/types/domain.test.ts`, `src/server/events/queries.plain-events.test.ts`, `src/mocks/fixtures.plain-events.test.ts`, 2 cases in `src/mocks/history.test.ts`)
-- Passing: all; unit suite under `src/` 482 passed (62 files); `family-dev` + this branch 990 passed
+- Passing: all; unit suite under `src/` 483 passed (63 files); `family-dev` + this branch 990 passed
 - Failing: 5 integration tests (F0-04 / F0-07) that need a working local Supabase ("Invalid API key"); they fail identically without this change
 - Last run: 2026-09-24, `npm run typecheck`, `npx vitest run src`, eslint (0 errors; 2 pre-existing warnings in `src/app/page.tsx`)
 - Tests-first evidence (Task 5): commit a5164ed. The 3 plain-event `ActivityRow` tests failed (no "Event" text; the row rendered a Planned pill); the 3 task-row guards, the 2 new axe tests and the `activity-row.tsx` token test passed already (guards).
@@ -57,14 +58,15 @@ Last updated: 2026-09-24
 ## Files changed
 - `DEVELOPMENT_PLAN.md`, `PRD.md`, `docs/development/shared/shared-plain-events/*`
 - `src/types/domain.ts`, `src/types/domain.test.ts`
-- `src/components/shared/event-pill.tsx`, `src/components/shared/calendar/{status-cue.ts,day-timeline.tsx,week-grid.tsx,month-grid.tsx,event-popover.tsx,use-event-hover.ts}`, tests `plain-events.test.tsx`, `calendar.axe.test.tsx`, `src/components/shared/plain-events.tokens.test.ts`; `src/app/dev-preview-calendar-kit/{fixtures.ts,page.tsx}` (FD-02); `src/components/shared/lists/activity-row.tsx` + `activity-row.plain-events.test.tsx`, `lists-cards-kit.axe.test.tsx`
+- `src/components/shared/event-pill.tsx`, `src/components/shared/calendar/{status-cue.ts,day-timeline.tsx,week-grid.tsx,month-grid.tsx,event-popover.tsx,use-event-hover.ts}`, tests `plain-events.test.tsx`, `calendar.axe.test.tsx`, `src/components/shared/plain-events.tokens.test.ts`; `src/app/dev-preview-calendar-kit/{fixtures.ts,page.tsx}` (FD-02); `src/components/shared/calendar/event-popover.hydration.test.tsx` (FD-07); `src/components/shared/lists/activity-row.tsx` + `activity-row.plain-events.test.tsx`, `lists-cards-kit.axe.test.tsx`
 - `src/mocks/fixtures.ts`, `src/mocks/history.ts, `src/mocks/history.test.ts`, `src/mocks/queries/events.ts`, `src/mocks/fixtures.plain-events.test.ts`, `src/server/events/queries.ts`, `src/server/events/queries.plain-events.test.ts`
 - Planned (FD-02): `src/app/dev-preview-forms-kit/**` (examples only)
 
 ## Decisions
-- FD-01 (answered, Option A), FD-02 (answered, option a), FD-03 (answered, Option A), FD-04, FD-05, FD-06 (implementation notes)
+- FD-01 (answered, Option A), FD-02 (answered, option a), FD-03 (answered, Option A), FD-04, FD-05, FD-06 (implementation notes), FD-07 (approved bug fix)
 
 ## Problems encountered
+- Hydration error on `/` from `EventPopover` (pre-existing on `main`); fixed under FD-07 with the human's approval. Verified in Chromium: the Next.js dev badge showed "1 Issue" before the fix and none after; hover cards on `/dev-preview-calendar-kit` still open at 1920–768.
 - Stale `.next/types` from a `family-dev` build broke `tsc` (missing pages); cleared the generated folder.
 - `npm run verify` stops at `format:check` on the uncommitted `.claude/settings.json` (never committed); ran its later steps directly.
 - 5 integration tests fail on a local Supabase "Invalid API key"; unrelated, same without this change.

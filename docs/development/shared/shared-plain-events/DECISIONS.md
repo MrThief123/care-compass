@@ -54,3 +54,10 @@ Authorisation: root DECISIONS.md CHG-009 (human, 2026-09-24). The human approved
 - `StatusPill` itself is unchanged. `AlertListCard` stays overdue-only (a plain event is never overdue). The other lists-kit components (`DataTable`, `NotificationRow`, `SelectableListRow`, `TaskChecklist`) have no status slot, so they need no change.
 - Preview: no lists preview page is editable under FD-02, so plain-event rows are covered by component and axe tests only; the showcase `ActivityRow` (task) was checked unchanged in a real browser.
 - Human confirmation required: no (within the approved ACs).
+
+### FD-07 — `EventPopover` hydration mismatch (bug fix outside UI-05's ACs, approved by the human)
+- Date: 2026-09-24
+- Context: the showcase page `/` renders an `EventPopover` on load. The popover returned `null` when `document` was undefined (server) but portalled into `document.body` on the client's first render, so React reported "Hydration failed…" on every load of `/`. Pre-existing on `main` (UI-01, 5cde58c; showcase 9c78cd7), not caused by UI-05. Real calendar screens only raise the card on hover, after hydration, so they were unaffected.
+- Decision: a `useHydrated()` hook (`useSyncExternalStore`, server snapshot `false`) in `event-popover.tsx`; the card renders only once hydrated. The positioning effect also re-runs when `hydrated` flips so the card is measured. Hover behaviour is unchanged.
+- Test: `src/components/shared/calendar/event-popover.hydration.test.tsx` (server render has no card; hydrating reports no recoverable error; the card appears after). Failing first in commit 47fc518.
+- Human confirmation required: done. Dhruv Verma, 2026-09-24: "yes" (fix on this branch).
