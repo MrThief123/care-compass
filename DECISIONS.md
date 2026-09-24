@@ -499,6 +499,16 @@ Docs updated: DECISIONS.md
 - Human confirmation: Dhruv Verma, 2026-09-19 (in-session).
 - Docs updated: DECISIONS.md (this entry). The family features record it in their own DECISIONS.md.
 
+### CHG-008 — Events contract: single-event read `getEvent`
+- Date / requested by: 2026-09-24 / Dhruv Verma (human, project lead)
+- Type: contract extension (shared folders changed from a dashboard feature branch)
+- Description: no Phase 1 contract returned an event's series fields. `Occurrence` has no recurrence, so Edit event could not show 'Weekly'. Added `getEvent(clientId, eventId): Promise<CareEvent | undefined>` to `src/server/events/queries.ts` (extended, not recreated, per CHG-002), and its mock in `src/mocks/queries/events.ts`, reading `CARE_EVENTS`. It returns `undefined` for an unknown id or another client's event. Supabase mode throws the standard not-implemented error. No fixtures or types changed.
+- Source / justification: human answer in-session, 2026-09-24 ("Add getEvent on this branch"), same route as CHG-006.
+- Impact: F0-11 must implement `getEvent` against Supabase with the same client scoping. FAM-07 (Edit event wiring) reads through it; CAR-07 may too. FAM-UI-03 only otherwise.
+- Numbering: CHG-006 and CHG-007 are on unmerged branches (`feature/family-ui-calendar`, `feature/admin-ui-home`). Whichever merges later renumbers.
+- Human confirmation: Dhruv Verma, 2026-09-24 (in-session).
+- Docs updated: DECISIONS.md (this entry); `docs/development/family-dev/family-ui-event-form/DECISIONS.md` FD-01.
+
 Template for future entries:
 ```
 ### CHG-xxx — <title>

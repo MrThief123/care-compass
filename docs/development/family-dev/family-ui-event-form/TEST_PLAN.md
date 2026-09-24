@@ -11,10 +11,20 @@ Tests are written **before** production code (TESTING.md §2). Run them, confirm
 
 | Test ID | Covers | Level | Test description | Written first? | Result |
 |---|---|---|---|---|---|
-| T-01 | AC-01 | component | Given the Physiotherapy fixture, when Edit event renders, then Date 'Monday 30 November 2026', Recurring 'Weekly', Status Planned and the description text are shown. | ☐ | NOT RUN |
-| T-02 | AC-02 | component | Given the Add event form with no date, when Save event is pressed, then a Date error is shown. | ☐ | NOT RUN |
-| T-03 | AC-03 | component | Given Edit event, when rendered, then document tiles 'Physio referral.pdf' and 'Exercise plan.pdf' and an 'Add file' tile are shown. | ☐ | NOT RUN |
-| T-04 | AC-04 | e2e | Given Family Home, when 'Enter event' is clicked, then the Add event screen opens. | ☐ | NOT RUN |
+| T-01 | AC-01 | component | Given the Physiotherapy fixture, when Edit event renders, then Date 'Monday 30 November 2026', Recurring 'Weekly', Status Planned and the description text are shown. | ☑ | PASS |
+| T-02 | AC-02 | component | Given the Add event form with no date, when Save event is pressed, then a Date error is shown. | ☑ | PASS |
+| T-03 | AC-03 | component | Given Edit event, when rendered, then document tiles 'Physio referral.pdf' and 'Exercise plan.pdf' and an 'Add file' tile are shown. | ☑ | PASS |
+| T-04 | AC-04 | e2e | Given Family Home, when 'Enter event' is clicked, then the Add event screen opens. | ☑ | PASS |
+| T-05 | AC-05 | component | Given the Add event form, the task switch is On, and pressing it turns it Off and On again. | ☑ | PASS |
+| T-06 | AC-06 | component | Given Edit event, the task switch is On for Physiotherapy and Off for Afternoon walk. | ☑ | PASS |
+
+## Where the tests live
+- T-01, T-03: `src/app/(family)/family/[clientId]/events/[eventId]/edit/page.test.tsx` (real mock contract), plus the `?occurrence=` cases, Add file, Save/Cancel, local-state edits, the 404 and axe.
+- T-06: the edit page test above. T-05: the new page test below.
+- T-02: `src/app/(family)/family/[clientId]/events/new/page.test.tsx`, plus the empty form, Save after a date is picked, and axe with the error shown.
+- T-04: `tests/e2e/family-event-form.spec.ts`, plus an e2e smoke of the prefilled Edit route.
+- States: `src/app/(family)/family/[clientId]/events/states.test.tsx` (loading, error retry, not-found, axe).
+- Contract (CHG-008): `src/server/events/queries.test.ts` `getEvent` block.
 
 ## Regression scope
 - Run the full unit/component suite and `supabase test db` before marking READY FOR PR.

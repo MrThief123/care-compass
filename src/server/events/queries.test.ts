@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ZodError } from "zod";
 
 import { MARGARET_CLIENT_ID, REFERENCE_DATE } from "@/mocks/fixtures";
-import { getOccurrence, getTaskLog, getTodayOccurrences } from "@/server/events/queries";
+import { getEvent, getOccurrence, getTaskLog, getTodayOccurrences } from "@/server/events/queries";
 import { TASK_LOG_PAGE_SIZE } from "@/types/domain";
 import type { Occurrence, OccurrenceStatus, TaskLogQuery } from "@/types/domain";
 
@@ -257,6 +257,41 @@ describe("[UI-04][AC-07] supabase mode", () => {
 
     await expect(getOccurrence(MARGARET_CLIENT_ID, "any:key")).rejects.toThrow(
       /events\.getOccurrence: DATA_SOURCE="supabase" is not implemented yet/,
+    );
+  });
+});
+
+describe("[FAM-UI-03][CHG-008] getEvent", () => {
+  it("[FAM-UI-03][AC-01] returns the Physiotherapy event with its weekly recurrence and description", async () => {
+    const event = await getEvent(MARGARET_CLIENT_ID, "event-margaret-physio");
+
+    expect(event).toMatchObject({
+      id: "event-margaret-physio",
+      clientId: MARGARET_CLIENT_ID,
+      title: "Physiotherapy",
+      recurrenceFrequency: "weekly",
+    });
+    expect(event?.description).toMatch(/^Mobility and strength session/);
+  });
+
+  it("[FAM-UI-03][CHG-008] returns undefined for an unknown event id", async () => {
+    expect(await getEvent(MARGARET_CLIENT_ID, "no-such-event")).toBeUndefined();
+    expect(await getEvent(MARGARET_CLIENT_ID, "")).toBeUndefined();
+  });
+
+  it("[FAM-UI-03][CHG-008] never returns another client's event", async () => {
+    expect(await getEvent("client-robert", "event-margaret-physio")).toBeUndefined();
+    expect(await getEvent("client-does-not-exist", "event-margaret-physio")).toBeUndefined();
+    for (const clientId of ["constructor", "__proto__"]) {
+      expect(await getEvent(clientId, "event-margaret-physio")).toBeUndefined();
+    }
+  });
+
+  it("[FAM-UI-03][CHG-008] throws the not-implemented error in supabase mode", async () => {
+    vi.stubEnv("DATA_SOURCE", "supabase");
+
+    await expect(getEvent(MARGARET_CLIENT_ID, "event-margaret-physio")).rejects.toThrow(
+      /events\.getEvent: DATA_SOURCE="supabase" is not implemented yet/,
     );
   });
 });
