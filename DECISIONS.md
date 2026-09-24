@@ -211,6 +211,7 @@ CONFIRMED.
 - Alternatives: TOTP MFA required for admins (rejected — the original proposed default); MFA optional for all (not chosen).
 - Consequences: NFR-3/TM-2108's MFA expectation is descoped for MVP — flag this to the human as a security tradeoff worth reconfirming before production launch, since Admin accounts hold access to health/financial data across an organisation's whole client base. F0-07, ADM-02, ADM-04 implement plain email/password auth only.
 - Human confirmation: CONFIRMED 2026-09-17.
+- **Amended by PD-057 / CHG-010 (2026-09-24):** "invitation emails for new users" now applies to **carers only**. Family and admin accounts are created by self-serve sign-up (F0-17). The MFA part of this entry is **reaffirmed** by CHG-010: MFA is not mandatory for any role, including admins. The forced admin TOTP enrolment that F0-07 shipped must be removed (CHG-010 follow-up).
 
 ### PD-041 — Carer visibility and edit access derived from shift schedule (no separate assignment table)
 - Date: 2026-09-17 · Decided by: Dhruv Verma (answering OQ-09)
@@ -348,6 +349,24 @@ CONFIRMED.
 - Alternatives: leaving it as an unwritten convention (rejected — not visible to other sessions/team members); updating docs only after merge confirmation (rejected by the human — adds an extra round trip for no benefit).
 - Consequences: `docs/DEVELOPMENT_WORKFLOW.md` gained new §7 and renumbered §7→§8 (PR template), §8→§9 (dev-branch testing), §9→§10 (checkpoints), §10→§11 (session hygiene). Cross-references updated: CLAUDE.md §3 and §8 (this file's own PR/commit rules already implied this; now explicit), PRD.md §19, ARCHITECTURE.md §12.10.
 - Human confirmation: CONFIRMED 2026-09-17.
+
+### PD-057 — Self-serve sign-up for Family and Admin; carers stay invite-only
+- Date: 2026-09-24 · Decided by: Prajeet (in-session; extends PD-037 and PD-040)
+- Decision:
+  - **Anyone creates their own account first, then links.** A public `/sign-up` page creates the account and the thing it links to in one step. There are two account types:
+    - **Family:** creates the family account and the client record (the person they care for). The family becomes that client's family member (PD-037, PD-042). The client starts with no organisation. The family links a provider later with the organisation picker (PD-036).
+    - **Organisation (admin):** creates the admin account and a **new organisation**, and becomes its first admin. This takes the *registration* half of PL-18 into scope; *deleting* an organisation stays parked.
+  - **Carers cannot sign up themselves.** A carer account exists only when an admin invites them (ADM-02, PD-040). The public page offers no carer option, and the database rejects any attempt to create a carer, or to join an existing organisation, through public sign-up.
+  - **Families do not link carers.** Carers reach a client only through shifts that the linked organisation's admin schedules (PD-041, unchanged).
+  - **No email confirmation.** A new account can sign in straight away (Supabase `enable_confirmations = false`, already the setting in `supabase/config.toml`).
+  - **Same look as sign-in.** `/sign-up` uses the `(auth)` layout and the same `CardShell`, `Field`, `InlineAlert` and `Button` components and tokens as `/sign-in`. Only the fields differ. Sign-in and sign-up link to each other.
+  - **Admin MFA is not mandatory** (reaffirms PD-040). A newly registered admin goes straight to `/admin/home`. The forced TOTP enrolment and challenge F0-07 shipped for admins (its feature CHG-001) contradicts PD-040 and is to be removed in a shared follow-up fix.
+  - **Every organisation needs a unique identifier** so families can tell a real provider from a lookalike in the picker (PL-24). Which identifier (e.g. the ABN, which `organisations.abn` already has a column for) and whether sign-up requires it is not decided yet.
+  - **Shared stream.** The feature is **F0-17**, in the shared stream and Lane B like F0-07, branch `feature/shared-sign-up`, PR → `main`.
+- Reason: human instruction in-session, 2026-09-24: "everyone can create their own account and then they link an organisation/client/carer etc." The follow-up answers to the four questions were: carers stay invite-only; admin sign-up registers a new organisation; no direct family-to-carer link; no email confirmation. On reviewing the CHG-010 risks the human then chose: admin MFA stays not mandatory; organisations need a unique identifier (noted for PL-24).
+- Alternatives: carer join request approved by an admin (rejected: human kept admin invite); carer join code (not chosen); admin joins an existing organisation by request (not chosen); no admin self-sign-up (not chosen); family picks carers (rejected: it would change PD-041); email confirmation required (rejected: human chose immediate sign-in).
+- Consequences: see CHG-010.
+- Human confirmation: CONFIRMED 2026-09-24 (Prajeet, in-session).
 
 ---
 
@@ -525,6 +544,26 @@ Docs updated: DECISIONS.md
   - **Numbering:** CHG-006, CHG-007 and CHG-008 are used on unmerged feature branches (`feature/admin-ui-home`, `feature/family-ui-calendar`, `feature/family-ui-event-form`), so this entry takes CHG-009 to avoid a clash.
 - Human confirmation: Dhruv Verma, 2026-09-24 (in-session; asked for these docs to be changed and a PR opened).
 - Docs updated: DECISIONS.md (this entry; amendment notes on PD-044 and CHG-001), PRD.md (REQ-17, REQ-18, REQ-21, new REQ-35, nav table, permissions, PL-23), ARCHITECTURE.md (§6 `care_events` and `care_event_overrides` rows, §6.3 status derivation, flow 2 'Tick task'), DEVELOPMENT_PLAN.md (CHG-009 notes on the affected cards). Each lane updates its own feature PRD, ACCEPTANCE_CRITERIA and TEST_PLAN when it starts or resumes an affected feature, and records it in that feature's DECISIONS.md (same approach as CHG-005).
+
+### CHG-010 — Self-serve sign-up (F0-17): Family and Organisation accounts; carers invite-only
+- Date / requested by: 2026-09-24 / Prajeet (human, in-session)
+- Type: new feature (shared, Lane B) and scope change (PL-18 registration half; PD-040 invitation wording)
+- Description: add **F0-17 — Self-serve sign-up for Family and Organisation accounts** (`feature/shared-sign-up`, PR → `main`). A `/sign-up` page in the `(auth)` layout, built the same way as `/sign-in`, asks for the account type (Family or Organisation), first name, last name, email, password and confirm password. A Family account also needs the client's first and last name. An Organisation account also needs the organisation name. A security-definer Postgres function creates the profile and the linked record in one transaction: the client plus a `client_family_members` row for Family, or the organisation plus `profiles.organisation_id` for an admin. After sign-up the user is signed in and routed like any sign-in (F0-07): Family to `/family/<new client id>/home`, admin to their MFA gate and then `/admin/home`. Full rules: PD-057.
+- Source / justification: human instruction in-session, 2026-09-24 (PD-057). PD-037 says the family creates the client, but no feature created a family account, so the confirmed workflow could not start.
+- Impact:
+  - **New feature F0-17** (shared, Lane B): `src/app/(auth)/sign-up/`, `src/server/auth/actions.ts` (new `signUp` action), a new migration (registration function, grants; users still cannot change their own `role`, `organisation_id` or `is_active`), a 'Create an account' link on `/sign-in`. Tests: integration, e2e and pgTAP (see its TEST_PLAN).
+  - **F0-07** (merged): no change to its ACs. `/sign-in` gains a link to `/sign-up`, made by F0-17 in the same lane.
+  - **ADM-02:** unchanged. Carers are still created by admin invitation. The public sign-up must never create a carer.
+  - **ADM-04:** the card still reads "adds a client with a family contact". That flow was already rejected by PD-037, and CHG-010 confirms that clients are created only by families. ADM-04 becomes the clients **list** (read and Remove per ADM-05) with no add panel. Lane A updates its own PRD, ACs and TEST_PLAN when it starts ADM-04, and records it in that feature's DECISIONS.md. The Admin Clients design's "Add client" panel is still the HUMAN REVIEW design item raised by PD-037.
+  - **FAM-13:** a self-registered family's client has **no organisation** at first. FAM-13's organisation card must handle "no organisation yet" with a 'Choose organisation' action (picker, no transfer confirmation, since there is nothing to transfer). Lane F records it when it starts FAM-13.
+  - **PL-18:** split. Organisation **registration** moves into F0-17; Add/Delete organisation by an operator stays parked.
+  - **Risks raised for the human, not decided here:**
+    1. **Admin MFA mismatch — DECIDED 2026-09-24 (Prajeet): MFA is not mandatory.** PD-040 says no mandatory MFA, but F0-07 shipped forced TOTP enrolment for admins (its feature CHG-001 says OQ-08 answered "TOTP MFA required", which misreads PD-040). **Follow-up needed:** a shared fix that removes the forced admin enrolment and AAL2 gate from `src/server/auth/routing.ts` / `guard.ts` and changes F0-07's AC-09/AC-10 and T-09/T-10 (a test-expectation change, flagged HUMAN REVIEW). F0-17 does not make that change; its AC-02 only requires that a new admin is routed the same way an existing admin is.
+    2. **Anyone can create an organisation.** It then appears in the family organisation picker (PD-036). Someone could register a lookalike of a real provider's name and a family could link their client to it. **Note (Prajeet, 2026-09-24): every organisation should have a unique identifier**, so that two organisations can never be confused in the picker. Which identifier (e.g. ABN) and when it is required are still to be decided. Parked as **PL-24** for the human to prioritise.
+    3. **No email confirmation.** A mistyped email address can create an account the real owner does not control. Supabase also reports "already registered" on sign-up, so account enumeration is possible on `/sign-up` (not on `/sign-in` or reset). Accepted by the human for MVP. Worth re-checking before production, together with the PD-040 MFA note.
+  - **Numbering:** CHG-006 to CHG-008 are taken on unmerged branches (see CHG-009), so this entry is CHG-010.
+- Human confirmation: Prajeet, 2026-09-24 (in-session).
+- Docs updated: DECISIONS.md (PD-057, this entry, amendment note on PD-040), PRD.md (REQ-01, REQ-09, new REQ-36, PL-18, new PL-24), DEVELOPMENT_PLAN.md (F0-17 row and card, totals, next number, CHG-010 notes on ADM-04 and FAM-13), `docs/development/shared/shared-sign-up/`.
 
 Template for future entries:
 ```
