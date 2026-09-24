@@ -340,7 +340,13 @@ export const TaskLogQuerySchema = z.object({
   type: OccurrenceTypeFilterSchema.optional(),
   page: z.number().int().positive().optional(),
 });
-export type TaskLogQuery = z.infer<typeof TaskLogQuerySchema>;
+/**
+ * The full validated query, including `type` (UI-05). `TaskLogQuery` keeps its
+ * shape from before UI-05 (no `type`), so code written against it still reads
+ * tasks only and keeps its types (FD-01, FD-03).
+ */
+export type TypedTaskLogQuery = z.infer<typeof TaskLogQuerySchema>;
+export type TaskLogQuery = Omit<TypedTaskLogQuery, "type">;
 
 /**
  * One page of a client's task history, the whole history and not a window of

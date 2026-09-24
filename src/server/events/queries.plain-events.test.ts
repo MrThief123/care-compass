@@ -10,8 +10,8 @@ import type {
   AnyOccurrence,
   Occurrence,
   OccurrenceTypeFilter,
-  TaskLogQuery,
   TaskLogResult,
+  TypedTaskLogQuery,
 } from "@/types/domain";
 
 /**
@@ -23,7 +23,7 @@ import type {
 const ROBERT_CLIENT_ID = "client-robert";
 const WALK_KEY = "event-margaret-walk:2026-11-30T14:00:00+11:00";
 
-async function readAll(clientId: string, query: TaskLogQuery = {}): Promise<AnyOccurrence[]> {
+async function readAll(clientId: string, query: TypedTaskLogQuery = {}): Promise<AnyOccurrence[]> {
   const rows: AnyOccurrence[] = [];
   for (let page = 1; page <= 200; page += 1) {
     const result = await getTaskLog(clientId, { type: "all", ...query, page });
