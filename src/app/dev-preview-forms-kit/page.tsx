@@ -36,6 +36,7 @@ import { Field } from "@/components/shared/forms/field";
 import { InlineAlert } from "@/components/shared/forms/inline-alert";
 import { SettingsActionCard } from "@/components/shared/forms/settings-action-card";
 import { SidePanelForm } from "@/components/shared/forms/side-panel-form";
+import { Switch } from "@/components/shared/forms/switch";
 import { TimeSlotChips, type TimeSlotValue } from "@/components/shared/forms/time-slot-chips";
 
 const PHYSIOTHERAPY: EventFormValues = {
@@ -44,6 +45,14 @@ const PHYSIOTHERAPY: EventFormValues = {
   status: "planned",
   description:
     "30-minute mobility and strength session with the physiotherapist. Focus on balance exercises per the current care plan.",
+};
+
+/** A plain event (UI-05, CHG-009): the task switch starts Off, so Status is hidden. */
+const AFTERNOON_WALK: EventFormValues = {
+  date: "2026-11-26",
+  recurrence: "daily",
+  status: "planned",
+  description: "Around the block with Aisha, weather permitting.",
 };
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
@@ -66,6 +75,9 @@ export default function DevPreviewFormsKitPage() {
   const [email, setEmail] = useState("not-an-email");
   const [staffName, setStaffName] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
+  const [walk, setWalk] = useState(AFTERNOON_WALK);
+  const [isTask, setIsTask] = useState(false);
+  const [reminders, setReminders] = useState(true);
 
   return (
     <main className="mx-auto flex max-w-5xl flex-col gap-8 bg-bg-canvas p-6">
@@ -88,6 +100,28 @@ export default function DevPreviewFormsKitPage() {
             </div>
           }
         />
+      </Section>
+
+      <Section title="Event form with the task switch (UI-05 — plain event, Status hidden while Off)">
+        <EventForm
+          values={walk}
+          onChange={setWalk}
+          onSubmit={() => {}}
+          onCancel={() => {}}
+          month="2026-11-15"
+          hideStatus={!isTask}
+          extraFields={
+            <Switch
+              label="This is a task — must be ticked off"
+              checked={isTask}
+              onChange={setIsTask}
+            />
+          }
+        />
+      </Section>
+
+      <Section title="Switch (UI-05)">
+        <Switch label="Send reminders" checked={reminders} onChange={setReminders} />
       </Section>
 
       <Section title="Settings cards">
