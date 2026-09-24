@@ -1,5 +1,6 @@
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { axe } from "jest-axe";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 const router = vi.hoisted(() => ({ back: vi.fn(), push: vi.fn(), replace: vi.fn() }));
@@ -99,6 +100,12 @@ describe("[FAM-UI-03] /family/[clientId]/events/[eventId]/edit (real mock contra
 
     expect(screen.getByLabelText("Recurring")).toHaveValue("monthly");
     expect(screen.getByLabelText("Date")).toHaveValue("Tuesday 24 November 2026");
+  });
+
+  it("[FAM-UI-03][PRD] the Edit event page has no axe violations", async () => {
+    const { container } = await renderEdit();
+
+    expect(await axe(container)).toHaveNoViolations();
   });
 
   it("[FAM-UI-03][PRD] an unknown event, or another client's event, is a 404", async () => {

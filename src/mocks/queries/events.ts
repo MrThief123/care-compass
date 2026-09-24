@@ -7,10 +7,10 @@
  * every data source follows; the Phase 3 Supabase implementations must match
  * them (UI-04, CHG-004, CHG-005).
  */
-import { OCCURRENCES_BY_CLIENT_ID, REFERENCE_DATE } from "@/mocks/fixtures";
+import { CARE_EVENTS, OCCURRENCES_BY_CLIENT_ID, REFERENCE_DATE } from "@/mocks/fixtures";
 import { melbourneDateKey } from "@/mocks/melbourne-time";
 import { TASK_LOG_PAGE_SIZE } from "@/types/domain";
-import type { Occurrence, TaskLogQuery, TaskLogResult } from "@/types/domain";
+import type { CareEvent, Occurrence, TaskLogQuery, TaskLogResult } from "@/types/domain";
 
 type OccurrencesByClient = Readonly<Record<string, readonly Occurrence[]>>;
 
@@ -121,6 +121,15 @@ export async function getOccurrence(
   key: string,
 ): Promise<Occurrence | undefined> {
   return findOccurrence(OCCURRENCES_BY_CLIENT_ID, clientId, key);
+}
+
+/**
+ * One care event (the series, not an occurrence) of the given client, or
+ * `undefined`. Matches on both ids, so another client's event never returns
+ * (CHG-008).
+ */
+export async function getEvent(clientId: string, eventId: string): Promise<CareEvent | undefined> {
+  return CARE_EVENTS.find((event) => event.id === eventId && event.clientId === clientId);
 }
 
 export interface SetOccurrenceDoneResult {

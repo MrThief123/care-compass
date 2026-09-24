@@ -1,5 +1,6 @@
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { axe } from "jest-axe";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 const router = vi.hoisted(() => ({ back: vi.fn(), push: vi.fn(), replace: vi.fn() }));
@@ -11,8 +12,8 @@ vi.mock("next/navigation", async (importOriginal) => ({
 
 import NewEventPage from "./page";
 
-async function renderNew(clientId = "client-margaret") {
-  return render(await NewEventPage({ params: Promise.resolve({ clientId }) }));
+function renderNew() {
+  return render(NewEventPage());
 }
 
 afterEach(() => {
@@ -56,5 +57,13 @@ describe("[FAM-UI-03] /family/[clientId]/events/new (real mock contract, DATA_SO
     await user.click(screen.getByRole("button", { name: "Save event" }));
 
     expect(router.back).toHaveBeenCalledTimes(1);
+  });
+
+  it("[FAM-UI-03][PRD] the Add event page has no axe violations, including with the Date error shown", async () => {
+    const user = userEvent.setup();
+    const { container } = renderNew();
+    await user.click(screen.getByRole("button", { name: "Save event" }));
+
+    expect(await axe(container)).toHaveNoViolations();
   });
 });

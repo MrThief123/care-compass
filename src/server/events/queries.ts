@@ -7,7 +7,7 @@
 import * as mock from "@/mocks/queries/events";
 import { getDataSourceMode, notImplementedForSupabase } from "@/server/data-source";
 import { TaskLogQuerySchema } from "@/types/domain";
-import type { Occurrence, OccurrenceStatus, TaskLogResult } from "@/types/domain";
+import type { CareEvent, Occurrence, OccurrenceStatus, TaskLogResult } from "@/types/domain";
 
 export interface TaskLogQueryInput {
   q?: string;
@@ -71,4 +71,18 @@ export async function getOccurrence(
     return mock.getOccurrence(clientId, key);
   }
   notImplementedForSupabase("events", "getOccurrence");
+}
+
+/**
+ * One care event, the series itself (title, description, recurrence, anchor
+ * start), by id, or `undefined` when the id is unknown or the event belongs to
+ * another client (CHG-008). Occurrence-level fields (date, status) come from
+ * `getOccurrence`. Authorisation itself stays in RLS.
+ */
+export async function getEvent(clientId: string, eventId: string): Promise<CareEvent | undefined> {
+  const mode = getDataSourceMode();
+  if (mode === "mock") {
+    return mock.getEvent(clientId, eventId);
+  }
+  notImplementedForSupabase("events", "getEvent");
 }

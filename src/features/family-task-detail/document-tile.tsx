@@ -17,7 +17,14 @@ import { fileTypeLabel, formatFileSize } from "./document-format";
  * resort (`overflow-wrap:anywhere`). The type and size stay on one line and are
  * cut with an ellipsis, not wrapped or spilled, if the tile is ever too narrow.
  */
-export function DocumentTile({ document }: { document: EventDocument }) {
+export function DocumentTile({
+  document,
+  showDetails = true,
+}: {
+  document: EventDocument;
+  /** The type and size line. Edit event draws the name only (FAM-UI-03 FD-03). */
+  showDetails?: boolean;
+}) {
   const typeAndSize = `${fileTypeLabel(document.mimeType)} · ${formatFileSize(document.sizeBytes)}`;
 
   return (
@@ -26,9 +33,11 @@ export function DocumentTile({ document }: { document: EventDocument }) {
       <span title={document.name} className="line-clamp-2 max-w-full [overflow-wrap:anywhere]">
         {document.name}
       </span>
-      <span title={typeAndSize} className="max-w-full truncate text-text-secondary">
-        {typeAndSize}
-      </span>
+      {showDetails && (
+        <span title={typeAndSize} className="max-w-full truncate text-text-secondary">
+          {typeAndSize}
+        </span>
+      )}
     </div>
   );
 }
