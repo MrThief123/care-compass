@@ -46,3 +46,12 @@ _No decisions recorded yet._
 - AC-03 and empty-state test button matchers updated from Add staff to Add Staff for this explicit copy change; no assertions removed or behavior changed.
 - Human also requested removal of the visible Edit column heading; row Edit buttons retain full-name accessible labels.
 - Accessibility check caught an empty table header. Keep Edit as screen-reader-only header text using a screen-local class; it is not visible.
+
+### FD-04 - Clock-independent calendar assertions (2026-09-24)
+- Human explicitly authorized diagnosing/fixing the Staff CI failure, including shared test edits, and committing the fix.
+- Root cause: the live clock label deliberately suppresses overlapping hour labels, so the static DayTimeline test fails near 18:00 (or another asserted hour).
+- DayTimeline "renders the whole day so any hour can be scrolled to" and WeekGrid AC-02 "renders the whole day and opens on the 07:00-18:00 focus window": before, default live clock; after, now={null}.
+- Existing hour and viewport assertions are unchanged. No assertions removed, production behavior changed, or tests skipped. Dedicated current-time tests remain intact.
+- Same narrow fix previously applied on Manage; copied only the two test changes, not Manage feature code.
+- Synced current origin/admin-dev as required. Resolved Admin layout conflict by retaining both full names and upstream sign-out control.
+- Validation: all 105 calendar and Staff tests pass.

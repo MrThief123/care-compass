@@ -33,3 +33,9 @@ No - baseline verification failures remain; PR not requested.
 
 - Review feedback applied: Staff List, Add Staff and Add / Edit Staff capitalization.
 - Removed Edit column heading as requested; row actions retained. All 10 Staff tests pass after copy revisions.
+
+## CI follow-up - 2026-09-24
+- Fixed live-clock interference in two static calendar label tests; all original assertions retained.
+- Calendar and Staff regression suite: 105 tests passed across 12 files.
+- Synced origin/admin-dev; retained full-name header and upstream sign-out control.
+- User requested local fix commit. No push requested for this follow-up.

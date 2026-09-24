@@ -15,3 +15,9 @@ Design: C:/Users/kavis/OneDrive/Pictures/Screenshots/Screenshot 2026-09-23 12274
 
 Latest review change: capitalized Staff List, Add Staff and Add / Edit Staff. Reviewed; commit/push authorized.
 - Removed Edit column heading; row buttons unchanged. Validation: 10 Staff tests passed.
+
+## Latest session - 2026-09-24
+- Fixed CI hour-label flake using now={null} in DayTimeline and WeekGrid static-layout tests.
+- 105 calendar/Staff regression tests pass.
+- Synced origin/admin-dev, resolving the header conflict by keeping full names and sign-out.
+- Exact next action: push the local fix when requested. No PR opened.
