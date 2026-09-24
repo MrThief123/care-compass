@@ -4,13 +4,18 @@ import { EmptyState } from "@/components/shared/states";
 import { CardShell } from "@/components/ui/card-shell";
 import { ActivityLinkRow } from "@/features/family-home/activity-link-row";
 import { shortDate } from "@/features/family-home/home-format";
-import { taskDetailHref, taskLogHref } from "@/features/family-task-log/task-routes";
+import { taskDetailHrefFrom } from "@/features/family-task-detail/task-detail-origin";
+import { taskLogHref } from "@/features/family-task-log/task-routes";
 import type { Occurrence } from "@/types/domain";
+
+import type { CalendarParams } from "./calendar-params";
 
 export interface LogPanelProps {
   clientId: string;
   /** The latest done or overdue tasks, newest first. */
   occurrences: Occurrence[];
+  /** The calendar's current view and day; a row's task detail returns to it (CHG-014). */
+  calendar: CalendarParams;
 }
 
 /**
@@ -19,7 +24,7 @@ export interface LogPanelProps {
  * a title that wraps, a pill that is never squeezed), not the kit's
  * `ActivityRow` button (DECISIONS.md FD-05).
  */
-export function LogPanel({ clientId, occurrences }: LogPanelProps) {
+export function LogPanel({ clientId, occurrences, calendar }: LogPanelProps) {
   return (
     <section aria-labelledby="family-calendar-log" className="min-w-0">
       <CardShell className="flex h-full flex-col gap-2 px-5 py-4">
@@ -45,7 +50,10 @@ export function LogPanel({ clientId, occurrences }: LogPanelProps) {
             {occurrences.map((occurrence) => (
               <li key={occurrence.key}>
                 <ActivityLinkRow
-                  href={taskDetailHref(clientId, occurrence.key)}
+                  href={taskDetailHrefFrom(clientId, occurrence.key, {
+                    from: "calendar",
+                    view: calendar,
+                  })}
                   title={occurrence.title}
                   date={shortDate(occurrence.start)}
                   status={occurrence.status}

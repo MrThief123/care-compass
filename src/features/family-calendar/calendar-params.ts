@@ -139,8 +139,13 @@ export function selectDate(params: CalendarParams, date: LocalDate): CalendarPar
     : { ...params, date, month: monthForWeekOf(date) };
 }
 
-export function calendarHref(clientId: string, { view, date, month }: CalendarParams): string {
+/** The calendar's own query, `view=&date=` (and `month=` for the month view). */
+export function calendarQuery({ view, date, month }: CalendarParams): string {
   const search = new URLSearchParams({ view, date });
   if (view === "month") search.set("month", month);
-  return `/family/${encodeURIComponent(clientId)}/calendar?${search.toString()}`;
+  return search.toString();
+}
+
+export function calendarHref(clientId: string, params: CalendarParams): string {
+  return `/family/${encodeURIComponent(clientId)}/calendar?${calendarQuery(params)}`;
 }

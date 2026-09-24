@@ -8,7 +8,7 @@ import { DayTimeline } from "@/components/shared/calendar/day-timeline";
 import { MonthGrid } from "@/components/shared/calendar/month-grid";
 import { WeekGrid } from "@/components/shared/calendar/week-grid";
 import { CardShell } from "@/components/ui/card-shell";
-import { taskDetailHref } from "@/features/family-task-log/task-routes";
+import { taskDetailHrefFrom } from "@/features/family-task-detail/task-detail-origin";
 import type { LocalDate } from "@/lib/dates/week-range";
 import type { Occurrence } from "@/types/domain";
 
@@ -75,8 +75,6 @@ export function FamilyCalendarView({
   const [ticks, setTicks] = useState<Record<string, boolean>>({});
 
   const navigate = (next: CalendarParams) => router.push(calendarHref(clientId, next));
-  const openOccurrence = (occurrence: Occurrence) =>
-    router.push(taskDetailHref(clientId, occurrence.key));
 
   function select(date: LocalDate) {
     setSelection({ source: paramsHref, date });
@@ -84,6 +82,9 @@ export function FamilyCalendarView({
   }
 
   const current: CalendarParams = { ...params, date: selected };
+  // A task opened here remembers this view and day, so Task detail's Back returns to them (CHG-014).
+  const openOccurrence = (occurrence: Occurrence) =>
+    router.push(taskDetailHrefFrom(clientId, occurrence.key, { from: "calendar", view: current }));
   const dayOccurrences = occurrences.filter(
     (occurrence) => melbourneDay(occurrence.start) === selected,
   );
@@ -149,7 +150,7 @@ export function FamilyCalendarView({
           isTicked={(occurrence) => ticks[occurrence.key] ?? occurrence.status === "done"}
           onToggle={(key, ticked) => setTicks((previous) => ({ ...previous, [key]: ticked }))}
         />
-        <LogPanel clientId={clientId} occurrences={log} />
+        <LogPanel clientId={clientId} occurrences={log} calendar={current} />
       </div>
     </div>
   );

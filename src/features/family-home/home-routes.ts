@@ -1,3 +1,5 @@
+import { taskDetailHrefFrom } from "@/features/family-task-detail/task-detail-origin";
+
 /**
  * Where the Family · Home screen sends people. Task detail lives at
  * `/family/[clientId]/tasks/[occurrenceKey]` (ARCHITECTURE.md §3.1); an
@@ -10,7 +12,8 @@ export const homeRoutes = {
   newEvent: (clientId: string) => `/family/${clientId}/events/new`,
   tasks: (clientId: string) => `/family/${clientId}/tasks`,
   overdueTasks: (clientId: string) => `/family/${clientId}/tasks?status=overdue`,
+  /** Carries `from=home`, so Task detail's Back returns to Home (CHG-014). */
   taskDetail: (clientId: string, occurrenceKey: string) =>
-    `/family/${clientId}/tasks/${encodeURIComponent(occurrenceKey)}`,
+    taskDetailHrefFrom(clientId, occurrenceKey, { from: "home" }),
   budget: (clientId: string) => `/family/${clientId}/budget`,
 };

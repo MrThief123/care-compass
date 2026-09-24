@@ -7,8 +7,9 @@ import { getEventDocuments } from "@/server/documents/queries";
 import { getOccurrence } from "@/server/events/queries";
 import type { EventDocument, Occurrence } from "@/types/domain";
 
-import type { TaskDetailOrigin } from "./task-detail-origin";
 import { TaskDetailView } from "./task-detail-view";
+
+import type { TaskDetailOrigin } from "./task-detail-origin";
 
 const ID = "client-margaret";
 const MORNING_MEDICATION_KEY = "event-margaret-morning-meds:2026-11-30T09:00:00+11:00";

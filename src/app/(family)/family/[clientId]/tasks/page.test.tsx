@@ -160,11 +160,11 @@ describe("[FAM-UI-07] /family/[clientId]/tasks page (real mock contract, DATA_SO
     );
   });
 
-  it("[FAM-UI-07][AC-08] every task link carries the current q, status and page", async () => {
+  it("[FAM-UI-07][AC-08] every task link carries from=tasks and the current q, status and page", async () => {
     await renderPage(ID, { q: "medication", status: "done", page: "2" });
 
     for (const href of rowKeys()) {
-      expect(href.endsWith("?q=medication&status=done&page=2")).toBe(true);
+      expect(href.endsWith("?from=tasks&q=medication&status=done&page=2")).toBe(true);
     }
   });
 
