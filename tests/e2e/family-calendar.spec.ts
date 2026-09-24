@@ -89,3 +89,38 @@ for (const width of [1920, 1280, 1024, 768]) {
     expect(overflow).toBeLessThanOrEqual(0);
   });
 }
+
+/*
+ * CHG-016: a tick in the Tasks panel shows on the grid on the same page, with
+ * the signed-in person's name where the view shows one. Nothing is saved.
+ */
+const PHYSIO_30_NOV = "event-margaret-physio:2026-11-30T11:30:00+11:00";
+
+test("[FAM-UI-02][AC-08] ticking Physiotherapy turns its week block Done at once", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.goto("/family/client-margaret/calendar?view=week&date=2026-11-30&as=family");
+  const block = page.getByTestId(`week-grid-block-${PHYSIO_30_NOV}`);
+  await expect(block).toContainText("Planned:");
+
+  await page.getByRole("region", { name: "Tasks" }).getByLabel("Physiotherapy").check();
+
+  await expect(block).toContainText("Done:");
+});
+
+test("[FAM-UI-02][AC-08] in the day view a ticked task reads 'Done · Helen Doyle'; unticked, Planned again", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.goto("/family/client-margaret/calendar?view=day&date=2026-11-30&as=family");
+  const block = page.getByTestId(`day-timeline-block-${PHYSIO_30_NOV}`);
+  const box = page.getByRole("region", { name: "Tasks" }).getByLabel("Physiotherapy");
+
+  await box.check();
+  await expect(block).toContainText("Done · Helen Doyle");
+
+  await box.uncheck();
+  await expect(block).toContainText("Planned");
+  await expect(block).not.toContainText("Helen Doyle");
+});

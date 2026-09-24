@@ -614,6 +614,15 @@ Docs updated: DECISIONS.md
 - Human confirmation: Dhruv Verma, 2026-09-24 (in-session).
 - Docs updated: DECISIONS.md (this entry); FAM-UI-07 ACCEPTANCE_CRITERIA.md, TEST_PLAN.md, DECISIONS.md, PROGRESS.md, SESSION_STATE.md.
 
+### CHG-016 — Family Calendar: a tick in the Tasks panel shows on the grids, with who ticked it
+- Date / requested by: 2026-09-24 / Dhruv Verma (human, project lead)
+- Type: scope change on a merged feature (FAM-UI-02)
+- Description: (1) Ticking a task in the Calendar's Tasks panel makes its block in the week, day and month views show Done at once, on the same page, with the signed-in person's name where the view shows a name ("Done · <First Last>", read through the existing `getCurrentUser("family")` contract, the same form `setOccurrenceDone` records). (2) Unticking restores the task's original status (Planned or Overdue); a task that was Done in the data shows Planned, without its old name (PROPOSED: whether a past task counts as Overdue is a business rule for FAM-04 / FAM-05). (3) Display only: nothing is saved, it is lost on reload or on moving to another range, and the Log panel and Task detail are unchanged. FAM-05 later replaces the local tick with `setOccurrenceDone` and keeps the same state as its optimistic update. (4) Plain events (no checkbox, no status) are untouched.
+- Source / justification: human instruction in-session, 2026-09-24: chose option (a) "Grids show ticks now" for the Step 3 question (ticks were local to the Tasks panel and the block stayed "Planned"), and "I think it makes sense but it should record the person who ticked it".
+- Impact: FAM-UI-02 (new AC-08, TEST_PLAN T-08, feature DECISIONS FD-13; the calendar tests gain mocks for `getCurrentUser` and `setOccurrenceDone`, no existing assertion changed). Lane F only (`src/features/family-calendar/**`); the kit grids are unchanged. FAM-05's wiring should reuse the lifted tick state.
+- Human confirmation: Dhruv Verma, 2026-09-24 (in-session).
+- Docs updated: DECISIONS.md (this entry); FAM-UI-02 ACCEPTANCE_CRITERIA.md, TEST_PLAN.md, DECISIONS.md, PROGRESS.md, SESSION_STATE.md.
+
 Template for future entries:
 ```
 ### CHG-xxx — <title>
