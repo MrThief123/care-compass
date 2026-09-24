@@ -12,7 +12,8 @@ import { MAX_PAGE, normaliseQuery, type TaskLogParams } from "./task-log-params"
 
 const STATUSES = new Set(["planned", "done", "overdue"]);
 
-function viewQuery(view: Partial<TaskLogParams> | undefined): string {
+/** The Task log's own query string (`q=&status=&page=`, defaults left out), without a `?`. */
+export function taskLogQuery(view: Partial<TaskLogParams> | undefined): string {
   if (!view) return "";
   const search = new URLSearchParams();
   const q = normaliseQuery(view.q ?? "");
@@ -25,7 +26,7 @@ function viewQuery(view: Partial<TaskLogParams> | undefined): string {
 }
 
 function withView(path: string, view: Partial<TaskLogParams> | undefined): string {
-  const query = viewQuery(view);
+  const query = taskLogQuery(view);
   return query ? `${path}?${query}` : path;
 }
 
@@ -46,7 +47,7 @@ export function taskDetailHref(
 ): string {
   const path = `/family/${encodeURIComponent(clientId)}/tasks/${encodeURIComponent(occurrenceKey)}`;
   if (!view) return path;
-  const query = viewQuery(view);
+  const query = taskLogQuery(view);
   return `${path}?from=tasks${query ? `&${query}` : ""}`;
 }
 
