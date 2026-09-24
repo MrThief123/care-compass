@@ -34,6 +34,22 @@ describe("[FAM-UI-03] /family/[clientId]/events/new (real mock contract, DATA_SO
     expect(within(documents).queryByText(/\.pdf$/)).not.toBeInTheDocument();
   });
 
+  it("[FAM-UI-03][AC-05] the task switch starts on and can be turned off and on again (local state)", async () => {
+    const user = userEvent.setup();
+    await renderNew();
+
+    const toggle = screen.getByRole("switch", { name: "This is a task — must be ticked off" });
+    expect(toggle).toHaveAttribute("aria-checked", "true");
+    expect(toggle).toHaveTextContent("On");
+
+    await user.click(toggle);
+    expect(toggle).toHaveAttribute("aria-checked", "false");
+    expect(toggle).toHaveTextContent("Off");
+
+    await user.click(toggle);
+    expect(toggle).toHaveAttribute("aria-checked", "true");
+  });
+
   it("[FAM-UI-03][AC-02] Save event with no date shows a Date error and stays on the form", async () => {
     const user = userEvent.setup();
     await renderNew();

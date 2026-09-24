@@ -61,6 +61,25 @@ describe("[FAM-UI-03] /family/[clientId]/events/[eventId]/edit (real mock contra
     expect(screen.getByLabelText("Description")).toHaveValue(PHYSIO_DESCRIPTION);
   });
 
+  it("[FAM-UI-03][AC-06] the task switch shows the event's current value: on for a task", async () => {
+    await renderEdit();
+
+    expect(
+      screen.getByRole("switch", { name: "This is a task — must be ticked off" }),
+    ).toHaveAttribute("aria-checked", "true");
+  });
+
+  it("[FAM-UI-03][AC-06] the task switch is off for a plain event (Afternoon walk)", async () => {
+    await renderEdit("event-margaret-walk");
+
+    expect(
+      screen.getByRole("switch", { name: "This is a task — must be ticked off" }),
+    ).toHaveAttribute("aria-checked", "false");
+    expect(screen.getByLabelText("Description")).toHaveValue(
+      "Accompany Margaret on a short walk around the garden.",
+    );
+  });
+
   it("[FAM-UI-03][AC-03] shows document tiles 'Physio referral.pdf' and 'Exercise plan.pdf' and an 'Add file' tile", async () => {
     await renderEdit();
 
