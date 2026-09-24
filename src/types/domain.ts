@@ -303,6 +303,30 @@ export const TaskLogQuerySchema = z.object({
 export type TaskLogQuery = z.infer<typeof TaskLogQuerySchema>;
 
 /**
+ * Longest range `getOccurrences` answers, in days: a 6×7 month grid (CHG-006).
+ * A calendar never asks for more than one screen of days at a time.
+ */
+export const OCCURRENCE_RANGE_MAX_DAYS = 42;
+
+const DAY_MS = 86_400_000;
+
+/**
+ * Input to `getOccurrences` (CHG-006): Melbourne calendar dates, `YYYY-MM-DD`,
+ * both inclusive. `to` may not be before `from`, and the range may not be
+ * longer than `OCCURRENCE_RANGE_MAX_DAYS`.
+ */
+export const OccurrenceRangeSchema = z
+  .object({ from: z.iso.date(), to: z.iso.date() })
+  .refine(({ from, to }) => from <= to, { message: "`to` is before `from`", path: ["to"] })
+  .refine(
+    ({ from, to }) =>
+      (Date.parse(`${to}T00:00:00Z`) - Date.parse(`${from}T00:00:00Z`)) / DAY_MS + 1 <=
+      OCCURRENCE_RANGE_MAX_DAYS,
+    { message: `a range may cover at most ${OCCURRENCE_RANGE_MAX_DAYS} days`, path: ["to"] },
+  );
+export type OccurrenceRange = z.infer<typeof OccurrenceRangeSchema>;
+
+/**
  * One page of a client's task history, the whole history and not a window of
  * it (UI-04, CHG-004, CHG-005).
  *
