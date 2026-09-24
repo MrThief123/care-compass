@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   calendarHref,
+  goToToday,
   parseCalendarParams,
   selectDate,
   stepCalendar,
@@ -127,6 +128,32 @@ describe("[FAM-UI-02] stepCalendar", () => {
       view: "month",
       date: "2027-01-01",
       month: "2027-01",
+    });
+  });
+});
+
+describe("[FAM-UI-02][AC-07] goToToday", () => {
+  it("[FAM-UI-02][AC-07] week: today's week, today selected", () => {
+    expect(goToToday({ view: "week", date: "2027-03-10", month: "2027-03" }, TODAY)).toEqual({
+      view: "week",
+      date: "2026-11-30",
+      month: "2026-12",
+    });
+  });
+
+  it("[FAM-UI-02][AC-07] day: today", () => {
+    expect(goToToday({ view: "day", date: "2025-01-02", month: "2025-01" }, TODAY)).toEqual({
+      view: "day",
+      date: "2026-11-30",
+      month: "2026-12",
+    });
+  });
+
+  it("[FAM-UI-02][AC-07] month: the month today is in, not the month of its week", () => {
+    expect(goToToday({ view: "month", date: "2027-05-01", month: "2027-05" }, TODAY)).toEqual({
+      view: "month",
+      date: "2026-11-30",
+      month: "2026-11",
     });
   });
 });

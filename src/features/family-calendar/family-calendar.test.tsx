@@ -393,6 +393,161 @@ describe("[FAM-UI-02][AC-05] D / W / M", () => {
   });
 });
 
+describe("[FAM-UI-02][AC-06] keyboard shortcuts", () => {
+  it("[FAM-UI-02][AC-06] D and M switch the view from the week view", async () => {
+    const user = userEvent.setup();
+    await renderCalendar();
+
+    await user.keyboard("d");
+    expect(mocks.push).toHaveBeenLastCalledWith(
+      `/family/${CLIENT_ID}/calendar?view=day&date=2026-11-30`,
+    );
+    await user.keyboard("m");
+    expect(mocks.push).toHaveBeenLastCalledWith(
+      `/family/${CLIENT_ID}/calendar?view=month&date=2026-11-30&month=2026-12`,
+    );
+  });
+
+  it("[FAM-UI-02][AC-06] W switches to the week view, upper or lower case", async () => {
+    const user = userEvent.setup();
+    await renderCalendar({ view: "day", date: "2026-12-04" });
+
+    await user.keyboard("W");
+    expect(mocks.push).toHaveBeenLastCalledWith(
+      `/family/${CLIENT_ID}/calendar?view=week&date=2026-12-04`,
+    );
+  });
+
+  it("[FAM-UI-02][AC-06] the view already shown is not pushed again", async () => {
+    const user = userEvent.setup();
+    await renderCalendar();
+
+    await user.keyboard("w");
+    expect(mocks.push).not.toHaveBeenCalled();
+  });
+
+  it("[FAM-UI-02][AC-06] the arrow keys move a week in the week view", async () => {
+    const user = userEvent.setup();
+    await renderCalendar();
+
+    await user.keyboard("{ArrowRight}");
+    expect(mocks.push).toHaveBeenLastCalledWith(
+      `/family/${CLIENT_ID}/calendar?view=week&date=2026-12-07`,
+    );
+    await user.keyboard("{ArrowLeft}");
+    expect(mocks.push).toHaveBeenLastCalledWith(
+      `/family/${CLIENT_ID}/calendar?view=week&date=2026-11-23`,
+    );
+  });
+
+  it("[FAM-UI-02][AC-06] the arrow keys move a day in the day view", async () => {
+    const user = userEvent.setup();
+    await renderCalendar({ view: "day", date: "2026-12-04" });
+
+    await user.keyboard("{ArrowRight}");
+    expect(mocks.push).toHaveBeenLastCalledWith(
+      `/family/${CLIENT_ID}/calendar?view=day&date=2026-12-05`,
+    );
+  });
+
+  it("[FAM-UI-02][AC-06] the arrow keys move a month in the month view", async () => {
+    const user = userEvent.setup();
+    await renderCalendar({ view: "month", date: "2026-12-15", month: "2026-12" });
+
+    await user.keyboard("{ArrowRight}");
+    expect(mocks.push).toHaveBeenLastCalledWith(
+      `/family/${CLIENT_ID}/calendar?view=month&date=2027-01-01&month=2027-01`,
+    );
+  });
+
+  it("[FAM-UI-02][AC-06] steps from the day picked on screen, not the one first loaded", async () => {
+    const user = userEvent.setup();
+    await renderCalendar();
+
+    await user.click(screen.getByTestId("week-grid-header-2026-12-03"));
+    await user.keyboard("d");
+    expect(mocks.push).toHaveBeenLastCalledWith(
+      `/family/${CLIENT_ID}/calendar?view=day&date=2026-12-03`,
+    );
+  });
+
+  it("[FAM-UI-02][AC-06] shortcuts are ignored with Ctrl, Cmd or Alt held", async () => {
+    const user = userEvent.setup();
+    await renderCalendar();
+
+    await user.keyboard("{Control>}d{/Control}{Meta>}{ArrowRight}{/Meta}{Alt>}m{/Alt}");
+    expect(mocks.push).not.toHaveBeenCalled();
+  });
+
+  it("[FAM-UI-02][AC-06] shortcuts are ignored while typing in a text field", async () => {
+    const user = userEvent.setup();
+    await renderCalendar();
+    const field = document.createElement("input");
+    document.body.append(field);
+
+    await user.click(field);
+    await user.keyboard("dwmt{ArrowRight}");
+    expect(mocks.push).not.toHaveBeenCalled();
+    field.remove();
+  });
+
+  it("[FAM-UI-02][AC-06] the arrows, Today and the view options name their shortcut keys", async () => {
+    await renderCalendar();
+
+    expect(screen.getByRole("button", { name: "Previous week" })).toHaveAttribute(
+      "aria-keyshortcuts",
+      "ArrowLeft",
+    );
+    expect(screen.getByRole("button", { name: "Next week" })).toHaveAttribute(
+      "aria-keyshortcuts",
+      "ArrowRight",
+    );
+    expect(screen.getByRole("button", { name: "Today" })).toHaveAttribute("aria-keyshortcuts", "T");
+  });
+});
+
+describe("[FAM-UI-02][AC-07] Today", () => {
+  it("[FAM-UI-02][AC-07] the Today button brings the week view back to today's week", async () => {
+    const user = userEvent.setup();
+    await renderCalendar({ view: "week", date: "2027-02-10" });
+
+    await user.click(screen.getByRole("button", { name: "Today" }));
+    expect(mocks.push).toHaveBeenLastCalledWith(
+      `/family/${CLIENT_ID}/calendar?view=week&date=2026-11-30`,
+    );
+  });
+
+  it("[FAM-UI-02][AC-07] T brings the day view back to today", async () => {
+    const user = userEvent.setup();
+    await renderCalendar({ view: "day", date: "2027-02-10" });
+
+    await user.keyboard("t");
+    expect(mocks.push).toHaveBeenLastCalledWith(
+      `/family/${CLIENT_ID}/calendar?view=day&date=2026-11-30`,
+    );
+  });
+
+  it("[FAM-UI-02][AC-07] T brings the month view back to the month today is in", async () => {
+    const user = userEvent.setup();
+    await renderCalendar({ view: "month", date: "2027-02-10", month: "2027-02" });
+
+    await user.keyboard("T");
+    expect(mocks.push).toHaveBeenLastCalledWith(
+      `/family/${CLIENT_ID}/calendar?view=month&date=2026-11-30&month=2026-11`,
+    );
+  });
+
+  it("[FAM-UI-02][AC-07] on today already, Today reselects today without a navigation", async () => {
+    const user = userEvent.setup();
+    await renderCalendar();
+
+    await user.click(screen.getByTestId("week-grid-header-2026-12-03"));
+    await user.keyboard("t");
+    expect(mocks.push).not.toHaveBeenCalled();
+    expect(within(tasksPanel()).getByText("Monday 30 November")).toBeVisible();
+  });
+});
+
 describe("[FAM-UI-02] states", () => {
   it("[FAM-UI-02] loading shows a skeleton with a status role", () => {
     render(<CalendarLoading />);

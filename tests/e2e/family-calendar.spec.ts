@@ -44,6 +44,39 @@ test("[FAM-UI-02][AC-03] selecting a day survives a reload (the URL keeps it)", 
   ).toBeVisible();
 });
 
+test("[FAM-UI-02][AC-06][AC-07] the keyboard switches views, steps the range and goes back to today", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.goto(CALENDAR);
+  const heading = page.getByRole("heading", { level: 1 });
+  await expect(heading).toHaveText("30 Nov – 6 Dec 2026");
+
+  await page.keyboard.press("ArrowRight");
+  await expect(heading).toHaveText("7 Dec – 13 Dec 2026");
+
+  await page.keyboard.press("d");
+  await expect(page).toHaveURL(/view=day/);
+  await expect(heading).toHaveText("Monday 7 December 2026");
+  await page.keyboard.press("ArrowLeft");
+  await expect(heading).toHaveText("Sunday 6 December 2026");
+
+  await page.keyboard.press("m");
+  await expect(heading).toHaveText("December 2026");
+  await page.keyboard.press("ArrowRight");
+  await expect(heading).toHaveText("January 2027");
+
+  await page.keyboard.press("t");
+  await expect(heading).toHaveText("November 2026");
+  await page.keyboard.press("w");
+  await expect(heading).toHaveText("30 Nov – 6 Dec 2026");
+
+  await page.keyboard.press("ArrowLeft");
+  await expect(heading).toHaveText("23 Nov – 29 Nov 2026");
+  await page.getByRole("button", { name: "Today" }).click();
+  await expect(heading).toHaveText("30 Nov – 6 Dec 2026");
+});
+
 for (const width of [1920, 1280, 1024, 768]) {
   test(`[FAM-UI-02][PRD] nothing overflows the page at ${width}px wide`, async ({ page }) => {
     await page.setViewportSize({ width, height: 900 });
