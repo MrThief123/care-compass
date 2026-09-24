@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
 import { SegmentedControl, type SegmentedControlOption } from "@/components/ui/segmented-control";
 
@@ -17,6 +18,7 @@ export interface CalendarToolbarProps {
   view: CalendarView;
   onViewChange: (view: CalendarView) => void;
   onStep: (direction: -1 | 1) => void;
+  onToday: () => void;
 }
 
 /**
@@ -25,8 +27,15 @@ export interface CalendarToolbarProps {
  * "Previous"/"Next" whatever the view; the day and month views need their own
  * heading ("Friday 4 December 2026", "December 2026") and the arrows need to
  * say what they move by (DECISIONS.md FD-04). The heading is the page's h1.
+ * The arrows and Today name their keyboard shortcuts (`use-calendar-shortcuts`).
  */
-export function CalendarToolbar({ label, view, onViewChange, onStep }: CalendarToolbarProps) {
+export function CalendarToolbar({
+  label,
+  view,
+  onViewChange,
+  onStep,
+  onToday,
+}: CalendarToolbarProps) {
   const unit = view;
   const arrow =
     "flex h-11 w-11 shrink-0 items-center justify-center rounded-control text-text-secondary outline-none hover:bg-bg-inset focus-visible:ring-[3px] focus-visible:ring-ring/50";
@@ -37,6 +46,8 @@ export function CalendarToolbar({ label, view, onViewChange, onStep }: CalendarT
         <button
           type="button"
           aria-label={`Previous ${unit}`}
+          aria-keyshortcuts="ArrowLeft"
+          title={`Previous ${unit} (←)`}
           onClick={() => onStep(-1)}
           className={arrow}
         >
@@ -46,11 +57,22 @@ export function CalendarToolbar({ label, view, onViewChange, onStep }: CalendarT
         <button
           type="button"
           aria-label={`Next ${unit}`}
+          aria-keyshortcuts="ArrowRight"
+          title={`Next ${unit} (→)`}
           onClick={() => onStep(1)}
           className={arrow}
         >
           <Icon name="chevron-right" aria-hidden />
         </button>
+        <Button
+          variant="secondary"
+          aria-keyshortcuts="T"
+          title="Today (T)"
+          onClick={onToday}
+          className="ml-2 shrink-0"
+        >
+          Today
+        </Button>
       </div>
       <SegmentedControl
         value={TO_OPTION[view]}

@@ -123,6 +123,15 @@ export function stepCalendar(params: CalendarParams, direction: -1 | 1): Calenda
   return { view: params.view, date, month: monthForWeekOf(date) };
 }
 
+/**
+ * Back to today in the same view. The month view opens the month today is in,
+ * not the month of its week (FD-12): "today" should land on its own month.
+ */
+export function goToToday(params: CalendarParams, today: LocalDate): CalendarParams {
+  const month = params.view === "month" ? today.slice(0, 7) : monthForWeekOf(today);
+  return { view: params.view, date: today, month };
+}
+
 /** A new selected day. The month view's grid stays put, even for a leading or trailing day. */
 export function selectDate(params: CalendarParams, date: LocalDate): CalendarParams {
   return params.view === "month"

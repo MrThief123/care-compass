@@ -15,6 +15,7 @@ import type { Occurrence } from "@/types/domain";
 import { dayHeading, melbourneDay, rangeLabel } from "./calendar-format";
 import {
   calendarHref,
+  goToToday,
   selectDate,
   stepCalendar,
   switchView,
@@ -25,6 +26,7 @@ import {
 import { CalendarToolbar } from "./calendar-toolbar";
 import { LogPanel } from "./log-panel";
 import { TasksPanel } from "./tasks-panel";
+import { useCalendarShortcuts } from "./use-calendar-shortcuts";
 
 export interface FamilyCalendarViewProps {
   clientId: string;
@@ -86,13 +88,27 @@ export function FamilyCalendarView({
     (occurrence) => melbourneDay(occurrence.start) === selected,
   );
 
+  const changeView = (view: CalendarView) => {
+    if (view !== params.view) navigate(switchView(current, view));
+  };
+  const step = (direction: -1 | 1) => navigate(stepCalendar(current, direction));
+  // Today already on screen: select it without asking the server again.
+  const goToday = () => {
+    const next = goToToday(current, today);
+    const nextRange = visibleRange(next);
+    if (nextRange.from === range.from && nextRange.to === range.to) select(today);
+    else navigate(next);
+  };
+  useCalendarShortcuts({ onViewChange: changeView, onStep: step, onToday: goToday });
+
   return (
     <div className="flex min-w-0 flex-col gap-5 px-6 pb-6 pt-4">
       <CalendarToolbar
         label={rangeLabel(params, range)}
         view={params.view}
-        onViewChange={(view: CalendarView) => navigate(switchView(current, view))}
-        onStep={(direction) => navigate(stepCalendar(current, direction))}
+        onViewChange={changeView}
+        onStep={step}
+        onToday={goToday}
       />
 
       <CardShell className="flex min-w-0 flex-col overflow-hidden p-0">
