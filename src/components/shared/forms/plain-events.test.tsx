@@ -77,9 +77,9 @@ describe("[UI-05][AC-10] the shared switch", () => {
 
   it("[UI-05][AC-10] takes the same checked / onChange props as FAM-UI-03's TaskSwitch", () => {
     type TaskSwitchProps = { checked: boolean; onChange: (checked: boolean) => void };
-    expectTypeOf<Pick<Parameters<typeof Switch>[0], "checked" | "onChange">>().toEqualTypeOf<
-      TaskSwitchProps
-    >();
+    expectTypeOf<
+      Pick<Parameters<typeof Switch>[0], "checked" | "onChange">
+    >().toEqualTypeOf<TaskSwitchProps>();
   });
 });
 

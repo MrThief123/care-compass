@@ -179,11 +179,7 @@ describe("[UI-05][AC-12] forms kit accessibility with plain events", () => {
         month="2026-11-15"
         hideStatus
         extraFields={
-          <Switch
-            label="This is a task — must be ticked off"
-            checked={false}
-            onChange={() => {}}
-          />
+          <Switch label="This is a task — must be ticked off" checked={false} onChange={() => {}} />
         }
       />,
     );
