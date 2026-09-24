@@ -1,12 +1,14 @@
 # Progress — FAM-UI-03 Family Add / Edit event screens (UI)
 
-Status: PR OPEN
+Status: IN PROGRESS
 Owner: Dhruv Verma
 Lane: F — Family
 Sprint: SPRINT · planned D5
-Branch: `feature/family-ui-event-form` (created from `origin/family-dev` at 9053abd)
+Branch: `feature/family-ui-event-form-origin` (CHG-015 follow-up, created from `origin/family-dev` at d7ccf71). The original build, `feature/family-ui-event-form`, was merged to `family-dev` in PR #79 on 2026-09-24.
 PR target: `family-dev`
 Last updated: 2026-09-24
+
+**CHG-015 (2026-09-24), in progress:** Save and Cancel on Edit event and Add event go to a validated origin instead of `router.back()`, and Task detail's "Edit event" button passes the occurrence being viewed (closes FAM-UI-07 FD-29).
 
 ## Blockers
 - None.
