@@ -123,3 +123,40 @@ describe("[UI-03][AC-06] lists/cards kit accessibility", () => {
     expect(await axe(container)).toHaveNoViolations();
   });
 });
+
+describe("[UI-05][AC-12] lists kit accessibility with plain events", () => {
+  it("[UI-05][AC-12] ActivityRow for a plain event has no axe violations", async () => {
+    const { container } = render(
+      <ActivityRow title="Garden walk" date="Thu 26 Nov" kind="event" />,
+    );
+    expect(await axe(container)).toHaveNoViolations();
+  });
+
+  it("[UI-05][AC-12] a clickable list of tasks and plain events has no axe violations", async () => {
+    const { container } = render(
+      <ul aria-label="Care log">
+        <li>
+          <ActivityRow
+            title="Morning medication"
+            date="Sat 28 Nov"
+            status="done"
+            actorName="Aisha Rahman"
+            onClick={() => {}}
+          />
+        </li>
+        <li>
+          <ActivityRow title="Garden walk" date="Thu 26 Nov" kind="event" onClick={() => {}} />
+        </li>
+        <li>
+          <ActivityRow
+            title="Wound dressing check"
+            date="Fri 27 Nov"
+            status="overdue"
+            onClick={() => {}}
+          />
+        </li>
+      </ul>,
+    );
+    expect(await axe(container)).toHaveNoViolations();
+  });
+});

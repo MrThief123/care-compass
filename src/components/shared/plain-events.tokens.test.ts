@@ -16,6 +16,7 @@ const CHANGED_KIT_FILES = [
   "src/components/shared/calendar/week-grid.tsx",
   "src/components/shared/calendar/month-grid.tsx",
   "src/components/shared/calendar/event-popover.tsx",
+  "src/components/shared/lists/activity-row.tsx",
 ];
 
 const RAW_COLOUR = [
