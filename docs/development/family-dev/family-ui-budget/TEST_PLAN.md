@@ -10,9 +10,49 @@ Tests are written **before** production code (TESTING.md §2). Run them, confirm
 
 | Test ID | Covers | Level | Test description | Written first? | Result |
 |---|---|---|---|---|---|
-| T-01 | AC-01 | component | Given fixtures, when Budget renders, then NDIS '$14,880', Fixed '$2,750' and Government '$240' cards are shown. | ☐ | NOT RUN |
-| T-02 | AC-02 | component | Given fixtures, when History renders, then the first row is '3 Nov 2026', 'NDIS quarterly plan top-up', '+$6,000'. | ☐ | NOT RUN |
-| T-03 | AC-03 | component | Given no fund entries, when History renders, then an empty state is shown. | ☐ | NOT RUN |
+| T-01 | AC-01 | component | Given fixtures, when Budget renders, then NDIS '$14,880', Fixed '$2,750' and Government '$240' cards are shown. | ☑ | FAIL (red, expected) |
+| T-02 | AC-02 | component | Given fixtures, when History renders, then the first row is '3 Nov 2026', 'NDIS quarterly plan top-up', '+$6,000'. | ☑ | FAIL (red, expected) |
+| T-03 | AC-03 | component | Given no fund entries, when History renders, then an empty state is shown. | ☑ | FAIL (red, expected) |
+
+T-01 is `[FAM-UI-05][AC-01]` in `family-budget.test.tsx` (cards, order, totals, percent used, progress bars, Government's warning in words). T-02 is `[FAM-UI-05][AC-02]` in `family-budget.test.tsx` (columns, first row, all three rows) with the contract and fixture tests below. T-03 is `[FAM-UI-05][AC-03]` in `family-budget.test.tsx` (empty History shows the empty state and no table; cards and 'Update' stay).
+
+### Tests added beyond T-01..T-03 (PRD scope, edge cases, contracts)
+All titles start `[FAM-UI-05]`, were written first, and are red now (see Results).
+
+| Test group | Covers | Level | File |
+|---|---|---|---|
+| History rows: an expense reads "-$320" in the same columns, no "recorded by" text (FD-05), cents kept and "Sep" not "Sept", "No description" for a missing or blank description (FD-09), identical entries shown without a duplicate-key warning, 40 entries with no paging, cards and table stay in their own card | PD-034, PRD Scope, FD-05, FD-09 | component | `src/features/family-budget/family-budget.test.tsx` |
+| Screen shape: two cards 'Funds by source' then 'History', no client name or h1 repeated, 'Update' is a `type="button"` | PRD Scope, FD-08 | component | `src/features/family-budget/family-budget.test.tsx` |
+| 'Update': a live region is on the page from the start and empty, pressing it says "Updating funds is not available yet." and changes nothing, works from the keyboard | FD-06 (the flow is FAM-11) | component | `src/features/family-budget/family-budget.test.tsx` |
+| States: empty History, no buckets (keeps 'Update'), neither, error state with Retry for either read rejecting (Retry calls `router.refresh()` once, no regions, no 'Update'), feature-tagged log with no error message and no client data, labelled loading skeleton with no data | PRD Scope, States sheet, FD-07, OQ-24 defaults | component | `src/features/family-budget/family-budget.test.tsx` |
+| Contract reads: each read is called once with the route's client, the header summary is not read | FD-08, PRD Data / privacy | component | `src/features/family-budget/family-budget.test.tsx` |
+| Long and unusual content: a 300-character unbroken description is cut to two lines with the whole text in the DOM and `title`, long spaced and non-ASCII descriptions keep every character, "+$9,999,999,999.99" keeps every digit, a long bucket name is cut to two lines with `title`, five buckets including duplicates without a key warning, an overspent bucket says "over budget" in words | PRD Error / Edge Cases, no overlap at any width | component | `src/features/family-budget/family-budget.test.tsx` |
+| axe: the screen before and after 'Update', and the loading, empty and error states | PRD accessibility | component | `src/features/family-budget/family-budget.test.tsx` |
+| `loadFamilyBudgetData`: reads buckets and history only through the contract, only for the route's client, gives the screen nothing else, does not read the header summary, keeps the contract's order, passes empties through, rejects as a whole | PRD Data / privacy, FD-08 | unit | `src/features/family-budget/budget-data.test.ts` |
+| `formatFundDate`: "2026-11-03" is "3 Nov 2026", no leading zero, three-letter months, unaffected by the Melbourne daylight-saving switches, year ends and a leap day, invalid input returned unchanged. `formatSignedDollars`: "+$6,000", "-$320", cents only when present, floating-point sums, "$0" for nothing, very large amounts | FD-04 | unit | `src/features/family-budget/budget-format.test.ts` |
+| `getBudgetSummary` for Margaret: NDIS $14,880, Fixed $2,750, Government $240 remaining, 38 / 45 / 92 percent, Government in the `alert` state (PD-032) | AC-01 | unit | `src/server/budget/queries.test.ts` |
+| `getFundHistory`: the design's first row, the three design rows word for word in order, newest date first for each client, valid entries, client scoping, unknown and object-prototype ids give `[]`, callers cannot mutate fixtures, supabase mode throws the not-implemented error | CHG-019 contract, AC-02, AC-03 | unit | `src/server/budget/queries.test.ts` |
+| `FUND_ENTRIES` fixtures: schema-valid with unique ids, every client and bucket kind exists, top-ups are positive and expenses negative, Margaret has exactly the three design rows, another client has an entry of their own | CHG-019 fixtures, AC-02 | unit | `src/mocks/queries/budget.test.ts` |
+
+Not tested here, by design: the Update funds flow (FAM-11), wiring to the database (FAM-10), and attribution of an entry to the person who recorded it (FD-05, awaiting a human decision).
+
+## Results
+
+### Red run before implementation (2026-09-25)
+`npx vitest run src/features/family-budget src/server/budget src/mocks/queries/budget.test.ts`: 5 files failed. 11 tests failed and 6 passed in the two files that could load; the other three files fail at import, so their 67 tests do not run yet. 84 tests in all.
+
+| File | Tests | Red because |
+|---|---|---|
+| `src/features/family-budget/family-budget.test.tsx` | 37 | Fails at import: `budget/loading` does not exist yet. Run once with that import stubbed, 35 of 37 failed for the expected reasons: the placeholder page renders "Coming soon.", so the 'Funds by source' and 'History' regions, the cards, the table, 'Update', the states and the contract reads are all missing. The 2 that passed (header summary not read, axe on empty states) pass on the placeholder and are expected to stay green. |
+| `src/features/family-budget/budget-format.test.ts` | 24 | Fails at import: `./budget-format` does not exist. |
+| `src/features/family-budget/budget-data.test.ts` | 6 | Fails at import: `./budget-data` does not exist. |
+| `src/server/budget/queries.test.ts` | 11 | 9 fail with `getFundHistory is not a function` (the contract read does not exist). The 2 `getBudgetSummary` tests pass already: that read and its fixtures are unchanged (PD-032, PD-033). |
+| `src/mocks/queries/budget.test.ts` | 6 | 2 fail: Margaret's fixtures have 2 entries, not the design's 3, and no other client has an entry. The other 4 pass on the current fixtures and must stay green after they are reshaped. |
+
+The failing tests fail for the right reason: the code they test does not exist yet. No test was skipped, marked `.only`, or weakened.
+
+### After implementation
+Not run yet. To be filled in at READY FOR PR: the same command to green, then the full local checks (`npx vitest run src tests/unit`, `npx tsc --noEmit`, `npx eslint .`, `npx prettier --check .`, Playwright e2e on the production build with `--grep-invert "F0-07"`), the real-browser design and width check, and a note that CI is down so the checks ran locally.
 
 ## Regression scope
 - Run the full unit/component suite and `supabase test db` before marking READY FOR PR.

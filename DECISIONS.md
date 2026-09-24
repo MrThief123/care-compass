@@ -641,6 +641,16 @@ Docs updated: DECISIONS.md
 - Human confirmation: Dhruv Verma, 2026-09-24 (in-session).
 - Docs updated: DECISIONS.md (this entry); FAM-UI-02 and FAM-UI-03 ACCEPTANCE_CRITERIA.md, TEST_PLAN.md, DECISIONS.md, PROGRESS.md, SESSION_STATE.md.
 
+### CHG-019 — Fund history contract, and the Family · Budget design fixtures
+- Date / requested by: 2026-09-25 / Dhruv Verma (human, project lead)
+- Type: contract extension (shared folders changed from a dashboard feature branch)
+- Description: no Phase 1 contract returned a client's fund entries, and `FUND_ENTRIES` did not hold what the design draws. Added, read-only: `getFundHistory(clientId): Promise<FundEntry[]>` to `src/server/budget/queries.ts` (extended, not recreated, per CHG-002): the client's entries, newest date first; `[]` for a client with none or an unknown id. Its mock is in `src/mocks/queries/budget.ts`. `src/mocks/fixtures.ts`: `FUND_ENTRIES` now holds Margaret's three top-ups exactly as `family-06-budget.png` draws them (3 Nov 2026 "NDIS quarterly plan top-up" +$6,000; 15 Oct 2026 "Fixed funding top-up" +$1,000; 1 Oct 2026 "Government subsidy payment" +$750) and one entry for Robert, so client scoping is testable. The two earlier entries (a 1 Nov top-up worded "Quarterly NDIS plan top-up" and a 15 Nov physiotherapy expense of -$320) are replaced; only `fixtures.test.ts` referenced them, and it only parses them against the schema. No types change (`FundEntry` exists). Supabase mode throws the standard not-implemented error. Nothing here writes: Update on the Budget screen changes nothing (Phase 1).
+- Source / justification: human answer in-session, 2026-09-25 (chose "On this branch as CHG-019" over a separate shared PR), same route as CHG-008, CHG-012 and CHG-018.
+- Impact: FAM-UI-05 (`src/features/family-budget/**`). F0-12 owns the budget tables. FAM-10 (Budget overview and history) reads and wires through this contract and must keep the newest-first order and the client scoping, and add PD-034's attribution of each entry to the person who recorded it (the design draws no such column, FAM-UI-05 FD-05). FAM-11 (Update funds) writes the entries this reads. The Admin Budget screen and CAR-08 should extend this contract, not add a second pattern. The fixtures are display data, not a ledger: the three top-ups do not reconcile with the buckets' totals.
+- Numbering: CHG-018 (FAM-UI-04, PR #89) is unmerged and is not in `family-dev` yet; this is CHG-019 so the two do not collide. Whichever merges second resolves the neighbouring entries in this file.
+- Human confirmation: Dhruv Verma, 2026-09-25 (in-session).
+- Docs updated: DECISIONS.md (this entry); `docs/development/family-dev/family-ui-budget/DECISIONS.md` FD-02.
+
 Template for future entries:
 ```
 ### CHG-xxx — <title>
