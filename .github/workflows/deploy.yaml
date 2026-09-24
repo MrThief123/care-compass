@@ -137,7 +137,6 @@ jobs:
           echo "EC2 IP: ${{ steps.ec2.outputs.ip }}"
           echo "Application: http://${{ steps.ec2.outputs.ip }}:8080"
 
-
   stop:
     name: Stop EC2
     if: inputs.action == 'stop'

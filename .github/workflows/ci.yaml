@@ -133,6 +133,10 @@ jobs:
         with:
           version: latest
 
+      - name: Start local database
+        if: steps.check.outputs.exists == 'true'
+        run: supabase db start
+
       - name: Run database tests
         if: steps.check.outputs.exists == 'true'
         run: supabase test db
@@ -192,4 +196,3 @@ jobs:
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/care-compass:latest
             ${{ secrets.DOCKERHUB_USERNAME }}/care-compass:${{ github.sha }}
-
