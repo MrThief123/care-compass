@@ -524,7 +524,7 @@ Docs updated: DECISIONS.md
 - Date / requested by: 2026-09-24 / Dhruv Verma (human, project lead)
 - Type: contract extension (shared folders changed from a dashboard feature branch)
 - Description: no Phase 1 contract returned an event's series fields. `Occurrence` has no recurrence, so Edit event could not show 'Weekly'. Added `getEvent(clientId, eventId): Promise<CareEvent | undefined>` to `src/server/events/queries.ts` (extended, not recreated, per CHG-002), and its mock in `src/mocks/queries/events.ts`, reading `CARE_EVENTS`. It returns `undefined` for an unknown id or another client's event. Supabase mode throws the standard not-implemented error. No fixtures or types changed.
-- Source / justification: human answer in-session, 2026-09-24 ("Add getEvent on this branch"), same route as CHG-006.
+- Source / justification: human answer in-session, 2026-09-24 ("Add getEvent on this branch"), same route as CHG-012 (then numbered CHG-006).
 - Impact: F0-11 must implement `getEvent` against Supabase with the same client scoping. FAM-07 (Edit event wiring) reads through it; CAR-07 may too. FAM-UI-03 only otherwise.
 - Numbering: CHG-006 and CHG-007 are on unmerged branches (`feature/family-ui-calendar`, `feature/admin-ui-home`). Whichever merges later renumbers.
 - Human confirmation: Dhruv Verma, 2026-09-24 (in-session).
@@ -584,6 +584,26 @@ Docs updated: DECISIONS.md
 - Numbering: recorded as CHG-010 on `feature/shared-plain-events`; renumbered to CHG-011 when merging `main`, where CHG-010 is self-serve sign-up (F0-17).
 - Human confirmation: Dhruv Verma, 2026-09-24 (in-session).
 - Docs updated: DECISIONS.md (this entry), `docs/development/shared/shared-plain-events/ACCEPTANCE_CRITERIA.md` (AC-12), `docs/development/shared/shared-plain-events/DECISIONS.md` (FD-05).
+
+### CHG-012 — Events contract: calendar range read `getOccurrences` and `getToday`; design-week fixtures to 6 Dec
+- Date / requested by: 2026-09-24 / Dhruv Verma (human, project lead)
+- Type: contract extension (shared folders changed from a dashboard feature branch)
+- Description: no Phase 1 contract could answer "this client's occurrences from date X to date Y", so no calendar could draw any week but the reference day. Added to `src/server/events/queries.ts` (extended, not recreated, per CHG-002): `getOccurrences(clientId, { from, to })`, which returns occurrences on Melbourne calendar days `from` to `to` inclusive, oldest first, ties by key, validated by `OccurrenceRangeSchema` (at most `OCCURRENCE_RANGE_MAX_DAYS` = 42, one 6×7 month grid). Also added `getToday()`, the Melbourne calendar date the calendar opens on (the fixtures' reference day in mock mode, the real day otherwise). In `src/mocks/**`: the mock implementations, plus five hand-written Planned rows, Tue 1 to Sat 5 Dec 2026, exactly as drawn in `family-02-calendar.png`. They are held in `UPCOMING_OCCURRENCES_BY_CLIENT_ID`, which `getOccurrences` and `getOccurrence` read and `getTaskLog` does not (a log lists what has happened, and the Task log fixtures stay at 137 rows). `src/types/domain.ts` gains `OccurrenceRangeSchema`, `OccurrenceRange` and `OCCURRENCE_RANGE_MAX_DAYS`.
+- Source / justification: human instruction in-session, 2026-09-24: "make on this feature branch". The app is real, not a design clone: users add events on any date, so the calendar must read any range. Events will live in the database; F0-11's PRD already names `getOccurrences(clientId, range)` for the Supabase side, and this is its Phase 1 mock with the same name and shape.
+- Impact: F0-11 must implement `getOccurrences` against Supabase with the same range, order and validation semantics (recurrence expansion, overrides, latest completion, assigned carer). CAR-UI-03 (Carer Calendar) has the same gap, probably as a carer-wide read across patients, and should extend this contract rather than add a second pattern. FAM-04 and FAM-05 wire FAM-UI-02 through it. No other screen changes behaviour.
+- Numbering: recorded as CHG-006 on `feature/family-ui-calendar` (its code comments and commit messages before the merge say CHG-006); renumbered to CHG-012 when merging `family-dev`, where CHG-006 to CHG-011 were taken. `feature/admin-ui-home` (unmerged) also records a CHG-006 and renumbers when it merges.
+- Human confirmation: Dhruv Verma, 2026-09-24 (in-session).
+- Docs updated: DECISIONS.md (this entry); `docs/development/family-dev/family-ui-calendar/DECISIONS.md` FD-01, FD-02.
+
+### CHG-013 — FAM-UI-02: keyboard shortcuts and a Today button on the Family Calendar
+- Date / requested by: 2026-09-24 / Dhruv Verma (human, project lead)
+- Type: scope change (new ACs on an in-flight feature)
+- Description: FAM-UI-02 gains AC-06 (D / W / M switch the view; ← / → step one day, week or month by view) and AC-07 (a Today button beside the range heading, also on T, returns to today in the current view). Shortcuts are ignored while typing in a text field, with Ctrl/Cmd/Alt held, and on key repeat. The arrows and Today expose `aria-keyshortcuts` and a tooltip.
+- Source / justification: human instruction in-session, 2026-09-24. Not in the design (`family-02-calendar.png`).
+- Impact: FAM-UI-02 only (ACCEPTANCE_CRITERIA AC-06, AC-07; TEST_PLAN T-06, T-07; feature DECISIONS FD-12). No shared folders changed. CAR-UI-03 may want the same behaviour for consistency.
+- Numbering: recorded as CHG-007 on `feature/family-ui-calendar`; renumbered to CHG-013 when merging `family-dev`.
+- Human confirmation: Dhruv Verma, 2026-09-24 (in-session).
+- Docs updated: DECISIONS.md (this entry); FAM-UI-02 ACCEPTANCE_CRITERIA.md, TEST_PLAN.md, DECISIONS.md, PROGRESS.md, SESSION_STATE.md.
 
 Template for future entries:
 ```

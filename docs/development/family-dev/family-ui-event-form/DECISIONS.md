@@ -52,7 +52,7 @@ Non-blocking OQs: OQ-10, OQ-11, OQ-12 and OQ-22 have all been answered in root D
 
 ### FD-07 — Visual differences left as they are (kit or layout, not lane F)
 - Real-browser check against `family-03-edit-event.png` at 1440, plus a 1920–768 sweep with no page scroll, no text overflow and no overlap.
-- From the kit (`src/components/shared/**`, lane S): the `DatePickerGrid` day cells are about 30px tall against about 44px in the design (so the Pick a date card is shorter, and day buttons are below the 44px target rule); the Status legend is secondary grey where the design has it dark and emphasised; Overdue is shown disabled (PD-044); the picker has no dots under days with events. The dots need a date-range read, and `getOccurrences` (CHG-006) is not on `family-dev` yet.
+- From the kit (`src/components/shared/**`, lane S): the `DatePickerGrid` day cells are about 30px tall against about 44px in the design (so the Pick a date card is shorter, and day buttons are below the 44px target rule); the Status legend is secondary grey where the design has it dark and emphasised; Overdue is shown disabled (PD-044); the picker has no dots under days with events. The dots need a date-range read, and `getOccurrences` (CHG-012) is not on `family-dev` yet.
 - From the layout: the header shows client identity and the real date (FD-06). The page keeps the family screens' 24px side padding where the design leaves about 84px on the right.
 - Fixture: the description reads "Mobility and strength session…" where the design says "30-minute…" (the fixture follows the 90-minute duration; see `src/mocks/fixtures.ts`).
 - Raise with the shared owner: the DatePickerGrid cell size and 44px targets, and the Status legend style.

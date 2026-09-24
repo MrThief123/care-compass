@@ -533,6 +533,27 @@ export const OCCURRENCES_BY_CLIENT_ID: Record<string, Occurrence[]> = {
 };
 
 /**
+ * The rest of the calendar's design week, Tue 1 to Sat 5 Dec 2026, exactly as
+ * drawn in `family-02-calendar.png` (CHG-012). All Planned. Hand-written, not
+ * expanded from the rules above: the drawing is a snapshot, and real expansion
+ * arrives with F0-11. Kept apart from `OCCURRENCES_BY_CLIENT_ID` because they
+ * are in the future: `getOccurrences` and `getOccurrence` read them, the Task
+ * log does not.
+ */
+const MARGARET_UPCOMING: Occurrence[] = [
+  occurrenceOf(MORNING_MEDS, "2026-12-01T09:00:00+11:00", { status: "planned" }),
+  occurrenceOf(WOUND_DRESSING, "2026-12-02T10:00:00+11:00", { status: "planned" }),
+  occurrenceOf(WEIGH_IN, "2026-12-03T09:30:00+11:00", { status: "planned" }),
+  occurrenceOf(PHYSIO, "2026-12-04T11:30:00+11:00", { status: "planned" }),
+  occurrenceOf(MED_REVIEW, "2026-12-05T14:00:00+11:00", { status: "planned" }),
+];
+
+/** Occurrences after the reference day, by client (CHG-012). Not part of any Task log. */
+export const UPCOMING_OCCURRENCES_BY_CLIENT_ID: Record<string, Occurrence[]> = {
+  [MARGARET_CLIENT_ID]: MARGARET_UPCOMING,
+};
+
+/**
  * Plain-event occurrences (UI-05, CHG-009): Margaret's Afternoon walk, 14:00
  * on each day of the reference week (Thu 26 to Mon 30 Nov 2026), with Aisha
  * as the assignee as on the design week's tasks. No status, actor or

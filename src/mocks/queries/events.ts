@@ -12,6 +12,7 @@ import {
   OCCURRENCES_BY_CLIENT_ID,
   PLAIN_EVENT_OCCURRENCES_BY_CLIENT_ID,
   REFERENCE_DATE,
+  UPCOMING_OCCURRENCES_BY_CLIENT_ID,
 } from "@/mocks/fixtures";
 import { melbourneDateKey } from "@/mocks/melbourne-time";
 import { isPlainEvent, TASK_LOG_PAGE_SIZE } from "@/types/domain";
@@ -19,6 +20,7 @@ import type {
   AnyOccurrence,
   CareEvent,
   Occurrence,
+  OccurrenceRange,
   OccurrenceTypeFilter,
   TaskLogResult,
   TypedTaskLogQuery,
@@ -171,7 +173,10 @@ export async function getOccurrence(
   key: string,
   options: OccurrenceTypeOptions = {},
 ): Promise<AnyOccurrence | undefined> {
-  return rowsOfType(clientId, options.type).find((occurrence) => occurrence.key === key);
+  const found = rowsOfType(clientId, options.type).find((occurrence) => occurrence.key === key);
+  if (found || options.type === "events") return found;
+  // Upcoming rows are tasks, outside every Task log (CHG-012).
+  return findOccurrence(UPCOMING_OCCURRENCES_BY_CLIENT_ID, clientId, key);
 }
 
 /**
@@ -181,6 +186,43 @@ export async function getOccurrence(
  */
 export async function getEvent(clientId: string, eventId: string): Promise<CareEvent | undefined> {
   return CARE_EVENTS.find((event) => event.id === eventId && event.clientId === clientId);
+}
+
+/** The mock's "today": the reference day, as a Melbourne calendar date (CHG-012). */
+export async function getToday(): Promise<string> {
+  return melbourneDateKey(REFERENCE_DATE);
+}
+
+/**
+ * The rows whose start falls on a Melbourne calendar day from `range.from` to
+ * `range.to`, both inclusive, oldest first (ties by key ascending). `range` is
+ * already validated (`OccurrenceRangeSchema`). Returns copies, and does not
+ * reorder the array it is given.
+ */
+export function occurrencesInRange(
+  occurrences: readonly Occurrence[],
+  range: OccurrenceRange,
+): Occurrence[] {
+  return occurrences
+    .filter((occurrence) => {
+      const day = melbourneDateKey(occurrence.start);
+      return day >= range.from && day <= range.to;
+    })
+    .sort(oldestFirst)
+    .map((occurrence) => ({ ...occurrence }));
+}
+
+export async function getOccurrences(
+  clientId: string,
+  range: OccurrenceRange,
+): Promise<Occurrence[]> {
+  return occurrencesInRange(
+    [
+      ...rowsFor(OCCURRENCES_BY_CLIENT_ID, clientId),
+      ...rowsFor(UPCOMING_OCCURRENCES_BY_CLIENT_ID, clientId),
+    ],
+    range,
+  );
 }
 
 export interface SetOccurrenceDoneResult {
