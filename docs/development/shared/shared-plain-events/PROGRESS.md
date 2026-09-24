@@ -23,41 +23,44 @@ Last updated: 2026-09-24
 1. Plan (docs only) — DONE
 2. Types (`src/types/domain.ts`) — DONE
 3. Mocks and contracts — DONE
-4. UI-01 calendar kit — next
-5. UI-03 lists kit
+4. UI-01 calendar kit — DONE
+5. UI-03 lists kit — next
 6. UI-02 forms kit
 7. Full verification
 
 ## Completed
+- Task 4: calendar kit. `EVENT_CUE` (dotted neutral bar, no icon, "Event") and `occurrenceCue()` in `status-cue.ts`; new `EventPill`; `DayTimeline` / `WeekGrid` / `MonthGrid` generic over the occurrence type (default `Occurrence`); `EventPopover` shows `EventPill` for a plain event; month chips get a test id. Preview `src/app/dev-preview-calendar-kit/` shows Short walk, Garden walk, Music in the lounge and Picnic in the park as plain events (FD-02). FD-05.
 - Task 3: fixtures: Afternoon walk starts Thu 26 Nov 14:00; `PLAIN_EVENT_OCCURRENCES_BY_CLIENT_ID` (5 walk rows, 26–30 Nov, assignee Aisha) via `generatePlainEventOccurrences` in `src/mocks/history.ts`. Mock adapter: `type` filter in `queryTaskLog` (status filter keeps tasks only), `getTodayOccurrences` / `getOccurrence` options. Contracts: `OccurrenceTypeOption`, overloads on `getTaskLog` / `getTodayOccurrences` / `getOccurrence`, JSDoc says the log and exports read with `type: "all"`. FD-04 (`TaskLogQuery` keeps its shape). `family-dev` compatibility checked in a scratch merge.
 - Task 2: audit of every file assuming an occurrence has a status (FD-03). `src/types/domain.ts`: `occurrenceBaseShape`; `OccurrenceSchema` gains optional `kind: "task"`; `TaskOccurrence` alias; strict `PlainEventOccurrenceSchema` (`kind: "event"`); `AnyOccurrenceSchema` / `AnyOccurrence`; `isPlainEvent()`; `OccurrenceTypeFilterSchema` and `TaskLogQuerySchema.type`; `TaskLogResult<T = Occurrence>`. AC-04 reworded for FD-03 (`getOccurrence` needs `type: "all"` for a plain event).
 - Task 1: DEVELOPMENT_PLAN.md UI-05 row and card (totals 80 features, 333 criteria); PRD.md REQ-35 "Implemented by" gains UI-05; this folder from the template.
 
 ## In progress
-- Nothing (waiting for the go-ahead for Task 4).
+- Nothing (waiting for the go-ahead for Task 5).
 
 ## Remaining
-- Tasks 4 to 7.
+- Tasks 5 to 7.
 
 ## Acceptance criteria status
-- 6 / 13 MET (AC-01 to AC-06)
+- 8 / 13 MET (AC-01 to AC-08); AC-12 calendar part passing, lists and forms parts to come
 
 ## Tests
-- Written: 10 / 19 (T-01 to T-10: `src/types/domain.test.ts`, `src/server/events/queries.plain-events.test.ts`, `src/mocks/fixtures.plain-events.test.ts`, 2 cases in `src/mocks/history.test.ts`)
-- Passing: all; unit suite under `src/` 447 passed (59 files); `family-dev` + this branch 964 passed
+- Written: 13 / 19 + calendar parts of T-17 / T-18 (T-11 to T-13: `src/components/shared/calendar/plain-events.test.tsx`; axe: `calendar.axe.test.tsx`; tokens: `src/components/shared/plain-events.tokens.test.ts`. T-01 to T-10: `src/types/domain.test.ts`, `src/server/events/queries.plain-events.test.ts`, `src/mocks/fixtures.plain-events.test.ts`, 2 cases in `src/mocks/history.test.ts`)
+- Passing: all; unit suite under `src/` 473 passed (61 files); `family-dev` + this branch 990 passed
 - Failing: 5 integration tests (F0-04 / F0-07) that need a working local Supabase ("Invalid API key"); they fail identically without this change
 - Last run: 2026-09-24, `npm run typecheck`, `npx vitest run src`, eslint (0 errors; 2 pre-existing warnings in `src/app/page.tsx`)
+- Tests-first evidence (Task 4): commit 4b27a71. The plain-events component file failed to load (`EVENT_CUE` undefined), 3 of 4 plain-event axe tests and the `event-pill.tsx` token test failed; the popover axe test passed already (a guard). Four new accessible-name assertions were then loosened in the same task, before any existing test was touched: jsdom joins inline text without spaces ("Event:Short walk"), so `^Event: ` became `^Event:` — a bug in the new test, not a behaviour change.
 - Tests-first evidence (Task 3): 12 of 23 new contract/fixture tests failed before implementation (no walk rows, `type` ignored); the 11 that passed are the AC-06 regression guards, the type-level checks, the unknown-type rejection (already by the schema) and "plain key not found without the option". Commit 553e29c. The test's query type was renamed to `TypedTaskLogQuery` with FD-04.
 - Tests-first evidence (Task 2): 7 fail for the right reason before implementation: `PlainEventOccurrenceSchema`, `AnyOccurrenceSchema`, `isPlainEvent` undefined; `OccurrenceSchema` strips `kind: "event"`; `TaskLogQuerySchema` strips `type`.
 
 ## Files changed
 - `DEVELOPMENT_PLAN.md`, `PRD.md`, `docs/development/shared/shared-plain-events/*`
 - `src/types/domain.ts`, `src/types/domain.test.ts`
-- `src/mocks/fixtures.ts`, `src/mocks/history.ts`, `src/mocks/history.test.ts`, `src/mocks/queries/events.ts`, `src/mocks/fixtures.plain-events.test.ts`, `src/server/events/queries.ts`, `src/server/events/queries.plain-events.test.ts`
-- Planned (FD-02): `src/app/dev-preview-calendar-kit/**`, `src/app/dev-preview-forms-kit/**` (examples only)
+- `src/components/shared/event-pill.tsx`, `src/components/shared/calendar/{status-cue.ts,day-timeline.tsx,week-grid.tsx,month-grid.tsx,event-popover.tsx,use-event-hover.ts}`, tests `plain-events.test.tsx`, `calendar.axe.test.tsx`, `src/components/shared/plain-events.tokens.test.ts`; `src/app/dev-preview-calendar-kit/{fixtures.ts,page.tsx}` (FD-02)
+- `src/mocks/fixtures.ts`, `src/mocks/history.ts, `src/mocks/history.test.ts`, `src/mocks/queries/events.ts`, `src/mocks/fixtures.plain-events.test.ts`, `src/server/events/queries.ts`, `src/server/events/queries.plain-events.test.ts`
+- Planned (FD-02): `src/app/dev-preview-forms-kit/**` (examples only)
 
 ## Decisions
-- FD-01 (answered, Option A), FD-02 (answered, option a), FD-03 (answered, Option A), FD-04 (implementation note)
+- FD-01 (answered, Option A), FD-02 (answered, option a), FD-03 (answered, Option A), FD-04, FD-05 (implementation notes)
 
 ## Problems encountered
 - Stale `.next/types` from a `family-dev` build broke `tsc` (missing pages); cleared the generated folder.
@@ -70,10 +73,11 @@ Last updated: 2026-09-24
 ## Notes for the dashboard lanes (not edited here)
 - Care log (FAM-UI-07, FAM-14, FAM-15) and any log export (PL-06, PL-08): call `getTaskLog` with `type: "all"` so tasks and plain events appear together (FD-01). Today timelines that show both pass the same option to `getTodayOccurrences`.
 - Types (FD-03): results read with a `type` option are `AnyOccurrence`; use `isPlainEvent()` before reading `status`. `Occurrence` itself is unchanged.
-- Merging `main` into `family-dev` after UI-05: import-line conflicts only in `src/server/events/queries.ts` and `src/mocks/queries/events.ts`; keep both sides' imports (FD-04).
+- Merging `main` into `family-dev` after UI-05: import-line conflicts in `src/server/events/queries.ts` and `src/mocks/queries/events.ts` (keep both sides' imports, FD-04), and a root `DECISIONS.md` conflict between CHG-009 (main) and CHG-008 (family-dev) — keep both (FD-05).
+- Calendar screens that show plain events: pass `AnyOccurrence[]` (read with `type: "all"`) to `DayTimeline` / `WeekGrid` / `MonthGrid`; callbacks then receive `AnyOccurrence` (FD-05).
 
 ## Next action
-- Task 4 (on go-ahead): failing `[UI-05][AC-07]`, `[AC-08]`, `[AC-12]` component and axe tests for the calendar kit, then the neutral "Event" look in `status-cue`, day/week/month grids and the popover, and plain-event examples on `src/app/dev-preview-calendar-kit/`.
+- Task 5 (on go-ahead): read `src/components/shared/lists/**` and `lists-cards-kit.axe.test.tsx`; failing `[UI-05][AC-09]` / `[AC-12]` tests (T-14, lists part of T-17 / T-18); put `EventPill` where a `StatusPill` goes for a plain event without changing `StatusPill` / `ActivityRow` for tasks.
 
 ## Ready for PR
 - No

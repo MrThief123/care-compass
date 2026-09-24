@@ -38,3 +38,12 @@ Authorisation: root DECISIONS.md CHG-009 (human, 2026-09-24). The human approved
 - Plain-event rows live in a separate fixture map, `PLAIN_EVENT_OCCURRENCES_BY_CLIENT_ID`, so `OCCURRENCES_BY_CLIENT_ID` (and every test reading it) is unchanged. Afternoon walk's `start` moves from 2026-12-01 to 2026-11-26 14:00 so its daily series has a row on every day of the reference week (no test on `main` or the dev branches depends on the old date).
 - Verified: `origin/family-dev` merged with this branch in a scratch worktree type-checks clean and its 964 unit tests pass. The merge has import-line conflicts only, in `src/server/events/queries.ts` and `src/mocks/queries/events.ts` (`family-dev` added `getEvent`); keep both sides' imports.
 - Human confirmation required: no (follows FD-01 / FD-03; no behaviour choice).
+
+### FD-05 — The calendar kit's plain-event look (implementation note, within AC-07 / AC-08 / AC-12)
+- Date: 2026-09-24
+- Cue: `EVENT_CUE` in `status-cue.ts` (label "Event", no icon) and `occurrenceCue(occurrence)`, which every surface now calls instead of `STATUS_CUE[item.status]`. `STATUS_CUE` is unchanged.
+- Bar: dotted and neutral (`border-l-4 border-dotted border-text-secondary`), not a solid fill. A Planned task also has no shape, and compact day blocks, week blocks and month chips say the status word to screen readers only, so a solid grey bar would have told a plain event from a Planned task by colour alone (seen in the real-browser check). The dots are a pattern, not a status shape.
+- Label: new `EventPill` (`src/components/shared/event-pill.tsx`, beside `StatusPill`), used where `StatusPill` goes (day `full` tier, popover). Task 5 reuses it in the lists kit.
+- Types: `DayTimeline`, `WeekGrid` and `MonthGrid` props are generic, `<T extends AnyOccurrence = Occurrence>`, so callers that pass `Occurrence[]` keep `(occurrence: Occurrence) => …` callbacks; callers that pass `AnyOccurrence[]` get `AnyOccurrence` back. `EventPopover` and the internal `useEventHover` take `AnyOccurrence`. Month chips gain `data-testid="month-grid-chip-<key>"` (additive).
+- Verified: `origin/family-dev` merged with this branch (scratch worktree) type-checks clean and its 990 unit tests pass. The merge also conflicts on `DECISIONS.md` (root): `main`'s CHG-009 entry against `family-dev`'s CHG-008 entry — keep both; not caused by this branch.
+- Human confirmation required: no (within the approved ACs).
