@@ -1,6 +1,6 @@
 # Progress — FAM-UI-04 Family Info screen (UI)
 
-Status: READY FOR PR
+Status: PR OPEN
 Owner: Dhruv Verma
 Lane: F — Family
 Sprint: SPRINT · planned D5
@@ -32,10 +32,10 @@ Last updated: 2026-09-25
 - Duplicate client name and summary block removed from the page body at the human's request (FD-08)
 
 ## In progress
-- Nothing. Waiting for the human's "yes" to open the PR.
+- Nothing. The human approved opening the PR on 2026-09-25; it is open against `family-dev`.
 
 ## Remaining
-- Open the PR to `family-dev` after the human approves (CLAUDE.md §8; the docs update ships in the same PR). A side-by-side screenshot of the design and the implementation goes on the PR (not committed to the repo).
+- Review and merge by the human. The side-by-side screenshot of the design and the implementation is not committed to the repo; it goes on the PR as an image (`gh` cannot upload images, so it is added in the GitHub web page).
 
 ## Acceptance criteria status
 - 3 / 3 MET (AC-01, AC-02, AC-03)
@@ -73,7 +73,7 @@ Last updated: 2026-09-25
 - Notification `notif-aisha-2` says "Care plan 2026.pdf" while Family · Info says "Care plan.pdf" (FD-02).
 
 ## Next action
-- Announce readiness to the human; open the PR to `family-dev` only after their "yes".
+- Wait for review. Answer review comments on this branch; do not merge the PR.
 
 ## Ready for PR
-- Yes (once the branch is pushed; PR not opened)
+- Yes. PR opened to `family-dev` on 2026-09-25 after the human's approval.

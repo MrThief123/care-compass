@@ -12,6 +12,6 @@ Important discoveries:
 - The kit `CardShell` draws a 1px border the design's cards do not have (FD-07).
 - The `notif-aisha-2` notification still says "Care plan 2026.pdf" (FD-02).
 Important decisions: FD-01 to FD-08 in DECISIONS.md (FD-08: client name shown once, in the shell header, at the human's request; tests of the removed block changed, flagged HUMAN REVIEW); CHG-018 in root DECISIONS.md (human-confirmed 2026-09-25)
-Exact next action: announce readiness to the human; open the PR to `family-dev` only after their "yes". PR title `FAM-UI-04 Family Info screen (UI)`; state that the checks were run locally because CI is down; attach the design-and-implementation side-by-side; flag the FD-01 wording, FD-08 (the design draws the block twice; the PR's side-by-side differs from the design by it, and the tests changed) and the HUMAN REVIEW list in PROGRESS.md; no AI-attribution lines.
+Exact next action: wait for review of the PR to `family-dev` (`FAM-UI-04 Family Info screen (UI)`, opened 2026-09-25 after the human's "yes"). Answer review comments on this branch. Do not merge it.
 Files likely to be touched next: none, unless review asks for changes
 Warning for next session: do not stage `.claude/settings.json` (unrelated, always dirty). Do not run the F0-07 auth e2e specs against the hosted project. Ask before deleting any row in it.
