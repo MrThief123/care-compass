@@ -8,10 +8,13 @@ import { DocumentTile } from "@/features/family-task-detail/document-tile";
 import type { EventDocument } from "@/types/domain";
 
 import { AddFileTile } from "./add-file-tile";
+import { TaskSwitch } from "./task-switch";
 
 export interface EventFormScreenProps {
   mode: "add" | "edit";
   initialValues: EventFormValues;
+  /** The task switch's starting value (CHG-009): on for a new event. */
+  initialIsTask: boolean;
   /** Any date in the month the picker opens on. */
   month: string;
   documents: EventDocument[];
@@ -25,9 +28,16 @@ const TITLES = { add: "Add event", edit: "Edit event" } as const;
  * returns to the previous screen without saving; Cancel returns without
  * changes (FD-04). Persisting is FAM-06 / FAM-07.
  */
-export function EventFormScreen({ mode, initialValues, month, documents }: EventFormScreenProps) {
+export function EventFormScreen({
+  mode,
+  initialValues,
+  initialIsTask,
+  month,
+  documents,
+}: EventFormScreenProps) {
   const router = useRouter();
   const [values, setValues] = useState(initialValues);
+  const [isTask, setIsTask] = useState(initialIsTask);
   const [uploadNotice, setUploadNotice] = useState(false);
 
   return (
@@ -42,6 +52,7 @@ export function EventFormScreen({ mode, initialValues, month, documents }: Event
         onCancel={() => router.back()}
         month={month}
         className="lg:grid-cols-[minmax(0,1fr)_21rem] lg:gap-10"
+        extraFields={<TaskSwitch checked={isTask} onChange={setIsTask} />}
         documents={
           <div role="region" aria-label="Documents" className="flex flex-col gap-2">
             <ul className="grid grid-cols-[repeat(auto-fill,6.5rem)] gap-3">

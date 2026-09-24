@@ -1,5 +1,5 @@
 import { EventFormScreen } from "@/features/family-event-form/event-form-screen";
-import { EMPTY_EVENT_VALUES } from "@/features/family-event-form/event-form-values";
+import { EMPTY_EVENT_VALUES, isTaskEvent } from "@/features/family-event-form/event-form-values";
 import { melbourneDateKey } from "@/features/family-task-log/melbourne-time";
 
 /**
@@ -12,6 +12,7 @@ export default function NewEventPage() {
     <EventFormScreen
       mode="add"
       initialValues={EMPTY_EVENT_VALUES}
+      initialIsTask={isTaskEvent()}
       month={melbourneDateKey(new Date().toISOString())}
       documents={[]}
     />

@@ -23,3 +23,11 @@ export function editEventValues(event: CareEvent, occurrence?: Occurrence): Even
     description: event.description,
   };
 }
+
+/**
+ * The task switch (CHG-009): `manual` is a task, `automatic` a plain event.
+ * A new event starts as a task.
+ */
+export function isTaskEvent(event?: CareEvent): boolean {
+  return (event?.completionMode ?? "manual") === "manual";
+}

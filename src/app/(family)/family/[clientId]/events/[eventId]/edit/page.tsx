@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { EventFormScreen } from "@/features/family-event-form/event-form-screen";
-import { editEventValues } from "@/features/family-event-form/event-form-values";
+import { editEventValues, isTaskEvent } from "@/features/family-event-form/event-form-values";
 import { getEventDocuments } from "@/server/documents/queries";
 import { getEvent, getOccurrence, getTodayOccurrences } from "@/server/events/queries";
 
@@ -38,6 +38,12 @@ export default async function EditEventPage({
   const values = editEventValues(event, occurrence);
 
   return (
-    <EventFormScreen mode="edit" initialValues={values} month={values.date} documents={documents} />
+    <EventFormScreen
+      mode="edit"
+      initialValues={values}
+      initialIsTask={isTaskEvent(event)}
+      month={values.date}
+      documents={documents}
+    />
   );
 }
