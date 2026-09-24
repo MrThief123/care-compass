@@ -109,7 +109,7 @@ test("[FAM-UI-02][AC-08] ticking Physiotherapy turns its week block Done at once
   await expect(block).toContainText("Done:");
 });
 
-test("[FAM-UI-02][AC-08] in the day view a ticked task reads 'Done · Helen Doyle'; unticked, Planned again", async ({
+test("[FAM-UI-02][AC-08] in the day view a ticked task's card reads 'Done · Helen Doyle'; unticked, Planned again", async ({
   page,
 }) => {
   await page.setViewportSize({ width: 1440, height: 1000 });
@@ -118,9 +118,16 @@ test("[FAM-UI-02][AC-08] in the day view a ticked task reads 'Done · Helen Doyl
   const box = page.getByRole("region", { name: "Tasks" }).getByLabel("Physiotherapy");
 
   await box.check();
-  await expect(block).toContainText("Done · Helen Doyle");
+  await expect(block).toContainText("Done");
+  // At this block size the name is on the block's detail card, as for any Done task.
+  await block.hover();
+  await expect(page.getByRole("tooltip")).toContainText("Done · Helen Doyle");
+  await page.mouse.move(0, 0);
+  await expect(page.getByRole("tooltip")).toBeHidden();
 
   await box.uncheck();
   await expect(block).toContainText("Planned");
-  await expect(block).not.toContainText("Helen Doyle");
+  await block.hover();
+  await expect(page.getByRole("tooltip")).toContainText("Planned");
+  await expect(page.getByRole("tooltip")).not.toContainText("Helen Doyle");
 });

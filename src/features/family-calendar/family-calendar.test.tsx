@@ -1,4 +1,4 @@
-import { render, screen, within } from "@testing-library/react";
+import { act, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { axe } from "jest-axe";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -358,7 +358,11 @@ describe("[FAM-UI-02][AC-08] a tick shows on the grids, with who ticked it (CHG-
     expect(block).not.toHaveTextContent("Done");
     await user.click(within(tasksPanel()).getByLabelText("Physiotherapy"));
 
-    expect(block).toHaveTextContent("Done · Helen Doyle");
+    expect(block).toHaveTextContent(/^Done: /);
+    // jsdom has no layout, so the block is compact; its detail card (opened by
+    // keyboard focus, with no delay) shows the full pill with the name.
+    act(() => block.focus());
+    expect(screen.getByRole("tooltip")).toHaveTextContent("Done · Helen Doyle");
     expect(mocks.getCurrentUser).toHaveBeenCalledWith("family");
   });
 
@@ -383,10 +387,13 @@ describe("[FAM-UI-02][AC-08] a tick shows on the grids, with who ticked it (CHG-
     await user.click(physio);
     expect(screen.getByTestId(`day-timeline-block-${PHYSIO}`)).not.toHaveTextContent("Done");
 
-    expect(morningBlock).toHaveTextContent("Done · Aisha Rahman");
+    act(() => morningBlock.focus());
+    expect(screen.getByRole("tooltip")).toHaveTextContent("Done · Aisha Rahman");
     await user.click(within(tasksPanel()).getByLabelText("Morning medication"));
-    expect(morningBlock).toHaveTextContent("Planned");
-    expect(morningBlock).not.toHaveTextContent(/Done|Aisha Rahman/);
+    expect(morningBlock).toHaveTextContent(/^Planned: /);
+    act(() => morningBlock.focus());
+    expect(screen.getByRole("tooltip")).toHaveTextContent("Planned");
+    expect(screen.getByRole("tooltip")).not.toHaveTextContent(/Done|Aisha Rahman/);
   });
 
   it("[FAM-UI-02][AC-08] an Overdue task ticked and unticked is Overdue again", async () => {

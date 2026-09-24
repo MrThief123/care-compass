@@ -12,6 +12,7 @@ import { taskDetailHrefFrom } from "@/features/family-task-detail/task-detail-or
 import type { LocalDate } from "@/lib/dates/week-range";
 import type { Occurrence } from "@/types/domain";
 
+import { applyTick } from "./apply-ticks";
 import { dayHeading, melbourneDay, rangeLabel } from "./calendar-format";
 import {
   calendarHref,
@@ -36,6 +37,8 @@ export interface FamilyCalendarViewProps {
   occurrences: Occurrence[];
   /** Latest done or overdue tasks, newest first. */
   log: Occurrence[];
+  /** The signed-in person, shown on a task they tick (CHG-016). */
+  actorName: string;
 }
 
 /**
@@ -44,14 +47,16 @@ export interface FamilyCalendarViewProps {
  * Changing view or range navigates, so the server reads that range. Picking a
  * day inside the range only rewrites the URL (`history.replaceState`, which the
  * Next.js router syncs with), because its data is already on screen. Ticks are
- * local and survive both, until a reload.
+ * local and survive both, until a reload. The grids draw them too, with the
+ * signed-in person as the actor (CHG-016, `apply-ticks.ts`); nothing is saved.
  */
 export function FamilyCalendarView({
   clientId,
   today,
   params,
-  occurrences,
+  occurrences: loaded,
   log,
+  actorName,
 }: FamilyCalendarViewProps) {
   const router = useRouter();
   const range = visibleRange(params);
@@ -73,6 +78,9 @@ export function FamilyCalendarView({
   const now = clockDay && clockDay >= range.from && clockDay <= range.to ? clock : null;
 
   const [ticks, setTicks] = useState<Record<string, boolean>>({});
+  const occurrences = loaded.map((occurrence) =>
+    applyTick(occurrence, ticks[occurrence.key], actorName),
+  );
 
   const navigate = (next: CalendarParams) => router.push(calendarHref(clientId, next));
 
