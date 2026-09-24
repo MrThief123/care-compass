@@ -68,7 +68,8 @@ Record feature-level decisions here using the template below. Project-wide decis
 - Date: 2026-09-24
 - Context: the kit's blocks are buttons ("opens the event for editing"), but the Edit event route (FAM-UI-03) does not exist yet and the design does not say (OQ-19).
 - Decision: a block opens `/family/[clientId]/tasks/[occurrenceKey]` (Task detail, which has an Edit link). Change to the edit route when FAM-UI-03 lands if the human prefers.
-- Human confirmation required: yes, when convenient (non-blocking).
+- Human confirmation: answered by Dhruv Verma, 2026-09-24 (in-session), after FAM-UI-03 landed. Keep it: a block opens the read-only Task detail, and editing goes through Task detail's edit control. Not the Edit event route, which edits the whole series rather than the clicked day.
+- Follow-up (separate branch from `family-dev` after this PR, CHG-014): Task detail gets a clearer "Edit event" button, and its back link returns to where the task was opened from (Calendar, Home or Task log) instead of always the Task log.
 
 ### FD-10 — Kit differences from the design, left as the kit draws them
 - Date: 2026-09-24

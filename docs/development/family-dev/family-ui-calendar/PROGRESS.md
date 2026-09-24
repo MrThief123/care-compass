@@ -49,7 +49,7 @@ Last updated: 2026-09-24
 - `DECISIONS.md` (CHG-012), feature docs
 
 ## Decisions
-- See DECISIONS.md FD-01 to FD-12. HUMAN REVIEW: FD-01 (shared folders edited from a family branch, approved), FD-08 (M-month rule), FD-09 (block click → Task detail).
+- See DECISIONS.md FD-01 to FD-12. HUMAN REVIEW: FD-01 (shared folders edited from a family branch, approved), FD-08 (M-month rule), FD-09 (block click → Task detail; answered 2026-09-24: keep).
 - CHG numbering: recorded as CHG-006 and CHG-007 on this branch; renumbered to CHG-012 and CHG-013 when merging `family-dev` (2026-09-24), where CHG-006 to CHG-011 were taken. `feature/admin-ui-home` still records a CHG-006 and renumbers when it merges.
 
 ## Problems encountered
@@ -61,7 +61,8 @@ Last updated: 2026-09-24
 - The design's "Aisha R." pill is shown as the full name (PD-038), as on Home.
 
 ## Next action
-- Human: approve opening the PR (and decide the CHG number). Then push and open `FAM-UI-02 Family Calendar screen (UI)` → `family-dev`.
+- Human: review and merge PR #77 into `family-dev`.
+- Follow-up, not in this PR: (1) Task detail: a clearer "Edit event" button, and Back returns to where the task was opened from (CHG-014, FD-09). (2) `getOccurrences` returns tasks only, so plain events (CHG-009) do not show on the calendar yet.
 
 ## Ready for PR
-- Yes, pending human approval
+- Yes. PR #77 open.

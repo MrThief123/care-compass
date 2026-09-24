@@ -9,6 +9,6 @@ Test results: all green. On `next dev` the interaction specs fail because the de
 Current blocker: none. PR #77 open to `family-dev`, awaiting review.
 Important discoveries: no Phase 1 contract could read a date range, so every calendar screen had this gap (CAR-UI-03 too). The kit's `CalendarHeader` only labels weeks, `WeekGrid` has no selected-day highlight, and `TimeGridScroller` labels the time on any week (FD-04, FD-07, FD-10).
 Important decisions: FD-01 to FD-12. Root CHG-006 and CHG-007 renumbered to CHG-012 and CHG-013 when merging `family-dev`.
-Exact next action: human reviews and merges PR #77 into `family-dev`, then set PROGRESS to MERGED TO DEV. Follow-up: `getOccurrences` returns tasks only; plain events (CHG-009) on the calendar need their own change.
+Exact next action: human reviews and merges PR #77 into `family-dev`, then set PROGRESS to MERGED TO DEV. Follow-ups: Task detail's Edit event button and origin-aware Back (CHG-014, FD-09); plain events on the calendar (`getOccurrences` returns tasks only).
 Files likely to be touched next: none for this feature. FAM-04 / FAM-05 wire it later.
 Warning for next session: do not add a second range read for the Carer calendar; extend `getOccurrences`. Merge `origin/family-dev` before opening the PR if it has moved.
