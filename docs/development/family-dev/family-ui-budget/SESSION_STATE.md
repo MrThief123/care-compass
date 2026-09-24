@@ -1,18 +1,39 @@
 # Session State — FAM-UI-05 Family Budget screen (UI)
 
 Last session date: 2026-09-25
-Current branch: `feature/family-ui-budget` (from `origin/family-dev` at 02c7fa7)
-Worked on: FAM-UI-05 tests-first: claim, the CHG-019 decision (History contract read and design fixtures), feature DECISIONS.md FD-01 to FD-09, TEST_PLAN.md, and five test files
+Current branch: `feature/family-ui-budget` (from `origin/family-dev` at 02c7fa7; `family-dev` had not moved when this was written)
+Worked on: FAM-UI-05 tests-first: claim, CHG-019 (History contract read and design fixtures), feature DECISIONS.md FD-01 to FD-09, TEST_PLAN.md, five test files, then FD-05 (the human chose to show who recorded each entry) and the implementation plan below
 What changed: see PROGRESS.md "Files changed". No production code.
-Tests run: `npx vitest run src/features/family-budget src/server/budget src/mocks/queries/budget.test.ts` (red run); one throwaway copy of the screen test with `loading` stubbed, to see its per-test red state, deleted before commit
-Test results: 84 tests written. 11 fail, 6 pass, 67 fail at import (missing modules). Red for the right reasons (TEST_PLAN.md Results).
-Current blocker: None. Paused for the human's greenlight to implement.
+Tests run: `npx vitest run src/features/family-budget src/server/budget src/mocks/queries/budget.test.ts` (red run, re-run after FD-05)
+Test results: 92 tests written. 12 fail, 7 pass, 73 fail at import (missing modules). Red for the right reasons (TEST_PLAN.md Results).
+Current blocker: None. Implementation is ready to start; the human starts it by opening the implementation session.
 Important discoveries:
-- The History table has no contract read and no design fixtures. Added on this branch as CHG-019, human-confirmed 2026-09-25.
-- PD-034 (History shows who recorded each entry) conflicts with the design, which draws date, description and amount only. Recorded as FD-05, a human decision. The default follows the design and the tests assert it.
+- The History table had no contract read and no design fixtures. Added on this branch as CHG-019, human-confirmed 2026-09-25.
+- PD-034 (History shows who recorded each entry) differs from the design, which draws date, description and amount only. The human chose to show it (FD-05): a "Recorded by <name>" line under the description, same cell, three columns kept. The design does not draw it; flag it in the PR.
 - Home's `BudgetBucketTile` already draws the design's bucket card, so this screen reuses it (FD-01) rather than the kit's `BudgetBucketCard`.
 - Vite fails a test file at load if it imports a module that does not exist, even through a dynamic `import()`.
-Important decisions: FD-01 to FD-09 in DECISIONS.md; CHG-019 in root DECISIONS.md
-Exact next action: wait for the human's greenlight. Then read the Next.js docs (CLAUDE.md §14) and implement in this order: `getFundHistory` and fixtures, `budget-format.ts`, `budget-data.ts`, the view components, `page.tsx` and `loading.tsx`. Run the red tests to green. Then the full local checks and the real-browser check.
-Files likely to be touched next: `src/app/(family)/family/[clientId]/budget/page.tsx`, `src/app/(family)/family/[clientId]/budget/loading.tsx`, `src/features/family-budget/*`, `src/server/budget/queries.ts`, `src/mocks/queries/budget.ts`, `src/mocks/fixtures.ts`
-Warning for next session: do not implement before the human's greenlight. Do not stage `.claude/settings.json` (unrelated, always dirty). Do not run the F0-07 auth e2e specs against the hosted project (`--grep-invert "F0-07"`). No AI-attribution lines in commits or PRs. Do not open the PR without the human's "yes".
+Important decisions: FD-01 to FD-09 in DECISIONS.md; CHG-019 in root DECISIONS.md (amended: entries name their recorder)
+Exact next action: run the pre-flight, then build in the order below until the 92 tests are green.
+Files likely to be touched next: see "Build order".
+Warning for next session: do not stage `.claude/settings.json` (unrelated, always dirty). Do not run the F0-07 auth e2e specs against the hosted project (`--grep-invert "F0-07"`). No AI-attribution lines in commits or PRs (CLAUDE.md §8, memory). Do not open the PR without the human's "yes". Do not change the tests to get green: they are the spec (CLAUDE.md §5); if one looks wrong, stop and ask.
+
+## Pre-flight
+1. `git status`, `git branch --show-current` (must be `feature/family-ui-budget`), `git fetch origin`, `git merge origin/family-dev` if it has moved. The only dirty file should be `.claude/settings.json`.
+2. Read the Next.js guides before writing Next code (CLAUDE.md §14): `node_modules/next/dist/docs/01-app/03-api-reference/03-file-conventions/page.md` (the `params` promise) and `loading.md`. Follow the precedent pages, do not invent a second pattern.
+3. Read the tests, they are the interface: `src/features/family-budget/family-budget.test.tsx`, `budget-data.test.ts`, `budget-format.test.ts`, `src/server/budget/queries.test.ts`, `src/mocks/queries/budget.test.ts`. Then DECISIONS.md FD-01 to FD-09 and CHG-019.
+4. Run the red command once to see the starting state.
+
+## Build order (minimum to green; nothing else)
+1. **Contract and fixtures (CHG-019).** `src/server/budget/queries.ts`: add `getFundHistory(clientId)` beside `getBudgetSummary`, same `getDataSourceMode()` / `notImplementedForSupabase("budget", "getFundHistory")` pattern. `src/mocks/queries/budget.ts`: filter `FUND_ENTRIES` by client, sort date newest first, return copies (callers must not be able to change fixtures). `src/mocks/fixtures.ts`: replace the two `FUND_ENTRIES` with Margaret's three design rows (all `recordedBy: "Helen Doyle"`): `fund-margaret-1` ndis topup 6000 "2026-11-03" "NDIS quarterly plan top-up"; `fund-margaret-2` fixed topup 1000 "2026-10-15" "Fixed funding top-up"; `fund-margaret-3` government topup 750 "2026-10-01" "Government subsidy payment"; plus one for Robert (`ROBERT_CLIENT_ID`, ndis topup, `recordedBy: "Michael Hale"`). Run `src/server/budget` and `src/mocks/queries/budget.test.ts` to green; `src/mocks/fixtures.test.ts` must still pass.
+2. **`src/features/family-budget/budget-format.ts`.** `formatFundDate`, `formatSignedDollars` (FD-04); reuse `formatDollars` from `src/features/family-home/home-format.ts`. No `Date` object.
+3. **`src/features/family-budget/budget-data.ts`.** `loadFamilyBudgetData(clientId)` returns `{ buckets, history }` from `getBudgetSummary` and `getFundHistory` (each once, no re-sort, not `getClientHeaderSummary`); export the data type.
+4. **View components in `src/features/family-budget/`.** `family-budget-view` (two independent cards, each a labelled region with its own h2: "Funds by source" then "History"); the bucket grid reusing `BudgetBucketTile` (FD-01; precedent `src/features/family-home/budget-strip.tsx`); `history-table` (local container-query table, FD-03; precedent `src/features/family-task-log/task-log-table.tsx`; description cell = description element first, optional "Recorded by <name>" element second, FD-05; both clamped with `title`; "No description" per FD-09); `update-funds-button` (client component: primary 44px `type="button"`, empty `role="status"` live region present from the start, message "Updating funds is not available yet.", FD-06; precedent: Family · Info's 'Add file' notice, read with `git show feature/family-ui-info:src/features/family-info/documentation-card.tsx`); `budget-error-state` (client: `ErrorState` from `@/components/shared/states` with `router.refresh()`; copy `src/features/family-home/home-error-state.tsx`); `budget-skeleton` (`role="status" aria-label="Loading" aria-busy="true"`, the two cards' shape; precedent `home-skeleton.tsx`, and `info-skeleton.tsx` on `feature/family-ui-info`). Empty states via `EmptyState` (FD-07 wording).
+5. **Route.** `src/app/(family)/family/[clientId]/budget/page.tsx`: async, `params: Promise<{ clientId: string }>`, `loadFamilyBudgetData` in try/catch; on a rejection `console.error("[family-budget] could not load budget data:", error instanceof Error ? error.name : "unknown error")` and return the error state (no message, no client data in the log); otherwise the view. Add `budget/loading.tsx` rendering the skeleton. Replace the "Coming soon." placeholder.
+6. Green: `npx vitest run src/features/family-budget src/server/budget src/mocks/queries/budget.test.ts`, then the full checks below.
+
+## Then, before READY FOR PR
+- `npx vitest run src tests/unit`, `npx tsc --noEmit`, `npx eslint .`, `npx prettier --check .`; Playwright e2e on a production build with `--grep-invert "F0-07"`. CI is down (GitHub Actions limits): run everything locally and say so in the PR.
+- Real-browser check against `docs/design/screens/family-06-budget.png`, then a width sweep 1920, 1600, 1440, 1280, 1024 (clean) and 768 (graceful), with long-content stress (300-character description and recorder name, 40 rows, five buckets). Nothing overlaps. Give the human the full preview URL: `/family/client-margaret/budget` on the dev server (the bare origin is the component showcase).
+- Update TEST_PLAN.md Results ("After implementation"), PROGRESS.md, this file and DECISIONS.md (any new FD). Commit in small Conventional Commits: `feat(family): …` for code, `docs(family-ui-budget): …` for docs. No attribution lines.
+- Announce READY FOR PR and wait for the human's "yes". The PR targets `family-dev`, titled `FAM-UI-05 Family Budget screen (UI)`. In the body flag: the local `BudgetBucketTile` and local History table instead of the kit's `BudgetBucketCard` and `DataTable` (FD-01, FD-03); the "Recorded by" line the design does not draw (FD-05); the copy that needs review (FD-06 Update message, FD-07 empty and error wording, FD-09 "No description"; OQ-24 stays open); CHG-019 touching `src/server/**` and `src/mocks/**`; that the checks ran locally because CI is down.
+- Checkpoint and ask the human to `/compact` at about 120k–150k tokens, at a natural resting point.
