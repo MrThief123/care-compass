@@ -19,6 +19,7 @@ Tests are written **before** production code (TESTING.md §2). Run them, confirm
 | T-06 | AC-06 | component + e2e | D/W/M switch the view; ←/→ step a day, week or month; ignored with a modifier or in a text field; the controls name their keys. | ☑ | PASS |
 | T-07 | AC-07 | component + e2e | Today and T return each view to today (month: today's month); already on today, it reselects without navigating. | ☑ | PASS |
 | T-08 | AC-08 | component + e2e | Added by CHG-016. Week block Planned to Done on tick; day view "Done · Helen Doyle" (`getCurrentUser("family")`); month chip Done; untick restores Planned, and a fixture-Done task becomes Planned without its old name; Overdue to Done to Overdue; no `setOccurrenceDone` call, no navigation, Log unchanged, survives picking another day (`family-calendar.test.tsx`). e2e: on the production build a tick turns the block Done in the week view and "Done · Helen Doyle" in the day view (`family-calendar.spec.ts`). | ☑ | PASS |
+| T-09 | AC-09 | component + e2e | Added by CHG-017. The toolbar's "Enter event" link: href `/family/<id>/events/new?from=calendar&view=…&date=…&month=…` in week, day and month views, follows a picked day, sits before the D/W/M control, 44px tall (`family-calendar.test.tsx`). e2e: from the month view, Enter event then Cancel returns to that month view; no overflow at 1920–768 (`family-calendar.spec.ts`). | ☐ | NOT RUN |
 
 ## Where the tests live
 - T-01 to T-04: `src/features/family-calendar/family-calendar.test.tsx` (titles `[FAM-UI-02][AC-xx] T-0x …`).

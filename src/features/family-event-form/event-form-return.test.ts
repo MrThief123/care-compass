@@ -9,7 +9,12 @@ import {
 } from "@/features/family-task-detail/task-detail-origin";
 import { editEventHref } from "@/features/family-task-log/task-routes";
 
-import { addEventReturnHref, editEventHrefFrom, editEventReturnHref } from "./event-form-return";
+import {
+  addEventHrefFrom,
+  addEventReturnHref,
+  editEventHrefFrom,
+  editEventReturnHref,
+} from "./event-form-return";
 
 /*
  * CHG-015: Task detail's 'Edit event' passes the occurrence being viewed and
@@ -134,5 +139,67 @@ describe("[FAM-UI-03] Where Save event and Cancel go (CHG-015)", () => {
   it("[FAM-UI-03][AC-09] Add event returns to Family Home, its only opener", () => {
     expect(addEventReturnHref(ID)).toBe("/family/client-margaret/home");
     expect(addEventReturnHref("a/b?c")).toBe("/family/a%2Fb%3Fc/home");
+  });
+});
+
+describe("[FAM-UI-03] Add event opened from the Calendar (CHG-017)", () => {
+  const NEW = "/family/client-margaret/events/new";
+  const DAY: CalendarParams = { view: "day", date: "2026-12-04", month: "2026-12" };
+
+  it("[FAM-UI-03][AC-10] the Calendar's Enter event link carries its view, selected day and month", () => {
+    expect(addEventHrefFrom(ID, { from: "calendar", view: WEEK })).toBe(
+      `${NEW}?from=calendar&view=week&date=2026-12-03`,
+    );
+    expect(addEventHrefFrom(ID, { from: "calendar", view: MONTH })).toBe(
+      `${NEW}?from=calendar&view=month&date=2026-11-28&month=2026-11`,
+    );
+    expect(addEventHrefFrom(ID, { from: "calendar", view: DAY })).toBe(
+      `${NEW}?from=calendar&view=day&date=2026-12-04`,
+    );
+    expect(
+      addEventHrefFrom("a/b?c", { from: "calendar", view: WEEK }).startsWith(
+        "/family/a%2Fb%3Fc/events/new?",
+      ),
+    ).toBe(true);
+  });
+
+  it("[FAM-UI-03][AC-10] Save event and Cancel return to that Calendar view", () => {
+    for (const view of [WEEK, MONTH, DAY]) {
+      expect(addEventReturnHref(ID, { from: "calendar", view })).toBe(
+        backLinkFor(ID, { from: "calendar", view }).href,
+      );
+    }
+    expect(addEventReturnHref(ID, { from: "calendar", view: MONTH })).toBe(
+      "/family/client-margaret/calendar?view=month&date=2026-11-28&month=2026-11",
+    );
+  });
+
+  it("[FAM-UI-03][AC-10] the origin survives the round trip link → page params", () => {
+    for (const view of [WEEK, MONTH, DAY]) {
+      const raw = searchOf(addEventHrefFrom(ID, { from: "calendar", view }));
+      expect(addEventReturnHref(ID, parseTaskDetailOrigin(raw, TODAY))).toBe(
+        addEventReturnHref(ID, { from: "calendar", view }),
+      );
+    }
+  });
+
+  it("[FAM-UI-03][AC-10] any origin but the Calendar returns to Home, as in AC-09", () => {
+    expect(addEventReturnHref(ID, { from: "home" })).toBe("/family/client-margaret/home");
+    expect(addEventReturnHref(ID, { from: "tasks", view: { q: "physio" } })).toBe(
+      "/family/client-margaret/home",
+    );
+    expect(
+      addEventReturnHref(ID, parseTaskDetailOrigin({ from: "https://evil.example" }, TODAY)),
+    ).toBe("/family/client-margaret/home");
+  });
+
+  it("[FAM-UI-03][AC-10] hostile Calendar params fall back to the Calendar's defaults", () => {
+    const origin = parseTaskDetailOrigin(
+      { from: "calendar", view: "//evil.example", date: "../../x", month: "javascript:1" },
+      TODAY,
+    );
+    expect(addEventReturnHref(ID, origin)).toBe(
+      "/family/client-margaret/calendar?view=week&date=2026-11-30",
+    );
   });
 });

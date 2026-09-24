@@ -241,6 +241,55 @@ describe("[FAM-UI-02][AC-02] week grid", () => {
   });
 });
 
+describe("[FAM-UI-02][AC-09] Enter event (CHG-017)", () => {
+  const NEW = `/family/${CLIENT_ID}/events/new`;
+
+  it("[FAM-UI-02][AC-09] T-09 the week view's Enter event link opens Add event with the Calendar's origin", async () => {
+    await renderCalendar();
+
+    expect(screen.getByRole("link", { name: "Enter event" })).toHaveAttribute(
+      "href",
+      `${NEW}?from=calendar&view=week&date=2026-11-30`,
+    );
+  });
+
+  it("[FAM-UI-02][AC-09] T-09 it carries the day and month views' params", async () => {
+    const { unmount } = await renderCalendar({ view: "day", date: "2026-12-02" });
+    expect(screen.getByRole("link", { name: "Enter event" })).toHaveAttribute(
+      "href",
+      `${NEW}?from=calendar&view=day&date=2026-12-02`,
+    );
+    unmount();
+
+    await renderCalendar({ view: "month", date: "2026-11-29", month: "2026-12" });
+    expect(screen.getByRole("link", { name: "Enter event" })).toHaveAttribute(
+      "href",
+      `${NEW}?from=calendar&view=month&date=2026-11-29&month=2026-12`,
+    );
+  });
+
+  it("[FAM-UI-02][AC-09] T-09 it follows a day picked in the range", async () => {
+    const user = userEvent.setup();
+    await renderCalendar();
+
+    await user.click(screen.getByTestId("week-grid-header-2026-12-03"));
+
+    expect(screen.getByRole("link", { name: "Enter event" })).toHaveAttribute(
+      "href",
+      `${NEW}?from=calendar&view=week&date=2026-12-03`,
+    );
+  });
+
+  it("[FAM-UI-02][AC-09] T-09 it sits just before the D/W/M control and is 44px tall", async () => {
+    await renderCalendar();
+
+    const link = screen.getByRole("link", { name: "Enter event" });
+    const dwm = screen.getByRole("radiogroup");
+    expect(link.nextElementSibling).toBe(dwm);
+    expect(link).toHaveClass("h-11");
+  });
+});
+
 describe("[FAM-UI-02][AC-03] Tasks panel", () => {
   it("[FAM-UI-02][AC-03] starts on the selected day (today): 'Monday 30 November' and its three tasks", async () => {
     await renderCalendar();
