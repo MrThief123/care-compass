@@ -34,7 +34,7 @@ Tests are written **before** production code (TESTING.md §2). Run them, confirm
 | T-16 | AC-11 | component | `EventForm` with the hide-Status option: no Status group, submits without a status; without it, existing behaviour (existing tests unchanged). | ☑ | PASS (`src/components/shared/forms/plain-events.test.tsx`) |
 | T-17 | AC-12 | axe | Calendar, lists and forms axe files gain plain-event and switch fixtures; zero violations. | ☑ | PASS (calendar, lists and forms axe files) |
 | T-18 | AC-12 | unit | No raw colour values in the changed kit files (token classes only). | ☑ | PASS (`src/components/shared/plain-events.tokens.test.ts`, 9 files) |
-| T-19 | AC-13 | regression | `npm run verify` and the full Playwright suite on a fresh build are green with no existing test changed. | ☐ | NOT RUN |
+| T-19 | AC-13 | regression | `npm run verify` and the full Playwright suite on a fresh build are green with no existing test changed. | n/a (regression) | PASS: lint, typecheck, prettier (excl. `.claude/`), 510 / 515 tests (500 / 500 under `src/`), Playwright 6 / 8 on a fresh build, no existing test changed. The 5 integration and 2 e2e failures need a local Supabase and fail the same on `origin/main`. |
 
 Test titles must start with `[UI-05][AC-xx]`.
 

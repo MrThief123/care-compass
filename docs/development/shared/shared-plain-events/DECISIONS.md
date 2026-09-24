@@ -69,3 +69,11 @@ Authorisation: root DECISIONS.md CHG-009 (human, 2026-09-24). The human approved
 - Every existing caller (`src/app/page.tsx`, `dev-preview-forms-kit`, `family-dev`'s `EventFormScreen`) passes no `hideStatus` and compiles and behaves as before.
 - Known, pre-existing: `ChipGroup` builds its label id from the legend (`Status-legend`), so two Status groups on one page share an id. Both still read "Status"; only the forms preview page shows two. Not changed here.
 - Human confirmation required: no (within the approved ACs).
+
+### FD-09 — AC-13 with suites that need a local Supabase (verification note, Task 7)
+- Date: 2026-09-24
+- Finding: locally, 5 integration tests (F0-04 / F0-07) and 2 e2e tests (F0-07 AC-01 / AC-03 sign-in) fail because the local Supabase rejects the app's API key ("Invalid API key"; the e2e sign-in page shows "That email or password isn't right"). The service-role path works (the e2e test user is created).
+- Evidence that this is environmental, not UI-05: all 7 fail the same way on `origin/main` (e2e checked in a scratch worktree with a fresh build); this branch changes no auth, Supabase or `tests/` files; CI `db-test` (the integration tests) is green on head 2e74531. CI skips e2e.
+- Decision: AC-13 marked MET on that evidence. Every other test passes: 510 / 515 in `npm run test` (500 / 500 under `src/`), 6 / 8 Playwright. No existing test changed.
+- Also found (pre-existing, outside UI-05, not fixed): on the showcase `/`, the standalone `CurrentTimeLine` example has no positioned wrapper, so its `absolute` red line sits against the page and crosses the "Navigation Rail" label, at a height that follows the clock. Reported to the human.
+- Human confirmation required: no. The human may overrule the AC-13 judgement at PR review.

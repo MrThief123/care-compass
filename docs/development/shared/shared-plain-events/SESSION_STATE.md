@@ -2,13 +2,13 @@
 
 Last session date: 2026-09-24
 Current branch: `feature/shared-plain-events`
-Worked on: Task 6 (forms kit). Before that: FD-07 hydration fix, Task 5 (lists kit), Task 4 (calendar kit).
-What changed: new `src/components/shared/forms/switch.tsx` (`Switch`: label, checked, onChange; same markup as FAM-UI-03's `TaskSwitch`); `event-form.tsx` — `EventFormProps` is a union on `hideStatus`; with it the Status chips are absent and `onSubmit` gets `PlainEventFormValues` (no `status`); forms `index.ts` exports both. Preview `src/app/dev-preview-forms-kit/page.tsx` gains a plain-event form driven by the switch and a standalone switch (FD-02). FD-08.
-Tests run: failing tests first (commit fe52cc1), then eslint, `npx tsc --noEmit`, `npx vitest run src` (500 passed, 64 files); Playwright real-Chromium sweep of `/dev-preview-forms-kit` at 1920/1440/1280/1024/768: switch 44px tall, Space and Enter toggle it, Status chips hidden while Off and shown while On, no horizontal scroll, no console errors, no Next.js issue badge.
-Test results: green.
-Current blocker: none. CI: commit 7987918 failed `format:check` (two test files unformatted); fixed by 46b6b8e, head e801fb3 green on every job. Locally, 5 integration tests (F0-04 / F0-07) fail with Supabase "Invalid API key" — a local environment problem (keys in `.env.local` vs the local Supabase), not code; CI `db-test` passes.
-Important discoveries: `ChipGroup` ids come from the legend, so two Status groups on one page share an id (pre-existing; only the forms preview shows two; noted in FD-08, not changed). The Chrome extension is not connected; Playwright scripts in the session scratchpad import `node_modules/playwright/index.mjs` by absolute path. A `next dev` server runs on port 3000.
-Important decisions: FD-01, FD-02, FD-03 (answered), FD-04, FD-05, FD-06, FD-08 (implementation notes), FD-07 (approved bug fix); CHG-010 (root DECISIONS.md, confirmed by the human).
-Exact next action: on the human's go-ahead, Task 7 (full verification) — see PROGRESS.md "Next action".
-Files likely to be touched next: feature docs only, unless verification finds a problem.
-Warning for next session: do not edit `src/features/**` or `src/app/**` (except the two dev-preview kit pages, FD-02); do not commit `.claude/settings.json`; no Co-Authored-By lines; do not open the PR until the human says yes. CI on the failing-tests commits goes red by design (accepted by the human).
+Worked on: Task 7 (full verification, T-19 / AC-13). Before that: Tasks 1–6 and the FD-07 hydration fix.
+What changed: feature docs only (PROGRESS, SESSION_STATE, TEST_PLAN, ACCEPTANCE_CRITERIA, DECISIONS FD-09). No code.
+Tests run: `npm run verify` (lint 0 errors / 3 pre-existing warnings, typecheck clean, stops at `format:check` on the uncommitted `.claude/settings.json`); `prettier --check . '!.claude/**'` clean; `npm run test` 510 passed / 5 failed; `npx vitest run src` 500 / 500; `npm run test:e2e` on a fresh build 6 passed / 2 failed; the same 2 e2e fail on `origin/main` (scratch worktree, removed). Playwright real-Chromium sweep 1920/1440/1280/1024/768 of `/`, `/dev-preview-calendar-kit` (Day/Week/Month) and `/dev-preview-forms-kit`: clean.
+Test results: green apart from the 7 environment-only failures (local Supabase "Invalid API key"; FD-09). CI on head 2e74531 green on every job (e2e skipped in CI).
+Current blocker: none. Waiting for the human's yes to open the PR.
+Important discoveries: pre-existing showcase issue on `/` — the standalone `CurrentTimeLine` line crosses the "Navigation Rail" label (no positioned wrapper); outside UI-05, reported, not fixed. Turbopack refuses a symlinked `node_modules` in a scratch worktree; run `npm ci` there. A `next dev` server is running on :3000 again (restarted after the e2e run).
+Important decisions: FD-01 to FD-08 as before; FD-09 (AC-13 judged MET on the environment-failure evidence).
+Exact next action: on the human's yes, open the PR to `main`, titled "UI-05 Plain events in the shared kit and contracts", with the body per `docs/DEVELOPMENT_WORKFLOW.md` §8 and the dashboard-lane notes from PROGRESS.md.
+Files likely to be touched next: none (PR only).
+Warning for next session: do not commit `.claude/settings.json`; no Co-Authored-By lines or "Generated with Claude Code" footer; do not open the PR until the human says yes.

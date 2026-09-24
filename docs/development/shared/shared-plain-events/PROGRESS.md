@@ -1,6 +1,6 @@
 # Progress — UI-05 Plain events in the shared kit and contracts (CHG-009)
 
-Status: IN PROGRESS
+Status: READY FOR PR
 Owner: Dhruv Verma
 Lane: S — Shared kit
 Sprint: SPRINT · planned D8
@@ -26,9 +26,10 @@ Last updated: 2026-09-24
 4. UI-01 calendar kit — DONE
 5. UI-03 lists kit — DONE
 6. UI-02 forms kit — DONE
-7. Full verification — next
+7. Full verification — DONE
 
 ## Completed
+- Task 7: full verification (T-19). `npm run verify`: lint 0 errors (3 pre-existing warnings), typecheck clean, then stopped at `format:check` on the uncommitted `.claude/settings.json`; `prettier --check . '!.claude/**'` clean; `npm run test` 510 passed, 5 failed (the known F0-04 / F0-07 Supabase "Invalid API key" tests); `npx vitest run src` 500 passed (64 files). Stopped the dev server on :3000; `npm run test:e2e` (fresh `next build`) 6 passed, 2 failed: F0-07 AC-01 / AC-03 sign-in e2e ("That email or password isn't right"; the app's anon-key sign-in hits the same local key problem). The same 2 fail on `origin/main` in a scratch worktree with a fresh build, so they're environmental. Real-Chromium sweep 1920/1440/1280/1024/768 of `/`, `/dev-preview-calendar-kit` (Day, Week, Month) and `/dev-preview-forms-kit`: no horizontal scroll, no overlapping text (rects clipped to scroll containers), no console errors, no Next.js issue badge; every plain-event block and chip (Short walk, Garden walk, Music in the lounge, Picnic in the park) has the grey stripe, "Event" and no icon; the Garden walk hover card opens in Day and Week (month chips have no hover card, same as `main`); task switch 44px, Space and Enter toggle it, Status chips absent while Off and present while On. CI on head 2e74531: every job green (e2e skipped in CI).
 - Task 6: forms kit. New shared `Switch` (`role="switch"`, On/Off words, 44px, same markup as FAM-UI-03's `TaskSwitch`); `EventForm` `hideStatus` drops the Status chips and submits `PlainEventFormValues` (no `status`); `PlainEventFormValues` and `Switch` exported. Preview `src/app/dev-preview-forms-kit/` gains a plain-event form driven by the switch and a standalone switch (FD-02). FD-08.
 - Bug fix (FD-07, approved): `EventPopover` no longer causes a hydration mismatch on `/`; renders after hydration. Pre-existing on `main`.
 - Task 5: lists kit. `ActivityRow` takes `kind: "event"` (no status) and shows `EventPill` where `StatusPill` goes; task rows unchanged. Axe and token tests extended. FD-06.
@@ -38,19 +39,19 @@ Last updated: 2026-09-24
 - Task 1: DEVELOPMENT_PLAN.md UI-05 row and card (totals 80 features, 333 criteria); PRD.md REQ-35 "Implemented by" gains UI-05; this folder from the template.
 
 ## In progress
-- Nothing (waiting for the go-ahead for Task 7).
+- Nothing.
 
 ## Remaining
-- Task 7.
+- Open the PR once the human says yes.
 
 ## Acceptance criteria status
-- 12 / 13 MET (AC-01 to AC-12); AC-13 is checked in Task 7
+- 13 / 13 MET. AC-13: no suite regresses. The only local failures (5 integration, 2 e2e) need a working local Supabase and fail the same on `origin/main`; CI `db-test` runs the integration tests green.
 
 ## Tests
-- Written: 18 / 19 (T-15 / T-16: `src/components/shared/forms/plain-events.test.tsx`, forms axe in `forms-kit.axe.test.tsx`; T-14: `src/components/shared/lists/activity-row.plain-events.test.tsx`, axe in `lists-cards-kit.axe.test.tsx`; T-11 to T-13: `src/components/shared/calendar/plain-events.test.tsx`; axe: `calendar.axe.test.tsx`; tokens: `src/components/shared/plain-events.tokens.test.ts`. T-01 to T-10: `src/types/domain.test.ts`, `src/server/events/queries.plain-events.test.ts`, `src/mocks/fixtures.plain-events.test.ts`, 2 cases in `src/mocks/history.test.ts`)
-- Passing: all; unit suite under `src/` 500 passed (64 files); `family-dev` + this branch 990 passed
-- Failing: 5 integration tests (F0-04 / F0-07) that need a working local Supabase ("Invalid API key"); they fail identically without this change
-- Last run: 2026-09-24, `npm run typecheck`, `npx vitest run src`, eslint (0 errors; 2 pre-existing warnings in `src/app/page.tsx`)
+- Written: 19 / 19 (T-19 is the regression run) (T-15 / T-16: `src/components/shared/forms/plain-events.test.tsx`, forms axe in `forms-kit.axe.test.tsx`; T-14: `src/components/shared/lists/activity-row.plain-events.test.tsx`, axe in `lists-cards-kit.axe.test.tsx`; T-11 to T-13: `src/components/shared/calendar/plain-events.test.tsx`; axe: `calendar.axe.test.tsx`; tokens: `src/components/shared/plain-events.tokens.test.ts`. T-01 to T-10: `src/types/domain.test.ts`, `src/server/events/queries.plain-events.test.ts`, `src/mocks/fixtures.plain-events.test.ts`, 2 cases in `src/mocks/history.test.ts`)
+- Passing: all UI-05 tests; unit suite under `src/` 500 passed (64 files); `npm run test` 510 / 515; Playwright 6 / 8; `family-dev` + this branch 990 passed
+- Failing (environment only): 5 integration tests (F0-04 / F0-07, "Invalid API key") and 2 e2e tests (F0-07 AC-01 / AC-03 sign-in) that need a working local Supabase; all 7 fail identically on `origin/main`
+- Last run: 2026-09-24 (Task 7), `npm run verify` (steps after `format:check` run directly), `npm run test:e2e` on a fresh build, Playwright width sweep
 - Tests-first evidence (Task 6): commit fe52cc1. Both new test files failed to load (`./switch` did not exist) and the `switch.tsx` token test failed (no file); the `event-form.tsx` token test passed already (a guard).
 - Tests-first evidence (Task 5): commit a5164ed. The 3 plain-event `ActivityRow` tests failed (no "Event" text; the row rendered a Planned pill); the 3 task-row guards, the 2 new axe tests and the `activity-row.tsx` token test passed already (guards).
 - Tests-first evidence (Task 4): commit 4b27a71. The plain-events component file failed to load (`EVENT_CUE` undefined), 3 of 4 plain-event axe tests and the `event-pill.tsx` token test failed; the popover axe test passed already (a guard). Four new accessible-name assertions were then loosened in the same task, before any existing test was touched: jsdom joins inline text without spaces ("Event:Short walk"), so `^Event: ` became `^Event:` — a bug in the new test, not a behaviour change.
@@ -71,6 +72,8 @@ Last updated: 2026-09-24
 - Stale `.next/types` from a `family-dev` build broke `tsc` (missing pages); cleared the generated folder.
 - `npm run verify` stops at `format:check` on the uncommitted `.claude/settings.json` (never committed); ran its later steps directly.
 - 5 integration tests fail on a local Supabase "Invalid API key"; unrelated, same without this change.
+- 2 e2e sign-in tests (F0-07 AC-01 / AC-03) fail locally for the same reason; checked on `origin/main` (scratch worktree, fresh build): same 2 fail.
+- Pre-existing, outside UI-05 (not fixed; reported to the human): on the showcase `/`, the standalone `CurrentTimeLine` example has no positioned wrapper, so its red line sits against the page and crosses the "Navigation Rail" label (its height follows the clock). Neither `src/app/page.tsx` nor `current-time-line.tsx` is changed on this branch.
 
 ## Assumptions
 - `docs/JIRA_TICKETS.md`, `docs/JIRA_BACKLOG.csv` and root `SESSION_STATE.md` are not updated (as with UI-04).
@@ -84,7 +87,7 @@ Last updated: 2026-09-24
 - Calendar screens that show plain events: pass `AnyOccurrence[]` (read with `type: "all"`) to `DayTimeline` / `WeekGrid` / `MonthGrid`; callbacks then receive `AnyOccurrence` (FD-05).
 
 ## Next action
-- Task 7 (on go-ahead): `npm run verify` (steps after `format:check` run directly if `.claude/settings.json` still blocks it), stop the dev server on :3000, full Playwright suite on a fresh build, real-browser width sweep 1920–768 of `/`, `/dev-preview-calendar-kit` and `/dev-preview-forms-kit`; then PROGRESS / SESSION_STATE / DECISIONS, and report ready for PR (do not open it).
+- Wait for the human's yes, then open the PR to `main`: title "UI-05 Plain events in the shared kit and contracts", body per `docs/DEVELOPMENT_WORKFLOW.md` §8 with the dashboard-lane notes above.
 
 ## Ready for PR
-- No
+- Yes (PR not opened; waiting for approval)

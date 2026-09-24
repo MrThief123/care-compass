@@ -16,7 +16,7 @@ Each criterion is observable and maps to at least one test in TEST_PLAN.md. Crit
 | AC-10 | US-02 | happy | Given the shared switch, when rendered, then it has `role="switch"`, `aria-checked` matching its value, an accessible name from its visible label, a target at least 44px tall, and the words "On" or "Off"; clicking it, or pressing Space or Enter while focused, calls `onChange` with the opposite value; it matches FAM-UI-03's `TaskSwitch` behaviour so that one can be swapped for it. | MET |
 | AC-11 | US-02 | happy | Given `EventForm`, when the new hide-Status option is set, then the Status chips are not rendered (absent, not disabled) and the form submits without a status; when it is not set, the form renders and validates exactly as before. | MET |
 | AC-12 | US-02 | security | Given the calendar, lists and forms kits with plain events and the switch rendered, when axe runs, then there are no violations; status is never conveyed by colour alone (event type may be, on compact surfaces only, per CHG-010); the new styles use design tokens only (no raw colour values). | MET |
-| AC-13 | US-02 | edge | Given the existing kit APIs, when this feature is merged, then every existing kit prop and export keeps its type and behaviour, and the full existing unit, component, integration and e2e suites stay green. | NOT MET |
+| AC-13 | US-02 | edge | Given the existing kit APIs, when this feature is merged, then every existing kit prop and export keeps its type and behaviour, and the full existing unit, component, integration and e2e suites stay green. | MET |
 
 Types: happy · validation · error · permission · empty · edge · security.
 Status values: NOT MET · MET (test passing) · BLOCKED (cite OQ/PD).
