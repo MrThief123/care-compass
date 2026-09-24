@@ -1,18 +1,18 @@
 # Progress — F0-08 Append-only audit log capture
 
-Status: NOT STARTED
-Owner: unclaimed
+Status: IN PROGRESS
+Owner: Prajeet
 Lane: B — Backend
 Sprint: SPRINT · planned D4
-Branch: `feature/shared-audit-log-capture` (not yet created)
+Branch: `feature/shared-audit-log-capture`
 PR target: `main (per OQ-01 — shared work)`
-Last updated: 2026-09-17 (planning pack generated)
+Last updated: 2026-09-25
 
 ## Blockers
-- OQ-01 — Branch parent and naming for shared (foundation and cross-cutting) work
+- None — OQ-01 ANSWERED (see root DECISIONS.md)
 
 ## Dependencies status
-- F0-06 — NOT STARTED
+- F0-06 — MERGED TO DEV (merged to `main`)
 
 ## Completed
 - Feature documentation drafted (Claude Chat planning pack)
