@@ -1,6 +1,6 @@
 # Progress — FAM-UI-02 Family Calendar screen (UI)
 
-Status: READY FOR PR (waiting for the human's approval to open the PR to `family-dev`)
+Status: PR OPEN (#77 to `family-dev`)
 Owner: Dhruv Verma
 Lane: F — Family
 Sprint: SPRINT · planned D4–D5
@@ -30,7 +30,7 @@ Last updated: 2026-09-24
 - None
 
 ## Remaining
-- Open the PR to `family-dev` after the human approves, with the side-by-side screenshot.
+- Review and merge of PR #77 (human). Side-by-side screenshot to be attached to the PR by hand.
 
 ## Acceptance criteria status
 - 7 / 7 MET (AC-06, AC-07 added by CHG-007)
