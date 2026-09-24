@@ -24,12 +24,13 @@ export function DocumentationCard({ documents, canEdit }: DocumentationCardProps
   const headingId = useId();
   const [uploadNotice, setUploadNotice] = useState(false);
 
+  // p-3.75 inside the kit's 1px border keeps the design's 16px inset (see InfoSectionCard).
   return (
-    <CardShell role="region" aria-labelledby={headingId} className="flex flex-col">
+    <CardShell role="region" aria-labelledby={headingId} className="flex flex-col p-3.75">
       <h2 id={headingId} className="text-title-card text-text-primary [overflow-wrap:anywhere]">
         Documentation
       </h2>
-      <ul className="mt-3 flex flex-wrap gap-3">
+      <ul className="mt-2.5 flex flex-wrap gap-3">
         {documents.map((document) => (
           <li key={document.id} className="w-26 min-w-0">
             <DocumentTile document={document} showDetails={false} />
@@ -43,7 +44,7 @@ export function DocumentationCard({ documents, canEdit }: DocumentationCardProps
       </ul>
       <p
         role="status"
-        className={cn("text-body-small text-text-secondary", uploadNotice && "mt-3")}
+        className={cn("text-body-small text-text-secondary", uploadNotice && "mt-2.5")}
       >
         {uploadNotice ? "Adding files is not available yet." : ""}
       </p>

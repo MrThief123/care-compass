@@ -31,7 +31,7 @@ export function FamilyInfoView({ data, canEdit = true }: FamilyInfoViewProps) {
           <h1 className="text-title-page text-text-primary [overflow-wrap:anywhere]">
             {client.firstName}
           </h1>
-          <p className="text-body-small text-text-secondary [overflow-wrap:anywhere]">
+          <p className="mt-0.5 text-body-secondary text-text-secondary [overflow-wrap:anywhere]">
             {client.meta}
           </p>
         </div>

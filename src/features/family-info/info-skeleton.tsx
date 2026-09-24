@@ -7,7 +7,7 @@ function Bar({ className }: { className: string }) {
 
 function TextCardSkeleton() {
   return (
-    <CardShell className="flex flex-col gap-2.5">
+    <CardShell className="flex flex-col gap-2.5 p-3.75">
       <div className="flex min-h-11 items-center">
         <Bar className="h-4 w-28" />
       </div>
@@ -43,7 +43,7 @@ export function InfoSkeleton() {
       <TextCardSkeleton />
       <TextCardSkeleton />
       <TextCardSkeleton />
-      <CardShell className="flex flex-col gap-3">
+      <CardShell className="flex flex-col gap-2.5 p-3.75">
         <Bar className="h-4 w-32" />
         <div className="flex flex-wrap gap-3">
           {Array.from({ length: 3 }, (_, index) => (

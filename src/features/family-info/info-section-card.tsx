@@ -49,8 +49,9 @@ export function InfoSectionCard({ title, content, canEdit }: InfoSectionCardProp
     setEditing(false);
   }
 
+  // p-3.75 inside the kit's 1px border keeps the design's 16px inset and its 106px card.
   return (
-    <CardShell role="region" aria-labelledby={headingId} className="flex flex-col gap-2.5">
+    <CardShell role="region" aria-labelledby={headingId} className="flex flex-col gap-2.5 p-3.75">
       <div className="flex min-h-11 items-center justify-between gap-3">
         <h2
           id={headingId}
