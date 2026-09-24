@@ -1,6 +1,6 @@
 # Progress — FAM-UI-02 Family Calendar screen (UI)
 
-Status: PR OPEN (#77 to `family-dev`)
+Status: MERGED TO DEV
 Owner: Dhruv Verma
 Lane: F — Family
 Sprint: SPRINT · planned D4–D5
