@@ -380,6 +380,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Acceptance criteria summary:** 4 criteria — Date 'Monday 30 November 2026', Recurring 'Weekly', Status Planned and the description text are shown; a Date error is shown; document tiles 'Physio referral.pdf' and 'Exercise plan.pdf' and an 'Add file' tile are shown …
 - **Testing summary:** 3 component, 1 e2e
 - **Requirements:** REQ-02, REQ-N1, REQ-N2, REQ-N3
+- **CHG-009 (tasks and plain events, REQ-35):** both screens show the "This is a task — must be ticked off" switch (On for a new event, the event's value when editing), local state only.
 - **Docs:** `docs/development/family-dev/family-ui-event-form/` · **Status:** NOT STARTED
 
 ### FAM-UI-04 — Family Info screen (UI)
