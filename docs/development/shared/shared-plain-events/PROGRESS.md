@@ -13,7 +13,7 @@ Last updated: 2026-09-24
 
 **HUMAN REVIEW requested:**
 1. FD-01 — ANSWERED 2026-09-24 (Option A): with no `type`, the contracts return tasks only, so existing callers and tests are unchanged. Constraint from the human: the log and any export must show tasks and plain events together, so those callers pass `type: "all"`.
-2. FD-02 — may the two shared `src/app/dev-preview-*` pages be edited to show plain events and the switch?
+2. FD-02 — ANSWERED 2026-09-24 (option a): the two shared preview pages `src/app/dev-preview-calendar-kit/` and `src/app/dev-preview-forms-kit/` may be edited to show plain-event and switch examples; nothing else under `src/app/**`.
 
 ## Dependencies status
 - UI-00, UI-01, UI-02, UI-03, UI-04 — MERGED TO DEV (all on `main`)
@@ -48,9 +48,10 @@ Last updated: 2026-09-24
 
 ## Files changed
 - `DEVELOPMENT_PLAN.md`, `PRD.md`, `docs/development/shared/shared-plain-events/*`
+- Planned (FD-02): `src/app/dev-preview-calendar-kit/**`, `src/app/dev-preview-forms-kit/**` (examples only)
 
 ## Decisions
-- FD-01 (answered, Option A), FD-02 (pending)
+- FD-01 (answered, Option A), FD-02 (answered, option a)
 
 ## Problems encountered
 - None.
