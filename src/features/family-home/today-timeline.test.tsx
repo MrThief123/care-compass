@@ -122,7 +122,7 @@ describe("[FAM-UI-01][AC-01] Today timeline shows everything at rest", () => {
 
     expect(screen.getByRole("link", { name: /Morning medication/ })).toHaveAttribute(
       "href",
-      `/family/client-margaret/tasks/${encodeURIComponent(MORNING.key)}`,
+      `/family/client-margaret/tasks/${encodeURIComponent(MORNING.key)}?from=home`,
     );
   });
 });

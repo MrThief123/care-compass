@@ -1,6 +1,13 @@
 # Session State — FAM-UI-07 Family Task log and Task detail screens (UI)
 
-Last session date: 2026-09-20 (fourth session: sync merged, PR #55 opened; #55 then merged to `family-dev`)
+Last session date: 2026-09-24 (fifth session: CHG-014 amendment, "Edit event" button and Back to the origin)
+
+## CHG-014 amendment (2026-09-24)
+Branch: `feature/family-ui-task-detail-nav` (from `family-dev` at 6e6dd82, pushed). Status: READY FOR PR, not opened.
+Done: AC-09 to AC-11 MET, T-20 to T-22 GREEN, FD-27 to FD-30 recorded, root DECISIONS.md CHG-014. All local checks green (PROGRESS.md). CI is off (Actions limit); do not trigger workflows.
+Exact next action: the human reviews and says yes, then open the PR to `family-dev` titled "FAM-UI-07 Task detail: Edit event button and return to origin (CHG-014)", with the HUMAN REVIEW items from FD-27 and FD-30 and the FD-29 follow-ups in the body. No AI attribution.
+
+## Earlier sessions
 Current branch: `feature/family-ui-task-log-detail` (parent `family-dev`; UI-04 `feature/shared-screen-contracts-fixtures` merged in, FD-14, d49b4e2; shared shell fix `fix/shared-app-shell-nav-header` merged in, FD-26, b27c2e6; `origin/family-dev` merged in after the sync #56, b74bf10). Worktree: `/Users/dhruv/Documents/Dev/care-compass/.claude/worktrees/agent-a1cf1306432fc6abb`.
 Status: **MERGED TO DEV (#55 merged to `family-dev`, 2026-09-20).** All Tasks A to F are done. UI-04 and the shell fix are on `main` and synced into `family-dev` (FD-14, FD-26).
 Worked on the fourth session: after #52, #53 and the sync #56 were merged by the human, merged `origin/family-dev` into this branch (b74bf10), re-ran the checks (below) and opened PR #55.

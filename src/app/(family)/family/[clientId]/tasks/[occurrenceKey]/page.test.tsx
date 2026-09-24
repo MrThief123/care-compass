@@ -2,7 +2,7 @@ import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import { taskDetailHref } from "@/features/family-task-log/task-routes";
-import { getTaskLog } from "@/server/events/queries";
+import { getTaskLog, getToday } from "@/server/events/queries";
 
 import TaskDetailPage from "./page";
 
@@ -77,6 +77,70 @@ describe("[FAM-UI-07] /family/[clientId]/tasks/[occurrenceKey] page (real mock c
 
     const href = screen.getByRole("link", { name: "Back to Task log" }).getAttribute("href")!;
     expect(href).toBe(`/family/client-margaret/tasks?q=${"a".repeat(200)}`);
+  });
+
+  it("[FAM-UI-07][AC-10] opened from the Calendar, Back reads 'Back to Calendar' and returns to that view and day", async () => {
+    await renderDetail(MORNING_MEDICATION_KEY, {
+      from: "calendar",
+      view: "month",
+      date: "2026-11-29",
+      month: "2026-12",
+    });
+
+    expect(screen.getByRole("link", { name: "Back to Calendar" })).toHaveAttribute(
+      "href",
+      "/family/client-margaret/calendar?view=month&date=2026-11-29&month=2026-12",
+    );
+    expect(screen.queryByRole("link", { name: "Back to Task log" })).not.toBeInTheDocument();
+  });
+
+  it("[FAM-UI-07][AC-10] opened from Home, Back reads 'Back to Home'", async () => {
+    await renderDetail(MORNING_MEDICATION_KEY, { from: "home" });
+
+    expect(screen.getByRole("link", { name: "Back to Home" })).toHaveAttribute(
+      "href",
+      "/family/client-margaret/home",
+    );
+  });
+
+  it("[FAM-UI-07][AC-10] opened from the Task log (from=tasks), Back keeps its q, status and page", async () => {
+    await renderDetail(MORNING_MEDICATION_KEY, { from: "tasks", q: "meds", page: "2" });
+
+    expect(screen.getByRole("link", { name: "Back to Task log" })).toHaveAttribute(
+      "href",
+      "/family/client-margaret/tasks?q=meds&page=2",
+    );
+  });
+
+  it("[FAM-UI-07][AC-11] a hostile from and junk calendar params never reach the Back link", async () => {
+    await renderDetail(MORNING_MEDICATION_KEY, {
+      from: "https://evil.example/family/client-margaret/calendar",
+      view: "//evil",
+      date: "javascript:alert(1)",
+      status: "overdue",
+    });
+
+    const href = screen.getByRole("link", { name: "Back to Task log" }).getAttribute("href")!;
+    expect(href).toBe("/family/client-margaret/tasks?status=overdue");
+  });
+
+  it("[FAM-UI-07][AC-11] from=calendar with an impossible date falls back to the calendar's week of today", async () => {
+    const today = await getToday();
+    await renderDetail(MORNING_MEDICATION_KEY, { from: "calendar", date: "2026-02-30" });
+
+    expect(screen.getByRole("link", { name: "Back to Calendar" })).toHaveAttribute(
+      "href",
+      `/family/client-margaret/calendar?view=week&date=${today}`,
+    );
+  });
+
+  it("[FAM-UI-07][AC-09] shows the Edit event button linking to the event's edit route", async () => {
+    await renderDetail(MORNING_MEDICATION_KEY, { from: "calendar" });
+
+    expect(screen.getByRole("link", { name: "Edit event" })).toHaveAttribute(
+      "href",
+      "/family/client-margaret/events/event-margaret-morning-meds/edit",
+    );
   });
 
   it("[FAM-UI-07][PRD] the Documents card shows 'Medication chart.pdf' with its type and size for the Morning medication", async () => {

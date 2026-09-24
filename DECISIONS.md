@@ -605,6 +605,15 @@ Docs updated: DECISIONS.md
 - Human confirmation: Dhruv Verma, 2026-09-24 (in-session).
 - Docs updated: DECISIONS.md (this entry); FAM-UI-02 ACCEPTANCE_CRITERIA.md, TEST_PLAN.md, DECISIONS.md, PROGRESS.md, SESSION_STATE.md.
 
+### CHG-014 — Task detail: an "Edit event" button, and Back returns to where the task was opened from
+- Date / requested by: 2026-09-24 / Dhruv Verma (human, project lead)
+- Type: scope change on a merged feature (FAM-UI-07)
+- Description: Task detail stays read-only. (1) A clear outlined "Edit event" button sits at the right of the title row (it wraps below a long title on narrow widths, never overlapping) and links to the existing Edit event route; the small "Edit" link in the Description card is removed, so there is one edit control. (2) Back returns to the screen the task was opened from, on the exact view: every link to Task detail carries an origin marker, `from=calendar` plus the calendar's `view / date / month`, `from=home`, or `from=tasks` plus the Task log's `q / status / page`. Task detail shows "Back to Calendar", "Back to Home" or "Back to Task log". A missing or invalid origin keeps the old behaviour ("Back to Task log" with any valid Task log params). The Back href is rebuilt only from a whitelisted origin name and params re-validated by that screen's own parser; no URL or path is ever read from the query, and `router.back()` / `history.back()` are not used (they break on reload, shared links and arrivals from outside the app).
+- Source / justification: human instruction in-session, 2026-09-24: "keep it as the read only mode but then have a edit button which takes you to the edit page", "add a clearer edit event button", and "going back should take [you] not to task log but wherever you clicked the link from originally".
+- Impact: FAM-UI-07 (new AC-09, AC-10, AC-11; TEST_PLAN T-20 to T-22; feature DECISIONS FD-27 to FD-30; existing tests' expected hrefs and the Description Edit link changed, FD-30). FAM-UI-02 (Calendar blocks and Log rows) and FAM-UI-01 (Home's Today, Overdue and Recent activity rows) now add the origin to their Task detail links. The design differs from `family-08-task-detail.png`: the button placement is new and the back label varies. FAM-UI-03 (Edit event) is unchanged; its Cancel uses `router.back()` and the Task detail link does not pass `?occurrence=` (follow-ups, FAM-UI-07 FD-29). No shared folders changed.
+- Human confirmation: Dhruv Verma, 2026-09-24 (in-session).
+- Docs updated: DECISIONS.md (this entry); FAM-UI-07 ACCEPTANCE_CRITERIA.md, TEST_PLAN.md, DECISIONS.md, PROGRESS.md, SESSION_STATE.md.
+
 Template for future entries:
 ```
 ### CHG-xxx — <title>

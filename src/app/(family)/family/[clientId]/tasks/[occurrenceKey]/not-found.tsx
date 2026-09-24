@@ -4,7 +4,7 @@ import { useParams } from "next/navigation";
 
 import { EmptyState } from "@/components/shared/states";
 import { CardShell } from "@/components/ui/card-shell";
-import { BackToTaskLogLink } from "@/features/family-task-detail/back-to-task-log-link";
+import { BackLink } from "@/features/family-task-detail/back-link";
 
 /**
  * Shown when `notFound()` is thrown for an unknown or foreign occurrence key
@@ -16,7 +16,7 @@ export default function TaskNotFound() {
 
   return (
     <div className="flex flex-col gap-4 px-6 pb-6 pt-2">
-      <BackToTaskLogLink clientId={clientId} />
+      <BackLink clientId={clientId} />
       <CardShell>
         <EmptyState
           icon="search"

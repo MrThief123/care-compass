@@ -34,19 +34,23 @@ export function taskLogHref(clientId: string, view?: Partial<TaskLogParams>): st
   return withView(`/family/${encodeURIComponent(clientId)}/tasks`, view);
 }
 
-/** One task's detail; `view` carries the Task log's view so 'Back to Task log' returns to it. */
+/**
+ * One task's detail. Without `view` it is the bare route. With `view` the task was opened from
+ * the Task log: the link carries `from=tasks` (CHG-014, `task-detail-origin.ts`) and the Task
+ * log's view, so 'Back to Task log' returns to it.
+ */
 export function taskDetailHref(
   clientId: string,
   occurrenceKey: string,
   view?: Partial<TaskLogParams>,
 ): string {
-  return withView(
-    `/family/${encodeURIComponent(clientId)}/tasks/${encodeURIComponent(occurrenceKey)}`,
-    view,
-  );
+  const path = `/family/${encodeURIComponent(clientId)}/tasks/${encodeURIComponent(occurrenceKey)}`;
+  if (!view) return path;
+  const query = viewQuery(view);
+  return `${path}?from=tasks${query ? `&${query}` : ""}`;
 }
 
-/** The Edit link on Task detail goes to the edit-event route for the occurrence's event. */
+/** Task detail's 'Edit event' button goes to the edit-event route for the occurrence's event. */
 export function editEventHref(clientId: string, eventId: string): string {
   return `/family/${encodeURIComponent(clientId)}/events/${encodeURIComponent(eventId)}/edit`;
 }
