@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 
 import { formatDuration } from "@/lib/format/duration";
@@ -31,6 +31,21 @@ const CARD_WIDTH = 288;
 const GAP = 8;
 const MARGIN = 8;
 
+const subscribeNever = () => () => {};
+
+/**
+ * False on the server and during hydration, true once the client has taken
+ * over: the card is portalled to `document.body`, which the server cannot
+ * render, so it appears only after hydration and the markup always matches.
+ */
+function useHydrated(): boolean {
+  return useSyncExternalStore(
+    subscribeNever,
+    () => true,
+    () => false,
+  );
+}
+
 /**
  * The detail a short event block had no room to show, raised on hover.
  *
@@ -54,6 +69,7 @@ export function EventPopover({
 }: EventPopoverProps) {
   const cardRef = useRef<HTMLDivElement>(null);
   const [position, setPosition] = useState<{ top: number; left: number } | null>(null);
+  const hydrated = useHydrated();
 
   useLayoutEffect(() => {
     if (!anchor) return;
@@ -66,7 +82,7 @@ export function EventPopover({
         : Math.min(rect.right + GAP, window.innerWidth - MARGIN - CARD_WIDTH),
       top: Math.max(MARGIN, Math.min(rect.top, window.innerHeight - MARGIN - height)),
     });
-  }, [anchor]);
+  }, [anchor, hydrated]);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -90,7 +106,7 @@ export function EventPopover({
     };
   }, [anchor, onClose]);
 
-  if (typeof document === "undefined") return null;
+  if (!hydrated) return null;
 
   return createPortal(
     <div

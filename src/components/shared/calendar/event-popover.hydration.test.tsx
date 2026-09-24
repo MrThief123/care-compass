@@ -1,6 +1,6 @@
 import { act } from "@testing-library/react";
-import { renderToString } from "react-dom/server";
 import { hydrateRoot } from "react-dom/client";
+import { renderToString } from "react-dom/server";
 import { afterEach, describe, expect, it } from "vitest";
 
 import type { Occurrence } from "@/types/domain";
