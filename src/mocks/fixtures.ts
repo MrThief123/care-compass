@@ -24,6 +24,7 @@ import type {
   CarerNotification,
   CareEvent,
   Client,
+  ClientInfoSection,
   DocumentRef,
   EventDocument,
   FundEntry,
@@ -673,16 +674,67 @@ export const FUND_ENTRIES: FundEntry[] = [
 ];
 
 // ---------------------------------------------------------------------------
+// Client information (Family · Info)
+// ---------------------------------------------------------------------------
+
+/**
+ * The three text sections of `family-04-info.png`, word for word (FAM-UI-04,
+ * CHG-018). Read through `getClientInfoSections`, which returns them in this
+ * order: Description, Habits, Medical history. Only Margaret has any.
+ */
+export const CLIENT_INFO_SECTIONS: ClientInfoSection[] = [
+  {
+    id: "info-margaret-description",
+    clientId: MARGARET_CLIENT_ID,
+    kind: "description",
+    title: "Description",
+    content:
+      "Margaret lives independently with regular support from Banksia Home Care. She uses a walking frame for mobility outside the home and prefers morning appointments.",
+    updatedAt: "2026-09-01T10:00:00+10:00",
+  },
+  {
+    id: "info-margaret-habits",
+    clientId: MARGARET_CLIENT_ID,
+    kind: "habits",
+    title: "Habits",
+    content:
+      "Enjoys gardening and radio in the afternoon. Prefers tea over coffee. Sleeps 9pm–7am — morning routine should not be rushed.",
+    updatedAt: "2026-09-01T10:00:00+10:00",
+  },
+  {
+    id: "info-margaret-medical-history",
+    clientId: MARGARET_CLIENT_ID,
+    kind: "medicalHistory",
+    title: "Medical history",
+    content:
+      "Type 2 diabetes (diagnosed 2019), mild osteoarthritis. Known allergy: penicillin. See attached care plan for full medication schedule.",
+    updatedAt: "2026-09-01T10:00:00+10:00",
+  },
+];
+
+// ---------------------------------------------------------------------------
 // Documents
 // ---------------------------------------------------------------------------
 
+/**
+ * Client-level documents, read through `getClientDocuments` (FAM-UI-04, CHG-018):
+ * the two tiles on `family-04-info.png`. Neither is attached to an event.
+ */
 export const DOCUMENTS: DocumentRef[] = [
   {
     id: "doc-margaret-care-plan",
     clientId: MARGARET_CLIENT_ID,
-    name: "Care plan 2026.pdf",
+    name: "Care plan.pdf",
     url: "https://example.invalid/documents/doc-margaret-care-plan",
     uploadedAt: "2026-10-01T10:00:00+11:00",
+    uploadedBy: "Helen Doyle",
+  },
+  {
+    id: "doc-margaret-medication-schedule",
+    clientId: MARGARET_CLIENT_ID,
+    name: "Medication schedule.pdf",
+    url: "https://example.invalid/documents/doc-margaret-medication-schedule",
+    uploadedAt: "2026-10-02T09:30:00+11:00",
     uploadedBy: "Helen Doyle",
   },
 ];

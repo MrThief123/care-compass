@@ -4,7 +4,8 @@
  * by `src/app` or `src/features`.
  */
 import { ageFromDob } from "@/lib/format/age";
-import { CLIENTS, ORGANISATION, REFERENCE_DATE } from "@/mocks/fixtures";
+import { CLIENT_INFO_SECTIONS, CLIENTS, ORGANISATION, REFERENCE_DATE } from "@/mocks/fixtures";
+import type { ClientInfoSection, ClientInfoSectionKind } from "@/types/domain";
 
 export interface ClientHeaderSummary {
   id: string;
@@ -31,4 +32,25 @@ export async function getClientHeaderSummary(clientId: string): Promise<ClientHe
     suburb: client.suburb,
     organisationName: client.organisationId === ORGANISATION.id ? ORGANISATION.name : undefined,
   };
+}
+
+/** The order the sections are drawn in on Family · Info. */
+const SECTION_ORDER: readonly ClientInfoSectionKind[] = ["description", "habits", "medicalHistory"];
+
+/**
+ * One client's information sections in `SECTION_ORDER`. Returns copies, so a
+ * caller that edits what it was given cannot change the fixtures.
+ */
+export function selectClientInfoSections(
+  sections: readonly ClientInfoSection[],
+  clientId: string,
+): ClientInfoSection[] {
+  return sections
+    .filter((section) => section.clientId === clientId)
+    .sort((a, b) => SECTION_ORDER.indexOf(a.kind) - SECTION_ORDER.indexOf(b.kind))
+    .map((section) => ({ ...section }));
+}
+
+export async function getClientInfoSections(clientId: string): Promise<ClientInfoSection[]> {
+  return selectClientInfoSections(CLIENT_INFO_SECTIONS, clientId);
 }
