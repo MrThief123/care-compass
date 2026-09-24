@@ -262,6 +262,50 @@ Status verified against root `DECISIONS.md` on 2026-09-19 (`grep -n "OQ-xx" DECI
 - Human confirmation required: no (requested by the human, 2026-09-20).
 - Test changes caused: none.
 
+### FD-27 — CHG-014: the "Edit event" button sits at the right of the title row; the Description "Edit" link is removed. **HUMAN REVIEW: deviates from the design**
+- Date: 2026-09-24
+- Context: CHG-014 (root DECISIONS.md), the human: "keep it as the read only mode but then have a edit button which takes you to the edit page" and "add a clearer edit event button". `family-08-task-detail.png` draws only a small "Edit" text link in the Description card.
+- Decision: Task detail's title row is `flex flex-wrap justify-between`: the title and its date line on the left (`min-w-0 flex-[1_1_16rem]`, wrapping anywhere), an "Edit event" link on the right. It is a `next/link` styled as the kit's outlined `secondary` Button, the same look as the Calendar's "Today" (`border-border-brand`, `text-secondary-foreground` = brand text on a transparent fill, `h-11 min-w-11`, focus ring), because the kit `Button` renders a `<button>` and cannot wrap a link (same reason as FAM-UI-01 FD-05). When the row is narrower than 16rem plus the button, the button wraps below; it never overlaps (measured, PROGRESS.md). The Description card's "Edit" link is removed so the page has one edit control. The button goes to `editEventHref(clientId, eventId)`, unchanged.
+- Reason: a clear, single edit control, where the page's primary action usually sits; tokens only, 44×44px, never white text on #0C9BA9.
+- Alternatives considered: keep both links (two controls for one action); a filled primary button (the page is read-only, and the kit's primary fill is the brand teal the white-text rule is about); a pencil icon (the kit icon set has none, and a new icon is a shared change).
+- Consequences: design differs from `family-08-task-detail.png` (button placement). No shared folder changed.
+- Human confirmation required: yes (design review; the change itself was requested, CHG-014).
+- Test changes caused: see FD-30.
+
+### FD-28 — CHG-014: the origin travels as `from=<tasks|calendar|home>` plus the origin screen's own params; Back is rebuilt only from whitelisted names
+- Date: 2026-09-24
+- Context: CHG-014, the human: "going back should take [you] not to task log but wherever you clicked the link from originally". Task detail is opened from Home (Today, Overdue, Recent activity), the Task log (rows) and the Calendar (week and day blocks, Log rows).
+- Decision: `src/features/family-task-detail/task-detail-origin.ts`. Param name `from`, values `tasks`, `calendar`, `home` (Zod enum; a repeated `from` uses its first value, like the Task log's params). Links: `from=calendar&view=&date=` (`&month=` for the month view, via the new `calendarQuery` in `calendar-params.ts`, which `calendarHref` now uses too); `from=home`; `from=tasks&q=&status=&page=` (`taskDetailHref(clientId, key, view)` adds `from=tasks` whenever a Task log view is passed; without a view it is still the bare route). Parsing: `from=calendar` re-validates with `parseCalendarParams` (junk falls back to week / today, the calendar's own defaults; today is read with `getToday()` only in this case, `resolveTaskDetailOrigin`); `from=home` ignores every other param; anything else, including no `from`, is the Task log with `parseTaskLogParams`. `backLinkFor` returns the label ("Back to Calendar", "Back to Home", "Back to Task log") and an href built only by `calendarHref`, `/family/<encoded id>/home` or `taskLogHref`. The Calendar passes its current view with the selected day (so a day picked in the week is kept). `BackToTaskLogLink` became `BackLink` (`back-link.tsx`), which the not-found page still uses with no origin.
+- Reason: never echo a URL or path from the query and never redirect to a user-supplied string; one parser per screen, reused. `router.back()` / `history.back()` rejected: they break on reload, shared links and arrivals from outside the app.
+- Alternatives considered: a `back=<path>` param (an open-redirect risk even when checked); `from=tasks` left implicit (fewer test changes, but the agreed design names every origin explicitly; absence still falls back to the Task log).
+- Consequences: calendar and Task log param names do not collide (`view/date/month` vs `q/status/page`). Home's `homeRoutes.taskDetail` now encodes the client id (it did not before; the ids are unchanged by it).
+- Human confirmation required: no (design agreed in-session, CHG-014).
+- Test changes caused: see FD-30.
+
+### FD-29 — CHG-014 follow-ups on the Edit event page (FAM-UI-03), not implemented
+- Date: 2026-09-24
+- Context: the brief kept FAM-UI-03 unchanged.
+- Findings: (1) Edit event's Cancel uses `router.back()` (`event-form-screen.tsx`), which returns to Task detail, with its origin, in normal use but not after a reload or from a shared link. (2) The Edit event page accepts `?occurrence=<key>` to pick the occurrence being edited, but Task detail's button links without it (`editEventHref` takes the event id only), so the form opens on today's occurrence or the event's anchor date rather than the one being viewed.
+- Decision: recorded as follow-ups for FAM-UI-03 / FAM-07; not implemented here.
+- Human confirmation required: yes (whether to schedule them).
+- Test changes caused: none.
+
+### FD-30 — Existing tests whose expectation changed (CHG-014). **HUMAN REVIEW: test expectation changed**
+- Date: 2026-09-24
+- Context: CHG-014 is a recorded requirement change (CLAUDE.md §5). No test was skipped, `.only`-ed or deleted.
+- Changes (test, before, after, reason):
+  1. `task-detail-view.test.tsx` `[PRD] shows the Description card with an Edit link to the event's edit route`: before, a link named "Edit" inside the Description card; after, retitled `…which no longer holds an Edit link…`: the card has no link, and "Edit event" (outside the card) has the same href. Reason: FD-27.
+  2. `task-detail-view.test.tsx` `[PRD] keeps the Back link and the Edit link when the text is long`: before, `link "Edit"`; after, `link "Edit event"`. Reason: FD-27.
+  3. `task-detail-view.test.tsx` `renderDetail` helper: `backParams` is now passed as `origin={ from: "tasks", view: backParams }` (the view's prop became `origin`). No assertion changed.
+  4. `task-routes.test.ts` `[AC-08] a Task detail carries the same three params…`: before, `…?q=physio&status=done&page=3` and `{ page: 1 }` equal to the bare route; after, `…?from=tasks&q=physio&status=done&page=3` and `{ page: 1 }` is the bare route plus `?from=tasks`. Reason: FD-28.
+  5. `task-log-view.test.tsx` `[AC-01] keeps the order the contract returned…`: expected hrefs built with `taskDetailHref(ID, key, PLAIN)` (the view the rows are rendered with) instead of without a view. Reason: FD-28.
+  6. `task-log-view.test.tsx` `[AC-08] each task links to its detail carrying…`: `toContain("?q=phys&status=done&page=3")` became `toContain("?from=tasks&q=phys&status=done&page=3")`. Reason: FD-28.
+  7. `task-log-view.test.tsx` `[AC-08] a plain first page links to the plain detail route, with no query string`: retitled `…with only its origin, from=tasks`; expects the bare route plus `?from=tasks`. Reason: FD-28.
+  8. `tasks/page.test.tsx` `[AC-08] every task link carries the current q, status and page`: retitled `…carries from=tasks and…`; `endsWith("?q=medication&status=done&page=2")` became `endsWith("?from=tasks&q=medication&status=done&page=2")`. Reason: FD-28.
+  9. `family-calendar.test.tsx` (FAM-UI-02) `clicking a block opens that task's detail` and `shows 'Log', 'View all'…`: expected Task detail hrefs gained `?from=calendar&view=week&date=2026-11-30`. Reason: FD-28.
+  10. FAM-UI-01 Home tests, five assertions (`activity-cards.test.tsx` ×2, `family-home.test.tsx` ×2, `today-timeline.test.tsx` ×1): expected Task detail hrefs gained `?from=home`. Reason: FD-28.
+- Human confirmation required: yes (flag in the PR).
+
 <!-- Template
 ### FD-01 — <title>
 - Date:
