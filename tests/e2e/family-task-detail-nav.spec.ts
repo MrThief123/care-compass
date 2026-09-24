@@ -43,7 +43,8 @@ test("[FAM-UI-07][AC-10] opened from the Calendar's month Log, Back returns to t
   await page.goto(`${CLIENT}/calendar?view=month&date=2026-11-29&month=2026-12`);
   await expect(page.getByRole("heading", { level: 1, name: "December 2026" })).toBeVisible();
 
-  await page.getByRole("region", { name: "Log" }).getByRole("link").first().click();
+  // The first task row, not 'View all'.
+  await page.getByRole("region", { name: "Log" }).locator('a[href*="/tasks/"]').first().click();
   await expect(page).toHaveURL(/from=calendar&view=month&date=2026-11-29&month=2026-12$/);
 
   await page.getByRole("link", { name: "Back to Calendar" }).click();
@@ -54,7 +55,11 @@ test("[FAM-UI-07][AC-10] opened from the Calendar's month Log, Back returns to t
 test("[FAM-UI-07][AC-10] opened from Home, Back returns to Home", async ({ page }) => {
   await page.goto(`${CLIENT}/home`);
 
-  await page.getByRole("region", { name: "Recent activity" }).getByRole("link").first().click();
+  await page
+    .getByRole("region", { name: "Recent activity" })
+    .locator('a[href*="/tasks/"]')
+    .first()
+    .click();
   await expect(page).toHaveURL(/\/tasks\/[^?]+\?from=home$/);
 
   await page.getByRole("link", { name: "Back to Home" }).click();
@@ -66,14 +71,14 @@ test("[FAM-UI-07][AC-10] opened from a filtered, paged Task log, Back returns to
   page,
 }) => {
   await page.goto(`${CLIENT}/tasks?status=done&page=2`);
-  await expect(page.getByText(/^Showing 21-40 of /)).toBeVisible();
+  await expect(page.getByText(/^Showing 21-40 of \d+$/)).toBeVisible();
 
   await page.getByRole("row").nth(1).getByRole("link").click();
   await expect(page).toHaveURL(/\/tasks\/[^?]+\?from=tasks&status=done&page=2$/);
 
   await page.getByRole("link", { name: "Back to Task log" }).click();
   await expect(page).toHaveURL(`${CLIENT}/tasks?status=done&page=2`);
-  await expect(page.getByText(/^Showing 21-40 of /)).toBeVisible();
+  await expect(page.getByText(/^Showing 21-40 of \d+$/)).toBeVisible();
 });
 
 test("[FAM-UI-07][AC-11] a hostile from falls back to 'Back to Task log' and never leaves the app", async ({
