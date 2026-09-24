@@ -16,7 +16,7 @@
  * `src/features` (lint-enforced, see eslint.config.mjs) — screens read
  * data through `src/server/<domain>/queries.ts` instead.
  */
-import { generateCompletedHistory } from "@/mocks/history";
+import { generateCompletedHistory, generatePlainEventOccurrences } from "@/mocks/history";
 import type {
   BudgetBucketKind,
   BudgetBucketState,
@@ -29,6 +29,7 @@ import type {
   FundEntry,
   Occurrence,
   Organisation,
+  PlainEventOccurrence,
   Profile,
   Shift,
   StaffMember,
@@ -357,13 +358,17 @@ const EYE_DROPS: CareEvent = {
   completionMode: "manual",
 };
 
-/** Automatic completion mode example (PD-044); starts after the reference week, so it has no rows yet. */
+/**
+ * The plain event (CHG-009): `automatic` completion mode (PD-044), never ticked
+ * off. Starts on the first day of the reference week, so it has a row on every
+ * day of that week (UI-05, `PLAIN_EVENT_OCCURRENCES_BY_CLIENT_ID`).
+ */
 const AFTERNOON_WALK: CareEvent = {
   id: "event-margaret-walk",
   clientId: MARGARET_CLIENT_ID,
   title: "Afternoon walk",
   description: "Accompany Margaret on a short walk around the garden.",
-  start: "2026-12-01T14:00:00+11:00",
+  start: "2026-11-26T14:00:00+11:00",
   durationMinutes: 45,
   recurrenceFrequency: "daily",
   completionMode: "automatic",
@@ -481,6 +486,9 @@ const MARGARET_DESIGN_WEEK: Occurrence[] = [
 /** The generated history stops here (exclusive), so the design week above stays exactly nine rows. */
 const HISTORY_END_EXCLUSIVE = "2026-11-26T00:00";
 
+/** Plain-event rows run to the end of the reference day (exclusive). */
+const HISTORY_END_OF_WEEK = "2026-12-01T00:00";
+
 /**
  * 128 completed occurrences before the design week, going back to Sat 5 Sep
  * 2026 (so the daylight-saving change on Sun 4 Oct is crossed and both +10:00
@@ -522,6 +530,18 @@ const ROBERT_OCCURRENCES: Occurrence[] = [
 export const OCCURRENCES_BY_CLIENT_ID: Record<string, Occurrence[]> = {
   [MARGARET_CLIENT_ID]: [...MARGARET_DESIGN_WEEK, ...MARGARET_HISTORY],
   [ROBERT_CLIENT_ID]: ROBERT_OCCURRENCES,
+};
+
+/**
+ * Plain-event occurrences (UI-05, CHG-009): Margaret's Afternoon walk, 14:00
+ * on each day of the reference week (Thu 26 to Mon 30 Nov 2026), with Aisha
+ * as the assignee as on the design week's tasks. No status, actor or
+ * completion time. Kept apart from `OCCURRENCES_BY_CLIENT_ID`, so the task
+ * rows (and Margaret's 137-row log) are unchanged; the contract merges them
+ * only when a `type` option asks for plain events (FD-01, FD-03).
+ */
+export const PLAIN_EVENT_OCCURRENCES_BY_CLIENT_ID: Record<string, PlainEventOccurrence[]> = {
+  [MARGARET_CLIENT_ID]: generatePlainEventOccurrences(AFTERNOON_WALK, AISHA, HISTORY_END_OF_WEEK),
 };
 
 // ---------------------------------------------------------------------------

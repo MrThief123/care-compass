@@ -50,6 +50,9 @@ export interface EventFormValues {
   description: string;
 }
 
+/** What a plain event submits (UI-05, CHG-009): a plain event has no status. */
+export type PlainEventFormValues = Omit<EventFormValues, "status">;
+
 const eventFormSchema = z.object({
   date: requiredText("Date"),
   recurrence: z.string(),
@@ -57,10 +60,9 @@ const eventFormSchema = z.object({
   description: z.string(),
 });
 
-export interface EventFormProps {
+interface EventFormBaseProps {
   values: EventFormValues;
   onChange: (values: EventFormValues) => void;
-  onSubmit: (values: EventFormValues) => void;
   onCancel: () => void;
   /** Any date in the month the picker opens on. */
   month: LocalDate;
@@ -78,6 +80,28 @@ export interface EventFormProps {
   className?: string;
 }
 
+interface TaskEventFormProps extends EventFormBaseProps {
+  hideStatus?: false;
+  onSubmit: (values: EventFormValues) => void;
+}
+
+interface PlainEventFormProps extends EventFormBaseProps {
+  /**
+   * A plain event (UI-05, CHG-009): the Status chips are not rendered and
+   * `onSubmit` receives the values without `status`. Driven by the shared
+   * `Switch` on the Add / Edit event screens.
+   */
+  hideStatus: true;
+  onSubmit: (values: PlainEventFormValues) => void;
+}
+
+/**
+ * With `hideStatus` left out the form is unchanged. A caller that toggles
+ * `hideStatus` passes an `onSubmit` taking `PlainEventFormValues`, which
+ * serves both cases.
+ */
+export type EventFormProps = TaskEventFormProps | PlainEventFormProps;
+
 function shiftMonth(month: LocalDate, step: number): LocalDate {
   const [year, monthIndex] = month.split("-").map(Number);
   const date = new Date(Date.UTC(year!, monthIndex! - 1 + step, 1));
@@ -88,19 +112,19 @@ function shiftMonth(month: LocalDate, step: number): LocalDate {
  * The Edit event layout (UI-02 Scope: `EventForm`): fields on the left,
  * "Pick a date" card with Save event and Cancel on the right.
  */
-export function EventForm({
-  values,
-  onChange,
-  onSubmit,
-  onCancel,
-  month,
-  onMonthChange,
-  datesWithItems,
-  documents,
-  extraFields,
-  submitLabel = "Save event",
-  className,
-}: EventFormProps) {
+export function EventForm(props: EventFormProps) {
+  const {
+    values,
+    onChange,
+    onCancel,
+    month,
+    onMonthChange,
+    datesWithItems,
+    documents,
+    extraFields,
+    submitLabel = "Save event",
+    className,
+  } = props;
   const [errors, setErrors] = useState<Record<string, string>>({});
   // Uncontrolled month, so callers that do not care about paging still get it.
   const [ownMonth, setOwnMonth] = useState(month);
@@ -119,7 +143,13 @@ export function EventForm({
       return;
     }
     setErrors({});
-    onSubmit(values);
+    if (props.hideStatus) {
+      // Field by field, so a new form field fails the type check here.
+      const { date, recurrence, description } = values;
+      props.onSubmit({ date, recurrence, description });
+    } else {
+      props.onSubmit(values);
+    }
   }
 
   return (
@@ -144,12 +174,15 @@ export function EventForm({
           options={RECURRENCE_OPTIONS}
         />
 
-        <ChipGroup
-          legend="Status"
-          value={values.status}
-          onChange={(status) => onChange({ ...values, status: status as OccurrenceStatus })}
-          options={STATUS_OPTIONS}
-        />
+        {/* Absent, not disabled: a plain event has no status (UI-05). */}
+        {!props.hideStatus && (
+          <ChipGroup
+            legend="Status"
+            value={values.status}
+            onChange={(status) => onChange({ ...values, status: status as OccurrenceStatus })}
+            options={STATUS_OPTIONS}
+          />
+        )}
 
         {extraFields}
 

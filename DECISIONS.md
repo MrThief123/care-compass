@@ -211,6 +211,7 @@ CONFIRMED.
 - Alternatives: TOTP MFA required for admins (rejected — the original proposed default); MFA optional for all (not chosen).
 - Consequences: NFR-3/TM-2108's MFA expectation is descoped for MVP — flag this to the human as a security tradeoff worth reconfirming before production launch, since Admin accounts hold access to health/financial data across an organisation's whole client base. F0-07, ADM-02, ADM-04 implement plain email/password auth only.
 - Human confirmation: CONFIRMED 2026-09-17.
+- **Amended by PD-057 / CHG-010 (2026-09-24):** "invitation emails for new users" now applies to **carers only**. Family and admin accounts are created by self-serve sign-up (F0-17). The MFA part of this entry is **reaffirmed** by CHG-010: MFA is not mandatory for any role, including admins. The forced admin TOTP enrolment that F0-07 shipped must be removed (CHG-010 follow-up).
 
 ### PD-041 — Carer visibility and edit access derived from shift schedule (no separate assignment table)
 - Date: 2026-09-17 · Decided by: Dhruv Verma (answering OQ-09)
@@ -251,6 +252,7 @@ CONFIRMED.
 - Alternatives: a single global auto-vs-manual toggle (rejected — the whole point is that different routines need different modes); auto mode marking events "Done" with no distinction from manual (rejected in discussion — would defeat safeguarding intent, since a missed automatic task would show as completed with no one having confirmed it).
 - Consequences: this is a **new capability beyond any original source document** — logged separately as **CHG-001** (below) since it adds a field to the event data model and a toggle to the Edit event form that no PRD/AC/design currently shows. F0-11 (event schema) gains a `completion_mode` column; FAM-06/FAM-07/CAR-06/CAR-07 (event create/edit UI) gain the mode toggle; the Edit event design needs this control added (fold into OQ-19 design gaps). Resolves OQ-10 in full.
 - Human confirmation: CONFIRMED 2026-09-17.
+- **Amended by CHG-009 (2026-09-24):** the **Automatic** mode no longer self-completes. An event in that mode is a **plain event** with no status at all (never Planned, Done or Overdue, and never ticked off). Manual-mode events are called **tasks** in the UI. "Set once per event" is replaced: the mode can be changed at any time, forward only. Read CHG-009 for the full rules.
 
 ### PD-045 — Recurring event edits get a scope selector (this occurrence / this and future / entire series)
 - Date: 2026-09-17 · Decided by: Dhruv Verma (answering OQ-11)
@@ -347,6 +349,24 @@ CONFIRMED.
 - Alternatives: leaving it as an unwritten convention (rejected — not visible to other sessions/team members); updating docs only after merge confirmation (rejected by the human — adds an extra round trip for no benefit).
 - Consequences: `docs/DEVELOPMENT_WORKFLOW.md` gained new §7 and renumbered §7→§8 (PR template), §8→§9 (dev-branch testing), §9→§10 (checkpoints), §10→§11 (session hygiene). Cross-references updated: CLAUDE.md §3 and §8 (this file's own PR/commit rules already implied this; now explicit), PRD.md §19, ARCHITECTURE.md §12.10.
 - Human confirmation: CONFIRMED 2026-09-17.
+
+### PD-057 — Self-serve sign-up for Family and Admin; carers stay invite-only
+- Date: 2026-09-24 · Decided by: Prajeet (in-session; extends PD-037 and PD-040)
+- Decision:
+  - **Anyone creates their own account first, then links.** A public `/sign-up` page creates the account and the thing it links to in one step. There are two account types:
+    - **Family:** creates the family account and the client record (the person they care for). The family becomes that client's family member (PD-037, PD-042). The client starts with no organisation. The family links a provider later with the organisation picker (PD-036).
+    - **Organisation (admin):** creates the admin account and a **new organisation**, and becomes its first admin. This takes the *registration* half of PL-18 into scope; *deleting* an organisation stays parked.
+  - **Carers cannot sign up themselves.** A carer account exists only when an admin invites them (ADM-02, PD-040). The public page offers no carer option, and the database rejects any attempt to create a carer, or to join an existing organisation, through public sign-up.
+  - **Families do not link carers.** Carers reach a client only through shifts that the linked organisation's admin schedules (PD-041, unchanged).
+  - **No email confirmation.** A new account can sign in straight away (Supabase `enable_confirmations = false`, already the setting in `supabase/config.toml`).
+  - **Same look as sign-in.** `/sign-up` uses the `(auth)` layout and the same `CardShell`, `Field`, `InlineAlert` and `Button` components and tokens as `/sign-in`. Only the fields differ. Sign-in and sign-up link to each other.
+  - **Admin MFA is not mandatory** (reaffirms PD-040). A newly registered admin goes straight to `/admin/home`. The forced TOTP enrolment and challenge F0-07 shipped for admins (its feature CHG-001) contradicts PD-040 and is to be removed in a shared follow-up fix.
+  - **Every organisation needs a unique identifier** so families can tell a real provider from a lookalike in the picker (PL-24). Which identifier (e.g. the ABN, which `organisations.abn` already has a column for) and whether sign-up requires it is not decided yet.
+  - **Shared stream.** The feature is **F0-17**, in the shared stream and Lane B like F0-07, branch `feature/shared-sign-up`, PR → `main`.
+- Reason: human instruction in-session, 2026-09-24: "everyone can create their own account and then they link an organisation/client/carer etc." The follow-up answers to the four questions were: carers stay invite-only; admin sign-up registers a new organisation; no direct family-to-carer link; no email confirmation. On reviewing the CHG-010 risks the human then chose: admin MFA stays not mandatory; organisations need a unique identifier (noted for PL-24).
+- Alternatives: carer join request approved by an admin (rejected: human kept admin invite); carer join code (not chosen); admin joins an existing organisation by request (not chosen); no admin self-sign-up (not chosen); family picks carers (rejected: it would change PD-041); email confirmation required (rejected: human chose immediate sign-in).
+- Consequences: see CHG-010.
+- Human confirmation: CONFIRMED 2026-09-24 (Prajeet, in-session).
 
 ---
 
@@ -462,6 +482,7 @@ Docs updated: DECISIONS.md
 - Impact: F0-11 event schema gains `completion_mode`; FAM-06/FAM-07/CAR-06/CAR-07 event create/edit UI gain a mode toggle; Edit event design needs the control added (design gap, fold into OQ-19); ACCEPTANCE_CRITERIA.md for affected features needs new ACs for both modes; TEST_PLAN.md needs cases for automatic self-completion and manual tick-off with/without proof.
 - Human confirmation: Dhruv Verma, 2026-09-17.
 - Docs updated: DECISIONS.md (PD-044, this entry). Still to update: PRD.md scope section, affected features' ACCEPTANCE_CRITERIA.md and TEST_PLAN.md, DEVELOPMENT_PLAN.md if it changes feature sizing.
+- **Amended by CHG-009 (2026-09-24):** Automatic mode becomes a plain event with no status; see CHG-009, which also carries the PRD, ARCHITECTURE and DEVELOPMENT_PLAN updates this entry left outstanding.
 
 ### CHG-002 — `budget`/`events` `src/server/<domain>/` contract files: ownership reconciled to UI-00 (initial shape) / Lane B (extension)
 - Date / requested by: 2026-09-17 / Dhruv Verma (human, project lead)
@@ -508,6 +529,61 @@ Docs updated: DECISIONS.md
 - Numbering: CHG-006 and CHG-007 are on unmerged branches (`feature/family-ui-calendar`, `feature/admin-ui-home`). Whichever merges later renumbers.
 - Human confirmation: Dhruv Verma, 2026-09-24 (in-session).
 - Docs updated: DECISIONS.md (this entry); `docs/development/family-dev/family-ui-event-form/DECISIONS.md` FD-01.
+
+### CHG-009 — Tasks and plain events: every event is either a task (ticked off by hand) or a plain event (no status); the Task log becomes the Care log
+- Date / requested by: 2026-09-24 / Dhruv Verma (human, project lead)
+- Type: scope change (amends PD-044 and CHG-001)
+- Description:
+  - **Model.** Every calendar item is an event. A **task** is an event that must also be ticked off by hand, with the actor's name recorded, and becomes Overdue if nobody ticks it off by its due time (PD-044 Manual, unchanged). A **plain event** has **no status**: it is never Planned, Done or Overdue and cannot be ticked off. This replaces PD-044's Automatic self-completion. Data: the existing `completion_mode` field stays (`manual` = task, `automatic` = plain event); the UI only ever says "Task" or "Event".
+  - **Form switch.** The event form has one switch, "This is a task — must be ticked off". It starts **on** for a new event and shows the current value when editing.
+  - **Changing it is forward only.** Switching never changes past occurrences: they keep their status and recorded actors (append-only history, PD-005). Switching an event to a task does not make past occurrences Overdue. The value can be changed at any time; "set once per event" in PD-044 no longer applies.
+  - **Edit scope.** The switch follows the PD-045 scope choice. "This occurrence only" makes one occurrence differ from its series (a PD-004 per-occurrence override). "This and future" applies from that occurrence onward. "Entire series" applies from now onward, never before now.
+  - **Who can change it.** Anyone who can edit the event can switch it either way: Family at any time, a carer during an active shift for that client (PD-041). The change is captured by the append-only audit log (PD-006). No screen shows it for now; a Family alert is parked as **PL-23**.
+  - **Where each appears.** Anything with a checkbox shows **tasks only**: the Family Calendar Tasks panel, the Carer Home Tasks checklist and the Carer Calendar "Tasks for the selected shift". Overdue lists (Family Home Overdue, Admin Home overdue) contain only tasks, since a plain event cannot be Overdue. Anything that shows the schedule or history shows **both**: Family Home Today timeline, Family Calendar day/week/month, Carer Home "Today's calendar", Carer Calendar blocks, the Calendar Log panel and the Care log.
+  - **Calendar look.** A plain event gets a fourth, neutral block look: neutral colour, no status shape, and the word "Event" where the block has room. Tasks keep the Planned, Done and Overdue looks. Status is still never conveyed by colour alone.
+  - **Care log.** The Family "Task log" is renamed **"Care log"** and lists tasks and plain events. The page title, the "View all" links on Home and Calendar and the detail page's back link ("Back to Care log") change; the route stays `/family/[clientId]/tasks`. The Status column shows "Event" for a plain event. The filter gains a type choice, **All / Tasks only / Events only**; the Planned, Done and Overdue status filters return tasks only. The Nurse column is unchanged for plain events: the carer whose shift covers the start (PD-055), or "—".
+  - **Detail page.** Opening a plain event from the Care log shows the same page as a task, except the Status card reads "Event" with "No tick-off needed" and no pill or completion time. Description, Edit and Documents work as for a task; documents on a plain event are attachments, not proof of completion.
+- Source / justification: human instruction in-session, 2026-09-24, refining PD-044: "tasks" are events with the extra function of being ticked off by hand; plain events "would just exist" (a walk vs picking up a prescription); only tasks belong in the task (checkbox) sections; all events and tasks go into the log. Decided question by question in a grilling session with the human on 2026-09-24.
+- Impact:
+  - **Shared (Lane S, all shared features are merged):** needs a **shared follow-up feature**, not yet planned. `src/types/domain.ts` (an occurrence of a plain event has no status; `TaskLogQuerySchema` gains a type filter), `src/mocks/**` (plain-event fixtures in the log and calendar), UI-01 calendar kit (neutral "Event" block look in `status-cue` and day, week and month grids, event popover), UI-03 lists (a neutral "Event" label where a status pill would go), `getTaskLog` / `getOccurrence` / `getTodayOccurrences` contract semantics (UI-04). Until it merges, dashboard features cannot show plain events correctly.
+  - **Backend (Lane B):** F0-11 keeps `completion_mode`; status derivation returns no status for a plain-event occurrence; `set_occurrence_done` rejects plain-event occurrences; per-occurrence mode overrides; mode changes never apply before now. F0-16 seeds plain events.
+  - **Family:** FAM-UI-01 / FAM-01 (Today timeline shows both), FAM-02 (Overdue tasks only; Recent activity unchanged: Done or Overdue rows, so tasks only), FAM-UI-02 / FAM-04 (neutral event look), FAM-05 (Tasks panel tasks only; Log panel both), FAM-06 / FAM-07 (the switch, default on, scope rules; FAM-UI-03 needs no change), FAM-UI-07 / FAM-14 / FAM-15 (Care log name, type filter, "Event" label, plain-event detail).
+  - **Carer:** CAR-UI-01 / CAR-01 (Today's calendar both; Tasks checklist tasks only), CAR-UI-03 / CAR-05 (blocks both; selected-shift tasks only), CAR-06 (tick-off applies to tasks only), CAR-07 (the switch).
+  - **Admin:** ADM-01 overdue list is tasks only by definition; no change.
+  - **Tests:** each affected feature adds cases for plain events (no status, excluded from checklists and Overdue, included in schedule views and the Care log, type filter, forward-only switching, per-occurrence switch).
+  - **Numbering:** CHG-006, CHG-007 and CHG-008 are used on unmerged feature branches (`feature/admin-ui-home`, `feature/family-ui-calendar`, `feature/family-ui-event-form`), so this entry takes CHG-009 to avoid a clash.
+- Human confirmation: Dhruv Verma, 2026-09-24 (in-session; asked for these docs to be changed and a PR opened).
+- Docs updated: DECISIONS.md (this entry; amendment notes on PD-044 and CHG-001), PRD.md (REQ-17, REQ-18, REQ-21, new REQ-35, nav table, permissions, PL-23), ARCHITECTURE.md (§6 `care_events` and `care_event_overrides` rows, §6.3 status derivation, flow 2 'Tick task'), DEVELOPMENT_PLAN.md (CHG-009 notes on the affected cards). Each lane updates its own feature PRD, ACCEPTANCE_CRITERIA and TEST_PLAN when it starts or resumes an affected feature, and records it in that feature's DECISIONS.md (same approach as CHG-005).
+
+### CHG-010 — Self-serve sign-up (F0-17): Family and Organisation accounts; carers invite-only
+- Date / requested by: 2026-09-24 / Prajeet (human, in-session)
+- Type: new feature (shared, Lane B) and scope change (PL-18 registration half; PD-040 invitation wording)
+- Description: add **F0-17 — Self-serve sign-up for Family and Organisation accounts** (`feature/shared-sign-up`, PR → `main`). A `/sign-up` page in the `(auth)` layout, built the same way as `/sign-in`, asks for the account type (Family or Organisation), first name, last name, email, password and confirm password. A Family account also needs the client's first and last name. An Organisation account also needs the organisation name. A security-definer Postgres function creates the profile and the linked record in one transaction: the client plus a `client_family_members` row for Family, or the organisation plus `profiles.organisation_id` for an admin. After sign-up the user is signed in and routed like any sign-in (F0-07): Family to `/family/<new client id>/home`, admin to their MFA gate and then `/admin/home`. Full rules: PD-057.
+- Source / justification: human instruction in-session, 2026-09-24 (PD-057). PD-037 says the family creates the client, but no feature created a family account, so the confirmed workflow could not start.
+- Impact:
+  - **New feature F0-17** (shared, Lane B): `src/app/(auth)/sign-up/`, `src/server/auth/actions.ts` (new `signUp` action), a new migration (registration function, grants; users still cannot change their own `role`, `organisation_id` or `is_active`), a 'Create an account' link on `/sign-in`. Tests: integration, e2e and pgTAP (see its TEST_PLAN).
+  - **F0-07** (merged): no change to its ACs. `/sign-in` gains a link to `/sign-up`, made by F0-17 in the same lane.
+  - **ADM-02:** unchanged. Carers are still created by admin invitation. The public sign-up must never create a carer.
+  - **ADM-04:** the card still reads "adds a client with a family contact". That flow was already rejected by PD-037, and CHG-010 confirms that clients are created only by families. ADM-04 becomes the clients **list** (read and Remove per ADM-05) with no add panel. Lane A updates its own PRD, ACs and TEST_PLAN when it starts ADM-04, and records it in that feature's DECISIONS.md. The Admin Clients design's "Add client" panel is still the HUMAN REVIEW design item raised by PD-037.
+  - **FAM-13:** a self-registered family's client has **no organisation** at first. FAM-13's organisation card must handle "no organisation yet" with a 'Choose organisation' action (picker, no transfer confirmation, since there is nothing to transfer). Lane F records it when it starts FAM-13.
+  - **PL-18:** split. Organisation **registration** moves into F0-17; Add/Delete organisation by an operator stays parked.
+  - **Risks raised for the human, not decided here:**
+    1. **Admin MFA mismatch — DECIDED 2026-09-24 (Prajeet): MFA is not mandatory.** PD-040 says no mandatory MFA, but F0-07 shipped forced TOTP enrolment for admins (its feature CHG-001 says OQ-08 answered "TOTP MFA required", which misreads PD-040). **Follow-up needed:** a shared fix that removes the forced admin enrolment and AAL2 gate from `src/server/auth/routing.ts` / `guard.ts` and changes F0-07's AC-09/AC-10 and T-09/T-10 (a test-expectation change, flagged HUMAN REVIEW). F0-17 does not make that change; its AC-02 only requires that a new admin is routed the same way an existing admin is.
+    2. **Anyone can create an organisation.** It then appears in the family organisation picker (PD-036). Someone could register a lookalike of a real provider's name and a family could link their client to it. **Note (Prajeet, 2026-09-24): every organisation should have a unique identifier**, so that two organisations can never be confused in the picker. Which identifier (e.g. ABN) and when it is required are still to be decided. Parked as **PL-24** for the human to prioritise.
+    3. **No email confirmation.** A mistyped email address can create an account the real owner does not control. Supabase also reports "already registered" on sign-up, so account enumeration is possible on `/sign-up` (not on `/sign-in` or reset). Accepted by the human for MVP. Worth re-checking before production, together with the PD-040 MFA note.
+  - **Numbering:** CHG-006 to CHG-008 are taken on unmerged branches (see CHG-009), so this entry is CHG-010.
+- Human confirmation: Prajeet, 2026-09-24 (in-session).
+- Docs updated: DECISIONS.md (PD-057, this entry, amendment note on PD-040), PRD.md (REQ-01, REQ-09, new REQ-36, PL-18, new PL-24), DEVELOPMENT_PLAN.md (F0-17 row and card, totals, next number, CHG-010 notes on ADM-04 and FAM-13), `docs/development/shared/shared-sign-up/`.
+
+### CHG-011 — Plain events on the calendar use a solid neutral stripe; on compact surfaces they may differ from Planned tasks by colour alone
+- Date / requested by: 2026-09-24 / Dhruv Verma (human, project lead)
+- Type: scope change (amends CHG-009 "Calendar look" and UI-05 AC-12)
+- Description: a plain event's calendar block and month chip carry a **solid** neutral stripe (token `text-secondary` grey) instead of a patterned one, with no status shape. The word "Event" is still visible where the block has room (day view `full` tier, event popover) and is always in the accessible name. On compact day blocks, week blocks and month chips — where a Planned task also has no shape and the status word is read out to screen readers only — a plain event differs **visually** from a Planned task by stripe colour alone. This is an accepted exception for **event type** only: task **status** (Planned, Done, Overdue) is still never conveyed by colour alone (CLAUDE.md §7 unchanged for status).
+- Source / justification: human instruction in-session, 2026-09-24, after reviewing the dotted-bar preview: "I don't like the grey dotted line … just have the same grey as a stripe rather than dots"; the colour-alone trade-off was put to the human, who chose "stripe only".
+- Impact: UI-05 AC-12 reworded (event type exempt from the colour-alone rule on compact surfaces; status still covered); UI-05 FD-05; UI-01 calendar kit `EVENT_CUE`. Dashboard features that show plain events (FAM-UI-01/02, FAM-04/05, CAR-UI-01/03, CAR-05) inherit the look; no test changes outside UI-05.
+- Numbering: recorded as CHG-010 on `feature/shared-plain-events`; renumbered to CHG-011 when merging `main`, where CHG-010 is self-serve sign-up (F0-17).
+- Human confirmation: Dhruv Verma, 2026-09-24 (in-session).
+- Docs updated: DECISIONS.md (this entry), `docs/development/shared/shared-plain-events/ACCEPTANCE_CRITERIA.md` (AC-12), `docs/development/shared/shared-plain-events/DECISIONS.md` (FD-05).
 
 Template for future entries:
 ```

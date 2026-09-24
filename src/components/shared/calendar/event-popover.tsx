@@ -1,18 +1,21 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 
 import { formatDuration } from "@/lib/format/duration";
 import { cn } from "@/lib/utils";
-import type { Occurrence } from "@/types/domain";
+import { isPlainEvent } from "@/types/domain";
+import type { AnyOccurrence } from "@/types/domain";
 
+import { EventPill } from "../event-pill";
 import { StatusPill } from "../status-pill";
 
 import { melbourneTimeRange } from "./melbourne-time";
 
 export interface EventPopoverProps {
-  occurrence: Occurrence;
+  /** A task, or a plain event (UI-05), which shows "Event" in place of a status. */
+  occurrence: AnyOccurrence;
   /** The block being hovered or focused; the card is placed beside it. */
   anchor: HTMLElement | null;
   /** DOM id, so the block can point at the card with `aria-describedby`. */
@@ -27,6 +30,21 @@ export interface EventPopoverProps {
 const CARD_WIDTH = 288;
 const GAP = 8;
 const MARGIN = 8;
+
+const subscribeNever = () => () => {};
+
+/**
+ * False on the server and during hydration, true once the client has taken
+ * over: the card is portalled to `document.body`, which the server cannot
+ * render, so it appears only after hydration and the markup always matches.
+ */
+function useHydrated(): boolean {
+  return useSyncExternalStore(
+    subscribeNever,
+    () => true,
+    () => false,
+  );
+}
 
 /**
  * The detail a short event block had no room to show, raised on hover.
@@ -51,6 +69,7 @@ export function EventPopover({
 }: EventPopoverProps) {
   const cardRef = useRef<HTMLDivElement>(null);
   const [position, setPosition] = useState<{ top: number; left: number } | null>(null);
+  const hydrated = useHydrated();
 
   useLayoutEffect(() => {
     if (!anchor) return;
@@ -63,7 +82,7 @@ export function EventPopover({
         : Math.min(rect.right + GAP, window.innerWidth - MARGIN - CARD_WIDTH),
       top: Math.max(MARGIN, Math.min(rect.top, window.innerHeight - MARGIN - height)),
     });
-  }, [anchor]);
+  }, [anchor, hydrated]);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -87,7 +106,7 @@ export function EventPopover({
     };
   }, [anchor, onClose]);
 
-  if (typeof document === "undefined") return null;
+  if (!hydrated) return null;
 
   return createPortal(
     <div
@@ -119,7 +138,15 @@ export function EventPopover({
       {occurrence.description ? (
         <p className="text-body-small text-text-primary">{occurrence.description}</p>
       ) : null}
-      <StatusPill status={occurrence.status} actorName={occurrence.actor} className="self-start" />
+      {isPlainEvent(occurrence) ? (
+        <EventPill className="self-start" />
+      ) : (
+        <StatusPill
+          status={occurrence.status}
+          actorName={occurrence.actor}
+          className="self-start"
+        />
+      )}
     </div>,
     document.body,
   );
