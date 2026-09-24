@@ -6,7 +6,7 @@
  */
 import * as mock from "@/mocks/queries/budget";
 import { getDataSourceMode, notImplementedForSupabase } from "@/server/data-source";
-import type { BudgetBucketSummary } from "@/types/domain";
+import type { BudgetBucketSummary, FundEntry } from "@/types/domain";
 
 export async function getBudgetSummary(clientId: string): Promise<BudgetBucketSummary[]> {
   const mode = getDataSourceMode();
@@ -14,4 +14,13 @@ export async function getBudgetSummary(clientId: string): Promise<BudgetBucketSu
     return mock.getBudgetSummary(clientId);
   }
   notImplementedForSupabase("budget", "getBudgetSummary");
+}
+
+/** The client's fund entries (top-ups and expenses), newest first; `[]` for none. */
+export async function getFundHistory(clientId: string): Promise<FundEntry[]> {
+  const mode = getDataSourceMode();
+  if (mode === "mock") {
+    return mock.getFundHistory(clientId);
+  }
+  notImplementedForSupabase("budget", "getFundHistory");
 }
