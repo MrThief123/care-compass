@@ -61,3 +61,11 @@ Authorisation: root DECISIONS.md CHG-009 (human, 2026-09-24). The human approved
 - Decision: a `useHydrated()` hook (`useSyncExternalStore`, server snapshot `false`) in `event-popover.tsx`; the card renders only once hydrated. The positioning effect also re-runs when `hydrated` flips so the card is measured. Hover behaviour is unchanged.
 - Test: `src/components/shared/calendar/event-popover.hydration.test.tsx` (server render has no card; hydrating reports no recoverable error; the card appears after). Failing first in commit 47fc518.
 - Human confirmation required: done. Dhruv Verma, 2026-09-24: "yes" (fix on this branch).
+
+### FD-08 — The shared `Switch` and `EventForm`'s `hideStatus` (implementation note, within AC-10 / AC-11 / AC-12)
+- Date: 2026-09-24
+- Switch: `Switch` in `src/components/shared/forms/switch.tsx`, exported from the forms kit. Props `label`, `checked`, `onChange`, optional `className`. The markup and classes copy FAM-UI-03's local `TaskSwitch` (`family-dev`), so the Family lane can swap it in as `<Switch label="This is a task — must be ticked off" checked={isTask} onChange={setIsTask} />` with no visual change. It is a native `button role="switch"`, so Space and Enter toggle it; "On" / "Off" is shown in words; `min-h-11` (44px).
+- EventForm: `EventFormProps` becomes a union on `hideStatus`. Without it (or `false`) nothing changes: the Status chips render and `onSubmit` gets `EventFormValues`. With `hideStatus: true` the chips are not rendered (absent, not disabled) and `onSubmit` gets the new `PlainEventFormValues` (`EventFormValues` without `status`). A screen that toggles it (`hideStatus={!isTask}`) passes an `onSubmit` taking `PlainEventFormValues`, which fits both cases. `values` / `onChange` keep carrying `status`, so switching back to a task keeps the chosen chip. Validation is unchanged (Date required).
+- Every existing caller (`src/app/page.tsx`, `dev-preview-forms-kit`, `family-dev`'s `EventFormScreen`) passes no `hideStatus` and compiles and behaves as before.
+- Known, pre-existing: `ChipGroup` builds its label id from the legend (`Status-legend`), so two Status groups on one page share an id. Both still read "Status"; only the forms preview page shows two. Not changed here.
+- Human confirmation required: no (within the approved ACs).
