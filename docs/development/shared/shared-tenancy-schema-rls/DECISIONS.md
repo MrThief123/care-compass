@@ -14,7 +14,15 @@ Record feature-level decisions here using the template below. Project-wide decis
 
 ## Feature decisions log
 
-_No decisions recorded yet._
+### FD-01 — Cross-organisation profile display-name view not built
+- Date: 2026-09-22
+- Context: PRD.md scope lists "nobody reads other organisations' profiles except display names needed on shared records" as a PROPOSED view. No AC in ACCEPTANCE_CRITERIA.md and no case in TEST_PLAN.md covers it.
+- Decision: not implemented in F0-06. `profiles_select_same_org` restricts reads to active profiles within the same organisation; no cross-organisation view exists.
+- Reason: human confirmed it isn't needed.
+- Alternatives considered: build the view now speculatively (rejected — no AC backs it, would be scope creep per CLAUDE.md §6).
+- Consequences: if a later feature (e.g. an admin- or carer-facing screen showing another organisation's staff/family display name on a shared record) needs this, it must be scoped and added as its own change, not assumed to already exist.
+- Human confirmation required: yes — CONFIRMED 2026-09-22 (not needed).
+- Test changes caused: none.
 
 <!-- Template
 ### FD-01 — <title>
