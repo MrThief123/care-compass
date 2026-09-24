@@ -1,25 +1,26 @@
 # Progress — FAM-UI-05 Family Budget screen (UI)
 
-Status: NOT STARTED
-Owner: unclaimed
+Status: IN PROGRESS
+Owner: Dhruv Verma
 Lane: F — Family
 Sprint: SPRINT · planned D6
-Branch: `feature/family-ui-budget` (not yet created)
+Branch: `feature/family-ui-budget` (created from `origin/family-dev` at 02c7fa7)
 PR target: `family-dev`
-Last updated: 2026-09-17 (planning pack generated)
+Last updated: 2026-09-25
 
 ## Blockers
-- None recorded at planning time
+- None recorded at claim time. Anything outside Lane F (a History contract read and design fixtures) will be raised as a stop-and-ask before it is touched (CLAUDE.md §10).
 
 ## Dependencies status
-- F0-15 — NOT STARTED
-- UI-03 — NOT STARTED
+- F0-15 — MERGED
+- UI-03 — MERGED
 
 ## Completed
 - Feature documentation drafted (Claude Chat planning pack)
+- Claimed (`docs(family-ui-budget): claim`)
 
 ## In progress
-- None
+- Feature docs and tests-first (no production code yet)
 
 ## Remaining
 - Route `/family/[clientId]/budget` inside the family layout.
@@ -50,7 +51,7 @@ Last updated: 2026-09-17 (planning pack generated)
 - PROPOSED items in PRD.md are unconfirmed until validated in F0-01 or answered in DECISIONS.md.
 
 ## Next action
-- complete dependencies, run START FEATURE FAM-UI-05, and write the tests in TEST_PLAN.md first.
+- Write the tests in TEST_PLAN.md first, run them red, then wait for the human's go-ahead before implementing.
 
 ## Ready for PR
 - No
