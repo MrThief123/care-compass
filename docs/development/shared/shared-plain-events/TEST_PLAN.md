@@ -19,13 +19,13 @@ Tests are written **before** production code (TESTING.md §2). Run them, confirm
 | T-01 | AC-01 | unit | Task occurrence without a status, or with an unknown status, rejects; plain-event occurrence without status parses; plain-event occurrence with status, actor or completedAt rejects. | ☑ | PASS |
 | T-02 | AC-01 | unit | The task / plain-event helper returns the right answer for both kinds (plus a type-level narrowing check). | ☑ | PASS |
 | T-03 | AC-02 | unit | `TaskLogQuerySchema` accepts `all`, `tasks`, `events`, omitted; rejects `bogus`. | ☑ | PASS |
-| T-04 | AC-03 | contract | `type: "all"`: both kinds, newest first, strictly ordered across pages, `total` equals the concatenated length. | ☐ | NOT RUN |
-| T-05 | AC-03 | contract | `type: "tasks"` has no plain events; `type: "events"` has only plain events, none with a status. | ☐ | NOT RUN |
-| T-06 | AC-03 | contract | Each `status` filter returns tasks only, with and without `type: "all"`; with `type: "events"` → `items: []`, `total` 0; `q` combined with `type`. | ☐ | NOT RUN |
-| T-07 | AC-04 | contract | `getOccurrence` for a plain-event key: no status, actor or completedAt; another client's plain-event key → `undefined`. | ☐ | NOT RUN |
-| T-08 | AC-04 | contract | `getTodayOccurrences` with the new option returns the reference day's plain events and tasks, oldest first, Margaret only. | ☐ | NOT RUN |
-| T-09 | AC-05 | unit | Fixtures: plain-event rows in the reference week, on the reference day and in the calendar data; mode agreement with their events; key rules; determinism. | ☐ | NOT RUN |
-| T-10 | AC-06 | contract | Callers without the new options: Margaret's log total 137, the design rows, Overdue and Recent activity rows, and `getTodayOccurrences` results unchanged; existing UI-00 and UI-04 tests unchanged and green. | ☐ | NOT RUN |
+| T-04 | AC-03 | contract | `type: "all"`: both kinds, newest first, strictly ordered across pages, `total` equals the concatenated length. | ☑ | PASS |
+| T-05 | AC-03 | contract | `type: "tasks"` has no plain events; `type: "events"` has only plain events, none with a status. | ☑ | PASS |
+| T-06 | AC-03 | contract | Each `status` filter returns tasks only, with and without `type: "all"`; with `type: "events"` → `items: []`, `total` 0; `q` combined with `type`. | ☑ | PASS |
+| T-07 | AC-04 | contract | `getOccurrence` for a plain-event key: no status, actor or completedAt; another client's plain-event key → `undefined`. | ☑ | PASS |
+| T-08 | AC-04 | contract | `getTodayOccurrences` with the new option returns the reference day's plain events and tasks, oldest first, Margaret only. | ☑ | PASS |
+| T-09 | AC-05 | unit | Fixtures: plain-event rows in the reference week, on the reference day and in the calendar data; mode agreement with their events; key rules; determinism. | ☑ | PASS |
+| T-10 | AC-06 | contract | Callers without the new options: Margaret's log total 137, the design rows, Overdue and Recent activity rows, and `getTodayOccurrences` results unchanged; existing UI-00 and UI-04 tests unchanged and green. | ☑ | PASS |
 | T-11 | AC-07 | component | Day timeline, week grid and month grid: a plain event at each density has the neutral bar, no check or alert icon, "Event" where the tier shows a status word, and "Event" in its accessible name. | ☐ | NOT RUN |
 | T-12 | AC-07 | component | The same surfaces still draw Planned, Done and Overdue exactly as before (existing tests plus one side-by-side case). | ☐ | NOT RUN |
 | T-13 | AC-08 | component | Event popover for a plain event: "Event" label, no status icon, no "Done ·", no completion time. | ☐ | NOT RUN |
