@@ -170,3 +170,20 @@ describe("[FAM-UI-07] DocumentTile: fits its tile at any window width", () => {
     expect(classesOf(tile).filter((name) => /^w-\d+$/.test(name))).toEqual([]);
   });
 });
+
+/** Family · Info draws client documents, which carry a name but no type or size (FAM-UI-04, CHG-018). */
+describe("[FAM-UI-04] DocumentTile: a document with a name only", () => {
+  it("[FAM-UI-04][AC-03] draws just the name, with no type and size line, even when details are asked for", () => {
+    const { container } = render(<DocumentTile document={{ name: "Care plan.pdf" }} />);
+
+    expect(screen.getByText("Care plan.pdf")).toBeInTheDocument();
+    expect(container.textContent).toBe("Care plan.pdf");
+    expect(container.textContent).not.toMatch(/undefined|NaN|0 B/);
+  });
+
+  it("[FAM-UI-04][AC-03] still draws the type and size when the document has both", () => {
+    render(<DocumentTile document={doc()} />);
+
+    expect(screen.getByText("PDF · 82.3 KB")).toBeInTheDocument();
+  });
+});
