@@ -1,20 +1,20 @@
 # Progress — FAM-UI-02 Family Calendar screen (UI)
 
-Status: NOT STARTED
-Owner: unclaimed
+Status: IN PROGRESS
+Owner: Dhruv Verma
 Lane: F — Family
 Sprint: SPRINT · planned D4–D5
-Branch: `feature/family-ui-calendar` (not yet created)
+Branch: `feature/family-ui-calendar`
 PR target: `family-dev`
-Last updated: 2026-09-17 (planning pack generated)
+Last updated: 2026-09-24 (claimed)
 
 ## Blockers
 - None recorded at planning time
 
 ## Dependencies status
-- F0-15 — NOT STARTED
-- UI-01 — NOT STARTED
-- UI-03 — NOT STARTED
+- F0-15 — MERGED
+- UI-01 — MERGED
+- UI-03 — MERGED
 
 ## Completed
 - Feature documentation drafted (Claude Chat planning pack)
