@@ -499,6 +499,16 @@ Docs updated: DECISIONS.md
 - Human confirmation: Dhruv Verma, 2026-09-19 (in-session).
 - Docs updated: DECISIONS.md (this entry). The family features record it in their own DECISIONS.md.
 
+### CHG-006 — Events contract: calendar range read `getOccurrences` and `getToday`; design-week fixtures to 6 Dec
+- Date / requested by: 2026-09-24 / Dhruv Verma (human, project lead)
+- Type: contract extension (shared folders changed from a dashboard feature branch)
+- Description: no Phase 1 contract could answer "this client's occurrences from date X to date Y", so no calendar could draw any week but the reference day. Added to `src/server/events/queries.ts` (extended, not recreated, per CHG-002): `getOccurrences(clientId, { from, to })`, which returns occurrences on Melbourne calendar days `from` to `to` inclusive, oldest first, ties by key, validated by `OccurrenceRangeSchema` (at most `OCCURRENCE_RANGE_MAX_DAYS` = 42, one 6×7 month grid). Also added `getToday()`, the Melbourne calendar date the calendar opens on (the fixtures' reference day in mock mode, the real day otherwise). In `src/mocks/**`: the mock implementations, plus five hand-written Planned rows, Tue 1 to Sat 5 Dec 2026, exactly as drawn in `family-02-calendar.png`. They are held in `UPCOMING_OCCURRENCES_BY_CLIENT_ID`, which `getOccurrences` and `getOccurrence` read and `getTaskLog` does not (a log lists what has happened, and the Task log fixtures stay at 137 rows). `src/types/domain.ts` gains `OccurrenceRangeSchema`, `OccurrenceRange` and `OCCURRENCE_RANGE_MAX_DAYS`.
+- Source / justification: human instruction in-session, 2026-09-24: "make on this feature branch". The app is real, not a design clone: users add events on any date, so the calendar must read any range. Events will live in the database; F0-11's PRD already names `getOccurrences(clientId, range)` for the Supabase side, and this is its Phase 1 mock with the same name and shape.
+- Impact: F0-11 must implement `getOccurrences` against Supabase with the same range, order and validation semantics (recurrence expansion, overrides, latest completion, assigned carer). CAR-UI-03 (Carer Calendar) has the same gap, probably as a carer-wide read across patients, and should extend this contract rather than add a second pattern. FAM-04 and FAM-05 wire FAM-UI-02 through it. No other screen changes behaviour.
+- Numbering: `feature/admin-ui-home` (unmerged) also records a CHG-006 (Admin Home upcoming shifts). Whichever merges second must renumber. FAM-UI-02's code comments and commit messages say CHG-006.
+- Human confirmation: Dhruv Verma, 2026-09-24 (in-session).
+- Docs updated: DECISIONS.md (this entry); `docs/development/family-dev/family-ui-calendar/DECISIONS.md` FD-01, FD-02.
+
 Template for future entries:
 ```
 ### CHG-xxx — <title>
