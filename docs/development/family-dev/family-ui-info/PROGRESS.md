@@ -1,25 +1,25 @@
 # Progress — FAM-UI-04 Family Info screen (UI)
 
-Status: NOT STARTED
-Owner: unclaimed
+Status: IN PROGRESS
+Owner: Dhruv Verma
 Lane: F — Family
 Sprint: SPRINT · planned D5
-Branch: `feature/family-ui-info` (not yet created)
+Branch: `feature/family-ui-info` (created from `origin/family-dev` at 02c7fa7)
 PR target: `family-dev`
-Last updated: 2026-09-17 (planning pack generated)
+Last updated: 2026-09-25
 
 ## Blockers
-- None recorded at planning time
+- Waiting on a human answer: the screen needs a client-info contract read, a client-documents contract read and design fixtures, all in folders Lane F does not own (`src/server/**`, `src/mocks/**`). No code is written until that is answered (CLAUDE.md §4.2, §10).
 
 ## Dependencies status
-- F0-15 — NOT STARTED
-- UI-03 — NOT STARTED
+- F0-15 — MERGED
+- UI-03 — MERGED
 
 ## Completed
 - Feature documentation drafted (Claude Chat planning pack)
 
 ## In progress
-- None
+- Claimed; inspecting kit, contracts and fixtures against the design
 
 ## Remaining
 - Route `/family/[clientId]/info` inside the family layout.
