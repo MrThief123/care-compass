@@ -1,27 +1,27 @@
 # Progress — FAM-UI-03 Family Add / Edit event screens (UI)
 
-Status: NOT STARTED
-Owner: unclaimed
+Status: IN PROGRESS
+Owner: Dhruv Verma
 Lane: F — Family
 Sprint: SPRINT · planned D5
-Branch: `feature/family-ui-event-form` (not yet created)
+Branch: `feature/family-ui-event-form` (created from `origin/family-dev` at 9053abd)
 PR target: `family-dev`
-Last updated: 2026-09-17 (planning pack generated)
+Last updated: 2026-09-24
 
 ## Blockers
 - None recorded at planning time
 
 ## Dependencies status
-- F0-15 — NOT STARTED
-- UI-02 — NOT STARTED
-- UI-01 — NOT STARTED
-- UI-03 — NOT STARTED
+- F0-15 — MERGED
+- UI-02 — MERGED
+- UI-01 — MERGED
+- UI-03 — MERGED
 
 ## Completed
 - Feature documentation drafted (Claude Chat planning pack)
 
 ## In progress
-- None
+- Claimed; inspecting kit and writing tests first
 
 ## Remaining
 - Route `/family/[clientId]/events/[eventId]/edit` inside the family layout.
