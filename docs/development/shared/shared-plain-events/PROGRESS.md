@@ -1,6 +1,6 @@
 # Progress — UI-05 Plain events in the shared kit and contracts (CHG-009)
 
-Status: READY FOR PR
+Status: PR OPEN
 Owner: Dhruv Verma
 Lane: S — Shared kit
 Sprint: SPRINT · planned D8
@@ -42,7 +42,7 @@ Last updated: 2026-09-24
 - Nothing.
 
 ## Remaining
-- Open the PR once the human says yes.
+- Review and merge of PR #81 (human).
 
 ## Acceptance criteria status
 - 13 / 13 MET. AC-13: no suite regresses. The only local failures (5 integration, 2 e2e) need a working local Supabase and fail the same on `origin/main`; CI `db-test` runs the integration tests green.
@@ -87,7 +87,7 @@ Last updated: 2026-09-24
 - Calendar screens that show plain events: pass `AnyOccurrence[]` (read with `type: "all"`) to `DayTimeline` / `WeekGrid` / `MonthGrid`; callbacks then receive `AnyOccurrence` (FD-05).
 
 ## Next action
-- Wait for the human's yes, then open the PR to `main`: title "UI-05 Plain events in the shared kit and contracts", body per `docs/DEVELOPMENT_WORKFLOW.md` §8 with the dashboard-lane notes above.
+- PR #81 to `main` is open (https://github.com/MrThief123/care-compass/pull/81), opened by the human 2026-09-24. Next: review feedback, if any.
 
 ## Ready for PR
-- Yes (PR not opened; waiting for approval)
+- Yes. PR #81 opened: https://github.com/MrThief123/care-compass/pull/81
