@@ -22,12 +22,12 @@ Tests are written **before** production code (TESTING.md §2). Run them, confirm
 ## Where the tests live
 - T-01 to T-04: `src/features/family-calendar/family-calendar.test.tsx` (titles `[FAM-UI-02][AC-xx] T-0x …`).
 - T-05: `tests/e2e/family-calendar.spec.ts`.
-- T-06, T-07 (CHG-007): `family-calendar.test.tsx` (`[AC-06]` keyboard shortcuts, `[AC-07]` Today, 13 tests), `calendar-params.test.ts` (`goToToday`, 3 tests), and one e2e walk through every key in `tests/e2e/family-calendar.spec.ts`.
+- T-06, T-07 (CHG-013): `family-calendar.test.tsx` (`[AC-06]` keyboard shortcuts, `[AC-07]` Today, 13 tests), `calendar-params.test.ts` (`goToToday`, 3 tests), and one e2e walk through every key in `tests/e2e/family-calendar.spec.ts`.
 
 ## Additional tests (written first, same session)
 - `src/features/family-calendar/family-calendar.test.tsx`: today from the contract, fallback for bad params, a block opens Task detail, the Tasks panel on the default, empty and URL-selected day, the URL kept on selection, a Done task ticked and untickable (OQ-10 default), ticks surviving day changes, the Log panel (three rows, View all, empty), the month and day views, Previous/Next, loading, error and Retry, empty week, a long title wraps, and axe on the week and month views. 26 tests.
 - `src/features/family-calendar/calendar-params.test.ts`: URL parsing and fallbacks, visible ranges, D/W/M switching (the AC-05 month rule), stepping across months and years, selection, hrefs. 22 tests.
-- `src/server/events/occurrences.test.ts`: the CHG-006 contract (`getOccurrences`, `getToday`): the design week as drawn, inclusive Melbourne-day boundaries, order, client isolation, prototype keys, empty ranges, copies, validation and the 42-day limit, the Supabase-mode message, future rows open in Task detail but stay out of the Task log. 17 tests.
+- `src/server/events/occurrences.test.ts`: the CHG-012 contract (`getOccurrences`, `getToday`): the design week as drawn, inclusive Melbourne-day boundaries, order, client isolation, prototype keys, empty ranges, copies, validation and the 42-day limit, the Supabase-mode message, future rows open in Task detail but stay out of the Task log. 17 tests.
 - `tests/e2e/family-calendar.spec.ts`: selection survives a reload; no horizontal overflow at 1920, 1280, 1024 and 768 px.
 
 ## Regression scope

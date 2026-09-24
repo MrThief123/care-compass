@@ -9,7 +9,7 @@ import { OCCURRENCE_RANGE_MAX_DAYS } from "@/types/domain";
 import type { Occurrence } from "@/types/domain";
 
 /**
- * Contract tests for the calendar read (CHG-006): `getOccurrences` over a
+ * Contract tests for the calendar read (CHG-012): `getOccurrences` over a
  * Melbourne date range and `getToday`, called the way screens call them, with
  * DATA_SOURCE=mock. F0-11's Supabase implementation must pass the same rules.
  */

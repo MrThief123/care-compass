@@ -2,11 +2,17 @@
 export { ChipGroup, type ChipGroupProps, type ChipOption } from "./chip-group";
 export { ConfirmationModal, type ConfirmationModalProps } from "./confirmation-modal";
 export { DetailsFormCard, type DetailsFormCardProps } from "./details-form-card";
-export { EventForm, type EventFormProps, type EventFormValues } from "./event-form";
+export {
+  EventForm,
+  type EventFormProps,
+  type EventFormValues,
+  type PlainEventFormValues,
+} from "./event-form";
 export { Field, type FieldOption, type FieldProps, type FieldType } from "./field";
 export { InlineAlert, type InlineAlertProps } from "./inline-alert";
 export { SettingsActionCard, type SettingsActionCardProps } from "./settings-action-card";
 export { SidePanelForm, type SidePanelFormProps } from "./side-panel-form";
+export { Switch, type SwitchProps } from "./switch";
 export {
   CUSTOM_SLOT,
   TIME_SLOTS,

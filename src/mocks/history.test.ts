@@ -1,8 +1,8 @@
 // @vitest-environment node
 import { describe, expect, it } from "vitest";
 
-import { generateCompletedHistory } from "@/mocks/history";
-import { OccurrenceSchema } from "@/types/domain";
+import { generateCompletedHistory, generatePlainEventOccurrences } from "@/mocks/history";
+import { OccurrenceSchema, PlainEventOccurrenceSchema } from "@/types/domain";
 import type { CareEvent } from "@/types/domain";
 
 function event(overrides: Partial<CareEvent> = {}): CareEvent {
@@ -139,5 +139,32 @@ describe("[UI-04][AC-09] generateCompletedHistory", () => {
     expect(() =>
       generateCompletedHistory([{ event: event(), carers: [] }], "2026-10-07T00:00"),
     ).toThrow(/carer/);
+  });
+});
+
+describe("[UI-05][AC-05] generatePlainEventOccurrences", () => {
+  it("[UI-05][AC-05] expands an automatic event into plain-event rows with no status, keeping the assignee", () => {
+    const rows = generatePlainEventOccurrences(
+      event({ completionMode: "automatic" }),
+      "Aisha Rahman",
+      "2026-10-05T00:00",
+    );
+
+    expect(rows.map((row) => row.start)).toEqual([
+      "2026-10-02T09:00:00+10:00",
+      "2026-10-03T09:00:00+10:00",
+      "2026-10-04T09:00:00+11:00",
+    ]);
+    for (const row of rows) {
+      expect(PlainEventOccurrenceSchema.parse(row)).toEqual(row);
+      expect(row).toMatchObject({ kind: "event", assignee: "Aisha Rahman" });
+      expect(row.key).toBe(`event-x:${row.start}`);
+    }
+  });
+
+  it("[UI-05][AC-05] refuses a manual (task) event", () => {
+    expect(() =>
+      generatePlainEventOccurrences(event(), "Aisha Rahman", "2026-10-05T00:00"),
+    ).toThrow(/not a plain event/);
   });
 });

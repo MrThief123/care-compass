@@ -12,7 +12,7 @@ Record feature-level decisions here using the template below. Project-wide decis
 
 ## Feature decisions log
 
-### FD-01 — The calendar range read is added on this branch (root CHG-006)
+### FD-01 — The calendar range read is added on this branch (root CHG-012)
 - Date: 2026-09-24
 - Context: the events contract had no range read (`getTodayOccurrences`, `getTaskLog`, `getOccurrence` only) and the fixtures stopped at Mon 30 Nov, so no week but the reference day could be drawn and AC-02 (Physiotherapy on FRI 4) could not be met.
 - Decision: add `getOccurrences(clientId, { from, to })` and `getToday()` to `src/server/events/queries.ts`, their mocks, `OccurrenceRangeSchema` in `src/types/domain.ts`, and the Tue 1 – Sat 5 Dec design rows in `src/mocks/fixtures.ts`, all on this feature branch.
@@ -26,7 +26,7 @@ Record feature-level decisions here using the template below. Project-wide decis
 - Date: 2026-09-24
 - Decision: the Tue 1 – Sat 5 Dec rows live in `UPCOMING_OCCURRENCES_BY_CLIENT_ID`. `getOccurrences` and `getOccurrence` read them; `getTaskLog` does not.
 - Reason: a log is what has happened, and perpetual events have no end, so a log over the future cannot be finite. It also keeps the Task log fixtures at exactly 137 rows (7 pages) and their tests unchanged. Task detail still opens a future occurrence (CHG-005).
-- Human confirmation required: no (within CHG-006).
+- Human confirmation required: no (within CHG-012).
 
 ### FD-03 — The URL is the calendar's state: `?view=&date=&month=`
 - Date: 2026-09-24
@@ -82,7 +82,7 @@ Record feature-level decisions here using the template below. Project-wide decis
 - Decision: left in place. It is outside Lane F's folders. Raise with Lane S.
 - Human confirmation required: no.
 
-### FD-12 — Keyboard shortcuts and Today (CHG-007)
+### FD-12 — Keyboard shortcuts and Today (CHG-013)
 - Date: 2026-09-24
 - Decision: a window `keydown` listener (`use-calendar-shortcuts.ts`, no new dependency). D/W/M change view (pressing the current view's key does nothing), ←/→ step, T goes to today. Skipped when a modifier is held (so Cmd+← and browser shortcuts still work), on key repeat (each step is a server navigation), and when focus is in a text input, textarea, select or contenteditable; checkboxes and buttons do not block them. Keys act on the day picked on screen, not only the URL's first date.
 - Today uses the contract's `getToday()` (the fixtures' 30 Nov in mock mode, the real Melbourne day once wired), so in mock mode it disagrees with the shell's header date, as FD-07 already notes. In the month view Today opens today's own month (30 Nov → November), unlike M, which opens the month of the selected week's Thursday (FD-08). If today is already in the visible range, Today selects it locally with no navigation.

@@ -161,8 +161,8 @@ The Confluence ERD (Organisation, Carer, Shift, Shift_has_Carer, Clients, Budget
 | carer_client_assignments | Carer ↔ client access periods | F0-06 |
 | audit_log | Append-only change log | F0-08 |
 | shifts | Carer–client time windows (no recurrence) | F0-10 |
-| care_events | Event series or one-off (title, description, start, duration, recurrence) | F0-11 |
-| care_event_overrides | Cancel/modify single occurrence | F0-11 |
+| care_events | Event series or one-off (title, description, start, duration, recurrence, `completion_mode`: `manual` = task, `automatic` = plain event; PD-044, CHG-009) | F0-11 |
+| care_event_overrides | Cancel/modify single occurrence, including switching one occurrence between task and plain event (CHG-009) | F0-11 |
 | care_event_completions | Append-only done/undone history with actor snapshot | F0-11 |
 | budget_buckets | Per-client funding bucket and period | F0-12 |
 | budget_fund_entries | Append-only top-ups (History) | F0-12 |
@@ -187,6 +187,8 @@ Rules stored on `care_events.recurrence`; occurrences generated on demand for a 
 ### 6.3 Status derivation (CONFIRMED set UI-D18; rule PROPOSED, OQ-10)
 `done` if latest completion action is `done`; else `overdue` if now ≥ occurrence due time; else `planned`.
 
+This applies to **tasks** only (`completion_mode = manual`). An occurrence of a **plain event** (`automatic`) has no status: never Planned, Done or Overdue, and `set_occurrence_done` rejects it (CHG-009, amending PD-044). An occurrence's mode is its override's mode if it has one, else its series'. Changing the mode never reaches before now: a series change is stored as a split at the first affected occurrence (or at now, for "entire series"), so past occurrences keep their mode, status and completions. Checklist views read tasks only; schedule and log views read both, and `getTaskLog` takes a type filter (all, tasks, events).
+
 ---
 
 ## 7. API conventions (PROPOSED)
@@ -210,7 +212,7 @@ Rules stored on `care_events.recurrence`; occurrences generated on demand for a 
 
 ## 9. Key data flows
 1. **View Family Home** → layout verifies role → `getOccurrences(clientId, today)` (RLS) → expand rules → merge overrides/completions/shift assignee → render; `getBudgetSummary(clientId)`.
-2. **Tick task** → Server Action → RPC `set_occurrence_done` (authorises family or on-shift carer, inserts completion, audit) → revalidate.
+2. **Tick task** → Server Action → RPC `set_occurrence_done` (authorises family or on-shift carer, rejects plain-event occurrences (CHG-009), inserts completion, audit) → revalidate.
 3. **Assign shift** → overlap query (warning) → insert shift (RLS admin) → trigger creates carer notification (CAR-02) → assignment ensured (OQ-09).
 4. **Record expense** → RPC `record_expense` → summary recalculated → threshold job later emails once per threshold/period.
 5. **Change organisation** → RPC `transfer_client_organisation` → next requests by old org return no rows.
