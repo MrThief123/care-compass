@@ -1,12 +1,14 @@
 # Progress — FAM-UI-02 Family Calendar screen (UI)
 
-Status: MERGED TO DEV
+Status: IN PROGRESS
 Owner: Dhruv Verma
 Lane: F — Family
 Sprint: SPRINT · planned D4–D5
-Branch: `feature/family-ui-calendar` (created from `origin/family-dev` at 9053abd)
+Branch: `feature/family-ui-calendar-ticks` (CHG-016 follow-up, created from `origin/family-dev` at d7ccf71). The original build, `feature/family-ui-calendar`, was merged to `family-dev` (#77).
 PR target: `family-dev`
 Last updated: 2026-09-24
+
+**CHG-016 (2026-09-24), in progress:** a tick in the Tasks panel shows on the week, day and month grids on the same page ("Done · <signed-in name>"); display only, nothing saved (FAM-05 wires `setOccurrenceDone`).
 
 ## Blockers
 - None.
