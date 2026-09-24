@@ -1,14 +1,17 @@
 # Session State — FAM-UI-04 Family Info screen (UI)
 
-Last session date: none (no implementation session yet)
-Current branch: n/a — `feature/family-ui-info` not created
-Worked on: n/a
-What changed: n/a
-Tests run: none
-Test results: n/a
+Last session date: 2026-09-25
+Current branch: `feature/family-ui-info` (from `origin/family-dev` at 02c7fa7)
+Worked on: FAM-UI-04 end to end: CHG-018 contracts and fixtures, the Info screen and its states, the design-match pass, the local checks, the docs, and removing the duplicate client name block from the page body (FD-08)
+What changed: see PROGRESS.md "Files changed"
+Tests run: `npx vitest run src tests/unit`; `npx tsc --noEmit`; `npx eslint .`; `npx prettier --check .`; Playwright e2e on the production build without the F0-07 auth specs; a real-browser design and width check
+Test results: 1230 / 1230 unit and component tests pass (after FD-08); tsc, prettier clean; eslint 0 errors (3 warnings in files this branch does not touch); e2e 35 pass, 1 flaky shell spec that also fails on `family-dev` without this branch (TEST_PLAN.md Results)
 Current blocker: None
-Important discoveries: none
-Important decisions: none
-Exact next action: Run `START FEATURE FAM-UI-04` once dependencies are MERGED TO DEV (or COMPLETE) and blocking decisions are answered.
-Files likely to be touched next: `src/app/(family)/family/[clientId]/info/page.tsx`
-Warning for next session: Read PRD.md, ACCEPTANCE_CRITERIA.md and TEST_PLAN.md before writing any code. Do not create the branch from the wrong parent (`family-dev`).
+Important discoveries:
+- `tests/e2e/auth.spec.ts` writes to the hosted Supabase project in `.env.local` and leaves an `E2E Client` row per family run (one from this session; 22 older ones). Exclude it with `--grep-invert "F0-07"`.
+- The kit `CardShell` draws a 1px border the design's cards do not have (FD-07).
+- The `notif-aisha-2` notification still says "Care plan 2026.pdf" (FD-02).
+Important decisions: FD-01 to FD-08 in DECISIONS.md (FD-08: client name shown once, in the shell header, at the human's request; tests of the removed block changed, flagged HUMAN REVIEW); CHG-018 in root DECISIONS.md (human-confirmed 2026-09-25)
+Exact next action: wait for review of the PR to `family-dev` (`FAM-UI-04 Family Info screen (UI)`, opened 2026-09-25 after the human's "yes"). Answer review comments on this branch. Do not merge it.
+Files likely to be touched next: none, unless review asks for changes
+Warning for next session: do not stage `.claude/settings.json` (unrelated, always dirty). Do not run the F0-07 auth e2e specs against the hosted project. Ask before deleting any row in it.

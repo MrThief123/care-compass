@@ -641,6 +641,16 @@ Docs updated: DECISIONS.md
 - Human confirmation: Dhruv Verma, 2026-09-24 (in-session).
 - Docs updated: DECISIONS.md (this entry); FAM-UI-02 and FAM-UI-03 ACCEPTANCE_CRITERIA.md, TEST_PLAN.md, DECISIONS.md, PROGRESS.md, SESSION_STATE.md.
 
+### CHG-018 — Client info contract: section and client-document reads, and the Family · Info design fixtures
+- Date / requested by: 2026-09-25 / Dhruv Verma (human, project lead)
+- Type: contract extension (shared folders changed from a dashboard feature branch)
+- Description: no Phase 1 contract returned a client's Description, Habits and Medical history, or the documents attached to the client rather than to an event, and the fixtures did not hold the design text. Added, read-only: `getClientInfoSections(clientId): Promise<ClientInfoSection[]>` to `src/server/clients/queries.ts` (sections in the fixed order description, habits, medicalHistory; `[]` for a client with none or an unknown id) and `getClientDocuments(clientId): Promise<DocumentRef[]>` to `src/server/documents/queries.ts` (client-level documents only, oldest upload first, ties by id; a document with an `eventId` is never returned; `[]` for an unknown id). Their mocks live in `src/mocks/queries/clients.ts` and `documents.ts`. `src/mocks/fixtures.ts` gains `CLIENT_INFO_SECTIONS` (Margaret's three sections, worded exactly as in `family-04-info.png`), and `DOCUMENTS` holds the two files that design draws: `Care plan.pdf` (the existing `doc-margaret-care-plan` entry, renamed from `Care plan 2026.pdf`) and a new `Medication schedule.pdf`. No types change. Supabase mode throws the standard not-implemented error. Nothing here writes: Edit and Add file on the Info screen change local state only (Phase 1).
+- Source / justification: human answer in-session, 2026-09-25 (chose "Add on this branch as CHG-018" over a separate shared PR), same route as CHG-008 and CHG-012.
+- Impact: FAM-UI-04 (`src/features/family-info/**`). F0-06 owns `client_info_sections`; F0-13 owns document storage and signed URLs; FAM-09 (Client info wiring) reads and writes through these contracts and must keep the ordering, the client scoping and the "no event documents" rule. CAR-UI/CAR-04 (Carer patient info) may read them too. The rename changes no test expectation: the only other places that spell `Care plan 2026.pdf` are a carer notification fixture message (`notif-aisha-2`, left as drawn in the carer design, so the two designs name the same file differently; noted, not resolved) and one unrelated test's own literal in `task-detail-view.test.tsx`.
+- Numbering: CHG-018 was free on every local and remote branch when this was written. Whichever branch merges second renumbers.
+- Human confirmation: Dhruv Verma, 2026-09-25 (in-session).
+- Docs updated: DECISIONS.md (this entry); `docs/development/family-dev/family-ui-info/DECISIONS.md` FD-01 and FD-02.
+
 Template for future entries:
 ```
 ### CHG-xxx — <title>

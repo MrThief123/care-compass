@@ -3,11 +3,14 @@
  * Read only by `src/server/documents/queries.ts` — never imported directly by
  * `src/app` or `src/features`.
  */
-import { EVENT_DOCUMENTS } from "@/mocks/fixtures";
-import type { EventDocument } from "@/types/domain";
+import { DOCUMENTS, EVENT_DOCUMENTS } from "@/mocks/fixtures";
+import type { DocumentRef, EventDocument } from "@/types/domain";
 
 /** Oldest upload first (by instant, not string); ties by id ascending. */
-function oldestUploadFirst(a: EventDocument, b: EventDocument): number {
+function oldestUploadFirst(
+  a: Pick<DocumentRef, "id" | "uploadedAt">,
+  b: Pick<DocumentRef, "id" | "uploadedAt">,
+): number {
   const aUploaded = Date.parse(a.uploadedAt);
   const bUploaded = Date.parse(b.uploadedAt);
   if (aUploaded !== bUploaded) return aUploaded < bUploaded ? -1 : 1;
@@ -35,4 +38,23 @@ export async function getEventDocuments(
   eventId: string,
 ): Promise<EventDocument[]> {
   return selectEventDocuments(EVENT_DOCUMENTS, clientId, eventId);
+}
+
+/**
+ * The client-level documents of one client: those not attached to an event.
+ * Oldest upload first. Returns copies, so a caller that edits what it was
+ * given cannot change the fixtures.
+ */
+export function selectClientDocuments(
+  documents: readonly DocumentRef[],
+  clientId: string,
+): DocumentRef[] {
+  return documents
+    .filter((document) => document.clientId === clientId && document.eventId === undefined)
+    .sort(oldestUploadFirst)
+    .map((document) => ({ ...document }));
+}
+
+export async function getClientDocuments(clientId: string): Promise<DocumentRef[]> {
+  return selectClientDocuments(DOCUMENTS, clientId);
 }
