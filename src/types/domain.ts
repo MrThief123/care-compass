@@ -125,16 +125,8 @@ export type CareEvent = z.infer<typeof CareEventSchema>;
 export const OccurrenceStatusSchema = z.enum(["planned", "done", "overdue"]);
 export type OccurrenceStatus = z.infer<typeof OccurrenceStatusSchema>;
 
-/**
- * PRD.md Scope, verbatim field list:
- * `{key, eventId, clientId, title, description, start, durationMinutes,
- *   status: 'planned'|'done'|'overdue', actor?, assignee?, completedAt?}`
- *
- * `key` is `${eventId}:${originalStartISO}` (ARCHITECTURE.md §6.2).
- * `assignee` (PD-029): the carer whose shift covers the occurrence start,
- * or undefined if none. `actor` (REQ-19): who actually completed it.
- */
-export const OccurrenceSchema = z.object({
+/** Fields every occurrence has, whether a task or a plain event (CHG-009). */
+const occurrenceBaseShape = {
   key: z.string(),
   eventId: z.string(),
   clientId: z.string(),
@@ -142,12 +134,51 @@ export const OccurrenceSchema = z.object({
   description: z.string(),
   start: z.string(),
   durationMinutes: z.number().int().nonnegative(),
+  assignee: z.string().optional(),
+};
+
+/**
+ * A task occurrence: one occurrence of a `manual` event, ticked off by hand.
+ *
+ * PRD.md Scope, verbatim field list:
+ * `{key, eventId, clientId, title, description, start, durationMinutes,
+ *   status: 'planned'|'done'|'overdue', actor?, assignee?, completedAt?}`
+ *
+ * `key` is `${eventId}:${originalStartISO}` (ARCHITECTURE.md §6.2).
+ * `assignee` (PD-029): the carer whose shift covers the occurrence start,
+ * or undefined if none. `actor` (REQ-19): who actually completed it.
+ * `kind` is optional so every existing task occurrence stays valid (UI-05 FD-03).
+ */
+export const OccurrenceSchema = z.object({
+  ...occurrenceBaseShape,
+  kind: z.literal("task").optional(),
   status: OccurrenceStatusSchema,
   actor: z.string().optional(),
-  assignee: z.string().optional(),
   completedAt: z.string().optional(),
 });
 export type Occurrence = z.infer<typeof OccurrenceSchema>;
+/** Another name for `Occurrence`, for code that handles both kinds. */
+export type TaskOccurrence = Occurrence;
+
+/**
+ * A plain-event occurrence: one occurrence of an `automatic` event (CHG-009).
+ * It is never ticked off, so it has no `status`, `actor` or `completedAt`, and
+ * is rejected if it carries any of them. `assignee` is kept (PD-055).
+ */
+export const PlainEventOccurrenceSchema = z.strictObject({
+  ...occurrenceBaseShape,
+  kind: z.literal("event"),
+});
+export type PlainEventOccurrence = z.infer<typeof PlainEventOccurrenceSchema>;
+
+/** A task occurrence or a plain-event occurrence (UI-05 FD-03). */
+export const AnyOccurrenceSchema = z.union([OccurrenceSchema, PlainEventOccurrenceSchema]);
+export type AnyOccurrence = Occurrence | PlainEventOccurrence;
+
+/** The one way to tell the kinds apart; narrows to `PlainEventOccurrence`. */
+export function isPlainEvent(occurrence: AnyOccurrence): occurrence is PlainEventOccurrence {
+  return occurrence.kind === "event";
+}
 
 // ---------------------------------------------------------------------------
 // Shifts
@@ -294,13 +325,28 @@ export const TASK_LOG_PAGE_SIZE = 20;
  * (0, negatives, fractions, NaN and Infinity are rejected); a page past the
  * last is valid and returns no items. `q` is a trimmed, case-insensitive
  * substring of the task title; `status` is an exact match.
+ *
+ * `type` (UI-05, CHG-009): `all` returns tasks and plain events, `tasks` only
+ * tasks, `events` only plain events. Omitted means tasks only, as before
+ * (FD-01). Any `status` filter returns tasks only, since a plain event has no
+ * status.
  */
+export const OccurrenceTypeFilterSchema = z.enum(["all", "tasks", "events"]);
+export type OccurrenceTypeFilter = z.infer<typeof OccurrenceTypeFilterSchema>;
+
 export const TaskLogQuerySchema = z.object({
   q: z.string().optional(),
   status: OccurrenceStatusSchema.optional(),
+  type: OccurrenceTypeFilterSchema.optional(),
   page: z.number().int().positive().optional(),
 });
-export type TaskLogQuery = z.infer<typeof TaskLogQuerySchema>;
+/**
+ * The full validated query, including `type` (UI-05). `TaskLogQuery` keeps its
+ * shape from before UI-05 (no `type`), so code written against it still reads
+ * tasks only and keeps its types (FD-01, FD-03).
+ */
+export type TypedTaskLogQuery = z.infer<typeof TaskLogQuerySchema>;
+export type TaskLogQuery = Omit<TypedTaskLogQuery, "type">;
 
 /**
  * One page of a client's task history, the whole history and not a window of
@@ -312,9 +358,12 @@ export type TaskLogQuery = z.infer<typeof TaskLogQuerySchema>;
  * `status` filters, across all pages. `page` echoes the requested page and
  * `pageSize` is `TASK_LOG_PAGE_SIZE`. A page beyond the last has an empty
  * `items` array and the same `total`.
+ *
+ * `T` is `Occurrence` by default; a read with a `type` option returns
+ * `TaskLogResult<AnyOccurrence>` (UI-05 FD-03).
  */
-export interface TaskLogResult {
-  items: Occurrence[];
+export interface TaskLogResult<T extends AnyOccurrence = Occurrence> {
+  items: T[];
   page: number;
   pageSize: number;
   total: number;

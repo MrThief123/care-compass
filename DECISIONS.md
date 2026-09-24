@@ -565,6 +565,16 @@ Docs updated: DECISIONS.md
 - Human confirmation: Prajeet, 2026-09-24 (in-session).
 - Docs updated: DECISIONS.md (PD-057, this entry, amendment note on PD-040), PRD.md (REQ-01, REQ-09, new REQ-36, PL-18, new PL-24), DEVELOPMENT_PLAN.md (F0-17 row and card, totals, next number, CHG-010 notes on ADM-04 and FAM-13), `docs/development/shared/shared-sign-up/`.
 
+### CHG-011 — Plain events on the calendar use a solid neutral stripe; on compact surfaces they may differ from Planned tasks by colour alone
+- Date / requested by: 2026-09-24 / Dhruv Verma (human, project lead)
+- Type: scope change (amends CHG-009 "Calendar look" and UI-05 AC-12)
+- Description: a plain event's calendar block and month chip carry a **solid** neutral stripe (token `text-secondary` grey) instead of a patterned one, with no status shape. The word "Event" is still visible where the block has room (day view `full` tier, event popover) and is always in the accessible name. On compact day blocks, week blocks and month chips — where a Planned task also has no shape and the status word is read out to screen readers only — a plain event differs **visually** from a Planned task by stripe colour alone. This is an accepted exception for **event type** only: task **status** (Planned, Done, Overdue) is still never conveyed by colour alone (CLAUDE.md §7 unchanged for status).
+- Source / justification: human instruction in-session, 2026-09-24, after reviewing the dotted-bar preview: "I don't like the grey dotted line … just have the same grey as a stripe rather than dots"; the colour-alone trade-off was put to the human, who chose "stripe only".
+- Impact: UI-05 AC-12 reworded (event type exempt from the colour-alone rule on compact surfaces; status still covered); UI-05 FD-05; UI-01 calendar kit `EVENT_CUE`. Dashboard features that show plain events (FAM-UI-01/02, FAM-04/05, CAR-UI-01/03, CAR-05) inherit the look; no test changes outside UI-05.
+- Numbering: recorded as CHG-010 on `feature/shared-plain-events`; renumbered to CHG-011 when merging `main`, where CHG-010 is self-serve sign-up (F0-17).
+- Human confirmation: Dhruv Verma, 2026-09-24 (in-session).
+- Docs updated: DECISIONS.md (this entry), `docs/development/shared/shared-plain-events/ACCEPTANCE_CRITERIA.md` (AC-12), `docs/development/shared/shared-plain-events/DECISIONS.md` (FD-05).
+
 Template for future entries:
 ```
 ### CHG-xxx — <title>

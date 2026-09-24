@@ -14,7 +14,7 @@ import { expandOccurrences } from "@/lib/recurrence";
 import type { RecurrenceRule } from "@/lib/recurrence";
 import { formatLocalDateTime, parseLocalDateTime } from "@/lib/recurrence/local-time";
 import { localToMelbourneIso } from "@/mocks/melbourne-time";
-import type { CareEvent, Occurrence } from "@/types/domain";
+import type { CareEvent, Occurrence, PlainEventOccurrence } from "@/types/domain";
 
 export interface HistorySeries {
   event: CareEvent;
@@ -81,5 +81,37 @@ export function generateCompletedHistory(
         };
       },
     );
+  });
+}
+
+/**
+ * Every occurrence of a plain event (`automatic`, CHG-009) from its `start` up
+ * to (not including) `endExclusive`, a Melbourne local date-time. A plain event
+ * is never ticked off, so the rows carry no status, actor or completion time;
+ * `assignee` is kept (PD-055).
+ */
+export function generatePlainEventOccurrences(
+  event: CareEvent,
+  assignee: string,
+  endExclusive: string,
+): PlainEventOccurrence[] {
+  if (event.completionMode !== "automatic") {
+    throw new Error(`generatePlainEventOccurrences: ${event.id} is not a plain event.`);
+  }
+  const rule = ruleFor(event);
+
+  return expandOccurrences(rule, { start: rule.anchor, end: endExclusive }).map((slot) => {
+    const start = localToMelbourneIso(slot.start);
+    return {
+      key: `${event.id}:${start}`,
+      eventId: event.id,
+      clientId: event.clientId,
+      title: event.title,
+      description: event.description,
+      start,
+      durationMinutes: event.durationMinutes,
+      assignee,
+      kind: "event",
+    };
   });
 }
