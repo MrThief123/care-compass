@@ -101,7 +101,9 @@ test("[FAM-UI-07][AC-09] the Edit event button opens the event's edit page", asy
   expect(box.width).toBeGreaterThanOrEqual(44);
 
   await edit.click();
-  await expect(page).toHaveURL(`${CLIENT}/events/event-margaret-physio/edit`);
+  await expect(page).toHaveURL(
+    `${CLIENT}/events/event-margaret-physio/edit?occurrence=${key}&from=home`,
+  );
 });
 
 for (const width of [1920, 1440, 1280, 1024, 768]) {
