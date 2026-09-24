@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { useCurrentTime } from "@/components/shared/calendar/current-time-line";
 import { DayTimeline } from "@/components/shared/calendar/day-timeline";
 import { MonthGrid } from "@/components/shared/calendar/month-grid";
 import { WeekGrid } from "@/components/shared/calendar/week-grid";
@@ -63,6 +64,12 @@ export function FamilyCalendarView({
   }
   const selected = selection.source === paramsHref ? selection.date : params.date;
 
+  // The kit labels the time in the gutter whatever week is shown, so the clock
+  // is passed only while the real day is on screen (DECISIONS.md FD-07).
+  const clock = useCurrentTime();
+  const clockDay = clock ? melbourneDay(clock.toISOString()) : undefined;
+  const now = clockDay && clockDay >= range.from && clockDay <= range.to ? clock : null;
+
   const [ticks, setTicks] = useState<Record<string, boolean>>({});
 
   const navigate = (next: CalendarParams) => router.push(calendarHref(clientId, next));
@@ -80,7 +87,7 @@ export function FamilyCalendarView({
   );
 
   return (
-    <div className="flex min-w-0 flex-col gap-5 px-6 pb-6 pt-5">
+    <div className="flex min-w-0 flex-col gap-5 px-6 pb-6 pt-4">
       <CalendarToolbar
         label={rangeLabel(params, range)}
         view={params.view}
@@ -94,12 +101,18 @@ export function FamilyCalendarView({
             weekStart={range.from}
             today={today}
             occurrences={occurrences}
+            now={now}
             onSelectDay={select}
             onSelectOccurrence={openOccurrence}
           />
         )}
         {params.view === "day" && (
-          <DayTimeline occurrences={occurrences} onSelect={openOccurrence} className="px-2" />
+          <DayTimeline
+            occurrences={occurrences}
+            now={now}
+            onSelect={openOccurrence}
+            className="px-2"
+          />
         )}
         {params.view === "month" && (
           <MonthGrid

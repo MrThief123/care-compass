@@ -41,7 +41,7 @@ export function TasksPanel({ dateLabel, occurrences, isTicked, onToggle }: Tasks
               checked: isTicked(occurrence),
             }))}
             onToggle={onToggle}
-            className="flex flex-col [&_input]:m-3 [&_label]:gap-2 [&_span]:min-w-0 [&_span]:[overflow-wrap:anywhere]"
+            className="flex flex-col [&_input]:ml-3 [&_input]:accent-primary [&_label]:gap-4 [&_span]:min-w-0 [&_span]:[overflow-wrap:anywhere]"
           />
         )}
       </CardShell>
