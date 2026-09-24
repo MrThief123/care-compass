@@ -21,50 +21,55 @@ Last updated: 2026-09-24
 
 ## Task list (one at a time, human go-ahead between tasks)
 1. Plan (docs only) — DONE
-2. Types (`src/types/domain.ts`) — IN PROGRESS (audit done, FD-03; tests written, failing)
-3. Mocks and contracts
+2. Types (`src/types/domain.ts`) — DONE
+3. Mocks and contracts — next
 4. UI-01 calendar kit
 5. UI-03 lists kit
 6. UI-02 forms kit
 7. Full verification
 
 ## Completed
+- Task 2: audit of every file assuming an occurrence has a status (FD-03). `src/types/domain.ts`: `occurrenceBaseShape`; `OccurrenceSchema` gains optional `kind: "task"`; `TaskOccurrence` alias; strict `PlainEventOccurrenceSchema` (`kind: "event"`); `AnyOccurrenceSchema` / `AnyOccurrence`; `isPlainEvent()`; `OccurrenceTypeFilterSchema` and `TaskLogQuerySchema.type`; `TaskLogResult<T = Occurrence>`. AC-04 reworded for FD-03 (`getOccurrence` needs `type: "all"` for a plain event).
 - Task 1: DEVELOPMENT_PLAN.md UI-05 row and card (totals 80 features, 333 criteria); PRD.md REQ-35 "Implemented by" gains UI-05; this folder from the template.
 
 ## In progress
-- Task 2: audit done (FD-03). `src/types/domain.test.ts` written first (T-01, T-02, T-03).
+- Nothing (waiting for the go-ahead for Task 3).
 
 ## Remaining
-- Tasks 2 to 7.
+- Tasks 3 to 7.
 
 ## Acceptance criteria status
-- 0 / 13 MET
+- 2 / 13 MET (AC-01, AC-02)
 
 ## Tests
 - Written: 3 / 19 (T-01, T-02, T-03 in `src/types/domain.test.ts`, 8 tests)
-- Passing: 1 (the AC-06 type-level check, which holds before and after)
-- Failing: 7
-- Last run: 2026-09-24, `npx vitest run src/types/domain.test.ts`
+- Passing: 8 / 8 in `src/types/domain.test.ts`; full unit suite 432 passed
+- Failing: 5 integration tests (F0-04 / F0-07) that need a working local Supabase ("Invalid API key"); they fail identically without this change
+- Last run: 2026-09-24, `npm run typecheck`, `npx prettier --check src docs`, `npm test`
 - Tests-first evidence: 7 fail for the right reason before implementation: `PlainEventOccurrenceSchema`, `AnyOccurrenceSchema`, `isPlainEvent` undefined; `OccurrenceSchema` strips `kind: "event"`; `TaskLogQuerySchema` strips `type`.
 
 ## Files changed
 - `DEVELOPMENT_PLAN.md`, `PRD.md`, `docs/development/shared/shared-plain-events/*`
+- `src/types/domain.ts`, `src/types/domain.test.ts`
 - Planned (FD-02): `src/app/dev-preview-calendar-kit/**`, `src/app/dev-preview-forms-kit/**` (examples only)
 
 ## Decisions
 - FD-01 (answered, Option A), FD-02 (answered, option a), FD-03 (answered, Option A)
 
 ## Problems encountered
-- None.
+- Stale `.next/types` from a `family-dev` build broke `tsc` (missing pages); cleared the generated folder.
+- `npm run verify` stops at `format:check` on the uncommitted `.claude/settings.json` (never committed); ran its later steps directly.
+- 5 integration tests fail on a local Supabase "Invalid API key"; unrelated, same without this change.
 
 ## Assumptions
 - `docs/JIRA_TICKETS.md`, `docs/JIRA_BACKLOG.csv` and root `SESSION_STATE.md` are not updated (as with UI-04).
 
 ## Notes for the dashboard lanes (not edited here)
 - Care log (FAM-UI-07, FAM-14, FAM-15) and any log export (PL-06, PL-08): call `getTaskLog` with `type: "all"` so tasks and plain events appear together (FD-01). Today timelines that show both pass the same option to `getTodayOccurrences`.
+- Types (FD-03): results read with a `type` option are `AnyOccurrence`; use `isPlainEvent()` before reading `status`. `Occurrence` itself is unchanged.
 
 ## Next action
-- Task 2: list every file on `main` that assumes every occurrence has a status and report it before changing `src/types/domain.ts`.
+- Task 3 (on go-ahead): failing contract/fixture tests T-04 to T-08 (AC-03 to AC-06), then fixtures, mock adapter and `src/server/events/queries.ts` options.
 
 ## Ready for PR
 - No

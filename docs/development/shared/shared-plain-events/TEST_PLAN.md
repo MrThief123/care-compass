@@ -16,9 +16,9 @@ Tests are written **before** production code (TESTING.md §2). Run them, confirm
 
 | Test ID | Covers | Level | Test description | Written first? | Result |
 |---|---|---|---|---|---|
-| T-01 | AC-01 | unit | Task occurrence without a status, or with an unknown status, rejects; plain-event occurrence without status parses; plain-event occurrence with status, actor or completedAt rejects. | ☐ | NOT RUN |
-| T-02 | AC-01 | unit | The task / plain-event helper returns the right answer for both kinds (plus a type-level narrowing check). | ☐ | NOT RUN |
-| T-03 | AC-02 | unit | `TaskLogQuerySchema` accepts `all`, `tasks`, `events`, omitted; rejects `bogus`. | ☐ | NOT RUN |
+| T-01 | AC-01 | unit | Task occurrence without a status, or with an unknown status, rejects; plain-event occurrence without status parses; plain-event occurrence with status, actor or completedAt rejects. | ☑ | PASS |
+| T-02 | AC-01 | unit | The task / plain-event helper returns the right answer for both kinds (plus a type-level narrowing check). | ☑ | PASS |
+| T-03 | AC-02 | unit | `TaskLogQuerySchema` accepts `all`, `tasks`, `events`, omitted; rejects `bogus`. | ☑ | PASS |
 | T-04 | AC-03 | contract | `type: "all"`: both kinds, newest first, strictly ordered across pages, `total` equals the concatenated length. | ☐ | NOT RUN |
 | T-05 | AC-03 | contract | `type: "tasks"` has no plain events; `type: "events"` has only plain events, none with a status. | ☐ | NOT RUN |
 | T-06 | AC-03 | contract | Each `status` filter returns tasks only, with and without `type: "all"`; with `type: "events"` → `items: []`, `total` 0; `q` combined with `type`. | ☐ | NOT RUN |
