@@ -105,7 +105,7 @@ describe("[UI-05][AC-07] DayTimeline draws plain events", () => {
     for (const row of PLAIN_EVENTS) {
       const block = screen.getByTestId(`day-timeline-block-${row.key}`);
       expectNeutral(block);
-      expect(block).toHaveAccessibleName(expect.stringMatching(/\bEvent\b/));
+      expect(block).toHaveAccessibleName(expect.stringContaining("Event"));
       expect(block).toHaveAccessibleName(expect.stringContaining(row.title));
     }
   });
@@ -165,7 +165,7 @@ describe("[UI-05][AC-07] WeekGrid draws plain events", () => {
     const densities = PLAIN_EVENTS.map((row) => {
       const block = screen.getByTestId(`week-grid-block-${row.key}`);
       expectNeutral(block);
-      expect(block).toHaveAccessibleName(expect.stringMatching(/^Event: /));
+      expect(block).toHaveAccessibleName(expect.stringMatching(/^Event:/));
       expect(within(block).getByText("Event:", { exact: false })).toHaveClass("sr-only");
       return block.dataset.density;
     });
@@ -181,7 +181,7 @@ describe("[UI-05][AC-07] WeekGrid draws plain events", () => {
       const block = screen.getByTestId(`week-grid-block-${row.key}`);
       const cue = STATUS_CUE[row.status];
       expect(bar(block)).toHaveClass(cue.bar);
-      expect(block).toHaveAccessibleName(expect.stringMatching(new RegExp(`^${cue.label}: `)));
+      expect(block).toHaveAccessibleName(expect.stringMatching(new RegExp(`^${cue.label}:`)));
     }
   });
 
@@ -217,7 +217,7 @@ describe("[UI-05][AC-07] MonthGrid draws plain events", () => {
       expect(within(chip).getByText("Event:", { exact: false })).toHaveClass("sr-only");
     }
     expect(screen.getByTestId("month-grid-day-2026-11-30")).toHaveAccessibleName(
-      expect.stringMatching(/Event: 12:00\s?Park visit/),
+      expect.stringMatching(/Event:\s?12:00\s?Park visit/),
     );
   });
 

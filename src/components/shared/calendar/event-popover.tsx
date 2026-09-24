@@ -5,14 +5,17 @@ import { createPortal } from "react-dom";
 
 import { formatDuration } from "@/lib/format/duration";
 import { cn } from "@/lib/utils";
-import type { Occurrence } from "@/types/domain";
+import { isPlainEvent } from "@/types/domain";
+import type { AnyOccurrence } from "@/types/domain";
 
+import { EventPill } from "../event-pill";
 import { StatusPill } from "../status-pill";
 
 import { melbourneTimeRange } from "./melbourne-time";
 
 export interface EventPopoverProps {
-  occurrence: Occurrence;
+  /** A task, or a plain event (UI-05), which shows "Event" in place of a status. */
+  occurrence: AnyOccurrence;
   /** The block being hovered or focused; the card is placed beside it. */
   anchor: HTMLElement | null;
   /** DOM id, so the block can point at the card with `aria-describedby`. */
@@ -119,7 +122,15 @@ export function EventPopover({
       {occurrence.description ? (
         <p className="text-body-small text-text-primary">{occurrence.description}</p>
       ) : null}
-      <StatusPill status={occurrence.status} actorName={occurrence.actor} className="self-start" />
+      {isPlainEvent(occurrence) ? (
+        <EventPill className="self-start" />
+      ) : (
+        <StatusPill
+          status={occurrence.status}
+          actorName={occurrence.actor}
+          className="self-start"
+        />
+      )}
     </div>,
     document.body,
   );
