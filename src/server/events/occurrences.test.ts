@@ -34,7 +34,9 @@ function melbourneTime(iso: string): string {
 }
 
 function summary(rows: Occurrence[]): string[] {
-  return rows.map((row) => `${melbourneDateKey(row.start)} ${melbourneTime(row.start)} ${row.title}`);
+  return rows.map(
+    (row) => `${melbourneDateKey(row.start)} ${melbourneTime(row.start)} ${row.title}`,
+  );
 }
 
 describe("[FAM-UI-02][AC-01] getToday", () => {
@@ -161,10 +163,7 @@ describe("[FAM-UI-02][AC-02] getOccurrences — range rules", () => {
     ["not a date", { from: "30/11/2026", to: "2026-12-06" }],
     ["an impossible date", { from: "2026-02-30", to: "2026-03-01" }],
     ["to before from", { from: "2026-12-06", to: "2026-11-30" }],
-    [
-      `more than ${OCCURRENCE_RANGE_MAX_DAYS} days`,
-      { from: "2026-11-01", to: "2026-12-31" },
-    ],
+    [`more than ${OCCURRENCE_RANGE_MAX_DAYS} days`, { from: "2026-11-01", to: "2026-12-31" }],
   ])("[FAM-UI-02][AC-02] rejects %s with a ZodError", async (_label, range) => {
     await expect(getOccurrences(MARGARET_CLIENT_ID, range)).rejects.toBeInstanceOf(ZodError);
   });
