@@ -95,7 +95,7 @@ describe("[FAM-UI-07] TaskDetailView", () => {
     expect(within(card).queryByRole("link")).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Edit event" })).toHaveAttribute(
       "href",
-      "/family/client-margaret/events/event-margaret-morning-meds/edit",
+      "/family/client-margaret/events/event-margaret-morning-meds/edit?occurrence=event-margaret-morning-meds%3A2026-11-30T09%3A00%3A00%2B11%3A00",
     );
   });
 
@@ -332,13 +332,24 @@ describe("[FAM-UI-07] TaskDetailView: long text and narrow windows", () => {
 describe("[FAM-UI-07] TaskDetailView: Edit event button and Back to the origin (CHG-014)", () => {
   const classesOf = (element: Element) => [...element.classList];
 
+  it("[FAM-UI-03][AC-07] the Edit event button carries the occurrence being viewed and Task detail's own origin (CHG-015)", async () => {
+    await renderDetail(MORNING_MEDICATION_KEY, {
+      origin: { from: "calendar", view: { view: "month", date: "2026-11-28", month: "2026-11" } },
+    });
+
+    expect(screen.getByRole("link", { name: "Edit event" })).toHaveAttribute(
+      "href",
+      "/family/client-margaret/events/event-margaret-morning-meds/edit?occurrence=event-margaret-morning-meds%3A2026-11-30T09%3A00%3A00%2B11%3A00&from=calendar&view=month&date=2026-11-28&month=2026-11",
+    );
+  });
+
   it("[FAM-UI-07][AC-09] shows one 'Edit event' button in the title row, linking to the event's edit route", async () => {
     await renderDetail();
 
     const edit = screen.getByRole("link", { name: "Edit event" });
     expect(edit).toHaveAttribute(
       "href",
-      "/family/client-margaret/events/event-margaret-morning-meds/edit",
+      "/family/client-margaret/events/event-margaret-morning-meds/edit?occurrence=event-margaret-morning-meds%3A2026-11-30T09%3A00%3A00%2B11%3A00",
     );
     // One edit control on the page: the old Description 'Edit' link is gone.
     expect(screen.getAllByRole("link", { name: /edit/i })).toHaveLength(1);

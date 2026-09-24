@@ -614,6 +614,15 @@ Docs updated: DECISIONS.md
 - Human confirmation: Dhruv Verma, 2026-09-24 (in-session).
 - Docs updated: DECISIONS.md (this entry); FAM-UI-07 ACCEPTANCE_CRITERIA.md, TEST_PLAN.md, DECISIONS.md, PROGRESS.md, SESSION_STATE.md.
 
+### CHG-015 — Edit event and Add event return to a validated origin; Edit event opens on the occurrence being viewed
+- Date / requested by: 2026-09-24 / Dhruv Verma (human, project lead)
+- Type: scope change on a merged feature (FAM-UI-03), closing the CHG-014 follow-ups (FAM-UI-07 FD-29)
+- Description: (1) Task detail's "Edit event" button links to the Edit event route with `?occurrence=<key>` and Task detail's own origin (`from=` plus that screen's params, CHG-014), so the form opens on the occurrence being viewed. (2) On Edit event, Save event (after validation) and Cancel go to that occurrence's Task detail with its origin kept, so Back from there still reaches the Calendar, Home or Task log view it started on. If the occurrence is missing, unknown or belongs to another event, they go to the origin screen itself, and with no origin to the Task log. (3) On Add event, Save event (after validation) and Cancel go to Home, its only opener. (4) The target href is built only from a whitelisted origin re-validated by that screen's parser (`task-detail-origin.ts`) and an occurrence key the contract confirms belongs to the event; nothing is echoed from the URL. Navigation is `router.push(href)`; `router.back()` is no longer used. Save still persists nothing (FAM-UI-03 FD-04, Phase 1).
+- Source / justification: human instruction in-session, 2026-09-24: Step 2 brief (FD-29 (a) and (b): "Make them return to a validated origin, the same way Task detail's Back works … whitelist only, never echo a URL"; "Pass it from Task detail's Edit event button"), and "do both" (the CHG as proposed, and including Add event).
+- Impact: FAM-UI-03 (new AC-07 to AC-09, TEST_PLAN T-07 to T-09, feature DECISIONS FD-09 onward; FD-04's navigation is superseded; existing tests asserting `router.back()` change: HUMAN REVIEW). FAM-UI-07 (the "Edit event" href gains the occurrence and origin; FD-29 closed). No shared folders changed.
+- Human confirmation: Dhruv Verma, 2026-09-24 (in-session).
+- Docs updated: DECISIONS.md (this entry); FAM-UI-03 ACCEPTANCE_CRITERIA.md, TEST_PLAN.md, DECISIONS.md, PROGRESS.md, SESSION_STATE.md; FAM-UI-07 DECISIONS.md (FD-29 status).
+
 Template for future entries:
 ```
 ### CHG-xxx — <title>

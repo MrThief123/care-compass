@@ -288,6 +288,7 @@ Status verified against root `DECISIONS.md` on 2026-09-19 (`grep -n "OQ-xx" DECI
 - Findings: (1) Edit event's Cancel uses `router.back()` (`event-form-screen.tsx`), which returns to Task detail, with its origin, in normal use but not after a reload or from a shared link. (2) The Edit event page accepts `?occurrence=<key>` to pick the occurrence being edited, but Task detail's button links without it (`editEventHref` takes the event id only), so the form opens on today's occurrence or the event's anchor date rather than the one being viewed.
 - Decision: recorded as follow-ups for FAM-UI-03 / FAM-07; not implemented here.
 - Human confirmation required: yes (whether to schedule them).
+- **Resolved by root CHG-015 (2026-09-24)** in FAM-UI-03 (FD-09, branch `feature/family-ui-event-form-origin`): both follow-ups done. This feature's Edit event button now links through `editEventHrefFrom` (occurrence and origin); its changed tests are listed in FAM-UI-03 FD-10 (HUMAN REVIEW).
 - Test changes caused: none.
 
 ### FD-30 — Existing tests whose expectation changed (CHG-014). **HUMAN REVIEW: test expectation changed**

@@ -37,6 +37,7 @@ Non-blocking OQs: OQ-10, OQ-11, OQ-12 and OQ-22 have all been answered in root D
 
 ### FD-04 — Save event and Cancel
 - Date: 2026-09-24
+- **Superseded in part by FD-09 (CHG-015):** Save event and Cancel now go to a validated `returnHref`, not `router.back()`. Nothing persists, as below.
 - Decision: Save event validates through the kit (a Date error, AC-02), then `router.back()`. Cancel is `router.back()` too. Nothing persists. Opened directly with no history, Back leaves the page the way the browser's own Back would.
 - Human confirmation required: no.
 
@@ -64,6 +65,27 @@ Non-blocking OQs: OQ-10, OQ-11, OQ-12 and OQ-22 have all been answered in root D
 - Kit gaps (lane S, not edited here): the kit has no switch component, so it is local until one is shared; and the kit `EventForm` always shows the Status chips, so with the switch Off the Status row is still shown, although a plain event has no status. The CHG-009 shared follow-up should add a way to hide Status for a plain event (and a shared switch); FAM-06 / FAM-07 then hide it.
 - Human confirmation required: done (Dhruv Verma, 2026-09-24, asked for this feature's CHG-009 changes in-session). The switch has no Figma design yet: design review.
 - Test changes caused: none changed; T-05 and T-06 added (AC-05, AC-06).
+
+### FD-09 — CHG-015: where Save event and Cancel go, and the occurrence Task detail passes
+- Date: 2026-09-24
+- Context: root CHG-015 (human-confirmed in-session), closing FAM-UI-07 FD-29. FD-04 used `router.back()`, which breaks after a reload, on a shared link and after arriving from outside the app; and Task detail's 'Edit event' did not pass `?occurrence=`, so the form opened on today's occurrence.
+- Decision: `src/features/family-event-form/event-form-return.ts`. `editEventHrefFrom(clientId, occurrence, origin?)` builds Task detail's 'Edit event' link: `…/edit?occurrence=<key>` plus Task detail's origin (`from=` and that screen's params) via the new `taskDetailOriginQuery` in `task-detail-origin.ts`, which `taskDetailHrefFrom` now uses too (`taskLogQuery`, formerly the private `viewQuery`, is exported from `task-routes.ts` for it). The Edit event page re-validates both: the key must resolve through `getOccurrence` to this event, and the origin goes through `resolveTaskDetailOrigin`. `editEventReturnHref` is that occurrence's Task detail with the origin (`taskDetailHrefFrom`), or with no valid occurrence the origin screen itself (`backLinkFor`, the Task log with no origin). Add event's is Home (`addEventReturnHref`, via `backLinkFor`), its only opener; the Add event page now reads `params` for the client id. `EventFormScreen` takes a validated `returnHref` and calls `router.push(returnHref)` for both Save event (after the kit's validation) and Cancel. Nothing persists (FD-04 otherwise unchanged).
+- Reason: one pattern with Task detail's Back (CHG-014): whitelisted names and checked values only, never a URL or path from the query, and it works on reload and shared links.
+- Alternatives considered: `router.back()` with a fallback (still wrong after a reload with history, e.g. arriving from another site); a `returnTo=<path>` param (an open-redirect risk); `router.replace` (leaves the form out of history, which surprises a browser Back user; `push` matches a normal link).
+- Consequences: FD-04's navigation is superseded. The Edit event URL also carries the Task detail origin params (`from`, `view/date/month` or `q/status/page`); they do not collide with `occurrence`. The `?as=` role param is not carried, the same as CHG-014's links.
+- Human confirmation required: done (Dhruv Verma, 2026-09-24, CHG-015, "do both").
+- Test changes caused: see FD-10.
+
+### FD-10 — Existing tests whose expectation changed (CHG-015). **HUMAN REVIEW: test expectation changed**
+- Date: 2026-09-24
+- Context: CHG-015 is a recorded requirement change (CLAUDE.md §5). No test was skipped, `.only`-ed or deleted.
+- Changes (test, before, after, reason):
+  1. `edit/page.test.tsx` `[PRD] Save event returns to the previous screen without persisting; Cancel returns too`: before, `router.back` called once per press; after, retitled `[AC-08] Save event (without persisting) and Cancel go to the occurrence's Task detail with its origin, never router.back`, opened with an occurrence and a Calendar origin, expects `router.push` with that Task detail href and `router.back` not called. Reason: FD-09.
+  2. `new/page.test.tsx` `[AC-02] once a date is picked, Save event returns to the previous screen`: before, `router.back` called once; after, retitled `[AC-09] …goes to Family Home, never router.back`, expects `router.push("/family/client-margaret/home")` once. The AC-02 validation test itself is unchanged. Reason: FD-09.
+  3. `new/page.test.tsx` `renderNew` helper: the page now takes `params` (the client id), so the helper is async and passes `{ clientId }`; the axe test awaits it. No assertion changed.
+  4. FAM-UI-07 `task-detail-view.test.tsx` `[PRD] shows the Description card, which no longer holds an Edit link…` and `[AC-09] shows one 'Edit event' button in the title row…`: expected href gained `?occurrence=<encoded key>`. Reason: FD-09 (CHG-015 (1)).
+  5. FAM-UI-07 `[occurrenceKey]/page.test.tsx` `[AC-09] shows the Edit event button linking to the event's edit route`: retitled `…with the occurrence and origin (CHG-015)`; expected href gained `?occurrence=<encoded key>&from=calendar&view=week&date=<today>`. Reason: FD-09.
+  6. FAM-UI-07 `tests/e2e/family-task-detail-nav.spec.ts` `[AC-09] the Edit event button opens the event's edit page`: expected URL gained `?occurrence=<encoded key>&from=home`. Reason: FD-09.
 
 <!-- Template
 ### FD-01 — <title>

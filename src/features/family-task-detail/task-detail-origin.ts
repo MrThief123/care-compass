@@ -11,7 +11,7 @@ import {
   type RawSearchParams,
   type TaskLogParams,
 } from "@/features/family-task-log/task-log-params";
-import { taskDetailHref, taskLogHref } from "@/features/family-task-log/task-routes";
+import { taskDetailHref, taskLogHref, taskLogQuery } from "@/features/family-task-log/task-routes";
 import type { LocalDate } from "@/lib/dates/week-range";
 
 /**
@@ -41,16 +41,24 @@ function firstValue(value: string | string[] | undefined): string | undefined {
   return Array.isArray(value) ? value[0] : value;
 }
 
+/**
+ * The origin as a query string, without a `?`: `from=` plus that screen's own params. Also
+ * carried through Edit event (CHG-015), so Task detail can be rebuilt on the way back.
+ */
+export function taskDetailOriginQuery(origin: TaskDetailOrigin): string {
+  if (origin.from === "home") return "from=home";
+  if (origin.from === "calendar") return `from=calendar&${calendarQuery(origin.view)}`;
+  const view = taskLogQuery(origin.view);
+  return view ? `from=tasks&${view}` : "from=tasks";
+}
+
 /** A link to one task's detail that remembers where it was opened from. */
 export function taskDetailHrefFrom(
   clientId: string,
   occurrenceKey: string,
   origin: TaskDetailOrigin,
 ): string {
-  if (origin.from === "tasks") return taskDetailHref(clientId, occurrenceKey, origin.view ?? {});
-  const path = taskDetailHref(clientId, occurrenceKey);
-  if (origin.from === "home") return `${path}?from=home`;
-  return `${path}?from=calendar&${calendarQuery(origin.view)}`;
+  return `${taskDetailHref(clientId, occurrenceKey)}?${taskDetailOriginQuery(origin)}`;
 }
 
 /**
