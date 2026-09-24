@@ -49,7 +49,7 @@ Each requirement links to sources and to the features that implement it. Require
 | REQ-06 | Access | Admins (managers/head nurses share one dashboard) manage their organisation's staff accounts and organisation details; withdrawing staff access is possible. | MUST · CONFIRMED | CM-1908; UI-D2; US A-2; CIS5 Q&A; Design Staff, Settings | F0-06, ADM-02, ADM-03, ADM-08, ADM-10 |
 | REQ-07 | Access | Admins add and remove clients for their organisation but cannot edit client information. | SHOULD · CONFIRMED by design (conflicts OQ-07) | UI-D28, §7.16; Design Clients | ADM-04 |
 | REQ-08 | Access | Staff are identified by name (and optional reference); organisations differ on showing full surname or initial. | MUST · CONFIRMED (display AMBIGUOUS, OQ-13) | CIS5 Rostering & Q&A; UI-D33 | ADM-02 |
-| REQ-09 | Access | MFA available/required for Admin accounts. | SHOULD · AMBIGUOUS (OQ-08) | NFR-3; ADR-03; TM-2108 | F0-07 |
+| REQ-09 | Access | MFA is not mandatory for any role, including Admin (PD-040, reaffirmed by CHG-010 on 2026-09-24). | SHOULD · CONFIRMED (PD-040, CHG-010) | NFR-3; ADR-03; TM-2108 | F0-07 |
 | REQ-10 | Client record | Client information page with key descriptive, habit and medical information and documentation; editable by Family and by Carers within shift restrictions; opened first when selecting a client. | MUST · CONFIRMED (field list AMBIGUOUS, OQ-38) | CIS3 Data 1–2; CIS5 Front page; CM-0309; UI-D9, D10, D29; Design Info | UI-03, FAM-09, CAR-04 |
 | REQ-11 | Client record | Client information can be extended with new headings, summary flags and organisation proforma forms archived on provider change. | SHOULD · CONFIRMED requirement, PARKED (PL-13, OQ-38) | CIS3 Data 2A, 2B; US A-11, A-12 | Not scheduled — see Parking lot |
 | REQ-12 | Client record | The client's name and avatar anchor Family page headers; the signed-in user is shown separately. | MUST · CONFIRMED | UI-D16; DD §1 | F0-15 |
@@ -209,7 +209,7 @@ Note: OOS-5 (rostering out of scope) is superseded by later client meetings and 
 | PL-21 | Comments/notes and evidence on events and completions | BRIEF item 4; CIS5 Q&A; US C-3, C-10 | OQ-34 |
 | PL-22 | Front-page extras: 'last updated' indicator, change summary, renameable program title | CIS3 Data 1; CIS5 Front page | OQ-38 |
 | PL-23 | Alert Family (email or Home alert) when a carer switches a task to a plain event | Human, 2026-09-24 (CHG-009) | Audit log records it; no design or notification type yet |
-| PL-24 | Verify a self-registered organisation before it appears in the family organisation picker (lookalike-provider risk) | Human, 2026-09-24 (CHG-010 risk 2) | Raised for prioritisation; no design |
+| PL-24 | Unique identifier for every organisation (e.g. ABN), and verifying a self-registered organisation before it appears in the family organisation picker (lookalike-provider risk) | Human, 2026-09-24 (CHG-010 risk 2) | Identifier to be chosen; no design |
 
 
 ## 18. Dependencies

@@ -13,7 +13,7 @@ Tests are written **before** production code (TESTING.md §2). Run them, confirm
 | Test ID | Covers | Level | Test description | Written first? | Result |
 |---|---|---|---|---|---|
 | T-01 | AC-01 | e2e | Family sign-up with client 'Harold Smith' lands on `/family/<Harold id>/home`; Harold has null `organisation_id`; a `client_family_members` row links the new profile. | ☐ | — |
-| T-02 | AC-02 | integration | Organisation sign-up creates 'Wattle Care' and an `admin` profile with that `organisation_id`; `redirectTo` equals what `signIn` returns for that admin (MFA gate path). | ☐ | — |
+| T-02 | AC-02 | integration | Organisation sign-up creates 'Wattle Care' and an `admin` profile with that `organisation_id`; `redirectTo` equals what `signIn` returns for an existing admin. | ☐ | — |
 | T-03 | AC-03 | integration | Missing field, mismatched passwords and short password each return a field error; no auth user or table rows are created. | ☐ | — |
 | T-04 | AC-04 | integration | Sign-up with an existing email returns the 'already exists' error; row counts in `profiles`, `clients`, `organisations` are unchanged. | ☐ | — |
 | T-05 | AC-05 | db | The registration function called with role `carer` raises; no `profiles` row exists for the caller. | ☐ | — |

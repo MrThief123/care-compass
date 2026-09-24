@@ -45,14 +45,15 @@ A family member or a provider can start using Care Compass on their own, "as sim
   - **Family:** `profiles` (role `family`, no organisation), `clients` (the names given, `organisation_id` null) and `client_family_members`.
   - **Organisation:** `organisations` (the name given) and `profiles` (role `admin`, `organisation_id` = the new organisation).
   - It only accepts `family` or `admin`, only for the calling user, and only once per user.
-- Post-sign-up routing reuses F0-07's `resolvePostSignInPath`. Family goes to `/family/<new client id>/home`. Admin goes through F0-07's MFA gate (whatever is on `main`; see CHG-010 risk 1) and then to `/admin/home`.
+- Post-sign-up routing reuses F0-07's `resolvePostSignInPath`. Family goes to `/family/<new client id>/home`. Admin goes to `/admin/home`. MFA is not mandatory (PD-040, CHG-010). Until the CHG-010 follow-up removes F0-07's forced admin enrolment, a new admin passes through it like any existing admin.
 
 ## Out of Scope
 - Carer sign-up, carer join requests or join codes (carers are invited, ADM-02, PD-040/PD-057).
 - Linking the client to an organisation (FAM-13 organisation picker; CHG-010 note).
 - Family linking carers directly (PD-041).
 - Email confirmation (PD-057: not required).
-- Joining an existing organisation as a second admin, organisation verification (PL-24), deleting organisations (PL-18).
+- Joining an existing organisation as a second admin, deleting organisations (PL-18).
+- An organisation unique identifier (e.g. ABN) and organisation verification (PL-24). The identifier is not yet chosen; do not add a required field for it until it is decided.
 - More than one client per family account (PL-15, OQ-30).
 
 ## Functional Requirements
@@ -94,7 +95,7 @@ A family member or a provider can start using Care Compass on their own, "as sim
 
 ## Traceability
 - Product requirements: REQ-01, REQ-36
-- Sources: Human 2026-09-24 (PD-057, CHG-010); CIS3 Order 1–3; CM-1908; PD-036; PD-037; PD-040; PD-041
+- Sources: Human 2026-09-24, Prajeet (PD-057, CHG-010); CIS3 Order 1–3; CM-1908; PD-036; PD-037; PD-040; PD-041
 - Source abbreviations are defined in `docs/SOURCES.md`.
 
 ## Labels

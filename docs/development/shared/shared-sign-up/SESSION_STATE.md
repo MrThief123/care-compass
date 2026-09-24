@@ -7,7 +7,7 @@ What changed: feature docs created
 Tests run: none
 Test results: none
 Current blocker: none
-Important discoveries: admin TOTP MFA is live on `main` (F0-07 CHG-001) although PD-040 says no mandatory MFA — CHG-010 risk 1; a new admin will hit MFA enrolment straight after sign-up.
+Important discoveries: admin TOTP MFA is live on `main` (F0-07 CHG-001) although PD-040 says no mandatory MFA. CHG-010 decided MFA stays not mandatory; its removal is a separate shared follow-up fix. Until that lands a new admin hits MFA enrolment after sign-up.
 Important decisions: PD-057, CHG-010
 Exact next action: START FEATURE F0-17
 Files likely to be touched next: `src/app/(auth)/sign-up/`, `src/app/(auth)/sign-in/sign-in-form.tsx` (link only), `src/server/auth/actions.ts`, `supabase/migrations/`, `supabase/tests/`, `tests/integration/shared-sign-up.test.ts`, `tests/e2e/sign-up.spec.ts`

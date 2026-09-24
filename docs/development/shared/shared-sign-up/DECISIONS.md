@@ -13,7 +13,8 @@ Record feature-level decisions here using the template below. Project-wide decis
 
 ## Project decisions this feature implements
 - PD-057 / CHG-010: self-serve Family and Organisation sign-up; carers invite-only; no email confirmation; same look as sign-in.
-- CHG-010 risk 1: admin MFA follows whatever F0-07 shipped on `main`; this feature does not change it.
+- CHG-010 risk 1 (decided): admin MFA is not mandatory. Removing F0-07's forced admin enrolment is a separate shared follow-up fix, not part of this feature.
+- CHG-010 risk 2: organisations need a unique identifier (PL-24); not yet chosen, so this feature adds no identifier field.
 
 ## Feature decisions log
 

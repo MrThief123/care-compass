@@ -211,7 +211,7 @@ CONFIRMED.
 - Alternatives: TOTP MFA required for admins (rejected — the original proposed default); MFA optional for all (not chosen).
 - Consequences: NFR-3/TM-2108's MFA expectation is descoped for MVP — flag this to the human as a security tradeoff worth reconfirming before production launch, since Admin accounts hold access to health/financial data across an organisation's whole client base. F0-07, ADM-02, ADM-04 implement plain email/password auth only.
 - Human confirmation: CONFIRMED 2026-09-17.
-- **Amended by PD-057 / CHG-010 (2026-09-24):** "invitation emails for new users" now applies to **carers only**. Family and admin accounts are created by self-serve sign-up (F0-17). The MFA part of this entry is unchanged by CHG-010 (see CHG-010 Impact for the MFA mismatch it found).
+- **Amended by PD-057 / CHG-010 (2026-09-24):** "invitation emails for new users" now applies to **carers only**. Family and admin accounts are created by self-serve sign-up (F0-17). The MFA part of this entry is **reaffirmed** by CHG-010: MFA is not mandatory for any role, including admins. The forced admin TOTP enrolment that F0-07 shipped must be removed (CHG-010 follow-up).
 
 ### PD-041 — Carer visibility and edit access derived from shift schedule (no separate assignment table)
 - Date: 2026-09-17 · Decided by: Dhruv Verma (answering OQ-09)
@@ -360,8 +360,10 @@ CONFIRMED.
   - **Families do not link carers.** Carers reach a client only through shifts that the linked organisation's admin schedules (PD-041, unchanged).
   - **No email confirmation.** A new account can sign in straight away (Supabase `enable_confirmations = false`, already the setting in `supabase/config.toml`).
   - **Same look as sign-in.** `/sign-up` uses the `(auth)` layout and the same `CardShell`, `Field`, `InlineAlert` and `Button` components and tokens as `/sign-in`. Only the fields differ. Sign-in and sign-up link to each other.
+  - **Admin MFA is not mandatory** (reaffirms PD-040). A newly registered admin goes straight to `/admin/home`. The forced TOTP enrolment and challenge F0-07 shipped for admins (its feature CHG-001) contradicts PD-040 and is to be removed in a shared follow-up fix.
+  - **Every organisation needs a unique identifier** so families can tell a real provider from a lookalike in the picker (PL-24). Which identifier (e.g. the ABN, which `organisations.abn` already has a column for) and whether sign-up requires it is not decided yet.
   - **Shared stream.** The feature is **F0-17**, in the shared stream and Lane B like F0-07, branch `feature/shared-sign-up`, PR → `main`.
-- Reason: human instruction in-session, 2026-09-24: "everyone can create their own account and then they link an organisation/client/carer etc." The follow-up answers to the four questions were: carers stay invite-only; admin sign-up registers a new organisation; no direct family-to-carer link; no email confirmation.
+- Reason: human instruction in-session, 2026-09-24: "everyone can create their own account and then they link an organisation/client/carer etc." The follow-up answers to the four questions were: carers stay invite-only; admin sign-up registers a new organisation; no direct family-to-carer link; no email confirmation. On reviewing the CHG-010 risks the human then chose: admin MFA stays not mandatory; organisations need a unique identifier (noted for PL-24).
 - Alternatives: carer join request approved by an admin (rejected: human kept admin invite); carer join code (not chosen); admin joins an existing organisation by request (not chosen); no admin self-sign-up (not chosen); family picks carers (rejected: it would change PD-041); email confirmation required (rejected: human chose immediate sign-in).
 - Consequences: see CHG-010.
 - Human confirmation: CONFIRMED 2026-09-24 (Prajeet, in-session).
@@ -556,12 +558,12 @@ Docs updated: DECISIONS.md
   - **FAM-13:** a self-registered family's client has **no organisation** at first. FAM-13's organisation card must handle "no organisation yet" with a 'Choose organisation' action (picker, no transfer confirmation, since there is nothing to transfer). Lane F records it when it starts FAM-13.
   - **PL-18:** split. Organisation **registration** moves into F0-17; Add/Delete organisation by an operator stays parked.
   - **Risks raised for the human, not decided here:**
-    1. **Admin MFA mismatch.** PD-040 says no mandatory MFA, but F0-07 shipped forced TOTP enrolment for admins (its feature CHG-001 says OQ-08 answered "TOTP MFA required"). So a newly registered admin will be sent straight to MFA enrolment. F0-17 follows whatever is on `main` and does not settle this.
-    2. **Anyone can create an organisation.** It then appears in the family organisation picker (PD-036). Someone could register a lookalike of a real provider's name and a family could link their client to it. Parked as **PL-24** (organisation verification before it appears in the picker) for the human to prioritise.
+    1. **Admin MFA mismatch — DECIDED 2026-09-24 (Prajeet): MFA is not mandatory.** PD-040 says no mandatory MFA, but F0-07 shipped forced TOTP enrolment for admins (its feature CHG-001 says OQ-08 answered "TOTP MFA required", which misreads PD-040). **Follow-up needed:** a shared fix that removes the forced admin enrolment and AAL2 gate from `src/server/auth/routing.ts` / `guard.ts` and changes F0-07's AC-09/AC-10 and T-09/T-10 (a test-expectation change, flagged HUMAN REVIEW). F0-17 does not make that change; its AC-02 only requires that a new admin is routed the same way an existing admin is.
+    2. **Anyone can create an organisation.** It then appears in the family organisation picker (PD-036). Someone could register a lookalike of a real provider's name and a family could link their client to it. **Note (Prajeet, 2026-09-24): every organisation should have a unique identifier**, so that two organisations can never be confused in the picker. Which identifier (e.g. ABN) and when it is required are still to be decided. Parked as **PL-24** for the human to prioritise.
     3. **No email confirmation.** A mistyped email address can create an account the real owner does not control. Supabase also reports "already registered" on sign-up, so account enumeration is possible on `/sign-up` (not on `/sign-in` or reset). Accepted by the human for MVP. Worth re-checking before production, together with the PD-040 MFA note.
   - **Numbering:** CHG-006 to CHG-008 are taken on unmerged branches (see CHG-009), so this entry is CHG-010.
 - Human confirmation: Prajeet, 2026-09-24 (in-session).
-- Docs updated: DECISIONS.md (PD-057, this entry, amendment note on PD-040), PRD.md (REQ-01, new REQ-36, PL-18, new PL-24), DEVELOPMENT_PLAN.md (F0-17 row and card, totals, next number, CHG-010 notes on ADM-04 and FAM-13), `docs/development/shared/shared-sign-up/`.
+- Docs updated: DECISIONS.md (PD-057, this entry, amendment note on PD-040), PRD.md (REQ-01, REQ-09, new REQ-36, PL-18, new PL-24), DEVELOPMENT_PLAN.md (F0-17 row and card, totals, next number, CHG-010 notes on ADM-04 and FAM-13), `docs/development/shared/shared-sign-up/`.
 
 Template for future entries:
 ```
