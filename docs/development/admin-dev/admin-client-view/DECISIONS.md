@@ -3,7 +3,7 @@
 ## Open decisions affecting this feature
 | ID | Decision needed | Blocking? | Proposed default |
 |---|---|---|---|
-| — | Whether an admin may change a client's organisation (PD-058 says admins can do everything Family can, but did not address this) | no | Family only; raise with the human before ADM-11 starts |
+| — | None open. Changing a client's organisation stays Family only (PD-058, answered 2026-09-25). | — | — |
 
 ## Feature decisions log
 

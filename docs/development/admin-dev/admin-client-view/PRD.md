@@ -65,7 +65,7 @@ Care and money keep being managed when a family steps away, without a second cop
 
 ## Security / Permissions
 - RLS grants admins of the client's current organisation the same read and write rights as the client's family (F0-06, F0-11, F0-12, F0-13 policies). The UI never grants access on its own.
-- Changing organisation stays Family-only unless the human decides otherwise (not decided in PD-058).
+- Changing organisation stays Family only (PD-058, human answer 2026-09-25).
 
 ## Technical Considerations
 - If reusing the Family screens needs code moved out of `src/features/family-*` (Lane F folders), that move goes through a shared PR first (CLAUDE.md §4.2); ADM-11 does not edit Lane F folders.
