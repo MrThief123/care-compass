@@ -18,8 +18,8 @@ function TextCardSkeleton() {
 }
 
 /**
- * Loading state (States sheet): the screen's own shape, the name line and the
- * four cards, with no data in it, so nothing jumps when the content arrives.
+ * Loading state (States sheet): the screen's own shape, the four cards, with
+ * no data in it, so nothing jumps when the content arrives.
  * One labelled status for the whole screen; the bars are hidden from assistive tech.
  */
 export function InfoSkeleton() {
@@ -30,16 +30,6 @@ export function InfoSkeleton() {
       aria-busy="true"
       className="flex flex-col gap-[22px] px-6 py-5"
     >
-      <div className="mb-4 flex items-center gap-4">
-        <div
-          aria-hidden
-          className="h-[46px] w-[46px] shrink-0 animate-pulse rounded-full bg-bg-inset"
-        />
-        <div className="flex flex-col gap-1.5">
-          <Bar className="h-4 w-28" />
-          <Bar className="h-3 w-52" />
-        </div>
-      </div>
       <TextCardSkeleton />
       <TextCardSkeleton />
       <TextCardSkeleton />

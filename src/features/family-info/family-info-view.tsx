@@ -1,5 +1,4 @@
 import { EmptyState } from "@/components/shared/states";
-import { Avatar } from "@/components/ui/avatar";
 import { CardShell } from "@/components/ui/card-shell";
 
 import { DocumentationCard } from "./documentation-card";
@@ -14,29 +13,18 @@ export interface FamilyInfoViewProps {
 }
 
 /**
- * Family · Info (FAM-UI-04): the client's name and summary line, then the
- * Description, Habits, Medical history and Documentation cards. Composed here
- * rather than from the shared `ClientInfoView` (FD-01). With no sections and no
- * documents the cards give way to one empty state.
+ * Family · Info (FAM-UI-04): the Description, Habits, Medical history and
+ * Documentation cards. Composed here rather than from the shared
+ * `ClientInfoView` (FD-01). The client's name and summary line are the shell
+ * header's, not repeated here (FD-08). With no sections and no documents the
+ * cards give way to one empty state.
  */
 export function FamilyInfoView({ data, canEdit = true }: FamilyInfoViewProps) {
-  const { client, sections, documents } = data;
+  const { sections, documents } = data;
   const isEmpty = sections.length === 0 && documents.length === 0;
 
   return (
     <div className="flex flex-col gap-[22px] px-6 py-5">
-      <div className="mb-4 flex min-w-0 items-center gap-4">
-        <Avatar name={client.firstName} size="lg" />
-        <div className="flex min-w-0 flex-col">
-          <h1 className="text-title-page text-text-primary [overflow-wrap:anywhere]">
-            {client.firstName}
-          </h1>
-          <p className="mt-0.5 text-body-secondary text-text-secondary [overflow-wrap:anywhere]">
-            {client.meta}
-          </p>
-        </div>
-      </div>
-
       {isEmpty ? (
         <CardShell>
           <EmptyState

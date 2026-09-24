@@ -124,11 +124,16 @@ describe("[FAM-UI-04] Family Info", () => {
     expect(within(card("Medical history")).getByText(MEDICAL_HISTORY)).toBeInTheDocument();
   });
 
-  it("[FAM-UI-04][AC-01] puts the client's name and summary line above the cards", async () => {
+  it("[FAM-UI-04][PRD] does not repeat the client's name and summary line, which the shell header already shows", async () => {
     await renderInfo();
 
-    expect(screen.getByRole("heading", { level: 1, name: "Margaret" })).toBeInTheDocument();
-    expect(screen.getByText("78 years · Preston VIC · Banksia Home Care")).toBeInTheDocument();
+    // FD-08: the design draws the block twice; the human asked for one copy, the shell's.
+    expect(screen.queryByRole("heading", { level: 1 })).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Margaret" })).not.toBeInTheDocument();
+    expect(
+      screen.queryByText("78 years · Preston VIC · Banksia Home Care"),
+    ).not.toBeInTheDocument();
+    expect(screen.queryByText("M")).not.toBeInTheDocument();
   });
 
   it("[FAM-UI-04][AC-01] each of the three text cards has an Edit button named for its section", async () => {
@@ -353,10 +358,6 @@ describe("[FAM-UI-04] states (States sheet)", () => {
   });
 
   it.each([
-    [
-      "getClientHeaderSummary",
-      () => mocks.getClientHeaderSummary.mockRejectedValue(new Error("x")),
-    ],
     ["getClientInfoSections", () => mocks.getClientInfoSections.mockRejectedValue(new Error("x"))],
     ["getClientDocuments", () => mocks.getClientDocuments.mockRejectedValue(new Error("x"))],
   ])(
@@ -402,9 +403,14 @@ describe("[FAM-UI-04] the screen reads through the contract", () => {
   it("[FAM-UI-04][PRD] asks the contract for the route's client, and only that client", async () => {
     await renderInfo();
 
-    expect(mocks.getClientHeaderSummary).toHaveBeenCalledWith(CLIENT_ID);
     expect(mocks.getClientInfoSections).toHaveBeenCalledWith(CLIENT_ID);
     expect(mocks.getClientDocuments).toHaveBeenCalledWith(CLIENT_ID);
+  });
+
+  it("[FAM-UI-04][PRD] does not read the client's header summary: the shell header owns it", async () => {
+    await renderInfo();
+
+    expect(mocks.getClientHeaderSummary).not.toHaveBeenCalled();
   });
 });
 
