@@ -1,4 +1,4 @@
-import { render, screen, within } from "@testing-library/react";
+import { act, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { axe } from "jest-axe";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -13,6 +13,8 @@ const mocks = vi.hoisted(() => ({
   getToday: vi.fn(),
   getOccurrences: vi.fn(),
   getTaskLog: vi.fn(),
+  getCurrentUser: vi.fn(),
+  setOccurrenceDone: vi.fn(),
 }));
 
 vi.mock("next/navigation", () => ({
@@ -23,6 +25,8 @@ vi.mock("@/server/events/queries", () => ({
   getOccurrences: mocks.getOccurrences,
   getTaskLog: mocks.getTaskLog,
 }));
+vi.mock("@/server/auth/queries", () => ({ getCurrentUser: mocks.getCurrentUser }));
+vi.mock("@/server/events/actions", () => ({ setOccurrenceDone: mocks.setOccurrenceDone }));
 
 /*
  * The screen reads only through the `src/server/**` contract, so these tests
@@ -132,6 +136,7 @@ beforeEach(() => {
   mocks.getToday.mockResolvedValue("2026-11-30");
   mocks.getOccurrences.mockResolvedValue(DESIGN_WEEK);
   mocks.getTaskLog.mockResolvedValue(taskLog(LOG));
+  mocks.getCurrentUser.mockResolvedValue({ firstName: "Helen", lastName: "Doyle" });
   vi.spyOn(window.history, "replaceState");
 });
 
@@ -325,6 +330,102 @@ describe("[FAM-UI-02][AC-04] ticking a task", () => {
     await user.click(screen.getByTestId("week-grid-header-2026-11-30"));
 
     expect(within(tasksPanel()).getByLabelText("Physiotherapy")).toBeChecked();
+    expect(mocks.push).not.toHaveBeenCalled();
+  });
+});
+
+describe("[FAM-UI-02][AC-08] a tick shows on the grids, with who ticked it (CHG-016)", () => {
+  const PHYSIO = "event-physiotherapy:2026-11-30T11:30:00+11:00";
+  const MORNING = "event-morning-medication:2026-11-30T09:00:00+11:00";
+  const weekBlock = (key: string) => screen.getByTestId(`week-grid-block-${key}`);
+
+  it("[FAM-UI-02][AC-08] ticking Physiotherapy turns its week block from Planned to Done, on the same page", async () => {
+    const user = userEvent.setup();
+    await renderCalendar();
+
+    expect(weekBlock(PHYSIO)).toHaveTextContent(/^Planned: /);
+    await user.click(within(tasksPanel()).getByLabelText("Physiotherapy"));
+
+    expect(weekBlock(PHYSIO)).toHaveTextContent(/^Done: /);
+    expect(mocks.push).not.toHaveBeenCalled();
+  });
+
+  it("[FAM-UI-02][AC-08] the day view shows 'Done · <signed-in name>' for a ticked task", async () => {
+    const user = userEvent.setup();
+    await renderCalendar({ view: "day", date: "2026-11-30" });
+    const block = screen.getByTestId(`day-timeline-block-${PHYSIO}`);
+
+    expect(block).not.toHaveTextContent("Done");
+    await user.click(within(tasksPanel()).getByLabelText("Physiotherapy"));
+
+    expect(block).toHaveTextContent(/^Done: /);
+    // jsdom has no layout, so the block is compact; its detail card (opened by
+    // keyboard focus, with no delay) shows the full pill with the name.
+    act(() => block.focus());
+    expect(screen.getByRole("tooltip")).toHaveTextContent("Done · Helen Doyle");
+    expect(mocks.getCurrentUser).toHaveBeenCalledWith("family");
+  });
+
+  it("[FAM-UI-02][AC-08] the month view's chip turns Done when ticked", async () => {
+    const user = userEvent.setup();
+    await renderCalendar({ view: "month", date: "2026-11-30", month: "2026-11" });
+    const chip = screen.getByTestId(`month-grid-chip-${PHYSIO}`);
+
+    expect(chip).toHaveTextContent(/^Planned: /);
+    await user.click(within(tasksPanel()).getByLabelText("Physiotherapy"));
+
+    expect(chip).toHaveTextContent(/^Done: /);
+  });
+
+  it("[FAM-UI-02][AC-08] unticking restores the original status; a task that was Done shows Planned, without its old name", async () => {
+    const user = userEvent.setup();
+    await renderCalendar({ view: "day", date: "2026-11-30" });
+    const physio = within(tasksPanel()).getByLabelText("Physiotherapy");
+    const morningBlock = screen.getByTestId(`day-timeline-block-${MORNING}`);
+
+    await user.click(physio);
+    await user.click(physio);
+    expect(screen.getByTestId(`day-timeline-block-${PHYSIO}`)).not.toHaveTextContent("Done");
+
+    act(() => morningBlock.focus());
+    expect(screen.getByRole("tooltip")).toHaveTextContent("Done · Aisha Rahman");
+    await user.click(within(tasksPanel()).getByLabelText("Morning medication"));
+    expect(morningBlock).toHaveTextContent(/^Planned: /);
+    act(() => morningBlock.focus());
+    expect(screen.getByRole("tooltip")).toHaveTextContent("Planned");
+    expect(screen.getByRole("tooltip")).not.toHaveTextContent(/Done|Aisha Rahman/);
+  });
+
+  it("[FAM-UI-02][AC-08] an Overdue task ticked and unticked is Overdue again", async () => {
+    const user = userEvent.setup();
+    const overdue = occurrence({
+      title: "Weekly weigh-in",
+      start: at("2026-11-30", "13:00"),
+      durationMinutes: 30,
+      status: "overdue",
+    });
+    mocks.getOccurrences.mockResolvedValue([...DESIGN_WEEK, overdue]);
+    await renderCalendar();
+    const box = within(tasksPanel()).getByLabelText("Weekly weigh-in");
+
+    expect(weekBlock(overdue.key)).toHaveTextContent(/^Overdue: /);
+    await user.click(box);
+    expect(weekBlock(overdue.key)).toHaveTextContent(/^Done: /);
+    await user.click(box);
+    expect(weekBlock(overdue.key)).toHaveTextContent(/^Overdue: /);
+  });
+
+  it("[FAM-UI-02][AC-08] the tick is display only: nothing is saved, the Log is unchanged, and it survives picking another day", async () => {
+    const user = userEvent.setup();
+    await renderCalendar();
+    const logBefore = logPanel().textContent;
+
+    await user.click(within(tasksPanel()).getByLabelText("Physiotherapy"));
+    await user.click(screen.getByTestId("week-grid-header-2026-12-01"));
+
+    expect(weekBlock(PHYSIO)).toHaveTextContent(/^Done: /);
+    expect(logPanel().textContent).toBe(logBefore);
+    expect(mocks.setOccurrenceDone).not.toHaveBeenCalled();
     expect(mocks.push).not.toHaveBeenCalled();
   });
 });

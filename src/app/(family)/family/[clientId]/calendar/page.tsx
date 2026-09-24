@@ -24,6 +24,7 @@ export default async function FamilyCalendarPage({
       params={data.params}
       occurrences={data.occurrences}
       log={data.log}
+      actorName={data.actorName}
     />
   );
 }
