@@ -66,6 +66,7 @@ Record feature-level decisions here using the template below. Project-wide decis
   - `budget-data.test.ts`: its fund entry carries `recordedBy`, so the loader is shown to pass it through. `queries.test.ts`, `mocks/queries/budget.test.ts`: the first row and the three design rows expect `recordedBy: "Helen Doyle"`; new tests say every entry names a recorder, and that the recorder is a person the fixtures have.
 
 ### FD-06 — 'Update' does nothing but say so in Phase 1
+- **Superseded by FD-11 / CHG-020 (2026-09-25):** 'Update' now opens the simple add-or-remove form.
 - Date: 2026-09-25
 - Context: the PRD Scope says "'Update' primary button (no action — flow undesigned)". The flow is FAM-11 (post-sprint); OQ-19 lists it as a design gap. PD-034 says both Family and organisation admins may edit funds, so the button is drawn for a family user.
 - Decision: pressing 'Update' shows "Updating funds is not available yet." in a live region that is on the page from the start (so it is announced), and changes nothing: no card, no History row. Same pattern as Family · Info's 'Add file' (Info FD-05). The button is a primary 44px-tall button, as drawn.
@@ -114,6 +115,16 @@ Record feature-level decisions here using the template below. Project-wide decis
 - Consequences: none for the tests, which check content, roles and clamping, not track widths.
 - Human confirmation required: no.
 - Test changes caused: none.
+
+### FD-11 — Scope grows under CHG-020: the Update form and pending costs
+- Date: 2026-09-25
+- Context: the human decided (PD-058, CHG-020) that funds are changed with one simple form by Family and admins, that event costs a bucket cannot cover are held as pending, and chose to build the form and the pending display on this branch before its PR rather than in a separate feature.
+- Decision: new AC-04 to AC-08 (TEST_PLAN T-04 to T-08). 'Update' opens a form (bucket, Add or Remove, amount, optional note) that changes local state only; a removal over the balance is refused. Bucket cards show pending costs and History lists them as Pending, on fixtures. Status goes back from READY FOR PR to IN PROGRESS. The budget types, contract and fixtures gain what the pending display needs, extended rather than recreated (CHG-002, same route as CHG-019); the exact fields are recorded here when built.
+- Reason: the human's decision; the Budget screen UI is complete for the new model in one PR.
+- Alternatives considered: ship FAM-UI-05 as it was and put the form and pending display in later features (rejected by the human).
+- Consequences: AC-01's '$240' Government figure is kept; the pending fixture ($310, more than Government's balance) sits beside it. The form is undesigned: built from tokens and the existing form patterns, flagged HUMAN REVIEW in the PR (PD-052). The local form does not pay pending costs (F0-12 owns that).
+- Human confirmation required: yes — given, Dhruv Verma, 2026-09-25 (in-session).
+- Test changes caused: the FD-06 'Update' tests in `family-budget.test.tsx` (before: pressing 'Update' announces "Updating funds is not available yet." and changes no card or row; after: pressing 'Update' opens the form, covered by T-04 to T-06, and axe runs with the form open). Reason: recorded requirement change (CHG-020). Flagged HUMAN REVIEW in PROGRESS.md and the PR.
 
 <!-- Template
 ### FD-01 — <title>

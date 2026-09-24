@@ -13,6 +13,11 @@ Tests are written **before** production code (TESTING.md §2). Run them, confirm
 | T-01 | AC-01 | component | Given fixtures, when Budget renders, then NDIS '$14,880', Fixed '$2,750' and Government '$240' cards are shown. | ☑ | FAIL (red, expected) |
 | T-02 | AC-02 | component | Given fixtures, when History renders, then the first row is '3 Nov 2026', 'NDIS quarterly plan top-up', '+$6,000'. | ☑ | FAIL (red, expected) |
 | T-03 | AC-03 | component | Given no fund entries, when History renders, then an empty state is shown. | ☑ | FAIL (red, expected) |
+| T-04 | AC-04 | component | Update → NDIS, Add, 500, no note → NDIS card '$15,380', first History row reference day, 'Funds added', '+$500' (CHG-020) | ☐ | NOT RUN |
+| T-05 | AC-05 | component | Remove 40 from Government → '$200', 'Funds removed', '-$40'; remove 300 → 'Only $240 available', nothing changes (CHG-020) | ☐ | NOT RUN |
+| T-06 | AC-06 | unit + component | Update form schema and form: empty, 0, negative, 3-decimal amounts and no bucket are refused with a field message (CHG-020) | ☐ | NOT RUN |
+| T-07 | AC-07 | component | Government card reads 'Pending $310 · 1 cost' in words (CHG-020) | ☐ | NOT RUN |
+| T-08 | AC-08 | component | History lists the pending cost with '-$310' and a 'Pending' text label (CHG-020) | ☐ | NOT RUN |
 
 T-01 is `[FAM-UI-05][AC-01]` in `family-budget.test.tsx` (cards, order, totals, percent used, progress bars, Government's warning in words). T-02 is `[FAM-UI-05][AC-02]` in `family-budget.test.tsx` (columns, first row, all three rows) with the contract and fixture tests below. T-03 is `[FAM-UI-05][AC-03]` in `family-budget.test.tsx` (empty History shows the empty state and no table; cards and 'Update' stay).
 
@@ -35,7 +40,9 @@ All titles start `[FAM-UI-05]`, were written first, and are red now (see Results
 | `getFundHistory`: the design's first row, the three design rows word for word in order, every entry names its recorder (Helen Doyle for Margaret's three), newest date first for each client, valid entries, client scoping, unknown and object-prototype ids give `[]`, callers cannot mutate fixtures, supabase mode throws the not-implemented error | CHG-019 contract, AC-02, AC-03, FD-05 | unit | `src/server/budget/queries.test.ts` |
 | `FUND_ENTRIES` fixtures: schema-valid with unique ids, every client and bucket kind exists, top-ups are positive and expenses negative, Margaret has exactly the three design rows with their recorder, every entry names a recorder who is a person the fixtures have, another client has an entry of their own | CHG-019 fixtures, AC-02, FD-05 | unit | `src/mocks/queries/budget.test.ts` |
 
-Not tested here, by design: the Update funds flow and recording an entry with its recorder (FAM-11), and wiring to the database (FAM-10).
+Not tested here, by design: saving an entry to the database with its recorder (FAM-11), paying pending costs (F0-12), and wiring to the database (FAM-10). The local Update form is tested here since CHG-020 (T-04 to T-06).
+
+**HUMAN REVIEW: test expectation changed (CLAUDE.md §5), CHG-020.** The 'Update' group's tests (pressing 'Update' says "Updating funds is not available yet." and changes nothing; axe after 'Update') assert FD-06's Phase 1 placeholder. CHG-020 (human-confirmed 2026-09-25) replaces the placeholder with the form, so those assertions are replaced by T-04 to T-06 and an axe check with the form open. Recorded requirement change; before and after in DECISIONS.md FD-11.
 
 **HUMAN REVIEW: test expectation changed (CLAUDE.md §5).** On 2026-09-25, after the tests were committed (`a7ffb6e`) and before any implementation, the human decided History should show who recorded each entry (FD-05). The test `[FAM-UI-05][PRD] FD-05: a row is date, description and amount only, with no 'recorded by' text drawn` asserted the opposite, so it was replaced by the attribution tests in the group above, and the fixtures and contract tests now expect `recordedBy`. No other assertion changed; DECISIONS.md FD-05 lists each change, before and after. The changed expectations were run red first (below).
 

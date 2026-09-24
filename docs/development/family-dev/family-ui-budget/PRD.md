@@ -29,7 +29,8 @@ A clickable, reviewable screen that matches the design, ready for data wiring in
 
 ## Scope
 - Route `/family/[clientId]/budget` inside the family layout.
-- 'Funds by source' card with 'Update' primary button (no action — flow undesigned, OQ-05).
+- 'Funds by source' card with 'Update' primary button. **CHG-020 (PD-058):** it opens a simple form: bucket, Add or Remove, amount, optional note (dated the reference day). Saving changes local state only: the bucket's figures and a new first History row ("Funds added" / "Funds removed" when the note is blank). A removal larger than the bucket's balance is refused ("Only $X available"). Amount > 0 with at most 2 decimals.
+- **CHG-020 (PD-058):** a bucket with pending costs shows the pending total and count in words on its card; History lists pending items marked "Pending" in text. Fixture data only; settling pending costs is F0-12's.
 - Three `BudgetBucketCard`s.
 - History `DataTable`: DATE · DESCRIPTION · AMOUNT.
 - Loading skeleton, empty state and error state (States sheet) wired to the query contract's states.
@@ -37,6 +38,7 @@ A clickable, reviewable screen that matches the design, ready for data wiring in
 
 ## Out of Scope
 - Real data, permissions and persistence (Phase 3 wiring features)
+- Paying pending costs when funds are added (F0-12); the local form does not simulate it
 - Undesigned flows (listed in DECISIONS.md OQ-19)
 
 ## Functional Requirements

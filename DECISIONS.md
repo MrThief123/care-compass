@@ -88,6 +88,7 @@ CONFIRMED.
 ### PD-022 — No recurring shifts (UI-D31). CONFIRMED.
 
 ### PD-023 — Admin cannot edit client information (UI-D28). CONFIRMED by design; creation flow OQ-07.
+- **Superseded by PD-058 / CHG-020 (2026-09-25):** after talking to the client, an admin can do everything Family can for their own organisation's clients, including editing client information.
 
 ### PD-024 — Confluence "Database Model" ERD superseded (PROPOSED)
 - Reason: integer money, no user/family/role tables, no recurrence/completions/audit — contradicts ADR-01 consequences. ARCHITECTURE.md §6 replaces it.
@@ -163,6 +164,7 @@ CONFIRMED.
 - Alternatives: Family-only edit rights per UI-D1 (rejected — superseded by CM-0409); admin read-only per the original proposed default (rejected by human).
 - Consequences: the Admin Budget screen needs edit controls, not just read access — the "Update" interaction UI-D19 flagged as undesigned still needs a design (raise as a design gap alongside OQ-19). RLS policies must allow admin writes to budget tables for their organisation's clients. Resolves C-02.
 - Human confirmation: CONFIRMED 2026-09-17.
+- **Amended by PD-058 / CHG-020 (2026-09-25):** carers no longer record expenses (CAR-08 retired). Carers affect the budget only through the cost of an event they create, charged when an occurrence is completed. Family and admins add or remove funds with one Update form.
 
 ### PD-035 — Budget email recipients: Family + current org admins; period = bucket period
 - Date: 2026-09-17 · Decided by: Dhruv Verma (answering OQ-28)
@@ -367,6 +369,22 @@ CONFIRMED.
 - Alternatives: carer join request approved by an admin (rejected: human kept admin invite); carer join code (not chosen); admin joins an existing organisation by request (not chosen); no admin self-sign-up (not chosen); family picks carers (rejected: it would change PD-041); email confirmation required (rejected: human chose immediate sign-in).
 - Consequences: see CHG-010.
 - Human confirmation: CONFIRMED 2026-09-24 (Prajeet, in-session).
+
+### PD-058 — Event costs, pending costs, the simple Update form, and admins act as Family
+- Date: 2026-09-25 · Decided by: Dhruv Verma (in-session; amends PD-034 and PD-023)
+- Decision:
+  - **Who changes the budget.** Only Family and the client's current organisation admins change the budget by hand. Carers never do: CAR-08 (Record an expense) is retired. A carer affects the budget only through the cost of an event they create.
+  - **Update form.** One form on the Budget screen: bucket, Add or Remove, amount, and an optional note. The date is today. An empty note shows in History as "Funds added" or "Funds removed". A removal larger than the bucket's balance is refused ("Only $X available"), so a manual change never takes a bucket below $0.
+  - **Event cost.** An event or task may have an optional cost and the bucket it is paid from. Whoever creates the event sets them, carers included. Afterwards the cost and bucket can be changed by Family, admins, or the carer who created the event. A change applies to future completions only; costs already charged or pending keep their amount.
+  - **When a cost is charged.** Once per occurrence, when that occurrence is completed. Skipped or missed occurrences cost nothing. A recurring event is charged each time.
+  - **Bucket picker.** In the event form a bucket is struck through, cannot be picked, and says "No funds left" (in words, not colour alone) when its balance is $0 or it already has pending costs. When the balance is above $0 but below the event's cost, a warning shows and the bucket can still be picked.
+  - **Pending costs.** If the bucket cannot cover a completed occurrence's cost in full, the occurrence still completes and the whole cost is held as **pending** against that bucket. Nothing is part-paid. The bucket card shows the pending total and count, History lists the item as Pending, and Family and the organisation's admins get an email (the PD-035 recipients).
+  - **Paying pending costs.** When funds are added to a bucket, its pending costs are paid automatically, oldest first, each only when the bucket can cover it in full. A cost it cannot cover stays pending, and so do the ones after it.
+  - **Admins act as Family.** An admin can always do everything Family can for their own organisation's clients, including editing client information. In Admin · Clients, clicking a client's name opens that client's Family screens (Home, Info, Calendar, Budget, Care log) inside the admin layout at `/admin/clients/<id>/…`, with a way back to the list. Every change records who made it.
+- Reason: human instruction in-session, 2026-09-25, after talking to the client: carers should not edit the budget; costs should come off automatically when care is done; an admin must be able to stand in for a family that is no longer there. The human chose each rule above from offered options.
+- Alternatives: on an empty bucket, overdraft (balance goes negative), part-pay and log the rest, pay from another bucket automatically, or block completion (all rejected: pending chosen; blocking completion was advised against because money would stop care being recorded); pay pending costs by hand or part-pay them (rejected); carers keep manual expenses (rejected); cost locked once set, or editable by Family and admins only (rejected); admins write to Budget only, or full access only once no family is linked (rejected); admins sent into the `/family` routes (rejected: one copy of each screen, rendered inside the admin layout).
+- Consequences: see CHG-020.
+- Human confirmation: CONFIRMED 2026-09-25 (Dhruv Verma, in-session).
 
 ---
 
@@ -660,6 +678,27 @@ Docs updated: DECISIONS.md
 - Numbering: CHG-018 (FAM-UI-04, PR #89) was unmerged when this was written; this is CHG-019 so the two do not collide. PR #89 merged first; both entries kept in number order when `family-dev` was merged into this branch (2026-09-25).
 - Human confirmation: Dhruv Verma, 2026-09-25 (in-session). Amended the same day at the human's request: entries name their recorder, and the screen draws it (FD-05).
 - Docs updated: DECISIONS.md (this entry); `docs/development/family-dev/family-ui-budget/DECISIONS.md` FD-02, FD-05.
+
+### CHG-020 — Event costs with pending deduction, a simple add-or-remove Update form, carers never edit the budget, and admins act as Family
+- Date / requested by: 2026-09-25 / Dhruv Verma (human, project lead)
+- Type: new requirement, new features, scope change
+- Description: records PD-058. In short: events and tasks can carry a cost and a bucket; the cost is charged when an occurrence is completed; a cost the bucket cannot cover is held as pending and paid automatically, oldest first, once funds arrive; the event form strikes through a bucket at $0 or with pending costs; Family and admins change funds with one add-or-remove form; carers never change the budget by hand; admins can do everything Family can and reach a client's Family screens from Admin · Clients.
+- Source / justification: PD-058 (human answers in-session, 2026-09-25).
+- Impact:
+  - **FAM-UI-05 (this branch, Phase 1, fixtures):** scope grows. 'Update' opens the simplified form (bucket, Add or Remove, amount, optional note), which changes local state only and refuses a removal larger than the balance. Bucket cards show a pending total and count, and History lists pending items marked Pending. New AC-04 to AC-08 and T-04 to T-08. The budget types, contracts and fixtures gain what the screen needs to draw pending costs; the exact fields are recorded in the feature's DECISIONS.md when built (contract extension on a dashboard branch, same route as CHG-019). Status goes back to IN PROGRESS.
+  - **New FAM-UI-08 — Event cost fields (UI)** (Lane F, `feature/family-ui-event-cost`, PR → `family-dev`, Phase 1, fixtures): optional Cost and Bucket fields in the Add/Edit event form built by FAM-UI-03 (merged). The picker strikes through a bucket at $0 or with pending costs and warns when the balance is below the cost. Depends on FAM-UI-03 and FAM-UI-05.
+  - **New ADM-11 — Admin client view: a client's Family screens with full access** (Lane A, `feature/admin-client-view`, PR → `admin-dev`, Phase 3): a client's name in Admin · Clients links to `/admin/clients/<id>/…`, which renders the Family screens inside the admin layout with every Family action available. Reusing the Family screens from the admin routes needs the screens to take their client from the route rather than the family layout; if that means moving code out of `src/features/family-*`, it goes through a shared PR (§4.2). Depends on ADM-04 and the Family wiring features it renders (FAM-01 to FAM-15).
+  - **F0-12 (not started):** scope extended. Event cost and bucket columns, per-occurrence charges on completion, the pending state and its automatic oldest-first settlement when funds are added, removals that cannot go below $0, and admin RLS writes equal to Family's. Its AC "remaining is negative and threshold_state is 'depleted'" no longer holds for event costs (pending replaces overdraft); Lane B rewrites its PRD, ACs and TEST_PLAN when it starts F0-12 and records it in that feature's DECISIONS.md. Not decided yet, to raise when F0-12 starts: what happens to a pending cost when its event is deleted, and whether pending costs carry across a bucket's accounting period.
+  - **F0-11:** events gain `cost numeric(12,2)` (nullable) and the bucket; changes apply to future completions only. Lane B records it when it starts, together with F0-12.
+  - **FAM-06, FAM-07, CAR-07:** save and edit the cost and bucket. On edit, only Family, admins, or the carer who created the event may change them.
+  - **CAR-06, FAM-15 (completion):** completing an occurrence charges its cost or makes it pending, through the F0-12 function, never in the client.
+  - **FAM-11:** the Update form becomes bucket, Add or Remove, amount, optional note, with today's date; amount > 0 with at most 2 decimals; a removal over the balance is refused. A top-up settles pending costs (F0-12). Its "Date in the future → reject" edge case no longer applies (there is no date field). Lane F updates its PRD, ACs and TEST_PLAN when it starts FAM-11.
+  - **CAR-08:** retired. No carer expense entry. REQ-30 is covered by Family and admin removals and by event costs; receipts on an expense are dropped.
+  - **ADM-04, PD-023:** admins may now edit client information; the "No edit of client info (D28)" line in ADM-04 no longer applies. Lane A records it when it starts ADM-04.
+  - **INT-01:** a new email when a cost goes pending, to the PD-035 recipients.
+  - **PRD.md:** REQ-28, REQ-29, REQ-30, REQ-07 and the §8 permissions matrix updated; new REQ-37 (event costs and pending) and REQ-38 (admin acts as Family).
+- Human confirmation: Dhruv Verma, 2026-09-25 (in-session).
+- Docs updated: DECISIONS.md (PD-058, this entry, amendment notes on PD-023 and PD-034); PRD.md; DEVELOPMENT_PLAN.md (FAM-UI-08 and ADM-11 rows and cards, CAR-08 retired, CHG-020 notes on the affected cards, totals, next numbers); FAM-UI-05 ACCEPTANCE_CRITERIA.md, TEST_PLAN.md, PRD.md, DECISIONS.md, PROGRESS.md, SESSION_STATE.md; new `docs/development/family-dev/family-ui-event-cost/` and `docs/development/admin-dev/admin-client-view/`; CAR-08 PRD.md and PROGRESS.md (retired); `docs/AGENT_REFERENCE.md` (status value `RETIRED (CHG-xxx)`). `docs/JIRA_BACKLOG.csv` not updated (same as CHG-010).
 
 Template for future entries:
 ```
