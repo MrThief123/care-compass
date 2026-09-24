@@ -526,6 +526,15 @@ Docs updated: DECISIONS.md
 - Human confirmation: Dhruv Verma, 2026-09-24 (in-session; asked for these docs to be changed and a PR opened).
 - Docs updated: DECISIONS.md (this entry; amendment notes on PD-044 and CHG-001), PRD.md (REQ-17, REQ-18, REQ-21, new REQ-35, nav table, permissions, PL-23), ARCHITECTURE.md (§6 `care_events` and `care_event_overrides` rows, §6.3 status derivation, flow 2 'Tick task'), DEVELOPMENT_PLAN.md (CHG-009 notes on the affected cards). Each lane updates its own feature PRD, ACCEPTANCE_CRITERIA and TEST_PLAN when it starts or resumes an affected feature, and records it in that feature's DECISIONS.md (same approach as CHG-005).
 
+### CHG-010 — Plain events on the calendar use a solid neutral stripe; on compact surfaces they may differ from Planned tasks by colour alone
+- Date / requested by: 2026-09-24 / Dhruv Verma (human, project lead)
+- Type: scope change (amends CHG-009 "Calendar look" and UI-05 AC-12)
+- Description: a plain event's calendar block and month chip carry a **solid** neutral stripe (token `text-secondary` grey) instead of a patterned one, with no status shape. The word "Event" is still visible where the block has room (day view `full` tier, event popover) and is always in the accessible name. On compact day blocks, week blocks and month chips — where a Planned task also has no shape and the status word is read out to screen readers only — a plain event differs **visually** from a Planned task by stripe colour alone. This is an accepted exception for **event type** only: task **status** (Planned, Done, Overdue) is still never conveyed by colour alone (CLAUDE.md §7 unchanged for status).
+- Source / justification: human instruction in-session, 2026-09-24, after reviewing the dotted-bar preview: "I don't like the grey dotted line … just have the same grey as a stripe rather than dots"; the colour-alone trade-off was put to the human, who chose "stripe only".
+- Impact: UI-05 AC-12 reworded (event type exempt from the colour-alone rule on compact surfaces; status still covered); UI-05 FD-05; UI-01 calendar kit `EVENT_CUE`. Dashboard features that show plain events (FAM-UI-01/02, FAM-04/05, CAR-UI-01/03, CAR-05) inherit the look; no test changes outside UI-05.
+- Human confirmation: Dhruv Verma, 2026-09-24 (in-session).
+- Docs updated: DECISIONS.md (this entry), `docs/development/shared/shared-plain-events/ACCEPTANCE_CRITERIA.md` (AC-12), `docs/development/shared/shared-plain-events/DECISIONS.md` (FD-05).
+
 Template for future entries:
 ```
 ### CHG-xxx — <title>
