@@ -41,7 +41,7 @@ Each requirement links to sources and to the features that implement it. Require
 
 | ID | Area | Requirement | Priority · Status | Sources | Implemented by |
 |---|---|---|---|---|---|
-| REQ-01 | Access | Users sign in simply and securely; users can reset their password by email. | MUST · CONFIRMED (method AMBIGUOUS, OQ-08) | CIS3 Order 1; CIS5 Q&A; NFR-3; UC-S01; Design Settings | F0-07, FAM-12, CAR-09 |
+| REQ-01 | Access | Users sign in simply and securely; users can reset their password by email. Family and organisation admins create their own accounts (REQ-36); carers are invited by their admin. | MUST · CONFIRMED (method answered OQ-08/PD-040; sign-up PD-057) | CIS3 Order 1; CIS5 Q&A; NFR-3; UC-S01; Design Settings | F0-07, F0-17, FAM-12, CAR-09 |
 | REQ-02 | Access | Three separate role dashboards — Family, Carer, Admin — each with its own navigation; controls a role may not use are absent, not disabled. | MUST · CONFIRMED | CM-0708; FR-5.4; UI-§4, D15; DD §8 | F0-15, FAM-UI-01, FAM-UI-02, FAM-UI-03, FAM-UI-04, FAM-UI-05, FAM-UI-06, FAM-UI-07, CAR-UI-01, CAR-UI-02, CAR-UI-03, CAR-UI-04, ADM-UI-01, ADM-UI-02, ADM-UI-03, ADM-UI-04, ADM-UI-05, F0-07 |
 | REQ-03 | Access | Authorisation enforced by the database (RLS) on every read and write. | MUST · CONFIRMED | FR-5.5; NFR-3; ADR-01–03; TM-2808 | F0-04, F0-06, INT-05 |
 | REQ-04 | Access | A client belongs to one organisation at a time; the family can move the client to another organisation; the outgoing organisation and all its staff lose access immediately; no data is lost; emails stop going to the old organisation. | MUST · CONFIRMED (mechanism AMBIGUOUS, OQ-06/OQ-15) | CIS3 Order 2–4, #9; CIS5 Q&A; UI-D3, D24, D36; US P-12–P-15 | F0-06, FAM-13, ADM-05, INT-02 |
@@ -76,6 +76,7 @@ Each requirement links to sources and to the features that implement it. Require
 | REQ-33 | Notifications | Reminders for upcoming care and alerts for overdue care. | SHOULD · CONFIRMED requirement, PARKED (PL-03) | CM-0309; US C-8; UC-F04; CIS5 | Not scheduled — see Parking lot |
 | REQ-34 | Admin | Admin Home shows client and staff counts and overdue events across all clients. | MUST · CONFIRMED | UI-D5; US A-5; Design Admin Home | ADM-01 |
 | REQ-35 | Scheduling | Every event is either a task (ticked off by hand with the actor recorded; Overdue if not done by its due time) or a plain event (no status, never ticked off). A switch on the event form, on by default, sets it; changes follow the edit scope and never alter past occurrences. Checkbox views show tasks only; schedule and log views show both, with plain events in a neutral 'Event' look. | MUST · CONFIRMED | Human, 2026-09-24 (PD-044, CHG-009) | F0-11, F0-16, FAM-01, FAM-02, FAM-04, FAM-05, FAM-06, FAM-07, FAM-14, FAM-15, CAR-01, CAR-05, CAR-06, CAR-07 |
+| REQ-36 | Access | Self-serve sign-up. A family member creates their account and the client record in one step and links a provider organisation later. An organisation admin creates their account and a new organisation in one step. Carers cannot sign up themselves; they are invited by their organisation's admin. No email confirmation is required. Sign-up uses the same look as sign-in. | MUST · CONFIRMED | Human, 2026-09-24 (PD-057, CHG-010); CIS3 Order 1–3; CM-1908 | F0-17, FAM-13, ADM-02, ADM-04 |
 | REQ-N1 | Non-functional | Usable by non-technical users aged 55–80 and carers on shared laptops; plain language; destructive actions explain consequences. | MUST · CONFIRMED | NFR-2; CIS1 #4; CIS3 Access 6; UI-§2; DD §1 | F0-14, F0-15, UI-02, FAM-UI-01, FAM-UI-02, FAM-UI-03, FAM-UI-04, FAM-UI-05, FAM-UI-06, FAM-UI-07, CAR-UI-01, CAR-UI-02, CAR-UI-03, CAR-UI-04, ADM-UI-01, ADM-UI-02, ADM-UI-03, ADM-UI-04, ADM-UI-05, INT-06 |
 | REQ-N2 | Non-functional | WCAG 2.1 AA: 4.5:1 text contrast, 44×44px targets, visible focus, status not by colour alone, 13px body minimum. | MUST · CONFIRMED | UI-§5.4; DD §7 | F0-05, F0-14, F0-15, UI-02, FAM-UI-01, FAM-UI-02, FAM-UI-03, FAM-UI-04, FAM-UI-05, FAM-UI-06, FAM-UI-07, CAR-UI-01, CAR-UI-02, CAR-UI-03, CAR-UI-04, ADM-UI-01, ADM-UI-02, ADM-UI-03, ADM-UI-04, ADM-UI-05, INT-06 |
 | REQ-N3 | Non-functional | Visual system follows Figma Foundations tokens, IBM Plex Sans, 88px rail, 76px header, 1440 frame. | MUST · CONFIRMED | FIG; UI-§5 | F0-05, F0-14, FAM-UI-01, FAM-UI-02, FAM-UI-03, FAM-UI-04, FAM-UI-05, FAM-UI-06, FAM-UI-07, CAR-UI-01, CAR-UI-02, CAR-UI-03, CAR-UI-04, ADM-UI-01, ADM-UI-02, ADM-UI-03, ADM-UI-04, ADM-UI-05 |
@@ -202,12 +203,13 @@ Note: OOS-5 (rostering out of scope) is superseded by later client meetings and 
 | PL-15 | Client switcher for family accounts with multiple clients | CM-2108; US P-10 | OQ-30 |
 | PL-16 | View-only family members distinct from POA authority | US P-11; FR-5.3 | OQ-16 |
 | PL-17 | Mobile/phone-optimised views and phone warnings | CIS5 Q&A | REQ-N10 |
-| PL-18 | Organisation registration and Add/Delete organisation | CM-0309 | OQ-06 |
+| PL-18 | Add/Delete organisation by an operator (self-serve organisation **registration** moved into F0-17 by CHG-010) | CM-0309 | OQ-06; CHG-010 |
 | PL-19 | Organisation-configurable shift patterns | CIS5 Rostering | OQ-21 |
 | PL-20 | Admin/Carer task log and task detail equivalents | UI-Q14 | OQ-37 |
 | PL-21 | Comments/notes and evidence on events and completions | BRIEF item 4; CIS5 Q&A; US C-3, C-10 | OQ-34 |
 | PL-22 | Front-page extras: 'last updated' indicator, change summary, renameable program title | CIS3 Data 1; CIS5 Front page | OQ-38 |
 | PL-23 | Alert Family (email or Home alert) when a carer switches a task to a plain event | Human, 2026-09-24 (CHG-009) | Audit log records it; no design or notification type yet |
+| PL-24 | Verify a self-registered organisation before it appears in the family organisation picker (lookalike-provider risk) | Human, 2026-09-24 (CHG-010 risk 2) | Raised for prioritisation; no design |
 
 
 ## 18. Dependencies

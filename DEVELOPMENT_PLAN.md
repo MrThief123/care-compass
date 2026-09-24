@@ -1,7 +1,7 @@
 # DEVELOPMENT PLAN — Care Compass
 
 Version 0.2 · 17 September 2026 · Status: DRAFT (controlled after planning freeze) · Supersedes v0.1 dashboard-by-dashboard phases
-Totals: **79 features** · **320 acceptance criteria** across 5 phases (UI-04 and its 10 criteria added by CHG-004, 2026-09-19; the Jira import `docs/JIRA_BACKLOG.csv` predates it). Jira import: `docs/JIRA_BACKLOG.csv`.
+Totals: **80 features** · **328 acceptance criteria** across 5 phases (UI-04 and its 10 criteria added by CHG-004, 2026-09-19; F0-17 and its 8 criteria added by CHG-010, 2026-09-24; the Jira import `docs/JIRA_BACKLOG.csv` predates both). Jira import: `docs/JIRA_BACKLOG.csv`.
 
 ---
 
@@ -149,6 +149,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 | 8 | F0-12 | Budget buckets, fund top-ups, spending and summary calculation | B | D6 | SPRINT | F0-06, F0-08 | OQ-01, OQ-03, OQ-04, OQ-05 | `feature/shared-budget-schema` | NOT STARTED |
 | 9 | F0-13 | Client document storage | B | D6–D7 | SPRINT | F0-06, F0-11 | OQ-01, OQ-26 | `feature/shared-document-storage` | NOT STARTED |
 | 10 | F0-16 | Development seed data from the design content | B | D7 | SPRINT | F0-11, F0-12, F0-13, F0-10 | OQ-01 | `feature/shared-dev-seed-data` | NOT STARTED |
+| 11 | F0-17 | Self-serve sign-up for Family and Organisation accounts | B | D8 | SPRINT | F0-06, F0-07 | OQ-01, OQ-07, OQ-08 | `feature/shared-sign-up` | NOT STARTED |
 
 ### Phase 3 — Data wiring & behaviour (parallel: Family · Carer · Admin)
 
@@ -627,6 +628,17 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **CHG-009 (tasks and plain events, REQ-35):** seed plain events (e.g. a daily walk) alongside tasks.
 - **Docs:** `docs/development/shared/shared-dev-seed-data/` · **Status:** NOT STARTED
 
+### F0-17 — Self-serve sign-up for Family and Organisation accounts
+- **Dashboard / stream:** shared · **Lane:** B · **Days:** D8 · **Sprint:** SPRINT · **PR target:** `main (per OQ-01 — shared work)` · **Branch:** `feature/shared-sign-up`
+- **Description:** A public `/sign-up` page, built like `/sign-in`, where a family member creates their account and their client, or an organisation admin creates their account and a new organisation. Carers are invited by their admin and cannot sign up. Added by CHG-010 (PD-057).
+- **User value:** The confirmed workflow (PD-037: the family sets up the client, then picks a provider) can start without anyone creating accounts by hand.
+- **Dependencies:** F0-06, F0-07 · **Blocking decisions:** OQ-01, OQ-07, OQ-08
+- **Jira summary:** Sign-up page (account type, names, email, password, plus client or organisation name) that creates the account and its linked record atomically, then signs the user in
+- **Acceptance criteria summary:** 8 criteria — a family sign-up lands on the new client's Home; an organisation sign-up is routed like an admin sign-in; public sign-up cannot create a carer or join an existing organisation …
+- **Testing summary:** 2 e2e, 4 integration, 2 db
+- **Requirements:** REQ-01, REQ-36
+- **Docs:** `docs/development/shared/shared-sign-up/` · **Status:** NOT STARTED
+
 ## Phase 3 — Data wiring & behaviour (parallel: Family · Carer · Admin) — feature detail
 
 ### FAM-01 — Family Home — Today day-view timeline
@@ -776,6 +788,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Acceptance criteria summary:** 6 criteria — clients.organisation_id changes, future shifts are cancelled and the assignment is ended; zero rows are returned; counts equal the pre-transfer counts …
 - **Testing summary:** 4 db, 2 component
 - **Requirements:** REQ-04, REQ-N6
+- **CHG-010 (self-serve sign-up, REQ-36):** a self-registered family's client starts with no organisation; the organisation card must offer 'Choose organisation' (picker, no transfer confirmation) when there is none yet.
 - **Docs:** `docs/development/family-dev/family-change-organisation/` · **Status:** NOT STARTED
 
 ### FAM-14 — Family — Task log
@@ -947,6 +960,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Acceptance criteria summary:** 4 criteria — Harold appears in the list with family contact 'Grace'; an error is shown; rows include 'Margaret' with family contact 'Helen' …
 - **Testing summary:** 1 e2e, 2 component, 1 integration
 - **Requirements:** REQ-07
+- **CHG-010 (self-serve sign-up, REQ-36):** clients are created only by families (PD-037, PD-057). This feature becomes the clients list (with Remove per ADM-05) and has no add-client panel. Lane A rewrites its PRD, ACs and TEST_PLAN when it starts.
 - **Docs:** `docs/development/admin-dev/admin-clients/` · **Status:** NOT STARTED
 
 ### ADM-05 — Admin — Remove client
@@ -1112,7 +1126,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 See PRD.md §17. Promotion requires a CHG entry, human confirmation, and new feature docs from `docs/templates/FEATURE_TEMPLATE/`.
 
 ## 7. Adding a new feature
-1. Propose ID (next number: `FAM-16`, `FAM-UI-08`, `CAR-10`, `ADM-11`, `UI-04`, `INT-09`, `F0-17`), slug `<stream>-<name>`, lane and planned day.
+1. Propose ID (next number: `FAM-16`, `FAM-UI-08`, `CAR-10`, `ADM-11`, `UI-04`, `INT-09`, `F0-18`), slug `<stream>-<name>`, lane and planned day.
 2. Record CHG-xxx in DECISIONS.md; get human confirmation if material.
 3. Copy `docs/templates/FEATURE_TEMPLATE/` to `docs/development/<stream>/<slug>/` and complete it.
 4. Add the row to §4 and a card to §5; add to `docs/JIRA_BACKLOG.csv`; update root PROGRESS.md.
