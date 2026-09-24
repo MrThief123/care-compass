@@ -26,6 +26,7 @@ export type Database = {
       [_ in never]: never;
     };
   };
+
   public: {
     Tables: {
       carer_client_assignments: {
@@ -77,6 +78,7 @@ export type Database = {
           },
         ];
       };
+
       client_family_members: {
         Row: {
           client_id: string;
@@ -110,6 +112,7 @@ export type Database = {
           },
         ];
       };
+
       client_info_sections: {
         Row: {
           body: string | null;
@@ -149,6 +152,7 @@ export type Database = {
           },
         ];
       };
+
       clients: {
         Row: {
           avatar_path: string | null;
@@ -193,6 +197,7 @@ export type Database = {
           },
         ];
       };
+
       organisations: {
         Row: {
           abn: string | null;
@@ -220,6 +225,7 @@ export type Database = {
         };
         Relationships: [];
       };
+
       profiles: {
         Row: {
           address: string | null;
@@ -267,12 +273,37 @@ export type Database = {
           },
         ];
       };
+
+      test: {
+        Row: {
+          id: string;
+          name: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
     };
+
     Views: {
       [_ in never]: never;
     };
+
     Functions: {
-      current_organisation_id: { Args: never; Returns: string };
+      current_organisation_id: {
+        Args: never;
+        Returns: string;
+      };
+
       current_profile: {
         Args: never;
         Returns: {
@@ -294,13 +325,33 @@ export type Database = {
           isSetofReturn: false;
         };
       };
-      is_admin_of_client: { Args: { p_client_id: string }; Returns: boolean };
-      is_assigned_carer: { Args: { p_client_id: string }; Returns: boolean };
-      is_family_of: { Args: { p_client_id: string }; Returns: boolean };
+
+      is_admin_of_client: {
+        Args: {
+          p_client_id: string;
+        };
+        Returns: boolean;
+      };
+
+      is_assigned_carer: {
+        Args: {
+          p_client_id: string;
+        };
+        Returns: boolean;
+      };
+
+      is_family_of: {
+        Args: {
+          p_client_id: string;
+        };
+        Returns: boolean;
+      };
     };
+
     Enums: {
       app_role: "family" | "carer" | "admin";
     };
+
     CompositeTypes: {
       [_ in never]: never;
     };
