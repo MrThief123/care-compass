@@ -1,12 +1,12 @@
 # Progress — F0-10 Shifts schema, active-shift function and conflict query
 
-Status: READY FOR PR
+Status: MERGED TO DEV (merged to `main`, PR #69)
 Owner: Prajeet
 Lane: B — Backend
 Sprint: SPRINT · planned D4–D5
 Branch: `feature/shared-shifts-schema`
 PR target: `main (per OQ-01 — shared work)`
-Last updated: 2026-09-23
+Last updated: 2026-09-25
 
 ## Blockers
 - None — OQ-01, OQ-09 both ANSWERED (see root DECISIONS.md PD-041; supersedes this file's stale proposed defaults below)
