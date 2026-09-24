@@ -632,6 +632,15 @@ Docs updated: DECISIONS.md
 - Human confirmation: Dhruv Verma, 2026-09-24 (in-session).
 - Docs updated: DECISIONS.md (this entry); FAM-UI-02 ACCEPTANCE_CRITERIA.md, TEST_PLAN.md, DECISIONS.md, PROGRESS.md, SESSION_STATE.md.
 
+### CHG-017 — Family Calendar: an "Enter event" button that returns to the Calendar
+- Date / requested by: 2026-09-24 / Dhruv Verma (human, project lead)
+- Type: scope change on merged features (FAM-UI-02, FAM-UI-03)
+- Description: (1) The Family Calendar toolbar gets a primary "Enter event" link, the same wording and style as Home's, just left of the D/W/M control, 44px tall. It opens Add event with the Calendar's origin (`from=calendar` plus its `view / date / month`, the selected day included, CHG-014's format). (2) On Add event, Save event (after validation) and Cancel go back to that Calendar view when the origin is the Calendar; otherwise, as before, to Home (CHG-015). The origin is re-validated by the Calendar's own parser; nothing is echoed from the URL. (3) The form is not prefilled with the selected date. Nothing persists (Phase 1).
+- Source / justification: human instruction in-session, 2026-09-24: "it's missing the add event button like there is for the home page … put a similar button in for the calendar page next to the toggles for D, W, M", and the answers "Back to Calendar view", "No prefill", "\"Enter event\", primary".
+- Impact: FAM-UI-02 (new AC-09, TEST_PLAN T-09, feature DECISIONS FD-14; the design `family-02-calendar.png` has no such button: design review). FAM-UI-03 (new AC-10, TEST_PLAN T-10, feature DECISIONS FD-11; AC-09's "its only opener" now means "with no Calendar origin", no existing assertion changed). Lane F only; no shared folders changed.
+- Human confirmation: Dhruv Verma, 2026-09-24 (in-session).
+- Docs updated: DECISIONS.md (this entry); FAM-UI-02 and FAM-UI-03 ACCEPTANCE_CRITERIA.md, TEST_PLAN.md, DECISIONS.md, PROGRESS.md, SESSION_STATE.md.
+
 Template for future entries:
 ```
 ### CHG-xxx — <title>

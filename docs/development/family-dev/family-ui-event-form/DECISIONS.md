@@ -87,6 +87,16 @@ Non-blocking OQs: OQ-10, OQ-11, OQ-12 and OQ-22 have all been answered in root D
   5. FAM-UI-07 `[occurrenceKey]/page.test.tsx` `[AC-09] shows the Edit event button linking to the event's edit route`: retitled `…with the occurrence and origin (CHG-015)`; expected href gained `?occurrence=<encoded key>&from=calendar&view=week&date=<today>`. Reason: FD-09.
   6. FAM-UI-07 `tests/e2e/family-task-detail-nav.spec.ts` `[AC-09] the Edit event button opens the event's edit page`: expected URL gained `?occurrence=<encoded key>&from=home`. Reason: FD-09.
 
+### FD-11 — CHG-017: Add event returns to the Calendar it was opened from
+- Date: 2026-09-24
+- Context: root CHG-017. The Calendar now opens Add event (FAM-UI-02 FD-14), so Home is no longer its only opener (FD-09, AC-09).
+- Decision: `event-form-return.ts` gains `addEventHrefFrom(clientId, { from: "calendar", view })`, which builds `…/events/new?from=calendar&view=…&date=…[&month=…]` with `taskDetailOriginQuery`, and `addEventReturnHref(clientId, origin?)`, which is the Calendar view (`backLinkFor`) for a Calendar origin and Home for anything else (Home, the Task log, none, hostile). The Add event page now reads `searchParams` and re-validates them with `resolveTaskDetailOrigin` (the Calendar's own parser, `getToday` as its fallback day), as the Edit event page does.
+- Reason: one pattern with CHG-014 / CHG-015: whitelisted names and checked values, never a URL from the query.
+- Alternatives considered: a separate origin parser for Add event (a second pattern); honour a Task log origin too (the Task log has no Add event button).
+- Consequences: AC-09's "its only opener" now reads "with no Calendar origin"; no AC-09 assertion changed. The `?as=` role param is not carried, as with CHG-014.
+- Human confirmation required: done (Dhruv Verma, 2026-09-24, CHG-017, "Back to Calendar view").
+- Test changes caused: `new/page.test.tsx` `renderNew` also passes `searchParams` (default empty), because the page now takes them; no assertion changed.
+
 <!-- Template
 ### FD-01 — <title>
 - Date:

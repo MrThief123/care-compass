@@ -14,8 +14,13 @@ import NewEventPage from "./page";
 
 const ID = "client-margaret";
 
-async function renderNew(clientId = ID) {
-  return render(await NewEventPage({ params: Promise.resolve({ clientId }) }));
+async function renderNew(clientId = ID, search: Record<string, string> = {}) {
+  return render(
+    await NewEventPage({
+      params: Promise.resolve({ clientId }),
+      searchParams: Promise.resolve(search),
+    }),
+  );
 }
 
 afterEach(() => {
@@ -95,6 +100,38 @@ describe("[FAM-UI-03] /family/[clientId]/events/new (real mock contract, DATA_SO
     await user.click(screen.getByRole("button", { name: "Cancel" }));
 
     expect(router.push).toHaveBeenCalledExactlyOnceWith("/family/..%2Fadmin%3Fx%3D1/home");
+  });
+
+  it("[FAM-UI-03][AC-10] opened from the Calendar, Save event returns to that Calendar view (CHG-017)", async () => {
+    const user = userEvent.setup();
+    await renderNew(ID, { from: "calendar", view: "month", date: "2026-12-04", month: "2026-12" });
+
+    const [firstDay] = screen.getAllByTestId(/^date-picker-day-/);
+    await user.click(firstDay!);
+    await user.click(screen.getByRole("button", { name: "Save event" }));
+
+    expect(router.push).toHaveBeenCalledExactlyOnceWith(
+      "/family/client-margaret/calendar?view=month&date=2026-12-04&month=2026-12",
+    );
+    expect(router.back).not.toHaveBeenCalled();
+  });
+
+  it("[FAM-UI-03][AC-10] opened from the Calendar, Cancel returns to that Calendar view (CHG-017)", async () => {
+    const user = userEvent.setup();
+    await renderNew(ID, { from: "calendar", view: "day", date: "2026-12-01" });
+
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
+
+    expect(router.push).toHaveBeenCalledExactlyOnceWith(
+      "/family/client-margaret/calendar?view=day&date=2026-12-01",
+    );
+  });
+
+  it("[FAM-UI-03][AC-10] a Task log or hostile origin still returns to Home", async () => {
+    const user = userEvent.setup();
+    await renderNew(ID, { from: "tasks", q: "physio" });
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
+    expect(router.push).toHaveBeenLastCalledWith("/family/client-margaret/home");
   });
 
   it("[FAM-UI-03][PRD] the Add event page has no axe violations, including with the Date error shown", async () => {

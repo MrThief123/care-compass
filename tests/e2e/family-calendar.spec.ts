@@ -77,11 +77,33 @@ test("[FAM-UI-02][AC-06][AC-07] the keyboard switches views, steps the range and
   await expect(heading).toHaveText("30 Nov – 6 Dec 2026");
 });
 
+test("[FAM-UI-02][AC-09] T-09 Enter event opens Add event, and Cancel returns to the same month view (CHG-017)", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.goto(
+    "/family/client-margaret/calendar?view=month&date=2026-12-04&month=2026-12&as=family",
+  );
+
+  await page.getByRole("link", { name: "Enter event" }).click();
+  await expect(page).toHaveURL(
+    "/family/client-margaret/events/new?from=calendar&view=month&date=2026-12-04&month=2026-12",
+  );
+  await expect(page.getByRole("heading", { level: 1, name: "Add event" })).toBeVisible();
+
+  await page.getByRole("button", { name: "Cancel" }).click();
+  await expect(page).toHaveURL(
+    "/family/client-margaret/calendar?view=month&date=2026-12-04&month=2026-12",
+  );
+  await expect(page.getByRole("heading", { level: 1, name: "December 2026" })).toBeVisible();
+});
+
 for (const width of [1920, 1280, 1024, 768]) {
   test(`[FAM-UI-02][PRD] nothing overflows the page at ${width}px wide`, async ({ page }) => {
     await page.setViewportSize({ width, height: 900 });
     await page.goto(CALENDAR);
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Enter event" })).toBeVisible();
 
     const overflow = await page.evaluate(
       () => document.documentElement.scrollWidth - document.documentElement.clientWidth,

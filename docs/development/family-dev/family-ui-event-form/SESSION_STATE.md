@@ -2,7 +2,7 @@
 
 Last session date: 2026-09-24
 Current branch: `feature/family-ui-event-form-origin` (from `origin/family-dev` at d7ccf71, after PR #85). The original `feature/family-ui-event-form` was merged in PR #79.
-Worked on: CHG-015. Edit event and Add event Save / Cancel go to a validated origin instead of `router.back()`, and Task detail's Edit event link passes the occurrence being viewed plus its origin (FD-09). Closes FAM-UI-07 FD-29.
+Worked on (latest): CHG-017, on `feature/family-ui-calendar-add-event` with FAM-UI-02: Add event opened from the Calendar returns there (AC-10, FD-11); PR #88 open, see FAM-UI-02 SESSION_STATE.md. Earlier: CHG-015. Edit event and Add event Save / Cancel go to a validated origin instead of `router.back()`, and Task detail's Edit event link passes the occurrence being viewed plus its origin (FD-09). Closes FAM-UI-07 FD-29.
 What changed: see PROGRESS.md (CHG-015 paragraph).
 Tests run: tsc; eslint; prettier; `vitest run src tests/unit` (1,160 pass); production build, then Playwright on five specs (31 of 32; the failure is pre-existing on family-dev, see below); browser flow and width sweep.
 Test results: all feature tests pass.

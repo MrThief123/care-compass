@@ -1,14 +1,14 @@
 # Session State — FAM-UI-02 Family Calendar screen (UI)
 
 Last session date: 2026-09-24
-Current branch: `feature/family-ui-calendar-ticks` (from `origin/family-dev` at d7ccf71). The original `feature/family-ui-calendar` was merged in #77.
-Worked on: CHG-016. The Tasks panel's local ticks are drawn on the week, day and month grids, with the signed-in person as the actor ("Done · Helen Doyle" on the detail card); untick restores the original status (FD-13).
-What changed: see PROGRESS.md (CHG-016 paragraph).
-Tests run: tsc; eslint; prettier; `vitest run src tests/unit` (1,150 pass); production build, then Playwright on five specs (three runs; Family tests green apart from one keyboard flake that passed 45/45 when repeated; shell header tests at 480/338px fail intermittently, also on family-dev); browser check and width sweep. After merging `family-dev` (with #86): tsc, eslint, prettier clean; vitest 1,164 of 1,166 (the 2 failures are lane S kit tests `day-timeline` / `week-grid` expecting a "23:00" label, which the kit hides next to the now label after about 22:40 (`time-grid-scroller.tsx:122`), so they fail late in the evening on any branch); production build plus the five e2e specs: 32 passed, 2 failed (the known shell header tests at 480/338px).
+Current branch: `feature/family-ui-calendar-add-event` (from `origin/family-dev` at 227bc26, after #87).
+Worked on: CHG-017. An "Enter event" button on the Calendar toolbar, just left of D/W/M; Add event's Save and Cancel return to that Calendar view (with FAM-UI-03 AC-10).
+What changed: see PROGRESS.md (CHG-017 paragraph).
+Tests run: tsc; eslint; prettier; `vitest run src tests/unit` (1,176 of 1,178; the 2 are the known late-evening kit "23:00" tests); production build, then Playwright on all four Family specs (30 of 30); browser width sweep in all three views.
 Test results: all feature tests pass.
-Current blocker: none. PR #87 open to `family-dev`; `family-dev` (with #86) merged in, DECISIONS.md conflict resolved by keeping both CHG entries.
-Important discoveries: in the kit, the actor's name shows on a block only at `full` density; at 1440px the fixture blocks are smaller, so the name is on the detail card (hover or focus). The card stores the occurrence it opened with, so a test must re-focus the block to see a change. `getOccurrences` returns tasks only (plain events do not show on the calendar yet, earlier follow-up).
-Important decisions: CHG-016; FD-13 (untick rule PROPOSED).
-Exact next action: none for the agent; the human reviews and merges #87. Then set Status to MERGED TO DEV.
-Files likely to be touched next: this folder's PROGRESS.md and SESSION_STATE.md.
-Warning for next session: `.claude/settings.json` has a local uncommitted change that is not part of this feature. Do not commit it. CI (GitHub Actions) is off: run checks locally and say so in the PR. When FAM-05 wires `setOccurrenceDone`, reuse the lifted `ticks` state as the optimistic update.
+Current blocker: none. PR #88 open to `family-dev`.
+Important discoveries: port 3000 was held by another `next-server` in this repo, so the e2e run used a production server on 3100 with a temporary Playwright config (not committed).
+Important decisions: CHG-017; FD-14 (this feature); FAM-UI-03 FD-11.
+Exact next action: none for the agent; the human reviews and merges #88. Then set Status to MERGED TO DEV here and in FAM-UI-03.
+Files likely to be touched next: this folder's and FAM-UI-03's PROGRESS.md and SESSION_STATE.md.
+Warning for next session: `.claude/settings.json` has a local uncommitted change that is not part of this feature. Do not commit it. CI (GitHub Actions) is off: run checks locally and say so in the PR.
