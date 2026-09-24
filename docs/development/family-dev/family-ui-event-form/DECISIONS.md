@@ -57,6 +57,14 @@ Non-blocking OQs: OQ-10, OQ-11, OQ-12 and OQ-22 have all been answered in root D
 - Fixture: the description reads "Mobility and strength session…" where the design says "30-minute…" (the fixture follows the 90-minute duration; see `src/mocks/fixtures.ts`).
 - Raise with the shared owner: the DatePickerGrid cell size and 44px targets, and the Status legend style.
 
+### FD-08 — The task switch (CHG-009)
+- Date: 2026-09-24
+- Context: root CHG-009 (PR #78 to `main`, human-confirmed) makes every event either a task (ticked off by hand) or a plain event (no status), with one form switch, "This is a task — must be ticked off", On for a new event. CHG-009 first put the switch in FAM-06 / FAM-07 only; the human then asked for it on this screen too, so the screen shows it on fixtures.
+- Decision: a local `TaskSwitch` (`src/features/family-event-form/task-switch.tsx`, `role="switch"`, 44px tall, "On" / "Off" shown in words so state is not colour or position alone), passed to the kit `EventForm` through `extraFields`. Add event starts On; Edit event starts from `completionMode` (`manual` = On, `automatic` = Off; `isTaskEvent`). Pressing it changes local state only; Save event persists nothing (FD-04). Saving it, and the edit-scope rules (this occurrence / this and future / entire series from now), are FAM-06 / FAM-07.
+- Kit gaps (lane S, not edited here): the kit has no switch component, so it is local until one is shared; and the kit `EventForm` always shows the Status chips, so with the switch Off the Status row is still shown, although a plain event has no status. The CHG-009 shared follow-up should add a way to hide Status for a plain event (and a shared switch); FAM-06 / FAM-07 then hide it.
+- Human confirmation required: done (Dhruv Verma, 2026-09-24, asked for this feature's CHG-009 changes in-session). The switch has no Figma design yet: design review.
+- Test changes caused: none changed; T-05 and T-06 added (AC-05, AC-06).
+
 <!-- Template
 ### FD-01 — <title>
 - Date:
