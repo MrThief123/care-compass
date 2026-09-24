@@ -24,6 +24,7 @@ Last updated: 2026-09-24
 - Documents: 'Physio referral.pdf', 'Exercise plan.pdf' and a dashed 'Add file' tile that uploads nothing (FD-03).
 - Save event validates, then goes Back; Cancel goes Back; nothing persists (FD-04).
 - `loading.tsx`, `error.tsx` and `not-found.tsx` (FD-05).
+- CHG-009 task switch, "This is a task — must be ticked off": On for Add event, the event's current value for Edit event, local state only (FD-08, AC-05, AC-06).
 - Real-browser check (Playwright, production build) against `family-03-edit-event.png` at 1440, and a sweep at 1920, 1440, 1280, 1024, 900 and 768 on both routes: no page scroll, no text overflow, no overlap. Kit and layout differences are recorded in FD-07.
 
 ## In progress
@@ -33,12 +34,12 @@ Last updated: 2026-09-24
 - Human approval to open the PR to `family-dev`.
 
 ## Acceptance criteria status
-- 4 / 4 MET
+- 6 / 6 MET
 
 ## Tests
-- Written: 4 / 4 plan tests (T-01 to T-04), plus 15 more for PRD states, axe and the CHG-008 contract
-- Passing: all feature tests (17 component, 4 contract, 2 e2e)
-- Failing: 0 in this feature. The full unit run has 938 passing and 5 failing; the 5 are Supabase integration tests (`tests/integration/shared-authentication.test.ts`, `shared-supabase-environment.test.ts`) that need a local Supabase, and Docker is not installed on this machine. They are unrelated to this change. `supabase test db` was not run for the same reason (no schema changes here).
+- Written: 6 / 6 plan tests (T-01 to T-06), plus 15 more for PRD states, axe and the CHG-008 contract
+- Passing: all feature tests (20 component, 4 contract, 2 e2e; all 5 Family e2e pass)
+- Failing: 0 in this feature. The full unit run has 941 passing and 5 failing; the 5 are Supabase integration tests (`tests/integration/shared-authentication.test.ts`, `shared-supabase-environment.test.ts`) that need a local Supabase, and Docker is not installed on this machine. They are unrelated to this change. `supabase test db` was not run for the same reason (no schema changes here).
 
 ## Files changed
 - `src/app/(family)/family/[clientId]/events/**` (new: edit and new pages, loading, error, not-found, tests)
@@ -48,13 +49,15 @@ Last updated: 2026-09-24
 - `tests/e2e/family-event-form.spec.ts`
 
 ## Decisions
-- See DECISIONS.md FD-01 to FD-07; root CHG-008.
+- See DECISIONS.md FD-01 to FD-08; root CHG-008, CHG-009 (PR #78).
 
 ## Problems encountered
 - The e2e run first served a stale production build (404); fixed by rebuilding.
+- CHG-009 session: Playwright reused a stale `npm run start` server on port 3000 from an earlier run, and the Add event route hit the error boundary; stopping that server fixed it.
 
 ## Assumptions
 - Add event layout and copy are PROPOSED (not designed).
+- The task switch has no Figma design; its look is PROPOSED (FD-08).
 
 ## Next action
 - Get human approval, then open PR "FAM-UI-03 Family Add / Edit event screens (UI)" to `family-dev`.

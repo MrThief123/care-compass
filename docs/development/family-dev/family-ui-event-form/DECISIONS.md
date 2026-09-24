@@ -13,7 +13,7 @@ Record feature-level decisions here using the template below. Project-wide decis
 
 ## Feature decisions log
 
-Non-blocking OQs: OQ-10, OQ-11, OQ-12 and OQ-22 have all been answered in root DECISIONS.md (PD-044, PD-045, PD-046, PD-047). This screen shows what the kit `EventForm` already does for them: the full recurrence list and Overdue shown but not selectable. The extra fields (Title, Start time, Duration, completion mode, edit scope) are FAM-06 / FAM-07 work, passed in through `extraFields`, and are not built here.
+Non-blocking OQs: OQ-10, OQ-11, OQ-12 and OQ-22 have all been answered in root DECISIONS.md (PD-044, PD-045, PD-046, PD-047). This screen shows what the kit `EventForm` already does for them: the full recurrence list and Overdue shown but not selectable. The extra fields (Title, Start time, Duration, edit scope) are FAM-06 / FAM-07 work, passed in through `extraFields`, and are not built here. Since CHG-009 the task switch (completion mode) is shown here on fixtures (FD-08).
 
 ### FD-01 — Where Edit event gets its data (CHG-008)
 - Date: 2026-09-24
