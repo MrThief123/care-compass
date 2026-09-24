@@ -20,7 +20,7 @@ export interface HistoryTableProps {
 const ROW_GRID = cn(
   "grid items-center gap-x-4 text-body-default text-text-primary",
   "grid-cols-[minmax(0,1fr)_auto] [grid-template-areas:'desc_desc'_'date_amount']",
-  "@xl:grid-cols-[7.5rem_minmax(0,1fr)_clamp(7rem,18%,12rem)]",
+  "@xl:grid-cols-[7.5rem_minmax(0,1fr)_clamp(9rem,18%,12rem)]",
   "@xl:[grid-template-areas:'date_desc_amount']",
 );
 
