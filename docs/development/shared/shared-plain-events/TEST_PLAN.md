@@ -29,11 +29,11 @@ Tests are written **before** production code (TESTING.md §2). Run them, confirm
 | T-11 | AC-07 | component | Day timeline, week grid and month grid: a plain event at each density has the neutral bar, no check or alert icon, "Event" where the tier shows a status word, and "Event" in its accessible name. | ☑ | PASS |
 | T-12 | AC-07 | component | The same surfaces still draw Planned, Done and Overdue exactly as before (existing tests plus one side-by-side case). | ☑ | PASS |
 | T-13 | AC-08 | component | Event popover for a plain event: "Event" label, no status icon, no "Done ·", no completion time. | ☑ | PASS |
-| T-14 | AC-09 | component | Lists: the "Event" label (word, no icon, neutral tokens) in the place of a `StatusPill`; `StatusPill` and `ActivityRow` unchanged for the three statuses. | ☐ | NOT RUN |
+| T-14 | AC-09 | component | Lists: the "Event" label (word, no icon, neutral tokens) in the place of a `StatusPill`; `StatusPill` and `ActivityRow` unchanged for the three statuses. | ☑ | PASS (`src/components/shared/lists/activity-row.plain-events.test.tsx`) |
 | T-15 | AC-10 | component | Switch: role, `aria-checked`, accessible name, 44px class, "On"/"Off"; click, Space and Enter toggle; controlled value respected. | ☐ | NOT RUN |
 | T-16 | AC-11 | component | `EventForm` with the hide-Status option: no Status group, submits without a status; without it, existing behaviour (existing tests unchanged). | ☐ | NOT RUN |
-| T-17 | AC-12 | axe | Calendar, lists and forms axe files gain plain-event and switch fixtures; zero violations. | ☐ | PARTIAL (calendar kit PASS; lists and forms in Tasks 5–6) |
-| T-18 | AC-12 | unit | No raw colour values in the changed kit files (token classes only). | ☐ | PARTIAL (calendar kit and `EventPill` PASS; lists and forms files added in Tasks 5–6) |
+| T-17 | AC-12 | axe | Calendar, lists and forms axe files gain plain-event and switch fixtures; zero violations. | ☐ | PARTIAL (calendar and lists kits PASS; forms in Task 6) |
+| T-18 | AC-12 | unit | No raw colour values in the changed kit files (token classes only). | ☐ | PARTIAL (calendar kit, `EventPill` and `activity-row.tsx` PASS; forms files added in Task 6) |
 | T-19 | AC-13 | regression | `npm run verify` and the full Playwright suite on a fresh build are green with no existing test changed. | ☐ | NOT RUN |
 
 Test titles must start with `[UI-05][AC-xx]`.

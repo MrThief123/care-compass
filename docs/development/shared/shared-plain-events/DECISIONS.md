@@ -47,3 +47,10 @@ Authorisation: root DECISIONS.md CHG-009 (human, 2026-09-24). The human approved
 - Types: `DayTimeline`, `WeekGrid` and `MonthGrid` props are generic, `<T extends AnyOccurrence = Occurrence>`, so callers that pass `Occurrence[]` keep `(occurrence: Occurrence) => …` callbacks; callers that pass `AnyOccurrence[]` get `AnyOccurrence` back. `EventPopover` and the internal `useEventHover` take `AnyOccurrence`. Month chips gain `data-testid="month-grid-chip-<key>"` (additive).
 - Verified: `origin/family-dev` merged with this branch (scratch worktree) type-checks clean and its 990 unit tests pass. The merge also conflicts on `DECISIONS.md` (root): `main`'s CHG-009 entry against `family-dev`'s CHG-008 entry — keep both; not caused by this branch.
 - Human confirmation required: no (within the approved ACs).
+
+### FD-06 — `ActivityRow` for a plain event (implementation note, within AC-09 / AC-12)
+- Date: 2026-09-24
+- Decision: `ActivityRowProps` becomes a union. The task form is unchanged (`status` required, optional `actorName`, plus an optional `kind?: "task"`); the plain-event form is `kind: "event"` with no `status` or `actorName` (typed `never`). A plain-event row renders `EventPill` where `StatusPill` goes; title, date, chevron and the button/div shell are shared. Every existing caller (`AlertListCard`, the showcase page, dashboard lanes) compiles and renders as before.
+- `StatusPill` itself is unchanged. `AlertListCard` stays overdue-only (a plain event is never overdue). The other lists-kit components (`DataTable`, `NotificationRow`, `SelectableListRow`, `TaskChecklist`) have no status slot, so they need no change.
+- Preview: no lists preview page is editable under FD-02, so plain-event rows are covered by component and axe tests only; the showcase `ActivityRow` (task) was checked unchanged in a real browser.
+- Human confirmation required: no (within the approved ACs).
