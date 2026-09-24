@@ -11,6 +11,8 @@ export interface PageHeaderProps {
   userFirstName: string;
   /** Carer only (PRD.md F0-15 Scope: "Bell renders only in the Carer header"). */
   bell?: boolean;
+  /** F0-07: the sign-out control, rendered by the caller (`<SignOutButton />`) so this stays a plain component. */
+  signOutSlot?: ReactNode;
 }
 
 /**
@@ -20,7 +22,13 @@ export interface PageHeaderProps {
  * the bar or overlaps. `subject` must let its own text shrink (`min-w-0` plus
  * `truncate` or `line-clamp-*`).
  */
-export function PageHeader({ subject, date, userFirstName, bell = false }: PageHeaderProps) {
+export function PageHeader({
+  subject,
+  date,
+  userFirstName,
+  bell = false,
+  signOutSlot,
+}: PageHeaderProps) {
   return (
     <header className="flex min-h-[76px] shrink-0 flex-wrap items-center gap-x-4 gap-y-2 border-b border-border-default bg-bg-surface px-6 py-1.5">
       <div className="flex min-w-0 flex-[1_1_14rem] items-center gap-3">{subject}</div>
@@ -36,6 +44,7 @@ export function PageHeader({ subject, date, userFirstName, bell = false }: PageH
           <Avatar name={userFirstName} size="md" />
           <p className="text-body-default text-text-primary">{userFirstName}</p>
         </div>
+        {signOutSlot}
       </div>
     </header>
   );

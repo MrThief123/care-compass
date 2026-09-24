@@ -1,5 +1,6 @@
 import { PageHeader } from "@/components/shared/page-header";
 import { Rail } from "@/components/shared/rail";
+import { SignOutButton } from "@/components/shared/sign-out-button";
 import { Avatar } from "@/components/ui/avatar";
 import { formatLongDate } from "@/lib/format/date";
 import { getCurrentUser } from "@/server/auth/queries";
@@ -47,6 +48,7 @@ export default async function FamilyLayout({
           }
           date={formatLongDate(new Date())}
           userFirstName={user.firstName}
+          signOutSlot={<SignOutButton />}
         />
         <main className="flex-1">{children}</main>
       </div>
