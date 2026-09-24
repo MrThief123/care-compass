@@ -52,21 +52,23 @@ export function TaskDetailView({ clientId, occurrence, documents, origin }: Task
       <div className="flex flex-col">
         <BackLink clientId={clientId} origin={origin} />
         {/* The button sits right of the title and wraps below it when the row is too narrow;
-            the title takes the rest of the row and wraps anywhere, so they never overlap. */}
+            the title and date line take the rest of the row and wrap anywhere, so they never overlap. */}
         <div
           data-testid="task-detail-title-row"
           className="mt-1 flex flex-wrap items-start justify-between gap-x-4 gap-y-2"
         >
-          <h1 className="min-w-0 flex-[1_1_16rem] text-title-page text-text-primary [overflow-wrap:anywhere]">
-            {occurrence.title}
-          </h1>
+          <div className="flex min-w-0 flex-[1_1_16rem] flex-col">
+            <h1 className="min-w-0 text-title-page text-text-primary [overflow-wrap:anywhere]">
+              {occurrence.title}
+            </h1>
+            <p className="mt-0.5 text-body-small text-text-secondary [overflow-wrap:anywhere]">
+              {`${formatLongDate(occurrence.start)} · Assigned to ${nurse}`}
+            </p>
+          </div>
           <Link href={editEventHref(clientId, occurrence.eventId)} className={EDIT_EVENT_BUTTON}>
             Edit event
           </Link>
         </div>
-        <p className="mt-0.5 text-body-small text-text-secondary [overflow-wrap:anywhere]">
-          {`${formatLongDate(occurrence.start)} · Assigned to ${nurse}`}
-        </p>
       </div>
 
       <CardShell role="region" aria-labelledby="task-status-heading" className={CARD}>
