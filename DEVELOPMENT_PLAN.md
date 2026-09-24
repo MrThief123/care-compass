@@ -1,7 +1,7 @@
 # DEVELOPMENT PLAN — Care Compass
 
 Version 0.2 · 17 September 2026 · Status: DRAFT (controlled after planning freeze) · Supersedes v0.1 dashboard-by-dashboard phases
-Totals: **79 features** · **320 acceptance criteria** across 5 phases (UI-04 and its 10 criteria added by CHG-004, 2026-09-19; the Jira import `docs/JIRA_BACKLOG.csv` predates it). Jira import: `docs/JIRA_BACKLOG.csv`.
+Totals: **80 features** · **333 acceptance criteria** across 5 phases (UI-04 and its 10 criteria added by CHG-004, 2026-09-19; UI-05 and its 13 criteria added under CHG-009, 2026-09-24; the Jira import `docs/JIRA_BACKLOG.csv` predates it). Jira import: `docs/JIRA_BACKLOG.csv`.
 
 ---
 
@@ -113,6 +113,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 | 9 | UI-02 | Forms kit: fields, settings cards, side panels, chips, modal, event form | S | D3–D4 | SPRINT | F0-14, UI-00, UI-01 | OQ-01 | `feature/shared-forms-kit` | NOT STARTED |
 | 10 | UI-03 | Lists and cards kit: tables, rows, person/stat/budget/alert cards, client info view | S | D3 | SPRINT | F0-14, UI-00 | OQ-01 | `feature/shared-lists-cards-kit` | NOT STARTED |
 | 11 | UI-04 | Screen data contracts and fixtures: full-history Task log, single occurrence, event documents | S | D6 | SPRINT | UI-00 | OQ-01 | `feature/shared-screen-contracts-fixtures` | NOT STARTED |
+| 12 | UI-05 | Plain events in the shared kit and contracts (CHG-009) | S | D8 | SPRINT | UI-00, UI-01, UI-02, UI-03, UI-04 | — | `feature/shared-plain-events` | NOT STARTED |
 
 ### Phase 1 — Screens on fixtures (parallel: Family · Carer · Admin)
 
@@ -329,6 +330,17 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Testing summary:** 22 unit
 - **Requirements:** REQ-19, REQ-N9
 - **Docs:** `docs/development/shared/shared-screen-contracts-fixtures/` · **Status:** NOT STARTED
+
+### UI-05 — Plain events in the shared kit and contracts (CHG-009)
+- **Dashboard / stream:** shared · **Lane:** S · **Days:** D8 · **Sprint:** SPRINT · **PR target:** `main (per OQ-01 — shared work)` · **Branch:** `feature/shared-plain-events`
+- **Description:** Added by CHG-009 (the shared follow-up its Impact section lists). An occurrence of a plain event has no status in the domain types; `getTaskLog` gains a type filter (All / Tasks only / Events only) and status filters return tasks only; `getOccurrence` and `getTodayOccurrences` return plain events with no status; the mock fixtures carry plain events; the calendar kit gets a fourth, neutral "Event" block look; the lists kit gets a neutral "Event" label; the forms kit gets a shared switch and a way to hide the Status chips on the event form. Existing kit APIs stay backward compatible; dashboard lanes adopt the changes themselves.
+- **User value:** Families and carers see plain events (a walk) on the schedule and in the log, clearly marked "Event" and never shown as Planned, Done or Overdue.
+- **Dependencies:** UI-00, UI-01, UI-02, UI-03, UI-04 · **Blocking decisions:** None (OQ-01 ANSWERED; authorised by CHG-009)
+- **Jira summary:** plain-event occurrence type, Task log type filter, plain-event fixtures, neutral Event look in calendar and lists kits, shared switch, EventForm status toggle
+- **Acceptance criteria summary:** 13 criteria — a plain-event occurrence has no status; type filter with status filters returning tasks only; contracts return plain events without a status; plain-event fixtures with existing values kept; neutral "Event" look in every calendar surface and list row; a shared switch; EventForm can hide Status; axe clean; existing kit APIs unchanged …
+- **Testing summary:** unit, contract, component and axe
+- **Requirements:** REQ-35, REQ-17
+- **Docs:** `docs/development/shared/shared-plain-events/` · **Status:** NOT STARTED
 
 ## Phase 1 — Screens on fixtures (parallel: Family · Carer · Admin) — feature detail
 
