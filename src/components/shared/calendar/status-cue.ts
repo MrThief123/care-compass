@@ -28,16 +28,13 @@ export const STATUS_CUE: Record<OccurrenceStatus, StatusCue> = {
 };
 
 /**
- * The cue for a plain event (UI-05, CHG-009): it has no status, so it gets no
- * check or alert shape and the word "Event" in place of a status word. Its bar
- * is dotted and neutral rather than solid, so even where the word is only read
- * out (compact blocks, week blocks, month chips) a plain event does not differ
- * from a Planned task by colour alone.
+ * The cue for a plain event (UI-05, CHG-009): it has no status, so it gets a
+ * neutral stripe, no check or alert shape, and the word "Event" in place of a
+ * status word. On compact surfaces, where the word is read out only, the
+ * stripe colour alone sets it apart from a Planned task — accepted for event
+ * type by CHG-010; status itself is never colour alone.
  */
-export const EVENT_CUE: StatusCue = {
-  bar: "border-l-4 border-dotted border-text-secondary",
-  label: "Event",
-};
+export const EVENT_CUE: StatusCue = { bar: "bg-text-secondary", label: "Event" };
 
 /** The cue for any occurrence: the event cue for a plain event, else its status cue. */
 export function occurrenceCue(occurrence: AnyOccurrence): StatusCue {

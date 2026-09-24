@@ -85,7 +85,8 @@ export default function CalendarKitPreviewPage() {
 
       <p className="text-body-small text-text-secondary">
         Plain events (UI-05) — Short walk, Garden walk, Music in the lounge, Picnic in the park —
-        have no status: a neutral bar, no check or alert shape, and the word &ldquo;Event&rdquo;.
+        have no status: a neutral grey stripe, no check or alert shape, and the word
+        &ldquo;Event&rdquo;.
       </p>
 
       <CalendarHeader range={weekRange(TODAY)} />
