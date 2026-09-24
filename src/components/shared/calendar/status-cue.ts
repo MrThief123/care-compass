@@ -32,7 +32,7 @@ export const STATUS_CUE: Record<OccurrenceStatus, StatusCue> = {
  * neutral stripe, no check or alert shape, and the word "Event" in place of a
  * status word. On compact surfaces, where the word is read out only, the
  * stripe colour alone sets it apart from a Planned task — accepted for event
- * type by CHG-010; status itself is never colour alone.
+ * type by CHG-011; status itself is never colour alone.
  */
 export const EVENT_CUE: StatusCue = { bar: "bg-text-secondary", label: "Event" };
 
