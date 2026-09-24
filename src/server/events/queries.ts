@@ -8,12 +8,7 @@
 import * as mock from "@/mocks/queries/events";
 import { getDataSourceMode, notImplementedForSupabase } from "@/server/data-source";
 import { OccurrenceRangeSchema, TaskLogQuerySchema } from "@/types/domain";
-import type {
-  Occurrence,
-  OccurrenceRange,
-  OccurrenceStatus,
-  TaskLogResult,
-} from "@/types/domain";
+import type { Occurrence, OccurrenceRange, OccurrenceStatus, TaskLogResult } from "@/types/domain";
 
 export interface TaskLogQueryInput {
   q?: string;
