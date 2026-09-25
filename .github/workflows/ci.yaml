@@ -130,7 +130,8 @@ jobs:
         if: steps.check.outputs.exists == 'true'
         uses: supabase/setup-cli@v1
         with:
-          version: latest
+          # Pinned: `latest` calls the GitHub API every run and hits its rate limit.
+          version: 2.118.0
 
       - name: Start local database
         if: steps.check.outputs.exists == 'true'
