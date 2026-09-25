@@ -1,11 +1,11 @@
 # Progress - ADM-UI-03 Admin Staff screen (UI)
 
-Status: IN PROGRESS
+Status: MERGED TO DEV
 Owner: Kavis
 Lane: A - Admin
 Branch: feature/admin-ui-staff
 PR target: admin-dev
-Last updated: 2026-09-23
+Last updated: 2026-09-25
 
 ## Completed
 - Built Staff list and always-visible Add / edit staff panel from the supplied screenshot.
@@ -39,3 +39,8 @@ No - baseline verification failures remain; PR not requested.
 - Calendar and Staff regression suite: 105 tests passed across 12 files.
 - Synced origin/admin-dev; retained full-name header and upstream sign-out control.
 - User requested local fix commit. No push requested for this follow-up.
+
+## Merged — 2026-09-25
+- PR #97 (https://github.com/MrThief123/care-compass/pull/97) merged to `admin-dev` on 2026-09-25. Status set to MERGED TO DEV in a docs sync by Dhruv Verma, since the merge left it at IN PROGRESS.
+- Feature tests re-run on `admin-dev` at `ef0836e`: all admin screen and query tests pass (35 across ADM-UI-01 to 03). Every AC has a passing tagged test.
+- The "Remaining" and "Ready for PR" notes above describe the state before the PR and are superseded.

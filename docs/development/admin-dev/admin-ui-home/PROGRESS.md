@@ -1,11 +1,11 @@
 # Progress — ADM-UI-01 Admin Home screen (UI)
 
-Status: IN PROGRESS
+Status: MERGED TO DEV
 Owner: Kav1sh-11
 Lane: A — Admin
 Branch: feature/admin-ui-home
 PR target: admin-dev
-Last updated: 2026-09-22
+Last updated: 2026-09-25
 
 ## Completed
 - Isolated uncommitted preview from origin/admin-dev, with parentage verified and plan-status confirming readiness.
@@ -48,3 +48,8 @@ No — preview awaiting human review; full verification is not green.
 - Save all Admin implementation, tests, fixtures, contract and documentation on feature/admin-ui-home. Existing Family work is untouched.
 - Latest feature verification: 11 tests pass and TypeScript passes. Full-suite baseline limitations remain as recorded above.
 - No PR opened. Preview remains available for further feedback.
+
+## Merged — 2026-09-25
+- PR #95 (https://github.com/MrThief123/care-compass/pull/95) merged to `admin-dev` on 2026-09-25. Status set to MERGED TO DEV in a docs sync by Dhruv Verma, since the merge left it at IN PROGRESS.
+- Feature tests re-run on `admin-dev` at `ef0836e`: all admin screen and query tests pass (35 across ADM-UI-01 to 03). Every AC has a passing tagged test.
+- The "Remaining" and "Ready for PR" notes above describe the state before the PR and are superseded.

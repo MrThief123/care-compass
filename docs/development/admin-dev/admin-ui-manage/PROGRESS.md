@@ -1,11 +1,11 @@
 # Progress — ADM-UI-02 Admin Manage screen (UI)
 
-Status: IN PROGRESS
+Status: MERGED TO DEV
 Owner: Kav1sh-11
 Lane: A — Admin
 Branch: feature/admin-ui-manage
 PR target: admin-dev
-Last updated: 2026-09-23
+Last updated: 2026-09-25
 
 ## Completed
 - Ready-to-start gate verified using plan-status; parent origin/admin-dev at 322523b verified.
@@ -49,3 +49,8 @@ Human approved committing and pushing the reviewed Manage implementation and dis
 - Fixed the two clock-dependent shared calendar layout tests with explicit now={null}, under human authorization.
 - All 109 calendar/Manage regression tests and TypeScript pass. No production code or assertion changes.
 - Human authorized commit and push to feature/admin-ui-manage.
+
+## Merged — 2026-09-25
+- PR #96 (https://github.com/MrThief123/care-compass/pull/96) merged to `admin-dev` on 2026-09-25. Status set to MERGED TO DEV in a docs sync by Dhruv Verma, since the merge left it at IN PROGRESS.
+- Feature tests re-run on `admin-dev` at `ef0836e`: all admin screen and query tests pass (35 across ADM-UI-01 to 03). Every AC has a passing tagged test.
+- The "Remaining" and "Ready for PR" notes above describe the state before the PR and are superseded.
