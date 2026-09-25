@@ -93,7 +93,9 @@ function blockFor(occurrence: Occurrence): HTMLElement {
 
 describe("[UI-01] DayTimeline", () => {
   it("renders the whole day so any hour can be scrolled to", () => {
-    render(<DayTimeline occurrences={[]} />);
+    // The clock is off: the gutter's current-time label hides any hour label within a line of it, so
+    // with the real clock this failed whenever the time was close to one of the hours checked below.
+    render(<DayTimeline occurrences={[]} now={null} />);
     expect(screen.getByText("00:00")).toBeInTheDocument();
     expect(screen.getByText("06:00")).toBeInTheDocument();
     expect(screen.getByText("07:00")).toBeInTheDocument();
