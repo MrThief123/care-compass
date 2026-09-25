@@ -22,11 +22,11 @@ Tests are written **before** production code (TESTING.md §2). Run them, confirm
 | T-10 | AC-10 | component | Rename 'Fixed' to 'Fixed support' → same figures, no new History row (CHG-021) | ☑ | FAIL (red, expected) |
 | T-11 | AC-11 | component | Remove the added 'Council grant' → card gone, 'Bucket removed', '-$1,200'; NDIS and Government have no 'Remove bucket' and say why (CHG-021) | ☑ | FAIL (red, expected) |
 | T-12 | AC-12 | component | No buckets → empty Funds card pointing to 'Edit'; Edit budget suggests 'NDIS', 'Fixed', 'Government' (CHG-021) | ☑ | FAIL (red, expected) |
-| T-13 | AC-13 | component | 'Pending costs' section between the cards and History lists '27 Oct 2026', 'Government', 'Physiotherapy', '$310', oldest first; none → 'No pending costs.' (CHG-022) | ☑ | FAIL (red, expected) |
-| T-14 | AC-14 | unit + component | Add 100 to Government → '$30', no pending line, 'No pending costs.', row no longer 'Pending'; add 50 → '$290', still pending; older cost that does not fit blocks a newer one (CHG-022) | ☑ | FAIL (red, expected) |
-| T-15 | AC-15 | unit + component | A row opens by click, Enter or Space a dialog titled with its description: date, bucket, amount, status, recorder, note; Close or Escape returns focus to the row (CHG-022) | ☑ | FAIL (red, expected) |
-| T-16 | AC-16 | unit + component | NDIS +500 with note 'Q3 plan review' → first row 'Q3 plan review', 'Recorded by you', note in details; a 'Bucket added' row of the same save shows the note (CHG-022) | ☑ | FAIL (red, expected) |
-| T-17 | AC-17 | unit + component | 'Export' downloads 'budget-history-2026-11-30.csv': header, one line per row in order, plain amounts, formulas neutralised; no rows → no 'Export' (CHG-022) | ☑ | FAIL (red, expected) |
+| T-13 | AC-13 | component | 'Pending costs' section between the cards and History lists '27 Oct 2026', 'Government', 'Physiotherapy', '$310', oldest first; none → 'No pending costs.' (CHG-022) | ☑ | PASS |
+| T-14 | AC-14 | unit + component | Add 100 to Government → '$30', no pending line, 'No pending costs.', row no longer 'Pending'; add 50 → '$290', still pending; older cost that does not fit blocks a newer one (CHG-022) | ☑ | PASS |
+| T-15 | AC-15 | unit + component | A row opens by click, Enter or Space a dialog titled with its description: date, bucket, amount, status, recorder, note; Close or Escape returns focus to the row (CHG-022) | ☑ | PASS |
+| T-16 | AC-16 | unit + component | NDIS +500 with note 'Q3 plan review' → first row 'Q3 plan review', 'Recorded by you', note in details; a 'Bucket added' row of the same save shows the note (CHG-022) | ☑ | PASS |
+| T-17 | AC-17 | unit + component | 'Export' downloads 'budget-history-2026-11-30.csv': header, one line per row in order, plain amounts, formulas neutralised; no rows → no 'Export' (CHG-022) | ☑ | PASS except one test (see "After CHG-022 implementation") |
 
 **CHG-022 (2026-09-25):** T-13 to T-17 are new (PD-060). They are written and run red before any CHG-022 code:
 - `family-budget.test.tsx`, new groups:
@@ -174,6 +174,23 @@ No test was skipped, marked `.only` or deleted. `tsc` is not clean on this commi
 - Budget, Edit budget and Home with the fixtures: no page scroll, no overlap, nothing off screen, at every width.
 - The Edit budget stress case had unique 40-character names on every bucket, `9999999999.99` in every amount, and a new bucket and a note. It was clean at every width, and so was the same page with every field in error (the error messages sit under their fields).
 - Saving that stress case gave a four-bucket Budget with `$10,000,014,879.99` cards, 40-character labels and four `+$9,999,999,999.99` History rows. It was clean at every width, including 768, where the cards sit two across and pending stays on its own line.
+
+### After CHG-022 implementation (2026-09-25)
+**CI is down, so every check below ran locally.** No test was changed, skipped, marked `.only` or deleted after the CHG-022 red run.
+
+- `npx vitest run src/features/family-budget src/features/family-home src/server/budget src/mocks/queries/budget.test.ts src/types`: 17 files, **474 pass, 1 fails**. The failure is a test bug, not the build (below). AC-13 to AC-16 have every tagged test passing, and AC-17 all but that one.
+- `npx vitest run src tests/unit`: **1565 pass, 2 fail**. The same export test, plus `[FAM-UI-07][AC-05]` tasks paging (`src/app/(family)/family/[clientId]/tasks/page.test.tsx`), which timed out at 7.4s under the full run's load and passes alone (28 of 28). That file is FAM-UI-07's, and this branch does not touch it.
+- `npx tsc --noEmit`: clean. `npx eslint .`: 0 errors, the same 3 warnings as before, none in this feature's files. `npx prettier --check .`: clean.
+- `next build`: succeeds.
+- Playwright e2e on the production build (`next start`), `--grep-invert "F0-07"`: **35 of 36 pass**. `[F0-15][PRD] keeps header text inside the header bar … at 338px` failed. That is the shell flake recorded above, and this branch does not touch the shell. A first run had reused a `next dev` server left on :3000 and failed 11 calendar and event-form tests. Those tests passed once the run used the production build.
+- `supabase test db`: not run. This feature changes no migration or SQL.
+
+**The test bug (raised with the human, not changed).** `budget-export.test.ts`, "[FAM-UI-05][AC-17] a field with a comma, a double quote or a line break is quoted, with quotes doubled (RFC 4180)". The failing assertion is `lineOf({ note: "Line one\r\nLine two" })`. `lineOf` splits the file on CRLF and expects exactly one line. A correctly quoted field with an embedded CRLF holds a CRLF itself, so the split gives two pieces and `toHaveLength(1)` fails before the `toContain` runs. The CSV is right, `…,"Line one\r\nLine two"\r\n`, and no build can pass this assertion without breaking RFC 4180. The `\n` case on the line above passes.
+
+**Real-browser width sweep** (Playwright, Chromium against the dev server on :3000). The widths were 1920, 1600, 1440, 1280, 1152, 1024, 900, 800 and 768. The checks were the same as for CHG-021, plus lines hidden by a two-line cut, which do not count as overlap. At every width the details dialog was opened from a pending row and from a History row, checked, and closed with Escape. Screenshots at 1920, 1280 and 768, and of the dialog at 1920 and 768, were checked by eye.
+- The fixtures had Pending costs with Margaret's $310 Physiotherapy cost, the Export button and both dialogs. All were clean at every width.
+- Stress names had every bucket renamed to a unique 40-character name and a 200-character note, with no money added, so the cost stays pending. Edit budget and the saved Budget were clean at every width. At 768 the pending table's Bucket cell is cut at two lines with the full name in `title`, and the dialog shows the full name.
+- Stress amounts added `9999999999.99` to every bucket, with a 140-character note. Edit budget and the saved Budget were clean at every width. The save paid the pending cost: Pending costs read "No pending costs.", and the Physiotherapy details read "Status: Paid on 30 Nov 2026". The three `+$9,999,999,999.99` rows keep their amount on one line at 768, and their long description, which is the note, is cut at two lines.
 
 ## Regression scope
 - Run the full unit/component suite and `supabase test db` before marking READY FOR PR.
