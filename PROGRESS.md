@@ -7,8 +7,9 @@ Plan v0.2 · The status section below is **generated** — run `node scripts/pla
 |---|---|
 | Stage | **G1 — Plan validated** (F0-01 merged; `docs/VALIDATION_REPORT.md` approved 2026-09-17 — planning freeze in DECISIONS.md §1) |
 | Sprint | 2 weeks, parallel lanes — see `docs/SPRINT_PLAN.md` |
-| Merged to main | F0-01, F0-02, F0-03, F0-04, F0-05, F0-09, F0-14, F0-15, UI-00, UI-01, UI-02, UI-03, UI-04 — all of lane S. Merged to `family-dev` only, so not visible on `main` until Checkpoint 1: FAM-UI-01 (#54), FAM-UI-07 (#55). (Status below is generated — see that section for current per-feature detail) |
-| Next human actions | Merge the `main` → `carer-dev`, `admin-dev` and `family-dev` sync PRs; assign lane owners in `docs/SPRINT_PLAN.md` §2 (still unassigned); install Docker + Supabase CLI (lane B, for F0-06); pick up ready features: F0-06 (lane B), ADM-UI-01, CAR-UI-01, FAM-UI-02 and the rest of the screen list below. **Lane F: read `plan-status` on `family-dev`, not `main`** — `main` still lists FAM-UI-01 and FAM-UI-07 as ready because their merges live on `family-dev` until Checkpoint 1 |
+| Merged to main | F0-01 to F0-10, F0-14, F0-15, UI-00 to UI-05. All of lane S is on `main`. |
+| Merged to a dev branch only | `family-dev`: F0-11 (#107), FAM-UI-01 to FAM-UI-08, FAM-12 (#102), FAM-13 (#105). `admin-dev`: ADM-UI-01 (#95), ADM-UI-02 (#96), ADM-UI-03 (#97). Not on `main` until the Checkpoint PRs #62 (family-dev, 225 commits ahead) and #63 (admin-dev) merge. `admin-dev` and `carer-dev` are 52 commits behind `main`. |
+| Next human actions | Merge `main` into `admin-dev` and `carer-dev`; decide on Checkpoint PRs #62 to #64; assign lane owners in `docs/SPRINT_PLAN.md` §2 (still unassigned); start Carer screens (no CAR-UI feature started yet); pick up ready features from the Status section. **Read `plan-status` on the lane's dev branch, not `main`**: `main` lists dev-only merges as ready. |
 | Checkpoints | D7 clickable prototype on fixtures · D10 wired core · D12 release candidate |
 
 ## Progress calculations
@@ -19,12 +20,13 @@ Plan v0.2 · The status section below is **generated** — run `node scripts/pla
 ## Known risks
 | Risk | Impact | Mitigation |
 |---|---|---|
-| Blocking decisions on events/carer access (OQ-09, 10, 22, 29, 33) not answered by D3–D5 | Backend events and most wiring slip | Screens continue unaffected; lane B works on unblocked features; see SPRINT_PLAN §4 |
-| Budget decisions (OQ-03/04/05) open on D6 | Budget backend and wiring slip | Budget screens still built on fixtures |
-| Shared kit late | Every screen lane idles | Lane S is top priority D1–D4; screens start with whichever kit parts are merged |
+| Open decisions still pending (OQ-02, 18, 21, 23, 24, 25, 30, 31, 32, 34, 37, 38, 39) | Features they block stay blocked | Non-blocking ones use their documented default; blocking ones wait for the human |
+| Carer lane not started | Carer screens and wiring slip past D7/D10 checkpoints | Assign a Carer owner; all four CAR-UI screens are ready |
+| Wiring lags screens | Nothing works end to end yet; Integration 0/5 | Lane B next: F0-12, F0-13, F0-16, F0-17 |
+| Dev branches drift from `main` (family-dev 225 ahead; admin-dev, carer-dev 52 behind) | Large Checkpoint merges and conflicts | Merge `main` into dev branches daily; land Checkpoint PRs |
 | Merge conflicts across lanes | Lost time | Folder ownership (CLAUDE.md §4.2); daily syncs; shared changes only via shared PRs |
 | Usage limits per account | Lanes stall mid-feature | One lane per person; END SESSION state before limits; worktrees don't add capacity |
-| Missing sources (CIS4, UI Spec v1) and Figma MCP only showing Foundations | Rework | docs/sources + exported screens; F0-01 records gaps |
+| GitHub Actions minutes exhausted | CI can't gate PRs | Run the full check suite locally and say so in the PR |
 | RLS mistakes | Health/financial data leak | pgTAP allow/deny per role in every schema feature |
 
 ## Status
