@@ -331,7 +331,7 @@ select is(
 -- Audit (F0-08)
 -- ---------------------------------------------------------------------------
 select results_eq(
-  $$ select actor_id, actor_role, client_id from audit_log where table_name = 'care_event_completions' and action = 'INSERT' order by id limit 1 $$,
+  $$ select actor_id, actor_role, client_id from audit_log where table_name = 'care_event_completions' and action = 'INSERT' and client_id = 'b1111111-1111-1111-1111-111111111111' order by id limit 1 $$,
   $$ values ('a1111111-1111-1111-1111-111111111111'::uuid, 'family'::text, 'b1111111-1111-1111-1111-111111111111'::uuid) $$,
   'the first completion is in the audit log, with Helen as the actor and the client');
 select ok(

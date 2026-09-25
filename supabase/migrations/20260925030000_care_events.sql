@@ -47,6 +47,9 @@ create table care_events (
   created_by uuid default auth.uid() references profiles (id) on delete set null,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
+  -- An occurrence is identified by its start, so a start is a whole second (the recurrence engine works
+  -- in whole seconds, and a key must match exactly).
+  constraint care_events_starts_at_whole_second check (starts_at = date_trunc('second', starts_at)),
   constraint care_events_recurrence_shape check (
     recurrence is null
     or (
@@ -84,6 +87,10 @@ create table care_event_overrides (
   created_by uuid default auth.uid() references profiles (id) on delete set null,
   created_at timestamptz not null default now(),
   constraint care_event_overrides_one_per_occurrence unique (event_id, original_start),
+  constraint care_event_overrides_whole_seconds check (
+    original_start = date_trunc('second', original_start)
+    and (new_starts_at is null or new_starts_at = date_trunc('second', new_starts_at))
+  ),
   constraint care_event_overrides_kind_shape check (
     (kind = 'cancelled'
       and new_starts_at is null and new_duration_minutes is null and new_completion_mode is null)
@@ -114,7 +121,8 @@ create table care_event_completions (
   actor_id uuid not null,
   actor_display_name text not null,
   organisation_id uuid,
-  occurred_at timestamptz not null default now()
+  occurred_at timestamptz not null default now(),
+  constraint care_event_completions_whole_second check (original_start = date_trunc('second', original_start))
 );
 
 alter table care_event_completions enable row level security;
