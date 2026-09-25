@@ -50,15 +50,6 @@ export const ORGANISATION: Organisation = {
   address: "24 Wattle Street, Ringwood VIC 3134",
 };
 
-/**
- * Other organisations registered with Care Compass, for the Change organisation
- * picker (FAM-13). Only `id` and `name` are ever shown there.
- */
-export const OTHER_ORGANISATIONS: Organisation[] = [
-  { id: "org-wattle", name: "Wattle Care" },
-  { id: "org-eucalyptus", name: "Eucalyptus Community Care" },
-];
-
 // ---------------------------------------------------------------------------
 // Clients
 // ---------------------------------------------------------------------------

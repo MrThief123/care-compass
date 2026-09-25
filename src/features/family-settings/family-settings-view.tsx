@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 import {
@@ -12,28 +11,23 @@ import {
 } from "@/components/shared/forms";
 import { Button } from "@/components/ui/button";
 import { CardShell } from "@/components/ui/card-shell";
-import { changeClientOrganisation } from "@/server/clients/actions";
-import type { ClientHeaderSummary, OrganisationChoice } from "@/server/clients/queries";
+import type { ClientHeaderSummary } from "@/server/clients/queries";
 import { requestOwnPasswordReset, updateFamilyContactDetails } from "@/server/profiles/actions";
 import type { FamilyContactDetails } from "@/server/profiles/queries";
 
-import { OrganisationChoices } from "./organisation-choices";
 import { familyInfoSchema, type FamilyInfoValues } from "./settings-schema";
 
 export interface FamilySettingsViewProps {
   header: ClientHeaderSummary;
   contact: FamilyContactDetails;
-  /** Where the client can move to (FAM-13): all organisations, the current one flagged. */
-  organisations?: OrganisationChoice[];
 }
 
+const NOT_AVAILABLE = "Choosing a new organisation is not available yet.";
 const RESET_SENT = "We've emailed you a link to reset your password.";
 const SAVED = "Saved.";
 // Shown when the action itself could not be reached; the server's own messages match these.
 const SAVE_FAILED = "Couldn't save your details. Try again.";
 const RESET_FAILED = "Couldn't send the reset link. Try again.";
-const CHANGE_FAILED = "Couldn't change the organisation. Try again.";
-const CHOOSE_ONE = "Choose an organisation to continue.";
 
 /** Display order, which is also the order focus looks for the first bad field. */
 const FIELDS: ReadonlyArray<{
@@ -50,15 +44,9 @@ const FIELDS: ReadonlyArray<{
 /**
  * Family · Settings (FAM-UI-06): Change organisation, Family info and Reset
  * username / password. Save and Reset go through the `profiles` Server Actions
- * (FAM-12). 'Change' opens an organisation picker, then the destructive
- * confirmation, and confirming moves the client (FAM-13).
+ * (FAM-12); Change organisation is still FAM-13's (FD-01).
  */
-export function FamilySettingsView({
-  header,
-  contact,
-  organisations = [],
-}: FamilySettingsViewProps) {
-  const router = useRouter();
+export function FamilySettingsView({ header, contact }: FamilySettingsViewProps) {
   // What Cancel goes back to: the fixture, then whatever was last saved (CHG-024).
   const [saved, setSaved] = useState<FamilyInfoValues>({
     name: contact.name,
@@ -69,17 +57,7 @@ export function FamilySettingsView({
   const [values, setValues] = useState<FamilyInfoValues>(saved);
   const [errors, setErrors] = useState<FieldErrors>({});
   const [message, setMessage] = useState("");
-  // Change organisation (FAM-13): the picker, then the confirmation for `chosenId`.
-  const [pickerOpen, setPickerOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const [chosenId, setChosenId] = useState("");
-  const [pickerError, setPickerError] = useState("");
-  const [changing, setChanging] = useState(false);
-  // After a change the card and the picker follow it, before the route refreshes.
-  const [current, setCurrent] = useState<{ id?: string; name?: string }>({
-    id: organisations.find((organisation) => organisation.isCurrent)?.id,
-    name: header.organisationName,
-  });
   // One request at a time, so a double press saves or emails once.
   const [saving, setSaving] = useState(false);
   const [resetting, setResetting] = useState(false);
@@ -182,63 +160,7 @@ export function FamilySettingsView({
     setMessage(sent ? RESET_SENT : failure);
   }
 
-  const { firstName } = header;
-  const organisationName = current.name;
-  const choices = organisations.map((organisation) => ({
-    ...organisation,
-    isCurrent: current.id !== undefined ? organisation.id === current.id : organisation.isCurrent,
-  }));
-  const canChange = choices.some((organisation) => !organisation.isCurrent);
-
-  function openPicker() {
-    setMessage("");
-    setChosenId("");
-    setPickerError("");
-    setPickerOpen(true);
-  }
-
-  function closePicker() {
-    setPickerOpen(false);
-    setPickerError("");
-  }
-
-  function continueToConfirmation() {
-    if (!chosenId) {
-      setPickerError(CHOOSE_ONE);
-      return;
-    }
-    setPickerOpen(false);
-    setPickerError("");
-    setConfirmOpen(true);
-  }
-
-  async function changeOrganisation() {
-    if (changing) return;
-    const target = choices.find((organisation) => organisation.id === chosenId);
-    setConfirmOpen(false);
-    if (!target) return;
-
-    setChanging(true);
-    setMessage("");
-    let failure = CHANGE_FAILED;
-    let moved = false;
-    try {
-      const outcome = await changeClientOrganisation(header.id, target.id);
-      moved = outcome.ok;
-      if (!outcome.ok) failure = outcome.error.message;
-    } catch {
-      // Not moved: never say it was.
-    }
-    setChanging(false);
-
-    if (!moved) {
-      setMessage(failure);
-      return;
-    }
-    setCurrent({ id: target.id, name: target.name });
-    setMessage(`${firstName}'s care has moved to ${target.name}.`);
-    router.refresh();
-  }
+  const { organisationName, firstName } = header;
 
   return (
     <div className="flex flex-col gap-[22px] px-6 py-5">
@@ -246,28 +168,23 @@ export function FamilySettingsView({
       {/* The kit cards title with h3; this keeps the heading order unbroken (FD-08). */}
       <h2 className="sr-only">Your account and organisation</h2>
 
-      {organisationName && canChange ? (
+      {organisationName ? (
         <SettingsActionCard
           title="Change organisation"
           description={`Currently registered with ${organisationName}.`}
           actionLabel="Change"
-          onAction={openPicker}
+          onAction={() => {
+            setMessage("");
+            setConfirmOpen(true);
+          }}
         />
       ) : (
-        // The kit card requires an action; with no organisation, or none to move to,
-        // 'Change' is absent, not disabled (FD-05, FAM-13 FD-02).
+        // The kit card requires an action; with no organisation 'Change' is absent (FD-05).
         <CardShell className="flex flex-col gap-1 p-5">
           <h3 className="text-title-card text-text-primary">Change organisation</h3>
           <p className="text-body-default text-text-secondary">
-            {organisationName
-              ? `Currently registered with ${organisationName}.`
-              : "Not registered with an organisation."}
+            Not registered with an organisation.
           </p>
-          {organisationName && (
-            <p className="text-body-default text-text-secondary">
-              There is no other organisation registered with Care Compass yet.
-            </p>
-          )}
         </CardShell>
       )}
 
@@ -320,32 +237,16 @@ export function FamilySettingsView({
       </p>
 
       <ConfirmationModal
-        open={pickerOpen}
-        title="Choose a new organisation"
-        body={
-          <OrganisationChoices
-            organisations={choices}
-            value={chosenId}
-            onChange={(id) => {
-              setChosenId(id);
-              setPickerError("");
-            }}
-            error={pickerError}
-          />
-        }
-        confirmLabel="Continue"
-        onCancel={closePicker}
-        onConfirm={continueToConfirmation}
-      />
-
-      <ConfirmationModal
         open={confirmOpen}
         tone="destructive"
         title="Change organisation?"
         body={`Switching ${firstName}'s care to a new organisation keeps her routines, events, budget, documents and history. Assigned nurses and all future shifts will be cleared, and ${organisationName} will lose access immediately. This can't be undone from your side.`}
         confirmLabel="Change organisation"
         onCancel={() => setConfirmOpen(false)}
-        onConfirm={changeOrganisation}
+        onConfirm={() => {
+          setConfirmOpen(false);
+          setMessage(NOT_AVAILABLE);
+        }}
       />
     </div>
   );

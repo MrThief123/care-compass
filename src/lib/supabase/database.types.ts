@@ -346,25 +346,6 @@ export type Database = {
         };
         Returns: boolean;
       };
-
-      list_organisations_for_transfer: {
-        Args: {
-          p_client_id: string;
-        };
-        Returns: {
-          id: string;
-          name: string;
-          is_current: boolean;
-        }[];
-      };
-
-      transfer_client_organisation: {
-        Args: {
-          p_client_id: string;
-          p_new_org_id: string;
-        };
-        Returns: undefined;
-      };
     };
 
     Enums: {
