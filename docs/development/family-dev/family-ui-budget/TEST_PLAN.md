@@ -22,6 +22,27 @@ Tests are written **before** production code (TESTING.md §2). Run them, confirm
 | T-10 | AC-10 | component | Rename 'Fixed' to 'Fixed support' → same figures, no new History row (CHG-021) | ☑ | FAIL (red, expected) |
 | T-11 | AC-11 | component | Remove the added 'Council grant' → card gone, 'Bucket removed', '-$1,200'; NDIS and Government have no 'Remove bucket' and say why (CHG-021) | ☑ | FAIL (red, expected) |
 | T-12 | AC-12 | component | No buckets → empty Funds card pointing to 'Edit'; Edit budget suggests 'NDIS', 'Fixed', 'Government' (CHG-021) | ☑ | FAIL (red, expected) |
+| T-13 | AC-13 | component | 'Pending costs' section between the cards and History lists '27 Oct 2026', 'Government', 'Physiotherapy', '$310', oldest first; none → 'No pending costs.' (CHG-022) | ☑ | FAIL (red, expected) |
+| T-14 | AC-14 | unit + component | Add 100 to Government → '$30', no pending line, 'No pending costs.', row no longer 'Pending'; add 50 → '$290', still pending; older cost that does not fit blocks a newer one (CHG-022) | ☑ | FAIL (red, expected) |
+| T-15 | AC-15 | unit + component | A row opens by click, Enter or Space a dialog titled with its description: date, bucket, amount, status, recorder, note; Close or Escape returns focus to the row (CHG-022) | ☑ | FAIL (red, expected) |
+| T-16 | AC-16 | unit + component | NDIS +500 with note 'Q3 plan review' → first row 'Q3 plan review', 'Recorded by you', note in details; a 'Bucket added' row of the same save shows the note (CHG-022) | ☑ | FAIL (red, expected) |
+| T-17 | AC-17 | unit + component | 'Export' downloads 'budget-history-2026-11-30.csv': header, one line per row in order, plain amounts, formulas neutralised; no rows → no 'Export' (CHG-022) | ☑ | FAIL (red, expected) |
+
+**CHG-022 (2026-09-25):** T-13 to T-17 are new (PD-060). They are written and run red before any CHG-022 code:
+- `family-budget.test.tsx`, new groups:
+  - "Pending costs section" (AC-13).
+  - "adding funds pays pending costs" (AC-14).
+  - "entry details" (AC-15).
+  - "who recorded a save, and its note" (AC-16).
+  - "History export" (AC-17).
+  - "accessibility of the CHG-022 additions".
+- `budget-edit.test.ts`, two new groups:
+  - `applyBudgetEdit` pays pending costs (AC-14): whole, oldest first, stops at the first that does not fit, same-day order, overspent, other buckets untouched, cents, no mutation.
+  - `applyBudgetEdit` records who made each row and keeps the note (AC-16).
+- `budget-export.test.ts` (new): `budgetHistoryCsv` and `budgetHistoryFileName` (AC-17).
+- `src/types/domain.test.ts`: `FundEntrySchema` keeps `note` and `paidOn`.
+
+Five existing assertions change with PD-060. They are listed in DECISIONS.md FD-13 and in the HUMAN REVIEW note below.
 
 **CHG-021 (2026-09-25):** T-04 to T-06 are rewritten for the Edit budget page and T-09 to T-12 added; they are written and run red before the page is built. The paragraph below describes the CHG-020 inline-form tests, which those replace.
 
@@ -49,6 +70,13 @@ All titles start `[FAM-UI-05]`, were written first, and are red now (see Results
 | `FUND_ENTRIES` fixtures: schema-valid with unique ids, every client and bucket kind exists, top-ups are positive and expenses negative, Margaret has exactly the three design rows with their recorder, every entry names a recorder who is a person the fixtures have, another client has an entry of their own | CHG-019 fixtures, AC-02, FD-05 | unit | `src/mocks/queries/budget.test.ts` |
 
 Not tested here, by design: saving an entry to the database with its recorder (FAM-11), paying pending costs (F0-12), and wiring to the database (FAM-10). The local Update form is tested here since CHG-020 (T-04 to T-06).
+
+**HUMAN REVIEW: test expectation changed (CLAUDE.md §5), CHG-022.** Five assertions stated behaviour that PD-060 replaces, so they change:
+- The screen is now three cards, not two.
+- A row saved on Edit budget now says "Recorded by you" (twice: the screen test and `applyBudgetEdit`'s `recordedBy`).
+- Adding funds now pays pending costs (twice: the screen test and `applyBudgetEdit`).
+
+This is a recorded requirement change. The before and after for each is in DECISIONS.md FD-13. "Not tested here, by design: paying pending costs (F0-12)" below no longer holds: the Phase 1 simulation is tested here, and F0-12 still owns the real payment.
 
 **HUMAN REVIEW: test expectation changed (CLAUDE.md §5), CHG-021.** The CHG-020 inline Update form's tests (`fecb598`: 'Update' opens a form in the Funds card, `aria-expanded`, focus back to 'Update', the "$500 added to NDIS." status, and `fund-update.test.ts`) assert a form the human replaced with the Edit budget page and a renamed 'Edit' button (PD-059). They are replaced by the new T-04 to T-06 and T-09 to T-12; the amount rules and the balance limit are kept. Recorded requirement change; before and after in DECISIONS.md FD-12.
 
@@ -96,6 +124,25 @@ The new tests that already pass are guards that the implementation must keep gre
 | `src/mocks/queries/budget.test.ts` | 3 / 10 | The fixture buckets have no `id` and the entries have no `bucketId`. |
 
 No test was skipped, marked `.only`, or deleted to get green. `fund-update.test.ts` was deleted because CHG-021 replaces the module it tests; `budget-edit.test.ts` carries its amount and balance-limit cases forward. The changed test expectations are listed in DECISIONS.md FD-12. `tsc` is not clean on this commit: the tests use the CHG-021 types (`id`, optional `kind`, `bucketId`) before the types exist. That is part of the red state and is fixed in the build.
+
+### Red run for CHG-022, before its implementation (2026-09-25)
+`npx vitest run src/features/family-budget src/features/family-home src/server/budget src/mocks/queries/budget.test.ts src/types`: 4 files fail. In the files that load, **59 tests fail and 395 pass**. `budget-export.test.ts` fails at import because `./budget-export` does not exist yet. So it was run once against a stub whose two functions throw, and all 21 of its tests failed with "not built". The stub was then deleted and never committed.
+
+| File | Failed / total | Red because |
+|---|---|---|
+| `family-budget.test.tsx` | 44 / 164 | There is no 'Pending costs' region, no button in any row, no dialog and no 'Export' button. A save still leaves the pending cost unpaid ($740, not $430) and gives the row no "Recorded by you". |
+| `budget-edit.test.ts` | 13 / 87 | `applyBudgetEdit` does not pay pending costs, and does not set `recordedBy: "you"` or `note`. |
+| `src/types/domain.test.ts` | 2 / 11 | `FundEntrySchema` strips `note` and `paidOn`, and so accepts any `paidOn`. |
+| `budget-export.test.ts` | fails at import (21 / 21 with the stub) | `./budget-export` does not exist. |
+
+Some of the new tests already pass. They are guards the build must keep green:
+- In `budget-edit.test.ts`, the cases where nothing is paid: $50 is not enough; the older cost does not fit; the bucket is overspent; only funds added pay. Also: no note gives no `note`, old rows are untouched, and the inputs are not mutated.
+- The schema still accepts entries without the new fields.
+- The error state has no Pending costs section and no Export.
+- With no History rows there is no Export.
+- axe on the screen, which has no section yet.
+
+No test was skipped, marked `.only` or deleted. `tsc` is not clean on this commit, because the tests use `note`, `paidOn` and `./budget-export` before they exist. That is part of the red state and the build fixes it. eslint on the touched folders reports 0 problems, and prettier is clean.
 
 ### After implementation (2026-09-25)
 **CI is down (GitHub Actions limits), so every check below ran locally.** No test was changed, skipped, marked `.only` or deleted: the 92 tests are the ones written first (FD-05 amendment aside, above).

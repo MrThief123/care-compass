@@ -62,6 +62,50 @@ const HISTORY: FundEntry[] = [
   },
 ];
 
+/** A cost a bucket could not cover when the care was completed (CHG-020, PD-058). */
+function pendingCost(
+  id: string,
+  amount: number,
+  date: string,
+  description = "Physiotherapy",
+  bucketId = "bucket-government",
+): FundEntry {
+  return {
+    id,
+    clientId: "client-margaret",
+    bucketId,
+    type: "expense",
+    amount: -amount,
+    date,
+    description,
+    recordedBy: "Aisha Rahman",
+    pending: true,
+  };
+}
+
+/** Margaret's fixture: Government at $240 holding a $310 cost from 27 Oct 2026. */
+const PHYSIO = pendingCost("fund-pending-1", 310, "2026-10-27");
+
+/** Government with pending costs of `total` over `count` costs. */
+function governmentPending(total: number, count: number, extra: Partial<BudgetBucketSummary> = {}) {
+  return [
+    BUCKETS[0]!,
+    BUCKETS[1]!,
+    { ...BUCKETS[2]!, pendingTotal: total, pendingCount: count, ...extra },
+  ];
+}
+
+const BUCKETS_PENDING = governmentPending(310, 1);
+
+const HISTORY_PENDING: FundEntry[] = [HISTORY[0]!, PHYSIO];
+
+/** `entry` as it reads once paid on `date` (CHG-022): the same row, no longer pending. */
+function paid(entry: FundEntry, date: string): FundEntry {
+  const next: FundEntry = { ...entry, paidOn: date };
+  delete next.pending;
+  return next;
+}
+
 const TODAY = "2026-11-30";
 
 /** What a save's new rows are stamped with: the client, the reference day, and which save it is. */
@@ -419,7 +463,8 @@ describe("[FAM-UI-05] applyBudgetEdit: funds (local state only, CHG-021)", () =>
       date: TODAY,
       description: "Funds added",
     });
-    expect(next.history[0]!.recordedBy).toBeUndefined();
+    // CHG-022 (PD-060): stated, not empty; Phase 1 has no signed-in user.
+    expect(next.history[0]!.recordedBy).toBe("you");
     expect(next.history[0]!.pending).toBeUndefined();
     expect(next.history[1]).toEqual(HISTORY[0]);
   });
@@ -478,14 +523,16 @@ describe("[FAM-UI-05] applyBudgetEdit: funds (local state only, CHG-021)", () =>
     expect(next.buckets[0]!.remaining).toBe(100.3);
   });
 
-  it("[FAM-UI-05][PRD] does not pay pending costs: they are F0-12's, so the pending figures are kept as they are", () => {
-    const buckets = [
-      ...BUCKETS.slice(0, 2),
-      { ...BUCKETS[2]!, pendingTotal: 310, pendingCount: 1 },
-    ];
-    const next = apply(withBucket(noChange(buckets), 2, { amount: 500 }), buckets);
+  it("[FAM-UI-05][AC-14] adding $500 to Government pays its $310 pending cost: $430 left and no pending figures (CHG-022)", () => {
+    const next = apply(
+      withBucket(noChange(BUCKETS_PENDING), 2, { amount: 500 }),
+      BUCKETS_PENDING,
+      HISTORY_PENDING,
+    );
 
-    expect(next.buckets[2]).toMatchObject({ remaining: 740, pendingTotal: 310, pendingCount: 1 });
+    expect(next.buckets[2]!.remaining).toBe(430);
+    expect(next.buckets[2]!.pendingTotal ?? 0).toBe(0);
+    expect(next.buckets[2]!.pendingCount ?? 0).toBe(0);
   });
 
   it("[FAM-UI-05][PRD] only the bucket with that id changes, even when two buckets share a kind and a name", () => {
@@ -670,5 +717,224 @@ describe("[FAM-UI-05] applyBudgetEdit: buckets (local state only, CHG-021)", () 
 
     expect(buckets).toEqual([...BUCKETS, COUNCIL]);
     expect(history).toEqual(HISTORY);
+  });
+});
+
+/*
+ * CHG-022 (PD-060): after a bucket gains funds, its pending costs are paid
+ * whole, strictly oldest first, stopping at the first one the balance cannot
+ * cover. A paid cost keeps its History row, loses `pending` and gains
+ * `paidOn`; no new row is added. Local state only, as the rest of a save.
+ */
+describe("[FAM-UI-05][AC-14] applyBudgetEdit pays pending costs when funds are added (CHG-022)", () => {
+  function addToGovernment(amount: number, buckets: BudgetBucketSummary[], history: FundEntry[]) {
+    return apply(withBucket(noChange(buckets), 2, { amount }), buckets, history);
+  }
+
+  it("[FAM-UI-05][AC-14] adding $100 to Government ($240) pays the $310 cost whole: $30 left, taken off as used, no pending figures", () => {
+    const next = addToGovernment(100, BUCKETS_PENDING, HISTORY_PENDING);
+
+    // 3000 + 100 = 3100 total; 2760 + 310 = 3070 used, 99% (PD-032 alert).
+    expect(next.buckets[2]).toMatchObject({
+      id: "bucket-government",
+      total: 3100,
+      used: 3070,
+      remaining: 30,
+      percentUsed: 99,
+      state: "alert",
+    });
+    expect(next.buckets[2]!.pendingTotal ?? 0).toBe(0);
+    expect(next.buckets[2]!.pendingCount ?? 0).toBe(0);
+  });
+
+  it("[FAM-UI-05][AC-14] the paid cost keeps its History row, in place, no longer pending and paid today; no row is added for it", () => {
+    const next = addToGovernment(100, BUCKETS_PENDING, HISTORY_PENDING);
+
+    expect(next.history).toHaveLength(3);
+    expect(next.history[0]).toMatchObject({ description: "Funds added", amount: 100 });
+    expect(next.history[1]).toEqual(HISTORY[0]);
+    expect(next.history[2]).toEqual(paid(PHYSIO, TODAY));
+    expect(next.history[2]!.pending).toBeUndefined();
+  });
+
+  it("[FAM-UI-05][AC-14] adding $50 is not enough for $310: $290 left and the cost stays pending", () => {
+    const next = addToGovernment(50, BUCKETS_PENDING, HISTORY_PENDING);
+
+    expect(next.buckets[2]).toMatchObject({
+      total: 3050,
+      used: 2760,
+      remaining: 290,
+      pendingTotal: 310,
+      pendingCount: 1,
+    });
+    expect(next.history[2]).toEqual(PHYSIO);
+  });
+
+  it("[FAM-UI-05][AC-14] strictly oldest first: when the older cost does not fit, the newer one is not paid either, even though it would fit", () => {
+    const newer = pendingCost("fund-pending-2", 90, "2026-11-10", "Occupational therapy");
+    const history = [newer, HISTORY[0]!, PHYSIO];
+    const next = addToGovernment(50, governmentPending(400, 2), history);
+
+    expect(next.buckets[2]).toMatchObject({ remaining: 290, pendingTotal: 400, pendingCount: 2 });
+    expect(next.history.slice(1)).toEqual(history);
+  });
+
+  it("[FAM-UI-05][AC-14] pays each cost in date order while the balance covers it, and stops at the first that does not fit", () => {
+    const oldest = pendingCost("fund-pending-a", 200, "2026-10-01", "Respite");
+    const middle = pendingCost("fund-pending-b", 90, "2026-10-20", "Transport");
+    const newest = pendingCost("fund-pending-c", 500, "2026-11-10", "Equipment");
+    // History is newest first, as the contract gives it.
+    const history = [newest, middle, oldest];
+    const next = addToGovernment(100, governmentPending(790, 3), history);
+
+    // 240 + 100 = 340; 340 - 200 = 140; 140 - 90 = 50; 500 does not fit.
+    expect(next.buckets[2]).toMatchObject({
+      used: 3050,
+      remaining: 50,
+      pendingTotal: 500,
+      pendingCount: 1,
+    });
+    expect(next.history.slice(1)).toEqual([newest, paid(middle, TODAY), paid(oldest, TODAY)]);
+  });
+
+  it("[FAM-UI-05][AC-14] a later, smaller cost is still paid once the older ones are", () => {
+    const older = pendingCost("fund-pending-a", 300, "2026-10-01", "Respite");
+    const newer = pendingCost("fund-pending-b", 20, "2026-11-01", "Transport");
+    const next = addToGovernment(100, governmentPending(320, 2), [newer, older]);
+
+    // 340 - 300 = 40; 40 - 20 = 20.
+    expect(next.buckets[2]!.remaining).toBe(20);
+    expect(next.history.slice(1)).toEqual([paid(newer, TODAY), paid(older, TODAY)]);
+  });
+
+  it("[FAM-UI-05][AC-14] a cost that exactly uses up the balance is paid, leaving $0 and an exhausted bucket", () => {
+    const next = addToGovernment(70, BUCKETS_PENDING, HISTORY_PENDING);
+
+    expect(next.buckets[2]).toMatchObject({ remaining: 0, percentUsed: 100, state: "exhausted" });
+    expect(next.history[2]).toEqual(paid(PHYSIO, TODAY));
+  });
+
+  it("[FAM-UI-05][PRD] two pending costs on the same day: the one recorded first (lower in History) is the older", () => {
+    const first = pendingCost("fund-pending-a", 150, "2026-10-27", "Respite");
+    const second = pendingCost("fund-pending-b", 200, "2026-10-27", "Transport");
+    const next = addToGovernment(10, governmentPending(350, 2), [second, first]);
+
+    // 250 - 150 = 100; 200 does not fit.
+    expect(next.buckets[2]).toMatchObject({ remaining: 100, pendingTotal: 200, pendingCount: 1 });
+    expect(next.history.slice(1)).toEqual([second, paid(first, TODAY)]);
+  });
+
+  it("[FAM-UI-05][PRD] an overspent bucket pays nothing until it is back above the cost", () => {
+    const buckets = governmentPending(100, 1, { total: 3000, used: 3050, remaining: -50 });
+    const cost = pendingCost("fund-pending-1", 100, "2026-10-27");
+    const next = addToGovernment(100, buckets, [cost]);
+
+    expect(next.buckets[2]).toMatchObject({ remaining: 50, pendingTotal: 100, pendingCount: 1 });
+    expect(next.history[1]).toEqual(cost);
+  });
+
+  it("[FAM-UI-05][PRD] only funds added pay: removing funds, renaming, or adding to another bucket leaves the cost pending", () => {
+    let edit = withBucket(noChange(BUCKETS_PENDING), 2, { direction: "remove", amount: 40 });
+    edit = withBucket(edit, 2, { name: "Government subsidy" });
+    edit = withBucket(edit, 0, { amount: 5000 });
+    const next = apply(edit, BUCKETS_PENDING, HISTORY_PENDING);
+
+    expect(next.buckets[2]).toMatchObject({ remaining: 200, pendingTotal: 310, pendingCount: 1 });
+    expect(next.history.find((row) => row.id === PHYSIO.id)).toEqual(PHYSIO);
+  });
+
+  it("[FAM-UI-05][PRD] only that bucket's costs are paid: a pending cost on NDIS stays when Government gains funds", () => {
+    const ndisCost = pendingCost("fund-pending-ndis", 10, "2026-09-01", "Taxi", "bucket-ndis");
+    const buckets = [
+      { ...BUCKETS[0]!, pendingTotal: 10, pendingCount: 1 },
+      BUCKETS[1]!,
+      BUCKETS_PENDING[2]!,
+    ];
+    const next = addToGovernment(1000, buckets, [PHYSIO, ndisCost]);
+
+    expect(next.buckets[0]).toEqual(buckets[0]);
+    expect(next.history.slice(1)).toEqual([paid(PHYSIO, TODAY), ndisCost]);
+  });
+
+  it("[FAM-UI-05][PRD] pays in cents, so no floating-point residue reaches the card", () => {
+    const buckets = [
+      bucket("b-1", undefined, "Council grant", 100.1, 0, { pendingTotal: 0.3, pendingCount: 1 }),
+    ];
+    const cost = pendingCost("fund-pending-1", 0.3, "2026-10-27", "Stamps", "b-1");
+    const next = apply(withBucket(noChange(buckets), 0, { amount: 0.2 }), buckets, [cost]);
+
+    expect(next.buckets[0]).toMatchObject({ total: 100.3, used: 0.3, remaining: 100 });
+    expect(next.buckets[0]!.pendingTotal ?? 0).toBe(0);
+  });
+
+  it("[FAM-UI-05][PRD] changes nothing it was given when it pays: the old History rows are new objects", () => {
+    const buckets = structuredClone(BUCKETS_PENDING);
+    const history = structuredClone(HISTORY_PENDING);
+
+    applyBudgetEdit({ buckets, history }, withBucket(noChange(buckets), 2, { amount: 100 }), SAVE);
+
+    expect(buckets).toEqual(BUCKETS_PENDING);
+    expect(history).toEqual(HISTORY_PENDING);
+  });
+});
+
+/*
+ * CHG-022 (PD-060): every row a save makes states who made it ("you" in
+ * Phase 1, with no signed-in user) and keeps the save's note, if any, in
+ * `note`. Funds rows also keep the note as their description (PD-059).
+ */
+describe("[FAM-UI-05][AC-16] applyBudgetEdit records who made each row and keeps the note (CHG-022)", () => {
+  function everyKindOfRow(note?: string) {
+    const buckets = [...BUCKETS, COUNCIL];
+    let edit = withBucket(noChange(buckets), 0, { amount: 500 });
+    edit = withBucket(edit, 1, { direction: "remove", amount: 50 });
+    edit = withBucket(edit, 3, { remove: true });
+    return apply({ ...edit, added: [{ name: "Family gift", startingAmount: 20 }], note }, buckets);
+  }
+
+  it("[FAM-UI-05][AC-16] funds added, funds removed, bucket removed and bucket added rows each say 'you' recorded them", () => {
+    const next = everyKindOfRow();
+
+    expect(next.history.slice(0, 4).map((row) => [row.description, row.recordedBy])).toEqual([
+      ["Funds added", "you"],
+      ["Funds removed", "you"],
+      ["Bucket removed", "you"],
+      ["Bucket added", "you"],
+    ]);
+  });
+
+  it("[FAM-UI-05][AC-16] with the note 'Q3 plan review', every row of the save keeps it; funds rows also use it as their description", () => {
+    const next = everyKindOfRow("Q3 plan review");
+
+    expect(next.history.slice(0, 4).map((row) => [row.description, row.note])).toEqual([
+      ["Q3 plan review", "Q3 plan review"],
+      ["Q3 plan review", "Q3 plan review"],
+      ["Bucket removed", "Q3 plan review"],
+      ["Bucket added", "Q3 plan review"],
+    ]);
+  });
+
+  it("[FAM-UI-05][AC-16] with no note, the rows have no note", () => {
+    const next = everyKindOfRow();
+
+    expect(next.history.slice(0, 4).every((row) => row.note === undefined)).toBe(true);
+  });
+
+  it("[FAM-UI-05][AC-16] rows from before the save keep their own recorder and gain no note", () => {
+    const next = everyKindOfRow("Q3 plan review");
+
+    expect(next.history[4]).toEqual(HISTORY[0]);
+  });
+
+  it("[FAM-UI-05][AC-16] a pending cost paid by the save keeps its own recorder and gains no note", () => {
+    const next = apply(
+      { ...withBucket(noChange(BUCKETS_PENDING), 2, { amount: 100 }), note: "Top-up" },
+      BUCKETS_PENDING,
+      HISTORY_PENDING,
+    );
+
+    expect(next.history[2]).toEqual(paid(PHYSIO, TODAY));
+    expect(next.history[2]!.recordedBy).toBe("Aisha Rahman");
+    expect(next.history[2]!.note).toBeUndefined();
   });
 });

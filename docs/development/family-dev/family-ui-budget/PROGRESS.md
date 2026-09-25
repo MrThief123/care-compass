@@ -36,15 +36,18 @@ Last updated: 2026-09-25
 
 - CHG-021 full local checks and width sweep (2026-09-25, TEST_PLAN.md "After CHG-021 implementation"). The full unit run passed 1480 of 1480, and tsc, eslint (0 errors) and prettier are clean. `next build` succeeded and e2e passed 36 of 36. The Playwright sweep of Budget, Edit budget and Home, 1920 to 768, found nothing, with the fixtures and with a stress case (40-character names, $9,999,999,999.99 amounts).
 
+- CHG-022 recorded (root DECISIONS.md PD-060 and CHG-022, PRD.md REQ-29 and REQ-37, DEVELOPMENT_PLAN.md, feature PRD and AC-13 to AC-17).
+- CHG-022 tests written first and run red for the right reasons (TEST_PLAN.md "Red run for CHG-022"): 59 fail and 395 pass in the files that load, and `budget-export.test.ts` fails at import (21 of 21 with a throwaway stub). FD-13 records the defaults and the five changed assertions. The CHG-022 impact line in root DECISIONS.md is corrected: it had said no assertion changes. Commit `test(family): …`.
+
 ## In progress
-- CHG-022 recorded (root DECISIONS.md PD-060 and CHG-022, PRD.md REQ-29 and REQ-37, DEVELOPMENT_PLAN.md, feature PRD and AC-13 to AC-17). Next: its tests, written first.
+- CHG-022: build, after the human's go-ahead.
 
 ## Remaining
-- CHG-022: tests first (T-13 to T-17), build, full local checks, width sweep.
+- CHG-022: build (types `note`, `paidOn`; payment and recorder in `applyBudgetEdit`; `budget-export.ts`; Pending costs section; details dialog; Export), then full local checks and the width sweep.
 - The human's "yes", then open the PR to `family-dev` (the docs update ships in it).
 
 ## Acceptance criteria status
-- 12 / 17 MET (AC-13 to AC-17, CHG-022, NOT MET: not built yet). AC-01 to AC-12 each have tagged tests passing (380 of 380 across the family-budget, family-home, budget server and budget fixture tests).
+- 12 / 17 MET. AC-13 to AC-17 (CHG-022) are NOT MET: their tests are written and red, and nothing is built yet. AC-01 to AC-12 had every tagged test passing after CHG-021. Since the CHG-022 tests went in, one `[AC-04]`-tagged unit test (a new row's `recordedBy`) fails by design until the build: it now expects "you" (FD-13).
 
 ## Tests
 - Passing: 380 of 380 in the 15 feature-related files; 1480 of 1480 in the full unit run (`src`, `tests/unit`)
@@ -66,6 +69,12 @@ Last updated: 2026-09-25
 - See DECISIONS.md (FD-01 to FD-10; FD-10 is new in the build: History column sizes). Root `DECISIONS.md`: CHG-019 (amended 2026-09-25: entries name their recorder).
 
 ## HUMAN REVIEW: test expectation changed
+- CHG-022 (PD-060): five assertions changed.
+  - The screen is three cards, not two.
+  - A saved row says "Recorded by you": the screen test, and `recordedBy` in `applyBudgetEdit`.
+  - Adding funds pays pending costs: the screen test gives $430, not $740, and so does `applyBudgetEdit`.
+
+  Before and after for each: DECISIONS.md FD-13.
 - CHG-021: the CHG-020 inline-form tests (`fecb598`) are replaced by the Edit budget page's tests (T-04 to T-06 rewritten, T-09 to T-12), and `fund-update.test.ts` is deleted with its module (replaced by `budget-edit.test.ts`). The assertions that changed behaviour: a blank amount is now no change (was "Enter an amount."), "Choose a bucket." is gone, the no-buckets body now reads "Choose ‘Edit’ to add a bucket.", and the fixture check matches entries to buckets by `bucketId` instead of `bucketKind`. Recorded requirement change (PD-059); each before and after is in DECISIONS.md FD-12.
 - CHG-020: the FD-06 'Update' tests (announces "not available yet", changes nothing) are replaced by the form's tests T-04 to T-06. Existing loader, contract and fixture tests now also expect `today` and Margaret's pending cost. Recorded requirement change; each before and after is in DECISIONS.md FD-11.
 - `[FAM-UI-05][PRD] FD-05: a row is date, description and amount only, with no 'recorded by' text drawn` asserted the opposite of the human's decision of 2026-09-25 (show who recorded each entry), so it was replaced by attribution tests before any implementation began. No other assertion changed. Before and after: DECISIONS.md FD-05, TEST_PLAN.md.
@@ -82,7 +91,7 @@ Last updated: 2026-09-25
 - OQ-24 (empty-state wording) is open; the default wording in use is flagged in FD-07.
 
 ## Next action
-- Write the CHG-022 tests (T-13 to T-17) into TEST_PLAN.md and the test files, run them red for the right reasons, commit `test(family): …`. Then build.
+- On the human's go-ahead: build CHG-022 until T-13 to T-17 and the five changed tests pass, without changing the tests.
 - Later, on the human's "yes": open the PR `FAM-UI-05 Family Budget screen (UI)` to `family-dev`, with the flags below and the note that CI is down so every check ran locally.
 
 ## Ready for PR

@@ -222,6 +222,27 @@ Record feature-level decisions here using the template below. Project-wide decis
   - `src/features/family-home/family-home.test.tsx`: `bucket-margaret-ndis`, `-fixed`, `-government`.
   - `src/features/family-home/home-data.test.ts`: `bucket()` gives `id: bucket-margaret-<kind>`, and its `kind` parameter is typed `BudgetBucketKind`, since `kind` is now optional on the summary and `label: kind` needs a string.
 
+### FD-13 — CHG-022: Pending costs section, entry details, "Recorded by you", paying pending costs, History export
+- Date: 2026-09-25
+- Context: the human's review questions and choices, recorded as PD-060 and CHG-022 (root DECISIONS.md), AC-13 to AC-17.
+- Decision (the parts PD-060 leaves to the build, chosen here as defaults and flagged for review in the PR):
+  - **Fields (proposed; confirmed here when built).** `FundEntrySchema` gains `note: z.string().optional()` (the save's note, on every row the save makes) and `paidOn: z.string().regex(ISO date).optional()` (set when a pending cost is paid; `pending` is then removed, since absent already means paid). No fixture changes: Margaret's pending cost stays unpaid.
+  - **Recorder.** Rows made on Edit budget carry `recordedBy: "you"`, shown as "Recorded by you". A paid cost keeps its own recorder. Where an entry names no recorder, the dialog and the export say "Not recorded".
+  - **Payment order.** Oldest by `date`; for two costs on the same day, the one lower in History (recorded first) is older. Only a bucket that gains funds in the save pays, and only its own costs; removing funds, renaming or a new bucket pays nothing. Each paid cost moves from pending to `used` in cents.
+  - **Pending costs section.** A table (Date, Bucket, Description, Amount), oldest first; the amount is shown as a positive cost ('$310'); the bucket is its current name. Built from History's rows still `pending`.
+  - **Details dialog.** Each History and pending row has one button, named by its description (or "No description"), and clicking anywhere on the row opens it too. The dialog is modal, titled with the description, and lists Date, Bucket, Amount, Status, Recorded by and, only when there is one, Note as a description list. Status: "Pending", "Paid on <date>" for a cost since paid, otherwise "Paid". A row whose bucket has been removed names it "Removed bucket". Close or Escape closes it and focus returns to the row's button.
+  - **Export.** An 'Export' button in the History card, absent with no rows. It downloads `budget-history-<reference day>.csv` (no client name in the file name). Lines end in CRLF, including the last; the file starts with a UTF-8 byte-order mark so a spreadsheet reads names such as "Zoë" correctly. Dates are ISO (`2026-11-30`, and "Paid on 2026-11-30"), so they sort. Amounts are plain with two decimals (`-310.00`), never prefixed. Text is trimmed; blank description or note is an empty field. Fields with a comma, a double quote or a line break are quoted, with quotes doubled (RFC 4180). A text field (bucket, description, recorded by, note) starting with `=`, `+`, `-` or `@` after trimming is prefixed with `'`. The object URL is revoked after the download starts.
+- Reason: PD-060; the defaults follow the screen's existing patterns (FD-03 table, FD-05 recorder line, FD-09 "No description") and OWASP's CSV-injection advice.
+- Alternatives considered: see PD-060. For "Not recorded", leaving the field empty (rejected: the human asked for the recorder to be stated rather than empty).
+- Consequences: the section, the dialog and Export are undesigned (PD-052), so they get HUMAN REVIEW in the PR. `src/types/domain.ts` gains two optional fields (CHG-022). `src/types/domain.test.ts` gains a CHG-022 group. The CHG-022 impact line "No existing assertion changes" in root DECISIONS.md was wrong. Five assertions change, listed below, and that line is corrected.
+- Human confirmation required: yes. The rules were given by Dhruv Verma on 2026-09-25 (PD-060). The defaults above are for review in the PR.
+- Test changes made (2026-09-25, `test(family)` commit, before any CHG-022 code). Each is the recorded requirement change PD-060. Flagged HUMAN REVIEW in PROGRESS.md and the PR.
+  - **`budget-edit.test.ts` "adds a first History row dated today, 'Funds added', +$500".** Before: `recordedBy` undefined. After: `"you"`.
+  - **`budget-edit.test.ts` "does not pay pending costs: they are F0-12's".** Before: adding $500 to Government ($240, $310 pending) left $740 and the pending figures 310 / 1. After: `[AC-14]`, $430 left and no pending figures.
+  - **`family-budget.test.tsx` "the screen is two cards".** Before: headings "Funds by source", "History"; 2 regions. After: `[AC-13]`, "Funds by source", "Pending costs", "History"; 3 regions. The FD-08 no-client-name assertions are kept.
+  - **`family-budget.test.tsx` "a row made on Edit budget does not say who recorded it".** Before: no "Recorded by" line. After: `[AC-16]`, "Recorded by you".
+  - **`family-budget.test.tsx` "adding funds does not pay pending costs (F0-12's)".** Before: +$500 gives $740, "Pending $310 · 1 cost" and a "Pending" label. After: `[AC-14]`, $430, no pending line, no "Pending" label.
+
 <!-- Template
 ### FD-01 — <title>
 - Date:

@@ -2,7 +2,7 @@ import { act, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { axe } from "jest-axe";
 import { useEffect, useState, type ReactNode } from "react";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, onTestFinished, vi } from "vitest";
 
 import EditLoading from "@/app/(family)/family/[clientId]/budget/edit/loading";
 import EditBudgetPage from "@/app/(family)/family/[clientId]/budget/edit/page";
@@ -353,6 +353,109 @@ function literal(text: string) {
   return new RegExp(text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
 }
 
+/* CHG-022 (PD-060): the Pending costs section, entry details and Export. */
+
+function pendingCard() {
+  return screen.getByRole("region", { name: "Pending costs" });
+}
+
+function pendingTable() {
+  return within(pendingCard()).getByRole("table", { name: "Pending costs" });
+}
+
+/** The Pending costs rows as [date, bucket, description, amount], the heading row left out. */
+function pendingRows() {
+  return within(pendingTable())
+    .getAllByRole("row")
+    .slice(1)
+    .map((row) =>
+      within(row)
+        .getAllByRole("cell")
+        .map((cell) => cell.textContent),
+    );
+}
+
+/** The data row of `table` whose details button is named `description`. */
+function rowIn(table: HTMLElement, description: string) {
+  const row = within(table)
+    .getAllByRole("row")
+    .slice(1)
+    .find((candidate) => within(candidate).queryByRole("button", { name: description }));
+  if (!row) throw new Error(`no row for ${description}`);
+  return row;
+}
+
+/** A row's one control: the button that opens its details, named by its description. */
+function detailsButton(row: HTMLElement) {
+  return within(row).getByRole("button");
+}
+
+function detailsDialog(title: string) {
+  return screen.getByRole("dialog", { name: title });
+}
+
+/** The dialog's details as { term: value }, in a description list. */
+function detailsOf(dialog: HTMLElement) {
+  return Object.fromEntries(
+    within(dialog)
+      .getAllByRole("term")
+      .map((term) => [term.textContent, term.nextElementSibling?.textContent]),
+  );
+}
+
+function exportButton() {
+  return within(historyCard()).getByRole("button", { name: "Export" });
+}
+
+/**
+ * Catches what Export downloads. jsdom has no object URLs and does not follow a
+ * download link, so both are stood in for: each Blob handed to
+ * `URL.createObjectURL`, and the name and href of each link clicked.
+ */
+function captureDownloads() {
+  const blobs: Blob[] = [];
+  const clicks: { download: string; href: string }[] = [];
+  const revoked: string[] = [];
+  const original = { createObjectURL: URL.createObjectURL, revokeObjectURL: URL.revokeObjectURL };
+  onTestFinished(() => {
+    Object.assign(URL, original);
+  });
+  Object.assign(URL, {
+    createObjectURL: (blob: Blob) => {
+      blobs.push(blob);
+      return `blob:budget-export-${blobs.length}`;
+    },
+    revokeObjectURL: (url: string) => {
+      revoked.push(url);
+    },
+  });
+  vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(function (
+    this: HTMLAnchorElement,
+  ) {
+    clicks.push({ download: this.download, href: this.getAttribute("href") ?? "" });
+  });
+  return { blobs, clicks, revoked };
+}
+
+/** A Blob's bytes as text, a byte-order mark kept (jsdom's Blob has no `text()`). */
+function readBlob(blob: Blob) {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () =>
+      resolve(new TextDecoder("utf-8", { ignoreBOM: true }).decode(reader.result as ArrayBuffer));
+    reader.onerror = () => reject(reader.error);
+    reader.readAsArrayBuffer(blob);
+  });
+}
+
+/** The exported file's lines: the byte-order mark and final line break checked, then left out. */
+async function exportedLines(blob: Blob) {
+  const text = await readBlob(blob);
+  expect(text.startsWith("﻿")).toBe(true);
+  expect(text.endsWith("\r\n")).toBe(true);
+  return text.slice(1, -2).split("\r\n");
+}
+
 describe("[FAM-UI-05] Family Budget", () => {
   it("[FAM-UI-05][AC-01] shows the NDIS $14,880, Fixed $2,750 and Government $240 cards, in that order, with their totals and percent used", async () => {
     await renderBudget();
@@ -395,12 +498,13 @@ describe("[FAM-UI-05] Family Budget", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("[FAM-UI-05][PRD] the screen is two cards, 'Funds by source' then 'History', and repeats no client name", async () => {
+  it("[FAM-UI-05][AC-13] the screen is three cards, 'Funds by source', 'Pending costs' then 'History', and repeats no client name", async () => {
     await renderBudget();
 
     const headings = screen.getAllByRole("heading", { level: 2 }).map((h) => h.textContent);
-    expect(headings).toEqual(["Funds by source", "History"]);
-    expect(screen.getAllByRole("region")).toHaveLength(2);
+    // CHG-022 (PD-060): Pending costs sits between the bucket cards and History.
+    expect(headings).toEqual(["Funds by source", "Pending costs", "History"]);
+    expect(screen.getAllByRole("region")).toHaveLength(3);
 
     // FD-08: the shell header shows the client; the body does not repeat it.
     expect(screen.queryByRole("heading", { level: 1 })).not.toBeInTheDocument();
@@ -715,13 +819,13 @@ describe("[FAM-UI-05] 'Edit' opens the Edit budget page (CHG-021, FD-12)", () =>
     expect(historyRows()).toHaveLength(5);
   });
 
-  it("[FAM-UI-05][AC-04] a row made on Edit budget does not say who recorded it (no signed-in user in Phase 1)", async () => {
+  it("[FAM-UI-05][AC-16] a row made on Edit budget says 'Recorded by you' (stated, not empty; no signed-in user in Phase 1)", async () => {
     const user = userEvent.setup();
     await renderBudget();
 
     await editAndSave(user, () => changeFunds(user, "NDIS", "Add", "500"));
 
-    expect(historyAttributions()[0]).toBeNull();
+    expect(historyAttributions()[0]).toHaveTextContent("Recorded by you");
   });
 
   it("[FAM-UI-05][AC-04] a save with nothing changed goes back to Budget with no new row and nothing announced", async () => {
@@ -779,7 +883,7 @@ describe("[FAM-UI-05] 'Edit' opens the Edit budget page (CHG-021, FD-12)", () =>
     expect(within(bucketCard("NDIS")).getByText("$15,380")).toBeInTheDocument();
   });
 
-  it("[FAM-UI-05][PRD] adding funds does not pay pending costs (F0-12's): the pending line and row stay", async () => {
+  it("[FAM-UI-05][AC-14] adding $500 to Government pays its $310 pending cost: $430 left, and no pending line or label (CHG-022)", async () => {
     mocks.getBudgetSummary.mockResolvedValue(BUCKETS_WITH_PENDING);
     mocks.getFundHistory.mockResolvedValue(HISTORY_WITH_PENDING);
     const user = userEvent.setup();
@@ -787,9 +891,9 @@ describe("[FAM-UI-05] 'Edit' opens the Edit budget page (CHG-021, FD-12)", () =>
 
     await editAndSave(user, () => changeFunds(user, "Government", "Add", "500"));
 
-    expect(within(bucketCard("Government")).getByText("$740")).toBeInTheDocument();
-    expect(within(bucketCard("Government")).getByText("Pending $310 · 1 cost")).toBeInTheDocument();
-    expect(within(historyTable()).getByText("Pending")).toBeInTheDocument();
+    expect(within(bucketCard("Government")).getByText("$430")).toBeInTheDocument();
+    expect(within(bucketCard("Government")).queryByText(/Pending/)).not.toBeInTheDocument();
+    expect(within(historyTable()).queryByText("Pending")).not.toBeInTheDocument();
   });
 });
 
@@ -1796,5 +1900,597 @@ describe("[FAM-UI-05] accessibility", () => {
 
     const editError = await renderRoute(EDIT_HREF);
     expect(await axe(editError.container)).toHaveNoViolations();
+  });
+});
+
+/** Government holding two pending costs: an older $310 and a newer $90 (CHG-022). */
+const BUCKETS_WITH_TWO_PENDING = [
+  BUCKETS[0]!,
+  BUCKETS[1]!,
+  { ...BUCKETS[2]!, pendingTotal: 400, pendingCount: 2 },
+];
+
+const HISTORY_WITH_TWO_PENDING = [
+  pendingCost("pending-2", 90, "2026-11-10", "Occupational therapy"),
+  HISTORY[0]!,
+  pendingCost("pending-1", 310, "2026-10-27", "Physiotherapy"),
+  HISTORY[1]!,
+  HISTORY[2]!,
+];
+
+describe("[FAM-UI-05] Pending costs section (CHG-022, AC-13)", () => {
+  it("[FAM-UI-05][AC-13] lists the $310 cost: '27 Oct 2026', 'Government', 'Physiotherapy', '$310'", async () => {
+    mocks.getBudgetSummary.mockResolvedValue(BUCKETS_WITH_PENDING);
+    mocks.getFundHistory.mockResolvedValue(HISTORY_WITH_PENDING);
+    await renderBudget();
+
+    expect(pendingRows()).toEqual([["27 Oct 2026", "Government", "Physiotherapy", "$310"]]);
+  });
+
+  it("[FAM-UI-05][AC-13] is a table with the columns Date, Bucket, Description and Amount", async () => {
+    mocks.getBudgetSummary.mockResolvedValue(BUCKETS_WITH_PENDING);
+    mocks.getFundHistory.mockResolvedValue(HISTORY_WITH_PENDING);
+    await renderBudget();
+
+    const headings = within(pendingTable()).getAllByRole("columnheader");
+    expect(headings.map((h) => h.textContent)).toEqual(["Date", "Bucket", "Description", "Amount"]);
+  });
+
+  it("[FAM-UI-05][AC-13] sits between the bucket cards and History", async () => {
+    mocks.getFundHistory.mockResolvedValue(HISTORY_WITH_PENDING);
+    await renderBudget();
+
+    expect(screen.getAllByRole("region")).toEqual([fundsCard(), pendingCard(), historyCard()]);
+  });
+
+  it("[FAM-UI-05][AC-13] lists several pending costs oldest first, whatever order History has them in", async () => {
+    mocks.getBudgetSummary.mockResolvedValue(BUCKETS_WITH_TWO_PENDING);
+    mocks.getFundHistory.mockResolvedValue(HISTORY_WITH_TWO_PENDING);
+    await renderBudget();
+
+    expect(pendingRows()).toEqual([
+      ["27 Oct 2026", "Government", "Physiotherapy", "$310"],
+      ["10 Nov 2026", "Government", "Occupational therapy", "$90"],
+    ]);
+  });
+
+  it("[FAM-UI-05][AC-13] with no pending costs it says 'No pending costs.' and has no table", async () => {
+    await renderBudget();
+
+    expect(within(pendingCard()).getByText("No pending costs.")).toBeInTheDocument();
+    expect(within(pendingCard()).queryByRole("table")).not.toBeInTheDocument();
+  });
+
+  it("[FAM-UI-05][AC-13] a paid cost is not listed; only costs still pending are", async () => {
+    mocks.getFundHistory.mockResolvedValue([
+      {
+        ...pendingCost("paid-1", 50, "2026-10-01", "Taxi"),
+        pending: undefined,
+        paidOn: "2026-10-05",
+      },
+      ...HISTORY_WITH_PENDING,
+    ]);
+    await renderBudget();
+
+    expect(pendingRows()).toEqual([["27 Oct 2026", "Government", "Physiotherapy", "$310"]]);
+  });
+
+  it("[FAM-UI-05][AC-13] shows the bucket's name as it is now, after a rename", async () => {
+    mocks.getBudgetSummary.mockResolvedValue(BUCKETS_WITH_PENDING);
+    mocks.getFundHistory.mockResolvedValue(HISTORY_WITH_PENDING);
+    const user = userEvent.setup();
+    await renderBudget();
+
+    await editAndSave(user, () => rename(user, "Government", "Government subsidy"));
+
+    expect(pendingRows()[0]![1]).toBe("Government subsidy");
+  });
+
+  it("[FAM-UI-05][AC-13] a 300-character description is cut by CSS only: the whole text stays in the DOM and in `title`", async () => {
+    const unbroken = "P".repeat(300);
+    mocks.getFundHistory.mockResolvedValue([pendingCost("pending-1", 310, "2026-10-27", unbroken)]);
+    await renderBudget();
+
+    const [, , description] = within(rowIn(pendingTable(), unbroken)).getAllByRole("cell");
+    expect(description!.textContent).toBe(unbroken);
+    expect(within(description!).getByTitle(unbroken)).toBeInTheDocument();
+  });
+
+  it("[FAM-UI-05][AC-13] the error state has no Pending costs section", async () => {
+    captureErrorLog();
+    mocks.getFundHistory.mockRejectedValue(new Error("x"));
+    await renderBudget();
+
+    expect(screen.queryByRole("region", { name: "Pending costs" })).not.toBeInTheDocument();
+  });
+});
+
+describe("[FAM-UI-05] adding funds pays pending costs (CHG-022, AC-14)", () => {
+  it("[FAM-UI-05][AC-14] adding $100 to Government: $30 left, no pending line, 'No pending costs.', and the History row no longer reads 'Pending'", async () => {
+    mocks.getBudgetSummary.mockResolvedValue(BUCKETS_WITH_PENDING);
+    mocks.getFundHistory.mockResolvedValue(HISTORY_WITH_PENDING);
+    const user = userEvent.setup();
+    await renderBudget();
+
+    await editAndSave(user, () => changeFunds(user, "Government", "Add", "100"));
+
+    expect(within(bucketCard("Government")).getByText("$30")).toBeInTheDocument();
+    expect(within(bucketCard("Government")).queryByText(/Pending/)).not.toBeInTheDocument();
+    expect(within(pendingCard()).getByText("No pending costs.")).toBeInTheDocument();
+    const physio = rowIn(historyTable(), "Physiotherapy");
+    expect(within(physio).queryByText("Pending")).not.toBeInTheDocument();
+    // The paid cost keeps its row: one new row for the funds, none for the payment.
+    expect(historyRows()).toHaveLength(5);
+    expect(within(physio).getAllByRole("cell")[2]).toHaveTextContent("-$310");
+  });
+
+  it("[FAM-UI-05][AC-14] adding $50 instead: $290 left and the cost stays pending on the card, in the section and in History", async () => {
+    mocks.getBudgetSummary.mockResolvedValue(BUCKETS_WITH_PENDING);
+    mocks.getFundHistory.mockResolvedValue(HISTORY_WITH_PENDING);
+    const user = userEvent.setup();
+    await renderBudget();
+
+    await editAndSave(user, () => changeFunds(user, "Government", "Add", "50"));
+
+    expect(within(bucketCard("Government")).getByText("$290")).toBeInTheDocument();
+    expect(within(bucketCard("Government")).getByText("Pending $310 · 1 cost")).toBeInTheDocument();
+    expect(pendingRows()).toEqual([["27 Oct 2026", "Government", "Physiotherapy", "$310"]]);
+    expect(within(rowIn(historyTable(), "Physiotherapy")).getByText("Pending")).toBeInTheDocument();
+  });
+
+  it("[FAM-UI-05][AC-14] with two pending costs where the older does not fit and the newer would, neither is paid", async () => {
+    mocks.getBudgetSummary.mockResolvedValue(BUCKETS_WITH_TWO_PENDING);
+    mocks.getFundHistory.mockResolvedValue(HISTORY_WITH_TWO_PENDING);
+    const user = userEvent.setup();
+    await renderBudget();
+
+    await editAndSave(user, () => changeFunds(user, "Government", "Add", "50"));
+
+    expect(within(bucketCard("Government")).getByText("$290")).toBeInTheDocument();
+    expect(
+      within(bucketCard("Government")).getByText("Pending $400 · 2 costs"),
+    ).toBeInTheDocument();
+    expect(pendingRows()).toHaveLength(2);
+  });
+
+  it("[FAM-UI-05][AC-14] adding enough for both pays both, oldest first: $40 left", async () => {
+    mocks.getBudgetSummary.mockResolvedValue(BUCKETS_WITH_TWO_PENDING);
+    mocks.getFundHistory.mockResolvedValue(HISTORY_WITH_TWO_PENDING);
+    const user = userEvent.setup();
+    await renderBudget();
+
+    // 240 + 200 = 440; 440 - 310 = 130; 130 - 90 = 40.
+    await editAndSave(user, () => changeFunds(user, "Government", "Add", "200"));
+
+    expect(within(bucketCard("Government")).getByText("$40")).toBeInTheDocument();
+    expect(within(pendingCard()).getByText("No pending costs.")).toBeInTheDocument();
+  });
+
+  it("[FAM-UI-05][AC-14] once paid, Government can be edited again from its new figures, and it says it was paid in its details", async () => {
+    mocks.getBudgetSummary.mockResolvedValue(BUCKETS_WITH_PENDING);
+    mocks.getFundHistory.mockResolvedValue(HISTORY_WITH_PENDING);
+    const user = userEvent.setup();
+    await renderBudget();
+
+    await editAndSave(user, () => changeFunds(user, "Government", "Add", "100"));
+    await user.click(detailsButton(rowIn(historyTable(), "Physiotherapy")));
+
+    expect(detailsOf(detailsDialog("Physiotherapy")).Status).toBe("Paid on 30 Nov 2026");
+  });
+});
+
+describe("[FAM-UI-05] entry details (CHG-022, AC-15)", () => {
+  beforeEach(() => {
+    mocks.getBudgetSummary.mockResolvedValue(BUCKETS_WITH_PENDING);
+    mocks.getFundHistory.mockResolvedValue(HISTORY_WITH_PENDING);
+  });
+
+  it("[FAM-UI-05][AC-15] each History row and each pending row has one button, named by its description", async () => {
+    await renderBudget();
+
+    expect(
+      within(historyTable())
+        .getAllByRole("row")
+        .slice(1)
+        .map((row) => detailsButton(row).textContent),
+    ).toEqual([
+      "NDIS quarterly plan top-up",
+      "Physiotherapy",
+      "Fixed funding top-up",
+      "Government subsidy payment",
+    ]);
+    expect(detailsButton(rowIn(pendingTable(), "Physiotherapy"))).toHaveAccessibleName(
+      "Physiotherapy",
+    );
+  });
+
+  it("[FAM-UI-05][AC-15] clicking a History row opens a dialog titled with its description: date, bucket, amount, status and who recorded it", async () => {
+    const user = userEvent.setup();
+    await renderBudget();
+
+    await user.click(detailsButton(rowIn(historyTable(), "NDIS quarterly plan top-up")));
+
+    expect(detailsOf(detailsDialog("NDIS quarterly plan top-up"))).toEqual({
+      Date: "3 Nov 2026",
+      Bucket: "NDIS",
+      Amount: "+$6,000",
+      Status: "Paid",
+      "Recorded by": "Helen Doyle",
+    });
+  });
+
+  it("[FAM-UI-05][AC-15] clicking anywhere on the row opens it, not only on the description", async () => {
+    const user = userEvent.setup();
+    await renderBudget();
+
+    const row = rowIn(historyTable(), "Fixed funding top-up");
+    await user.click(within(row).getAllByRole("cell")[2]!);
+
+    expect(detailsDialog("Fixed funding top-up")).toBeInTheDocument();
+  });
+
+  it("[FAM-UI-05][AC-15] a pending cost's details say 'Pending', from History or from the Pending costs section", async () => {
+    const user = userEvent.setup();
+    await renderBudget();
+    const expected = {
+      Date: "27 Oct 2026",
+      Bucket: "Government",
+      Amount: "-$310",
+      Status: "Pending",
+      "Recorded by": "Aisha Rahman",
+    };
+
+    await user.click(detailsButton(rowIn(pendingTable(), "Physiotherapy")));
+    expect(detailsOf(detailsDialog("Physiotherapy"))).toEqual(expected);
+    await user.click(within(detailsDialog("Physiotherapy")).getByRole("button", { name: "Close" }));
+
+    await user.click(detailsButton(rowIn(historyTable(), "Physiotherapy")));
+    expect(detailsOf(detailsDialog("Physiotherapy"))).toEqual(expected);
+  });
+
+  it.each([
+    ["Enter", "{Enter}"],
+    ["Space", " "],
+  ])("[FAM-UI-05][AC-15] %s on a row's button opens its details", async (_key, keys) => {
+    const user = userEvent.setup();
+    await renderBudget();
+
+    detailsButton(rowIn(historyTable(), "Government subsidy payment")).focus();
+    await user.keyboard(keys);
+
+    expect(detailsDialog("Government subsidy payment")).toBeInTheDocument();
+  });
+
+  it("[FAM-UI-05][AC-15] the row's button is reached with Tab", async () => {
+    const user = userEvent.setup();
+    await renderBudget();
+
+    const button = detailsButton(rowIn(historyTable(), "NDIS quarterly plan top-up"));
+    for (let i = 0; i < 20 && document.activeElement !== button; i++) await user.tab();
+
+    expect(button).toHaveFocus();
+  });
+
+  it("[FAM-UI-05][AC-15] opening moves focus into the dialog", async () => {
+    const user = userEvent.setup();
+    await renderBudget();
+
+    await user.click(detailsButton(rowIn(historyTable(), "Physiotherapy")));
+
+    expect(detailsDialog("Physiotherapy").contains(document.activeElement)).toBe(true);
+  });
+
+  it.each([
+    ["Close", async (user: User) => user.click(screen.getByRole("button", { name: "Close" }))],
+    ["Escape", async (user: User) => user.keyboard("{Escape}")],
+  ])(
+    "[FAM-UI-05][AC-15] %s closes it and focus returns to the row it was opened from",
+    async (_how, close) => {
+      const user = userEvent.setup();
+      await renderBudget();
+
+      const button = detailsButton(rowIn(historyTable(), "Physiotherapy"));
+      await user.click(button);
+      await close(user);
+
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+      expect(button).toHaveFocus();
+    },
+  );
+
+  it("[FAM-UI-05][AC-15] focus also returns to the row's button when it was opened by clicking elsewhere on the row", async () => {
+    const user = userEvent.setup();
+    await renderBudget();
+
+    const row = rowIn(pendingTable(), "Physiotherapy");
+    await user.click(within(row).getAllByRole("cell")[3]!);
+    await user.keyboard("{Escape}");
+
+    expect(detailsButton(row)).toHaveFocus();
+  });
+
+  it("[FAM-UI-05][AC-15] only one dialog is open at a time, and it is modal", async () => {
+    const user = userEvent.setup();
+    await renderBudget();
+
+    await user.click(detailsButton(rowIn(historyTable(), "Physiotherapy")));
+
+    expect(screen.getAllByRole("dialog")).toHaveLength(1);
+    expect(detailsDialog("Physiotherapy")).toHaveAttribute("aria-modal", "true");
+  });
+
+  it("[FAM-UI-05][AC-15] an entry with no description opens a dialog titled 'No description'", async () => {
+    mocks.getFundHistory.mockResolvedValue([entry("fund-9", "ndis", "topup", 20, "2026-11-20")]);
+    const user = userEvent.setup();
+    await renderBudget();
+
+    await user.click(detailsButton(rowIn(historyTable(), "No description")));
+
+    expect(detailsDialog("No description")).toBeInTheDocument();
+  });
+
+  it("[FAM-UI-05][AC-15] an entry that does not say who recorded it reads 'Not recorded', not an empty line", async () => {
+    mocks.getFundHistory.mockResolvedValue([
+      entry("fund-9", "ndis", "topup", 20, "2026-11-20", "Gift", "   "),
+    ]);
+    const user = userEvent.setup();
+    await renderBudget();
+
+    await user.click(detailsButton(rowIn(historyTable(), "Gift")));
+
+    expect(detailsOf(detailsDialog("Gift"))["Recorded by"]).toBe("Not recorded");
+  });
+
+  it("[FAM-UI-05][AC-15] a pending cost since paid reads 'Paid on <date>'", async () => {
+    mocks.getFundHistory.mockResolvedValue([
+      {
+        ...pendingCost("paid-1", 50, "2026-10-01", "Taxi"),
+        pending: undefined,
+        paidOn: "2026-10-05",
+      },
+    ]);
+    const user = userEvent.setup();
+    await renderBudget();
+
+    await user.click(detailsButton(rowIn(historyTable(), "Taxi")));
+
+    expect(detailsOf(detailsDialog("Taxi")).Status).toBe("Paid on 5 Oct 2026");
+  });
+
+  it("[FAM-UI-05][AC-15] shows the note when there is one, and no Note line when there is none", async () => {
+    mocks.getFundHistory.mockResolvedValue([
+      {
+        ...entry("fund-9", "ndis", "topup", 20, "2026-11-20", "Gift", "Helen Doyle"),
+        note: "From Tom",
+      },
+      entry("fund-8", "ndis", "topup", 30, "2026-11-19", "Refund", "Helen Doyle"),
+    ]);
+    const user = userEvent.setup();
+    await renderBudget();
+
+    await user.click(detailsButton(rowIn(historyTable(), "Gift")));
+    expect(detailsOf(detailsDialog("Gift")).Note).toBe("From Tom");
+    await user.keyboard("{Escape}");
+
+    await user.click(detailsButton(rowIn(historyTable(), "Refund")));
+    expect(detailsOf(detailsDialog("Refund"))).not.toHaveProperty("Note");
+  });
+
+  it("[FAM-UI-05][AC-15] a row whose bucket has been removed names it 'Removed bucket'", async () => {
+    mocks.getFundHistory.mockResolvedValue([
+      {
+        ...entry("fund-9", "ndis", "expense", -5, "2026-11-20", "Bucket removed", "you"),
+        bucketId: "bucket-gone",
+      },
+    ]);
+    const user = userEvent.setup();
+    await renderBudget();
+
+    await user.click(detailsButton(rowIn(historyTable(), "Bucket removed")));
+
+    expect(detailsOf(detailsDialog("Bucket removed")).Bucket).toBe("Removed bucket");
+  });
+
+  it("[FAM-UI-05][AC-15] a very long description and note keep every character in the dialog", async () => {
+    const long = "Q".repeat(300);
+    mocks.getFundHistory.mockResolvedValue([
+      { ...entry("fund-9", "ndis", "topup", 20, "2026-11-20", long, "Helen Doyle"), note: long },
+    ]);
+    const user = userEvent.setup();
+    await renderBudget();
+
+    await user.click(detailsButton(rowIn(historyTable(), long)));
+
+    expect(detailsOf(detailsDialog(long)).Note).toBe(long);
+  });
+
+  it("[FAM-UI-05][AC-15] the dialog changes nothing: closing it leaves the figures and History as they were", async () => {
+    const user = userEvent.setup();
+    await renderBudget();
+    const before = historyRows();
+
+    await user.click(detailsButton(rowIn(historyTable(), "Physiotherapy")));
+    await user.keyboard("{Escape}");
+
+    expect(historyRows()).toEqual(before);
+    expect(within(bucketCard("Government")).getByText("$240")).toBeInTheDocument();
+    expect(mocks.push).not.toHaveBeenCalled();
+  });
+});
+
+describe("[FAM-UI-05] who recorded a save, and its note (CHG-022, AC-16)", () => {
+  it("[FAM-UI-05][AC-16] adding $500 to NDIS with the note 'Q3 plan review': the first row reads it and 'Recorded by you', and its details show the note", async () => {
+    const user = userEvent.setup();
+    await renderBudget();
+
+    await editAndSave(user, async () => {
+      await changeFunds(user, "NDIS", "Add", "500");
+      await writeNote(user, "Q3 plan review");
+    });
+
+    expect(historyRows()[0]).toEqual(["30 Nov 2026", "Q3 plan review", "+$500"]);
+    expect(historyAttributions()[0]).toHaveTextContent("Recorded by you");
+
+    await user.click(detailsButton(dataRows()[0]!));
+    expect(detailsOf(detailsDialog("Q3 plan review"))).toEqual({
+      Date: "30 Nov 2026",
+      Bucket: "NDIS",
+      Amount: "+$500",
+      Status: "Paid",
+      "Recorded by": "you",
+      Note: "Q3 plan review",
+    });
+  });
+
+  it("[FAM-UI-05][AC-16] a 'Bucket added' row from the same save also shows the note in its details", async () => {
+    const user = userEvent.setup();
+    await renderBudget();
+
+    await editAndSave(user, async () => {
+      await changeFunds(user, "NDIS", "Add", "500");
+      await addBucket(user, "Council grant", "1200");
+      await writeNote(user, "Q3 plan review");
+    });
+
+    const added = rowIn(historyTable(), "Bucket added");
+    expect(within(added).getByText("Recorded by you")).toBeInTheDocument();
+    await user.click(detailsButton(added));
+    expect(detailsOf(detailsDialog("Bucket added"))).toMatchObject({
+      Bucket: "Council grant",
+      Amount: "+$1,200",
+      "Recorded by": "you",
+      Note: "Q3 plan review",
+    });
+  });
+
+  it("[FAM-UI-05][AC-16] a save with no note has no Note in its details", async () => {
+    const user = userEvent.setup();
+    await renderBudget();
+
+    await editAndSave(user, () => changeFunds(user, "NDIS", "Add", "500"));
+    await user.click(detailsButton(dataRows()[0]!));
+
+    expect(detailsOf(detailsDialog("Funds added"))).not.toHaveProperty("Note");
+  });
+});
+
+describe("[FAM-UI-05] History export (CHG-022, AC-17)", () => {
+  it("[FAM-UI-05][AC-17] History has an 'Export' button", async () => {
+    await renderBudget();
+
+    expect(exportButton()).toHaveAttribute("type", "button");
+  });
+
+  it("[FAM-UI-05][AC-17] pressing it downloads 'budget-history-2026-11-30.csv': the header and one line per row, in the order shown", async () => {
+    mocks.getFundHistory.mockResolvedValue(HISTORY_WITH_PENDING);
+    const downloads = captureDownloads();
+    const user = userEvent.setup();
+    await renderBudget();
+
+    await user.click(exportButton());
+
+    expect(downloads.clicks).toEqual([
+      { download: "budget-history-2026-11-30.csv", href: "blob:budget-export-1" },
+    ]);
+    expect(downloads.blobs).toHaveLength(1);
+    expect(downloads.blobs[0]!.type).toMatch(/^text\/csv/);
+    expect(await exportedLines(downloads.blobs[0]!)).toEqual([
+      "Date,Bucket,Description,Amount,Status,Recorded by,Note",
+      "2026-11-03,NDIS,NDIS quarterly plan top-up,6000.00,Paid,Helen Doyle,",
+      "2026-10-27,Government,Physiotherapy,-310.00,Pending,Aisha Rahman,",
+      "2026-10-15,Fixed,Fixed funding top-up,1000.00,Paid,Helen Doyle,",
+      "2026-10-01,Government,Government subsidy payment,750.00,Paid,Helen Doyle,",
+    ]);
+  });
+
+  it("[FAM-UI-05][AC-17] the file includes what Phase 1 saves changed: the new row, the note, 'you', and a cost since paid", async () => {
+    mocks.getBudgetSummary.mockResolvedValue(BUCKETS_WITH_PENDING);
+    mocks.getFundHistory.mockResolvedValue(HISTORY_WITH_PENDING);
+    const downloads = captureDownloads();
+    const user = userEvent.setup();
+    await renderBudget();
+
+    await editAndSave(user, async () => {
+      await changeFunds(user, "Government", "Add", "100");
+      await writeNote(user, "=Top-up");
+    });
+    await user.click(exportButton());
+
+    const lines = await exportedLines(downloads.blobs[0]!);
+    expect(lines).toHaveLength(6);
+    expect(lines[1]).toBe("2026-11-30,Government,'=Top-up,100.00,Paid,you,'=Top-up");
+    expect(lines[3]).toBe(
+      "2026-10-27,Government,Physiotherapy,-310.00,Paid on 2026-11-30,Aisha Rahman,",
+    );
+  });
+
+  it("[FAM-UI-05][AC-17] the object URL is let go once the download has started", async () => {
+    const downloads = captureDownloads();
+    const user = userEvent.setup();
+    await renderBudget();
+
+    await user.click(exportButton());
+
+    await waitFor(() => expect(downloads.revoked).toEqual(["blob:budget-export-1"]));
+  });
+
+  it("[FAM-UI-05][AC-17] exporting changes nothing and leaves no link behind on the page", async () => {
+    captureDownloads();
+    const user = userEvent.setup();
+    const { container } = await renderBudget();
+    const before = historyRows();
+
+    await user.click(exportButton());
+
+    expect(historyRows()).toEqual(before);
+    expect(container.querySelector("a[download]")).toBeNull();
+    expect(mocks.push).not.toHaveBeenCalled();
+  });
+
+  it("[FAM-UI-05][AC-17] with no History rows there is no 'Export' button", async () => {
+    mocks.getFundHistory.mockResolvedValue([]);
+    await renderBudget();
+
+    expect(within(historyCard()).queryByRole("button", { name: "Export" })).not.toBeInTheDocument();
+  });
+
+  it("[FAM-UI-05][AC-17] the error state has no 'Export' button", async () => {
+    captureErrorLog();
+    mocks.getBudgetSummary.mockRejectedValue(new Error("x"));
+    await renderBudget();
+
+    expect(screen.queryByRole("button", { name: "Export" })).not.toBeInTheDocument();
+  });
+});
+
+describe("[FAM-UI-05] accessibility of the CHG-022 additions", () => {
+  it("[FAM-UI-05][PRD] the Pending costs section, full and empty, and Export have no axe violations", async () => {
+    mocks.getBudgetSummary.mockResolvedValue(BUCKETS_WITH_TWO_PENDING);
+    mocks.getFundHistory.mockResolvedValue(HISTORY_WITH_TWO_PENDING);
+    const full = await renderBudget();
+    expect(await axe(full.container)).toHaveNoViolations();
+    full.unmount();
+
+    mocks.getBudgetSummary.mockResolvedValue(BUCKETS);
+    mocks.getFundHistory.mockResolvedValue(HISTORY);
+    const empty = await renderBudget();
+    expect(await axe(empty.container)).toHaveNoViolations();
+  });
+
+  it("[FAM-UI-05][PRD] the details dialog, with a note and a paid date, has no axe violations", async () => {
+    mocks.getFundHistory.mockResolvedValue([
+      {
+        ...pendingCost("paid-1", 50, "2026-10-01", "Taxi"),
+        pending: undefined,
+        paidOn: "2026-10-05",
+        note: "Paid from the top-up",
+      },
+    ]);
+    const user = userEvent.setup();
+    const { container } = await renderBudget();
+
+    await user.click(detailsButton(rowIn(historyTable(), "Taxi")));
+
+    expect(await axe(container)).toHaveNoViolations();
   });
 });
