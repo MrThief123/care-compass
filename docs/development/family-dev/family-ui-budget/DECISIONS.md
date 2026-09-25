@@ -161,7 +161,52 @@ Record feature-level decisions here using the template below. Project-wide decis
 - Alternatives considered: see PD-059.
 - Consequences: the bucket type gains a stable `id`, `kind` becomes optional, fund entries gain `bucketId` (CHG-021; exact fields recorded here when built). Family · Home keys its tiles by `id`. The page, its layout and all its copy are undesigned (PD-052): HUMAN REVIEW in the PR. FD-06's and FD-11's 'Update' wording goes. FD-07's no-buckets empty state gains a line pointing to 'Edit'.
 - Human confirmation required: yes — given, Dhruv Verma, 2026-09-25 (in-session).
-- Test changes caused: the CHG-020 inline-form tests (`fecb598`) in `family-budget.test.tsx` and `fund-update.test.ts` are replaced by T-04 to T-06 (rewritten) and T-09 to T-12; each before and after is listed here when the `test(family)` commit is made. Flagged HUMAN REVIEW in PROGRESS.md and the PR.
+- Test changes caused: the CHG-020 inline-form tests (`fecb598`) in `family-budget.test.tsx` and `fund-update.test.ts` are replaced by T-04 to T-06 (rewritten) and T-09 to T-12. Flagged HUMAN REVIEW in PROGRESS.md and the PR.
+- Test changes made (2026-09-25, `test(family)` commit, before any CHG-021 code). Every one is the recorded requirement change CHG-021. No assertion about AC-01 to AC-03, AC-07 or AC-08 was weakened; the amount rules, the balance limit and "adding funds does not pay pending costs" are kept.
+  - **`family-budget.test.tsx`, harness.** Before: each test rendered `BudgetPage` alone. After: the route renders as the App Router runs it. `budget/layout.tsx` wraps a slot that holds the page, `goTo(href)` swaps the page under the same layout, and `followPush()` follows the last `router.push`. A reload is an unmount followed by a fresh render. `useRouter` now also gives `push`. The test buckets carry `id` and the test entries carry `bucketId`.
+  - **"'Funds by source' has an 'Update' button".** Before: a `type="button"` named "Update". After: "has an 'Edit' link to the Edit budget page, and no 'Update'" (href `/family/client-margaret/budget/edit`).
+  - **The "'Update' opens the simple form" group (23 tests), replaced as a whole.**
+    - Before: the form is closed at first (`aria-expanded`). It has a Bucket select, Add or Remove, an Amount and a Note. Saving closes it, announces "$500 added to NDIS." or "$40 removed from Government.", and gives focus back to 'Update'. Its tests covered local state only, the limit following the screen, removing the whole balance, the refused amounts (including a blank amount, "Enter an amount."), no bucket chosen ("Choose a bucket."), focus on the first field to fix, a fixed form saving, Cancel with focus back, Enter from the keyboard, and adding funds not paying pending costs.
+    - After, in new groups:
+      - **"'Edit' opens the Edit budget page" (AC-04):** a live region that starts empty; the Edit page with an h1, one form and none of Budget's cards; one panel per bucket (Name, "$X remaining", Change Add/Remove, blank Amount); one Note; 'Add bucket', Save and Cancel; +$500 to NDIS; "Budget updated." after a save that changes something; the note as the description; several changes making rows in page order; no "Recorded by" on a local row; a save with no changes (no row, no announcement); the saved figures shown when Edit is opened again; local state reset on reload; held state scoped by client; adding funds not paying pending costs.
+      - **"removing funds" (AC-05):** −$40 from Government; −$300 refused with "Only $240 available" (focus on it, no navigation); the limit following the saved balance ("Only $200 available"); removing the whole balance.
+      - **"refuses what it cannot save" (AC-06):**
+        - Refused amounts '0', '-5', '12.345', 'abc' and '10000000000'. A blank amount is now no change, where before it was "Enter an amount.": this assertion changed because CHG-021 makes an amount optional per bucket.
+        - Names: empty, only spaces, 41 characters, a duplicate ignoring case, a duplicate with spaces. The duplicate error goes on the renamed bucket only. Exactly 40 characters is accepted. A new bucket named like a saved one is refused. A removed bucket frees its name.
+        - Starting amounts: none, negative, 3 decimal places, not a number.
+        - Every field in error gets its message, with focus on the first in page order. A fixed page saves. Cancel and Escape change nothing.
+        - "Choose a bucket." is gone: there is no bucket select any more.
+      - **"adding a bucket" (AC-09), "renaming a bucket" (AC-10), "removing a bucket" (AC-11), "no buckets yet" (AC-12):** new, see TEST_PLAN T-09 to T-12.
+      - **"Edit budget's own states":** new. The contract read, the error state with Retry for each read, and a loading status.
+  - **"the bucket cards and 'Update' are still there when History is empty" (AC-03).** After: "…cards and 'Edit'…", asserting the link.
+  - **"with no buckets, 'Funds by source' shows an empty state and keeps 'Update'".** Before: the body is "Funding buckets will appear here once they are set up." and 'Update' is shown. After: an `[AC-12]` test. The body is "Choose ‘Edit’ to add a bucket." (FD-07 copy changed by CHG-021) and the 'Edit' link is shown.
+  - **Error state `it.each`.** Before: no 'Update' button beside the error. After: no 'Edit' link.
+  - **axe "with the Update form closed, open, and showing errors".** After, three tests:
+    - Budget, and Budget after a save.
+    - Edit budget as it opens, showing errors, with a bucket added, and with one marked for removal.
+    - Edit budget with no buckets and the suggestions showing.
+
+    The loading, empty and error axe test also covers the Edit page's loading and error states.
+  - **New in "long and unusual content":** cards are keyed by bucket id, so a swap keeps each card's element.
+  - **`fund-update.test.ts`, deleted with the module it tests.** It is replaced by `budget-edit.test.ts` (69 tests):
+    - `editValuesFor`.
+    - `nameSuggestions`.
+    - `validateBudgetEdit`: the kept amount cases and balance limit; errors keyed `buckets.<i>.amount|name|remove` and `added.<i>.name|startingAmount`.
+    - `applyBudgetEdit`: the kept totals, cents, pending and no-mutation cases; buckets matched by `id`, not index; new rows carry `bucketId`; the added, renamed and removed bucket rows; unique ids across saves; `changed`.
+  - **`src/features/family-home/test-support.ts`.** `bucket()` gives each bucket a new `id`. **`budget-strip.test.tsx`:** a new test that Home's tiles are keyed by id.
+  - **`src/server/budget/queries.test.ts`.**
+    - New: Margaret's buckets have the stable ids `bucket-margaret-ndis`, `-fixed` and `-government`, and keep their kinds; bucket ids are unique across clients.
+    - The first-row, design-rows and pending-cost tests also expect each entry's `bucketId`.
+  - **`src/mocks/queries/budget.test.ts`.**
+    - "every entry is against a bucket its client has". Before: the entry's `bucketKind` is one of its client's bucket kinds. After: the entry's `bucketId` is one of its client's bucket ids, and a `bucketKind`, when given, matches that bucket's kind.
+    - New: every fixture bucket has an id, unique across clients.
+    - The pending-cost test also expects `bucketId: "bucket-margaret-government"`.
+  - **Proposed fields, to be confirmed and recorded here when built:**
+    - `BudgetBucketSummary.id: string`, with `kind` optional.
+    - `FundEntry.bucketId: string`, with `bucketKind` optional.
+    - `RAW_BUDGET_BUCKETS_BY_CLIENT_ID` entries gain `id`.
+    - The mock counts pending costs by `bucketId`.
+  - **Not changed, and needs the human (CLAUDE.md §4.2):** `src/components/shared/cards/budget-bucket-card.test.tsx` (Lane S) builds `BudgetBucketSummary` literals without an `id`. If `id` becomes required, `tsc` fails in that file, which lane F does not own.
 
 <!-- Template
 ### FD-01 — <title>

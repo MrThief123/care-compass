@@ -27,14 +27,26 @@ describe("[FAM-UI-05][PRD] FUND_ENTRIES fixtures (CHG-019)", () => {
     }
   });
 
-  it("[FAM-UI-05][PRD] every entry is against a bucket its client has", () => {
+  it("[FAM-UI-05][PRD] every entry is against a bucket its client has, by the bucket's id (CHG-021)", () => {
     for (const entry of FUND_ENTRIES) {
-      const kinds = (RAW_BUDGET_BUCKETS_BY_CLIENT_ID[entry.clientId] ?? []).map(
-        (bucket) => bucket.kind,
+      expect(entry.bucketId).toBeTruthy();
+      const bucket = (RAW_BUDGET_BUCKETS_BY_CLIENT_ID[entry.clientId] ?? []).find(
+        (candidate) => candidate.id === entry.bucketId,
       );
 
-      expect(kinds).toContain(entry.bucketKind);
+      expect(bucket).toBeDefined();
+      // An entry that also names a kind names its bucket's kind.
+      if (entry.bucketKind) expect(entry.bucketKind).toBe(bucket!.kind);
     }
+  });
+
+  it("[FAM-UI-05][PRD] every fixture bucket has an id, unique across all clients (CHG-021)", () => {
+    const ids = Object.values(RAW_BUDGET_BUCKETS_BY_CLIENT_ID)
+      .flat()
+      .map((bucket) => bucket.id);
+
+    expect(ids.every((id) => typeof id === "string" && id.length > 0)).toBe(true);
+    expect(new Set(ids).size).toBe(ids.length);
   });
 
   it("[FAM-UI-05][PRD] a top-up is a positive amount and an expense a negative one", () => {
@@ -88,6 +100,7 @@ describe("[FAM-UI-05][PRD] FUND_ENTRIES fixtures (CHG-019)", () => {
     expect(pending).toEqual([
       expect.objectContaining({
         clientId: MARGARET_CLIENT_ID,
+        bucketId: "bucket-margaret-government",
         bucketKind: "government",
         type: "expense",
         amount: -310,

@@ -59,6 +59,26 @@ describe("[FAM-UI-05][AC-01] getBudgetSummary (the three cards' data)", () => {
     ]);
   });
 
+  it("[FAM-UI-05][PRD] gives each bucket a stable id (CHG-021); Margaret's keep their kinds NDIS, Fixed and Government", async () => {
+    const buckets = await getBudgetSummary(MARGARET_CLIENT_ID);
+
+    expect(buckets.map((bucket) => [bucket.id, bucket.kind, bucket.label])).toEqual([
+      ["bucket-margaret-ndis", "ndis", "NDIS"],
+      ["bucket-margaret-fixed", "fixed", "Fixed"],
+      ["bucket-margaret-government", "government", "Government"],
+    ]);
+    expect(await getBudgetSummary(MARGARET_CLIENT_ID)).toEqual(buckets);
+  });
+
+  it("[FAM-UI-05][PRD] bucket ids are unique across clients (CHG-021)", async () => {
+    const ids = [
+      ...(await getBudgetSummary(MARGARET_CLIENT_ID)),
+      ...(await getBudgetSummary(ROBERT_CLIENT_ID)),
+    ].map((bucket) => bucket.id);
+
+    expect(new Set(ids).size).toBe(ids.length);
+  });
+
   it("[FAM-UI-05][PRD] every summary is valid against the domain schema", async () => {
     for (const clientId of [MARGARET_CLIENT_ID, ROBERT_CLIENT_ID]) {
       (await getBudgetSummary(clientId)).forEach((bucket) =>
@@ -77,6 +97,7 @@ describe("[FAM-UI-05][AC-02] getFundHistory (CHG-019)", () => {
       description: "NDIS quarterly plan top-up",
       amount: 6000,
       type: "topup",
+      bucketId: "bucket-margaret-ndis",
       bucketKind: "ndis",
       recordedBy: "Helen Doyle",
     });
@@ -92,6 +113,11 @@ describe("[FAM-UI-05][AC-02] getFundHistory (CHG-019)", () => {
       ["2026-10-01", "Government subsidy payment", 750],
     ]);
     expect(history.map((entry) => entry.bucketKind)).toEqual(["ndis", "fixed", "government"]);
+    expect(history.map((entry) => entry.bucketId)).toEqual([
+      "bucket-margaret-ndis",
+      "bucket-margaret-fixed",
+      "bucket-margaret-government",
+    ]);
   });
 
   it("[FAM-UI-05][AC-02] names who recorded each entry, for the screen's 'Recorded by' line (PD-034, FD-05)", async () => {
@@ -121,6 +147,7 @@ describe("[FAM-UI-05][AC-02] getFundHistory (CHG-019)", () => {
       ["2026-10-01", false],
     ]);
     expect(history[1]).toMatchObject({
+      bucketId: "bucket-margaret-government",
       bucketKind: "government",
       type: "expense",
       amount: -310,

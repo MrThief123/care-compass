@@ -100,6 +100,9 @@ export function denseDay(count: number): Occurrence[] {
 }
 
 /** A bucket whose remaining, percent and state follow from its total and used (PD-032 thresholds). */
+let bucketSeq = 0;
+
+/** A bucket with its own `id` each time (CHG-021), unless the overrides give one. */
 export function bucket(
   label: string,
   total: number,
@@ -116,6 +119,7 @@ export function bucket(
           ? "warning"
           : "ok";
   return {
+    id: `bucket-${++bucketSeq}`,
     kind: "ndis",
     label,
     total,

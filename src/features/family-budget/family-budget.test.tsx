@@ -1,13 +1,18 @@
-import { render, screen, within } from "@testing-library/react";
+import { act, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { axe } from "jest-axe";
+import { useEffect, useState, type ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import EditLoading from "@/app/(family)/family/[clientId]/budget/edit/loading";
+import EditBudgetPage from "@/app/(family)/family/[clientId]/budget/edit/page";
+import BudgetLayout from "@/app/(family)/family/[clientId]/budget/layout";
 import Loading from "@/app/(family)/family/[clientId]/budget/loading";
 import BudgetPage from "@/app/(family)/family/[clientId]/budget/page";
 import type { BudgetBucketSummary, FundEntry } from "@/types/domain";
 
 const mocks = vi.hoisted(() => ({
+  push: vi.fn(),
   refresh: vi.fn(),
   getBudgetSummary: vi.fn(),
   getFundHistory: vi.fn(),
@@ -16,13 +21,13 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({ push: vi.fn(), refresh: mocks.refresh }),
+  useRouter: () => ({ push: mocks.push, refresh: mocks.refresh }),
 }));
 vi.mock("@/server/budget/queries", () => ({
   getBudgetSummary: mocks.getBudgetSummary,
   getFundHistory: mocks.getFundHistory,
 }));
-// The reference day a saved update is dated (CHG-020); the mock answers Mon 30 Nov 2026.
+// The reference day a saved edit is dated (CHG-020, CHG-021); the mock answers Mon 30 Nov 2026.
 vi.mock("@/server/events/queries", () => ({
   getToday: mocks.getToday,
 }));
@@ -37,12 +42,18 @@ vi.mock("@/server/clients/queries", () => ({
  * fixtures are covered in src/server/budget/queries.test.ts.
  */
 const CLIENT_ID = "client-margaret";
+const BUDGET_HREF = `/family/${CLIENT_ID}/budget`;
+const EDIT_HREF = `${BUDGET_HREF}/edit`;
 
+let bucketSeq = 0;
+
+/** A bucket (CHG-021: a stable `id`, a free name in `label`, `kind` only when made from a suggestion). */
 function bucket(
   kind: BudgetBucketSummary["kind"],
   label: string,
   total: number,
   used: number,
+  id = `bucket-test-${++bucketSeq}`,
 ): BudgetBucketSummary {
   const percentUsed = total === 0 ? 0 : Math.round((used / total) * 100);
   const state: BudgetBucketSummary["state"] =
@@ -53,13 +64,13 @@ function bucket(
         : percentUsed >= 75
           ? "warning"
           : "ok";
-  return { kind, label, total, used, remaining: total - used, percentUsed, state };
+  return { id, kind, label, total, used, remaining: total - used, percentUsed, state };
 }
 
 const BUCKETS = [
-  bucket("ndis", "NDIS", 24000, 9120),
-  bucket("fixed", "Fixed", 5000, 2250),
-  bucket("government", "Government", 3000, 2760),
+  bucket("ndis", "NDIS", 24000, 9120, "bucket-ndis"),
+  bucket("fixed", "Fixed", 5000, 2250, "bucket-fixed"),
+  bucket("government", "Government", 3000, 2760, "bucket-government"),
 ];
 
 function entry(
@@ -71,7 +82,17 @@ function entry(
   description?: string,
   recordedBy?: string,
 ): FundEntry {
-  return { id, clientId: CLIENT_ID, bucketKind, type, amount, date, description, recordedBy };
+  return {
+    id,
+    clientId: CLIENT_ID,
+    bucketId: `bucket-${bucketKind}`,
+    bucketKind,
+    type,
+    amount,
+    date,
+    description,
+    recordedBy,
+  };
 }
 
 const HISTORY = [
@@ -93,6 +114,7 @@ function pendingCost(id: string, amount: number, date: string, description: stri
   return {
     id,
     clientId: CLIENT_ID,
+    bucketId: "bucket-government",
     bucketKind: "government",
     type: "expense",
     amount: -amount,
@@ -141,9 +163,55 @@ function captureErrorLog() {
   return vi.spyOn(console, "error").mockImplementation(() => {});
 }
 
+/*
+ * The budget route as the App Router runs it (CHG-021): `budget/layout.tsx` stays
+ * mounted while its page changes between Budget and Edit budget, so what a save
+ * holds survives the trip back to Budget, and a reload (unmount, render again)
+ * drops it. `Slot` stands in for the router's page slot under the layout.
+ */
+let showPage: ((page: ReactNode) => void) | undefined;
+
+function Slot({ first }: { first: ReactNode }) {
+  const [page, setPage] = useState(first);
+  useEffect(() => {
+    showPage = setPage;
+  }, []);
+  return <>{page}</>;
+}
+
+/** The page the route draws for `href`: Budget or Edit budget, for any client. */
+async function pageFor(href: string) {
+  const match = /^\/family\/([^/]+)\/budget(\/edit)?$/.exec(href);
+  if (!match) throw new Error(`no budget route for ${href}`);
+  const params = Promise.resolve({ clientId: match[1]! });
+  return match[2] ? await EditBudgetPage({ params }) : await BudgetPage({ params });
+}
+
+async function renderRoute(href: string) {
+  const clientId = /^\/family\/([^/]+)\//.exec(href)![1]!;
+  const first = await pageFor(href);
+  const layout = await BudgetLayout({
+    children: <Slot first={first} />,
+    params: Promise.resolve({ clientId }),
+  });
+  return render(layout);
+}
+
 async function renderBudget() {
-  const page = await BudgetPage({ params: Promise.resolve({ clientId: CLIENT_ID }) });
-  return render(page);
+  return renderRoute(BUDGET_HREF);
+}
+
+/** A client-side navigation: the layout stays, the page changes. */
+async function goTo(href: string) {
+  const page = await pageFor(href);
+  await act(async () => showPage!(page));
+}
+
+/** Follows the last `router.push` the page made. */
+async function followPush() {
+  const href = mocks.push.mock.lastCall?.[0];
+  if (typeof href !== "string") throw new Error("the page did not push a route");
+  await goTo(href);
 }
 
 function fundsCard() {
@@ -195,29 +263,94 @@ function bucketCard(label: string) {
 
 type User = ReturnType<typeof userEvent.setup>;
 
-function updateForm() {
-  return within(fundsCard()).getByRole("form", { name: "Update funds" });
+function status() {
+  return within(fundsCard()).getByRole("status");
 }
 
-async function openUpdateForm(user: User) {
-  await user.click(within(fundsCard()).getByRole("button", { name: "Update" }));
-  return updateForm();
+/** Budget's 'Edit' link, which leads to the Edit budget page (PD-059). */
+function editLink() {
+  return within(fundsCard()).getByRole("link", { name: "Edit" });
 }
 
-/** Fills the Update form; a field left out keeps its starting value. */
-async function fillUpdateForm(
+/** Opens Edit budget from Budget, as pressing 'Edit' does. */
+async function openEdit() {
+  expect(editLink()).toHaveAttribute("href", EDIT_HREF);
+  await goTo(EDIT_HREF);
+  return editForm();
+}
+
+function editForm() {
+  return screen.getByRole("form", { name: "Edit budget" });
+}
+
+/** A saved bucket's panel on Edit budget, named by its saved name. */
+function panel(name: string) {
+  return within(editForm()).getByRole("group", { name });
+}
+
+/** The panels for new buckets, in the order they were added. */
+function newPanels() {
+  return within(editForm()).queryAllByRole("group", { name: "New bucket" });
+}
+
+function lastNewPanel() {
+  const panels = newPanels();
+  if (panels.length === 0) throw new Error("no new bucket");
+  return panels[panels.length - 1]!;
+}
+
+/** Adds or removes funds on a saved bucket; the Change is left at Add unless it says Remove. */
+async function changeFunds(
   user: User,
-  fields: { bucket?: string; change?: "Add" | "Remove"; amount?: string; note?: string },
+  bucketName: string,
+  change: "Add" | "Remove",
+  amount: string,
 ) {
-  const form = updateForm();
-  if (fields.bucket) await user.selectOptions(within(form).getByLabelText("Bucket"), fields.bucket);
-  if (fields.change) await user.click(within(form).getByRole("radio", { name: fields.change }));
-  if (fields.amount) await user.type(within(form).getByLabelText("Amount"), fields.amount);
-  if (fields.note) await user.type(within(form).getByLabelText("Note (optional)"), fields.note);
+  const group = panel(bucketName);
+  if (change === "Remove") await user.click(within(group).getByRole("radio", { name: "Remove" }));
+  await user.type(within(group).getByLabelText("Amount"), amount);
 }
 
-async function saveUpdateForm(user: User) {
-  await user.click(within(updateForm()).getByRole("button", { name: "Save" }));
+async function rename(user: User, bucketName: string, name: string) {
+  const field = within(panel(bucketName)).getByLabelText("Name");
+  await user.clear(field);
+  if (name) await user.type(field, name);
+}
+
+/** Presses 'Add bucket' and fills the new bucket's name and starting amount. */
+async function addBucket(user: User, name: string, startingAmount: string) {
+  await user.click(within(editForm()).getByRole("button", { name: "Add bucket" }));
+  const group = lastNewPanel();
+  if (name) await user.type(within(group).getByLabelText("Name"), name);
+  if (startingAmount)
+    await user.type(within(group).getByLabelText("Starting amount"), startingAmount);
+}
+
+async function writeNote(user: User, note: string) {
+  await user.type(within(editForm()).getByLabelText("Note (optional)"), note);
+}
+
+async function save(user: User) {
+  await user.click(within(editForm()).getByRole("button", { name: "Save" }));
+}
+
+/** Saves, checks the page went back to Budget, and follows it there. */
+async function saveAndReturn(user: User) {
+  await save(user);
+  expect(mocks.push).toHaveBeenLastCalledWith(BUDGET_HREF);
+  await followPush();
+}
+
+/** Opens Edit budget from Budget, makes the change, saves and returns to Budget. */
+async function editAndSave(user: User, change: () => Promise<void>) {
+  await openEdit();
+  await change();
+  await saveAndReturn(user);
+}
+
+/** Escapes a string for use inside a RegExp. */
+function literal(text: string) {
+  return new RegExp(text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
 }
 
 describe("[FAM-UI-05] Family Budget", () => {
@@ -277,11 +410,12 @@ describe("[FAM-UI-05] Family Budget", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("[FAM-UI-05][PRD] 'Funds by source' has an 'Update' button", async () => {
+  it("[FAM-UI-05][AC-04] 'Funds by source' has an 'Edit' link to the Edit budget page, and no 'Update'", async () => {
     await renderBudget();
 
-    const update = within(fundsCard()).getByRole("button", { name: "Update" });
-    expect(update).toHaveAttribute("type", "button");
+    expect(editLink()).toHaveAttribute("href", EDIT_HREF);
+    expect(screen.queryByRole("button", { name: "Update" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("form")).not.toBeInTheDocument();
   });
 
   it("[FAM-UI-05][AC-02] History is a table with the columns Date, Description and Amount", async () => {
@@ -460,41 +594,43 @@ describe("[FAM-UI-05] History rows (PD-034: top-ups and expenses)", () => {
   });
 });
 
-describe("[FAM-UI-05] 'Update' opens the simple form (CHG-020, FD-11)", () => {
-  it("[FAM-UI-05][PRD] has a live region on the page from the start, so a message will be announced, and it is empty", async () => {
+/** A bucket with nothing spent, so it can be removed (CHG-021); its name is free text with no kind. */
+const COUNCIL_GRANT = bucket(undefined, "Council grant", 1200, 0, "bucket-council");
+
+describe("[FAM-UI-05] 'Edit' opens the Edit budget page (CHG-021, FD-12)", () => {
+  it("[FAM-UI-05][PRD] Budget has a live region from the start, so a message will be announced, and it is empty", async () => {
     await renderBudget();
 
-    expect(within(fundsCard()).getByRole("status")).toBeEmptyDOMElement();
+    expect(status()).toBeEmptyDOMElement();
   });
 
-  it("[FAM-UI-05][PRD] the form is closed at first; 'Update' says so and opens it", async () => {
-    const user = userEvent.setup();
+  it("[FAM-UI-05][AC-04] Edit budget is its own page: a heading, one form, and none of Budget's cards", async () => {
     await renderBudget();
-    const update = within(fundsCard()).getByRole("button", { name: "Update" });
+    await openEdit();
 
-    expect(within(fundsCard()).queryByRole("form")).not.toBeInTheDocument();
-    expect(update).toHaveAttribute("aria-expanded", "false");
-
-    await user.click(update);
-
-    expect(updateForm()).toBeInTheDocument();
-    expect(update).toHaveAttribute("aria-expanded", "true");
+    expect(screen.getByRole("heading", { level: 1, name: "Edit budget" })).toBeInTheDocument();
+    expect(screen.getAllByRole("form")).toHaveLength(1);
+    expect(screen.queryByRole("region", { name: "Funds by source" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("table")).not.toBeInTheDocument();
   });
 
-  it("[FAM-UI-05][AC-04] the form has a bucket, Add or Remove, an amount and an optional note, and Save and Cancel", async () => {
-    const user = userEvent.setup();
+  it("[FAM-UI-05][AC-04] has one panel per bucket, in Budget's order, each with its name, what remains, Add or Remove and a blank amount", async () => {
     await renderBudget();
-    const form = await openUpdateForm(user);
+    const form = await openEdit();
 
-    const bucket = within(form).getByLabelText("Bucket");
-    expect(
-      within(bucket)
-        .getAllByRole("option")
-        .map((option) => option.textContent),
-    ).toEqual(["Choose a bucket", "NDIS", "Fixed", "Government"]);
-    expect(bucket).toHaveValue("");
+    const panels = within(form)
+      .getAllByRole("group")
+      .filter((group) => group.tagName === "FIELDSET");
+    expect(panels.map((group) => group.querySelector("legend")?.textContent)).toEqual([
+      "NDIS",
+      "Fixed",
+      "Government",
+    ]);
 
-    const change = within(form).getByRole("radiogroup", { name: "Change" });
+    const ndis = panel("NDIS");
+    expect(within(ndis).getByLabelText("Name")).toHaveValue("NDIS");
+    expect(within(ndis).getByText("$14,880 remaining")).toBeInTheDocument();
+    const change = within(ndis).getByRole("radiogroup", { name: "Change" });
     expect(within(change).getByRole("radio", { name: "Add" })).toHaveAttribute(
       "aria-checked",
       "true",
@@ -503,22 +639,33 @@ describe("[FAM-UI-05] 'Update' opens the simple form (CHG-020, FD-11)", () => {
       "aria-checked",
       "false",
     );
+    expect(within(ndis).getByLabelText("Amount")).toHaveValue("");
 
-    expect(within(form).getByLabelText("Amount")).toHaveValue("");
-    expect(within(form).getByLabelText("Note (optional)")).toHaveValue("");
-    // No date field: an update is dated today (PD-058).
-    expect(within(form).queryByLabelText(/date/i)).not.toBeInTheDocument();
-    expect(within(form).getByRole("button", { name: "Save" })).toHaveAttribute("type", "submit");
-    expect(within(form).getByRole("button", { name: "Cancel" })).toHaveAttribute("type", "button");
+    expect(within(panel("Fixed")).getByText("$2,750 remaining")).toBeInTheDocument();
+    expect(within(panel("Government")).getByText("$240 remaining")).toBeInTheDocument();
   });
 
-  it("[FAM-UI-05][AC-04] adding $500 to NDIS with no note: NDIS shows $15,380 and History's first row is today, 'Funds added', '+$500'", async () => {
+  it("[FAM-UI-05][AC-04] has one optional note for the whole save, 'Add bucket', Save and Cancel, and no date field", async () => {
+    await renderBudget();
+    const form = await openEdit();
+
+    expect(within(form).getAllByLabelText("Note (optional)")).toHaveLength(1);
+    expect(within(form).getByLabelText("Note (optional)")).toHaveValue("");
+    expect(within(form).getByRole("button", { name: "Add bucket" })).toHaveAttribute(
+      "type",
+      "button",
+    );
+    expect(within(form).getByRole("button", { name: "Save" })).toHaveAttribute("type", "submit");
+    expect(within(form).getByRole("button", { name: "Cancel" })).toHaveAttribute("type", "button");
+    // A save is dated today (PD-058).
+    expect(within(form).queryByLabelText(/date/i)).not.toBeInTheDocument();
+  });
+
+  it("[FAM-UI-05][AC-04] adding $500 to NDIS with no note: back on Budget, NDIS shows $15,380 and History's first row is today, 'Funds added', '+$500'", async () => {
     const user = userEvent.setup();
     await renderBudget();
-    await openUpdateForm(user);
 
-    await fillUpdateForm(user, { bucket: "NDIS", change: "Add", amount: "500" });
-    await saveUpdateForm(user);
+    await editAndSave(user, () => changeFunds(user, "NDIS", "Add", "500"));
 
     expect(within(bucketCard("NDIS")).getByText("$15,380")).toBeInTheDocument();
     expect(within(bucketCard("NDIS")).getByText("of $24,500 · 37% used")).toBeInTheDocument();
@@ -529,200 +676,107 @@ describe("[FAM-UI-05] 'Update' opens the simple form (CHG-020, FD-11)", () => {
     expect(within(bucketCard("Government")).getByText("$240")).toBeInTheDocument();
   });
 
-  it("[FAM-UI-05][AC-04] a saved update closes the form, says what changed, and gives focus back to 'Update'", async () => {
+  it("[FAM-UI-05][AC-04] a save that changes something is announced on Budget as 'Budget updated.'", async () => {
     const user = userEvent.setup();
     await renderBudget();
-    await openUpdateForm(user);
 
-    await fillUpdateForm(user, { bucket: "NDIS", amount: "500" });
-    await saveUpdateForm(user);
+    await editAndSave(user, () => changeFunds(user, "NDIS", "Add", "500"));
 
-    expect(within(fundsCard()).queryByRole("form")).not.toBeInTheDocument();
-    expect(within(fundsCard()).getByRole("status")).toHaveTextContent("$500 added to NDIS.");
-    expect(within(fundsCard()).getByRole("button", { name: "Update" })).toHaveFocus();
+    await waitFor(() => expect(status()).toHaveTextContent("Budget updated."));
   });
 
-  it("[FAM-UI-05][AC-04] a note becomes the row's description", async () => {
+  it("[FAM-UI-05][AC-04] the note becomes the funds row's description", async () => {
     const user = userEvent.setup();
     await renderBudget();
-    await openUpdateForm(user);
 
-    await fillUpdateForm(user, {
-      bucket: "Fixed",
-      amount: "120.50",
-      note: "Birthday money from Tom",
+    await editAndSave(user, async () => {
+      await changeFunds(user, "Fixed", "Add", "120.50");
+      await writeNote(user, "Birthday money from Tom");
     });
-    await saveUpdateForm(user);
 
     expect(historyRows()[0]).toEqual(["30 Nov 2026", "Birthday money from Tom", "+$120.50"]);
   });
 
-  it("[FAM-UI-05][AC-04] local state only: nothing is written or re-read, and a reload shows the fixtures again", async () => {
+  it("[FAM-UI-05][AC-04] several changes in one save each make a row, in the page's order, newest first above the old rows", async () => {
+    const user = userEvent.setup();
+    await renderBudget();
+
+    await editAndSave(user, async () => {
+      await changeFunds(user, "Government", "Remove", "40");
+      await changeFunds(user, "NDIS", "Add", "100");
+      await writeNote(user, "Plan review");
+    });
+
+    expect(historyRows().slice(0, 3)).toEqual([
+      ["30 Nov 2026", "Plan review", "+$100"],
+      ["30 Nov 2026", "Plan review", "-$40"],
+      ["3 Nov 2026", "NDIS quarterly plan top-up", "+$6,000"],
+    ]);
+    expect(historyRows()).toHaveLength(5);
+  });
+
+  it("[FAM-UI-05][AC-04] a row made on Edit budget does not say who recorded it (no signed-in user in Phase 1)", async () => {
+    const user = userEvent.setup();
+    await renderBudget();
+
+    await editAndSave(user, () => changeFunds(user, "NDIS", "Add", "500"));
+
+    expect(historyAttributions()[0]).toBeNull();
+  });
+
+  it("[FAM-UI-05][AC-04] a save with nothing changed goes back to Budget with no new row and nothing announced", async () => {
+    const user = userEvent.setup();
+    await renderBudget();
+
+    await editAndSave(user, async () => {});
+
+    expect(historyRows()).toHaveLength(3);
+    expect(within(bucketCard("NDIS")).getByText("$14,880")).toBeInTheDocument();
+    expect(status()).toBeEmptyDOMElement();
+  });
+
+  it("[FAM-UI-05][AC-04] Edit budget opened again shows the saved figures", async () => {
+    const user = userEvent.setup();
+    await renderBudget();
+    await editAndSave(user, () => changeFunds(user, "NDIS", "Add", "500"));
+
+    await openEdit();
+
+    expect(within(panel("NDIS")).getByText("$15,380 remaining")).toBeInTheDocument();
+    expect(within(panel("NDIS")).getByLabelText("Amount")).toHaveValue("");
+    expect(within(editForm()).getByLabelText("Note (optional)")).toHaveValue("");
+  });
+
+  it("[FAM-UI-05][AC-04] local state only: nothing is refreshed, and a reload shows the fixtures again", async () => {
     const user = userEvent.setup();
     const first = await renderBudget();
-    await openUpdateForm(user);
-    await fillUpdateForm(user, { bucket: "NDIS", amount: "500" });
-    await saveUpdateForm(user);
+    await editAndSave(user, () => changeFunds(user, "NDIS", "Add", "500"));
 
-    expect(mocks.getBudgetSummary).toHaveBeenCalledTimes(1);
-    expect(mocks.getFundHistory).toHaveBeenCalledTimes(1);
     expect(mocks.refresh).not.toHaveBeenCalled();
+    expect(within(bucketCard("NDIS")).getByText("$15,380")).toBeInTheDocument();
 
     first.unmount();
     await renderBudget();
 
     expect(within(bucketCard("NDIS")).getByText("$14,880")).toBeInTheDocument();
     expect(historyRows()).toHaveLength(3);
+    expect(status()).toBeEmptyDOMElement();
   });
 
-  it("[FAM-UI-05][AC-05] removing $40 from Government: Government shows $200 and History's first row reads 'Funds removed', '-$40'", async () => {
+  it("[FAM-UI-05][AC-04] what a save holds is for that client only: another client's Budget shows its own figures", async () => {
     const user = userEvent.setup();
     await renderBudget();
-    await openUpdateForm(user);
+    await editAndSave(user, () => changeFunds(user, "NDIS", "Add", "500"));
 
-    await fillUpdateForm(user, { bucket: "Government", change: "Remove", amount: "40" });
-    await saveUpdateForm(user);
+    await goTo("/family/client-robert/budget");
 
-    expect(within(bucketCard("Government")).getByText("$200")).toBeInTheDocument();
-    expect(within(bucketCard("Government")).getByText("of $2,960 · 93% used")).toBeInTheDocument();
-    expect(historyRows()[0]).toEqual(["30 Nov 2026", "Funds removed", "-$40"]);
-    expect(within(fundsCard()).getByRole("status")).toHaveTextContent(
-      "$40 removed from Government.",
-    );
-  });
-
-  it("[FAM-UI-05][AC-05] removing $300 from Government says 'Only $240 available' on the amount, and nothing changes", async () => {
-    const user = userEvent.setup();
-    await renderBudget();
-    await openUpdateForm(user);
-
-    await fillUpdateForm(user, { bucket: "Government", change: "Remove", amount: "300" });
-    await saveUpdateForm(user);
-
-    const amount = within(updateForm()).getByLabelText("Amount");
-    expect(amount).toHaveAccessibleDescription(/Only \$240 available/);
-    expect(amount).toHaveAttribute("aria-invalid", "true");
-    expect(within(bucketCard("Government")).getByText("$240")).toBeInTheDocument();
-    expect(historyRows()).toHaveLength(3);
-    expect(within(fundsCard()).getByRole("status")).toBeEmptyDOMElement();
-  });
-
-  it("[FAM-UI-05][AC-05] the limit follows the balance on screen: after removing $40, $300 is refused as 'Only $200 available'", async () => {
-    const user = userEvent.setup();
-    await renderBudget();
-    await openUpdateForm(user);
-    await fillUpdateForm(user, { bucket: "Government", change: "Remove", amount: "40" });
-    await saveUpdateForm(user);
-
-    await openUpdateForm(user);
-    await fillUpdateForm(user, { bucket: "Government", change: "Remove", amount: "300" });
-    await saveUpdateForm(user);
-
-    expect(within(updateForm()).getByLabelText("Amount")).toHaveAccessibleDescription(
-      /Only \$200 available/,
-    );
-  });
-
-  it("[FAM-UI-05][AC-05] the whole balance can be removed, leaving $0", async () => {
-    const user = userEvent.setup();
-    await renderBudget();
-    await openUpdateForm(user);
-
-    await fillUpdateForm(user, { bucket: "Government", change: "Remove", amount: "240" });
-    await saveUpdateForm(user);
-
-    expect(within(bucketCard("Government")).getByText("$0")).toBeInTheDocument();
-    expect(within(bucketCard("Government")).getByText("Budget exhausted")).toBeInTheDocument();
-  });
-
-  it.each([
-    ["an empty amount", "", "Enter an amount."],
-    ["'0'", "0", "Enter an amount more than $0."],
-    ["'-5'", "-5", "Enter an amount more than $0."],
-    ["'12.345'", "12.345", "Use no more than 2 decimal places."],
-  ])(
-    "[FAM-UI-05][AC-06] %s is refused with a message on the amount, and nothing changes",
-    async (_case, amount, message) => {
-      const user = userEvent.setup();
-      await renderBudget();
-      await openUpdateForm(user);
-
-      await fillUpdateForm(user, { bucket: "NDIS", amount });
-      await saveUpdateForm(user);
-
-      const field = within(updateForm()).getByLabelText("Amount");
-      expect(field).toHaveAccessibleDescription(new RegExp(message.replace(/[.$]/g, "\\$&")));
-      expect(field).toHaveAttribute("aria-invalid", "true");
-      expect(within(bucketCard("NDIS")).getByText("$14,880")).toBeInTheDocument();
-      expect(historyRows()).toHaveLength(3);
-    },
-  );
-
-  it("[FAM-UI-05][AC-06] no bucket chosen is refused with a message on the bucket, and nothing changes", async () => {
-    const user = userEvent.setup();
-    await renderBudget();
-    await openUpdateForm(user);
-
-    await fillUpdateForm(user, { amount: "500" });
-    await saveUpdateForm(user);
-
-    const bucket = within(updateForm()).getByLabelText("Bucket");
-    expect(bucket).toHaveAccessibleDescription(/Choose a bucket\./);
-    expect(bucket).toHaveAttribute("aria-invalid", "true");
-    expect(within(updateForm()).getByLabelText("Amount")).not.toHaveAttribute("aria-invalid");
+    expect(mocks.getBudgetSummary).toHaveBeenLastCalledWith("client-robert");
     expect(within(bucketCard("NDIS")).getByText("$14,880")).toBeInTheDocument();
     expect(historyRows()).toHaveLength(3);
-  });
 
-  it("[FAM-UI-05][AC-06] a refused save moves focus to the first field that needs fixing", async () => {
-    const user = userEvent.setup();
-    await renderBudget();
-    await openUpdateForm(user);
+    await goTo(BUDGET_HREF);
 
-    await saveUpdateForm(user);
-
-    expect(within(updateForm()).getByLabelText("Bucket")).toHaveFocus();
-  });
-
-  it("[FAM-UI-05][AC-06] once fixed, the same form saves and the messages go", async () => {
-    const user = userEvent.setup();
-    await renderBudget();
-    await openUpdateForm(user);
-    await fillUpdateForm(user, { bucket: "NDIS", amount: "12.345" });
-    await saveUpdateForm(user);
-
-    const amount = within(updateForm()).getByLabelText("Amount");
-    await user.clear(amount);
-    await user.type(amount, "12.34");
-    await saveUpdateForm(user);
-
-    expect(within(fundsCard()).queryByRole("form")).not.toBeInTheDocument();
-    expect(historyRows()[0]).toEqual(["30 Nov 2026", "Funds added", "+$12.34"]);
-  });
-
-  it("[FAM-UI-05][PRD] Cancel closes the form, changes nothing, and gives focus back to 'Update'", async () => {
-    const user = userEvent.setup();
-    await renderBudget();
-    await openUpdateForm(user);
-    await fillUpdateForm(user, { bucket: "NDIS", amount: "500" });
-
-    await user.click(within(updateForm()).getByRole("button", { name: "Cancel" }));
-
-    expect(within(fundsCard()).queryByRole("form")).not.toBeInTheDocument();
-    expect(within(bucketCard("NDIS")).getByText("$14,880")).toBeInTheDocument();
-    expect(historyRows()).toHaveLength(3);
-    expect(within(fundsCard()).getByRole("button", { name: "Update" })).toHaveFocus();
-  });
-
-  it("[FAM-UI-05][PRD] works from the keyboard: Enter on 'Update' opens the form with focus on the bucket", async () => {
-    const user = userEvent.setup();
-    await renderBudget();
-
-    await user.tab();
-    expect(within(fundsCard()).getByRole("button", { name: "Update" })).toHaveFocus();
-    await user.keyboard("{Enter}");
-
-    expect(within(updateForm()).getByLabelText("Bucket")).toHaveFocus();
+    expect(within(bucketCard("NDIS")).getByText("$15,380")).toBeInTheDocument();
   });
 
   it("[FAM-UI-05][PRD] adding funds does not pay pending costs (F0-12's): the pending line and row stay", async () => {
@@ -730,14 +784,660 @@ describe("[FAM-UI-05] 'Update' opens the simple form (CHG-020, FD-11)", () => {
     mocks.getFundHistory.mockResolvedValue(HISTORY_WITH_PENDING);
     const user = userEvent.setup();
     await renderBudget();
-    await openUpdateForm(user);
 
-    await fillUpdateForm(user, { bucket: "Government", amount: "500" });
-    await saveUpdateForm(user);
+    await editAndSave(user, () => changeFunds(user, "Government", "Add", "500"));
 
     expect(within(bucketCard("Government")).getByText("$740")).toBeInTheDocument();
     expect(within(bucketCard("Government")).getByText("Pending $310 · 1 cost")).toBeInTheDocument();
     expect(within(historyTable()).getByText("Pending")).toBeInTheDocument();
+  });
+});
+
+describe("[FAM-UI-05] removing funds on Edit budget (CHG-021, AC-05)", () => {
+  it("[FAM-UI-05][AC-05] removing $40 from Government: Government shows $200 and History's first row reads 'Funds removed', '-$40'", async () => {
+    const user = userEvent.setup();
+    await renderBudget();
+
+    await editAndSave(user, () => changeFunds(user, "Government", "Remove", "40"));
+
+    expect(within(bucketCard("Government")).getByText("$200")).toBeInTheDocument();
+    expect(within(bucketCard("Government")).getByText("of $2,960 · 93% used")).toBeInTheDocument();
+    expect(historyRows()[0]).toEqual(["30 Nov 2026", "Funds removed", "-$40"]);
+    await waitFor(() => expect(status()).toHaveTextContent("Budget updated."));
+  });
+
+  it("[FAM-UI-05][AC-05] removing $300 from Government says 'Only $240 available' on that amount; the page stays and nothing changes", async () => {
+    const user = userEvent.setup();
+    await renderBudget();
+    await openEdit();
+
+    await changeFunds(user, "Government", "Remove", "300");
+    await save(user);
+
+    const amount = within(panel("Government")).getByLabelText("Amount");
+    expect(amount).toHaveAccessibleDescription(/Only \$240 available/);
+    expect(amount).toHaveAttribute("aria-invalid", "true");
+    expect(amount).toHaveFocus();
+    expect(mocks.push).not.toHaveBeenCalled();
+    expect(editForm()).toBeInTheDocument();
+
+    await user.click(within(editForm()).getByRole("button", { name: "Cancel" }));
+    await followPush();
+
+    expect(within(bucketCard("Government")).getByText("$240")).toBeInTheDocument();
+    expect(historyRows()).toHaveLength(3);
+  });
+
+  it("[FAM-UI-05][AC-05] the limit follows the saved balance: after removing $40, $300 is refused as 'Only $200 available'", async () => {
+    const user = userEvent.setup();
+    await renderBudget();
+    await editAndSave(user, () => changeFunds(user, "Government", "Remove", "40"));
+
+    await openEdit();
+    await changeFunds(user, "Government", "Remove", "300");
+    await save(user);
+
+    expect(within(panel("Government")).getByLabelText("Amount")).toHaveAccessibleDescription(
+      /Only \$200 available/,
+    );
+  });
+
+  it("[FAM-UI-05][AC-05] the whole balance can be removed, leaving $0", async () => {
+    const user = userEvent.setup();
+    await renderBudget();
+
+    await editAndSave(user, () => changeFunds(user, "Government", "Remove", "240"));
+
+    expect(within(bucketCard("Government")).getByText("$0")).toBeInTheDocument();
+    expect(within(bucketCard("Government")).getByText("Budget exhausted")).toBeInTheDocument();
+  });
+});
+
+describe("[FAM-UI-05] Edit budget refuses what it cannot save (CHG-021, AC-06)", () => {
+  it.each([
+    ["'0'", "0", "Enter an amount more than $0."],
+    ["'-5'", "-5", "Enter an amount more than $0."],
+    ["'12.345'", "12.345", "Use no more than 2 decimal places."],
+    ["'abc'", "abc", "Enter an amount in dollars, like 250 or 250.50."],
+    ["'10000000000'", "10000000000", "Enter an amount under $10,000,000,000."],
+  ])(
+    "[FAM-UI-05][AC-06] an amount of %s is refused with a message on that amount, and nothing is saved",
+    async (_case, amount, message) => {
+      const user = userEvent.setup();
+      await renderBudget();
+      await openEdit();
+
+      await changeFunds(user, "NDIS", "Add", amount);
+      await save(user);
+
+      const field = within(panel("NDIS")).getByLabelText("Amount");
+      expect(field).toHaveAccessibleDescription(literal(message));
+      expect(field).toHaveAttribute("aria-invalid", "true");
+      expect(mocks.push).not.toHaveBeenCalled();
+      expect(editForm()).toBeInTheDocument();
+    },
+  );
+
+  it("[FAM-UI-05][AC-06] a blank amount is no change, not an error", async () => {
+    const user = userEvent.setup();
+    await renderBudget();
+    await openEdit();
+
+    await save(user);
+
+    expect(within(panel("NDIS")).getByLabelText("Amount")).not.toHaveAttribute("aria-invalid");
+    expect(mocks.push).toHaveBeenCalledWith(BUDGET_HREF);
+  });
+
+  it.each([
+    ["empty", "", "Enter a name."],
+    ["only spaces", "   ", "Enter a name."],
+    ["41 characters", "N".repeat(41), "Use 40 characters or fewer."],
+    [
+      "the same as another bucket's, ignoring case",
+      "ndis",
+      "Another bucket already has this name.",
+    ],
+    ["another's with spaces around it", "  Government ", "Another bucket already has this name."],
+  ])(
+    "[FAM-UI-05][AC-06] a name that is %s is refused with a message on that name, and nothing is saved",
+    async (_case, name, message) => {
+      const user = userEvent.setup();
+      await renderBudget();
+      await openEdit();
+
+      await rename(user, "Fixed", name);
+      await save(user);
+
+      const field = within(panel("Fixed")).getByLabelText("Name");
+      expect(field).toHaveAccessibleDescription(literal(message));
+      expect(field).toHaveAttribute("aria-invalid", "true");
+      expect(mocks.push).not.toHaveBeenCalled();
+    },
+  );
+
+  it("[FAM-UI-05][AC-06] a duplicate name is marked on the bucket being renamed, not on the one that already had it", async () => {
+    const user = userEvent.setup();
+    await renderBudget();
+    await openEdit();
+
+    await rename(user, "Fixed", "NDIS");
+    await save(user);
+
+    expect(within(panel("Fixed")).getByLabelText("Name")).toHaveAttribute("aria-invalid", "true");
+    expect(within(panel("NDIS")).getByLabelText("Name")).not.toHaveAttribute("aria-invalid");
+  });
+
+  it("[FAM-UI-05][AC-06] a name of exactly 40 characters, spaces around it trimmed, is accepted", async () => {
+    const user = userEvent.setup();
+    await renderBudget();
+    const forty = "F".repeat(40);
+
+    await editAndSave(user, () => rename(user, "Fixed", `  ${forty}  `));
+
+    expect(within(fundsCard()).getByText(forty)).toBeInTheDocument();
+  });
+
+  it("[FAM-UI-05][AC-06] a new bucket named like a saved one is refused on the new bucket's name", async () => {
+    const user = userEvent.setup();
+    await renderBudget();
+    await openEdit();
+
+    await addBucket(user, "government", "100");
+    await save(user);
+
+    const field = within(lastNewPanel()).getByLabelText("Name");
+    expect(field).toHaveAccessibleDescription(/Another bucket already has this name\./);
+    expect(within(panel("Government")).getByLabelText("Name")).not.toHaveAttribute("aria-invalid");
+    expect(mocks.push).not.toHaveBeenCalled();
+  });
+
+  it("[FAM-UI-05][AC-06] a bucket being removed frees its name for a new bucket", async () => {
+    mocks.getBudgetSummary.mockResolvedValue([...BUCKETS, COUNCIL_GRANT]);
+    const user = userEvent.setup();
+    await renderBudget();
+
+    await editAndSave(user, async () => {
+      await user.click(
+        within(panel("Council grant")).getByRole("button", { name: "Remove bucket" }),
+      );
+      await addBucket(user, "Council grant", "500");
+    });
+
+    const councilCards = within(fundsCard())
+      .getAllByRole("listitem")
+      .filter((card) => within(card).queryByText("Council grant", { exact: true }));
+    expect(councilCards).toHaveLength(1);
+    expect(within(councilCards[0]!).getByText("$500")).toBeInTheDocument();
+    expect(historyRows().slice(0, 2)).toEqual([
+      ["30 Nov 2026", "Bucket removed", "-$1,200"],
+      ["30 Nov 2026", "Bucket added", "+$500"],
+    ]);
+  });
+
+  it.each([
+    ["no starting amount", "", "Enter a starting amount, or 0."],
+    ["a negative one", "-5", "Enter an amount of $0 or more."],
+    ["one with 3 decimal places", "12.345", "Use no more than 2 decimal places."],
+    ["one that is not a number", "abc", "Enter an amount in dollars, like 250 or 250.50."],
+  ])(
+    "[FAM-UI-05][AC-06] a new bucket with %s is refused with a message on its starting amount",
+    async (_case, startingAmount, message) => {
+      const user = userEvent.setup();
+      await renderBudget();
+      await openEdit();
+
+      await addBucket(user, "Council grant", startingAmount);
+      await save(user);
+
+      const field = within(lastNewPanel()).getByLabelText("Starting amount");
+      expect(field).toHaveAccessibleDescription(literal(message));
+      expect(field).toHaveAttribute("aria-invalid", "true");
+      expect(mocks.push).not.toHaveBeenCalled();
+    },
+  );
+
+  it("[FAM-UI-05][AC-06] every field in error gets its own message, and focus goes to the first in page order", async () => {
+    const user = userEvent.setup();
+    await renderBudget();
+    await openEdit();
+
+    await rename(user, "Government", "");
+    await changeFunds(user, "NDIS", "Add", "0");
+    await addBucket(user, "", "100");
+    await save(user);
+
+    const ndisAmount = within(panel("NDIS")).getByLabelText("Amount");
+    expect(ndisAmount).toHaveAttribute("aria-invalid", "true");
+    expect(within(panel("Government")).getByLabelText("Name")).toHaveAttribute(
+      "aria-invalid",
+      "true",
+    );
+    expect(within(lastNewPanel()).getByLabelText("Name")).toHaveAttribute("aria-invalid", "true");
+    expect(within(panel("Fixed")).getByLabelText("Name")).not.toHaveAttribute("aria-invalid");
+    expect(ndisAmount).toHaveFocus();
+  });
+
+  it("[FAM-UI-05][AC-06] once fixed, the same page saves and the messages go", async () => {
+    const user = userEvent.setup();
+    await renderBudget();
+    await openEdit();
+    await changeFunds(user, "NDIS", "Add", "12.345");
+    await save(user);
+
+    const amount = within(panel("NDIS")).getByLabelText("Amount");
+    await user.clear(amount);
+    await user.type(amount, "12.34");
+    await saveAndReturn(user);
+
+    expect(historyRows()[0]).toEqual(["30 Nov 2026", "Funds added", "+$12.34"]);
+  });
+
+  it("[FAM-UI-05][AC-06] Cancel goes back to Budget with nothing changed and nothing announced", async () => {
+    const user = userEvent.setup();
+    await renderBudget();
+    await openEdit();
+    await changeFunds(user, "NDIS", "Add", "500");
+    await rename(user, "Fixed", "Fixed support");
+    await addBucket(user, "Council grant", "1200");
+
+    await user.click(within(editForm()).getByRole("button", { name: "Cancel" }));
+    expect(mocks.push).toHaveBeenLastCalledWith(BUDGET_HREF);
+    await followPush();
+
+    expect(within(bucketCard("NDIS")).getByText("$14,880")).toBeInTheDocument();
+    expect(within(fundsCard()).getByText("Fixed")).toBeInTheDocument();
+    expect(within(fundsCard()).getAllByRole("listitem")).toHaveLength(3);
+    expect(historyRows()).toHaveLength(3);
+    expect(status()).toBeEmptyDOMElement();
+  });
+
+  it("[FAM-UI-05][AC-06] Escape does what Cancel does", async () => {
+    const user = userEvent.setup();
+    await renderBudget();
+    await openEdit();
+    await changeFunds(user, "NDIS", "Add", "500");
+
+    await user.keyboard("{Escape}");
+    expect(mocks.push).toHaveBeenLastCalledWith(BUDGET_HREF);
+    await followPush();
+
+    expect(within(bucketCard("NDIS")).getByText("$14,880")).toBeInTheDocument();
+    expect(historyRows()).toHaveLength(3);
+  });
+});
+
+describe("[FAM-UI-05] adding a bucket (CHG-021, AC-09)", () => {
+  it("[FAM-UI-05][AC-09] 'Council grant' starting at 1200: Budget shows it as a fourth card with $1,200, and History's first row is 'Bucket added', '+$1,200'", async () => {
+    const user = userEvent.setup();
+    await renderBudget();
+
+    await editAndSave(user, () => addBucket(user, "Council grant", "1200"));
+
+    const cards = within(fundsCard()).getAllByRole("listitem");
+    expect(cards).toHaveLength(4);
+    expect(within(cards[3]!).getByText("Council grant")).toBeInTheDocument();
+    expect(within(cards[3]!).getByText("$1,200")).toBeInTheDocument();
+    expect(within(cards[3]!).getByText("of $1,200 · 0% used")).toBeInTheDocument();
+    expect(
+      screen.getByRole("progressbar", { name: "Council grant budget, 0% used" }),
+    ).toBeInTheDocument();
+    expect(historyRows()[0]).toEqual(["30 Nov 2026", "Bucket added", "+$1,200"]);
+    await waitFor(() => expect(status()).toHaveTextContent("Budget updated."));
+  });
+
+  it("[FAM-UI-05][AC-09] 'Add bucket' adds a 'New bucket' panel with a name and a starting amount, and moves focus to its name", async () => {
+    const user = userEvent.setup();
+    await renderBudget();
+    await openEdit();
+
+    expect(newPanels()).toHaveLength(0);
+    await user.click(within(editForm()).getByRole("button", { name: "Add bucket" }));
+
+    const group = lastNewPanel();
+    expect(within(group).getByLabelText("Name")).toHaveValue("");
+    expect(within(group).getByLabelText("Starting amount")).toHaveValue("");
+    expect(within(group).getByLabelText("Name")).toHaveFocus();
+    // A new bucket has nothing to remove funds from.
+    expect(within(group).queryByRole("radiogroup")).not.toBeInTheDocument();
+  });
+
+  it("[FAM-UI-05][AC-09] a new bucket can be discarded before saving, and nothing is added", async () => {
+    const user = userEvent.setup();
+    await renderBudget();
+
+    await editAndSave(user, async () => {
+      await addBucket(user, "Council grant", "1200");
+      await user.click(within(lastNewPanel()).getByRole("button", { name: "Discard new bucket" }));
+      expect(newPanels()).toHaveLength(0);
+    });
+
+    expect(within(fundsCard()).getAllByRole("listitem")).toHaveLength(3);
+    expect(historyRows()).toHaveLength(3);
+  });
+
+  it("[FAM-UI-05][AC-09] two new buckets are both added, in the order they were added, after the saved ones", async () => {
+    const user = userEvent.setup();
+    await renderBudget();
+
+    await editAndSave(user, async () => {
+      await addBucket(user, "Council grant", "1200");
+      await addBucket(user, "Family gift", "300");
+    });
+
+    const names = within(fundsCard())
+      .getAllByRole("listitem")
+      .map((card) => within(card).getByRole("progressbar").getAttribute("aria-label"));
+    expect(names).toEqual([
+      "NDIS budget, 38% used",
+      "Fixed budget, 45% used",
+      "Government budget, 92% used",
+      "Council grant budget, 0% used",
+      "Family gift budget, 0% used",
+    ]);
+    expect(historyRows().slice(0, 2)).toEqual([
+      ["30 Nov 2026", "Bucket added", "+$1,200"],
+      ["30 Nov 2026", "Bucket added", "+$300"],
+    ]);
+  });
+
+  it("[FAM-UI-05][AC-09] the note does not replace 'Bucket added'", async () => {
+    const user = userEvent.setup();
+    await renderBudget();
+
+    await editAndSave(user, async () => {
+      await addBucket(user, "Council grant", "1200");
+      await writeNote(user, "From the council");
+    });
+
+    expect(historyRows()[0]).toEqual(["30 Nov 2026", "Bucket added", "+$1,200"]);
+  });
+
+  it("[FAM-UI-05][AC-09] a new bucket's figures can then be changed on Edit budget like any other", async () => {
+    const user = userEvent.setup();
+    await renderBudget();
+    await editAndSave(user, () => addBucket(user, "Council grant", "1200"));
+
+    await editAndSave(user, () => changeFunds(user, "Council grant", "Add", "300"));
+
+    expect(within(bucketCard("Council grant")).getByText("$1,500")).toBeInTheDocument();
+    expect(historyRows()[0]).toEqual(["30 Nov 2026", "Funds added", "+$300"]);
+  });
+
+  it("[FAM-UI-05][AC-09] a client with NDIS, Fixed and Government already is offered no name suggestions", async () => {
+    const user = userEvent.setup();
+    await renderBudget();
+    await openEdit();
+
+    await user.click(within(editForm()).getByRole("button", { name: "Add bucket" }));
+
+    expect(
+      within(lastNewPanel()).queryByRole("group", { name: "Suggested names" }),
+    ).not.toBeInTheDocument();
+  });
+});
+
+describe("[FAM-UI-05] renaming a bucket (CHG-021, AC-10)", () => {
+  it("[FAM-UI-05][AC-10] 'Fixed' renamed 'Fixed support': the card keeps its place and figures, and no History row is added", async () => {
+    const user = userEvent.setup();
+    await renderBudget();
+
+    await editAndSave(user, () => rename(user, "Fixed", "Fixed support"));
+
+    const cards = within(fundsCard()).getAllByRole("listitem");
+    expect(within(cards[1]!).getByText("Fixed support")).toBeInTheDocument();
+    expect(within(cards[1]!).getByText("$2,750")).toBeInTheDocument();
+    expect(within(cards[1]!).getByText("of $5,000 · 45% used")).toBeInTheDocument();
+    expect(
+      screen.getByRole("progressbar", { name: "Fixed support budget, 45% used" }),
+    ).toBeInTheDocument();
+    expect(within(fundsCard()).queryByText("Fixed", { exact: true })).not.toBeInTheDocument();
+    expect(historyRows()).toHaveLength(3);
+    await waitFor(() => expect(status()).toHaveTextContent("Budget updated."));
+  });
+
+  it("[FAM-UI-05][AC-10] a panel keeps its saved name as its label while the name is being changed", async () => {
+    const user = userEvent.setup();
+    await renderBudget();
+    await openEdit();
+
+    await rename(user, "Fixed", "Fixed support");
+
+    expect(within(panel("Fixed")).getByLabelText("Name")).toHaveValue("Fixed support");
+  });
+
+  it("[FAM-UI-05][AC-10] a name changed only in case or by spaces around it is still a rename of the same bucket, not a duplicate", async () => {
+    const user = userEvent.setup();
+    await renderBudget();
+
+    await editAndSave(user, () => rename(user, "Fixed", "FIXED"));
+
+    expect(within(fundsCard()).getByText("FIXED")).toBeInTheDocument();
+    expect(historyRows()).toHaveLength(3);
+  });
+
+  it("[FAM-UI-05][AC-10] a rename and a funds change in one save make one row, for the funds", async () => {
+    const user = userEvent.setup();
+    await renderBudget();
+
+    await editAndSave(user, async () => {
+      await rename(user, "Fixed", "Fixed support");
+      await changeFunds(user, "Fixed", "Add", "250");
+    });
+
+    expect(within(bucketCard("Fixed support")).getByText("$3,000")).toBeInTheDocument();
+    expect(historyRows()[0]).toEqual(["30 Nov 2026", "Funds added", "+$250"]);
+    expect(historyRows()).toHaveLength(4);
+  });
+
+  it("[FAM-UI-05][AC-10] a rename keeps the bucket's pending costs", async () => {
+    mocks.getBudgetSummary.mockResolvedValue(BUCKETS_WITH_PENDING);
+    const user = userEvent.setup();
+    await renderBudget();
+
+    await editAndSave(user, () => rename(user, "Government", "Government subsidy"));
+
+    expect(
+      within(bucketCard("Government subsidy")).getByText("Pending $310 · 1 cost"),
+    ).toBeInTheDocument();
+  });
+});
+
+describe("[FAM-UI-05] removing a bucket (CHG-021, AC-11)", () => {
+  it("[FAM-UI-05][AC-11] 'Council grant', added with $1,200, can be removed: its card goes and History's first row is 'Bucket removed', '-$1,200'", async () => {
+    mocks.getBudgetSummary.mockResolvedValue(BUCKETS_WITH_PENDING);
+    mocks.getFundHistory.mockResolvedValue(HISTORY_WITH_PENDING);
+    const user = userEvent.setup();
+    await renderBudget();
+    await editAndSave(user, () => addBucket(user, "Council grant", "1200"));
+
+    await editAndSave(user, () =>
+      user.click(within(panel("Council grant")).getByRole("button", { name: "Remove bucket" })),
+    );
+
+    expect(within(fundsCard()).getAllByRole("listitem")).toHaveLength(3);
+    expect(within(fundsCard()).queryByText("Council grant")).not.toBeInTheDocument();
+    expect(historyRows().slice(0, 2)).toEqual([
+      ["30 Nov 2026", "Bucket removed", "-$1,200"],
+      ["30 Nov 2026", "Bucket added", "+$1,200"],
+    ]);
+    await waitFor(() => expect(status()).toHaveTextContent("Budget updated."));
+  });
+
+  it("[FAM-UI-05][AC-11] a bucket with money spent or pending has no 'Remove bucket', and says why in words", async () => {
+    mocks.getBudgetSummary.mockResolvedValue(BUCKETS_WITH_PENDING);
+    await renderBudget();
+    await openEdit();
+
+    for (const name of ["NDIS", "Fixed", "Government"]) {
+      expect(
+        within(panel(name)).queryByRole("button", { name: "Remove bucket" }),
+      ).not.toBeInTheDocument();
+    }
+    expect(within(panel("NDIS")).getByText(/spent from this bucket/)).toBeInTheDocument();
+    expect(within(panel("NDIS")).getByText(/can’t be removed/)).toBeInTheDocument();
+    expect(within(panel("Fixed")).getByText(/spent from this bucket/)).toBeInTheDocument();
+    // Government has both; the pending costs are the reason given.
+    expect(within(panel("Government")).getByText(/pending costs/)).toBeInTheDocument();
+    expect(
+      within(panel("Government")).queryByText(/spent from this bucket/),
+    ).not.toBeInTheDocument();
+  });
+
+  it("[FAM-UI-05][AC-11] a bucket with nothing spent but a pending cost cannot be removed either", async () => {
+    mocks.getBudgetSummary.mockResolvedValue([
+      { ...COUNCIL_GRANT, pendingTotal: 50, pendingCount: 1 },
+    ]);
+    await renderBudget();
+    await openEdit();
+
+    expect(
+      within(panel("Council grant")).queryByRole("button", { name: "Remove bucket" }),
+    ).not.toBeInTheDocument();
+    expect(within(panel("Council grant")).getByText(/pending costs/)).toBeInTheDocument();
+  });
+
+  it("[FAM-UI-05][AC-11] 'Remove bucket' marks the bucket, says so, and offers 'Keep bucket' with focus on it", async () => {
+    mocks.getBudgetSummary.mockResolvedValue([...BUCKETS, COUNCIL_GRANT]);
+    const user = userEvent.setup();
+    await renderBudget();
+    await openEdit();
+
+    await user.click(within(panel("Council grant")).getByRole("button", { name: "Remove bucket" }));
+
+    const group = panel("Council grant");
+    expect(
+      within(group).getByText("Council grant will be removed when you save."),
+    ).toBeInTheDocument();
+    expect(within(group).getByRole("button", { name: "Keep bucket" })).toHaveFocus();
+    expect(within(group).queryByRole("button", { name: "Remove bucket" })).not.toBeInTheDocument();
+  });
+
+  it("[FAM-UI-05][AC-11] 'Keep bucket' takes the mark off, and the save keeps it", async () => {
+    mocks.getBudgetSummary.mockResolvedValue([...BUCKETS, COUNCIL_GRANT]);
+    const user = userEvent.setup();
+    await renderBudget();
+
+    await editAndSave(user, async () => {
+      await user.click(
+        within(panel("Council grant")).getByRole("button", { name: "Remove bucket" }),
+      );
+      await user.click(within(panel("Council grant")).getByRole("button", { name: "Keep bucket" }));
+      expect(
+        within(panel("Council grant")).getByRole("button", { name: "Remove bucket" }),
+      ).toHaveFocus();
+    });
+
+    expect(within(bucketCard("Council grant")).getByText("$1,200")).toBeInTheDocument();
+    expect(historyRows()).toHaveLength(3);
+  });
+
+  it("[FAM-UI-05][AC-11] removing a bucket with $0 in it makes a '$0' row, not '-$0'", async () => {
+    mocks.getBudgetSummary.mockResolvedValue([
+      bucket(undefined, "Empty grant", 0, 0, "bucket-empty"),
+    ]);
+    const user = userEvent.setup();
+    await renderBudget();
+
+    await editAndSave(user, () =>
+      user.click(within(panel("Empty grant")).getByRole("button", { name: "Remove bucket" })),
+    );
+
+    expect(historyRows()[0]).toEqual(["30 Nov 2026", "Bucket removed", "$0"]);
+    expect(within(fundsCard()).getByText("No funding set up yet")).toBeInTheDocument();
+  });
+});
+
+describe("[FAM-UI-05] no buckets yet (CHG-021, AC-12)", () => {
+  it("[FAM-UI-05][AC-12] Edit budget has no bucket panels, and a new bucket is offered 'NDIS', 'Fixed' and 'Government' as names", async () => {
+    mocks.getBudgetSummary.mockResolvedValue([]);
+    const user = userEvent.setup();
+    await renderBudget();
+    await openEdit();
+
+    expect(within(editForm()).queryAllByRole("group")).toHaveLength(0);
+    await user.click(within(editForm()).getByRole("button", { name: "Add bucket" }));
+
+    const suggestions = within(lastNewPanel()).getByRole("group", { name: "Suggested names" });
+    const buttons = within(suggestions).getAllByRole("button");
+    expect(buttons.map((button) => button.textContent)).toEqual(["NDIS", "Fixed", "Government"]);
+    for (const button of buttons) expect(button).toHaveAttribute("type", "button");
+  });
+
+  it("[FAM-UI-05][AC-12] a suggestion fills the name; saved at $0, Budget shows a 'Government' card with $0 and a 'Bucket added', '$0' row", async () => {
+    mocks.getBudgetSummary.mockResolvedValue([]);
+    const user = userEvent.setup();
+    await renderBudget();
+
+    await editAndSave(user, async () => {
+      await user.click(within(editForm()).getByRole("button", { name: "Add bucket" }));
+      const group = lastNewPanel();
+      await user.click(within(group).getByRole("button", { name: "Government" }));
+      expect(within(group).getByLabelText("Name")).toHaveValue("Government");
+      await user.type(within(group).getByLabelText("Starting amount"), "0");
+    });
+
+    const cards = within(fundsCard()).getAllByRole("listitem");
+    expect(cards).toHaveLength(1);
+    expect(within(cards[0]!).getByText("Government")).toBeInTheDocument();
+    expect(within(cards[0]!).getByText("$0")).toBeInTheDocument();
+    expect(within(cards[0]!).getByText("of $0 · 0% used")).toBeInTheDocument();
+    expect(historyRows()[0]).toEqual(["30 Nov 2026", "Bucket added", "$0"]);
+  });
+
+  it("[FAM-UI-05][AC-12] a client with only an NDIS bucket is offered 'Fixed' and 'Government'; the match ignores case", async () => {
+    mocks.getBudgetSummary.mockResolvedValue([bucket(undefined, "ndis", 1000, 0, "bucket-lower")]);
+    const user = userEvent.setup();
+    await renderBudget();
+    await openEdit();
+
+    await user.click(within(editForm()).getByRole("button", { name: "Add bucket" }));
+
+    const suggestions = within(lastNewPanel()).getByRole("group", { name: "Suggested names" });
+    expect(
+      within(suggestions)
+        .getAllByRole("button")
+        .map((b) => b.textContent),
+    ).toEqual(["Fixed", "Government"]);
+  });
+});
+
+describe("[FAM-UI-05] Edit budget's own states (CHG-021)", () => {
+  it("[FAM-UI-05][PRD] reads the route's client through the contract", async () => {
+    await renderRoute(EDIT_HREF);
+
+    expect(mocks.getBudgetSummary).toHaveBeenLastCalledWith(CLIENT_ID);
+    expect(editForm()).toBeInTheDocument();
+  });
+
+  it.each([
+    ["getBudgetSummary", () => mocks.getBudgetSummary.mockRejectedValue(new Error("x"))],
+    ["getFundHistory", () => mocks.getFundHistory.mockRejectedValue(new Error("x"))],
+    ["getToday", () => mocks.getToday.mockRejectedValue(new Error("x"))],
+  ])(
+    "[FAM-UI-05][PRD] error state: Edit budget shows 'Something went wrong' with Retry, and no form, when %s rejects",
+    async (_contractFunction, rejectIt) => {
+      const log = captureErrorLog();
+      rejectIt();
+      const user = userEvent.setup();
+      await renderRoute(EDIT_HREF);
+
+      expect(screen.getByText("Something went wrong")).toBeInTheDocument();
+      expect(screen.queryByRole("form")).not.toBeInTheDocument();
+      expect(log.mock.calls[0]!.join(" ")).toContain("[family-budget]");
+
+      await user.click(screen.getByRole("button", { name: "Retry" }));
+      expect(mocks.refresh).toHaveBeenCalledTimes(1);
+    },
+  );
+
+  it("[FAM-UI-05][PRD] loading state: a labelled status, with no heading, data or controls", () => {
+    render(<EditLoading />);
+
+    expect(screen.getAllByRole("status", { name: "Loading" }).length).toBeGreaterThan(0);
+    expect(screen.queryByRole("heading")).not.toBeInTheDocument();
+    expect(screen.queryByText(/\$/)).not.toBeInTheDocument();
+    expect(screen.queryByRole("button")).not.toBeInTheDocument();
   });
 });
 
@@ -824,24 +1524,22 @@ describe("[FAM-UI-05] states (States sheet, OQ-24 defaults, FD-07)", () => {
     expect(within(card).queryByRole("columnheader")).not.toBeInTheDocument();
   });
 
-  it("[FAM-UI-05][AC-03] the bucket cards and 'Update' are still there when History is empty", async () => {
+  it("[FAM-UI-05][AC-03] the bucket cards and 'Edit' are still there when History is empty", async () => {
     mocks.getFundHistory.mockResolvedValue([]);
     await renderBudget();
 
     expect(within(fundsCard()).getAllByRole("listitem")).toHaveLength(3);
-    expect(within(fundsCard()).getByRole("button", { name: "Update" })).toBeInTheDocument();
+    expect(editLink()).toHaveAttribute("href", EDIT_HREF);
   });
 
-  it("[FAM-UI-05][PRD] with no buckets, 'Funds by source' shows an empty state and keeps 'Update'; History is unaffected", async () => {
+  it("[FAM-UI-05][AC-12] with no buckets, 'Funds by source' says there is no funding yet and to choose 'Edit' to add a bucket; 'Edit' is there and History is unaffected", async () => {
     mocks.getBudgetSummary.mockResolvedValue([]);
     await renderBudget();
 
     expect(within(fundsCard()).getByText("No funding set up yet")).toBeInTheDocument();
-    expect(
-      within(fundsCard()).getByText("Funding buckets will appear here once they are set up."),
-    ).toBeInTheDocument();
+    expect(within(fundsCard()).getByText("Choose ‘Edit’ to add a bucket.")).toBeInTheDocument();
     expect(within(fundsCard()).queryByRole("listitem")).not.toBeInTheDocument();
-    expect(within(fundsCard()).getByRole("button", { name: "Update" })).toBeInTheDocument();
+    expect(editLink()).toHaveAttribute("href", EDIT_HREF);
     expect(historyRows()).toHaveLength(3);
   });
 
@@ -867,9 +1565,9 @@ describe("[FAM-UI-05] states (States sheet, OQ-24 defaults, FD-07)", () => {
       await renderBudget();
 
       expect(screen.getByText("Something went wrong")).toBeInTheDocument();
-      // Nothing half-loaded is left on screen beside the error, and no 'Update' to press.
+      // Nothing half-loaded is left on screen beside the error, and no 'Edit' to press.
       expect(screen.queryByRole("region")).not.toBeInTheDocument();
-      expect(screen.queryByRole("button", { name: "Update" })).not.toBeInTheDocument();
+      expect(screen.queryByRole("link", { name: "Edit" })).not.toBeInTheDocument();
 
       await user.click(screen.getByRole("button", { name: "Retry" }));
       expect(mocks.refresh).toHaveBeenCalledTimes(1);
@@ -1001,6 +1699,19 @@ describe("[FAM-UI-05] long and unusual content stays inside its card (no overlap
     expect(log).not.toHaveBeenCalled();
   });
 
+  it("[FAM-UI-05][PRD] cards are keyed by bucket id (CHG-021): when two buckets swap places, each card keeps its element", async () => {
+    await renderBudget();
+    const ndis = bucketCard("NDIS");
+    const fixed = bucketCard("Fixed");
+
+    mocks.getBudgetSummary.mockResolvedValue([BUCKETS[1]!, BUCKETS[0]!, BUCKETS[2]!]);
+    await goTo(BUDGET_HREF);
+
+    const cards = within(fundsCard()).getAllByRole("listitem");
+    expect(cards[0]).toBe(fixed);
+    expect(cards[1]).toBe(ndis);
+  });
+
   it("[FAM-UI-05][PRD] an overspent bucket is written out as 'over budget', not only as a bar at 100%", async () => {
     mocks.getBudgetSummary.mockResolvedValue([bucket("government", "Government", 3000, 3360)]);
     await renderBudget();
@@ -1012,15 +1723,44 @@ describe("[FAM-UI-05] long and unusual content stays inside its card (no overlap
 });
 
 describe("[FAM-UI-05] accessibility", () => {
-  it("[FAM-UI-05][PRD] the screen, with the Update form closed, open, and showing errors, has no axe violations", async () => {
+  it("[FAM-UI-05][PRD] Budget, and Budget after a save, have no axe violations", async () => {
     const user = userEvent.setup();
     const { container } = await renderBudget();
     expect(await axe(container)).toHaveNoViolations();
 
-    await openUpdateForm(user);
+    await editAndSave(user, () => changeFunds(user, "NDIS", "Add", "500"));
+    await waitFor(() => expect(status()).toHaveTextContent("Budget updated."));
+    expect(await axe(container)).toHaveNoViolations();
+  });
+
+  it("[FAM-UI-05][PRD] Edit budget as it opens, showing errors, with a bucket added and with one marked for removal has no axe violations", async () => {
+    mocks.getBudgetSummary.mockResolvedValue([...BUCKETS, COUNCIL_GRANT]);
+    const user = userEvent.setup();
+    const { container } = await renderBudget();
+    await openEdit();
     expect(await axe(container)).toHaveNoViolations();
 
-    await saveUpdateForm(user);
+    await changeFunds(user, "NDIS", "Add", "abc");
+    await rename(user, "Fixed", "");
+    await save(user);
+    expect(await axe(container)).toHaveNoViolations();
+
+    await addBucket(user, "", "");
+    expect(await axe(container)).toHaveNoViolations();
+    await save(user);
+    expect(await axe(container)).toHaveNoViolations();
+
+    await user.click(within(panel("Council grant")).getByRole("button", { name: "Remove bucket" }));
+    expect(await axe(container)).toHaveNoViolations();
+  });
+
+  it("[FAM-UI-05][PRD] Edit budget with no buckets and the name suggestions showing has no axe violations", async () => {
+    mocks.getBudgetSummary.mockResolvedValue([]);
+    const user = userEvent.setup();
+    const { container } = await renderBudget();
+    await openEdit();
+    await user.click(within(editForm()).getByRole("button", { name: "Add bucket" }));
+
     expect(await axe(container)).toHaveNoViolations();
   });
 
@@ -1047,5 +1787,14 @@ describe("[FAM-UI-05] accessibility", () => {
     mocks.getFundHistory.mockRejectedValue(new Error("x"));
     const error = await renderBudget();
     expect(await axe(error.container)).toHaveNoViolations();
+    error.unmount();
+
+    // Edit budget's own loading and error states (CHG-021).
+    const editLoading = render(<EditLoading />);
+    expect(await axe(editLoading.container)).toHaveNoViolations();
+    editLoading.unmount();
+
+    const editError = await renderRoute(EDIT_HREF);
+    expect(await axe(editError.container)).toHaveNoViolations();
   });
 });

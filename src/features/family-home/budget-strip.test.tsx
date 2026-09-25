@@ -107,6 +107,18 @@ describe("[FAM-UI-01][PRD] Budget strip bucket counts", () => {
     expect(errors).not.toHaveBeenCalled();
   });
 
+  it("[FAM-UI-01][PRD] tiles are keyed by bucket id (CHG-021): when two buckets swap places, each tile keeps its element", () => {
+    const [ndis, fixed, government] = DESIGN_BUCKETS;
+    const { rerender, budget } = renderStrip([ndis!, fixed!, government!]);
+    const [ndisTile, fixedTile] = within(budget).getAllByRole("listitem");
+
+    rerender(<BudgetStrip clientId={CLIENT_ID} buckets={[fixed!, ndis!, government!]} />);
+
+    const tiles = within(budget).getAllByRole("listitem");
+    expect(tiles[0]).toBe(fixedTile);
+    expect(tiles[1]).toBe(ndisTile);
+  });
+
   it("[FAM-UI-01][PRD] a 60-character bucket name wraps or clamps, with the full name on hover, and never widens the card", () => {
     expect(LONG_LABEL).toHaveLength(60);
     const { budget } = renderStrip([

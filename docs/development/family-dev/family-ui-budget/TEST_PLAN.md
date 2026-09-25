@@ -13,21 +13,21 @@ Tests are written **before** production code (TESTING.md §2). Run them, confirm
 | T-01 | AC-01 | component | Given fixtures, when Budget renders, then NDIS '$14,880', Fixed '$2,750' and Government '$240' cards are shown. | ☑ | FAIL (red, expected) |
 | T-02 | AC-02 | component | Given fixtures, when History renders, then the first row is '3 Nov 2026', 'NDIS quarterly plan top-up', '+$6,000'. | ☑ | FAIL (red, expected) |
 | T-03 | AC-03 | component | Given no fund entries, when History renders, then an empty state is shown. | ☑ | FAIL (red, expected) |
-| T-04 | AC-04 | component | 'Edit' opens Edit budget; NDIS +500, no note, Save → Budget NDIS '$15,380', first History row reference day, 'Funds added', '+$500', "Budget updated." (CHG-020, CHG-021) | ☐ | — |
-| T-05 | AC-05 | component | Remove 40 from Government → '$200', 'Funds removed', '-$40'; remove 300 → 'Only $240 available', page stays, nothing changes (CHG-020, CHG-021) | ☐ | — |
-| T-06 | AC-06 | unit + component | Edit budget schema and page: bad amounts, empty / too long / duplicate names, a new bucket with no starting amount are refused, a message per field, focus on the first; Cancel and Escape change nothing (CHG-020, CHG-021) | ☐ | — |
+| T-04 | AC-04 | component | 'Edit' opens Edit budget; NDIS +500, no note, Save → Budget NDIS '$15,380', first History row reference day, 'Funds added', '+$500', "Budget updated." (CHG-020, CHG-021) | ☑ | FAIL (red, expected) |
+| T-05 | AC-05 | component | Remove 40 from Government → '$200', 'Funds removed', '-$40'; remove 300 → 'Only $240 available', page stays, nothing changes (CHG-020, CHG-021) | ☑ | FAIL (red, expected) |
+| T-06 | AC-06 | unit + component | Edit budget schema and page: bad amounts, empty / too long / duplicate names, a new bucket with no starting amount are refused, a message per field, focus on the first; Cancel and Escape change nothing (CHG-020, CHG-021) | ☑ | FAIL (red, expected) |
 | T-07 | AC-07 | component | Government card reads 'Pending $310 · 1 cost' in words (CHG-020) | ☑ | FAIL (red, expected) |
 | T-08 | AC-08 | component | History lists the pending cost with '-$310' and a 'Pending' text label (CHG-020) | ☑ | FAIL (red, expected) |
-| T-09 | AC-09 | component | 'Add bucket' 'Council grant' 1200 → fourth card '$1,200', first row 'Bucket added', '+$1,200' (CHG-021) | ☐ | — |
-| T-10 | AC-10 | component | Rename 'Fixed' to 'Fixed support' → same figures, no new History row (CHG-021) | ☐ | — |
-| T-11 | AC-11 | component | Remove the added 'Council grant' → card gone, 'Bucket removed', '-$1,200'; NDIS and Government have no 'Remove bucket' and say why (CHG-021) | ☐ | — |
-| T-12 | AC-12 | component | No buckets → empty Funds card pointing to 'Edit'; Edit budget suggests 'NDIS', 'Fixed', 'Government' (CHG-021) | ☐ | — |
+| T-09 | AC-09 | component | 'Add bucket' 'Council grant' 1200 → fourth card '$1,200', first row 'Bucket added', '+$1,200' (CHG-021) | ☑ | FAIL (red, expected) |
+| T-10 | AC-10 | component | Rename 'Fixed' to 'Fixed support' → same figures, no new History row (CHG-021) | ☑ | FAIL (red, expected) |
+| T-11 | AC-11 | component | Remove the added 'Council grant' → card gone, 'Bucket removed', '-$1,200'; NDIS and Government have no 'Remove bucket' and say why (CHG-021) | ☑ | FAIL (red, expected) |
+| T-12 | AC-12 | component | No buckets → empty Funds card pointing to 'Edit'; Edit budget suggests 'NDIS', 'Fixed', 'Government' (CHG-021) | ☑ | FAIL (red, expected) |
 
 **CHG-021 (2026-09-25):** T-04 to T-06 are rewritten for the Edit budget page and T-09 to T-12 added; they are written and run red before the page is built. The paragraph below describes the CHG-020 inline-form tests, which those replace.
 
 T-04 to T-06 (CHG-020, superseded by CHG-021) were the `[FAM-UI-05][AC-04]`, `[AC-05]` and `[AC-06]` tests in the "'Update' opens the simple form" group of `family-budget.test.tsx` (the form's fields, save, the status message and focus, local state only, the balance limit following the screen, removing the whole balance, each refused amount and no bucket, focus on the first field to fix, Cancel, keyboard, adding funds does not pay pending costs), and `src/features/family-budget/fund-update.test.ts` (unit: `validateFundUpdate` accepted and refused amounts with their messages, the bucket, the balance limit with cents and for an empty or overspent bucket, the note trimmed; `applyFundUpdate` totals, percent and state, the new row, cents arithmetic, pending figures kept, same-kind buckets, no mutation). T-07 and T-08 are the "pending costs" group of `family-budget.test.tsx`, plus the pending tests in `queries.test.ts`, `mocks/queries/budget.test.ts` and `budget-data.test.ts`.
 
-T-01 is `[FAM-UI-05][AC-01]` in `family-budget.test.tsx` (cards, order, totals, percent used, progress bars, Government's warning in words). T-02 is `[FAM-UI-05][AC-02]` in `family-budget.test.tsx` (columns, first row, all three rows) with the contract and fixture tests below. T-03 is `[FAM-UI-05][AC-03]` in `family-budget.test.tsx` (empty History shows the empty state and no table; cards and 'Update' stay).
+T-01 is `[FAM-UI-05][AC-01]` in `family-budget.test.tsx` (cards, order, totals, percent used, progress bars, Government's warning in words). T-02 is `[FAM-UI-05][AC-02]` in `family-budget.test.tsx` (columns, first row, all three rows) with the contract and fixture tests below. T-03 is `[FAM-UI-05][AC-03]` in `family-budget.test.tsx` (empty History shows the empty state and no table; cards and 'Edit' stay, since CHG-021).
 
 ### Tests added beyond T-01..T-03 (PRD scope, edge cases, contracts)
 All titles start `[FAM-UI-05]`, were written first, and are red now (see Results).
@@ -83,6 +83,19 @@ The failing tests fail for the right reason: the code they test does not exist y
 | `fund-update.test.ts` | fails at import | `./fund-update` does not exist. |
 
 The new tests that already pass are guards that the implementation must keep green: the live region starts empty (kept from FD-06), a bucket without pending costs has no pending line, the pending row keeps three cells and its "Recorded by" line, axe with pending data, the loader passes pending fields through, a pending cost does not lower Government's $240, and "a pending entry is always an expense" (true for now only because no pending entries exist). No test was skipped, marked `.only`, or deleted to get here. Changed test expectations: DECISIONS.md FD-11.
+
+### Red run for CHG-021, before its implementation (2026-09-25)
+`npx vitest run src/features/family-budget src/features/family-home src/server/budget src/mocks/queries/budget.test.ts`: 5 of 15 files fail, **9 tests fail and 183 pass** in the files that load. `family-budget.test.tsx` fails at import (`budget/layout`, `budget/edit/page` and `budget/edit/loading` do not exist yet), and so does `budget-edit.test.ts` (`./budget-edit` does not exist yet), so their tests do not run. To check each test fails for the right reason, those four modules were stubbed for one run and the stubs deleted before the commit (never committed): a layout that renders its children, an Edit page and loading that render a placeholder, and `budget-edit` functions that throw. With the stubs, **151 fail and 229 pass**, across 380 tests.
+
+| File | Failed / total (stubbed run) | Red because |
+|---|---|---|
+| `family-budget.test.tsx` | 73 / 119 | There is no 'Edit' link on Budget (66 tests stop at it). The rest fail because Budget has no "Choose ‘Edit’ to add a bucket." line, the Edit page has no error state, loading status or contract read, and the cards are keyed by index, so a swap re-creates them. The 46 that pass are the unchanged AC-01 to AC-03, pending, History, states and long-content tests, now rendered through the layout harness. |
+| `budget-edit.test.ts` | 69 / 69 | `editValuesFor`, `nameSuggestions`, `validateBudgetEdit` and `applyBudgetEdit` are not built. |
+| `src/features/family-home/budget-strip.test.tsx` | 1 / 15 | Home's tiles are keyed by index, kind and label, so swapping two buckets re-creates both tiles. |
+| `src/server/budget/queries.test.ts` | 5 / 19 | Buckets have no `id` and fund entries have no `bucketId`. |
+| `src/mocks/queries/budget.test.ts` | 3 / 10 | The fixture buckets have no `id` and the entries have no `bucketId`. |
+
+No test was skipped, marked `.only`, or deleted to get green. `fund-update.test.ts` was deleted because CHG-021 replaces the module it tests; `budget-edit.test.ts` carries its amount and balance-limit cases forward. The changed test expectations are listed in DECISIONS.md FD-12. `tsc` is not clean on this commit: the tests use the CHG-021 types (`id`, optional `kind`, `bucketId`) before the types exist. That is part of the red state and is fixed in the build.
 
 ### After implementation (2026-09-25)
 **CI is down (GitHub Actions limits), so every check below ran locally.** No test was changed, skipped, marked `.only` or deleted: the 92 tests are the ones written first (FD-05 amendment aside, above).
