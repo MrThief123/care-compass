@@ -1,26 +1,21 @@
 # Progress — F0-11 Care events, occurrence overrides and append-only completions
 
-Status: NOT STARTED
-Owner: unclaimed
+Status: IN PROGRESS
+Owner: Dhruv Verma
 Lane: B — Backend
 Sprint: SPRINT · planned D5–D6
-Branch: `feature/shared-care-events-schema` (not yet created)
+Branch: `feature/shared-care-events-schema` (created from `origin/main`)
 PR target: `main (per OQ-01 — shared work)`
-Last updated: 2026-09-17 (planning pack generated)
+Last updated: 2026-09-25
 
 ## Blockers
-- OQ-01 — Branch parent and naming for shared (foundation and cross-cutting) work
-- OQ-10 — Status behaviour and undo
-- OQ-22 — Event fields
-- OQ-29 — Which nurse is shown on an event
-- OQ-09 — Carer access model
-- OQ-33 — Carer calendar and task semantics
+- None. OQ-01, OQ-10, OQ-22, OQ-29, OQ-09 and OQ-33 are ANSWERED in DECISIONS.md; OQ-34 is non-blocking and parked.
 
 ## Dependencies status
-- F0-06 — NOT STARTED
-- F0-09 — NOT STARTED
-- F0-10 — NOT STARTED
-- F0-08 — NOT STARTED
+- F0-06 — MERGED TO DEV
+- F0-09 — MERGED TO DEV
+- F0-10 — MERGED TO DEV
+- F0-08 — MERGED TO DEV
 
 ## Completed
 - Feature documentation drafted (Claude Chat planning pack)
