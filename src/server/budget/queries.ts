@@ -9,8 +9,9 @@ import { getDataSourceMode, notImplementedForSupabase } from "@/server/data-sour
 import type { BudgetBucketSummary, FundEntry } from "@/types/domain";
 
 /**
- * The client's buckets, each with its pending costs (CHG-020, PD-058):
- * `pendingTotal` and `pendingCount`, not taken off `used` or `remaining`.
+ * The client's buckets, each with a stable `id` (CHG-021) and its pending
+ * costs (CHG-020, PD-058): `pendingTotal` and `pendingCount`, not taken off
+ * `used` or `remaining`. `kind` is set only on the suggested buckets.
  */
 export async function getBudgetSummary(clientId: string): Promise<BudgetBucketSummary[]> {
   const mode = getDataSourceMode();
@@ -22,7 +23,8 @@ export async function getBudgetSummary(clientId: string): Promise<BudgetBucketSu
 
 /**
  * The client's fund entries (top-ups and expenses), newest first; `[]` for
- * none. Pending costs (`pending: true`, CHG-020) are among them by date.
+ * none. Each names its bucket by `bucketId` (CHG-021). Pending costs
+ * (`pending: true`, CHG-020) are among them by date.
  */
 export async function getFundHistory(clientId: string): Promise<FundEntry[]> {
   const mode = getDataSourceMode();

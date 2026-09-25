@@ -207,6 +207,20 @@ Record feature-level decisions here using the template below. Project-wide decis
     - `RAW_BUDGET_BUCKETS_BY_CLIENT_ID` entries gain `id`.
     - The mock counts pending costs by `bucketId`.
   - **Lane S test file (CLAUDE.md §4.2), answered by the human on 2026-09-25: option 1.** `src/components/shared/cards/budget-bucket-card.test.tsx` builds `BudgetBucketSummary` literals without an `id`. `id` becomes required, and that file's literals gain an `id` on this branch, recorded under CHG-021 (the CHG-019 route). Only `id` is added: no assertion changes, and `budget-bucket-card.tsx` is not edited. Flag it in the PR.
+- **Built (2026-09-25), exact fields.** The proposed fields were built as proposed, with nothing added:
+  - `src/types/domain.ts` `BudgetBucketSummarySchema`: `id: z.string()` (required); `kind: BudgetBucketKindSchema.optional()`, set only on a bucket that matches one of the three suggested names.
+  - `src/types/domain.ts` `FundEntrySchema`: `bucketId: z.string()` (required); `bucketKind: BudgetBucketKindSchema.optional()`.
+  - `src/mocks/fixtures.ts`: `RAW_BUDGET_BUCKETS_BY_CLIENT_ID` entries gain `id`, `bucket-<client>-<kind>` (for example `bucket-margaret-ndis`); every `FUND_ENTRIES` row gains the matching `bucketId`.
+  - `src/mocks/queries/budget.ts` `getBudgetSummary` counts pending costs by `bucketId`, not by kind. `src/server/budget/queries.ts` changes in its doc comments only.
+  - Ids made on the Edit budget page (`budget-edit.ts`): a new bucket is `bucket-new-<save>-<n>`, a new History row is `fund-edit-<save>-<n>`, where `<save>` counts the saves in the holder and `<n>` counts from 1 within one save.
+  - Family · Home's strip (`budget-strip.tsx`) keys its tiles by `id`.
+- **Test and showcase files given ids only (human approval, 2026-09-25).** `id: string` becoming required broke `BudgetBucketSummary` and `FundEntry` literals in six files outside this feature's tests. Each gains `id` (and `bucketId` where it builds a `FundEntry`) and nothing else: no assertion changed. All six flagged in the PR.
+  - `src/components/shared/cards/budget-bucket-card.test.tsx` (Lane S, see above).
+  - `src/components/shared/lists-cards-kit.axe.test.tsx` (Lane S): `id: "bucket-government"`.
+  - `src/app/page.tsx` (component showcase): `id: "bucket-ndis"`.
+  - `src/features/family-budget/budget-data.test.ts`: `id` and `bucketId` `"bucket-margaret-ndis"`.
+  - `src/features/family-home/family-home.test.tsx`: `bucket-margaret-ndis`, `-fixed`, `-government`.
+  - `src/features/family-home/home-data.test.ts`: `bucket()` gives `id: bucket-margaret-<kind>`, and its `kind` parameter is typed `BudgetBucketKind`, since `kind` is now optional on the summary and `label: kind` needs a string.
 
 <!-- Template
 ### FD-01 — <title>

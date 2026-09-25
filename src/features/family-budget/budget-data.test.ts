@@ -25,6 +25,7 @@ vi.mock("@/server/clients/queries", () => ({
 const CLIENT_ID = "client-margaret";
 
 const BUCKET: BudgetBucketSummary = {
+  id: "bucket-margaret-ndis",
   kind: "ndis",
   label: "NDIS",
   total: 24000,
@@ -37,6 +38,7 @@ const BUCKET: BudgetBucketSummary = {
 const ENTRY: FundEntry = {
   id: "fund-1",
   clientId: CLIENT_ID,
+  bucketId: "bucket-margaret-ndis",
   bucketKind: "ndis",
   type: "topup",
   amount: 6000,

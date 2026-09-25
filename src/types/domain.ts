@@ -212,9 +212,13 @@ export type BudgetBucketState = z.infer<typeof BudgetBucketStateSchema>;
  * plus the bucket's pending costs (CHG-020, PD-058): costs of completed care it
  * could not cover, not yet taken off `used` or `remaining`. Optional, so a
  * source without them reads as none.
+ *
+ * Buckets are open (CHG-021, PD-059): each has a stable `id`, and `kind` is only
+ * set on a bucket that matches one of the three suggested names.
  */
 export const BudgetBucketSummarySchema = z.object({
-  kind: BudgetBucketKindSchema,
+  id: z.string(),
+  kind: BudgetBucketKindSchema.optional(),
   label: z.string(),
   total: z.number().nonnegative(),
   used: z.number().nonnegative(),
@@ -235,7 +239,9 @@ export type FundEntryType = z.infer<typeof FundEntryTypeSchema>;
 export const FundEntrySchema = z.object({
   id: z.string(),
   clientId: z.string(),
-  bucketKind: BudgetBucketKindSchema,
+  /** The bucket this entry belongs to (CHG-021). */
+  bucketId: z.string(),
+  bucketKind: BudgetBucketKindSchema.optional(),
   type: FundEntryTypeSchema,
   amount: z.number(),
   /** ISO date. */

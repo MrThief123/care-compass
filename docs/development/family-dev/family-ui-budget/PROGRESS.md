@@ -32,11 +32,13 @@ Last updated: 2026-09-25
 - CHG-021 recorded (PD-059, FD-12) after the human reviewed the inline form.
 - CHG-021 tests written first and run red for the right reasons (TEST_PLAN.md Results, "Red run for CHG-021"): T-04 to T-06 rewritten, T-09 to T-12 new, `budget-edit.test.ts` replacing `fund-update.test.ts`, plus bucket-id and `bucketId` tests for Home, the contract and the fixtures. Commit `test(family): …`.
 
+- CHG-021 built (`feat(family)` commit): the Edit budget page, the open bucket model (`id`, optional `kind`, `bucketId`), the budget route's local holder, Home keyed by id, and ids added to six test/showcase literals (FD-12). 808 of 808 tests pass across family-budget, family-home, server, mocks and shared components; `tsc --noEmit` clean (after `next typegen`); eslint 0 errors on the touched folders; prettier clean.
+
 ## In progress
-- CHG-021: tests red (`08f032a`); the build (step 2) is next, in a new session.
+- CHG-021: build committed; the full local checks and the browser sweep are next, after the human's go-ahead.
 
 ## Remaining
-- CHG-021: the Edit budget page, the open bucket model (`id`, optional `kind`, `bucketId`) and the budget route's local holder; then full local checks (`next build`, e2e) and a real-browser width sweep, 1920 to 768, of Budget, Edit budget and Home.
+- CHG-021: full local checks (full unit run, `next build`, e2e) and a real-browser width sweep, 1920 to 768, of Budget, Edit budget and Home.
 - Then the human's "yes", and open the PR to `family-dev` (the docs update ships in it).
 
 ## Acceptance criteria status

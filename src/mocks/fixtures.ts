@@ -602,6 +602,8 @@ export function deriveBudgetBucketState(percentUsed: number): BudgetBucketState 
 }
 
 interface RawBudgetBucket {
+  /** `bucket-<client>-<kind>` (CHG-021): stable, so fund entries can point at it. */
+  id: string;
   kind: BudgetBucketKind;
   label: string;
   total: number;
@@ -625,14 +627,44 @@ const BUDGET_LABELS: Record<BudgetBucketKind, string> = {
  */
 export const RAW_BUDGET_BUCKETS_BY_CLIENT_ID: Record<string, RawBudgetBucket[]> = {
   [MARGARET_CLIENT_ID]: [
-    { kind: "ndis", label: BUDGET_LABELS.ndis, total: 24000, used: 9120 },
-    { kind: "fixed", label: BUDGET_LABELS.fixed, total: 5000, used: 2250 },
-    { kind: "government", label: BUDGET_LABELS.government, total: 3000, used: 2760 },
+    {
+      id: "bucket-margaret-ndis",
+      kind: "ndis",
+      label: BUDGET_LABELS.ndis,
+      total: 24000,
+      used: 9120,
+    },
+    {
+      id: "bucket-margaret-fixed",
+      kind: "fixed",
+      label: BUDGET_LABELS.fixed,
+      total: 5000,
+      used: 2250,
+    },
+    {
+      id: "bucket-margaret-government",
+      kind: "government",
+      label: BUDGET_LABELS.government,
+      total: 3000,
+      used: 2760,
+    },
   ],
   "client-robert": [
-    { kind: "ndis", label: BUDGET_LABELS.ndis, total: 18000, used: 4000 },
-    { kind: "fixed", label: BUDGET_LABELS.fixed, total: 4000, used: 1200 },
-    { kind: "government", label: BUDGET_LABELS.government, total: 2500, used: 500 },
+    { id: "bucket-robert-ndis", kind: "ndis", label: BUDGET_LABELS.ndis, total: 18000, used: 4000 },
+    {
+      id: "bucket-robert-fixed",
+      kind: "fixed",
+      label: BUDGET_LABELS.fixed,
+      total: 4000,
+      used: 1200,
+    },
+    {
+      id: "bucket-robert-government",
+      kind: "government",
+      label: BUDGET_LABELS.government,
+      total: 2500,
+      used: 500,
+    },
   ],
 };
 
@@ -640,6 +672,7 @@ export function deriveBudgetBucketSummary(raw: RawBudgetBucket): BudgetBucketSum
   const remaining = raw.total - raw.used;
   const percentUsed = raw.total === 0 ? 0 : Math.round((raw.used / raw.total) * 100);
   return {
+    id: raw.id,
     kind: raw.kind,
     label: raw.label,
     total: raw.total,
@@ -654,6 +687,7 @@ export const FUND_ENTRIES: FundEntry[] = [
   {
     id: "fund-margaret-1",
     clientId: MARGARET_CLIENT_ID,
+    bucketId: "bucket-margaret-ndis",
     bucketKind: "ndis",
     type: "topup",
     amount: 6000,
@@ -664,6 +698,7 @@ export const FUND_ENTRIES: FundEntry[] = [
   {
     id: "fund-margaret-2",
     clientId: MARGARET_CLIENT_ID,
+    bucketId: "bucket-margaret-fixed",
     bucketKind: "fixed",
     type: "topup",
     amount: 1000,
@@ -674,6 +709,7 @@ export const FUND_ENTRIES: FundEntry[] = [
   {
     id: "fund-margaret-3",
     clientId: MARGARET_CLIENT_ID,
+    bucketId: "bucket-margaret-government",
     bucketKind: "government",
     type: "topup",
     amount: 750,
@@ -686,6 +722,7 @@ export const FUND_ENTRIES: FundEntry[] = [
   {
     id: "fund-margaret-4",
     clientId: MARGARET_CLIENT_ID,
+    bucketId: "bucket-margaret-government",
     bucketKind: "government",
     type: "expense",
     amount: -310,
@@ -697,6 +734,7 @@ export const FUND_ENTRIES: FundEntry[] = [
   {
     id: "fund-robert-1",
     clientId: ROBERT_CLIENT_ID,
+    bucketId: "bucket-robert-ndis",
     bucketKind: "ndis",
     type: "topup",
     amount: 4500,
