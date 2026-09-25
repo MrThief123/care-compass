@@ -763,6 +763,24 @@ Docs updated: DECISIONS.md
 - Human confirmation: Dhruv Verma, 2026-09-25 (in-session).
 - Docs updated: DECISIONS.md (PD-060, this entry); PRD.md (REQ-29, REQ-37); DEVELOPMENT_PLAN.md (totals, CHG-022 notes on FAM-UI-05, F0-12, FAM-10, FAM-11); FAM-UI-05 PRD.md, ACCEPTANCE_CRITERIA.md, PROGRESS.md, SESSION_STATE.md.
 
+### CHG-023 — Contact details contract and fixtures for Family · Settings
+- Date / requested by: 2026-09-25 / Dhruv Verma (human, project lead)
+- Type: scope change (contract and fixtures)
+- Description: adds the `getFamilyContactDetails(profileId)` contract in `src/server/profiles/queries.ts` (mock data source; Supabase mode throws the not-implemented error until FAM-12), backed by `src/mocks/queries/profiles.ts`. `ProfileSchema` gains an optional `address`. The `profile-helen` fixture gains phone '0412 345 678', contact email 'helen@example.com' and address '12 Wattle St, Preston VIC 3072'. The Family info card shows the full name 'Helen Doyle' (PD-038).
+- Source / justification: the Settings design needs the signed-in family member's contact details, and no contract returned them. Decided in-session with the human while building FAM-UI-06.
+- Impact: FAM-UI-06 AC-01 and T-12; FAM-12 implements the contract for Supabase. Recorded at the time in FAM-UI-06 DECISIONS.md only; this entry mirrors it (docs sync, 2026-09-25).
+- Human confirmation: Dhruv Verma, 2026-09-25 (in-session).
+- Docs updated: FAM-UI-06 PRD.md, ACCEPTANCE_CRITERIA.md, TEST_PLAN.md, DECISIONS.md, PROGRESS.md; DECISIONS.md (this entry).
+
+### CHG-024 — Family · Settings: Family info is read-only until 'Edit', with 'Cancel'
+- Date / requested by: 2026-09-25 / Dhruv Verma (human, project lead)
+- Type: new requirement (UI behaviour)
+- Description: the Family info inputs start read-only with an 'Edit' button. 'Edit' unlocks them and the button becomes 'Save', with 'Cancel' beside it. A valid Save locks the inputs again; 'Cancel' restores the last saved values, clears errors and locks the inputs. The card is built locally in `src/features/family-settings/` because the kit card has no Cancel slot (FAM-UI-06 FD-10); `src/components/shared/**` is unchanged.
+- Source / justification: human request in-session, so Family info cannot be changed by accident.
+- Impact: FAM-UI-06 new AC-10 and AC-11, T-13 and T-14; T-06, T-07 and T-11 click 'Edit' first (no assertion removed; FD-09). FAM-12 keeps this flow when it wires saving. Recorded at the time in FAM-UI-06 DECISIONS.md only; this entry mirrors it (docs sync, 2026-09-25).
+- Human confirmation: Dhruv Verma, 2026-09-25 (in-session).
+- Docs updated: FAM-UI-06 ACCEPTANCE_CRITERIA.md, TEST_PLAN.md, DECISIONS.md (FD-09, FD-10), PROGRESS.md, SESSION_STATE.md; DECISIONS.md (this entry).
+
 Template for future entries:
 ```
 ### CHG-xxx — <title>
