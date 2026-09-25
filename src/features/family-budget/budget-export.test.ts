@@ -146,7 +146,10 @@ describe("[FAM-UI-05][AC-17] budgetHistoryCsv (CHG-022)", () => {
     expect(lineOf({ description: "Smith, Jo" })).toContain(',"Smith, Jo",');
     expect(lineOf({ description: 'The "big" shop' })).toContain(',"The ""big"" shop",');
     expect(lineOf({ note: "Line one\nLine two" })).toContain(',"Line one\nLine two"');
-    expect(lineOf({ note: "Line one\r\nLine two" })).toContain(',"Line one\r\nLine two"');
+    // A quoted CRLF is part of the field, so this line cannot be read back by splitting on CRLF.
+    expect(budgetHistoryCsv([row({ note: "Line one\r\nLine two" })], BUCKETS)).toContain(
+      ',"Line one\r\nLine two"\r\n',
+    );
   });
 
   it.each([
