@@ -211,6 +211,16 @@ New test files (not changes): `home-format.test.ts`, `today-layout.test.ts`, `to
 - Human confirmation required: no (requested by the human, 2026-09-20).
 - Test changes caused: none.
 
+### FD-23 — The loading skeleton stacks below 768px (2026-09-25, fix/family-home-narrow-overflow)
+- Date: 2026-09-25
+- Context: `tests/e2e/shared-app-shell.spec.ts` "[F0-15][PRD] keeps header text inside the header bar, without overlap, at 338px/480px wide" failed every run on `family-dev` (page 172px wider than the viewport at 338px) and passed on `main`, where Home is a placeholder. The test measures on page load, when the route's `loading.tsx` (`HomeSkeleton`) can still be on screen. The skeleton's right column was a fixed `w-[340px] shrink-0` beside Today at every width (right edge at 510px in a 338px window). The loaded view was already fine (FD-18).
+- Decision: `home-skeleton.tsx` stacks its two columns below `md` (768px) and keeps the 340px column side by side from 768px up, so nothing changes at 768px and above. `md`, not the view's `xl`, because the brief was no layout change at 768px and above.
+- Alternatives considered: stack at `xl` to match the loaded view (FD-18). It would also change the skeleton at 768 to 1279px, which the brief kept unchanged.
+- Consequences: from 768 to 1279px the skeleton still shows two columns while the loaded view stacks. That's a small jump when content arrives, the same as before this fix.
+- Verified: the shell spec 15/15 over 3 repeats; skeleton captured by delaying the Home RSC fetch on a client navigation, and loaded page, swept 1920 to 338 (14 widths): page scroll 0, no overlapping cards. Skeleton column boxes at 768px and up are the same as before (two columns, right one 340px).
+- Human confirmation required: no (requested by the human, 2026-09-25).
+- Test changes caused: none.
+
 <!-- Template
 ### FD-01 — <title>
 - Date:

@@ -93,5 +93,9 @@ Routes: `/family/client-margaret/home?as=family` (mock data) and a throwaway pre
 ## Next action
 - None. The feature is merged to `family-dev`.
 
+## Post-merge fix (2026-09-25, fix/family-home-narrow-overflow → family-dev)
+- The loading skeleton's fixed 340px column made the page 172px wider than a 338px window, which failed the F0-15 header spec at 338px/480px on `family-dev`. The skeleton now stacks below 768px (DECISIONS.md FD-23). Only `home-skeleton.tsx` changed.
+- Local run against local Supabase: shell spec 15/15 (3 repeats); full e2e 38/38; integration 27/27; lint, typecheck clean; unit suite all green except `week-grid.test.tsx` [AC-02], a shared test that reads the real clock (the current-time label hides the 23:00 label between about 22:30 and 23:30). It's unrelated to this fix and belongs to the shared lane.
+
 ## Ready for PR
 - Merged: #54 to `family-dev` (2026-09-20).
