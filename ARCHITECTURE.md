@@ -178,6 +178,7 @@ The Confluence ERD (Organisation, Carer, Shift, Shift_has_Carer, Clients, Budget
 - Soft retirement (`is_active`, `detached_at`, `cancelled_at`) instead of deletes for care data (FR-1.2, NFR-6).
 - RLS enabled in the same migration as table creation; pgTAP test file per migration area.
 - Attach `audit_row_change()` trigger to every client-scoped table.
+  - One-line attach pattern (F0-08): `create trigger audit_<table> after insert or update or delete on <table> for each row execute function audit_row_change();` in the same migration that creates the table. `audit_log.record_id` is taken from the row's `id` (null for composite-key tables); `client_id` from `clients.id` or the row's `client_id`. Changes with no session user (service role) are recorded as `actor_role = 'system'`. `audit_log` is append-only for every role, including the owner and service role.
 - Indexes: `(client_id, starts_at)` on events; `(event_id, original_start)` on overrides/completions; `(carer_id, starts_at)` and `(client_id, starts_at)` on shifts; `(bucket_id)` on entries/expenses.
 - Generated types committed at `src/lib/supabase/database.types.ts` (`npm run db:types`).
 

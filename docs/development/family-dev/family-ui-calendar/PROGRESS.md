@@ -1,12 +1,12 @@
 # Progress — FAM-UI-02 Family Calendar screen (UI)
 
-Status: PR OPEN
+Status: MERGED TO DEV
 Owner: Dhruv Verma
 Lane: F — Family
 Sprint: SPRINT · planned D4–D5
 Branch: `feature/family-ui-calendar-add-event` (CHG-017 follow-up, created from `origin/family-dev` at 227bc26). CHG-016 was built on `feature/family-ui-calendar-ticks` (#87, merged). The original build, `feature/family-ui-calendar`, was merged to `family-dev` (#77).
 PR target: `family-dev`
-Last updated: 2026-09-24
+Last updated: 2026-09-25
 
 **CHG-017 (2026-09-24): PR OPEN** (#88 to `family-dev`). A primary "Enter event" link on the Calendar toolbar, just left of D/W/M, 44px tall, the same wording and style as Home's. It opens Add event with the Calendar's origin (`from=calendar&view=…&date=…[&month=…]`), and Add event's Save and Cancel return to that view (FAM-UI-03 AC-10, FD-11). No prefill. Not in Figma: design review. New AC-09 (MET), T-09 (PASS), FD-14. Files: `src/features/family-calendar/{calendar-toolbar.tsx, family-calendar-view.tsx}`, `src/features/family-event-form/event-form-return.ts`, `src/app/(family)/family/[clientId]/events/new/page.tsx`, tests.
 - Red first: 2977ff8 (10 new tests failing for the expected reason: no "Enter event" link, `addEventHrefFrom` missing, Cancel still going Home). Green: c64d565.

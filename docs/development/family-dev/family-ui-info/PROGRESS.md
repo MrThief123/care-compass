@@ -1,6 +1,6 @@
 # Progress — FAM-UI-04 Family Info screen (UI)
 
-Status: PR OPEN
+Status: MERGED TO DEV
 Owner: Dhruv Verma
 Lane: F — Family
 Sprint: SPRINT · planned D5
