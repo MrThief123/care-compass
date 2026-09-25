@@ -74,13 +74,13 @@ Record feature-level decisions here using the template below. Project-wide decis
 - Human confirmation required: no.
 - Test changes caused: none.
 
-### FD-08 — `getOccurrences`: shape and what is not wired yet
-- Date: 2026-09-25
-- Context: PRD Scope: "Server query `getOccurrences(clientId, range)`". The events contract has other reads (`getTodayOccurrences`, `getTaskLog`, `getOccurrence`, `getEvent`) and `setOccurrenceDone`.
-- Decision: `getOccurrences(clientId, range, { type?, now? })` in `src/server/events/queries.ts`, with `range` as ISO instants (`from` inclusive, `to` exclusive, at most 400 days). It returns tasks only unless `type` is passed, like the other reads here (UI-05 FD-01). A user who cannot read the client's events gets `[]`. Errors carry no client or row data. A mock version returns the fixtures in the range. The other reads and `setOccurrenceDone` still throw "not implemented" for Supabase: they are the Family, Carer and Admin wiring features' (FAM-01, FAM-14, FAM-15, CAR-06 and others), which build on `getOccurrences` and the two RPCs.
-- Reason: PRD Scope; keeps this feature to the data layer.
+### FD-08 — `getOccurrences`: the contract is `family-dev`'s (CHG-012), with Supabase behind it
+- Date: 2026-09-25 (corrected 2026-09-25, see FD-12)
+- Context: PRD Scope: "Server query `getOccurrences(clientId, range)`". `family-dev` already had that function (FAM-UI-02, CHG-012): a range of Melbourne calendar dates, both inclusive, validated by `OccurrenceRangeSchema` (a `ZodError` on a bad range), `Occurrence[]`, oldest first, an unknown client is an empty list, and its doc block says "F0-11 implements this for Supabase". My first version added a second, instant-based `getOccurrences` beside it, which collided when the branches met.
+- Decision: keep CHG-012's signature and rules. With `DATA_SOURCE=supabase` the range's Melbourne days become a window of instants (start of `from` to the start of the day after `to`, `melbourneDaysToInstants`) and `loadOccurrences` reads the rows and calls `buildOccurrences`. Added, in the same style as `getTodayOccurrences`: an optional `{ type }` (tasks only unless passed, so `AnyOccurrence[]` comes back with it) and `{ now }` (the clock for Overdue; the mock ignores it). A user who cannot read the client's events, and an id that is not an id, get `[]`. Errors carry no client or row data. The mock gained the `type` option and returns plain events with it. The other reads (`getTodayOccurrences`, `getTaskLog`, `getOccurrence`, `getEvent`) and `setOccurrenceDone` still throw "not implemented" for Supabase: they are the Family, Carer and Admin wiring features'.
+- Reason: one function per problem (CLAUDE.md §7); screens already call CHG-012's.
 - Human confirmation required: no.
-- Test changes caused: none.
+- Test changes caused: see FD-12.
 
 ### FD-09 — Melbourne time conversion moved into `src/lib`
 - Date: 2026-09-25
@@ -114,3 +114,11 @@ Record feature-level decisions here using the template below. Project-wide decis
 - Human confirmation required: yes/no (who, when)
 - Test changes caused (if any): test ID, reason, flagged for review yes/no
 -->
+
+### FD-12 — One FAM-UI-02 test replaced, and two flaky calendar tests fixed (after the merge into `family-dev`)
+- Date: 2026-09-25
+- Context: after PR #107 merged this branch into `family-dev`, CI failed: typecheck, the build and 16 test files. Causes: (1) my second `getOccurrences` collided with `family-dev`'s (FD-08); (2) when `family-dev` was merged into this branch, the conflict in `src/server/events/queries.ts` was resolved by taking this branch's file, which dropped `getEvent` and `getToday` (used by six Family screens); (3) the same merge dropped the two FAM-13 function entries from `database.types.ts`; (4) `day-timeline.test.tsx` failed in CI at 19:00.
+- Decision: (1) and (2): restored `queries.ts` and the mock from before the merge and added F0-11's Supabase branch to CHG-012's function (FD-08); (3): restored `list_organisations_for_transfer` and `transfer_client_organisation`; (4): the timeline draws a current-time label in the gutter and hides any hour label within a line of it, and the test rendered without pinning the clock, so it failed whenever the real time was near an hour it checks (18:50 here, 19:00 in CI). `day-timeline.test.tsx` and `time-grid-scroller.test.tsx` now pass `now={null}`; reproduced with a pinned system clock at 18:50 before the change and passing after. Also replaced `src/server/events/occurrences.test.ts` "[FAM-UI-02] says clearly that the Supabase implementation lands later" (it asserted "not implemented yet") with two tests: a bad range still rejects with a `ZodError` under Supabase, and an id that is not an id is an empty list. My own tests moved to date ranges.
+- Reason: the requirement changed (F0-11 implements the branch); the timeline tests had a hidden dependency on the clock.
+- Human confirmation required: yes. **HUMAN REVIEW: one FAM-UI-02 test replaced; two UI-01 test renders changed (clock pinned).** No assertion was removed.
+- Test changes caused: as above.

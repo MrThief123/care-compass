@@ -1,6 +1,6 @@
 # Progress — F0-11 Care events, occurrence overrides and append-only completions
 
-Status: READY FOR PR
+Status: MERGED TO DEV
 Owner: Dhruv Verma
 Lane: B — Backend
 Sprint: SPRINT · planned D5–D6
@@ -49,6 +49,7 @@ Last updated: 2026-09-25
 - FD-01 F0-08 audit test scoped (HUMAN REVIEW); FD-02 full actor names vs AC-03 (HUMAN REVIEW); FD-03 due time is the start; FD-04 idempotent tick-off (HUMAN REVIEW); FD-05 schema differs from the proposal; FD-06 access rules; FD-07 history blocks deletion; FD-08 `getOccurrences` shape; FD-09 time helpers in lib; FD-10 types merged by hand; FD-11 defaults.
 
 ## Problems encountered
+- **Merge into `family-dev` broke CI (FD-12).** My `getOccurrences` duplicated `family-dev`'s (CHG-012), and resolving the conflict by taking this branch's `queries.ts` dropped `getEvent` and `getToday` and the FAM-13 function types. Fixed on `fix/events-contract-after-f0-11`. Lesson: merge `family-dev` into a shared branch only after reading what it already has in the files being touched; `git diff family-dev -- src/server/events` would have shown it.
 - `.env.local` points at a hosted Supabase project (see FAM-12 PROGRESS). This feature's integration test runs only against a local URL; run it with the three variables from `supabase status -o env`. **The migration is applied to the local database only.**
 - Your local database already has FAM-12 and FAM-13's migrations (on `family-dev`, not on this `main`-based branch), so `supabase migration up` refused; I applied this migration with `psql` and recorded its version. Revert script kept out of the repo.
 - The audit log is append-only and integration tests commit rows to it, which broke F0-08's unscoped pgTAP assertions on a used database (FD-01) and one of my own (scoped).

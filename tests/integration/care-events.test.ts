@@ -2,6 +2,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import { melbourneDateKey } from "@/lib/dates/melbourne-time";
 import type { Database } from "@/lib/supabase/database.types";
 import { createAdminClient } from "@/server/jobs/supabase-admin";
 
@@ -22,6 +23,9 @@ const hasLocalSupabase =
 
 const PASSWORD = "correct horse battery staple 1!";
 const HOUR = 3_600_000;
+
+/** The Melbourne calendar date `offsetMs` from now: what the contract's range takes. */
+const day = (offsetMs: number) => melbourneDateKey(new Date(Date.now() + offsetMs).toISOString());
 
 /** An occurrence start is a whole second (the database enforces it): `Date.now()` plus an offset, floored. */
 const at = (offsetMs: number) =>
@@ -184,8 +188,8 @@ describe.skipIf(!hasLocalSupabase)("[F0-11] care events against local Supabase",
       expect(created.error).toBeNull();
 
       const occurrences = await occurrencesAs(cookieStore, s.clientId, {
-        from: "2026-11-29T13:00:00Z",
-        to: "2026-12-06T13:00:00Z",
+        from: "2026-11-30",
+        to: "2026-12-06",
       });
 
       expect(occurrences).toHaveLength(1);
@@ -213,10 +217,7 @@ describe.skipIf(!hasLocalSupabase)("[F0-11] care events against local Supabase",
         .select("id")
         .single();
       expect(event.error).toBeNull();
-      const range = {
-        from: new Date(Date.now() - 3 * DAY).toISOString(),
-        to: new Date(Date.now() + DAY).toISOString(),
-      };
+      const range = { from: day(-3 * DAY), to: day(DAY) };
 
       const before = await occurrencesAs(cookieStore, s.clientId, range);
       expect(before).toHaveLength(1);
@@ -277,10 +278,7 @@ describe.skipIf(!hasLocalSupabase)("[F0-11] care events against local Supabase",
         organisation_id: s.orgId,
       });
 
-      const range = {
-        from: new Date(Date.now() - DAY).toISOString(),
-        to: new Date(Date.now() + DAY).toISOString(),
-      };
+      const range = { from: day(-DAY), to: day(DAY) };
       const seen = await occurrencesAs(helenSession, s.clientId, range);
       expect(seen[0]).toMatchObject({
         status: "done",
@@ -318,8 +316,8 @@ describe.skipIf(!hasLocalSupabase)("[F0-11] care events against local Supabase",
       expect(rows.data ?? []).toHaveLength(0);
 
       const occurrences = await occurrencesAs(rosaSession, s.clientId, {
-        from: "2026-11-29T13:00:00Z",
-        to: "2026-12-06T13:00:00Z",
+        from: "2026-11-30",
+        to: "2026-12-06",
       });
       expect(occurrences).toEqual([]);
     } finally {
@@ -355,15 +353,15 @@ describe.skipIf(!hasLocalSupabase)("[F0-11] care events against local Supabase",
       expect(deactivated.error).toBeNull();
 
       const history = await occurrencesAs(cookieStore, s.clientId, {
-        from: new Date(Date.now() - 22 * DAY).toISOString(),
-        to: new Date(Date.now() + 60_000).toISOString(),
+        from: day(-22 * DAY),
+        to: day(0),
       });
       expect(history.length).toBeGreaterThanOrEqual(3);
       expect(history[0]).toMatchObject({ status: "done", actor: "Helen Doyle" });
 
       const nextMonth = await occurrencesAs(cookieStore, s.clientId, {
-        from: new Date(Date.now() + DAY).toISOString(),
-        to: new Date(Date.now() + 35 * DAY).toISOString(),
+        from: day(DAY),
+        to: day(35 * DAY),
       });
       expect(nextMonth).toEqual([]);
     } finally {
