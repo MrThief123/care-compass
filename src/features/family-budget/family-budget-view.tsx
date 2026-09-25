@@ -1,23 +1,30 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { EmptyState } from "@/components/shared/states";
+import { Button } from "@/components/ui/button";
 import { CardShell } from "@/components/ui/card-shell";
 import { BudgetBucketTile } from "@/features/family-home/budget-bucket-tile";
 import { cn } from "@/lib/utils";
+import type { FundEntry } from "@/types/domain";
 
+import { budgetHistoryCsv, budgetHistoryFileName } from "./budget-export";
 import { useBudgetHolder, useHeldBudget } from "./budget-holder";
+import { EntryDetailsDialog } from "./entry-details-dialog";
 import { HistoryTable } from "./history-table";
+import { PendingCostsTable } from "./pending-costs-table";
 
 import type { FamilyBudgetData } from "./budget-data";
+import type { OpenEntryDetails } from "./entry-row";
 
 /**
  * Family · Budget (design `family-06-budget`): 'Funds by source', a card per
- * funding bucket with an 'Edit' link to the Edit budget page, and the fund
- * History under it. The two cards are independent, so either can be empty
- * alone. The client's name is not repeated here; the shell header shows it
+ * funding bucket with an 'Edit' link to the Edit budget page, then 'Pending
+ * costs' and the fund History with its 'Export' (CHG-022, FD-13). Each History
+ * and pending row opens its entry's details. The cards are independent, so
+ * any of them can be empty alone. The client's name is not repeated here; the shell header shows it
  * (DECISIONS.md FD-08).
  *
  * It shows the contract's figures, or what an Edit budget save left for this
@@ -33,6 +40,16 @@ export function FamilyBudgetView({ clientId, data }: { clientId: string; data: F
   const { buckets, history } = useHeldBudget(clientId, data);
   const { takeAnnouncement } = useBudgetHolder();
   const [message, setMessage] = useState("");
+  const [details, setDetails] = useState<{ entry: FundEntry; trigger: HTMLElement | null }>();
+
+  const openDetails: OpenEntryDetails = useCallback(
+    (entry, trigger) => setDetails({ entry, trigger }),
+    [],
+  );
+  const closeDetails = useCallback(() => setDetails(undefined), []);
+
+  const exportHistory = () =>
+    downloadCsv(budgetHistoryCsv(history, buckets), budgetHistoryFileName(data.today));
 
   // The live region is on screen first and the message goes in after, so it is announced.
   useEffect(() => {
@@ -84,11 +101,36 @@ export function FamilyBudgetView({ clientId, data }: { clientId: string; data: F
         </CardShell>
       </section>
 
+      <section aria-labelledby="family-budget-pending">
+        <CardShell className="p-5">
+          <h2 id="family-budget-pending" className="text-title-section text-text-primary">
+            Pending costs
+          </h2>
+          {history.some((entry) => entry.pending) ? (
+            <PendingCostsTable
+              headingId="family-budget-pending"
+              history={history}
+              buckets={buckets}
+              onOpen={openDetails}
+            />
+          ) : (
+            <p className="mt-2 text-body-default text-text-secondary">No pending costs.</p>
+          )}
+        </CardShell>
+      </section>
+
       <section aria-labelledby="family-budget-history">
         <CardShell className="p-5">
-          <h2 id="family-budget-history" className="text-title-section text-text-primary">
-            History
-          </h2>
+          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+            <h2 id="family-budget-history" className="min-w-0 text-title-section text-text-primary">
+              History
+            </h2>
+            {history.length > 0 && (
+              <Button type="button" variant="secondary" onClick={exportHistory}>
+                Export
+              </Button>
+            )}
+          </div>
           {history.length === 0 ? (
             <EmptyState
               icon="dollar"
@@ -96,10 +138,38 @@ export function FamilyBudgetView({ clientId, data }: { clientId: string; data: F
               body="Top-ups and expenses will appear here once funds are added."
             />
           ) : (
-            <HistoryTable headingId="family-budget-history" entries={history} />
+            <HistoryTable
+              headingId="family-budget-history"
+              entries={history}
+              onOpen={openDetails}
+            />
           )}
         </CardShell>
       </section>
+
+      {details && (
+        <EntryDetailsDialog
+          entry={details.entry}
+          buckets={buckets}
+          returnFocusTo={details.trigger}
+          onClose={closeDetails}
+        />
+      )}
     </div>
   );
+}
+
+/**
+ * Downloads `csv` as `fileName` through a temporary link (FD-13). The file
+ * starts with a UTF-8 byte-order mark so a spreadsheet reads names such as
+ * "Zoë" correctly. The link never joins the page, and the object URL is let
+ * go once the download has started.
+ */
+function downloadCsv(csv: string, fileName: string) {
+  const url = URL.createObjectURL(new Blob(["\uFEFF", csv], { type: "text/csv;charset=utf-8" }));
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = fileName;
+  link.click();
+  setTimeout(() => URL.revokeObjectURL(url), 0);
 }

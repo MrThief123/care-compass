@@ -2,12 +2,15 @@ import { cn } from "@/lib/utils";
 import type { FundEntry } from "@/types/domain";
 
 import { formatFundDate, formatSignedDollars } from "./budget-format";
+import { DetailsButton, ENTRY_ROW, openFromRow, type OpenEntryDetails } from "./entry-row";
 
 export interface HistoryTableProps {
   /** Labels the table; the History card's heading. */
   headingId: string;
   /** In the order given (the contract's: newest first). */
   entries: FundEntry[];
+  /** Opens an entry's details (CHG-022), with the row's button to return focus to. */
+  onOpen: OpenEntryDetails;
 }
 
 /**
@@ -30,7 +33,8 @@ const HEAD_CELL = "min-w-0 text-left text-label-caps text-text-secondary";
  * The fund History: DATE, DESCRIPTION and AMOUNT, the description cell also
  * naming who recorded the entry (DECISIONS.md FD-05). A pending cost
  * (CHG-020, PD-058) is labelled "Pending" in words under its amount, in the
- * same three columns.
+ * same three columns. The description is the row's one button, and clicking
+ * anywhere on the row opens the entry's details too (CHG-022, FD-13).
  *
  * Why this is not the shared `DataTable`: that is an auto-layout `<table>`, so
  * a long description would squeeze DATE and AMOUNT or push the amount past the
@@ -40,7 +44,7 @@ const HEAD_CELL = "min-w-0 text-left text-label-caps text-text-secondary";
  * long text is cut by CSS only, so the DOM and a screen reader keep the whole
  * value; the full text is also in `title` for hover.
  */
-export function HistoryTable({ headingId, entries }: HistoryTableProps) {
+export function HistoryTable({ headingId, entries, onOpen }: HistoryTableProps) {
   return (
     <div className="@container mt-4">
       <table role="table" aria-labelledby={headingId} className="block w-full text-left">
@@ -71,10 +75,8 @@ export function HistoryTable({ headingId, entries }: HistoryTableProps) {
               <tr
                 key={entry.id}
                 role="row"
-                className={cn(
-                  ROW_GRID,
-                  "min-h-11 gap-y-1 border-b border-border-subtle py-2 last:border-b-0",
-                )}
+                onClick={openFromRow(entry, onOpen)}
+                className={cn(ROW_GRID, ENTRY_ROW)}
               >
                 <td
                   role="cell"
@@ -83,15 +85,7 @@ export function HistoryTable({ headingId, entries }: HistoryTableProps) {
                   {formatFundDate(entry.date)}
                 </td>
                 <td role="cell" className="min-w-0 [grid-area:desc]">
-                  <p
-                    title={description || undefined}
-                    className={cn(
-                      "line-clamp-2 [overflow-wrap:anywhere]",
-                      !description && "text-text-secondary",
-                    )}
-                  >
-                    {description || "No description"}
-                  </p>
+                  <DetailsButton description={description} />
                   {recordedBy && (
                     <p
                       title={`Recorded by ${recordedBy}`}

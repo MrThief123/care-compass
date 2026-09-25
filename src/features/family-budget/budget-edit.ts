@@ -290,27 +290,82 @@ export function validateBudgetEdit(
   return fieldErrors(budgetEditSchema(buckets), values);
 }
 
-/** A bucket's figures with its total moved by `deltaCents`, worked out again in cents. */
-function withTotalMoved(bucket: BudgetBucketSummary, deltaCents: number): BudgetBucketSummary {
-  const totalCents = toCents(bucket.total) + deltaCents;
-  const usedCents = toCents(bucket.used);
+/** A bucket's figures worked out again, in cents, from its total and used. */
+function withFigures(
+  bucket: BudgetBucketSummary,
+  totalCents: number,
+  usedCents: number,
+): BudgetBucketSummary {
   const percentUsed = totalCents === 0 ? 0 : Math.round((usedCents / totalCents) * 100);
   return {
     ...bucket,
     total: totalCents / 100,
+    used: usedCents / 100,
     remaining: (totalCents - usedCents) / 100,
     percentUsed,
     state: bucketState(percentUsed),
   };
 }
 
+/** A bucket's figures with its total moved by `deltaCents`. */
+function withTotalMoved(bucket: BudgetBucketSummary, deltaCents: number): BudgetBucketSummary {
+  return withFigures(bucket, toCents(bucket.total) + deltaCents, toCents(bucket.used));
+}
+
+/**
+ * History's costs still pending, oldest first by date; on the same day, the
+ * one lower in History (recorded first) first. The order they are paid in,
+ * and the Pending costs section's order (CHG-022, FD-13).
+ */
+export function pendingCosts(history: FundEntry[]): FundEntry[] {
+  return history
+    .map((entry, index) => ({ entry, index }))
+    .filter(({ entry }) => entry.pending)
+    .sort((a, b) => a.entry.date.localeCompare(b.entry.date) || b.index - a.index)
+    .map(({ entry }) => entry);
+}
+
+/**
+ * Pays `bucket`'s pending costs from `history` (CHG-022, PD-060): strictly
+ * oldest first, each whole while the balance covers it, stopping at the first that does
+ * not. Returns the bucket's new figures and the ids of the costs paid.
+ */
+function payPendingCosts(
+  bucket: BudgetBucketSummary,
+  history: FundEntry[],
+): { bucket: BudgetBucketSummary; paidIds: Set<string> } {
+  const costs = pendingCosts(history).filter((entry) => entry.bucketId === bucket.id);
+
+  const totalCents = toCents(bucket.total);
+  let usedCents = toCents(bucket.used);
+  let pendingCents = toCents(bucket.pendingTotal ?? 0);
+  let pendingCount = bucket.pendingCount ?? 0;
+  const paidIds = new Set<string>();
+  for (const entry of costs) {
+    const costCents = Math.abs(toCents(entry.amount));
+    if (costCents > totalCents - usedCents) break;
+    usedCents += costCents;
+    pendingCents -= costCents;
+    pendingCount -= 1;
+    paidIds.add(entry.id);
+  }
+  if (paidIds.size === 0) return { bucket, paidIds };
+
+  const next = withFigures(bucket, totalCents, usedCents);
+  delete next.pendingTotal;
+  delete next.pendingCount;
+  if (pendingCount > 0) Object.assign(next, { pendingTotal: pendingCents / 100, pendingCount });
+  return { bucket: next, paidIds };
+}
+
 /**
  * The route's state after a saved edit, as new objects (the inputs are not
- * changed). Saved buckets are matched by id: a funds change moves the total
- * (so `used` stays and pending costs are kept, paying them is F0-12's), a
- * rename changes the label only, and a removed bucket goes. New buckets are
- * added last. History gains, above the old rows, one row per change in page
- * order, dated today and naming no recorder (Phase 1 has no signed-in user).
+ * changed). Saved buckets are matched by id: a funds change moves the total,
+ * and funds added then pay that bucket's pending costs (CHG-022), a rename
+ * changes the label only, and a removed bucket goes. New buckets are added
+ * last. History gains, above the old rows, one row per change in page order,
+ * dated today, recorded by "you" (Phase 1 has no signed-in user) and keeping
+ * the save's note. A paid cost keeps its row, no longer pending, paid today.
  */
 export function applyBudgetEdit(
   state: BudgetState,
@@ -335,11 +390,14 @@ export function applyBudgetEdit(
       amount: cents / 100 || 0,
       date: context.date,
       description,
+      recordedBy: "you",
+      ...(edit.note && { note: edit.note }),
     });
   };
 
   // Saved buckets are walked in their order, which is the page's order.
   const buckets: BudgetBucketSummary[] = [];
+  const paidIds = new Set<string>();
   for (const bucket of state.buckets) {
     const row = edit.buckets.find((candidate) => candidate.id === bucket.id);
     if (!row) {
@@ -365,6 +423,11 @@ export function applyBudgetEdit(
         adding ? cents : -cents,
         edit.note || (adding ? "Funds added" : "Funds removed"),
       );
+      if (adding) {
+        const paying = payPendingCosts(next, state.history);
+        next = paying.bucket;
+        paying.paidIds.forEach((id) => paidIds.add(id));
+      }
     }
     buckets.push(next);
   }
@@ -390,5 +453,11 @@ export function applyBudgetEdit(
 
   const changed = rows.length > 0 || renamed;
   if (!changed) return { buckets: state.buckets, history: state.history, changed };
-  return { buckets, history: [...rows, ...state.history], changed };
+  const history = state.history.map((entry) => {
+    if (!paidIds.has(entry.id)) return entry;
+    const paidEntry: FundEntry = { ...entry, paidOn: context.date };
+    delete paidEntry.pending;
+    return paidEntry;
+  });
+  return { buckets, history: [...rows, ...history], changed };
 }

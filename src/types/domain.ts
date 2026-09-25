@@ -253,6 +253,13 @@ export const FundEntrySchema = z.object({
    * not yet deducted (CHG-020, PD-058). Absent means paid.
    */
   pending: z.boolean().optional(),
+  /** ISO date (YYYY-MM-DD) a pending cost was paid on (CHG-022, PD-060). */
+  paidOn: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .optional(),
+  /** The note given with the save that made this entry (CHG-022, PD-060). */
+  note: z.string().optional(),
 });
 export type FundEntry = z.infer<typeof FundEntrySchema>;
 

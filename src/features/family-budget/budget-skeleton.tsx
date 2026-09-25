@@ -6,7 +6,8 @@ function Bar({ className }: { className: string }) {
 }
 
 /**
- * Loading state (States sheet): the screen's own shape, the two cards, with no
+ * Loading state (States sheet): the screen's own shape, the three cards
+ * (CHG-022 adds Pending costs), with no
  * data in it, so nothing jumps when the content arrives. One labelled status
  * for the whole screen; the bars are hidden from assistive technology.
  */
@@ -30,7 +31,14 @@ export function BudgetSkeleton() {
         </div>
       </CardShell>
       <CardShell className="p-5">
-        <Bar className="h-5 w-20" />
+        <Bar className="h-5 w-32" />
+        <Bar className="mt-4 h-4 w-full" />
+      </CardShell>
+      <CardShell className="p-5">
+        <div className="flex min-h-11 items-center justify-between gap-4">
+          <Bar className="h-5 w-20" />
+          <Bar className="h-11 w-24 rounded-control" />
+        </div>
         <div className="mt-4 flex flex-col gap-4">
           {Array.from({ length: 3 }, (_, index) => (
             <Bar key={index} className="h-4 w-full" />
