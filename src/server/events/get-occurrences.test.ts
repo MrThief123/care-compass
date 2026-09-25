@@ -209,7 +209,7 @@ describe("[F0-11] getOccurrences fails safely", () => {
     ["a range that ends before it starts", { from: RANGE.to, to: RANGE.from }],
     ["an empty range", { from: RANGE.from, to: RANGE.from }],
     ["a range that is not a date-time", { from: "soon", to: RANGE.to }],
-    ["a range longer than 400 days", { from: RANGE.from, to: "2028-01-01T00:00:00Z" }],
+    ["a range longer than 400 days", { from: RANGE.from, to: "2028-06-01T00:00:00Z" }],
   ])("[F0-11] refuses %s and reads nothing", async (_label, range) => {
     const { getOccurrences } = await import("@/server/events/queries");
     await expect(getOccurrences(CLIENT_ID, range, { now: NOW })).rejects.toThrow(

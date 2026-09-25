@@ -163,6 +163,19 @@ describe("[F0-11][AC-01] expanding an event into occurrences", () => {
     ]);
   });
 
+  it("[F0-11][AC-01] a 02:30 daily event on the night the clocks go forward (no 02:30 exists) moves to 03:30 instead of failing", () => {
+    const daily = event({
+      starts_at: "2026-10-01T16:30:00+00:00", // Fri 2 Oct 02:30 AEST
+      recurrence: { frequency: "daily", interval: 1 },
+    });
+    const range = { from: "2026-10-01T14:00:00Z", to: "2026-10-04T13:00:00Z" };
+    expect(build({ events: [daily], range }).map((o) => o.start)).toEqual([
+      "2026-10-02T02:30:00+10:00",
+      "2026-10-03T02:30:00+10:00",
+      "2026-10-04T03:30:00+11:00",
+    ]);
+  });
+
   it("[F0-11][AC-01] several events are merged, oldest first, ties by key", () => {
     const starts = build({ events: [plainWalk(), event()], range: RANGE_WEEK })
       .slice(0, 3)

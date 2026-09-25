@@ -22,6 +22,10 @@ const hasLocalSupabase =
 
 const PASSWORD = "correct horse battery staple 1!";
 const HOUR = 3_600_000;
+
+/** An occurrence start is a whole second (the database enforces it): `Date.now()` plus an offset, floored. */
+const at = (offsetMs: number) =>
+  new Date(Math.floor((Date.now() + offsetMs) / 1000) * 1000).toISOString();
 const DAY = 24 * HOUR;
 
 function unique(label: string) {
@@ -202,7 +206,7 @@ describe.skipIf(!hasLocalSupabase)("[F0-11] care events against local Supabase",
     const s = await seed();
     try {
       const { client, cookieStore } = await signIn(s.helen.email);
-      const anchor = new Date(Date.now() - 2 * DAY).toISOString();
+      const anchor = at(-2 * DAY);
       const event = await client
         .from("care_events")
         .insert({ client_id: s.clientId, title: "Physio", starts_at: anchor })
@@ -246,7 +250,7 @@ describe.skipIf(!hasLocalSupabase)("[F0-11] care events against local Supabase",
     const s = await seed();
     try {
       const { client: helenClient, cookieStore: helenSession } = await signIn(s.helen.email);
-      const anchor = new Date(Date.now() - 10 * 60_000).toISOString();
+      const anchor = at(-10 * 60_000);
       const event = await helenClient
         .from("care_events")
         .insert({ client_id: s.clientId, title: "Walk with Margaret", starts_at: anchor })
@@ -291,7 +295,7 @@ describe.skipIf(!hasLocalSupabase)("[F0-11] care events against local Supabase",
         .eq("client_id", s.clientId);
       const again = await aishaClient.rpc("set_occurrence_done", {
         p_event_id: event.data!.id,
-        p_original_start: new Date(Date.now() - 20 * 60_000).toISOString(),
+        p_original_start: at(-20 * 60_000),
       });
       expect(again.error?.code).toBe("42501");
     } finally {
@@ -327,7 +331,7 @@ describe.skipIf(!hasLocalSupabase)("[F0-11] care events against local Supabase",
     const s = await seed();
     try {
       const { client, cookieStore } = await signIn(s.helen.email);
-      const anchor = new Date(Date.now() - 21 * DAY).toISOString();
+      const anchor = at(-21 * DAY);
       const event = await client
         .from("care_events")
         .insert({

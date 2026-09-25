@@ -4,9 +4,11 @@
  * Screens must import from here, never from `src/mocks` directly
  * (lint-enforced).
  */
+import { z } from "zod";
+
 import * as mock from "@/mocks/queries/events";
 import { getDataSourceMode, notImplementedForSupabase } from "@/server/data-source";
-import { OccurrenceTypeFilterSchema, TaskLogQuerySchema } from "@/types/domain";
+import { isPlainEvent, OccurrenceTypeFilterSchema, TaskLogQuerySchema } from "@/types/domain";
 import type {
   AnyOccurrence,
   Occurrence,
@@ -127,4 +129,70 @@ export async function getOccurrence(
     return mock.getOccurrence(clientId, key, { type });
   }
   notImplementedForSupabase("events", "getOccurrence");
+}
+
+/** The range of a `getOccurrences` read: ISO instants, `from` inclusive, `to` exclusive. */
+export interface OccurrenceRange {
+  from: string;
+  to: string;
+}
+
+const MAX_RANGE_DAYS = 400;
+
+const GetOccurrencesInputSchema = z
+  .object({
+    clientId: z.string().min(1),
+    range: z.object({
+      from: z.string().refine((value) => !Number.isNaN(Date.parse(value)), "not a date-time"),
+      to: z.string().refine((value) => !Number.isNaN(Date.parse(value)), "not a date-time"),
+    }),
+  })
+  .refine(
+    ({ range }) => Date.parse(range.to) > Date.parse(range.from),
+    "range must end after it starts",
+  )
+  .refine(
+    ({ range }) => Date.parse(range.to) - Date.parse(range.from) <= MAX_RANGE_DAYS * 86_400_000,
+    `range must be at most ${MAX_RANGE_DAYS} days`,
+  );
+
+export interface GetOccurrencesOptions {
+  /** Tasks only unless a type is passed, as for the other reads here (UI-05 FD-01). */
+  type?: OccurrenceTypeFilter;
+  /** The clock for Overdue; `new Date()` unless a test passes one. Ignored by the mock. */
+  now?: Date;
+}
+
+/**
+ * The client's occurrences that start in `range`, oldest first (ties by key), each with its status,
+ * who did it and the carer on shift (F0-11). Occurrences are generated on demand from the events'
+ * recurrence rules (F0-09), with overrides and the latest completion applied; a deactivated event
+ * stops generating from when it was deactivated, and its earlier occurrences stay (AC-08).
+ * Tasks only unless `options.type` says otherwise, like the other reads here. A user who cannot read
+ * the client's events gets `[]`. Throws (naming no client or row) for a bad input or a failed read.
+ */
+export async function getOccurrences(
+  clientId: string,
+  range: OccurrenceRange,
+  options: GetOccurrencesOptions = {},
+): Promise<AnyOccurrence[]> {
+  const parsed = GetOccurrencesInputSchema.safeParse({ clientId, range });
+  if (!parsed.success) {
+    throw new Error(`getOccurrences: ${parsed.error.issues[0]?.message ?? "invalid input"}.`);
+  }
+  const type = options.type ? OccurrenceTypeFilterSchema.parse(options.type) : undefined;
+
+  const mode = getDataSourceMode();
+  let occurrences: AnyOccurrence[];
+  if (mode === "mock") {
+    occurrences = await mock.getOccurrences(clientId, range);
+  } else {
+    const { loadOccurrences } = await import("./occurrences");
+    occurrences = await loadOccurrences(clientId, range, options.now ?? new Date());
+  }
+
+  if (type === "all") return occurrences;
+  return occurrences.filter((occurrence) =>
+    type === "events" ? isPlainEvent(occurrence) : !isPlainEvent(occurrence),
+  );
 }
