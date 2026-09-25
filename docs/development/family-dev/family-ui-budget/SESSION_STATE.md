@@ -15,7 +15,7 @@ Test results:
 - tsc and prettier are clean, and eslint has 0 errors.
 - The build succeeds. e2e passes 35 of 36; the one failure is the `[F0-15]` 338px flake.
 - The sweep is clean.
-Current blocker: none. Waiting on the human's "yes" to open the PR. The export test bug is fixed: the human chose the proposed fix, recorded in FD-13, and the feature suites pass 475 of 475.
+Current blocker: none. PR #92 (https://github.com/MrThief123/care-compass/pull/92) is open to `family-dev` and waiting for review.
 Important discoveries:
 - A very large History amount broke mid-number at 768px until the amount column's floor went from 7rem to 9rem (FD-10). Found only by the stress check in a real browser, so any change to the History columns needs that check again.
 - Playwright reuses any server already on :3000. If a `next dev` preview is running, e2e runs against it, and 11 calendar and event-form tests fail. Stop the dev server before e2e, or check `lsof -iTCP:3000`.
@@ -23,8 +23,8 @@ Important discoveries:
 - Turbopack cannot build from a worktree whose `node_modules` is a symlink; clone it instead (`cp -cR` on APFS).
 - The PRD's "DataTable" and the design's card are met by local components (FD-03, FD-01), and the design does not draw the "Recorded by" line (FD-05): all flagged for the PR.
 Important decisions: FD-01 to FD-13 in DECISIONS.md (FD-13 new: CHG-022 fields and defaults, and the five changed assertions); CHG-019 to CHG-022 and PD-060 in root DECISIONS.md
-Exact next action: on the human's "yes", open the PR `FAM-UI-05 Family Budget screen (UI)` to `family-dev`. Its body lists the flags in PROGRESS.md "Ready for PR" and says that CI is down, so every check ran locally.
-Files likely to be touched next: none. After the PR opens, set PROGRESS.md Status to PR OPEN.
+Exact next action: respond to review comments on PR #92. Merging is a human's job.
+Files likely to be touched next: only what review asks for.
 Warning for next session: do not stage `.claude/settings.json` (unrelated, always dirty). Do not run the F0-07 auth e2e specs against the hosted project (`--grep-invert "F0-07"`). No AI-attribution lines in commits or PRs (CLAUDE.md §8, memory). Do not open the PR without the human's "yes". Do not change the tests to get green: they are the spec (CLAUDE.md §5); if one looks wrong, stop and ask.
 
 ## Preview
