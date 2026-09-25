@@ -27,6 +27,8 @@ Tests are written **before** production code (TESTING.md §2). Run them, confirm
 
 | T-13 | AC-10 | component | Inputs start read-only with 'Edit' and no 'Save'; typing does nothing. 'Edit' removes `readonly`, focuses Name and shows 'Save'. A valid Save keeps the value, restores `readonly` and 'Edit' (focused), and announces 'Saved.'. An invalid Save stays in edit mode. T-06, T-07 and T-11 now click 'Edit' first; T-11 also runs axe in edit mode (CHG-024). | ☑ | PASS 2026-09-25 (`family-settings.test.tsx`) |
 
+| T-14 | AC-11 | component | No 'Cancel' in read mode; in edit mode 'Cancel' sits beside 'Save'. After changing Name and Phone and a failed Save, Cancel restores 'Helen Doyle' and '0412 345 678', clears the errors, locks the inputs, focuses 'Edit' and announces nothing. After saving '0400 000 000', editing again and cancelling gives back '0400 000 000'. | ☑ | PASS 2026-09-25 (`family-settings.test.tsx`) |
+
 ## Red run (2026-09-25, tests written first)
 37 cases in 3 files: `src/server/profiles/queries.test.ts` (6), `src/features/family-settings/settings-schema.test.ts` (13), `src/features/family-settings/family-settings.test.tsx` (18). All three files fail at import, before any test runs, because the modules they import do not exist yet: `@/server/profiles/queries`, `@/features/family-settings/settings-schema`, `@/features/family-settings/family-settings-view`, `@/features/family-settings/settings-error-state` and `@/app/(family)/family/[clientId]/settings/loading`. `tsc --noEmit` reports only those missing modules; ESLint is clean. AC-09's 44×44px targets and the 200-character layout are checked in the real-browser sweep (FD-06), not in jsdom.
 
@@ -35,6 +37,8 @@ All 37 cases pass: `npx vitest run src/features/family-settings src/server/profi
 
 ## CHG-024 run (2026-09-25)
 Tests changed first: 8 of 34 component cases failed because there was no 'Edit' button. After the change, all 40 cases pass (`npx vitest run src/features/family-settings src/server/profiles`). Lint and `tsc` are clean. In the browser at 1920, 1440, 1024 and 768 wide: the inputs start read-only and typing does nothing, 'Edit' focuses Name, and Save keeps '0400 000 000', locks the inputs and announces 'Saved.'. The Edit button is 44px tall, and there's no horizontal scroll.
+
+Cancel (AC-11), same day: the 3 new cases failed first because there was no 'Cancel' button. After the change, all 43 cases pass, and lint and `tsc` are clean. In the browser at 1920, 1440, 1280, 1024, 900 and 768 wide: there's no Cancel in read mode. In edit mode Cancel is 44px tall, on the same row and left of Save. Cancel after a failed Save restores Helen's values, locks the inputs and focuses Edit. There's no horizontal scroll.
 
 ## Regression scope
 - Run the full unit/component suite, `npm run lint`, `npm run typecheck` and `npm run build` before marking READY FOR PR. `supabase test db` is not affected (no migration), but run it if local Supabase is up. CI is down (Actions limits): run the checks locally and say so in the PR.

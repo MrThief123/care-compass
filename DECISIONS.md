@@ -664,12 +664,12 @@ Docs updated: DECISIONS.md
 ### CHG-024 — FAM-UI-06: Family info is read-only until 'Edit'
 - Date / requested by: 2026-09-25 / Dhruv Verma (human, project lead)
 - Type: acceptance-criterion change
-- Description: the Family info inputs on Family · Settings start read-only, and the card's button reads 'Edit'. 'Edit' makes them editable and the button becomes 'Save'. A valid Save keeps the changes and locks the inputs again. This adds AC-10 and makes AC-06's precondition edit mode. PD-054's per-card Save stays; it is shown after 'Edit'.
-- Source / justification: human request in-session, 2026-09-25: "family info should be read only and have an edit button where save is … Just ensures no one accidently deleted information".
-- Impact: FAM-UI-06 only (`src/features/family-settings/family-settings-view.tsx`, its tests). FAM-12 (Settings wiring) keeps this flow. No shared-kit change: it uses `DetailsFormCard.saveLabel` and `Field.readOnly`.
+- Description: the Family info inputs on Family · Settings start read-only, and the card's button reads 'Edit'. 'Edit' makes them editable and the button becomes 'Save'. A valid Save keeps the changes and locks the inputs again. In edit mode, 'Cancel' next to 'Save' reverts every field to its last saved value and goes back to read mode with nothing announced. This adds AC-10 and AC-11 and makes AC-06's precondition edit mode. PD-054's per-card Save stays; it is shown after 'Edit'.
+- Source / justification: human request in-session, 2026-09-25: "family info should be read only and have an edit button where save is … Just ensures no one accidently deleted information"; then "next to the save should be a cancel button which just reverts all changes and goes back to read mode as if nothing happened".
+- Impact: FAM-UI-06 only (`src/features/family-settings/family-settings-view.tsx`, its tests). FAM-12 (Settings wiring) keeps this flow. No shared-kit change: `Field.readOnly`, and a local Family info card, because `DetailsFormCard` has no Cancel slot (FAM-UI-06 FD-10 records that need for the shared kit).
 - Numbering: CHG-024 was free on every local and remote branch when this was written. Whichever branch merges second renumbers.
 - Human confirmation: Dhruv Verma, 2026-09-25 (in-session).
-- Docs updated: DECISIONS.md (this entry); FAM-UI-06 ACCEPTANCE_CRITERIA.md (AC-06, AC-10), TEST_PLAN.md (T-13), DECISIONS.md (FD-09), PROGRESS.md, SESSION_STATE.md.
+- Docs updated: DECISIONS.md (this entry); FAM-UI-06 ACCEPTANCE_CRITERIA.md (AC-06, AC-10, AC-11), TEST_PLAN.md (T-13, T-14), DECISIONS.md (FD-09, FD-10), PROGRESS.md, SESSION_STATE.md.
 
 Template for future entries:
 ```

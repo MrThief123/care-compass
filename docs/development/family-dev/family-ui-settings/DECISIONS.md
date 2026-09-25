@@ -99,12 +99,22 @@ Record feature-level decisions here using the template below. Project-wide decis
 ### FD-09 — Family info is read-only until 'Edit' (CHG-024)
 - Date: 2026-09-25
 - Context: the human asked that Family info can't be changed by accident.
-- Decision: the inputs render `readOnly` and the kit card's button reads 'Edit'. 'Edit' unlocks the inputs, focuses Name and relabels the button 'Save' (the kit's `saveLabel`). A valid Save keeps the values and locks the inputs again; an invalid Save stays in edit mode. 'Edit' also clears a 'Saved.' message. There is no Cancel: the human didn't ask for one.
+- Decision: the inputs render `readOnly` and the kit card's button reads 'Edit'. 'Edit' unlocks the inputs, focuses Name and relabels the button 'Save' (the kit's `saveLabel`). A valid Save keeps the values and locks the inputs again; an invalid Save stays in edit mode. 'Edit' also clears a 'Saved.' message. In edit mode a 'Cancel' button next to 'Save' puts back the last saved values, clears errors and locks the inputs again, with no announcement (AC-11, added in-session at the human's request).
 - Reason: this uses the existing kit props `DetailsFormCard.saveLabel` and `Field.readOnly`, so `src/components/shared/**` is unchanged.
 - Alternatives considered: plain text instead of read-only inputs (a second display pattern, and it breaks the layout match with the design).
 - Consequences: read-only inputs look the same as editable ones (the kit's `read-only:` style only changes the cursor). FAM-12 keeps this flow when it wires saving.
 - Human confirmation required: yes. Given in-session by Dhruv Verma, 2026-09-25.
 - Test changes caused (recorded requirement change, CHG-024): T-06, T-07 and T-11 click 'Edit' before typing. Before: they typed straight into the inputs. After: 'Edit' first. No assertion was removed. In T-07's 'clears the Saved. message' case, the trigger for clearing 'Saved.' changed from typing in a field to clicking 'Edit', because the inputs are read-only after a save. T-11 also runs axe in edit mode. T-13 is new (AC-10).
+
+### FD-10 — Family info card built locally for its Cancel button
+- Date: 2026-09-25
+- Context: AC-11 needs 'Cancel' next to 'Save'. The kit's `DetailsFormCard` renders one button and has no slot for a second, and `src/components/shared/**` may not be edited (CLAUDE.md §4.2).
+- Decision: `family-settings-view.tsx` builds the card from `CardShell`, an `h3`, the same two-column grid classes and two kit `Button`s: Cancel (`secondary`, the same as `SidePanelForm`'s Cancel) and Edit/Save (primary). It is a local wrapper, not a new shared component.
+- Reason: CLAUDE.md §4.2 allows a local wrapper in `src/features/<screen>/` when the kit lacks something.
+- Alternatives considered: waiting for a shared PR that adds `onCancel`/`cancelLabel` to `DetailsFormCard` (the same props `SidePanelForm` has).
+- Consequences: need for the shared kit: `DetailsFormCard` should take `onCancel`/`cancelLabel`. When it does, switch back to it. Carer and Admin settings (My info, Organisation info) will likely want the same flow.
+- Human confirmation required: no (a wrapper allowed by §4.2). The human is told in-session.
+- Test changes caused: none (T-14 is new).
 
 <!-- Template
 ### FD-xx — <title>

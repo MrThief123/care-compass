@@ -4,12 +4,12 @@ import { useEffect, useRef, useState } from "react";
 
 import {
   ConfirmationModal,
-  DetailsFormCard,
   Field,
   fieldErrors,
   SettingsActionCard,
   type FieldErrors,
 } from "@/components/shared/forms";
+import { Button } from "@/components/ui/button";
 import { CardShell } from "@/components/ui/card-shell";
 import type { ClientHeaderSummary } from "@/server/clients/queries";
 import type { FamilyContactDetails } from "@/server/profiles/queries";
@@ -42,12 +42,14 @@ const FIELDS: ReadonlyArray<{
  * username / password. Phase 1: nothing is persisted or sent (FD-01 to FD-03).
  */
 export function FamilySettingsView({ header, contact }: FamilySettingsViewProps) {
-  const [values, setValues] = useState<FamilyInfoValues>({
+  // What Cancel goes back to: the fixture, then whatever was last saved (CHG-024).
+  const [saved, setSaved] = useState<FamilyInfoValues>({
     name: contact.name,
     phone: contact.phone ?? "",
     email: contact.email ?? "",
     address: contact.address ?? "",
   });
+  const [values, setValues] = useState<FamilyInfoValues>(saved);
   const [errors, setErrors] = useState<FieldErrors>({});
   const [message, setMessage] = useState("");
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -70,6 +72,14 @@ export function FamilySettingsView({ header, contact }: FamilySettingsViewProps)
     setMessage((current) => (current === SAVED ? "" : current));
   }
 
+  function cancel() {
+    setValues(saved);
+    setErrors({});
+    setEditing(false);
+    // Cancel is about to go; the Edit/Save button stays mounted.
+    formRef.current?.querySelector<HTMLElement>("[data-family-info-action]")?.focus();
+  }
+
   // Focus Name once the inputs have lost readOnly.
   useEffect(() => {
     if (editing) formRef.current?.querySelector<HTMLElement>('[name="name"]')?.focus();
@@ -85,6 +95,7 @@ export function FamilySettingsView({ header, contact }: FamilySettingsViewProps)
       return;
     }
     setValues(result.data);
+    setSaved(result.data);
     setErrors({});
     setEditing(false);
     setMessage(SAVED);
@@ -118,26 +129,36 @@ export function FamilySettingsView({ header, contact }: FamilySettingsViewProps)
         </CardShell>
       )}
 
+      {/* The kit's DetailsFormCard, rebuilt here because it has no Cancel slot (FD-10). */}
       <div ref={formRef}>
-        <DetailsFormCard
-          title="Family info"
-          onSave={editing ? save : startEditing}
-          saveLabel={editing ? "Save" : "Edit"}
-        >
-          {FIELDS.map(({ key, label, type }) => (
-            <Field
-              key={key}
-              name={key}
-              label={label}
-              type={type}
-              value={values[key]}
-              onChange={(value) => edit(key, value)}
-              error={errors[key]}
-              required={key === "name"}
-              readOnly={!editing}
-            />
-          ))}
-        </DetailsFormCard>
+        <CardShell className="flex flex-col gap-4 p-5">
+          <h3 className="text-title-card text-text-primary">Family info</h3>
+          <div className="grid gap-4 sm:grid-cols-2">
+            {FIELDS.map(({ key, label, type }) => (
+              <Field
+                key={key}
+                name={key}
+                label={label}
+                type={type}
+                value={values[key]}
+                onChange={(value) => edit(key, value)}
+                error={errors[key]}
+                required={key === "name"}
+                readOnly={!editing}
+              />
+            ))}
+          </div>
+          <div className="flex justify-end gap-3">
+            {editing && (
+              <Button variant="secondary" onClick={cancel}>
+                Cancel
+              </Button>
+            )}
+            <Button data-family-info-action onClick={editing ? save : startEditing}>
+              {editing ? "Save" : "Edit"}
+            </Button>
+          </div>
+        </CardShell>
       </div>
 
       <SettingsActionCard
