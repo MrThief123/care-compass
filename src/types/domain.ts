@@ -47,6 +47,7 @@ export const ProfileSchema = z.object({
   lastName: z.string(),
   email: z.string(),
   phone: z.string().optional(),
+  address: z.string().optional(),
   /** Admin/carer only; per-organisation editable list (PD-038/OQ-13). */
   jobTitle: z.string().optional(),
   isActive: z.boolean(),
@@ -119,6 +120,14 @@ export const CareEventSchema = z.object({
   /** ISO date; absent means the series repeats indefinitely (PD-046). */
   recurrenceEndDate: z.string().optional(),
   completionMode: CompletionModeSchema,
+  /**
+   * What each completion costs, in dollars (PD-058, FAM-UI-08): optional, and
+   * positive with at most 2 decimals when set. Charged to `bucketId` each time
+   * the care is completed; a change applies to future completions only.
+   */
+  cost: z.number().positive().optional(),
+  /** The budget bucket that pays `cost` (`BudgetBucketSummary.id`); set with it. */
+  bucketId: z.string().optional(),
 });
 export type CareEvent = z.infer<typeof CareEventSchema>;
 
@@ -207,15 +216,28 @@ export type BudgetBucketKind = z.infer<typeof BudgetBucketKindSchema>;
 export const BudgetBucketStateSchema = z.enum(["ok", "warning", "alert", "exhausted"]);
 export type BudgetBucketState = z.infer<typeof BudgetBucketStateSchema>;
 
-/** PRD.md Scope, verbatim field list: `{kind, label, total, used, remaining, percentUsed, state}`. */
+/**
+ * PRD.md Scope, verbatim field list: `{kind, label, total, used, remaining, percentUsed, state}`,
+ * plus the bucket's pending costs (CHG-020, PD-058): costs of completed care it
+ * could not cover, not yet taken off `used` or `remaining`. Optional, so a
+ * source without them reads as none.
+ *
+ * Buckets are open (CHG-021, PD-059): each has a stable `id`, and `kind` is only
+ * set on a bucket that matches one of the three suggested names.
+ */
 export const BudgetBucketSummarySchema = z.object({
-  kind: BudgetBucketKindSchema,
+  id: z.string(),
+  kind: BudgetBucketKindSchema.optional(),
   label: z.string(),
   total: z.number().nonnegative(),
   used: z.number().nonnegative(),
   remaining: z.number(),
   percentUsed: z.number().nonnegative(),
   state: BudgetBucketStateSchema,
+  /** Sum of the pending costs, as a positive amount. */
+  pendingTotal: z.number().nonnegative().optional(),
+  /** How many pending costs there are. */
+  pendingCount: z.number().int().nonnegative().optional(),
 });
 export type BudgetBucketSummary = z.infer<typeof BudgetBucketSummarySchema>;
 
@@ -226,13 +248,27 @@ export type FundEntryType = z.infer<typeof FundEntryTypeSchema>;
 export const FundEntrySchema = z.object({
   id: z.string(),
   clientId: z.string(),
-  bucketKind: BudgetBucketKindSchema,
+  /** The bucket this entry belongs to (CHG-021). */
+  bucketId: z.string(),
+  bucketKind: BudgetBucketKindSchema.optional(),
   type: FundEntryTypeSchema,
   amount: z.number(),
   /** ISO date. */
   date: z.string(),
   description: z.string().optional(),
   recordedBy: z.string().optional(),
+  /**
+   * An expense the bucket could not cover when the care was completed: listed,
+   * not yet deducted (CHG-020, PD-058). Absent means paid.
+   */
+  pending: z.boolean().optional(),
+  /** ISO date (YYYY-MM-DD) a pending cost was paid on (CHG-022, PD-060). */
+  paidOn: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .optional(),
+  /** The note given with the save that made this entry (CHG-022, PD-060). */
+  note: z.string().optional(),
 });
 export type FundEntry = z.infer<typeof FundEntrySchema>;
 
@@ -347,6 +383,30 @@ export const TaskLogQuerySchema = z.object({
  */
 export type TypedTaskLogQuery = z.infer<typeof TaskLogQuerySchema>;
 export type TaskLogQuery = Omit<TypedTaskLogQuery, "type">;
+
+/**
+ * Longest range `getOccurrences` answers, in days: a 6×7 month grid (CHG-012).
+ * A calendar never asks for more than one screen of days at a time.
+ */
+export const OCCURRENCE_RANGE_MAX_DAYS = 42;
+
+const DAY_MS = 86_400_000;
+
+/**
+ * Input to `getOccurrences` (CHG-012): Melbourne calendar dates, `YYYY-MM-DD`,
+ * both inclusive. `to` may not be before `from`, and the range may not be
+ * longer than `OCCURRENCE_RANGE_MAX_DAYS`.
+ */
+export const OccurrenceRangeSchema = z
+  .object({ from: z.iso.date(), to: z.iso.date() })
+  .refine(({ from, to }) => from <= to, { message: "`to` is before `from`", path: ["to"] })
+  .refine(
+    ({ from, to }) =>
+      (Date.parse(`${to}T00:00:00Z`) - Date.parse(`${from}T00:00:00Z`)) / DAY_MS + 1 <=
+      OCCURRENCE_RANGE_MAX_DAYS,
+    { message: `a range may cover at most ${OCCURRENCE_RANGE_MAX_DAYS} days`, path: ["to"] },
+  );
+export type OccurrenceRange = z.infer<typeof OccurrenceRangeSchema>;
 
 /**
  * One page of a client's task history, the whole history and not a window of

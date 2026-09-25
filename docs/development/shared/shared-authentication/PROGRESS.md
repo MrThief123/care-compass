@@ -1,6 +1,7 @@
 # Progress — F0-07 Sign-in, sign-out, password reset and role-based routing
 
-Status: MERGED TO DEV (merged to `main`, PR #67)
+Status: MERGED TO DEV
+Merged: to `main`, PR #67
 Owner: Prajeet
 Lane: B — Backend
 Sprint: SPRINT · planned D5

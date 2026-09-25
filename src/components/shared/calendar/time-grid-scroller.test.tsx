@@ -5,7 +5,9 @@ import { TimeGridScroller } from "./time-grid-scroller";
 
 describe("[UI-01] TimeGridScroller", () => {
   it("renders every hour of the day from 00:00 to 23:00", () => {
-    render(<TimeGridScroller>{null}</TimeGridScroller>);
+    // Clock off: the current-time label hides any hour label near it, so the real clock made this
+    // fail whenever the time was close to an hour checked below.
+    render(<TimeGridScroller now={null}>{null}</TimeGridScroller>);
     expect(screen.getByText("00:00")).toBeInTheDocument();
     expect(screen.getByText("07:00")).toBeInTheDocument();
     expect(screen.getByText("23:00")).toBeInTheDocument();

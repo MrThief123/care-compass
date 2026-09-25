@@ -76,6 +76,7 @@ describe("[UI-03][AC-06] lists/cards kit accessibility", () => {
     const { container } = render(
       <BudgetBucketCard
         summary={{
+          id: "bucket-government",
           kind: "government",
           label: "Government",
           total: 3000,

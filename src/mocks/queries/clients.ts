@@ -4,7 +4,14 @@
  * by `src/app` or `src/features`.
  */
 import { ageFromDob } from "@/lib/format/age";
-import { CLIENTS, ORGANISATION, REFERENCE_DATE } from "@/mocks/fixtures";
+import {
+  CLIENT_INFO_SECTIONS,
+  CLIENTS,
+  ORGANISATION,
+  OTHER_ORGANISATIONS,
+  REFERENCE_DATE,
+} from "@/mocks/fixtures";
+import type { ClientInfoSection, ClientInfoSectionKind } from "@/types/domain";
 
 export interface ClientHeaderSummary {
   id: string;
@@ -31,4 +38,44 @@ export async function getClientHeaderSummary(clientId: string): Promise<ClientHe
     suburb: client.suburb,
     organisationName: client.organisationId === ORGANISATION.id ? ORGANISATION.name : undefined,
   };
+}
+
+/** One row of the Change organisation picker (FAM-13). */
+export interface OrganisationChoice {
+  id: string;
+  name: string;
+  /** The organisation the client is with now; it cannot be chosen. */
+  isCurrent: boolean;
+}
+
+/** Every fixture organisation by name, the client's current one flagged. An unknown client is an error. */
+export async function getOrganisationChoices(clientId: string): Promise<OrganisationChoice[]> {
+  const client = CLIENTS.find((candidate) => candidate.id === clientId);
+  if (!client) {
+    throw new Error(`getOrganisationChoices: no client found for id "${clientId}".`);
+  }
+  return [ORGANISATION, ...OTHER_ORGANISATIONS]
+    .map(({ id, name }) => ({ id, name, isCurrent: id === client.organisationId }))
+    .sort((a, b) => a.name.localeCompare(b.name));
+}
+
+/** The order the sections are drawn in on Family · Info. */
+const SECTION_ORDER: readonly ClientInfoSectionKind[] = ["description", "habits", "medicalHistory"];
+
+/**
+ * One client's information sections in `SECTION_ORDER`. Returns copies, so a
+ * caller that edits what it was given cannot change the fixtures.
+ */
+export function selectClientInfoSections(
+  sections: readonly ClientInfoSection[],
+  clientId: string,
+): ClientInfoSection[] {
+  return sections
+    .filter((section) => section.clientId === clientId)
+    .sort((a, b) => SECTION_ORDER.indexOf(a.kind) - SECTION_ORDER.indexOf(b.kind))
+    .map((section) => ({ ...section }));
+}
+
+export async function getClientInfoSections(clientId: string): Promise<ClientInfoSection[]> {
+  return selectClientInfoSections(CLIENT_INFO_SECTIONS, clientId);
 }

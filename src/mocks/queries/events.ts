@@ -8,15 +8,19 @@
  * them (UI-04, CHG-004, CHG-005).
  */
 import {
+  CARE_EVENTS,
   OCCURRENCES_BY_CLIENT_ID,
   PLAIN_EVENT_OCCURRENCES_BY_CLIENT_ID,
   REFERENCE_DATE,
+  UPCOMING_OCCURRENCES_BY_CLIENT_ID,
 } from "@/mocks/fixtures";
 import { melbourneDateKey } from "@/mocks/melbourne-time";
 import { isPlainEvent, TASK_LOG_PAGE_SIZE } from "@/types/domain";
 import type {
   AnyOccurrence,
+  CareEvent,
   Occurrence,
+  OccurrenceRange,
   OccurrenceTypeFilter,
   TaskLogResult,
   TypedTaskLogQuery,
@@ -169,7 +173,63 @@ export async function getOccurrence(
   key: string,
   options: OccurrenceTypeOptions = {},
 ): Promise<AnyOccurrence | undefined> {
-  return rowsOfType(clientId, options.type).find((occurrence) => occurrence.key === key);
+  const found = rowsOfType(clientId, options.type).find((occurrence) => occurrence.key === key);
+  if (found || options.type === "events") return found;
+  // Upcoming rows are tasks, outside every Task log (CHG-012).
+  return findOccurrence(UPCOMING_OCCURRENCES_BY_CLIENT_ID, clientId, key);
+}
+
+/**
+ * One care event (the series, not an occurrence) of the given client, or
+ * `undefined`. Matches on both ids, so another client's event never returns
+ * (CHG-008).
+ */
+export async function getEvent(clientId: string, eventId: string): Promise<CareEvent | undefined> {
+  return CARE_EVENTS.find((event) => event.id === eventId && event.clientId === clientId);
+}
+
+/** The mock's "today": the reference day, as a Melbourne calendar date (CHG-012). */
+export async function getToday(): Promise<string> {
+  return melbourneDateKey(REFERENCE_DATE);
+}
+
+/**
+ * The rows whose start falls on a Melbourne calendar day from `range.from` to
+ * `range.to`, both inclusive, oldest first (ties by key ascending). `range` is
+ * already validated (`OccurrenceRangeSchema`). Returns copies, and does not
+ * reorder the array it is given.
+ */
+export function occurrencesInRange<T extends AnyOccurrence>(
+  occurrences: readonly T[],
+  range: OccurrenceRange,
+): T[] {
+  return occurrences
+    .filter((occurrence) => {
+      const day = melbourneDateKey(occurrence.start);
+      return day >= range.from && day <= range.to;
+    })
+    .sort(oldestFirst)
+    .map((occurrence) => ({ ...occurrence }));
+}
+
+export async function getOccurrences(
+  clientId: string,
+  range: OccurrenceRange,
+  options: OccurrenceTypeOptions = {},
+): Promise<AnyOccurrence[]> {
+  // Tasks, as before; plain events join only when the read asks for them (F0-11, UI-05 FD-01).
+  const tasks =
+    options.type === "events"
+      ? []
+      : [
+          ...rowsFor(OCCURRENCES_BY_CLIENT_ID, clientId),
+          ...rowsFor(UPCOMING_OCCURRENCES_BY_CLIENT_ID, clientId),
+        ];
+  const events =
+    options.type === "all" || options.type === "events"
+      ? rowsFor(PLAIN_EVENT_OCCURRENCES_BY_CLIENT_ID, clientId)
+      : [];
+  return occurrencesInRange<AnyOccurrence>([...tasks, ...events], range);
 }
 
 export interface SetOccurrenceDoneResult {
