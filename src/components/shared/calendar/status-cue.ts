@@ -1,5 +1,6 @@
 import type { IconName } from "@/components/ui/icon";
-import type { OccurrenceStatus } from "@/types/domain";
+import { isPlainEvent } from "@/types/domain";
+import type { AnyOccurrence, OccurrenceStatus } from "@/types/domain";
 
 export interface StatusCue {
   /** Background utility for the block/chip's left accent bar. */
@@ -25,3 +26,17 @@ export const STATUS_CUE: Record<OccurrenceStatus, StatusCue> = {
   done: { bar: "bg-bg-brand", icon: "check", label: "Done" },
   overdue: { bar: "bg-bg-alert-strong", icon: "alert-triangle", label: "Overdue" },
 };
+
+/**
+ * The cue for a plain event (UI-05, CHG-009): it has no status, so it gets a
+ * neutral stripe, no check or alert shape, and the word "Event" in place of a
+ * status word. On compact surfaces, where the word is read out only, the
+ * stripe colour alone sets it apart from a Planned task — accepted for event
+ * type by CHG-011; status itself is never colour alone.
+ */
+export const EVENT_CUE: StatusCue = { bar: "bg-text-secondary", label: "Event" };
+
+/** The cue for any occurrence: the event cue for a plain event, else its status cue. */
+export function occurrenceCue(occurrence: AnyOccurrence): StatusCue {
+  return isPlainEvent(occurrence) ? EVENT_CUE : STATUS_CUE[occurrence.status];
+}

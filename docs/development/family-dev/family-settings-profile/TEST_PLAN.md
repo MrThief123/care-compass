@@ -13,10 +13,10 @@ Tests are written **before** production code (TESTING.md §2). Run them, confirm
 
 | Test ID | Covers | Level | Test description | Written first? | Result |
 |---|---|---|---|---|---|
-| T-01 | AC-01 | e2e | Given Helen's phone '0412 345 678', when she changes it and saves (per OQ-35), then the new number is shown after reload. | ☐ | NOT RUN |
-| T-02 | AC-02 | component | Given an invalid email 'helen@', when saved, then an email error is shown. | ☐ | NOT RUN |
-| T-03 | AC-03 | integration | Given Helen clicks Reset, when the action runs, then a reset email is requested for her address and a confirmation message is shown. | ☐ | NOT RUN |
-| T-04 | AC-04 | db | Given Helen, when she updates another profile's row, then RLS rejects it. | ☐ | NOT RUN |
+| T-01 | AC-01 | integration (was e2e, FD-05) | Given Helen's phone '0412 345 678', when she changes it and saves (per OQ-35), then the new number is shown after reload. | ☑ | PASS |
+| T-02 | AC-02 | component | Given an invalid email 'helen@', when saved, then an email error is shown. | ☑ | PASS |
+| T-03 | AC-03 | unit + integration (FD-05) | Given Helen clicks Reset, when the action runs, then a reset email is requested for her address and a confirmation message is shown. | ☑ | PASS |
+| T-04 | AC-04 | db | Given Helen, when she updates another profile's row, then RLS rejects it. | ☑ | PASS |
 
 ## Regression scope
 - Run the full unit/component suite and `supabase test db` before marking READY FOR PR.

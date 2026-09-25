@@ -1,14 +1,10 @@
 # Session State — FAM-13 Family — Change organisation
 
-Last session date: none (no implementation session yet)
-Current branch: n/a — `feature/family-change-organisation` not created
-Worked on: n/a
-What changed: n/a
-Tests run: none
-Test results: n/a
-Current blocker: OQ-06, OQ-15
-Important discoveries: none
-Important decisions: none
-Exact next action: Run `START FEATURE FAM-13` once dependencies are MERGED TO DEV (or COMPLETE) and blocking decisions are answered.
-Files likely to be touched next: `src/features/family-settings/change-organisation.tsx`, `src/components/shared/confirmation-modal.tsx`, `supabase/migrations/*_transfer_client.sql`, `supabase/tests/transfer_client.test.sql`
-Warning for next session: Read PRD.md, ACCEPTANCE_CRITERIA.md and TEST_PLAN.md before writing any code. Do not create the branch from the wrong parent (`family-dev`).
+Last session date: 2026-09-25
+Current branch: `feature/family-change-organisation` (from `origin/family-dev`, which contains FAM-12)
+Worked on: tests first, migration, server action and contract, picker and view, verification, docs.
+Tests run: pgTAP (66), FAM-13 unit/component (80 in 5 files), FAM-13 and FAM-12 integration against the local stack (7), typecheck, lint, prettier, `next build`, full `npm run test`, real-browser run on the mock data source.
+Test results: all green.
+Current blocker: none. Waiting for the human's review and approval to open the PR.
+Important discoveries: `.env.local` points at a hosted Supabase project, so integration tests run there unless overridden, and the FAM-13 migration is applied locally only. AC-03 can only be proven for the tables that exist today (FD-05). The PR must flag: `supabase/**` edited from Lane F (FD-01), Lane S files edited (`src/mocks`, `database.types.ts`, FD-01, FD-06), FAM-UI-06 test helpers changed (FD-07), the undesigned picker and wording (FD-02, FD-08).
+Exact next action: on the human's "yes", open the PR `FAM-13 Family — Change organisation` to `family-dev` using `docs/DEVELOPMENT_WORKFLOW.md` §8.

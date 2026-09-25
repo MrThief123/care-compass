@@ -3,8 +3,10 @@
 import { Icon } from "@/components/ui/icon";
 import { layoutBlocks } from "@/lib/dates/layout-blocks";
 import { cn } from "@/lib/utils";
-import type { Occurrence } from "@/types/domain";
+import { isPlainEvent } from "@/types/domain";
+import type { AnyOccurrence, Occurrence } from "@/types/domain";
 
+import { EventPill } from "../event-pill";
 import { StatusPill } from "../status-pill";
 
 import {
@@ -18,12 +20,16 @@ import {
 import { CurrentTimeLine, useCurrentTime } from "./current-time-line";
 import { EventPopover } from "./event-popover";
 import { melbourneDateTime, melbourneTimeRange } from "./melbourne-time";
-import { STATUS_CUE } from "./status-cue";
+import { occurrenceCue } from "./status-cue";
 import { TimeGridScroller } from "./time-grid-scroller";
 import { useEventHover } from "./use-event-hover";
 
-export interface DayTimelineProps {
-  occurrences: Occurrence[];
+/**
+ * `T` is the occurrence type passed in: tasks only by default, or tasks and
+ * plain events (`AnyOccurrence`, UI-05) — `onSelect` hands back the same type.
+ */
+export interface DayTimelineProps<T extends AnyOccurrence = Occurrence> {
+  occurrences: T[];
   /** First hour in view when the day opens (default 7 = 07:00). */
   startHour?: number;
   /** Last hour in view when the day opens (default 18 = 18:00). */
@@ -36,7 +42,7 @@ export interface DayTimelineProps {
   /** Pins the current-time line (tests); omit to track the real clock. */
   now?: Date | null;
   /** Fired when a block is clicked — the event is being opened for editing. */
-  onSelect?: (occurrence: Occurrence) => void;
+  onSelect?: (occurrence: T) => void;
   className?: string;
 }
 
@@ -54,7 +60,7 @@ const COLUMN_GUTTER_PX = 3;
  * `blockDensity`); whatever a tier drops is shown in the card it raises on
  * hover, because a click on a block opens it for editing (UI-02).
  */
-export function DayTimeline({
+export function DayTimeline<T extends AnyOccurrence = Occurrence>({
   occurrences,
   startHour = 7,
   endHour = 18,
@@ -64,7 +70,7 @@ export function DayTimeline({
   now,
   onSelect,
   className,
-}: DayTimelineProps) {
+}: DayTimelineProps<T>) {
   const hover = useEventHover("day-timeline");
   // One clock for the line and the gutter label, so they cannot disagree.
   const clock = useCurrentTime(now);
@@ -98,7 +104,7 @@ export function DayTimeline({
         const columnWidth = 100 / columnCount;
         const { time: startTime } = melbourneDateTime(item.start);
         const timeRange = melbourneTimeRange(item.start, item.durationMinutes);
-        const cue = STATUS_CUE[item.status];
+        const cue = occurrenceCue(item);
         // Everything but the title: the block's own chrome, the time row, and
         // the status row the `full` tier adds. Whatever is left over, the
         // title may wrap into.
@@ -133,7 +139,7 @@ export function DayTimeline({
                 density === "compact" ? "justify-center" : "py-1",
               )}
             >
-              {/* The `full` tier renders StatusPill, which already says it. */}
+              {/* The `full` tier renders StatusPill or EventPill, which already says it. */}
               {density !== "full" && <span className="sr-only">{cue.label}: </span>}
 
               {density === "compact" ? (
@@ -203,7 +209,11 @@ export function DayTimeline({
                       {item.assignee}
                     </span>
                   )}
-                  <StatusPill status={item.status} actorName={item.actor} className="shrink-0" />
+                  {isPlainEvent(item) ? (
+                    <EventPill className="shrink-0" />
+                  ) : (
+                    <StatusPill status={item.status} actorName={item.actor} className="shrink-0" />
+                  )}
                 </span>
               )}
             </span>

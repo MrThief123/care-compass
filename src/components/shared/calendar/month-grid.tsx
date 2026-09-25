@@ -4,24 +4,29 @@ import { Icon } from "@/components/ui/icon";
 import { monthGrid } from "@/lib/dates/month-grid";
 import type { LocalDate } from "@/lib/dates/week-range";
 import { cn } from "@/lib/utils";
-import type { Occurrence } from "@/types/domain";
+import { isPlainEvent } from "@/types/domain";
+import type { AnyOccurrence, Occurrence } from "@/types/domain";
 
 import { melbourneDateTime } from "./melbourne-time";
-import { STATUS_CUE } from "./status-cue";
+import { occurrenceCue } from "./status-cue";
 
 const DAY_LABELS = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
 
-export interface MonthGridProps {
+/**
+ * `T` is the occurrence type passed in: tasks only by default, or tasks and
+ * plain events (`AnyOccurrence`, UI-05) — `labelFormat` gets the same type.
+ */
+export interface MonthGridProps<T extends AnyOccurrence = Occurrence> {
   /** Any date within the month to display. */
   month: LocalDate;
   today?: LocalDate;
   selected?: LocalDate;
-  occurrences?: Occurrence[];
+  occurrences?: T[];
   /**
    * Replaces the whole default chip label (start time + title) with one
    * string, e.g. the carer view's "Margaret — Morning m…".
    */
-  labelFormat?: (occurrence: Occurrence) => string;
+  labelFormat?: (occurrence: T) => string;
   /**
    * Rows a day cell can show before the rest collapse into an "N more" row.
    * The overflow row occupies one of these rows, matching Notion/Google
@@ -33,7 +38,7 @@ export interface MonthGridProps {
 }
 
 /** 6×7 month grid with event chips per day (UI-01 Scope: `MonthGrid`). */
-export function MonthGrid({
+export function MonthGrid<T extends AnyOccurrence = Occurrence>({
   month,
   today,
   selected,
@@ -42,10 +47,10 @@ export function MonthGrid({
   maxChipsPerDay = 4,
   onSelectDate,
   className,
-}: MonthGridProps) {
+}: MonthGridProps<T>) {
   const weeks = monthGrid(month);
 
-  const occurrencesByDay = new Map<LocalDate, Occurrence[]>();
+  const occurrencesByDay = new Map<LocalDate, T[]>();
   for (const occurrence of occurrences) {
     const { date } = melbourneDateTime(occurrence.start);
     const existing = occurrencesByDay.get(date);
@@ -119,10 +124,11 @@ export function MonthGrid({
                 >
                   {visible.map((occurrence) => {
                     const { time } = melbourneDateTime(occurrence.start);
-                    const cue = STATUS_CUE[occurrence.status];
+                    const cue = occurrenceCue(occurrence);
                     return (
                       <span
                         key={occurrence.key}
+                        data-testid={`month-grid-chip-${occurrence.key}`}
                         className="flex min-w-0 shrink-0 items-stretch overflow-hidden rounded-inset border border-border-default bg-bg-surface"
                       >
                         <span className={cn("w-1 shrink-0", cue.bar)} aria-hidden />
@@ -134,7 +140,7 @@ export function MonthGrid({
                               size={14}
                               className={cn(
                                 "shrink-0",
-                                occurrence.status === "overdue"
+                                !isPlainEvent(occurrence) && occurrence.status === "overdue"
                                   ? "text-text-alert-strong"
                                   : "text-text-brand",
                               )}

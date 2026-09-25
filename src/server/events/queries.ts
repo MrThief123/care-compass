@@ -1,13 +1,27 @@
 /**
  * `events` domain query contract (UI-00 — see feature DECISIONS.md FD-02;
- * extended by UI-04 under CHG-004, per CHG-002 "extend, not recreate").
+ * extended by UI-04 under CHG-004 and by FAM-UI-02 under CHG-012, per CHG-002
+ * "extend, not recreate").
  * Screens must import from here, never from `src/mocks` directly
  * (lint-enforced).
  */
 import * as mock from "@/mocks/queries/events";
 import { getDataSourceMode, notImplementedForSupabase } from "@/server/data-source";
-import { TaskLogQuerySchema } from "@/types/domain";
-import type { Occurrence, OccurrenceStatus, TaskLogResult } from "@/types/domain";
+import {
+  isPlainEvent,
+  OccurrenceRangeSchema,
+  OccurrenceTypeFilterSchema,
+  TaskLogQuerySchema,
+} from "@/types/domain";
+import type {
+  AnyOccurrence,
+  CareEvent,
+  Occurrence,
+  OccurrenceRange,
+  OccurrenceStatus,
+  OccurrenceTypeFilter,
+  TaskLogResult,
+} from "@/types/domain";
 
 export interface TaskLogQueryInput {
   q?: string;
@@ -16,13 +30,35 @@ export interface TaskLogQueryInput {
 }
 
 /**
- * The client's occurrences that start on the reference day (Melbourne
- * calendar day), oldest first, ties by key ascending.
+ * Asks a read to include plain events (UI-05, CHG-009): `all` gives tasks and
+ * plain events, `tasks` only tasks, `events` only plain events. A read with
+ * this option returns `AnyOccurrence`; check `isPlainEvent()` before reading a
+ * status. Without it, a read returns tasks only, typed `Occurrence`, exactly
+ * as before (FD-01, FD-03).
  */
-export async function getTodayOccurrences(clientId: string): Promise<Occurrence[]> {
+export interface OccurrenceTypeOption {
+  type: OccurrenceTypeFilter;
+}
+
+/**
+ * The client's occurrences that start on the reference day (Melbourne
+ * calendar day), oldest first, ties by key ascending. Tasks only unless a
+ * `type` option is passed; a Today timeline that shows plain events passes
+ * `{ type: "all" }`.
+ */
+export async function getTodayOccurrences(clientId: string): Promise<Occurrence[]>;
+export async function getTodayOccurrences(
+  clientId: string,
+  options: OccurrenceTypeOption,
+): Promise<AnyOccurrence[]>;
+export async function getTodayOccurrences(
+  clientId: string,
+  options?: OccurrenceTypeOption,
+): Promise<AnyOccurrence[]> {
+  const type = options ? OccurrenceTypeFilterSchema.parse(options.type) : undefined;
   const mode = getDataSourceMode();
   if (mode === "mock") {
-    return mock.getTodayOccurrences(clientId);
+    return mock.getTodayOccurrences(clientId, { type });
   }
   notImplementedForSupabase("events", "getTodayOccurrences");
 }
@@ -40,15 +76,33 @@ export async function getTodayOccurrences(clientId: string): Promise<Occurrence[
  *   `items` with the true `total` and the requested `page`; it does not throw.
  * - `q`: trimmed, case-insensitive substring of the task title. `status`:
  *   exact match.
+ * - `type` (UI-05, CHG-009): `all` returns tasks and plain events together,
+ *   `tasks` only tasks, `events` only plain events; the result is then typed
+ *   `TaskLogResult<AnyOccurrence>`. Omitted means **tasks only**, typed
+ *   `TaskLogResult`, exactly as before (FD-01). Any `status` filter returns
+ *   tasks only, since a plain event has no status.
+ * - **The log and every export read with `type: "all"`** (human, FD-01): the
+ *   Care log (FAM-UI-07, FAM-14, FAM-15) and any log or data export (PL-06,
+ *   PL-08) must show tasks and plain events together. The tasks-only default
+ *   exists only so callers written before UI-05 keep their results, and may
+ *   later switch to `all`.
  * - Validation: `query` is parsed with `TaskLogQuerySchema`. `page` of 0, a
- *   negative, a fraction, NaN or Infinity, or an unknown `status`, rejects with
- *   a `ZodError`. Screens sanitise URL params before calling.
+ *   negative, a fraction, NaN or Infinity, or an unknown `status` or `type`,
+ *   rejects with a `ZodError`. Screens sanitise URL params before calling.
  * - An unknown client has an empty log (`total` 0).
  */
 export async function getTaskLog(
   clientId: string,
-  query: TaskLogQueryInput = {},
-): Promise<TaskLogResult> {
+  query?: TaskLogQueryInput & { type?: undefined },
+): Promise<TaskLogResult>;
+export async function getTaskLog(
+  clientId: string,
+  query: TaskLogQueryInput & OccurrenceTypeOption,
+): Promise<TaskLogResult<AnyOccurrence>>;
+export async function getTaskLog(
+  clientId: string,
+  query: TaskLogQueryInput & Partial<OccurrenceTypeOption> = {},
+): Promise<TaskLogResult<AnyOccurrence>> {
   const parsed = TaskLogQuerySchema.parse(query);
   const mode = getDataSourceMode();
   if (mode === "mock") {
@@ -61,14 +115,108 @@ export async function getTaskLog(
  * One occurrence by its key (`${eventId}:${originalStartISO}`), past or future,
  * or `undefined` when the key is unknown or does not belong to `clientId`. It
  * never returns another client's row; authorisation itself stays in RLS.
+ * Tasks only unless a `type` option is passed: a plain event's key is found
+ * only with `{ type: "all" }` or `{ type: "events" }` (FD-03).
  */
+export async function getOccurrence(clientId: string, key: string): Promise<Occurrence | undefined>;
 export async function getOccurrence(
   clientId: string,
   key: string,
-): Promise<Occurrence | undefined> {
+  options: OccurrenceTypeOption,
+): Promise<AnyOccurrence | undefined>;
+export async function getOccurrence(
+  clientId: string,
+  key: string,
+  options?: OccurrenceTypeOption,
+): Promise<AnyOccurrence | undefined> {
+  const type = options ? OccurrenceTypeFilterSchema.parse(options.type) : undefined;
   const mode = getDataSourceMode();
   if (mode === "mock") {
-    return mock.getOccurrence(clientId, key);
+    return mock.getOccurrence(clientId, key, { type });
   }
   notImplementedForSupabase("events", "getOccurrence");
+}
+
+/**
+ * One care event, the series itself (title, description, recurrence, anchor
+ * start), by id, or `undefined` when the id is unknown or the event belongs to
+ * another client (CHG-008). Occurrence-level fields (date, status) come from
+ * `getOccurrence`. Authorisation itself stays in RLS.
+ */
+export async function getEvent(clientId: string, eventId: string): Promise<CareEvent | undefined> {
+  const mode = getDataSourceMode();
+  if (mode === "mock") {
+    return mock.getEvent(clientId, eventId);
+  }
+  notImplementedForSupabase("events", "getEvent");
+}
+
+/**
+ * Today, as a Melbourne calendar date (`YYYY-MM-DD`): the day a calendar opens
+ * on (CHG-012). The mock answers the fixtures' reference day (Mon 30 Nov 2026)
+ * so screens and fixtures agree; every other source answers the real day.
+ */
+export async function getToday(): Promise<string> {
+  const mode = getDataSourceMode();
+  if (mode === "mock") {
+    return mock.getToday();
+  }
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "Australia/Melbourne" }).format(new Date());
+}
+
+/**
+ * The client's occurrences whose start falls on a Melbourne calendar day from
+ * `range.from` to `range.to`, both inclusive (CHG-012): what a calendar draws
+ * for its visible days, past or future, any status.
+ *
+ * - Order: oldest first by `start` (instants, not strings), ties by `key`
+ *   ascending.
+ * - Validation: `range` is parsed with `OccurrenceRangeSchema`. A date that is
+ *   not `YYYY-MM-DD` or does not exist, `to` before `from`, or more than
+ *   `OCCURRENCE_RANGE_MAX_DAYS` days rejects with a `ZodError`. Screens
+ *   sanitise URL params before calling.
+ * - An unknown client, or a range with nothing in it, is an empty list; so is
+ *   a client the signed-in user cannot read (RLS).
+ * - Tasks only unless a `type` option is passed (FD-01), like the other reads
+ *   here; a read with `type` returns `AnyOccurrence`.
+ * - With `DATA_SOURCE=supabase` (F0-11): each event's rule is expanded by
+ *   `src/lib/recurrence` over the range's Melbourne days, merged with
+ *   overrides, the latest completion (status, who did it) and the carer on
+ *   shift; a deactivated event stops generating from when it was deactivated
+ *   and keeps its earlier occurrences. `options.now` is the clock for Overdue
+ *   (tests pass one); the mock ignores it.
+ */
+export async function getOccurrences(
+  clientId: string,
+  range: OccurrenceRange,
+  options?: { now?: Date },
+): Promise<Occurrence[]>;
+export async function getOccurrences(
+  clientId: string,
+  range: OccurrenceRange,
+  options: OccurrenceTypeOption & { now?: Date },
+): Promise<AnyOccurrence[]>;
+export async function getOccurrences(
+  clientId: string,
+  range: OccurrenceRange,
+  options: Partial<OccurrenceTypeOption> & { now?: Date } = {},
+): Promise<AnyOccurrence[]> {
+  const parsed = OccurrenceRangeSchema.parse(range);
+  const type = options.type ? OccurrenceTypeFilterSchema.parse(options.type) : undefined;
+
+  const mode = getDataSourceMode();
+  if (mode === "mock") {
+    return mock.getOccurrences(clientId, parsed, { type });
+  }
+
+  const { loadOccurrences, melbourneDaysToInstants } = await import("./occurrences");
+  const occurrences = await loadOccurrences(
+    clientId,
+    melbourneDaysToInstants(parsed),
+    options.now ?? new Date(),
+  );
+  if (type === "all") return occurrences;
+  return occurrences.filter((occurrence) =>
+    type === "events" ? isPlainEvent(occurrence) : !isPlainEvent(occurrence),
+  );
 }
