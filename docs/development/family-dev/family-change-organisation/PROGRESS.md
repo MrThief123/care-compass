@@ -1,21 +1,20 @@
 # Progress — FAM-13 Family — Change organisation
 
-Status: NOT STARTED
-Owner: unclaimed
+Status: IN PROGRESS
+Owner: Dhruv Verma
 Lane: F — Family
 Sprint: SPRINT · planned D11
-Branch: `feature/family-change-organisation` (not yet created)
+Branch: `feature/family-change-organisation` (created from `origin/family-dev` at 9f4de15)
 PR target: `family-dev`
-Last updated: 2026-09-17 (planning pack generated)
+Last updated: 2026-09-25
 
 ## Blockers
-- OQ-06 — Organisation change model
-- OQ-15 — Incoming organisation's visibility of history
+- None. Blocking decisions are ANSWERED in DECISIONS.md (FAM-12: OQ-35; FAM-13: OQ-06, OQ-15).
 
 ## Dependencies status
-- F0-06 — NOT STARTED
-- F0-10 — NOT STARTED
-- FAM-UI-06 — NOT STARTED
+- F0-06 — MERGED TO DEV
+- F0-10 — MERGED TO DEV
+- FAM-UI-06 — MERGED TO DEV
 
 ## Completed
 - Feature documentation drafted (Claude Chat planning pack)
