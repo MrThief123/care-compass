@@ -1,12 +1,12 @@
 # Progress — FAM-UI-06 Family Settings screen (UI)
 
-Status: READY FOR PR
+Status: IN REVIEW
 Owner: Dhruv Verma
 Lane: F — Family
 Sprint: SPRINT · planned D6
 Branch: `feature/family-ui-settings`
 PR target: `family-dev`
-Last updated: 2026-09-25 (CHG-024 Edit/Save/Cancel flow added; all 43 cases green; waiting for approval to open the PR)
+Last updated: 2026-09-25 (CHG-024 Edit/Save/Cancel flow added; all 43 cases green; PR #93 opened)
 
 ## Blockers
 - None
@@ -28,7 +28,7 @@ Last updated: 2026-09-25 (CHG-024 Edit/Save/Cancel flow added; all 43 cases gree
 - None
 
 ## Remaining
-- Open the PR to `family-dev` once the human approves.
+- Review and merge of PR #93 (a human merges).
 
 ## Acceptance criteria status
 - 11 / 11 MET
@@ -64,7 +64,7 @@ Last updated: 2026-09-25 (CHG-024 Edit/Save/Cancel flow added; all 43 cases gree
 - None beyond the FDs.
 
 ## Next action
-- Human approval, then open PR `FAM-UI-06 Family Settings screen (UI)` to `family-dev`.
+- Address review comments on PR #93, if any.
 
 ## Ready for PR
-- Yes (waiting for human approval)
+- Yes. PR #93 (https://github.com/MrThief123/care-compass/pull/93) opened to `family-dev` on 2026-09-25 with the human's approval.
