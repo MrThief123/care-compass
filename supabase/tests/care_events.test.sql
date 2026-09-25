@@ -3,7 +3,7 @@
 -- plus the CHG-001 / CHG-009 rules: plain events cannot be ticked off, per-occurrence mode overrides,
 -- and OQ-10 undo. AC-01 to AC-03 and AC-08 (occurrence listing, status) are TypeScript, tested elsewhere.
 begin;
-select plan(66);
+select plan(68);
 
 -- ---------------------------------------------------------------------------
 -- Seed: two organisations, five people, three clients, shifts, events
@@ -101,6 +101,10 @@ select throws_ok(
 select throws_ok(
   $$ insert into care_event_overrides (event_id, original_start, kind, created_by) values ('e1111111-1111-1111-1111-111111111111', '2026-12-07 09:00:00+11', 'modified', 'a1111111-1111-1111-1111-111111111111') $$,
   '23514', null, 'a modified override that changes nothing is rejected');
+
+select throws_ok(
+  $$ insert into care_events (client_id, title, starts_at, created_by) values ('b1111111-1111-1111-1111-111111111111', 'x', '2026-11-30 09:00:00.5+11', 'a1111111-1111-1111-1111-111111111111') $$,
+  '23514', null, 'an event start must be a whole second: an occurrence is identified by its start');
 
 insert into care_event_overrides (event_id, original_start, kind, created_by) values
   ('e1111111-1111-1111-1111-111111111111', '2026-12-14 09:00:00+11', 'cancelled', 'a1111111-1111-1111-1111-111111111111');
@@ -211,6 +215,9 @@ select throws_ok(
 select throws_ok(
   $$ select set_occurrence_done('99999999-9999-9999-9999-999999999999', '2026-11-30 09:00:00+11') $$,
   'P0002', null, 'an event that does not exist is refused');
+select throws_ok(
+  $$ select set_occurrence_done('e1111111-1111-1111-1111-111111111111', '2026-12-28 09:00:00.5+11') $$,
+  '23514', null, 'an occurrence start must be a whole second');
 select throws_ok(
   $$ select set_occurrence_done(null, '2026-11-30 09:00:00+11') $$,
   '22023', null, 'a missing event id is refused');
