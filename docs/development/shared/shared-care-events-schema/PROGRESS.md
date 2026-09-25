@@ -1,65 +1,67 @@
 # Progress — F0-11 Care events, occurrence overrides and append-only completions
 
-Status: NOT STARTED
-Owner: unclaimed
+Status: MERGED TO DEV
+Owner: Dhruv Verma
 Lane: B — Backend
 Sprint: SPRINT · planned D5–D6
-Branch: `feature/shared-care-events-schema` (not yet created)
+Branch: `feature/shared-care-events-schema` (created from `origin/main`)
 PR target: `main (per OQ-01 — shared work)`
-Last updated: 2026-09-17 (planning pack generated)
+Last updated: 2026-09-25
 
 ## Blockers
-- OQ-01 — Branch parent and naming for shared (foundation and cross-cutting) work
-- OQ-10 — Status behaviour and undo
-- OQ-22 — Event fields
-- OQ-29 — Which nurse is shown on an event
-- OQ-09 — Carer access model
-- OQ-33 — Carer calendar and task semantics
+- None. OQ-01, OQ-10, OQ-22, OQ-29, OQ-09 and OQ-33 are ANSWERED in DECISIONS.md; OQ-34 is non-blocking and parked.
 
 ## Dependencies status
-- F0-06 — NOT STARTED
-- F0-09 — NOT STARTED
-- F0-10 — NOT STARTED
-- F0-08 — NOT STARTED
+- F0-06 — MERGED TO DEV
+- F0-09 — MERGED TO DEV
+- F0-10 — MERGED TO DEV
+- F0-08 — MERGED TO DEV
 
 ## Completed
-- Feature documentation drafted (Claude Chat planning pack)
+- Tests first (T-01 to T-08 plus supporting tests), then implementation, 2026-09-25.
+- Migration `20260925030000_care_events.sql`: `care_events`, `care_event_overrides`, append-only `care_event_completions`, RLS, audit triggers, `set_occurrence_done`, `set_occurrence_undone`, `client_shift_carers`.
+- `deriveStatus` (`src/lib/occurrences/`), Melbourne conversion (`src/lib/dates/`), occurrence assembly (`build-occurrences.ts`), `getOccurrences` (real and mock).
 
 ## In progress
 - None
 
 ## Remaining
-- `care_events`: id, client_id, title, description, starts_at (anchor), duration_minutes, recurrence (jsonb validated by F0-09 schema), recurrence_until null, is_active, created_by, created_at, updated_at (final fields per OQ-22).
-- `care_event_overrides`: event_id, original_start, kind ('cancelled'|'modified'), new_starts_at, new_duration_minutes, created_by.
-- `care_event_completions` (append-only): id, event_id, original_start, action ('done'|'undone' per OQ-10), actor_id, actor_display_name snapshot, organisation_id snapshot, occurred_at.
-- Postgres function `set_occurrence_done(event_id, original_start)` — authorises (family of client, or carer on active shift per OQ-09) and inserts completion.
-- TypeScript `deriveStatus(occurrence, latestCompletion, now)` → 'planned'|'done'|'overdue' with actor.
-- Server query `getOccurrences(clientId, range)` combining events + F0-09 expansion + overrides + latest completion + assigned carer (per OQ-29).
-- RLS: family read/write events of linked clients; assigned carer read; carer write per OQ-09; admin read (for Admin Home overdue) — writes by admin not in design.
-- Attach audit trigger (F0-08).
+- Human review, then PR to `main` (needs the human's approval to open it).
+- Follow-ups for other features (FD-08, FD-11): Supabase branches of `getTodayOccurrences`, `getTaskLog`, `getOccurrence`, `getEvent` and `setOccurrenceDone` (FAM/CAR wiring); the domain-to-`{frequency, interval}` mapper (FAM-06 / FAM-07); F0-16 seed data.
 
 ## Acceptance criteria status
-- 0 / 8 MET
+- 8 / 8 MET (AC-01 to AC-08). AC-03's wording ('Aisha R.') conflicts with PD-038; behaviour is met with the full name (FD-02, HUMAN REVIEW).
 
 ## Tests
-- Written: 0 / 8
-- Passing: 0
-- Failing: 0
+- Written: 8 / 8 planned (T-01 to T-08) plus supporting tests: pgTAP 68, derive-status 17, melbourne-time 12, build-occurrences 33, get-occurrences 18, integration 5
+- Passing: all. `supabase test db`: 99 (4 files). Unit: 80 across the four new TypeScript files. `tests/integration/care-events.test.ts` against the local stack: 5
+- Failing: 0 of ours. Full `npm run test` (default env): 594 passed, 5 skipped (the local-only integration tests), 1 failed (the `day-timeline` test above, unrelated)
 
 ## Files changed
-- None yet. Likely files: `supabase/migrations/*_care_events.sql`, `supabase/tests/care_events.test.sql`, `src/server/events/queries.ts`, `src/server/events/status.ts`, `src/server/events/status.test.ts`, `tests/integration/events-queries.test.ts`
+- `supabase/migrations/20260925030000_care_events.sql`, `supabase/tests/care_events.test.sql`, `supabase/tests/audit_log.test.sql` (scoped, FD-01)
+- `src/lib/supabase/database.types.ts` (added blocks, FD-10)
+- `src/lib/dates/melbourne-time.ts` (moved from mocks, FD-09), `src/mocks/melbourne-time.ts` (re-export), `src/lib/occurrences/derive-status.ts`
+- `src/server/events/`: `build-occurrences.ts`, `occurrences.ts`, `queries.ts` (`getOccurrences`), `src/mocks/queries/events.ts` (mock `getOccurrences`), tests
+- `tests/integration/care-events.test.ts`
+- This feature's docs (DATA_MODEL.md updated to what was built)
 
 ## Decisions
-- See DECISIONS.md
+- FD-01 F0-08 audit test scoped (HUMAN REVIEW); FD-02 full actor names vs AC-03 (HUMAN REVIEW); FD-03 due time is the start; FD-04 idempotent tick-off (HUMAN REVIEW); FD-05 schema differs from the proposal; FD-06 access rules; FD-07 history blocks deletion; FD-08 `getOccurrences` shape; FD-09 time helpers in lib; FD-10 types merged by hand; FD-11 defaults.
 
 ## Problems encountered
-- None
+- **Merge into `family-dev` broke CI (FD-12).** My `getOccurrences` duplicated `family-dev`'s (CHG-012), and resolving the conflict by taking this branch's `queries.ts` dropped `getEvent` and `getToday` and the FAM-13 function types. Fixed on `fix/events-contract-after-f0-11`. Lesson: merge `family-dev` into a shared branch only after reading what it already has in the files being touched; `git diff family-dev -- src/server/events` would have shown it.
+- `.env.local` points at a hosted Supabase project (see FAM-12 PROGRESS). This feature's integration test runs only against a local URL; run it with the three variables from `supabase status -o env`. **The migration is applied to the local database only.**
+- Your local database already has FAM-12 and FAM-13's migrations (on `family-dev`, not on this `main`-based branch), so `supabase migration up` refused; I applied this migration with `psql` and recorded its version. Revert script kept out of the repo.
+- The audit log is append-only and integration tests commit rows to it, which broke F0-08's unscoped pgTAP assertions on a used database (FD-01) and one of my own (scoped).
+- The real database exposed a precision bug my unit tests could not: an anchor with milliseconds never matched its occurrence key. Fixed by whole-second checks (FD-05).
+- `src/components/shared/calendar/day-timeline.test.tsx` failed once in the full run and passes at other times on identical code (the machine clock read 18:50); not touched.
+- Stale `.next/types` from `family-dev` builds broke typecheck on this branch until `.next` was cleared.
 
 ## Assumptions
-- PROPOSED items in PRD.md are unconfirmed until validated in F0-01 or answered in DECISIONS.md.
+- Due time is the occurrence start (FD-03); a second tick-off leaves the first actor (FD-04).
 
 ## Next action
-- Wait for answers to OQ-01, OQ-10, OQ-22, OQ-29, OQ-09, OQ-33; then complete dependencies, run START FEATURE F0-11, and write the tests in TEST_PLAN.md first.
+- Human reviews (AC-03 wording, idempotency, due time, F0-08 test scoping, schema additions), then approves opening the PR to `main`.
 
 ## Ready for PR
 - No

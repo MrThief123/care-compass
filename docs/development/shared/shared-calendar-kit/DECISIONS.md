@@ -148,6 +148,15 @@ Record feature-level decisions here using the template below. Project-wide decis
 - Human confirmation required: the decision was the human's own instruction ("do your recommendation"); the deployment-exposure note above is new and still wants an eye.
 - Test changes caused: none. The route has no test, by design — it is a rendering surface for human and Playwright review, not a unit under test.
 
+### FD-09 — Week grid's full-day test pins the clock off (2026-09-25, fix/week-grid-clock)
+- Date: 2026-09-25
+- Context: `week-grid.test.tsx` "[AC-02] renders the whole day and opens on the 07:00–18:00 focus window" used the real clock. The current-time gutter label hides any hour label near it (FD-06), so `getByText("23:00")` failed every run between about 22:30 and 23:30 (seen at 22:46 on `family-dev`). `80e3aec` already fixed the same issue in `time-grid-scroller.test.tsx` and `day-timeline.test.tsx`; this test was missed.
+- Decision: render it with `now={null}` (clock off), the same as `80e3aec`.
+- Alternatives considered: a pinned `Date` (it would still hide whichever label sits near it); fake timers (a second pattern for the same thing).
+- Consequences: none outside the test. No component change.
+- Human confirmation required: no (requested by the human, 2026-09-25, as its own PR).
+- Test changes caused: `[UI-01][AC-03] WeekGrid > [AC-02] renders the whole day…`. Before: `render(<WeekGrid … occurrences={[]} />)`. After: adds `now={null}`. Reason: a test bug (it depended on the time of day). No assertion changed or removed, so it is not flagged for HUMAN REVIEW.
+
 <!-- Template
 ### FD-01 — <title>
 - Date:

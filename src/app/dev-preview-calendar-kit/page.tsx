@@ -83,6 +83,12 @@ export default function CalendarKitPreviewPage() {
         renders the kit.
       </p>
 
+      <p className="text-body-small text-text-secondary">
+        Plain events (UI-05) — Short walk, Garden walk, Music in the lounge, Picnic in the park —
+        have no status: a neutral grey stripe, no check or alert shape, and the word
+        &ldquo;Event&rdquo;.
+      </p>
+
       <CalendarHeader range={weekRange(TODAY)} />
 
       <section className="flex flex-col rounded-card border border-border-default p-3">

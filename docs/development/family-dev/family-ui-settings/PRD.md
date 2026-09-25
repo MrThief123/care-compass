@@ -30,10 +30,11 @@ A clickable, reviewable screen that matches the design, ready for data wiring in
 ## Scope
 - Route `/family/[clientId]/settings` inside the family layout.
 - 'Change organisation' `SettingsActionCard` ('Currently registered with Banksia Home Care.'); 'Change' opens the destructive `ConfirmationModal` with the D36 wording (organisation picker undesigned — OQ-06).
-- Family info `DetailsFormCard`: Name, Phone, Email, Address.
-- Reset `SettingsActionCard` with 'Reset'.
-- Loading skeleton, empty state and error state (States sheet) wired to the query contract's states.
-- Data only via `src/server/**` contract functions (mock data source).
+- Family info `DetailsFormCard`: Name, Phone, Email, Address, with a 'Save' button (PD-054). Save checks the fields and keeps them in local state (FD-03).
+- 'Change organisation' confirm: the dialog closes and says the picker is not available yet (FD-01).
+- Reset `SettingsActionCard` with 'Reset'. It shows a simulated "emailed you a link" message and sends nothing (FD-02).
+- Loading skeleton, empty state and error state (States sheet) wired to the query contract's states (FD-05).
+- Data only via `src/server/**` contract functions (mock data source): `getClientHeaderSummary` for the organisation name, and `getFamilyContactDetails` (added by CHG-023) for the Family info card.
 
 ## Out of Scope
 - Real data, permissions and persistence (Phase 3 wiring features)
@@ -48,10 +49,11 @@ A clickable, reviewable screen that matches the design, ready for data wiring in
 ## Dependencies
 - Features: F0-15 (Role app shell: rail, header and layouts), UI-02 (Forms kit: fields, settings cards, side panels, chips, modal, event form)
 - Blocking open decisions (must be answered before START FEATURE): None
-- Non-blocking open decisions (proposed defaults apply, confirm when possible): OQ-06, OQ-35
+- Answered decisions applied: OQ-06 → PD-036 (family-initiated change, picker undesigned); OQ-35 → PD-054 (Save per card; email is the contact email, not the login email)
+- Controlled changes: CHG-023 (contact details contract and fixtures; AC-01 shows the full name)
 
 ## Inputs
-- Fixtures
+- Fixtures via `getClientHeaderSummary(clientId)`, `getCurrentUser("family")` and `getFamilyContactDetails(profileId)`
 
 ## Outputs
 - Screen UI
