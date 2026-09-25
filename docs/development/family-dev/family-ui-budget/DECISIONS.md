@@ -206,7 +206,7 @@ Record feature-level decisions here using the template below. Project-wide decis
     - `FundEntry.bucketId: string`, with `bucketKind` optional.
     - `RAW_BUDGET_BUCKETS_BY_CLIENT_ID` entries gain `id`.
     - The mock counts pending costs by `bucketId`.
-  - **Not changed, and needs the human (CLAUDE.md §4.2):** `src/components/shared/cards/budget-bucket-card.test.tsx` (Lane S) builds `BudgetBucketSummary` literals without an `id`. If `id` becomes required, `tsc` fails in that file, which lane F does not own.
+  - **Lane S test file (CLAUDE.md §4.2), answered by the human on 2026-09-25: option 1.** `src/components/shared/cards/budget-bucket-card.test.tsx` builds `BudgetBucketSummary` literals without an `id`. `id` becomes required, and that file's literals gain an `id` on this branch, recorded under CHG-021 (the CHG-019 route). Only `id` is added: no assertion changes, and `budget-bucket-card.tsx` is not edited. Flag it in the PR.
 
 <!-- Template
 ### FD-01 — <title>

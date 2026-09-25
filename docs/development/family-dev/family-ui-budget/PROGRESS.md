@@ -33,7 +33,7 @@ Last updated: 2026-09-25
 - CHG-021 tests written first and run red for the right reasons (TEST_PLAN.md Results, "Red run for CHG-021"): T-04 to T-06 rewritten, T-09 to T-12 new, `budget-edit.test.ts` replacing `fund-update.test.ts`, plus bucket-id and `bucketId` tests for Home, the contract and the fixtures. Commit `test(family): …`.
 
 ## In progress
-- CHG-021: tests red; waiting for the human's go-ahead to build (step 2).
+- CHG-021: tests red (`08f032a`); the build (step 2) is next, in a new session.
 
 ## Remaining
 - CHG-021: the Edit budget page, the open bucket model (`id`, optional `kind`, `bucketId`) and the budget route's local holder; then full local checks (`next build`, e2e) and a real-browser width sweep, 1920 to 768, of Budget, Edit budget and Home.
@@ -79,7 +79,7 @@ Last updated: 2026-09-25
 - OQ-24 (empty-state wording) is open; the default wording in use is flagged in FD-07.
 
 ## Next action
-- Step 2, after the human's go-ahead: build the Edit budget page, the budget route's `layout.tsx` holder, `budget-edit.ts`, and the open bucket model (types, contract, fixtures; Home keyed by id). First the human decides on the Lane S test `budget-bucket-card.test.tsx` (FD-12).
+- Step 2, after the human's go-ahead: build the Edit budget page, the budget route's `layout.tsx` holder, `budget-edit.ts`, and the open bucket model (types, contract, fixtures; Home keyed by id). `id` is required; add `id` to the literals in the Lane S test `budget-bucket-card.test.tsx` (the human chose option 1, FD-12).
 
 ## Ready for PR
 - No (CHG-021 scope in progress). When it is, the PR body also flags: the undesigned Edit budget page and its copy, open buckets (PD-059, CHG-021) changing `src/types/**`, `src/server/**` and `src/mocks/**`, the replaced CHG-020 form tests (HUMAN REVIEW); the undesigned Update form and pending display (PD-052), the replaced FD-06 tests (HUMAN REVIEW), CHG-020. Earlier list: PR body flags: local `BudgetBucketTile` and local History table instead of the kit's `BudgetBucketCard` and `DataTable` (FD-01, FD-03); the "Recorded by" line the design does not draw (FD-05); copy needing review (FD-06 Update message, FD-07 empty and error wording, FD-09 "No description"; OQ-24 stays open); CHG-019 touching `src/server/**` and `src/mocks/**`; the checks ran locally because CI is down; the two shell e2e failures that also fail on `family-dev`.

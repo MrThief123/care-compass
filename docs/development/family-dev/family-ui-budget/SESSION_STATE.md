@@ -6,7 +6,7 @@ Worked on: CHG-021 tests written first and run red (`test(family)` commit); befo
 What changed: see PROGRESS.md "Files changed". Code commits `68e7e9c`, `8732005`, `7ecd0c2`, `4cc8aec`; the docs commit follows them.
 Tests run: `npx vitest run src/features/family-budget src/server/budget src/mocks/queries/budget.test.ts`; `npx vitest run src tests/unit`; `npx tsc --noEmit`; `npx eslint .`; `npx prettier --check .`; `next build`; Playwright e2e on the production build with `--grep-invert "F0-07"`
 Test results: 92 of 92 feature tests pass; 1270 of 1270 in the full unit run; tsc, eslint (0 errors) and prettier clean; e2e 34 pass and 2 fail (`[F0-15]` header at 480px and 338px on Home, which also fail on a clean `origin/family-dev`, see TEST_PLAN.md Results). CI is down, so all of this ran locally.
-Current blocker: waiting for the human's go-ahead to start the build (step 2), and a decision on the Lane S test `src/components/shared/cards/budget-bucket-card.test.tsx`, which builds buckets without `id` (FD-12).
+Current blocker: None. The human chose option 1 (2026-09-25): `id` is required, and the Lane S test `src/components/shared/cards/budget-bucket-card.test.tsx` gains `id` on its literals on this branch, under CHG-021 (FD-12). Step 2, the build, may start.
 Important discoveries:
 - A very large History amount broke mid-number at 768px until the amount column's floor went from 7rem to 9rem (FD-10). Found only by the stress check in a real browser, so any change to the History columns needs that check again.
 - The two `[F0-15]` shell e2e failures are not from this feature: same failure on a clean `origin/family-dev` build. The shell is not lane F's, so raise it with its owner rather than fix it here.
