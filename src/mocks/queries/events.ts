@@ -106,24 +106,6 @@ export function occurrencesOnDay<T extends AnyOccurrence>(
     .sort(oldestFirst);
 }
 
-/**
- * Every fixture row of the client that starts in `[from, to)`, tasks and plain events, oldest first
- * (F0-11). The contract's `getOccurrences` filters by `type` afterwards, as the Supabase source does.
- */
-export async function getOccurrences(
-  clientId: string,
-  range: { from: string; to: string },
-): Promise<AnyOccurrence[]> {
-  const from = Date.parse(range.from);
-  const to = Date.parse(range.to);
-  return rowsOfType(clientId, "all")
-    .filter((occurrence) => {
-      const start = Date.parse(occurrence.start);
-      return start >= from && start < to;
-    })
-    .sort(oldestFirst);
-}
-
 export async function getTodayOccurrences(
   clientId: string,
   options: OccurrenceTypeOptions = {},
@@ -217,10 +199,10 @@ export async function getToday(): Promise<string> {
  * already validated (`OccurrenceRangeSchema`). Returns copies, and does not
  * reorder the array it is given.
  */
-export function occurrencesInRange(
-  occurrences: readonly Occurrence[],
+export function occurrencesInRange<T extends AnyOccurrence>(
+  occurrences: readonly T[],
   range: OccurrenceRange,
-): Occurrence[] {
+): T[] {
   return occurrences
     .filter((occurrence) => {
       const day = melbourneDateKey(occurrence.start);
@@ -233,14 +215,21 @@ export function occurrencesInRange(
 export async function getOccurrences(
   clientId: string,
   range: OccurrenceRange,
-): Promise<Occurrence[]> {
-  return occurrencesInRange(
-    [
-      ...rowsFor(OCCURRENCES_BY_CLIENT_ID, clientId),
-      ...rowsFor(UPCOMING_OCCURRENCES_BY_CLIENT_ID, clientId),
-    ],
-    range,
-  );
+  options: OccurrenceTypeOptions = {},
+): Promise<AnyOccurrence[]> {
+  // Tasks, as before; plain events join only when the read asks for them (F0-11, UI-05 FD-01).
+  const tasks =
+    options.type === "events"
+      ? []
+      : [
+          ...rowsFor(OCCURRENCES_BY_CLIENT_ID, clientId),
+          ...rowsFor(UPCOMING_OCCURRENCES_BY_CLIENT_ID, clientId),
+        ];
+  const events =
+    options.type === "all" || options.type === "events"
+      ? rowsFor(PLAIN_EVENT_OCCURRENCES_BY_CLIENT_ID, clientId)
+      : [];
+  return occurrencesInRange<AnyOccurrence>([...tasks, ...events], range);
 }
 
 export interface SetOccurrenceDoneResult {

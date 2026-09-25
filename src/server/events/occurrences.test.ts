@@ -175,11 +175,21 @@ describe("[FAM-UI-02][AC-02] getOccurrences — range rules", () => {
   });
 });
 
+/*
+ * F0-11 implements the Supabase source, so the FAM-UI-02 test that expected "not implemented" is
+ * replaced by these two (F0-11 DECISIONS FD-12, flagged HUMAN REVIEW). What Supabase returns for real
+ * data is covered in get-occurrences.test.ts and tests/integration/care-events.test.ts.
+ */
 describe("[FAM-UI-02] getOccurrences — data source", () => {
-  it("[FAM-UI-02] says clearly that the Supabase implementation lands later", async () => {
+  it("[F0-11] with Supabase it follows the same rules: a bad range rejects with a ZodError before anything is read", async () => {
     vi.stubEnv("DATA_SOURCE", "supabase");
-    await expect(getOccurrences(MARGARET_CLIENT_ID, DESIGN_WEEK)).rejects.toThrow(
-      /getOccurrences: DATA_SOURCE="supabase" is not implemented yet/,
-    );
+    await expect(
+      getOccurrences(MARGARET_CLIENT_ID, { from: "2026-12-06", to: "2026-11-30" }),
+    ).rejects.toThrow(ZodError);
+  });
+
+  it("[F0-11] with Supabase an id that is not an id is an unknown client: an empty list, as in mock mode", async () => {
+    vi.stubEnv("DATA_SOURCE", "supabase");
+    await expect(getOccurrences(MARGARET_CLIENT_ID, DESIGN_WEEK)).resolves.toEqual([]);
   });
 });

@@ -1,5 +1,8 @@
 // @vitest-environment node
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { ZodError } from "zod";
+
+import { isPlainEvent } from "@/types/domain";
 
 /*
  * F0-11 `getOccurrences` with the Supabase client faked: which rows it asks for, what it does with
@@ -32,7 +35,11 @@ vi.mock("@/lib/supabase/server", () => ({
 
 const CLIENT_ID = "b1111111-1111-1111-1111-111111111111";
 const EVENT_ID = "e1111111-1111-1111-1111-111111111111";
-const RANGE = { from: "2026-11-29T13:00:00Z", to: "2026-12-06T13:00:00Z" };
+/** The contract's range: Melbourne calendar dates, both inclusive (CHG-012). */
+const RANGE = { from: "2026-11-30", to: "2026-12-06" };
+/** What the database is read over: from the start of `from` to the start of the day after `to`. */
+const FROM = "2026-11-30T00:00:00+11:00";
+const TO = "2026-12-07T00:00:00+11:00";
 const NOW = new Date("2026-12-01T00:00:00Z");
 
 const EVENT_ROW = {
@@ -71,11 +78,13 @@ afterEach(() => {
 
 async function run(options: { type?: "all" | "tasks" | "events" } = {}) {
   const { getOccurrences } = await import("@/server/events/queries");
-  return getOccurrences(CLIENT_ID, RANGE, { now: NOW, ...options });
+  return options.type
+    ? getOccurrences(CLIENT_ID, RANGE, { now: NOW, type: options.type })
+    : getOccurrences(CLIENT_ID, RANGE, { now: NOW });
 }
 
 describe("[F0-11][AC-01] getOccurrences reads and assembles", () => {
-  it("[F0-11][AC-01] asks only for this client's events that begin before the range ends", async () => {
+  it("[F0-11][AC-01] asks only for this client's events that begin before the range's last day ends", async () => {
     await run();
 
     const eventCalls = mocks.calls.filter((call) => call.table === "care_events");
@@ -87,7 +96,7 @@ describe("[F0-11][AC-01] getOccurrences reads and assembles", () => {
     expect(eventCalls).toContainEqual({
       table: "care_events",
       method: "lt",
-      args: ["starts_at", RANGE.to],
+      args: ["starts_at", TO],
     });
   });
 
@@ -100,22 +109,22 @@ describe("[F0-11][AC-01] getOccurrences reads and assembles", () => {
       expect(tableCalls).toContainEqual({
         table,
         method: "gte",
-        args: ["original_start", RANGE.from],
+        args: ["original_start", FROM],
       });
       expect(tableCalls).toContainEqual({
         table,
         method: "lt",
-        args: ["original_start", RANGE.to],
+        args: ["original_start", TO],
       });
     }
   });
 
-  it("[F0-11][AC-01] asks who is on shift for the same window", async () => {
+  it("[F0-11][AC-01] asks who is on shift for the same window (the range's days, in Melbourne time)", async () => {
     await run();
     expect(mocks.rpc).toHaveBeenCalledWith("client_shift_carers", {
       p_client_id: CLIENT_ID,
-      p_from: RANGE.from,
-      p_to: RANGE.to,
+      p_from: FROM,
+      p_to: TO,
     });
   });
 
@@ -185,7 +194,7 @@ describe("[F0-11] the type option follows the events contract", () => {
     expect(titles).toContain("Walk");
     const events = await run({ type: "events" });
     expect(events.length).toBeGreaterThan(0);
-    expect(events.every((occurrence) => occurrence.kind === "event")).toBe(true);
+    expect(events.every(isPlainEvent)).toBe(true);
   });
 });
 
@@ -206,58 +215,63 @@ describe("[F0-11] getOccurrences fails safely", () => {
   });
 
   it.each([
-    ["a range that ends before it starts", { from: RANGE.to, to: RANGE.from }],
-    ["an empty range", { from: RANGE.from, to: RANGE.from }],
-    ["a range that is not a date-time", { from: "soon", to: RANGE.to }],
-    ["a range longer than 400 days", { from: RANGE.from, to: "2028-06-01T00:00:00Z" }],
-  ])("[F0-11] refuses %s and reads nothing", async (_label, range) => {
+    ["a range that ends before it starts", { from: "2026-12-06", to: "2026-11-30" }],
+    ["a range that is not a date", { from: "soon", to: "2026-12-06" }],
+    ["a date that does not exist", { from: "2026-02-30", to: "2026-03-05" }],
+    ["a range longer than the most a read may cover", { from: "2026-01-01", to: "2026-12-31" }],
+  ])(
+    "[F0-11] refuses %s (a ZodError, as the contract says) and reads nothing",
+    async (_label, range) => {
+      const { getOccurrences } = await import("@/server/events/queries");
+      await expect(getOccurrences(CLIENT_ID, range, { now: NOW })).rejects.toThrow(ZodError);
+      expect(mocks.from).not.toHaveBeenCalled();
+    },
+  );
+
+  it("[F0-11] a one-day range is valid: `from` and `to` are both inclusive", async () => {
     const { getOccurrences } = await import("@/server/events/queries");
-    await expect(getOccurrences(CLIENT_ID, range, { now: NOW })).rejects.toThrow(
-      /getOccurrences: /,
-    );
-    expect(mocks.from).not.toHaveBeenCalled();
+    await getOccurrences(CLIENT_ID, { from: "2026-11-30", to: "2026-11-30" }, { now: NOW });
+    expect(mocks.calls).toContainEqual({
+      table: "care_events",
+      method: "lt",
+      args: ["starts_at", "2026-12-01T00:00:00+11:00"],
+    });
   });
 
-  it("[F0-11] refuses a client id that is not an id and reads nothing", async () => {
+  it("[F0-11] a client id that is not an id is an unknown client: an empty list, nothing read", async () => {
     const { getOccurrences } = await import("@/server/events/queries");
-    await expect(getOccurrences("", RANGE, { now: NOW })).rejects.toThrow(/getOccurrences: /);
+    await expect(getOccurrences("", RANGE, { now: NOW })).resolves.toEqual([]);
+    await expect(getOccurrences("client-margaret", RANGE, { now: NOW })).resolves.toEqual([]);
     expect(mocks.from).not.toHaveBeenCalled();
   });
 });
 
 describe("[F0-11] getOccurrences on the mock data source", () => {
-  it("[F0-11] returns the fixture occurrences that start inside the range, oldest first, tasks only by default", async () => {
+  it("[F0-11] still returns the design week as before, tasks only, and touches no database", async () => {
     vi.stubEnv("DATA_SOURCE", "mock");
     const { getOccurrences } = await import("@/server/events/queries");
 
-    const week = await getOccurrences("client-margaret", {
-      from: "2026-11-29T13:00:00Z",
-      to: "2026-12-06T13:00:00Z",
-    });
+    const week = await getOccurrences("client-margaret", RANGE);
 
     expect(week.length).toBeGreaterThan(0);
-    expect(week.every((occurrence) => occurrence.kind !== "event")).toBe(true);
+    expect(week.every((occurrence) => !isPlainEvent(occurrence))).toBe(true);
     const starts = week.map((occurrence) => Date.parse(occurrence.start));
     expect(starts).toEqual([...starts].sort((a, b) => a - b));
-    expect(
-      starts.every(
-        (start) =>
-          start >= Date.parse("2026-11-29T13:00:00Z") && start < Date.parse("2026-12-06T13:00:00Z"),
-      ),
-    ).toBe(true);
     expect(mocks.from).not.toHaveBeenCalled();
   });
 
-  it("[F0-11] type 'all' adds the plain events, and another client's occurrences never appear", async () => {
+  it("[F0-11] type 'all' adds the plain events, 'events' returns only them, and another client's never appear", async () => {
     vi.stubEnv("DATA_SOURCE", "mock");
     const { getOccurrences } = await import("@/server/events/queries");
-    const range = { from: "2026-11-29T13:00:00Z", to: "2026-12-06T13:00:00Z" };
 
-    const tasks = await getOccurrences("client-margaret", range);
-    const all = await getOccurrences("client-margaret", range, { type: "all" });
+    const tasks = await getOccurrences("client-margaret", RANGE);
+    const all = await getOccurrences("client-margaret", RANGE, { type: "all" });
+    const events = await getOccurrences("client-margaret", RANGE, { type: "events" });
 
-    expect(all.length).toBeGreaterThan(tasks.length);
+    expect(all.length).toBe(tasks.length + events.length);
+    expect(events.length).toBeGreaterThan(0);
+    expect(events.every(isPlainEvent)).toBe(true);
     expect(all.every((occurrence) => occurrence.clientId === "client-margaret")).toBe(true);
-    expect(await getOccurrences("client-nobody", range)).toEqual([]);
+    expect(await getOccurrences("client-nobody", RANGE, { type: "all" })).toEqual([]);
   });
 });

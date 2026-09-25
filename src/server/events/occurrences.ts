@@ -8,8 +8,9 @@
  * can read no events (another client's family, an unassigned carer), it returns [] without asking who
  * is on shift, since that lookup would refuse them.
  */
+import { localToMelbourneIso } from "@/lib/dates/melbourne-time";
 import { createClient } from "@/lib/supabase/server";
-import type { AnyOccurrence } from "@/types/domain";
+import type { AnyOccurrence, OccurrenceRange } from "@/types/domain";
 
 import {
   buildOccurrences,
@@ -19,12 +20,27 @@ import {
   type ShiftCarerRow,
 } from "./build-occurrences";
 
-export interface OccurrenceRange {
-  /** ISO instant, inclusive. */
+/** A half-open window of instants: `from` inclusive, `to` exclusive. */
+export interface InstantRange {
   from: string;
-  /** ISO instant, exclusive. */
   to: string;
 }
+
+/**
+ * The contract's range is Melbourne calendar dates, both inclusive (CHG-012); the database is read
+ * over instants: from the start of `from` to the start of the day after `to`, in Melbourne time.
+ */
+export function melbourneDaysToInstants(range: OccurrenceRange): InstantRange {
+  const [year, month, day] = range.to.split("-").map(Number) as [number, number, number];
+  const dayAfter = new Date(Date.UTC(year, month - 1, day + 1)).toISOString().slice(0, 10);
+  return {
+    from: localToMelbourneIso(`${range.from}T00:00:00`),
+    to: localToMelbourneIso(`${dayAfter}T00:00:00`),
+  };
+}
+
+// Any 8-4-4-4-12 hex id, as Postgres accepts (seed ids need not carry RFC version bits).
+const ID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 const FAILED = "getOccurrences: could not load occurrences.";
 
@@ -33,9 +49,12 @@ const EVENT_COLUMNS =
 
 export async function loadOccurrences(
   clientId: string,
-  range: OccurrenceRange,
+  range: InstantRange,
   now: Date,
 ): Promise<AnyOccurrence[]> {
+  // An id that is not an id is an unknown client, which the contract says is an empty list.
+  if (!ID_PATTERN.test(clientId)) return [];
+
   const supabase = await createClient();
 
   const { data: events, error: eventsError } = await supabase
