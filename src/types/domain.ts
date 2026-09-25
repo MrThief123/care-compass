@@ -47,6 +47,7 @@ export const ProfileSchema = z.object({
   lastName: z.string(),
   email: z.string(),
   phone: z.string().optional(),
+  address: z.string().optional(),
   /** Admin/carer only; per-organisation editable list (PD-038/OQ-13). */
   jobTitle: z.string().optional(),
   isActive: z.boolean(),

@@ -651,6 +651,26 @@ Docs updated: DECISIONS.md
 - Human confirmation: Dhruv Verma, 2026-09-25 (in-session).
 - Docs updated: DECISIONS.md (this entry); `docs/development/family-dev/family-ui-info/DECISIONS.md` FD-01 and FD-02.
 
+### CHG-023 — Family contact details contract, the Family · Settings design fixtures, and AC-01 shows the full name
+- Date / requested by: 2026-09-25 / Dhruv Verma (human, project lead)
+- Type: contract extension (shared folders changed from a dashboard feature branch) and acceptance-criterion change
+- Description: no Phase 1 contract returned the signed-in family member's contact details, `ProfileSchema` had no `address` (the `profiles` table already has one, `20260922053821_tenancy.sql`), and Helen's fixture had no phone and a different email from `family-05-settings.png`. Added, read-only: `getFamilyContactDetails(profileId): Promise<FamilyContactDetails>` in a new `src/server/profiles/queries.ts`, with its mock in `src/mocks/queries/profiles.ts`. `FamilyContactDetails` is `{ profileId: string; name: string; phone?: string; email?: string; address?: string }`. `name` is the full name (first and last, PD-038); a missing phone, email or address is left out, not an empty string. An unknown `profileId` throws, as `getClientHeaderSummary` does. Supabase mode throws the standard not-implemented error. `ProfileSchema` gains `address: z.string().optional()`. Helen's fixture (`profile-helen`) gains phone `0412 345 678` and address `12 Wattle St, Preston VIC 3072`, and her `email` becomes `helen@example.com`. `Profile.email` maps to `profiles.email`, the contact email, never the Supabase Auth login email (PD-054). AC-01 of FAM-UI-06 changes from Name 'Helen' to Name 'Helen Doyle' (PD-038 shows the full name everywhere). The rest of AC-01 is unchanged. AC-04 to AC-09 are added. They test what the PRD Scope already lists (Reset card, states), PD-054 (a Save button per card) and the in-session answers recorded in FAM-UI-06 FD-01 to FD-03. No scope is added beyond those.
+- Source / justification: human answers in-session, 2026-09-25: "CHG-023 on this branch" over a separate shared PR, the same route as CHG-018; and "full name, separate contact email" over matching the design's 'Helen'.
+- Impact: FAM-UI-06 (`src/features/family-settings/**`, AC-01). FAM-12 (Settings wiring) reads and saves through this contract. It must keep `email` as the contact email and must not touch the login email (PD-054). F0-06 already has the columns, so no migration is needed. No existing test uses `helen.doyle@example.com`.
+- Numbering: CHG-019 to CHG-022 are on `feature/family-ui-budget` (PR open, not yet on `family-dev`). CHG-023 was free on every local and remote branch when this was written. Whichever branch merges second renumbers.
+- Human confirmation: Dhruv Verma, 2026-09-25 (in-session).
+- Docs updated: DECISIONS.md (this entry); DEVELOPMENT_PLAN.md (CHG-023 note on FAM-UI-06); FAM-UI-06 PRD.md, ACCEPTANCE_CRITERIA.md, TEST_PLAN.md, DECISIONS.md, PROGRESS.md, SESSION_STATE.md.
+
+### CHG-024 — FAM-UI-06: Family info is read-only until 'Edit'
+- Date / requested by: 2026-09-25 / Dhruv Verma (human, project lead)
+- Type: acceptance-criterion change
+- Description: the Family info inputs on Family · Settings start read-only, and the card's button reads 'Edit'. 'Edit' makes them editable and the button becomes 'Save'. A valid Save keeps the changes and locks the inputs again. In edit mode, 'Cancel' next to 'Save' reverts every field to its last saved value and goes back to read mode with nothing announced. This adds AC-10 and AC-11 and makes AC-06's precondition edit mode. PD-054's per-card Save stays; it is shown after 'Edit'.
+- Source / justification: human request in-session, 2026-09-25: "family info should be read only and have an edit button where save is … Just ensures no one accidently deleted information"; then "next to the save should be a cancel button which just reverts all changes and goes back to read mode as if nothing happened".
+- Impact: FAM-UI-06 only (`src/features/family-settings/family-settings-view.tsx`, its tests). FAM-12 (Settings wiring) keeps this flow. No shared-kit change: `Field.readOnly`, and a local Family info card, because `DetailsFormCard` has no Cancel slot (FAM-UI-06 FD-10 records that need for the shared kit).
+- Numbering: CHG-024 was free on every local and remote branch when this was written. Whichever branch merges second renumbers.
+- Human confirmation: Dhruv Verma, 2026-09-25 (in-session).
+- Docs updated: DECISIONS.md (this entry); FAM-UI-06 ACCEPTANCE_CRITERIA.md (AC-06, AC-10, AC-11), TEST_PLAN.md (T-13, T-14), DECISIONS.md (FD-09, FD-10), PROGRESS.md, SESSION_STATE.md.
+
 Template for future entries:
 ```
 ### CHG-xxx — <title>

@@ -1,56 +1,70 @@
 # Progress — FAM-UI-06 Family Settings screen (UI)
 
-Status: NOT STARTED
-Owner: unclaimed
+Status: IN REVIEW
+Owner: Dhruv Verma
 Lane: F — Family
 Sprint: SPRINT · planned D6
-Branch: `feature/family-ui-settings` (not yet created)
+Branch: `feature/family-ui-settings`
 PR target: `family-dev`
-Last updated: 2026-09-17 (planning pack generated)
+Last updated: 2026-09-25 (CHG-024 Edit/Save/Cancel flow added; all 43 cases green; PR #93 opened)
 
 ## Blockers
-- None recorded at planning time
+- None
 
 ## Dependencies status
-- F0-15 — NOT STARTED
-- UI-02 — NOT STARTED
+- F0-15 — MERGED
+- UI-02 — MERGED
 
 ## Completed
-- Feature documentation drafted (Claude Chat planning pack)
+- Claimed (branch from `family-dev` at `e10f4ba`).
+- Decisions taken with the human in-session (2026-09-25): CHG-023, FD-01, FD-02.
+- Tests first: T-01 to T-12 (37 cases), red for the right reason (commit `900cf1c`).
+- CHG-023: `ProfileSchema.address`; Helen's phone, contact email and address in the fixtures; `src/mocks/queries/profiles.ts`; `src/server/profiles/queries.ts`.
+- Screen: `src/features/family-settings/` (`settings-schema.ts`, `family-settings-view.tsx`, `settings-error-state.tsx`, `settings-skeleton.tsx`); route `settings/page.tsx` and `loading.tsx`.
+- CHG-024 (human request): Family info is read-only until 'Edit' (AC-10, FD-09, T-13), and 'Cancel' reverts to read mode (AC-11, T-14). The card is built locally because the kit card has no Cancel slot (FD-10). Tests written first (red), then the view.
+- Checks: see TEST_PLAN.md "Green run" and "CHG-024 run". Width sweep from 1920 to 768 and side-by-side with `family-05-settings.png` done.
 
 ## In progress
 - None
 
 ## Remaining
-- Route `/family/[clientId]/settings` inside the family layout.
-- 'Change organisation' `SettingsActionCard` ('Currently registered with Banksia Home Care.'); 'Change' opens the destructive `ConfirmationModal` with the D36 wording (organisation picker undesigned — OQ-06).
-- Family info `DetailsFormCard`: Name, Phone, Email, Address.
-- Reset `SettingsActionCard` with 'Reset'.
-- Loading skeleton, empty state and error state (States sheet) wired to the query contract's states.
-- Data only via `src/server/**` contract functions (mock data source).
+- Review and merge of PR #93 (a human merges).
 
 ## Acceptance criteria status
-- 0 / 3 MET
+- 11 / 11 MET
 
 ## Tests
-- Written: 0 / 3
-- Passing: 0
+- Written: 14 / 14 test-plan rows (43 cases)
+- Passing: 43
 - Failing: 0
 
 ## Files changed
-- None yet. Likely files: `src/app/(family)/family/[clientId]/settings/page.tsx`
+- `src/types/domain.ts`, `src/mocks/fixtures.ts`, `src/mocks/queries/profiles.ts`, `src/server/profiles/queries.ts` (CHG-023)
+- `src/features/family-settings/**`, `src/app/(family)/family/[clientId]/settings/{page,loading}.tsx`
 
 ## Decisions
-- See DECISIONS.md
+- See DECISIONS.md (FD-01 to FD-10) and root CHG-023, CHG-024.
+
+## Design differences to name in the PR
+- Name reads 'Helen Doyle', not 'Helen' (CHG-023, PD-038).
+- Family info has an 'Edit' button, which becomes 'Save' with 'Cancel' beside it in edit mode (PD-054, CHG-024).
+- The live-region messages, the validation messages and the no-organisation text are undesigned and flagged for design review (FD-01 to FD-03, FD-05).
+
+## HUMAN REVIEW: test expectation changed
+- CHG-024: T-06, T-07 and T-11 now click 'Edit' first. In T-07's 'clears the Saved. message' case, clicking 'Edit' now clears 'Saved.' (it used to be typing in a field). No assertion was removed. Details in FD-09.
+
+## Shared-kit need (FD-10)
+- `DetailsFormCard` needs `onCancel`/`cancelLabel`. Until it has them, Family info uses a local card.
 
 ## Problems encountered
-- None
+- The full suite's 5 F0-07/F0-04 integration tests fail with `Invalid API key` (Supabase auth, environment). Unrelated to this feature.
+- A `next dev` server already on :3000 was reused by Playwright; e2e was run against `next start -p 3100` instead. That dev server refuses JS chunks for the `127.0.0.1` origin, so browse it at `localhost`.
 
 ## Assumptions
-- PROPOSED items in PRD.md are unconfirmed until validated in F0-01 or answered in DECISIONS.md.
+- None beyond the FDs.
 
 ## Next action
-- complete dependencies, run START FEATURE FAM-UI-06, and write the tests in TEST_PLAN.md first.
+- Address review comments on PR #93, if any.
 
 ## Ready for PR
-- No
+- Yes. PR #93 (https://github.com/MrThief123/care-compass/pull/93) opened to `family-dev` on 2026-09-25 with the human's approval.
