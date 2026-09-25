@@ -41,6 +41,9 @@ create table care_events (
   -- 'manual' = task (ticked off by hand); 'automatic' = plain event (no status). CHG-009.
   completion_mode text not null default 'manual' check (completion_mode in ('manual', 'automatic')),
   is_active boolean not null default true,
+  -- When it was deactivated (set by the update trigger, cleared on reactivation). A deactivated
+  -- event stops generating occurrences from then; earlier ones and their completions stay.
+  deactivated_at timestamptz,
   created_by uuid default auth.uid() references profiles (id) on delete set null,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
@@ -142,7 +145,8 @@ create trigger care_event_completions_no_truncate
 -- Triggers that keep the rows honest
 -- ---------------------------------------------------------------------------
 
--- An event never moves to another client; updated_at follows every edit.
+-- An event never moves to another client; updated_at follows every edit; deactivated_at
+-- follows is_active.
 create or replace function care_events_before_update()
 returns trigger
 language plpgsql
@@ -153,6 +157,11 @@ begin
     raise exception 'an event cannot be moved to another client' using errcode = '22023';
   end if;
   new.updated_at := now();
+  if old.is_active and not new.is_active then
+    new.deactivated_at := now();
+  elsif new.is_active then
+    new.deactivated_at := null;
+  end if;
   return new;
 end;
 $$;
@@ -253,6 +262,49 @@ revoke all on care_events, care_event_overrides, care_event_completions from ano
 grant select, insert, update on care_events to authenticated;
 grant select, insert, update on care_event_overrides to authenticated;
 grant select on care_event_completions to authenticated;
+
+-- ---------------------------------------------------------------------------
+-- Who is on shift (OQ-29)
+-- ---------------------------------------------------------------------------
+
+-- The carers whose non-cancelled shifts for the client overlap [p_from, p_to), with their full
+-- display names (PD-038), for the assignee shown on an occurrence: the carer whose shift covers
+-- its start. A function because a family member cannot read carer profiles (their
+-- organisation is null). Answers only readers of the client's events; only id, name and the
+-- shift window leave the database.
+create or replace function client_shift_carers(p_client_id uuid, p_from timestamptz, p_to timestamptz)
+returns table (shift_id uuid, carer_id uuid, carer_display_name text, starts_at timestamptz, ends_at timestamptz)
+language plpgsql
+stable
+security definer
+set search_path = public
+as $$
+begin
+  if auth.uid() is null or p_client_id is null or not can_read_care_events(p_client_id) then
+    raise exception 'not permitted to see who is on shift for this client' using errcode = '42501';
+  end if;
+  if p_from is null or p_to is null or p_to <= p_from then
+    raise exception 'a window with a start before its end is required' using errcode = '22023';
+  end if;
+
+  return query
+    select s.id,
+           s.carer_id,
+           coalesce(nullif(trim(coalesce(p.first_name, '') || ' ' || coalesce(p.last_name, '')), ''), 'Unknown'),
+           s.starts_at,
+           s.ends_at
+    from shifts s
+    join profiles p on p.id = s.carer_id
+    where s.client_id = p_client_id
+      and s.cancelled_at is null
+      and s.starts_at < p_to
+      and s.ends_at > p_from
+    order by s.starts_at, s.id;
+end;
+$$;
+
+revoke all on function client_shift_carers(uuid, timestamptz, timestamptz) from public, anon, authenticated;
+grant execute on function client_shift_carers(uuid, timestamptz, timestamptz) to authenticated;
 
 -- ---------------------------------------------------------------------------
 -- Ticking off and undoing
