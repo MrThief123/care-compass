@@ -4,7 +4,13 @@
  * by `src/app` or `src/features`.
  */
 import { ageFromDob } from "@/lib/format/age";
-import { CLIENT_INFO_SECTIONS, CLIENTS, ORGANISATION, REFERENCE_DATE } from "@/mocks/fixtures";
+import {
+  CLIENT_INFO_SECTIONS,
+  CLIENTS,
+  ORGANISATION,
+  OTHER_ORGANISATIONS,
+  REFERENCE_DATE,
+} from "@/mocks/fixtures";
 import type { ClientInfoSection, ClientInfoSectionKind } from "@/types/domain";
 
 export interface ClientHeaderSummary {
@@ -32,6 +38,25 @@ export async function getClientHeaderSummary(clientId: string): Promise<ClientHe
     suburb: client.suburb,
     organisationName: client.organisationId === ORGANISATION.id ? ORGANISATION.name : undefined,
   };
+}
+
+/** One row of the Change organisation picker (FAM-13). */
+export interface OrganisationChoice {
+  id: string;
+  name: string;
+  /** The organisation the client is with now; it cannot be chosen. */
+  isCurrent: boolean;
+}
+
+/** Every fixture organisation by name, the client's current one flagged. An unknown client is an error. */
+export async function getOrganisationChoices(clientId: string): Promise<OrganisationChoice[]> {
+  const client = CLIENTS.find((candidate) => candidate.id === clientId);
+  if (!client) {
+    throw new Error(`getOrganisationChoices: no client found for id "${clientId}".`);
+  }
+  return [ORGANISATION, ...OTHER_ORGANISATIONS]
+    .map(({ id, name }) => ({ id, name, isCurrent: id === client.organisationId }))
+    .sort((a, b) => a.name.localeCompare(b.name));
 }
 
 /** The order the sections are drawn in on Family · Info. */

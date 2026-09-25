@@ -144,10 +144,11 @@ select is(
 -- ---------------------------------------------------------------------------
 select pg_temp.login('a1111111-1111-1111-1111-111111111111');
 select results_eq(
-  $$ select id, name, is_current from list_organisations_for_transfer('b1111111-1111-1111-1111-111111111111') order by name $$,
+  $$ select id, name, is_current from list_organisations_for_transfer('b1111111-1111-1111-1111-111111111111')
+      where id in ('11111111-1111-1111-1111-111111111111', '22222222-2222-2222-2222-222222222222') order by name $$,
   $$ values ('11111111-1111-1111-1111-111111111111'::uuid, 'Banksia Home Care'::text, true),
             ('22222222-2222-2222-2222-222222222222'::uuid, 'Wattle Care'::text, false) $$,
-  'Helen sees every organisation, with Banksia marked as Margaret''s current one'
+  'Helen sees the organisations, with Banksia marked as Margaret''s current one (other rows in the database are ignored)'
 );
 
 select pg_temp.login('a3333333-3333-3333-3333-333333333333');

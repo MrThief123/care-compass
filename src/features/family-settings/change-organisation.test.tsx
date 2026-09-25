@@ -133,14 +133,12 @@ describe("[FAM-13][AC-04] picker, then confirmation", () => {
     expect(screen.queryByRole("dialog", { name: "Change organisation?" })).not.toBeInTheDocument();
   });
 
-  it("[FAM-13][AC-04] with no other organisation to move to, the picker says so and Continue is absent", async () => {
-    const user = userEvent.setup();
+  it("[FAM-13][AC-04] with no other organisation to move to there is no Change button, and the card says so", () => {
     renderSettings([ORGANISATIONS[0]!]);
 
-    await openPicker(user);
-
-    expect(within(picker()).getByText(/no other organisation/i)).toBeVisible();
-    expect(within(picker()).queryByRole("button", { name: "Continue" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Change" })).not.toBeInTheDocument();
+    expect(screen.getByText("Currently registered with Banksia Home Care.")).toBeVisible();
+    expect(screen.getByText(/no other organisation/i)).toBeVisible();
   });
 });
 
