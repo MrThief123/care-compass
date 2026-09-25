@@ -299,6 +299,9 @@ const PHYSIO: CareEvent = {
   durationMinutes: 90,
   recurrenceFrequency: "weekly",
   completionMode: "manual",
+  // FAM-UI-08 (PD-058): each session costs $90, paid from NDIS.
+  cost: 90,
+  bucketId: "bucket-margaret-ndis",
 };
 
 const AFTERNOON_CHECK_IN: CareEvent = {

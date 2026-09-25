@@ -21,10 +21,11 @@ const FIXED = "bucket-margaret-fixed";
 const GOVERNMENT = "bucket-margaret-government";
 
 let buckets: BudgetBucketSummary[];
-let latest: EventCostValues;
+let latest: EventCostValues = EMPTY_EVENT_COST;
 
 beforeEach(async () => {
   vi.stubEnv("DATA_SOURCE", "mock");
+  latest = EMPTY_EVENT_COST;
   buckets = await getBudgetSummary(CLIENT_ID);
 });
 
@@ -46,7 +47,6 @@ function Harness({
   savedCost?: boolean;
 }) {
   const [values, setValues] = useState(initial);
-  latest = values;
   return (
     <EventCostFields
       values={values}
@@ -215,11 +215,11 @@ describe("[FAM-UI-08][AC-05] recurring events", () => {
 
   it("[FAM-UI-08][AC-05] a one-off event, or a recurring one with no cost, does not say it", () => {
     const { rerender } = render(
-      <Harness initial={{ cost: "90", bucketId: NDIS }} recurrence="none" />,
+      <Harness key="one-off" initial={{ cost: "90", bucketId: NDIS }} recurrence="none" />,
     );
     expect(screen.queryByText(/charged each time/i)).not.toBeInTheDocument();
 
-    rerender(<Harness initial={EMPTY_EVENT_COST} recurrence="weekly" />);
+    rerender(<Harness key="no-cost" initial={EMPTY_EVENT_COST} recurrence="weekly" />);
     expect(screen.queryByText(/charged each time/i)).not.toBeInTheDocument();
   });
 });
