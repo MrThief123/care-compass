@@ -156,6 +156,7 @@ CONFIRMED.
 - Alternatives: full brief model with multiple sources, categories and restrictions (rejected — larger scope, not designed, Client Information Sheet No 4 on budgeting was never supplied).
 - Consequences: categories/restrictions/multiple funding sources go to the parking lot (PL-10). F0-12, FAM-03, FAM-10, FAM-11, CAR-08 proceed against the 3-bucket model.
 - Human confirmation: CONFIRMED 2026-09-17.
+- **Amended 2026-09-25 by PD-059 (CHG-021):** buckets are no longer three fixed kinds. A client has the buckets someone added, named freely; NDIS, Fixed and Government are suggestions. One accounting period each, no categories and no restrictions still hold.
 
 ### PD-034 — Fund/budget edit rights: Family and organisation admins can both edit
 - Date: 2026-09-17 · Decided by: Dhruv Verma (answering OQ-05)
@@ -384,6 +385,20 @@ CONFIRMED.
 - Reason: human instruction in-session, 2026-09-25, after talking to the client: carers should not edit the budget; costs should come off automatically when care is done; an admin must be able to stand in for a family that is no longer there. The human chose each rule above from offered options.
 - Alternatives: on an empty bucket, overdraft (balance goes negative), part-pay and log the rest, pay from another bucket automatically, or block completion (all rejected: pending chosen; blocking completion was advised against because money would stop care being recorded); pay pending costs by hand or part-pay them (rejected); carers keep manual expenses (rejected); cost locked once set, or editable by Family and admins only (rejected); admins write to Budget only, or full access only once no family is linked (rejected); admins sent into the `/family` routes (rejected: one copy of each screen, rendered inside the admin layout).
 - Consequences: see CHG-020.
+- Human confirmation: CONFIRMED 2026-09-25 (Dhruv Verma, in-session).
+- **Amended 2026-09-25 by PD-059 (CHG-021):** the "Update form" becomes the Edit budget page, which also adds, renames and removes buckets.
+
+### PD-059 — A client's buckets are open: add, rename and remove them on an Edit budget page
+- Date: 2026-09-25 · Decided by: Dhruv Verma (in-session; amends PD-033 and PD-058)
+- Decision:
+  - **Buckets are open.** A client has the buckets someone has added, each with a free name (for example a "Council grant"). NDIS, Fixed and Government (the labels the design draws) are offered as suggestions for a bucket the client does not have, not given to every client. A client may have none.
+  - **Edit budget page.** The Budget screen's button is 'Edit' (was 'Update'). It opens a separate page, `/family/<clientId>/budget/edit`, titled "Edit budget", with Save and Cancel. There, in one save: add or remove funds on any bucket, rename a bucket, add a bucket (a name and a starting amount, $0 allowed), and remove a bucket. One optional note covers the save. Cancel or Escape leaves with nothing changed; Save returns to Budget, which shows the result.
+  - **Removing a bucket.** Allowed only when nothing has been spent from it and it has no pending costs; otherwise the control is absent and the page says why. The money left in it leaves with it and is recorded, so the records still add up.
+  - **Rules.** A name is required, at most 40 characters, and unique for the client ignoring case and surrounding spaces. Amounts are more than $0 with at most 2 decimals (a starting amount may be $0). A removal of funds cannot exceed the balance ("Only $X available"). A save with any wrong field is refused whole, each field saying what to fix.
+  - **History.** Adding or removing funds records "Funds added" / "Funds removed" (or the note) and the amount. A new bucket records "Bucket added" and its starting amount. A removed bucket records "Bucket removed" and minus the money left in it. A rename records no row: History is a record of money.
+- Reason: human instruction in-session, 2026-09-25: a client may gain a new source of income (a grant) and some clients have no NDIS, so the budget must not be stuck to three buckets; the inline Update form left it unclear whether the screen was being edited. The human chose each rule above from offered options.
+- Alternatives: every client always starts with the three buckets (rejected: a client without NDIS would carry an empty NDIS card); adding a bucket only when one of the three kinds is missing (rejected: no grants); building custom buckets as a separate later feature (rejected: built on FAM-UI-05); keeping the inline form (rejected: unclear edit mode); an edit page whose Save shows nothing on return, like Edit event in Phase 1 (rejected: Budget shows the change until reload).
+- Consequences: see CHG-021.
 - Human confirmation: CONFIRMED 2026-09-25 (Dhruv Verma, in-session).
 
 ---
@@ -699,6 +714,26 @@ Docs updated: DECISIONS.md
   - **PRD.md:** REQ-28, REQ-29, REQ-30, REQ-07 and the §8 permissions matrix updated; new REQ-37 (event costs and pending) and REQ-38 (admin acts as Family).
 - Human confirmation: Dhruv Verma, 2026-09-25 (in-session).
 - Docs updated: DECISIONS.md (PD-058, this entry, amendment notes on PD-023 and PD-034); PRD.md; DEVELOPMENT_PLAN.md (FAM-UI-08 and ADM-11 rows and cards, CAR-08 retired, CHG-020 notes on the affected cards, totals, next numbers); FAM-UI-05 ACCEPTANCE_CRITERIA.md, TEST_PLAN.md, PRD.md, DECISIONS.md, PROGRESS.md, SESSION_STATE.md; new `docs/development/family-dev/family-ui-event-cost/` and `docs/development/admin-dev/admin-client-view/`; CAR-08 PRD.md and PROGRESS.md (retired); `docs/AGENT_REFERENCE.md` (status value `RETIRED (CHG-xxx)`). `docs/JIRA_BACKLOG.csv` not updated (same as CHG-010).
+
+### CHG-021 — Open buckets and an Edit budget page (replaces the inline Update form)
+- Date / requested by: 2026-09-25 / Dhruv Verma (human, project lead)
+- Type: new requirement, scope change
+- Description: records PD-059. A client's buckets are no longer three fixed kinds: they are added, renamed and removed by Family (and, through PD-058, admins), with NDIS, Fixed and Government as suggestions. 'Update' is renamed 'Edit' and opens an "Edit budget" page instead of an inline form.
+- Source / justification: PD-059 (human answers in-session, 2026-09-25).
+- Impact:
+  - **Types and contracts (this branch, same route as CHG-019 and CHG-020):** a bucket gains a stable `id`; its `label` is its free name; `kind` becomes optional and marks only a bucket made from a suggestion. A fund entry names its bucket by `bucketId` (two custom buckets are never confused); `bucketKind` becomes optional. The exact fields are recorded in FAM-UI-05 DECISIONS.md FD-12 when built. Consumers that key a bucket by kind move to `id`.
+  - **FAM-UI-05 (this branch, Phase 1, fixtures):** the inline Update form built under CHG-020 is replaced by the Edit budget page (`budget/edit`), holding its changes in local state across Budget and Edit budget until reload. AC-04 to AC-06 rewritten for the page; new AC-09 (add a bucket), AC-10 (rename), AC-11 (remove a bucket) and AC-12 (no buckets). AC-07 and AC-08 (pending) unchanged. The CHG-020 form tests are replaced (HUMAN REVIEW). The page and its copy are undesigned (PD-052): flagged for design review.
+  - **Family · Home (FAM-UI-01's tiles, lane F):** reads buckets by `id` and draws however many a client has; Phase 1 edits do not reach Home (no persistence).
+  - **F0-12 (not started):** buckets become rows with a name (unique per client, case-insensitive) and an optional kind, not a fixed enum; a bucket can be deleted only with no charges and no pending costs, its remaining funds recorded as a "Bucket removed" entry; renames keep entries attached by id. Lane B records it when it starts F0-12.
+  - **FAM-UI-08:** the 'Paid from' picker lists the client's own buckets by `id` and name, not three kinds. Its fixtures follow the contract.
+  - **FAM-10, FAM-03:** draw the client's buckets, any number, including none.
+  - **FAM-11:** wires the Edit budget page (all its actions), not a single add-or-remove form. Lane F rewrites its PRD, ACs and TEST_PLAN when it starts.
+  - **ADM-11:** renders the same Edit budget page inside the admin layout.
+  - **INT-01 (budget warning emails):** names the bucket by its name.
+  - **PL-10:** "multiple funding sources" is now in scope as named buckets; restrictions, categories, several periods and transfers stay parked.
+  - **PRD.md:** REQ-29 updated; REQ-27 notes the open bucket model.
+- Human confirmation: Dhruv Verma, 2026-09-25 (in-session).
+- Docs updated: DECISIONS.md (PD-059, this entry, amendment notes on PD-033 and PD-058); PRD.md (REQ-27, REQ-29, PL-10); DEVELOPMENT_PLAN.md (totals, CHG-021 notes on FAM-UI-05, FAM-UI-08, FAM-10, FAM-11, F0-12); FAM-UI-05 PRD.md, ACCEPTANCE_CRITERIA.md, TEST_PLAN.md, DECISIONS.md, PROGRESS.md, SESSION_STATE.md.
 
 Template for future entries:
 ```

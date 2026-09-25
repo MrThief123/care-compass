@@ -6,7 +6,7 @@ Record feature-level decisions here using the template below. Project-wide decis
 
 | ID | Decision needed | Blocking? | Status / default in use |
 |---|---|---|---|
-| OQ-04 | Funding model: buckets, categories and periods | no | ANSWERED — PD-033 (root DECISIONS.md): three fixed buckets NDIS / Fixed / Government, no categories. The screen draws whatever buckets the contract returns, in the order given. |
+| OQ-04 | Funding model: buckets, categories and periods | no | ANSWERED — PD-033 (root DECISIONS.md): three fixed buckets NDIS / Fixed / Government, no categories. Amended by PD-059 (CHG-021, FD-12): buckets are open, named freely, NDIS / Fixed / Government are suggestions. The screen draws whatever buckets the contract returns, in the order given. |
 | OQ-05 | Who can add funds and record spending; Budget History contents | no | ANSWERED — PD-034 (root DECISIONS.md): Family and organisation admins both edit funds; carers record expenses; History shows top-ups and expenses, each attributed to the actor. The Update flow is undesigned (OQ-19, built by FAM-11). See FD-05 and FD-06 for what this screen does with it. |
 | OQ-24 | Undesigned empty states | no | OPEN — the default is in use: the `EmptyState` primitive with proposed copy, flagged for review (FD-07). Not closed by this feature. |
 
@@ -117,6 +117,7 @@ Record feature-level decisions here using the template below. Project-wide decis
 - Test changes caused: none.
 
 ### FD-11 — Scope grows under CHG-020: the Update form and pending costs
+- **Form superseded by FD-12 / CHG-021 (2026-09-25):** 'Edit' opens an Edit budget page instead. The pending display and the pending fields below stand.
 - Date: 2026-09-25
 - Context: the human decided (PD-058, CHG-020) that funds are changed with one simple form by Family and admins, that event costs a bucket cannot cover are held as pending, and chose to build the form and the pending display on this branch before its PR rather than in a separate feature.
 - Decision: new AC-04 to AC-08 (TEST_PLAN T-04 to T-08). 'Update' opens a form (bucket, Add or Remove, amount, optional note) that changes local state only; a removal over the balance is refused. Bucket cards show pending costs and History lists them as Pending, on fixtures. Status goes back from READY FOR PR to IN PROGRESS. The budget types, contract and fixtures gain what the pending display needs, extended rather than recreated (CHG-002, same route as CHG-019); the exact fields are recorded here when built.
@@ -151,6 +152,16 @@ Record feature-level decisions here using the template below. Project-wide decis
 - **Built: the pending display.**
   - The shared tile `src/features/family-home/budget-bucket-tile.tsx` shows "Pending $310 · 1 cost" (plural "costs", cents kept) under its totals, in words, only when `pendingCount > 0`. The human chose, on 2026-09-25, to put it in the shared tile, so **Family · Home's Government card shows it too** (lane F owns both folders).
   - History labels a pending row "Pending" in words: a small alert-outlined pill under the amount, in the amount cell, so the table keeps its three columns and the "Recorded by" line stays the description cell's second line.
+
+### FD-12 — CHG-021: 'Edit' opens an Edit budget page; buckets are open
+- Date: 2026-09-25
+- Context: in a review of the CHG-020 build, the human found the inline form unclear ("I don't really know if I'm in edit mode"; 'Update' stayed on screen but did nothing while the form was open) and asked for a separate edit screen like Edit event, the button renamed 'Edit', and the ability to add a bucket for a new source of income such as a grant, since not every client has NDIS. The human then chose, from offered options: Budget shows the change after Save; NDIS, Fixed and Government are suggestions; add, rename and remove buckets as well as add or remove funds; built on this branch. Recorded as PD-059 and CHG-021 (root DECISIONS.md).
+- Decision: replaces FD-11's inline form. 'Edit' (a link styled as the primary button) goes to `/family/[clientId]/budget/edit`, page heading "Edit budget". One panel per bucket (Name, Remaining for reference, Add or Remove and Amount, blank for no change; 'Remove bucket' only when nothing is spent and nothing is pending, otherwise a line saying why), 'Add bucket' (Name with the unused suggestions as chips that fill it, Starting amount), one "Note (optional)", Save and Cancel. Save applies every change at once or refuses the whole save. Changes are held in a budget-route client holder (a `layout.tsx` for `budget/`, seeded once from the contract reads) so Budget shows them after Save; reload resets them. Rows: "Funds added" / "Funds removed" or the note; "Bucket added" (+ starting amount, also at $0); "Bucket removed" (minus what was left); rename adds none. The pending display (AC-07, AC-08) is unchanged.
+- Reason: the human's decision (PD-059).
+- Alternatives considered: see PD-059.
+- Consequences: the bucket type gains a stable `id`, `kind` becomes optional, fund entries gain `bucketId` (CHG-021; exact fields recorded here when built). Family · Home keys its tiles by `id`. The page, its layout and all its copy are undesigned (PD-052): HUMAN REVIEW in the PR. FD-06's and FD-11's 'Update' wording goes. FD-07's no-buckets empty state gains a line pointing to 'Edit'.
+- Human confirmation required: yes — given, Dhruv Verma, 2026-09-25 (in-session).
+- Test changes caused: the CHG-020 inline-form tests (`fecb598`) in `family-budget.test.tsx` and `fund-update.test.ts` are replaced by T-04 to T-06 (rewritten) and T-09 to T-12; each before and after is listed here when the `test(family)` commit is made. Flagged HUMAN REVIEW in PROGRESS.md and the PR.
 
 <!-- Template
 ### FD-01 — <title>

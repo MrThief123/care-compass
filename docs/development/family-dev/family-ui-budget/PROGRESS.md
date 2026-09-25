@@ -9,7 +9,7 @@ PR target: `family-dev`
 Last updated: 2026-09-25
 
 ## Blockers
-- None. **Scope grew under CHG-020 (2026-09-25):** the Update form and the pending display (AC-04 to AC-08, FD-11). Back to IN PROGRESS until they are built and green. Earlier note, kept for history: built and green; waiting only for the human's "yes" to open the PR. No open human decision blocks it (OQ-24, empty-state wording, stays open and uses the documented defaults, FD-07).
+- None. **Scope changed again under CHG-021 (2026-09-25):** 'Update' becomes 'Edit', opening an Edit budget page that also adds, renames and removes buckets (AC-04 to AC-06 rewritten, AC-09 to AC-12 new, FD-12). **Scope grew under CHG-020 (2026-09-25):** the Update form and the pending display (AC-04 to AC-08, FD-11). Back to IN PROGRESS until they are built and green. Earlier note, kept for history: built and green; waiting only for the human's "yes" to open the PR. No open human decision blocks it (OQ-24, empty-state wording, stays open and uses the documented defaults, FD-07).
 - FD-05 is answered: the human chose to show who recorded each entry (2026-09-25).
 
 ## Dependencies status
@@ -28,15 +28,18 @@ Last updated: 2026-09-25
 - Real-browser design check against `family-06-budget.png` and a width sweep (1920 to 600, normal and stress content): clean. One defect found and fixed on the way (a very large amount broke mid-number at 768; FD-10).
 - Full local checks run (CI is down): all green except two shell e2e tests that fail the same way on a clean `origin/family-dev` (TEST_PLAN.md Results).
 
+- CHG-020: T-04 to T-08 written first and run red (`fecb598`), then built (`997ef7b`): the inline Update form and the pending display. 137 of 137 feature tests; full unit run 1403 pass, 5 fail (the pre-existing Supabase "Invalid API key" integration tests). Not yet run for it: `next build`, e2e, the browser sweep.
+- CHG-021 recorded (PD-059, FD-12) after the human reviewed the inline form.
+
 ## In progress
-- CHG-020: T-04 to T-08 written first and run red for the right reasons (37 fail, 67 pass in the four files that load; `fund-update.test.ts` fails at import). The FD-06 'Update' tests are replaced (HUMAN REVIEW, below). See TEST_PLAN.md "Red run for CHG-020".
+- CHG-021: docs written; waiting for the human's review before rewriting T-04 to T-06 and writing T-09 to T-12 red first.
 
 ## Remaining
-- AC-04 to AC-08: implement the form and the pending display (types, contract, fixtures per CHG-002), then full local checks and a real-browser width sweep.
+- CHG-021: tests red first (`test(family)`), then the Edit budget page, the open bucket model (`id`, optional `kind`, `bucketId`) and the budget route's local holder; then full local checks (`next build`, e2e) and a real-browser width sweep, 1920 to 768, of Budget, Edit budget and Home.
 - Then the human's "yes", and open the PR to `family-dev` (the docs update ships in it).
 
 ## Acceptance criteria status
-- 3 / 8 MET (AC-01 the three bucket cards, AC-02 the first History row, AC-03 the empty state), each with tests passing. AC-04 to AC-08 (CHG-020) NOT MET.
+- 3 / 12 MET (AC-01 the three bucket cards, AC-02 the first History row, AC-03 the empty state), each with tests passing. AC-07 and AC-08 (pending) are built and their tests pass, but stay NOT MET until the full checks and browser sweep; AC-04 to AC-06 were rewritten by CHG-021; AC-09 to AC-12 (CHG-021) NOT MET.
 
 ## Tests
 - Written: 92 (T-01..T-03 and the tests beyond them, TEST_PLAN.md)
@@ -59,6 +62,7 @@ Last updated: 2026-09-25
 - See DECISIONS.md (FD-01 to FD-10; FD-10 is new in the build: History column sizes). Root `DECISIONS.md`: CHG-019 (amended 2026-09-25: entries name their recorder).
 
 ## HUMAN REVIEW: test expectation changed
+- CHG-021: the CHG-020 inline-form tests (`fecb598`) will be replaced by the Edit budget page's tests (T-04 to T-06 rewritten, T-09 to T-12). Recorded requirement change (PD-059); each before and after goes in DECISIONS.md FD-12 with the `test(family)` commit.
 - CHG-020: the FD-06 'Update' tests (announces "not available yet", changes nothing) are replaced by the form's tests T-04 to T-06. Existing loader, contract and fixture tests now also expect `today` and Margaret's pending cost. Recorded requirement change; each before and after is in DECISIONS.md FD-11.
 - `[FAM-UI-05][PRD] FD-05: a row is date, description and amount only, with no 'recorded by' text drawn` asserted the opposite of the human's decision of 2026-09-25 (show who recorded each entry), so it was replaced by attribution tests before any implementation began. No other assertion changed. Before and after: DECISIONS.md FD-05, TEST_PLAN.md.
 - The design (`family-06-budget.png`) does not draw the "Recorded by" line: flag for design review in the PR.
@@ -74,7 +78,7 @@ Last updated: 2026-09-25
 - OQ-24 (empty-state wording) is open; the default wording in use is flagged in FD-07.
 
 ## Next action
-- After the human reviews the CHG-020 docs: write T-04 to T-08 failing first.
+- After the human reviews the CHG-021 docs: rewrite T-04 to T-06 and write T-09 to T-12, failing first; run red; commit `test(family): …`.
 
 ## Ready for PR
-- No (CHG-020 scope in progress). When it is, the PR body also flags: the undesigned Update form and pending display (PD-052), the replaced FD-06 tests (HUMAN REVIEW), CHG-020. Earlier list: PR body flags: local `BudgetBucketTile` and local History table instead of the kit's `BudgetBucketCard` and `DataTable` (FD-01, FD-03); the "Recorded by" line the design does not draw (FD-05); copy needing review (FD-06 Update message, FD-07 empty and error wording, FD-09 "No description"; OQ-24 stays open); CHG-019 touching `src/server/**` and `src/mocks/**`; the checks ran locally because CI is down; the two shell e2e failures that also fail on `family-dev`.
+- No (CHG-021 scope in progress). When it is, the PR body also flags: the undesigned Edit budget page and its copy, open buckets (PD-059, CHG-021) changing `src/types/**`, `src/server/**` and `src/mocks/**`, the replaced CHG-020 form tests (HUMAN REVIEW); the undesigned Update form and pending display (PD-052), the replaced FD-06 tests (HUMAN REVIEW), CHG-020. Earlier list: PR body flags: local `BudgetBucketTile` and local History table instead of the kit's `BudgetBucketCard` and `DataTable` (FD-01, FD-03); the "Recorded by" line the design does not draw (FD-05); copy needing review (FD-06 Update message, FD-07 empty and error wording, FD-09 "No description"; OQ-24 stays open); CHG-019 touching `src/server/**` and `src/mocks/**`; the checks ran locally because CI is down; the two shell e2e failures that also fail on `family-dev`.
