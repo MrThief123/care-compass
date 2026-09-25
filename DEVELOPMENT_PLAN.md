@@ -1,7 +1,7 @@
 # DEVELOPMENT PLAN — Care Compass
 
 Version 0.2 · 17 September 2026 · Status: DRAFT (controlled after planning freeze) · Supersedes v0.1 dashboard-by-dashboard phases
-Totals: **79 features** · **320 acceptance criteria** across 5 phases (UI-04 and its 10 criteria added by CHG-004, 2026-09-19; the Jira import `docs/JIRA_BACKLOG.csv` predates it). Jira import: `docs/JIRA_BACKLOG.csv`.
+Totals: **82 active features** (83 listed; CAR-08 retired) · **364 acceptance criteria** across 5 phases (UI-04 and its 10 criteria added by CHG-004, 2026-09-19; UI-05 and its 13 criteria added under CHG-009, 2026-09-24; F0-17 and its 8 criteria added by CHG-010, 2026-09-24; CHG-020, 2026-09-25: FAM-UI-08 (6 criteria) and ADM-11 (5) added, FAM-UI-05 +5 criteria, CAR-08 and its 2 criteria retired; CHG-021, 2026-09-25: FAM-UI-05 +4 criteria; CHG-022, 2026-09-25: FAM-UI-05 +5 criteria; the Jira import `docs/JIRA_BACKLOG.csv` predates all five). Jira import: `docs/JIRA_BACKLOG.csv`.
 
 ---
 
@@ -113,6 +113,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 | 9 | UI-02 | Forms kit: fields, settings cards, side panels, chips, modal, event form | S | D3–D4 | SPRINT | F0-14, UI-00, UI-01 | OQ-01 | `feature/shared-forms-kit` | NOT STARTED |
 | 10 | UI-03 | Lists and cards kit: tables, rows, person/stat/budget/alert cards, client info view | S | D3 | SPRINT | F0-14, UI-00 | OQ-01 | `feature/shared-lists-cards-kit` | NOT STARTED |
 | 11 | UI-04 | Screen data contracts and fixtures: full-history Task log, single occurrence, event documents | S | D6 | SPRINT | UI-00 | OQ-01 | `feature/shared-screen-contracts-fixtures` | NOT STARTED |
+| 12 | UI-05 | Plain events in the shared kit and contracts (CHG-009) | S | D8 | SPRINT | UI-00, UI-01, UI-02, UI-03, UI-04 | — | `feature/shared-plain-events` | NOT STARTED |
 
 ### Phase 1 — Screens on fixtures (parallel: Family · Carer · Admin)
 
@@ -134,6 +135,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 | 14 | ADM-UI-03 | Admin Staff screen (UI) | A | D5–D6 | SPRINT | F0-15, UI-02, UI-03 | — | `feature/admin-ui-staff` | NOT STARTED |
 | 15 | ADM-UI-04 | Admin Clients screen (UI) | A | D6 | SPRINT | F0-15, UI-02, UI-03 | — | `feature/admin-ui-clients` | NOT STARTED |
 | 16 | ADM-UI-05 | Admin Settings screen (UI) | A | D6 | SPRINT | F0-15, UI-02 | — | `feature/admin-ui-settings` | NOT STARTED |
+| 17 | FAM-UI-08 | Family event cost fields (UI) (CHG-020) | F | — | SPRINT | FAM-UI-03, FAM-UI-05 | — | `feature/family-ui-event-cost` | NOT STARTED |
 
 ### Phase 2 — Backend & data layer (parallel with Phase 1)
 
@@ -149,6 +151,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 | 8 | F0-12 | Budget buckets, fund top-ups, spending and summary calculation | B | D6 | SPRINT | F0-06, F0-08 | OQ-01, OQ-03, OQ-04, OQ-05 | `feature/shared-budget-schema` | NOT STARTED |
 | 9 | F0-13 | Client document storage | B | D6–D7 | SPRINT | F0-06, F0-11 | OQ-01, OQ-26 | `feature/shared-document-storage` | NOT STARTED |
 | 10 | F0-16 | Development seed data from the design content | B | D7 | SPRINT | F0-11, F0-12, F0-13, F0-10 | OQ-01 | `feature/shared-dev-seed-data` | NOT STARTED |
+| 11 | F0-17 | Self-serve sign-up for Family and Organisation accounts | B | D8 | SPRINT | F0-06, F0-07 | OQ-01, OQ-07, OQ-08 | `feature/shared-sign-up` | NOT STARTED |
 
 ### Phase 3 — Data wiring & behaviour (parallel: Family · Carer · Admin)
 
@@ -176,7 +179,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 | 20 | CAR-05 | Carer — Calendar (shifts) and selected-shift tasks | C | D9–D10 | SPRINT | F0-10, F0-11, CAR-UI-03 | OQ-33 | `feature/carer-calendar-shifts` | NOT STARTED |
 | 21 | CAR-06 | Carer — Mark tasks done | C | D10 | SPRINT | F0-10, F0-11, CAR-UI-01, CAR-UI-03 | OQ-09, OQ-10, OQ-33 | `feature/carer-complete-task` | NOT STARTED |
 | 22 | CAR-07 | Carer — Add and edit events for a patient | C | — | POST-SPRINT | CAR-04, F0-11, UI-02 | OQ-09, OQ-22, OQ-19 | `feature/carer-manage-events` | NOT STARTED |
-| 23 | CAR-08 | Carer — Record an expense | C | — | POST-SPRINT | F0-12, F0-13 | OQ-19, OQ-04, OQ-05 | `feature/carer-record-expense` | NOT STARTED |
+| 23 | CAR-08 | ~~Carer — Record an expense~~ (retired, CHG-020) | C | — | POST-SPRINT | F0-12, F0-13 | OQ-19, OQ-04, OQ-05 | `feature/carer-record-expense` | RETIRED (CHG-020) |
 | 24 | CAR-09 | Carer — Settings | C | D10 | SPRINT | F0-07, CAR-UI-04 | OQ-35 | `feature/carer-settings` | NOT STARTED |
 | 25 | ADM-01 | Admin Home — counts and overdue events | A | D8 | SPRINT | F0-11, ADM-UI-01 | OQ-29 | `feature/admin-home` | NOT STARTED |
 | 26 | ADM-02 | Admin — Staff list and add/edit staff | A | D8–D9 | SPRINT | F0-06, F0-07, ADM-UI-03 | OQ-08, OQ-13 | `feature/admin-staff` | NOT STARTED |
@@ -188,6 +191,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 | 32 | ADM-08 | Admin — Manage carer-client assignments | A | — | POST-SPRINT | ADM-07 | OQ-09, OQ-19 | `feature/admin-carer-assignments` | NOT STARTED |
 | 33 | ADM-09 | Admin — Edit, extend or cancel a shift | A | — | POST-SPRINT | ADM-07 | OQ-27, OQ-19 | `feature/admin-edit-shift` | NOT STARTED |
 | 34 | ADM-10 | Admin — Settings | A | D10 | SPRINT | F0-07, ADM-UI-05 | OQ-35 | `feature/admin-settings` | NOT STARTED |
+| 35 | ADM-11 | Admin — Client view: a client's Family screens with full access (CHG-020) | A | — | POST-SPRINT | ADM-04, FAM-01, FAM-04, FAM-06, FAM-07, FAM-09, FAM-10, FAM-11, FAM-14, FAM-15 | — | `feature/admin-client-view` | NOT STARTED |
 
 ### Phase 4 — Integration, hardening & release
 
@@ -330,6 +334,17 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Requirements:** REQ-19, REQ-N9
 - **Docs:** `docs/development/shared/shared-screen-contracts-fixtures/` · **Status:** NOT STARTED
 
+### UI-05 — Plain events in the shared kit and contracts (CHG-009)
+- **Dashboard / stream:** shared · **Lane:** S · **Days:** D8 · **Sprint:** SPRINT · **PR target:** `main (per OQ-01 — shared work)` · **Branch:** `feature/shared-plain-events`
+- **Description:** Added by CHG-009 (the shared follow-up its Impact section lists). An occurrence of a plain event has no status in the domain types; `getTaskLog` gains a type filter (All / Tasks only / Events only) and status filters return tasks only; `getOccurrence` and `getTodayOccurrences` return plain events with no status; the mock fixtures carry plain events; the calendar kit gets a fourth, neutral "Event" block look; the lists kit gets a neutral "Event" label; the forms kit gets a shared switch and a way to hide the Status chips on the event form. Existing kit APIs stay backward compatible; dashboard lanes adopt the changes themselves.
+- **User value:** Families and carers see plain events (a walk) on the schedule and in the log, clearly marked "Event" and never shown as Planned, Done or Overdue.
+- **Dependencies:** UI-00, UI-01, UI-02, UI-03, UI-04 · **Blocking decisions:** None (OQ-01 ANSWERED; authorised by CHG-009)
+- **Jira summary:** plain-event occurrence type, Task log type filter, plain-event fixtures, neutral Event look in calendar and lists kits, shared switch, EventForm status toggle
+- **Acceptance criteria summary:** 13 criteria — a plain-event occurrence has no status; type filter with status filters returning tasks only; contracts return plain events without a status; plain-event fixtures with existing values kept; neutral "Event" look in every calendar surface and list row; a shared switch; EventForm can hide Status; axe clean; existing kit APIs unchanged …
+- **Testing summary:** unit, contract, component and axe
+- **Requirements:** REQ-35, REQ-17
+- **Docs:** `docs/development/shared/shared-plain-events/` · **Status:** NOT STARTED
+
 ## Phase 1 — Screens on fixtures (parallel: Family · Carer · Admin) — feature detail
 
 ### FAM-UI-01 — Family Home screen (UI)
@@ -341,6 +356,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Acceptance criteria summary:** 6 criteria — the Today panel shows Morning medication (Done · Aisha R.), Physiotherapy (Planned, 1 hr 30 min) and Afternoon check-in (Planned); the Overdue card badge is '3' and lists Wound dressing check (Fri 27 Nov), Medication review (Sat 28 Nov), Weekly weigh-in (Sun 29 Nov); the budget line reads '$17,870 remaining of $32,000 · 44% used' and Government is in alert state …
 - **Testing summary:** 6 component
 - **Requirements:** REQ-02, REQ-N1, REQ-N2, REQ-N3
+- **CHG-009 (tasks and plain events, REQ-35):** the Today timeline shows tasks and plain events; plain events use the neutral "Event" look; Overdue lists tasks only.
 - **Docs:** `docs/development/family-dev/family-ui-home/` · **Status:** NOT STARTED
 
 ### FAM-UI-02 — Family Calendar screen (UI)
@@ -352,6 +368,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Acceptance criteria summary:** 5 criteria — W is selected and '30 Nov – 6 Dec 2026' is shown; Physiotherapy blocks appear at 11:30 on MON 30 and FRI 4; its subtitle reads 'Tuesday 1 December' …
 - **Testing summary:** 4 component, 1 e2e
 - **Requirements:** REQ-02, REQ-N1, REQ-N2, REQ-N3
+- **CHG-009 (tasks and plain events, REQ-35):** calendar views show tasks and plain events (neutral "Event" look); the Tasks panel lists tasks only; the Log panel shows both.
 - **Docs:** `docs/development/family-dev/family-ui-calendar/` · **Status:** NOT STARTED
 
 ### FAM-UI-03 — Family Add / Edit event screens (UI)
@@ -363,6 +380,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Acceptance criteria summary:** 4 criteria — Date 'Monday 30 November 2026', Recurring 'Weekly', Status Planned and the description text are shown; a Date error is shown; document tiles 'Physio referral.pdf' and 'Exercise plan.pdf' and an 'Add file' tile are shown …
 - **Testing summary:** 3 component, 1 e2e
 - **Requirements:** REQ-02, REQ-N1, REQ-N2, REQ-N3
+- **CHG-009 (tasks and plain events, REQ-35):** both screens show the "This is a task — must be ticked off" switch (On for a new event, the event's value when editing), local state only.
 - **Docs:** `docs/development/family-dev/family-ui-event-form/` · **Status:** NOT STARTED
 
 ### FAM-UI-04 — Family Info screen (UI)
@@ -385,6 +403,9 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Acceptance criteria summary:** 3 criteria — NDIS '$14,880', Fixed '$2,750' and Government '$240' cards are shown; the first row is '3 Nov 2026', 'NDIS quarterly plan top-up', '+$6,000'; an empty state is shown
 - **Testing summary:** 3 component
 - **Requirements:** REQ-02, REQ-N1, REQ-N2, REQ-N3
+- **CHG-020 (PD-058):** 'Update' opens a simple form (bucket, Add or Remove, amount, optional note; local state only; a removal over the balance is refused); bucket cards show pending costs and History lists them marked Pending. +5 criteria (AC-04 to AC-08).
+- **CHG-021 (PD-059):** 'Update' becomes 'Edit' and opens an Edit budget page (`budget/edit`) replacing the inline form: add or remove funds, add, rename or remove a bucket; buckets are open (NDIS, Fixed, Government are suggestions). AC-04 to AC-06 rewritten; +4 criteria (AC-09 to AC-12).
+- **CHG-022 (PD-060):** a Pending costs section; each History and pending row opens a details dialog (note, recorder, paid or pending); rows made on Edit budget read "Recorded by you" and keep the save's note; adding funds pays pending costs whole, strictly oldest first (simulated in local state); an 'Export' button downloads History as CSV. +5 criteria (AC-13 to AC-17).
 - **Docs:** `docs/development/family-dev/family-ui-budget/` · **Status:** NOT STARTED
 
 ### FAM-UI-06 — Family Settings screen (UI)
@@ -396,6 +417,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Acceptance criteria summary:** 3 criteria — Name 'Helen', Phone '0412 345 678', Email 'helen@example.com', Address '12 Wattle St, Preston VIC 3072' are shown; its title is 'Change organisation?' and the body states Banksia Home Care will lose access immediately; it closes and nothing else happens
 - **Testing summary:** 3 component
 - **Requirements:** REQ-02, REQ-N1, REQ-N2, REQ-N3
+- **CHG-023:** adds the `getFamilyContactDetails` contract and Helen's Settings fixtures, and AC-01 shows 'Helen Doyle' (PD-038). The feature also gains criteria for the Phase 1 behaviour of the Change confirm, Reset, the per-card Save (PD-054), validation and states: AC-04 to AC-09.
 - **Docs:** `docs/development/family-dev/family-ui-settings/` · **Status:** NOT STARTED
 
 ### FAM-UI-07 — Family Task log and Task detail screens (UI)
@@ -407,7 +429,20 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Acceptance criteria summary:** 4 criteria — 9 rows appear starting 'Mon 30 Nov · Morning medication · Aisha R. · Done · Aisha R.'; only Weekly weigh-in and Medication review remain, each with nurse '—'; 'No matches for "Zoe".' is shown …
 - **Testing summary:** 4 component
 - **Requirements:** REQ-02, REQ-N1, REQ-N2, REQ-N3
+- **CHG-009 (tasks and plain events, REQ-35):** "Task log" becomes "Care log" (route unchanged); lists tasks and plain events; Status shows "Event" for plain events; type filter All / Tasks only / Events only; plain-event detail shows "Event · No tick-off needed".
 - **Docs:** `docs/development/family-dev/family-ui-task-log-detail/` · **Status:** NOT STARTED
+
+### FAM-UI-08 — Family event cost fields (UI)
+- **Dashboard / stream:** family · **Lane:** F · **Days:** — · **Sprint:** SPRINT · **PR target:** `family-dev` · **Branch:** `feature/family-ui-event-cost`
+- **Description:** Adds optional Cost and 'Paid from' bucket fields to the Add / Edit event form on fixtures. A bucket at $0 or with pending costs is struck through and cannot be picked; a cost above a bucket's balance warns that it will be held as pending. Added by CHG-020.
+- **User value:** Care is costed as it is planned, and nobody plans care against money that isn't there.
+- **Dependencies:** FAM-UI-03, FAM-UI-05 · **Blocking decisions:** None
+- **Jira summary:** Cost and bucket fields in the event form, with struck-through empty buckets and a low-balance warning — on fixtures
+- **Acceptance criteria summary:** 6 criteria — $90.00 from NDIS is held; 0, negatives, 3 decimals and a cost with no bucket are refused; a $0 or pending bucket reads "No funds left" and can't be chosen; a cost above the balance warns; a recurring event reads "Charged each time it's completed"; Edit opens with the saved cost …
+- **Testing summary:** 5 component, 1 unit
+- **Requirements:** REQ-37, REQ-28, REQ-N1
+- **CHG-021 (PD-059):** the picker lists the client's own buckets by id and name, not three kinds.
+- **Docs:** `docs/development/family-dev/family-ui-event-cost/` · **Status:** NOT STARTED
 
 ### CAR-UI-01 — Carer Home screen (UI)
 - **Dashboard / stream:** carer · **Lane:** C · **Days:** D4 · **Sprint:** SPRINT · **PR target:** `carer-dev` · **Branch:** `feature/carer-ui-home`
@@ -418,6 +453,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Acceptance criteria summary:** 3 criteria — Today's calendar shows 09:00, 11:30 and 15:00 rows for Margaret with Done/Planned/Planned pills; Notifications include 'New shift assigned: Tuesday 1 Dec, 09:00–11:00 (Margaret).' with an 'Admin' chip; a bell button is present
 - **Testing summary:** 3 component
 - **Requirements:** REQ-02, REQ-N1, REQ-N2, REQ-N3
+- **CHG-009 (tasks and plain events, REQ-35):** Today's calendar shows tasks and plain events; the Tasks checklist lists tasks only.
 - **Docs:** `docs/development/carer-dev/carer-ui-home/` · **Status:** NOT STARTED
 
 ### CAR-UI-02 — Carer Patients and patient info screens (UI)
@@ -440,6 +476,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Acceptance criteria summary:** 3 criteria — MON 30 shows blocks '09:00 Margaret — Morning m…', '11:30 Margaret — Physiother…', '15:00 Margaret — Afternoon c…'; the subtitle reads '09:00 · Margaret — Morning medication' with three checklist items; W is selected
 - **Testing summary:** 3 component
 - **Requirements:** REQ-02, REQ-N1, REQ-N2, REQ-N3
+- **CHG-009 (tasks and plain events, REQ-35):** calendar blocks show tasks and plain events; "Tasks for the selected shift" lists tasks only.
 - **Docs:** `docs/development/carer-dev/carer-ui-calendar/` · **Status:** NOT STARTED
 
 ### CAR-UI-04 — Carer Settings screen (UI)
@@ -585,6 +622,8 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Acceptance criteria summary:** 8 criteria — it returns the weekly occurrences in that range with status 'planned' for future ones; status is 'overdue'; status is 'done' with actor label 'Aisha R.' …
 - **Testing summary:** 2 integration, 2 unit, 4 db
 - **Requirements:** REQ-13, REQ-14, REQ-15, REQ-17, REQ-18, REQ-19, REQ-N6
+- **CHG-009 (tasks and plain events, REQ-35):** store `completion_mode` (`manual` = task, `automatic` = plain event) on events and per-occurrence overrides; plain-event occurrences have no status and `set_occurrence_done` rejects them; mode changes never apply before now; the log query takes a type filter.
+- **CHG-020 (PD-058, REQ-37):** events gain an optional cost (`numeric(12,2)`) and the bucket it is paid from; a change applies to future completions only; the creator is stored so the carer who created an event may change its cost.
 - **Docs:** `docs/development/shared/shared-care-events-schema/` · **Status:** NOT STARTED
 
 ### F0-12 — Budget buckets, fund top-ups, spending and summary calculation
@@ -596,6 +635,9 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Acceptance criteria summary:** 6 criteria — remaining is 14880.00 and percent_used is 38; percent_used is 92 and threshold_state is 'alert' (under 70/90/100 thresholds; recalculated once OQ-03 is answered); remaining is negative and threshold_state is 'depleted' …
 - **Testing summary:** 5 db, 1 unit
 - **Requirements:** REQ-27, REQ-28, REQ-29, REQ-N12
+- **CHG-020 (PD-058, REQ-37, REQ-38):** charge an event's cost once per completed occurrence; a cost the bucket cannot cover in full is held whole as pending (no overdraft from event costs, replacing the 'remaining is negative' criterion); a top-up pays pending costs oldest first, each only in full; a manual removal cannot go below $0; admins of the client's organisation get the same writes as Family; carers get no direct budget writes. Lane B rewrites the PRD/ACs/TEST_PLAN on start. Not yet decided: a pending cost whose event is deleted; pending costs across a bucket's period.
+- **CHG-021 (PD-059):** buckets are rows with a name (unique per client, case-insensitive) and an optional kind, not a fixed enum; fund entries reference the bucket by id; a bucket is deleted only with no charges and no pending costs, its remaining funds recorded as a 'Bucket removed' entry. Lane B records it on start.
+- **CHG-022 (PD-060):** a top-up pays the bucket's pending costs whole, strictly oldest first, stopping at the first that does not fit, recording the paid date on the cost; each entry stores its recorder and the save's note.
 - **Docs:** `docs/development/shared/shared-budget-schema/` · **Status:** NOT STARTED
 
 ### F0-13 — Client document storage
@@ -618,7 +660,19 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Acceptance criteria summary:** 3 criteria — NDIS remaining 14880, Fixed 2750, Government 240 are returned; each succeeds and lands on their role home; it exits non-zero without writing
 - **Testing summary:** 3 integration
 - **Requirements:** REQ-N9
+- **CHG-009 (tasks and plain events, REQ-35):** seed plain events (e.g. a daily walk) alongside tasks.
 - **Docs:** `docs/development/shared/shared-dev-seed-data/` · **Status:** NOT STARTED
+
+### F0-17 — Self-serve sign-up for Family and Organisation accounts
+- **Dashboard / stream:** shared · **Lane:** B · **Days:** D8 · **Sprint:** SPRINT · **PR target:** `main (per OQ-01 — shared work)` · **Branch:** `feature/shared-sign-up`
+- **Description:** A public `/sign-up` page, built like `/sign-in`, where a family member creates their account and their client, or an organisation admin creates their account and a new organisation. Carers are invited by their admin and cannot sign up. Added by CHG-010 (PD-057).
+- **User value:** The confirmed workflow (PD-037: the family sets up the client, then picks a provider) can start without anyone creating accounts by hand.
+- **Dependencies:** F0-06, F0-07 · **Blocking decisions:** OQ-01, OQ-07, OQ-08
+- **Jira summary:** Sign-up page (account type, names, email, password, plus client or organisation name) that creates the account and its linked record atomically, then signs the user in
+- **Acceptance criteria summary:** 8 criteria — a family sign-up lands on the new client's Home; an organisation sign-up is routed like an admin sign-in; public sign-up cannot create a carer or join an existing organisation …
+- **Testing summary:** 2 e2e, 4 integration, 2 db
+- **Requirements:** REQ-01, REQ-36
+- **Docs:** `docs/development/shared/shared-sign-up/` · **Status:** NOT STARTED
 
 ## Phase 3 — Data wiring & behaviour (parallel: Family · Carer · Admin) — feature detail
 
@@ -631,6 +685,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Acceptance criteria summary:** 6 criteria — a block at 09:00 shows 'Morning medication', 'Aisha R.', '1 hr' and pill 'Done · Aisha R.'; its block spans 11:30–13:00, shows '1 hr 30 min' and pill 'Planned'; tops are 88px and 198px and heights 44px and 66px …
 - **Testing summary:** 4 component, 1 unit, 1 integration
 - **Requirements:** REQ-16, REQ-17, REQ-19, REQ-26
+- **CHG-009 (tasks and plain events, REQ-35):** the Today timeline shows tasks and plain events; plain events have no status.
 - **Docs:** `docs/development/family-dev/family-home-today/` · **Status:** NOT STARTED
 
 ### FAM-02 — Family Home — Overdue card and Recent activity
@@ -642,6 +697,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Acceptance criteria summary:** 4 criteria — the badge shows '3' and three rows each show an 'Overdue' pill with warning icon; 'All caught up' and 'There are no overdue tasks right now.' are shown; exactly 5 items are returned ordered Mon 30 Nov, Sun 29 Nov, Sun 29 Nov, Sat 28 Nov, Sat 28 Nov …
 - **Testing summary:** 3 component, 1 integration
 - **Requirements:** REQ-17, REQ-19, REQ-21
+- **CHG-009 (tasks and plain events, REQ-35):** Overdue and Recent activity (Done or Overdue rows) contain tasks only, since plain events have no status.
 - **Docs:** `docs/development/family-dev/family-home-overdue-activity/` · **Status:** NOT STARTED
 
 ### FAM-03 — Family Home — Budget strip
@@ -664,6 +720,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Acceptance criteria summary:** 6 criteria — W is selected and columns MON 30 to SUN 6 are shown with 30 highlighted; it returns Mon 30 Nov 2026 to Sun 6 Dec 2026; '09:30 Weekly weigh-in' appears in the THU 3 column …
 - **Testing summary:** 3 component, 1 unit, 1 e2e, 1 integration
 - **Requirements:** REQ-14, REQ-16
+- **CHG-009 (tasks and plain events, REQ-35):** day, week and month views show plain events in the neutral "Event" look.
 - **Docs:** `docs/development/family-dev/family-calendar-views/` · **Status:** NOT STARTED
 
 ### FAM-05 — Family Calendar — Tasks panel and Log panel
@@ -675,6 +732,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Acceptance criteria summary:** 4 criteria — it shows struck through and the completion is recorded with actor Helen; the checkbox returns to unticked and an error message is shown; its subtitle reads 'Monday 30 November' and lists that day's occurrences …
 - **Testing summary:** 1 e2e, 3 component
 - **Requirements:** REQ-18, REQ-19, REQ-21
+- **CHG-009 (tasks and plain events, REQ-35):** the Tasks panel lists tasks only; the Log panel shows tasks and plain events.
 - **Docs:** `docs/development/family-dev/family-calendar-tasks-log/` · **Status:** NOT STARTED
 
 ### FAM-06 — Family — Add event (Enter event)
@@ -686,6 +744,8 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Acceptance criteria summary:** 5 criteria — the event appears on the calendar every week from the chosen date; an error is shown on Date and nothing is submitted; days 24, 26, 27 show event dots and the selected day is filled …
 - **Testing summary:** 1 e2e, 3 component, 1 integration
 - **Requirements:** REQ-13, REQ-14, REQ-18
+- **CHG-009 (tasks and plain events, REQ-35):** the form has the "This is a task — must be ticked off" switch, on by default.
+- **CHG-020 (PD-058):** save the event's optional cost and bucket (FAM-UI-08 fields).
 - **Docs:** `docs/development/family-dev/family-add-event/` · **Status:** NOT STARTED
 
 ### FAM-07 — Family — Edit event
@@ -697,6 +757,8 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Acceptance criteria summary:** 4 criteria — the new description shows on Task detail; past completions are unchanged in the task log; a Date error is shown …
 - **Testing summary:** 1 e2e, 2 integration, 1 component
 - **Requirements:** REQ-14, REQ-15, REQ-17
+- **CHG-009 (tasks and plain events, REQ-35):** the task switch shows the event's current value and follows the edit scope (this occurrence / this and future / entire series from now); it never changes past occurrences.
+- **CHG-020 (PD-058):** cost and bucket editable by Family, admins, or the carer who created the event; future completions only.
 - **Docs:** `docs/development/family-dev/family-edit-event/` · **Status:** NOT STARTED
 
 ### FAM-08 — Family — Event documents (file tiles)
@@ -730,6 +792,9 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Acceptance criteria summary:** 4 criteria — three bucket cards NDIS, Fixed, Government appear with remaining $14,880, $2,750, $240; the first row is '3 Nov 2026', 'NDIS quarterly plan top-up', '+$6,000'; the empty state is shown …
 - **Testing summary:** 3 component, 1 e2e
 - **Requirements:** REQ-27, REQ-28, REQ-29
+- **CHG-020 (PD-058):** show pending costs on bucket cards and in History (FAM-UI-05 layout).
+- **CHG-021 (PD-059):** draw the client's buckets, any number including none; 'Edit' opens the Edit budget page.
+- **CHG-022 (PD-060):** connect the Pending costs section, the entry details dialog and Export to real data; Export writes the client's whole History from the database.
 - **Docs:** `docs/development/family-dev/family-budget-overview/` · **Status:** NOT STARTED
 
 ### FAM-11 — Family — Update funds
@@ -741,6 +806,9 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Acceptance criteria summary:** 3 criteria — the NDIS card shows $15,880 and History's first row shows '+$1,000'; a validation error is shown and nothing is saved; it is rejected
 - **Testing summary:** 1 e2e, 1 component, 1 integration
 - **Requirements:** REQ-29
+- **CHG-020 (PD-058):** the form is bucket, Add or Remove, amount, optional note, dated today; a removal over the balance is refused; a top-up settles pending costs via F0-12; Family and admins only. The future-date edge case no longer applies. Lane F rewrites the PRD/ACs/TEST_PLAN on start.
+- **CHG-021 (PD-059):** wires the Edit budget page instead: add or remove funds, add, rename or remove a bucket, one note per save.
+- **CHG-022 (PD-060):** each save records its note on every row and the signed-in person as the recorder.
 - **Docs:** `docs/development/family-dev/family-budget-update-funds/` · **Status:** NOT STARTED
 
 ### FAM-12 — Family — Settings: family info and password reset
@@ -763,6 +831,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Acceptance criteria summary:** 6 criteria — clients.organisation_id changes, future shifts are cancelled and the assignment is ended; zero rows are returned; counts equal the pre-transfer counts …
 - **Testing summary:** 4 db, 2 component
 - **Requirements:** REQ-04, REQ-N6
+- **CHG-010 (self-serve sign-up, REQ-36):** a self-registered family's client starts with no organisation; the organisation card must offer 'Choose organisation' (picker, no transfer confirmation) when there is none yet.
 - **Docs:** `docs/development/family-dev/family-change-organisation/` · **Status:** NOT STARTED
 
 ### FAM-14 — Family — Task log
@@ -774,6 +843,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Acceptance criteria summary:** 5 criteria — the first rows are Mon 30 Nov Morning medication (Done · Aisha R.), Physiotherapy (Planned), Afternoon check-in (Planned); only Weekly weigh-in (Sun 29 Nov) and Medication review (Sat 28 Nov) are listed, each with nurse '—'; 'No matches for "Zoe".' is displayed …
 - **Testing summary:** 3 integration, 1 component, 1 e2e
 - **Requirements:** REQ-21
+- **CHG-009 (tasks and plain events, REQ-35):** the page is the "Care log"; it lists tasks and plain events, shows "Event" in Status for plain events, and adds a type filter (All / Tasks only / Events only); status filters return tasks only.
 - **Docs:** `docs/development/family-dev/family-task-log/` · **Status:** NOT STARTED
 
 ### FAM-15 — Family — Task detail
@@ -785,6 +855,8 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Acceptance criteria summary:** 4 criteria — it shows 'Done · Aisha R.' and 'Completed at 09:14'; the subline reads 'Monday 30 November 2026 · Assigned to Aisha R.'; its Task detail opens …
 - **Testing summary:** 2 component, 1 e2e, 1 integration
 - **Requirements:** REQ-19, REQ-21, REQ-22
+- **CHG-009 (tasks and plain events, REQ-35):** a plain event's detail shows "Event · No tick-off needed" in the Status card, no pill or completion time; back link reads "Back to Care log".
+- **CHG-020 (PD-058):** marking a task done charges its cost or makes it pending through F0-12.
 - **Docs:** `docs/development/family-dev/family-task-detail/` · **Status:** NOT STARTED
 
 ### CAR-01 — Carer Home — Today's calendar and Tasks
@@ -796,6 +868,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Acceptance criteria summary:** 3 criteria — Today's calendar shows '09:00 Margaret — Morning medication' with 'Done · Aisha R.', '11:30 Margaret — Physiotherapy' Planned and '15:00 Margaret — Afternoon check-in' Planned; no Robert occurrences are returned; the empty state is shown
 - **Testing summary:** 2 component, 1 integration
 - **Requirements:** REQ-05, REQ-17, REQ-25
+- **CHG-009 (tasks and plain events, REQ-35):** Today's calendar shows tasks and plain events; the Tasks checklist lists tasks only.
 - **Docs:** `docs/development/carer-dev/carer-home-today/` · **Status:** NOT STARTED
 
 ### CAR-02 — Carer — Notifications card and bell
@@ -840,6 +913,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Acceptance criteria summary:** 3 criteria — MON 30 shows blocks at 09:00, 11:30 and 15:00 labelled with 'Margaret —'; its subtitle reads '09:00 · Margaret — Morning medication'; none of Daniel's shifts appear
 - **Testing summary:** 2 component, 1 integration
 - **Requirements:** REQ-25
+- **CHG-009 (tasks and plain events, REQ-35):** calendar blocks show tasks and plain events; "Tasks for the selected shift" lists tasks only.
 - **Docs:** `docs/development/carer-dev/carer-calendar-shifts/` · **Status:** NOT STARTED
 
 ### CAR-06 — Carer — Mark tasks done
@@ -851,6 +925,8 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Acceptance criteria summary:** 3 criteria — Family Home shows 'Done · Aisha R.' for Physiotherapy; task checkboxes are not interactive; the checkbox reverts and an error is shown
 - **Testing summary:** 1 e2e, 2 component
 - **Requirements:** REQ-18, REQ-19, REQ-05
+- **CHG-009 (tasks and plain events, REQ-35):** only tasks can be ticked off; plain events have no status.
+- **CHG-020 (PD-058):** marking a task done charges its cost or makes it pending through F0-12; the carer never edits the budget directly.
 - **Docs:** `docs/development/carer-dev/carer-complete-task/` · **Status:** NOT STARTED
 
 ### CAR-07 — Carer — Add and edit events for a patient
@@ -862,6 +938,8 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Acceptance criteria summary:** 2 criteria — it appears on Margaret's family calendar; it is rejected
 - **Testing summary:** 1 e2e, 1 integration
 - **Requirements:** REQ-18
+- **CHG-009 (tasks and plain events, REQ-35):** the form has the task switch (on by default); a carer on shift can switch either way; the change is audited.
+- **CHG-020 (PD-058):** a carer may set a cost and bucket when creating an event (reusing FAM-UI-08's fields), and change them later only on events they created.
 - **Docs:** `docs/development/carer-dev/carer-manage-events/` · **Status:** NOT STARTED
 
 ### CAR-08 — Carer — Record an expense
@@ -873,7 +951,8 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Acceptance criteria summary:** 2 criteria — remaining becomes $200; it saves and state is 'depleted'
 - **Testing summary:** 2 integration
 - **Requirements:** REQ-28, REQ-30
-- **Docs:** `docs/development/carer-dev/carer-record-expense/` · **Status:** NOT STARTED
+- **RETIRED by CHG-020 (PD-058):** carers never change the budget by hand. Do not start.
+- **Docs:** `docs/development/carer-dev/carer-record-expense/` · **Status:** RETIRED (CHG-020)
 
 ### CAR-09 — Carer — Settings
 - **Dashboard / stream:** carer · **Lane:** C · **Days:** D10 · **Sprint:** SPRINT · **PR target:** `carer-dev` · **Branch:** `feature/carer-settings`
@@ -928,6 +1007,8 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Acceptance criteria summary:** 4 criteria — Harold appears in the list with family contact 'Grace'; an error is shown; rows include 'Margaret' with family contact 'Helen' …
 - **Testing summary:** 1 e2e, 2 component, 1 integration
 - **Requirements:** REQ-07
+- **CHG-010 (self-serve sign-up, REQ-36):** clients are created only by families (PD-037, PD-057). This feature becomes the clients list (with Remove per ADM-05) and has no add-client panel. Lane A rewrites its PRD, ACs and TEST_PLAN when it starts.
+- **CHG-020 (PD-058, REQ-38):** admins may now edit client information (PD-023 superseded); client names link to ADM-11's client view.
 - **Docs:** `docs/development/admin-dev/admin-clients/` · **Status:** NOT STARTED
 
 ### ADM-05 — Admin — Remove client
@@ -996,6 +1077,17 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Requirements:** REQ-06
 - **Docs:** `docs/development/admin-dev/admin-settings/` · **Status:** NOT STARTED
 
+### ADM-11 — Admin — Client view: a client's Family screens with full access
+- **Dashboard / stream:** admin · **Lane:** A · **Days:** — · **Sprint:** POST-SPRINT · **PR target:** `admin-dev` · **Branch:** `feature/admin-client-view`
+- **Description:** A client's name in Admin · Clients opens `/admin/clients/<id>/home`, which renders that client's Family screens inside the admin layout with every Family action available; each change names the admin. Added by CHG-020.
+- **User value:** Care and money keep being managed when a family is no longer there.
+- **Dependencies:** ADM-04, FAM-01, FAM-04, FAM-06, FAM-07, FAM-09, FAM-10, FAM-11, FAM-14, FAM-15 · **Blocking decisions:** None
+- **Jira summary:** Admin opens a client and uses the Family screens with full access
+- **Acceptance criteria summary:** 5 criteria — the client name opens its Family Home in the admin layout; each screen shows that client; an admin top-up reads "Recorded by <admin>"; admin edits, costed events and ticks save and name the admin; another organisation's admin gets not-found and RLS refuses …
+- **Testing summary:** 2 e2e, 2 integration, 1 db + e2e
+- **Requirements:** REQ-38, REQ-07, REQ-29
+- **Docs:** `docs/development/admin-dev/admin-client-view/` · **Status:** NOT STARTED
+
 ## Phase 4 — Integration, hardening & release — feature detail
 
 ### INT-01 — Automatic budget threshold emails
@@ -1007,6 +1099,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Acceptance criteria summary:** 5 criteria — one email per eligible recipient is sent with the client's name and percentage; no email is sent; they receive no email …
 - **Testing summary:** 5 integration
 - **Requirements:** REQ-31
+- **CHG-020 (PD-058):** also email Family and admins when an event cost goes pending.
 - **Docs:** `docs/development/shared/shared-budget-threshold-emails/` · **Status:** NOT STARTED
 
 ### INT-02 — End-to-end: organisation transfer journey
@@ -1093,7 +1186,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 See PRD.md §17. Promotion requires a CHG entry, human confirmation, and new feature docs from `docs/templates/FEATURE_TEMPLATE/`.
 
 ## 7. Adding a new feature
-1. Propose ID (next number: `FAM-16`, `FAM-UI-08`, `CAR-10`, `ADM-11`, `UI-04`, `INT-09`, `F0-17`), slug `<stream>-<name>`, lane and planned day.
+1. Propose ID (next number: `FAM-16`, `FAM-UI-09`, `CAR-10`, `ADM-12`, `UI-04`, `INT-09`, `F0-18`), slug `<stream>-<name>`, lane and planned day.
 2. Record CHG-xxx in DECISIONS.md; get human confirmation if material.
 3. Copy `docs/templates/FEATURE_TEMPLATE/` to `docs/development/<stream>/<slug>/` and complete it.
 4. Add the row to §4 and a card to §5; add to `docs/JIRA_BACKLOG.csv`; update root PROGRESS.md.

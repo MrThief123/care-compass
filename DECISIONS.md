@@ -88,6 +88,7 @@ CONFIRMED.
 ### PD-022 — No recurring shifts (UI-D31). CONFIRMED.
 
 ### PD-023 — Admin cannot edit client information (UI-D28). CONFIRMED by design; creation flow OQ-07.
+- **Superseded by PD-058 / CHG-020 (2026-09-25):** after talking to the client, an admin can do everything Family can for their own organisation's clients, including editing client information.
 
 ### PD-024 — Confluence "Database Model" ERD superseded (PROPOSED)
 - Reason: integer money, no user/family/role tables, no recurrence/completions/audit — contradicts ADR-01 consequences. ARCHITECTURE.md §6 replaces it.
@@ -155,6 +156,7 @@ CONFIRMED.
 - Alternatives: full brief model with multiple sources, categories and restrictions (rejected — larger scope, not designed, Client Information Sheet No 4 on budgeting was never supplied).
 - Consequences: categories/restrictions/multiple funding sources go to the parking lot (PL-10). F0-12, FAM-03, FAM-10, FAM-11, CAR-08 proceed against the 3-bucket model.
 - Human confirmation: CONFIRMED 2026-09-17.
+- **Amended 2026-09-25 by PD-059 (CHG-021):** buckets are no longer three fixed kinds. A client has the buckets someone added, named freely; NDIS, Fixed and Government are suggestions. One accounting period each, no categories and no restrictions still hold.
 
 ### PD-034 — Fund/budget edit rights: Family and organisation admins can both edit
 - Date: 2026-09-17 · Decided by: Dhruv Verma (answering OQ-05)
@@ -163,6 +165,7 @@ CONFIRMED.
 - Alternatives: Family-only edit rights per UI-D1 (rejected — superseded by CM-0409); admin read-only per the original proposed default (rejected by human).
 - Consequences: the Admin Budget screen needs edit controls, not just read access — the "Update" interaction UI-D19 flagged as undesigned still needs a design (raise as a design gap alongside OQ-19). RLS policies must allow admin writes to budget tables for their organisation's clients. Resolves C-02.
 - Human confirmation: CONFIRMED 2026-09-17.
+- **Amended by PD-058 / CHG-020 (2026-09-25):** carers no longer record expenses (CAR-08 retired). Carers affect the budget only through the cost of an event they create, charged when an occurrence is completed. Family and admins add or remove funds with one Update form.
 
 ### PD-035 — Budget email recipients: Family + current org admins; period = bucket period
 - Date: 2026-09-17 · Decided by: Dhruv Verma (answering OQ-28)
@@ -211,6 +214,7 @@ CONFIRMED.
 - Alternatives: TOTP MFA required for admins (rejected — the original proposed default); MFA optional for all (not chosen).
 - Consequences: NFR-3/TM-2108's MFA expectation is descoped for MVP — flag this to the human as a security tradeoff worth reconfirming before production launch, since Admin accounts hold access to health/financial data across an organisation's whole client base. F0-07, ADM-02, ADM-04 implement plain email/password auth only.
 - Human confirmation: CONFIRMED 2026-09-17.
+- **Amended by PD-057 / CHG-010 (2026-09-24):** "invitation emails for new users" now applies to **carers only**. Family and admin accounts are created by self-serve sign-up (F0-17). The MFA part of this entry is **reaffirmed** by CHG-010: MFA is not mandatory for any role, including admins. The forced admin TOTP enrolment that F0-07 shipped must be removed (CHG-010 follow-up).
 
 ### PD-041 — Carer visibility and edit access derived from shift schedule (no separate assignment table)
 - Date: 2026-09-17 · Decided by: Dhruv Verma (answering OQ-09)
@@ -251,6 +255,7 @@ CONFIRMED.
 - Alternatives: a single global auto-vs-manual toggle (rejected — the whole point is that different routines need different modes); auto mode marking events "Done" with no distinction from manual (rejected in discussion — would defeat safeguarding intent, since a missed automatic task would show as completed with no one having confirmed it).
 - Consequences: this is a **new capability beyond any original source document** — logged separately as **CHG-001** (below) since it adds a field to the event data model and a toggle to the Edit event form that no PRD/AC/design currently shows. F0-11 (event schema) gains a `completion_mode` column; FAM-06/FAM-07/CAR-06/CAR-07 (event create/edit UI) gain the mode toggle; the Edit event design needs this control added (fold into OQ-19 design gaps). Resolves OQ-10 in full.
 - Human confirmation: CONFIRMED 2026-09-17.
+- **Amended by CHG-009 (2026-09-24):** the **Automatic** mode no longer self-completes. An event in that mode is a **plain event** with no status at all (never Planned, Done or Overdue, and never ticked off). Manual-mode events are called **tasks** in the UI. "Set once per event" is replaced: the mode can be changed at any time, forward only. Read CHG-009 for the full rules.
 
 ### PD-045 — Recurring event edits get a scope selector (this occurrence / this and future / entire series)
 - Date: 2026-09-17 · Decided by: Dhruv Verma (answering OQ-11)
@@ -347,6 +352,67 @@ CONFIRMED.
 - Alternatives: leaving it as an unwritten convention (rejected — not visible to other sessions/team members); updating docs only after merge confirmation (rejected by the human — adds an extra round trip for no benefit).
 - Consequences: `docs/DEVELOPMENT_WORKFLOW.md` gained new §7 and renumbered §7→§8 (PR template), §8→§9 (dev-branch testing), §9→§10 (checkpoints), §10→§11 (session hygiene). Cross-references updated: CLAUDE.md §3 and §8 (this file's own PR/commit rules already implied this; now explicit), PRD.md §19, ARCHITECTURE.md §12.10.
 - Human confirmation: CONFIRMED 2026-09-17.
+
+### PD-057 — Self-serve sign-up for Family and Admin; carers stay invite-only
+- Date: 2026-09-24 · Decided by: Prajeet (in-session; extends PD-037 and PD-040)
+- Decision:
+  - **Anyone creates their own account first, then links.** A public `/sign-up` page creates the account and the thing it links to in one step. There are two account types:
+    - **Family:** creates the family account and the client record (the person they care for). The family becomes that client's family member (PD-037, PD-042). The client starts with no organisation. The family links a provider later with the organisation picker (PD-036).
+    - **Organisation (admin):** creates the admin account and a **new organisation**, and becomes its first admin. This takes the *registration* half of PL-18 into scope; *deleting* an organisation stays parked.
+  - **Carers cannot sign up themselves.** A carer account exists only when an admin invites them (ADM-02, PD-040). The public page offers no carer option, and the database rejects any attempt to create a carer, or to join an existing organisation, through public sign-up.
+  - **Families do not link carers.** Carers reach a client only through shifts that the linked organisation's admin schedules (PD-041, unchanged).
+  - **No email confirmation.** A new account can sign in straight away (Supabase `enable_confirmations = false`, already the setting in `supabase/config.toml`).
+  - **Same look as sign-in.** `/sign-up` uses the `(auth)` layout and the same `CardShell`, `Field`, `InlineAlert` and `Button` components and tokens as `/sign-in`. Only the fields differ. Sign-in and sign-up link to each other.
+  - **Admin MFA is not mandatory** (reaffirms PD-040). A newly registered admin goes straight to `/admin/home`. The forced TOTP enrolment and challenge F0-07 shipped for admins (its feature CHG-001) contradicts PD-040 and is to be removed in a shared follow-up fix.
+  - **Every organisation needs a unique identifier** so families can tell a real provider from a lookalike in the picker (PL-24). Which identifier (e.g. the ABN, which `organisations.abn` already has a column for) and whether sign-up requires it is not decided yet.
+  - **Shared stream.** The feature is **F0-17**, in the shared stream and Lane B like F0-07, branch `feature/shared-sign-up`, PR → `main`.
+- Reason: human instruction in-session, 2026-09-24: "everyone can create their own account and then they link an organisation/client/carer etc." The follow-up answers to the four questions were: carers stay invite-only; admin sign-up registers a new organisation; no direct family-to-carer link; no email confirmation. On reviewing the CHG-010 risks the human then chose: admin MFA stays not mandatory; organisations need a unique identifier (noted for PL-24).
+- Alternatives: carer join request approved by an admin (rejected: human kept admin invite); carer join code (not chosen); admin joins an existing organisation by request (not chosen); no admin self-sign-up (not chosen); family picks carers (rejected: it would change PD-041); email confirmation required (rejected: human chose immediate sign-in).
+- Consequences: see CHG-010.
+- Human confirmation: CONFIRMED 2026-09-24 (Prajeet, in-session).
+
+### PD-058 — Event costs, pending costs, the simple Update form, and admins act as Family
+- Date: 2026-09-25 · Decided by: Dhruv Verma (in-session; amends PD-034 and PD-023)
+- Decision:
+  - **Who changes the budget.** Only Family and the client's current organisation admins change the budget by hand. Carers never do: CAR-08 (Record an expense) is retired. A carer affects the budget only through the cost of an event they create.
+  - **Update form.** One form on the Budget screen: bucket, Add or Remove, amount, and an optional note. The date is today. An empty note shows in History as "Funds added" or "Funds removed". A removal larger than the bucket's balance is refused ("Only $X available"), so a manual change never takes a bucket below $0.
+  - **Event cost.** An event or task may have an optional cost and the bucket it is paid from. Whoever creates the event sets them, carers included. Afterwards the cost and bucket can be changed by Family, admins, or the carer who created the event. A change applies to future completions only; costs already charged or pending keep their amount.
+  - **When a cost is charged.** Once per occurrence, when that occurrence is completed. Skipped or missed occurrences cost nothing. A recurring event is charged each time.
+  - **Bucket picker.** In the event form a bucket is struck through, cannot be picked, and says "No funds left" (in words, not colour alone) when its balance is $0 or it already has pending costs. When the balance is above $0 but below the event's cost, a warning shows and the bucket can still be picked.
+  - **Pending costs.** If the bucket cannot cover a completed occurrence's cost in full, the occurrence still completes and the whole cost is held as **pending** against that bucket. Nothing is part-paid. The bucket card shows the pending total and count, History lists the item as Pending, and Family and the organisation's admins get an email (the PD-035 recipients).
+  - **Paying pending costs.** When funds are added to a bucket, its pending costs are paid automatically, oldest first, each only when the bucket can cover it in full. A cost it cannot cover stays pending, and so do the ones after it.
+  - **Admins act as Family.** An admin can always do everything Family can for their own organisation's clients, including editing client information. The one exception is changing the client's organisation, which stays Family only (human, 2026-09-25). In Admin · Clients, clicking a client's name opens that client's Family screens (Home, Info, Calendar, Budget, Care log) inside the admin layout at `/admin/clients/<id>/…`, with a way back to the list. Every change records who made it.
+- Reason: human instruction in-session, 2026-09-25, after talking to the client: carers should not edit the budget; costs should come off automatically when care is done; an admin must be able to stand in for a family that is no longer there. The human chose each rule above from offered options.
+- Alternatives: on an empty bucket, overdraft (balance goes negative), part-pay and log the rest, pay from another bucket automatically, or block completion (all rejected: pending chosen; blocking completion was advised against because money would stop care being recorded); pay pending costs by hand or part-pay them (rejected); carers keep manual expenses (rejected); cost locked once set, or editable by Family and admins only (rejected); admins write to Budget only, or full access only once no family is linked (rejected); admins sent into the `/family` routes (rejected: one copy of each screen, rendered inside the admin layout).
+- Consequences: see CHG-020.
+- Human confirmation: CONFIRMED 2026-09-25 (Dhruv Verma, in-session).
+- **Amended 2026-09-25 by PD-059 (CHG-021):** the "Update form" becomes the Edit budget page, which also adds, renames and removes buckets.
+
+### PD-059 — A client's buckets are open: add, rename and remove them on an Edit budget page
+- Date: 2026-09-25 · Decided by: Dhruv Verma (in-session; amends PD-033 and PD-058)
+- Decision:
+  - **Buckets are open.** A client has the buckets someone has added, each with a free name (for example a "Council grant"). NDIS, Fixed and Government (the labels the design draws) are offered as suggestions for a bucket the client does not have, not given to every client. A client may have none.
+  - **Edit budget page.** The Budget screen's button is 'Edit' (was 'Update'). It opens a separate page, `/family/<clientId>/budget/edit`, titled "Edit budget", with Save and Cancel. There, in one save: add or remove funds on any bucket, rename a bucket, add a bucket (a name and a starting amount, $0 allowed), and remove a bucket. One optional note covers the save. Cancel or Escape leaves with nothing changed; Save returns to Budget, which shows the result.
+  - **Removing a bucket.** Allowed only when nothing has been spent from it and it has no pending costs; otherwise the control is absent and the page says why. The money left in it leaves with it and is recorded, so the records still add up.
+  - **Rules.** A name is required, at most 40 characters, and unique for the client ignoring case and surrounding spaces. Amounts are more than $0 with at most 2 decimals (a starting amount may be $0). A removal of funds cannot exceed the balance ("Only $X available"). A save with any wrong field is refused whole, each field saying what to fix.
+  - **History.** Adding or removing funds records "Funds added" / "Funds removed" (or the note) and the amount. A new bucket records "Bucket added" and its starting amount. A removed bucket records "Bucket removed" and minus the money left in it. A rename records no row: History is a record of money.
+- Reason: human instruction in-session, 2026-09-25: a client may gain a new source of income (a grant) and some clients have no NDIS, so the budget must not be stuck to three buckets; the inline Update form left it unclear whether the screen was being edited. The human chose each rule above from offered options.
+- Alternatives: every client always starts with the three buckets (rejected: a client without NDIS would carry an empty NDIS card); adding a bucket only when one of the three kinds is missing (rejected: no grants); building custom buckets as a separate later feature (rejected: built on FAM-UI-05); keeping the inline form (rejected: unclear edit mode); an edit page whose Save shows nothing on return, like Edit event in Phase 1 (rejected: Budget shows the change until reload).
+- Consequences: see CHG-021.
+- Human confirmation: CONFIRMED 2026-09-25 (Dhruv Verma, in-session).
+
+### PD-060 — Budget: a Pending costs section, entry details, "Recorded by you", paying pending costs, and History export
+- Date: 2026-09-25 · Decided by: Dhruv Verma (in-session; builds on PD-058 and PD-059)
+- Decision:
+  - **Pending costs section.** The Budget screen has a "Pending costs" section between the bucket cards and History: one row per unpaid cost (date, bucket, description, amount), oldest first. With none it says "No pending costs."
+  - **Entry details.** Selecting a History row or a pending row (mouse or keyboard) opens a dialog titled with the entry's description: date, bucket, amount, status (Paid, Pending, or "Paid on <date>" for a pending cost since paid), who recorded it, and the save's note when there was one. Close or Escape closes it and returns focus to the row.
+  - **The note and the recorder are stated, not empty.** The optional note of a save is kept on every History row that save makes (the funds rows also keep using it as their description, PD-059), and shown in the details. Every change records who made it (REQ-38); in Phase 1, with no signed-in user, rows made on Edit budget read "Recorded by you".
+  - **Paying pending costs when funds are added.** After a bucket gains funds, its pending costs are paid whole, strictly oldest first, stopping at the first one the balance cannot cover (a newer, smaller cost never jumps an older one). A paid cost is taken off the bucket's remaining. Its existing History row loses "Pending" and its details say "Paid on <date>"; no new row is added, so each cost is counted once.
+  - **Export.** History has an "Export" button that downloads the client's History as a CSV file (Date, Bucket, Description, Amount, Status, Recorded by, Note), one line per row in the order shown. Text that a spreadsheet would read as a formula is neutralised. With no History rows the button is absent.
+- Reason: human questions in-session, 2026-09-25, while reviewing FAM-UI-05: where the optional note is kept, who made a change (blank "Recorded by"), whether adding money clears pending costs, where pending costs can be seen, how to see more about a cost, and how to manage History outside the app. The human chose each rule above from offered options, and chose to build them on FAM-UI-05 now rather than as a later feature, with Export built now rather than left to FAM-10.
+- Alternatives: pending costs listed only inside each bucket card (rejected); details expanding in place under the row (rejected); paying every cost that fits, skipping ones too large (rejected: the oldest could wait longest); adding a separate "Pending cost paid" row (rejected: the cost would appear twice); Export left to FAM-10 (rejected: FAM-10 connects data only and is blocked on F0-12, OQ-04 and OQ-05); opening the FAM-UI-05 PR first and building this as a follow-up (rejected).
+- Consequences: see CHG-022.
+- Human confirmation: CONFIRMED 2026-09-25 (Dhruv Verma, in-session).
 
 ---
 
@@ -462,6 +528,7 @@ Docs updated: DECISIONS.md
 - Impact: F0-11 event schema gains `completion_mode`; FAM-06/FAM-07/CAR-06/CAR-07 event create/edit UI gain a mode toggle; Edit event design needs the control added (design gap, fold into OQ-19); ACCEPTANCE_CRITERIA.md for affected features needs new ACs for both modes; TEST_PLAN.md needs cases for automatic self-completion and manual tick-off with/without proof.
 - Human confirmation: Dhruv Verma, 2026-09-17.
 - Docs updated: DECISIONS.md (PD-044, this entry). Still to update: PRD.md scope section, affected features' ACCEPTANCE_CRITERIA.md and TEST_PLAN.md, DEVELOPMENT_PLAN.md if it changes feature sizing.
+- **Amended by CHG-009 (2026-09-24):** Automatic mode becomes a plain event with no status; see CHG-009, which also carries the PRD, ARCHITECTURE and DEVELOPMENT_PLAN updates this entry left outstanding.
 
 ### CHG-002 — `budget`/`events` `src/server/<domain>/` contract files: ownership reconciled to UI-00 (initial shape) / Lane B (extension)
 - Date / requested by: 2026-09-17 / Dhruv Verma (human, project lead)
@@ -498,6 +565,221 @@ Docs updated: DECISIONS.md
 - Impact: FAM-UI-07 PRD Scope and Functional Requirements, AC wording (its AC-02 and AC-03 already reworded and AC-05 to AC-08 added on its branch, FD-12) and TEST_PLAN, updated by the family agents in their own lane; FAM-14 (Task log wiring) and FAM-15 (Task detail wiring) implement the same contract on Supabase. FAM-UI-01 (Home) reads the same contract and its Recent activity and Overdue composition follow the newest-first order. No family feature document is edited by this shared feature.
 - Human confirmation: Dhruv Verma, 2026-09-19 (in-session).
 - Docs updated: DECISIONS.md (this entry). The family features record it in their own DECISIONS.md.
+
+### CHG-008 — Events contract: single-event read `getEvent`
+- Date / requested by: 2026-09-24 / Dhruv Verma (human, project lead)
+- Type: contract extension (shared folders changed from a dashboard feature branch)
+- Description: no Phase 1 contract returned an event's series fields. `Occurrence` has no recurrence, so Edit event could not show 'Weekly'. Added `getEvent(clientId, eventId): Promise<CareEvent | undefined>` to `src/server/events/queries.ts` (extended, not recreated, per CHG-002), and its mock in `src/mocks/queries/events.ts`, reading `CARE_EVENTS`. It returns `undefined` for an unknown id or another client's event. Supabase mode throws the standard not-implemented error. No fixtures or types changed.
+- Source / justification: human answer in-session, 2026-09-24 ("Add getEvent on this branch"), same route as CHG-012 (then numbered CHG-006).
+- Impact: F0-11 must implement `getEvent` against Supabase with the same client scoping. FAM-07 (Edit event wiring) reads through it; CAR-07 may too. FAM-UI-03 only otherwise.
+- Numbering: CHG-006 and CHG-007 are on unmerged branches (`feature/family-ui-calendar`, `feature/admin-ui-home`). Whichever merges later renumbers.
+- Human confirmation: Dhruv Verma, 2026-09-24 (in-session).
+- Docs updated: DECISIONS.md (this entry); `docs/development/family-dev/family-ui-event-form/DECISIONS.md` FD-01.
+
+### CHG-009 — Tasks and plain events: every event is either a task (ticked off by hand) or a plain event (no status); the Task log becomes the Care log
+- Date / requested by: 2026-09-24 / Dhruv Verma (human, project lead)
+- Type: scope change (amends PD-044 and CHG-001)
+- Description:
+  - **Model.** Every calendar item is an event. A **task** is an event that must also be ticked off by hand, with the actor's name recorded, and becomes Overdue if nobody ticks it off by its due time (PD-044 Manual, unchanged). A **plain event** has **no status**: it is never Planned, Done or Overdue and cannot be ticked off. This replaces PD-044's Automatic self-completion. Data: the existing `completion_mode` field stays (`manual` = task, `automatic` = plain event); the UI only ever says "Task" or "Event".
+  - **Form switch.** The event form has one switch, "This is a task — must be ticked off". It starts **on** for a new event and shows the current value when editing.
+  - **Changing it is forward only.** Switching never changes past occurrences: they keep their status and recorded actors (append-only history, PD-005). Switching an event to a task does not make past occurrences Overdue. The value can be changed at any time; "set once per event" in PD-044 no longer applies.
+  - **Edit scope.** The switch follows the PD-045 scope choice. "This occurrence only" makes one occurrence differ from its series (a PD-004 per-occurrence override). "This and future" applies from that occurrence onward. "Entire series" applies from now onward, never before now.
+  - **Who can change it.** Anyone who can edit the event can switch it either way: Family at any time, a carer during an active shift for that client (PD-041). The change is captured by the append-only audit log (PD-006). No screen shows it for now; a Family alert is parked as **PL-23**.
+  - **Where each appears.** Anything with a checkbox shows **tasks only**: the Family Calendar Tasks panel, the Carer Home Tasks checklist and the Carer Calendar "Tasks for the selected shift". Overdue lists (Family Home Overdue, Admin Home overdue) contain only tasks, since a plain event cannot be Overdue. Anything that shows the schedule or history shows **both**: Family Home Today timeline, Family Calendar day/week/month, Carer Home "Today's calendar", Carer Calendar blocks, the Calendar Log panel and the Care log.
+  - **Calendar look.** A plain event gets a fourth, neutral block look: neutral colour, no status shape, and the word "Event" where the block has room. Tasks keep the Planned, Done and Overdue looks. Status is still never conveyed by colour alone.
+  - **Care log.** The Family "Task log" is renamed **"Care log"** and lists tasks and plain events. The page title, the "View all" links on Home and Calendar and the detail page's back link ("Back to Care log") change; the route stays `/family/[clientId]/tasks`. The Status column shows "Event" for a plain event. The filter gains a type choice, **All / Tasks only / Events only**; the Planned, Done and Overdue status filters return tasks only. The Nurse column is unchanged for plain events: the carer whose shift covers the start (PD-055), or "—".
+  - **Detail page.** Opening a plain event from the Care log shows the same page as a task, except the Status card reads "Event" with "No tick-off needed" and no pill or completion time. Description, Edit and Documents work as for a task; documents on a plain event are attachments, not proof of completion.
+- Source / justification: human instruction in-session, 2026-09-24, refining PD-044: "tasks" are events with the extra function of being ticked off by hand; plain events "would just exist" (a walk vs picking up a prescription); only tasks belong in the task (checkbox) sections; all events and tasks go into the log. Decided question by question in a grilling session with the human on 2026-09-24.
+- Impact:
+  - **Shared (Lane S, all shared features are merged):** needs a **shared follow-up feature**, not yet planned. `src/types/domain.ts` (an occurrence of a plain event has no status; `TaskLogQuerySchema` gains a type filter), `src/mocks/**` (plain-event fixtures in the log and calendar), UI-01 calendar kit (neutral "Event" block look in `status-cue` and day, week and month grids, event popover), UI-03 lists (a neutral "Event" label where a status pill would go), UI-02 forms kit (a shared switch control; a way for `EventForm` to hide the Status chips when the switch is off, since a plain event has no status), `getTaskLog` / `getOccurrence` / `getTodayOccurrences` contract semantics (UI-04). Until it merges, dashboard features cannot show plain events correctly.
+  - **Backend (Lane B):** F0-11 keeps `completion_mode`; status derivation returns no status for a plain-event occurrence; `set_occurrence_done` rejects plain-event occurrences; per-occurrence mode overrides; mode changes never apply before now. F0-16 seeds plain events.
+  - **Family:** FAM-UI-01 / FAM-01 (Today timeline shows both), FAM-02 (Overdue tasks only; Recent activity unchanged: Done or Overdue rows, so tasks only), FAM-UI-02 / FAM-04 (neutral event look), FAM-05 (Tasks panel tasks only; Log panel both), FAM-UI-03 (the switch on the Add and Edit event screens, local state only, as a local component through `EventForm` `extraFields`), FAM-06 / FAM-07 (saving the switch, default on, scope rules), FAM-UI-07 / FAM-14 / FAM-15 (Care log name, type filter, "Event" label, plain-event detail).
+  - **Carer:** CAR-UI-01 / CAR-01 (Today's calendar both; Tasks checklist tasks only), CAR-UI-03 / CAR-05 (blocks both; selected-shift tasks only), CAR-06 (tick-off applies to tasks only), CAR-07 (the switch).
+  - **Admin:** ADM-01 overdue list is tasks only by definition; no change.
+  - **Tests:** each affected feature adds cases for plain events (no status, excluded from checklists and Overdue, included in schedule views and the Care log, type filter, forward-only switching, per-occurrence switch).
+  - **Numbering:** CHG-006, CHG-007 and CHG-008 are used on unmerged feature branches (`feature/admin-ui-home`, `feature/family-ui-calendar`, `feature/family-ui-event-form`), so this entry takes CHG-009 to avoid a clash.
+- Human confirmation: Dhruv Verma, 2026-09-24 (in-session; asked for these docs to be changed and a PR opened).
+- Docs updated: DECISIONS.md (this entry; amendment notes on PD-044 and CHG-001), PRD.md (REQ-17, REQ-18, REQ-21, new REQ-35, nav table, permissions, PL-23), ARCHITECTURE.md (§6 `care_events` and `care_event_overrides` rows, §6.3 status derivation, flow 2 'Tick task'), DEVELOPMENT_PLAN.md (CHG-009 notes on the affected cards). Each lane updates its own feature PRD, ACCEPTANCE_CRITERIA and TEST_PLAN when it starts or resumes an affected feature, and records it in that feature's DECISIONS.md (same approach as CHG-005).
+
+### CHG-010 — Self-serve sign-up (F0-17): Family and Organisation accounts; carers invite-only
+- Date / requested by: 2026-09-24 / Prajeet (human, in-session)
+- Type: new feature (shared, Lane B) and scope change (PL-18 registration half; PD-040 invitation wording)
+- Description: add **F0-17 — Self-serve sign-up for Family and Organisation accounts** (`feature/shared-sign-up`, PR → `main`). A `/sign-up` page in the `(auth)` layout, built the same way as `/sign-in`, asks for the account type (Family or Organisation), first name, last name, email, password and confirm password. A Family account also needs the client's first and last name. An Organisation account also needs the organisation name. A security-definer Postgres function creates the profile and the linked record in one transaction: the client plus a `client_family_members` row for Family, or the organisation plus `profiles.organisation_id` for an admin. After sign-up the user is signed in and routed like any sign-in (F0-07): Family to `/family/<new client id>/home`, admin to their MFA gate and then `/admin/home`. Full rules: PD-057.
+- Source / justification: human instruction in-session, 2026-09-24 (PD-057). PD-037 says the family creates the client, but no feature created a family account, so the confirmed workflow could not start.
+- Impact:
+  - **New feature F0-17** (shared, Lane B): `src/app/(auth)/sign-up/`, `src/server/auth/actions.ts` (new `signUp` action), a new migration (registration function, grants; users still cannot change their own `role`, `organisation_id` or `is_active`), a 'Create an account' link on `/sign-in`. Tests: integration, e2e and pgTAP (see its TEST_PLAN).
+  - **F0-07** (merged): no change to its ACs. `/sign-in` gains a link to `/sign-up`, made by F0-17 in the same lane.
+  - **ADM-02:** unchanged. Carers are still created by admin invitation. The public sign-up must never create a carer.
+  - **ADM-04:** the card still reads "adds a client with a family contact". That flow was already rejected by PD-037, and CHG-010 confirms that clients are created only by families. ADM-04 becomes the clients **list** (read and Remove per ADM-05) with no add panel. Lane A updates its own PRD, ACs and TEST_PLAN when it starts ADM-04, and records it in that feature's DECISIONS.md. The Admin Clients design's "Add client" panel is still the HUMAN REVIEW design item raised by PD-037.
+  - **FAM-13:** a self-registered family's client has **no organisation** at first. FAM-13's organisation card must handle "no organisation yet" with a 'Choose organisation' action (picker, no transfer confirmation, since there is nothing to transfer). Lane F records it when it starts FAM-13.
+  - **PL-18:** split. Organisation **registration** moves into F0-17; Add/Delete organisation by an operator stays parked.
+  - **Risks raised for the human, not decided here:**
+    1. **Admin MFA mismatch — DECIDED 2026-09-24 (Prajeet): MFA is not mandatory.** PD-040 says no mandatory MFA, but F0-07 shipped forced TOTP enrolment for admins (its feature CHG-001 says OQ-08 answered "TOTP MFA required", which misreads PD-040). **Follow-up needed:** a shared fix that removes the forced admin enrolment and AAL2 gate from `src/server/auth/routing.ts` / `guard.ts` and changes F0-07's AC-09/AC-10 and T-09/T-10 (a test-expectation change, flagged HUMAN REVIEW). F0-17 does not make that change; its AC-02 only requires that a new admin is routed the same way an existing admin is.
+    2. **Anyone can create an organisation.** It then appears in the family organisation picker (PD-036). Someone could register a lookalike of a real provider's name and a family could link their client to it. **Note (Prajeet, 2026-09-24): every organisation should have a unique identifier**, so that two organisations can never be confused in the picker. Which identifier (e.g. ABN) and when it is required are still to be decided. Parked as **PL-24** for the human to prioritise.
+    3. **No email confirmation.** A mistyped email address can create an account the real owner does not control. Supabase also reports "already registered" on sign-up, so account enumeration is possible on `/sign-up` (not on `/sign-in` or reset). Accepted by the human for MVP. Worth re-checking before production, together with the PD-040 MFA note.
+  - **Numbering:** CHG-006 to CHG-008 are taken on unmerged branches (see CHG-009), so this entry is CHG-010.
+- Human confirmation: Prajeet, 2026-09-24 (in-session).
+- Docs updated: DECISIONS.md (PD-057, this entry, amendment note on PD-040), PRD.md (REQ-01, REQ-09, new REQ-36, PL-18, new PL-24), DEVELOPMENT_PLAN.md (F0-17 row and card, totals, next number, CHG-010 notes on ADM-04 and FAM-13), `docs/development/shared/shared-sign-up/`.
+
+### CHG-011 — Plain events on the calendar use a solid neutral stripe; on compact surfaces they may differ from Planned tasks by colour alone
+- Date / requested by: 2026-09-24 / Dhruv Verma (human, project lead)
+- Type: scope change (amends CHG-009 "Calendar look" and UI-05 AC-12)
+- Description: a plain event's calendar block and month chip carry a **solid** neutral stripe (token `text-secondary` grey) instead of a patterned one, with no status shape. The word "Event" is still visible where the block has room (day view `full` tier, event popover) and is always in the accessible name. On compact day blocks, week blocks and month chips — where a Planned task also has no shape and the status word is read out to screen readers only — a plain event differs **visually** from a Planned task by stripe colour alone. This is an accepted exception for **event type** only: task **status** (Planned, Done, Overdue) is still never conveyed by colour alone (CLAUDE.md §7 unchanged for status).
+- Source / justification: human instruction in-session, 2026-09-24, after reviewing the dotted-bar preview: "I don't like the grey dotted line … just have the same grey as a stripe rather than dots"; the colour-alone trade-off was put to the human, who chose "stripe only".
+- Impact: UI-05 AC-12 reworded (event type exempt from the colour-alone rule on compact surfaces; status still covered); UI-05 FD-05; UI-01 calendar kit `EVENT_CUE`. Dashboard features that show plain events (FAM-UI-01/02, FAM-04/05, CAR-UI-01/03, CAR-05) inherit the look; no test changes outside UI-05.
+- Numbering: recorded as CHG-010 on `feature/shared-plain-events`; renumbered to CHG-011 when merging `main`, where CHG-010 is self-serve sign-up (F0-17).
+- Human confirmation: Dhruv Verma, 2026-09-24 (in-session).
+- Docs updated: DECISIONS.md (this entry), `docs/development/shared/shared-plain-events/ACCEPTANCE_CRITERIA.md` (AC-12), `docs/development/shared/shared-plain-events/DECISIONS.md` (FD-05).
+
+### CHG-012 — Events contract: calendar range read `getOccurrences` and `getToday`; design-week fixtures to 6 Dec
+- Date / requested by: 2026-09-24 / Dhruv Verma (human, project lead)
+- Type: contract extension (shared folders changed from a dashboard feature branch)
+- Description: no Phase 1 contract could answer "this client's occurrences from date X to date Y", so no calendar could draw any week but the reference day. Added to `src/server/events/queries.ts` (extended, not recreated, per CHG-002): `getOccurrences(clientId, { from, to })`, which returns occurrences on Melbourne calendar days `from` to `to` inclusive, oldest first, ties by key, validated by `OccurrenceRangeSchema` (at most `OCCURRENCE_RANGE_MAX_DAYS` = 42, one 6×7 month grid). Also added `getToday()`, the Melbourne calendar date the calendar opens on (the fixtures' reference day in mock mode, the real day otherwise). In `src/mocks/**`: the mock implementations, plus five hand-written Planned rows, Tue 1 to Sat 5 Dec 2026, exactly as drawn in `family-02-calendar.png`. They are held in `UPCOMING_OCCURRENCES_BY_CLIENT_ID`, which `getOccurrences` and `getOccurrence` read and `getTaskLog` does not (a log lists what has happened, and the Task log fixtures stay at 137 rows). `src/types/domain.ts` gains `OccurrenceRangeSchema`, `OccurrenceRange` and `OCCURRENCE_RANGE_MAX_DAYS`.
+- Source / justification: human instruction in-session, 2026-09-24: "make on this feature branch". The app is real, not a design clone: users add events on any date, so the calendar must read any range. Events will live in the database; F0-11's PRD already names `getOccurrences(clientId, range)` for the Supabase side, and this is its Phase 1 mock with the same name and shape.
+- Impact: F0-11 must implement `getOccurrences` against Supabase with the same range, order and validation semantics (recurrence expansion, overrides, latest completion, assigned carer). CAR-UI-03 (Carer Calendar) has the same gap, probably as a carer-wide read across patients, and should extend this contract rather than add a second pattern. FAM-04 and FAM-05 wire FAM-UI-02 through it. No other screen changes behaviour.
+- Numbering: recorded as CHG-006 on `feature/family-ui-calendar` (its code comments and commit messages before the merge say CHG-006); renumbered to CHG-012 when merging `family-dev`, where CHG-006 to CHG-011 were taken. `feature/admin-ui-home` (unmerged) also records a CHG-006 and renumbers when it merges.
+- Human confirmation: Dhruv Verma, 2026-09-24 (in-session).
+- Docs updated: DECISIONS.md (this entry); `docs/development/family-dev/family-ui-calendar/DECISIONS.md` FD-01, FD-02.
+
+### CHG-013 — FAM-UI-02: keyboard shortcuts and a Today button on the Family Calendar
+- Date / requested by: 2026-09-24 / Dhruv Verma (human, project lead)
+- Type: scope change (new ACs on an in-flight feature)
+- Description: FAM-UI-02 gains AC-06 (D / W / M switch the view; ← / → step one day, week or month by view) and AC-07 (a Today button beside the range heading, also on T, returns to today in the current view). Shortcuts are ignored while typing in a text field, with Ctrl/Cmd/Alt held, and on key repeat. The arrows and Today expose `aria-keyshortcuts` and a tooltip.
+- Source / justification: human instruction in-session, 2026-09-24. Not in the design (`family-02-calendar.png`).
+- Impact: FAM-UI-02 only (ACCEPTANCE_CRITERIA AC-06, AC-07; TEST_PLAN T-06, T-07; feature DECISIONS FD-12). No shared folders changed. CAR-UI-03 may want the same behaviour for consistency.
+- Numbering: recorded as CHG-007 on `feature/family-ui-calendar`; renumbered to CHG-013 when merging `family-dev`.
+- Human confirmation: Dhruv Verma, 2026-09-24 (in-session).
+- Docs updated: DECISIONS.md (this entry); FAM-UI-02 ACCEPTANCE_CRITERIA.md, TEST_PLAN.md, DECISIONS.md, PROGRESS.md, SESSION_STATE.md.
+
+### CHG-014 — Task detail: an "Edit event" button, and Back returns to where the task was opened from
+- Date / requested by: 2026-09-24 / Dhruv Verma (human, project lead)
+- Type: scope change on a merged feature (FAM-UI-07)
+- Description: Task detail stays read-only. (1) A clear outlined "Edit event" button sits at the right of the title row (it wraps below a long title on narrow widths, never overlapping) and links to the existing Edit event route; the small "Edit" link in the Description card is removed, so there is one edit control. (2) Back returns to the screen the task was opened from, on the exact view: every link to Task detail carries an origin marker, `from=calendar` plus the calendar's `view / date / month`, `from=home`, or `from=tasks` plus the Task log's `q / status / page`. Task detail shows "Back to Calendar", "Back to Home" or "Back to Task log". A missing or invalid origin keeps the old behaviour ("Back to Task log" with any valid Task log params). The Back href is rebuilt only from a whitelisted origin name and params re-validated by that screen's own parser; no URL or path is ever read from the query, and `router.back()` / `history.back()` are not used (they break on reload, shared links and arrivals from outside the app).
+- Source / justification: human instruction in-session, 2026-09-24: "keep it as the read only mode but then have a edit button which takes you to the edit page", "add a clearer edit event button", and "going back should take [you] not to task log but wherever you clicked the link from originally".
+- Impact: FAM-UI-07 (new AC-09, AC-10, AC-11; TEST_PLAN T-20 to T-22; feature DECISIONS FD-27 to FD-30; existing tests' expected hrefs and the Description Edit link changed, FD-30). FAM-UI-02 (Calendar blocks and Log rows) and FAM-UI-01 (Home's Today, Overdue and Recent activity rows) now add the origin to their Task detail links. The design differs from `family-08-task-detail.png`: the button placement is new and the back label varies. FAM-UI-03 (Edit event) is unchanged; its Cancel uses `router.back()` and the Task detail link does not pass `?occurrence=` (follow-ups, FAM-UI-07 FD-29). No shared folders changed.
+- Human confirmation: Dhruv Verma, 2026-09-24 (in-session).
+- Docs updated: DECISIONS.md (this entry); FAM-UI-07 ACCEPTANCE_CRITERIA.md, TEST_PLAN.md, DECISIONS.md, PROGRESS.md, SESSION_STATE.md.
+
+### CHG-015 — Edit event and Add event return to a validated origin; Edit event opens on the occurrence being viewed
+- Date / requested by: 2026-09-24 / Dhruv Verma (human, project lead)
+- Type: scope change on a merged feature (FAM-UI-03), closing the CHG-014 follow-ups (FAM-UI-07 FD-29)
+- Description: (1) Task detail's "Edit event" button links to the Edit event route with `?occurrence=<key>` and Task detail's own origin (`from=` plus that screen's params, CHG-014), so the form opens on the occurrence being viewed. (2) On Edit event, Save event (after validation) and Cancel go to that occurrence's Task detail with its origin kept, so Back from there still reaches the Calendar, Home or Task log view it started on. If the occurrence is missing, unknown or belongs to another event, they go to the origin screen itself, and with no origin to the Task log. (3) On Add event, Save event (after validation) and Cancel go to Home, its only opener. (4) The target href is built only from a whitelisted origin re-validated by that screen's parser (`task-detail-origin.ts`) and an occurrence key the contract confirms belongs to the event; nothing is echoed from the URL. Navigation is `router.push(href)`; `router.back()` is no longer used. Save still persists nothing (FAM-UI-03 FD-04, Phase 1).
+- Source / justification: human instruction in-session, 2026-09-24: Step 2 brief (FD-29 (a) and (b): "Make them return to a validated origin, the same way Task detail's Back works … whitelist only, never echo a URL"; "Pass it from Task detail's Edit event button"), and "do both" (the CHG as proposed, and including Add event).
+- Impact: FAM-UI-03 (new AC-07 to AC-09, TEST_PLAN T-07 to T-09, feature DECISIONS FD-09 onward; FD-04's navigation is superseded; existing tests asserting `router.back()` change: HUMAN REVIEW). FAM-UI-07 (the "Edit event" href gains the occurrence and origin; FD-29 closed). No shared folders changed.
+- Human confirmation: Dhruv Verma, 2026-09-24 (in-session).
+- Docs updated: DECISIONS.md (this entry); FAM-UI-03 ACCEPTANCE_CRITERIA.md, TEST_PLAN.md, DECISIONS.md, PROGRESS.md, SESSION_STATE.md; FAM-UI-07 DECISIONS.md (FD-29 status).
+
+### CHG-016 — Family Calendar: a tick in the Tasks panel shows on the grids, with who ticked it
+- Date / requested by: 2026-09-24 / Dhruv Verma (human, project lead)
+- Type: scope change on a merged feature (FAM-UI-02)
+- Description: (1) Ticking a task in the Calendar's Tasks panel makes its block in the week, day and month views show Done at once, on the same page, with the signed-in person's name where the view shows a name ("Done · <First Last>", read through the existing `getCurrentUser("family")` contract, the same form `setOccurrenceDone` records). (2) Unticking restores the task's original status (Planned or Overdue); a task that was Done in the data shows Planned, without its old name (PROPOSED: whether a past task counts as Overdue is a business rule for FAM-04 / FAM-05). (3) Display only: nothing is saved, it is lost on reload or on moving to another range, and the Log panel and Task detail are unchanged. FAM-05 later replaces the local tick with `setOccurrenceDone` and keeps the same state as its optimistic update. (4) Plain events (no checkbox, no status) are untouched.
+- Source / justification: human instruction in-session, 2026-09-24: chose option (a) "Grids show ticks now" for the Step 3 question (ticks were local to the Tasks panel and the block stayed "Planned"), and "I think it makes sense but it should record the person who ticked it".
+- Impact: FAM-UI-02 (new AC-08, TEST_PLAN T-08, feature DECISIONS FD-13; the calendar tests gain mocks for `getCurrentUser` and `setOccurrenceDone`, no existing assertion changed). Lane F only (`src/features/family-calendar/**`); the kit grids are unchanged. FAM-05's wiring should reuse the lifted tick state.
+- Human confirmation: Dhruv Verma, 2026-09-24 (in-session).
+- Docs updated: DECISIONS.md (this entry); FAM-UI-02 ACCEPTANCE_CRITERIA.md, TEST_PLAN.md, DECISIONS.md, PROGRESS.md, SESSION_STATE.md.
+
+### CHG-017 — Family Calendar: an "Enter event" button that returns to the Calendar
+- Date / requested by: 2026-09-24 / Dhruv Verma (human, project lead)
+- Type: scope change on merged features (FAM-UI-02, FAM-UI-03)
+- Description: (1) The Family Calendar toolbar gets a primary "Enter event" link, the same wording and style as Home's, just left of the D/W/M control, 44px tall. It opens Add event with the Calendar's origin (`from=calendar` plus its `view / date / month`, the selected day included, CHG-014's format). (2) On Add event, Save event (after validation) and Cancel go back to that Calendar view when the origin is the Calendar; otherwise, as before, to Home (CHG-015). The origin is re-validated by the Calendar's own parser; nothing is echoed from the URL. (3) The form is not prefilled with the selected date. Nothing persists (Phase 1).
+- Source / justification: human instruction in-session, 2026-09-24: "it's missing the add event button like there is for the home page … put a similar button in for the calendar page next to the toggles for D, W, M", and the answers "Back to Calendar view", "No prefill", "\"Enter event\", primary".
+- Impact: FAM-UI-02 (new AC-09, TEST_PLAN T-09, feature DECISIONS FD-14; the design `family-02-calendar.png` has no such button: design review). FAM-UI-03 (new AC-10, TEST_PLAN T-10, feature DECISIONS FD-11; AC-09's "its only opener" now means "with no Calendar origin", no existing assertion changed). Lane F only; no shared folders changed.
+- Human confirmation: Dhruv Verma, 2026-09-24 (in-session).
+- Docs updated: DECISIONS.md (this entry); FAM-UI-02 and FAM-UI-03 ACCEPTANCE_CRITERIA.md, TEST_PLAN.md, DECISIONS.md, PROGRESS.md, SESSION_STATE.md.
+
+### CHG-018 — Client info contract: section and client-document reads, and the Family · Info design fixtures
+- Date / requested by: 2026-09-25 / Dhruv Verma (human, project lead)
+- Type: contract extension (shared folders changed from a dashboard feature branch)
+- Description: no Phase 1 contract returned a client's Description, Habits and Medical history, or the documents attached to the client rather than to an event, and the fixtures did not hold the design text. Added, read-only: `getClientInfoSections(clientId): Promise<ClientInfoSection[]>` to `src/server/clients/queries.ts` (sections in the fixed order description, habits, medicalHistory; `[]` for a client with none or an unknown id) and `getClientDocuments(clientId): Promise<DocumentRef[]>` to `src/server/documents/queries.ts` (client-level documents only, oldest upload first, ties by id; a document with an `eventId` is never returned; `[]` for an unknown id). Their mocks live in `src/mocks/queries/clients.ts` and `documents.ts`. `src/mocks/fixtures.ts` gains `CLIENT_INFO_SECTIONS` (Margaret's three sections, worded exactly as in `family-04-info.png`), and `DOCUMENTS` holds the two files that design draws: `Care plan.pdf` (the existing `doc-margaret-care-plan` entry, renamed from `Care plan 2026.pdf`) and a new `Medication schedule.pdf`. No types change. Supabase mode throws the standard not-implemented error. Nothing here writes: Edit and Add file on the Info screen change local state only (Phase 1).
+- Source / justification: human answer in-session, 2026-09-25 (chose "Add on this branch as CHG-018" over a separate shared PR), same route as CHG-008 and CHG-012.
+- Impact: FAM-UI-04 (`src/features/family-info/**`). F0-06 owns `client_info_sections`; F0-13 owns document storage and signed URLs; FAM-09 (Client info wiring) reads and writes through these contracts and must keep the ordering, the client scoping and the "no event documents" rule. CAR-UI/CAR-04 (Carer patient info) may read them too. The rename changes no test expectation: the only other places that spell `Care plan 2026.pdf` are a carer notification fixture message (`notif-aisha-2`, left as drawn in the carer design, so the two designs name the same file differently; noted, not resolved) and one unrelated test's own literal in `task-detail-view.test.tsx`.
+- Numbering: CHG-018 was free on every local and remote branch when this was written. Whichever branch merges second renumbers.
+- Human confirmation: Dhruv Verma, 2026-09-25 (in-session).
+- Docs updated: DECISIONS.md (this entry); `docs/development/family-dev/family-ui-info/DECISIONS.md` FD-01 and FD-02.
+
+### CHG-019 — Fund history contract, and the Family · Budget design fixtures
+- Date / requested by: 2026-09-25 / Dhruv Verma (human, project lead)
+- Type: contract extension (shared folders changed from a dashboard feature branch)
+- Description: no Phase 1 contract returned a client's fund entries, and `FUND_ENTRIES` did not hold what the design draws. Added, read-only: `getFundHistory(clientId): Promise<FundEntry[]>` to `src/server/budget/queries.ts` (extended, not recreated, per CHG-002): the client's entries, newest date first; `[]` for a client with none or an unknown id. Its mock is in `src/mocks/queries/budget.ts`. `src/mocks/fixtures.ts`: `FUND_ENTRIES` now holds Margaret's three top-ups exactly as `family-06-budget.png` draws them (3 Nov 2026 "NDIS quarterly plan top-up" +$6,000; 15 Oct 2026 "Fixed funding top-up" +$1,000; 1 Oct 2026 "Government subsidy payment" +$750) and one entry for Robert, so client scoping is testable. Every entry names who recorded it (`recordedBy`: Helen Doyle for Margaret's three, Michael Hale for Robert's), because the screen draws it (see Impact). The two earlier entries (a 1 Nov top-up worded "Quarterly NDIS plan top-up" and a 15 Nov physiotherapy expense of -$320) are replaced; only `fixtures.test.ts` referenced them, and it only parses them against the schema. No types change (`FundEntry` exists). Supabase mode throws the standard not-implemented error. Nothing here writes: Update on the Budget screen changes nothing (Phase 1).
+- Source / justification: human answer in-session, 2026-09-25 (chose "On this branch as CHG-019" over a separate shared PR), same route as CHG-008, CHG-012 and CHG-018.
+- Impact: FAM-UI-05 (`src/features/family-budget/**`). F0-12 owns the budget tables. FAM-10 (Budget overview and history) reads and wires through this contract and must keep the newest-first order and the client scoping, and supply each entry's recorder (PD-034: "each attributed to the actor who recorded it"). The Budget screen draws it as a "Recorded by <name>" line under the description, which `family-06-budget.png` does not draw: the human chose to show it, 2026-09-25 (FAM-UI-05 FD-05). FAM-11 (Update funds) writes the entries this reads. The Admin Budget screen and CAR-08 should extend this contract, not add a second pattern. The fixtures are display data, not a ledger: the three top-ups do not reconcile with the buckets' totals.
+- Numbering: CHG-018 (FAM-UI-04, PR #89) was unmerged when this was written; this is CHG-019 so the two do not collide. PR #89 merged first; both entries kept in number order when `family-dev` was merged into this branch (2026-09-25).
+- Human confirmation: Dhruv Verma, 2026-09-25 (in-session). Amended the same day at the human's request: entries name their recorder, and the screen draws it (FD-05).
+- Docs updated: DECISIONS.md (this entry); `docs/development/family-dev/family-ui-budget/DECISIONS.md` FD-02, FD-05.
+
+### CHG-020 — Event costs with pending deduction, a simple add-or-remove Update form, carers never edit the budget, and admins act as Family
+- Date / requested by: 2026-09-25 / Dhruv Verma (human, project lead)
+- Type: new requirement, new features, scope change
+- Description: records PD-058. In short: events and tasks can carry a cost and a bucket; the cost is charged when an occurrence is completed; a cost the bucket cannot cover is held as pending and paid automatically, oldest first, once funds arrive; the event form strikes through a bucket at $0 or with pending costs; Family and admins change funds with one add-or-remove form; carers never change the budget by hand; admins can do everything Family can and reach a client's Family screens from Admin · Clients.
+- Source / justification: PD-058 (human answers in-session, 2026-09-25).
+- Impact:
+  - **FAM-UI-05 (this branch, Phase 1, fixtures):** scope grows. 'Update' opens the simplified form (bucket, Add or Remove, amount, optional note), which changes local state only and refuses a removal larger than the balance. Bucket cards show a pending total and count, and History lists pending items marked Pending. New AC-04 to AC-08 and T-04 to T-08. The budget types, contracts and fixtures gain what the screen needs to draw pending costs; the exact fields are recorded in the feature's DECISIONS.md when built (contract extension on a dashboard branch, same route as CHG-019). Status goes back to IN PROGRESS.
+  - **New FAM-UI-08 — Event cost fields (UI)** (Lane F, `feature/family-ui-event-cost`, PR → `family-dev`, Phase 1, fixtures): optional Cost and Bucket fields in the Add/Edit event form built by FAM-UI-03 (merged). The picker strikes through a bucket at $0 or with pending costs and warns when the balance is below the cost. Depends on FAM-UI-03 and FAM-UI-05.
+  - **New ADM-11 — Admin client view: a client's Family screens with full access** (Lane A, `feature/admin-client-view`, PR → `admin-dev`, Phase 3): a client's name in Admin · Clients links to `/admin/clients/<id>/…`, which renders the Family screens inside the admin layout with every Family action available. Reusing the Family screens from the admin routes needs the screens to take their client from the route rather than the family layout; if that means moving code out of `src/features/family-*`, it goes through a shared PR (§4.2). Depends on ADM-04 and the Family wiring features it renders (FAM-01 to FAM-15).
+  - **F0-12 (not started):** scope extended. Event cost and bucket columns, per-occurrence charges on completion, the pending state and its automatic oldest-first settlement when funds are added, removals that cannot go below $0, and admin RLS writes equal to Family's. Its AC "remaining is negative and threshold_state is 'depleted'" no longer holds for event costs (pending replaces overdraft); Lane B rewrites its PRD, ACs and TEST_PLAN when it starts F0-12 and records it in that feature's DECISIONS.md. Not decided yet, to raise when F0-12 starts: what happens to a pending cost when its event is deleted, and whether pending costs carry across a bucket's accounting period.
+  - **F0-11:** events gain `cost numeric(12,2)` (nullable) and the bucket; changes apply to future completions only. Lane B records it when it starts, together with F0-12.
+  - **FAM-06, FAM-07, CAR-07:** save and edit the cost and bucket. On edit, only Family, admins, or the carer who created the event may change them.
+  - **CAR-06, FAM-15 (completion):** completing an occurrence charges its cost or makes it pending, through the F0-12 function, never in the client.
+  - **FAM-11:** the Update form becomes bucket, Add or Remove, amount, optional note, with today's date; amount > 0 with at most 2 decimals; a removal over the balance is refused. A top-up settles pending costs (F0-12). Its "Date in the future → reject" edge case no longer applies (there is no date field). Lane F updates its PRD, ACs and TEST_PLAN when it starts FAM-11.
+  - **CAR-08:** retired. No carer expense entry. REQ-30 is covered by Family and admin removals and by event costs; receipts on an expense are dropped.
+  - **ADM-04, PD-023:** admins may now edit client information; the "No edit of client info (D28)" line in ADM-04 no longer applies. Lane A records it when it starts ADM-04.
+  - **INT-01:** a new email when a cost goes pending, to the PD-035 recipients.
+  - **PRD.md:** REQ-28, REQ-29, REQ-30, REQ-07 and the §8 permissions matrix updated; new REQ-37 (event costs and pending) and REQ-38 (admin acts as Family).
+- Human confirmation: Dhruv Verma, 2026-09-25 (in-session).
+- Docs updated: DECISIONS.md (PD-058, this entry, amendment notes on PD-023 and PD-034); PRD.md; DEVELOPMENT_PLAN.md (FAM-UI-08 and ADM-11 rows and cards, CAR-08 retired, CHG-020 notes on the affected cards, totals, next numbers); FAM-UI-05 ACCEPTANCE_CRITERIA.md, TEST_PLAN.md, PRD.md, DECISIONS.md, PROGRESS.md, SESSION_STATE.md; new `docs/development/family-dev/family-ui-event-cost/` and `docs/development/admin-dev/admin-client-view/`; CAR-08 PRD.md and PROGRESS.md (retired); `docs/AGENT_REFERENCE.md` (status value `RETIRED (CHG-xxx)`). `docs/JIRA_BACKLOG.csv` not updated (same as CHG-010).
+
+### CHG-021 — Open buckets and an Edit budget page (replaces the inline Update form)
+- Date / requested by: 2026-09-25 / Dhruv Verma (human, project lead)
+- Type: new requirement, scope change
+- Description: records PD-059. A client's buckets are no longer three fixed kinds: they are added, renamed and removed by Family (and, through PD-058, admins), with NDIS, Fixed and Government as suggestions. 'Update' is renamed 'Edit' and opens an "Edit budget" page instead of an inline form.
+- Source / justification: PD-059 (human answers in-session, 2026-09-25).
+- Impact:
+  - **Types and contracts (this branch, same route as CHG-019 and CHG-020):** a bucket gains a stable `id`; its `label` is its free name; `kind` becomes optional and marks only a bucket made from a suggestion. A fund entry names its bucket by `bucketId` (two custom buckets are never confused); `bucketKind` becomes optional. The exact fields are recorded in FAM-UI-05 DECISIONS.md FD-12 when built. Consumers that key a bucket by kind move to `id`.
+  - **FAM-UI-05 (this branch, Phase 1, fixtures):** the inline Update form built under CHG-020 is replaced by the Edit budget page (`budget/edit`), holding its changes in local state across Budget and Edit budget until reload. AC-04 to AC-06 rewritten for the page; new AC-09 (add a bucket), AC-10 (rename), AC-11 (remove a bucket) and AC-12 (no buckets). AC-07 and AC-08 (pending) unchanged. The CHG-020 form tests are replaced (HUMAN REVIEW). The page and its copy are undesigned (PD-052): flagged for design review.
+  - **Family · Home (FAM-UI-01's tiles, lane F):** reads buckets by `id` and draws however many a client has; Phase 1 edits do not reach Home (no persistence).
+  - **F0-12 (not started):** buckets become rows with a name (unique per client, case-insensitive) and an optional kind, not a fixed enum; a bucket can be deleted only with no charges and no pending costs, its remaining funds recorded as a "Bucket removed" entry; renames keep entries attached by id. Lane B records it when it starts F0-12.
+  - **FAM-UI-08:** the 'Paid from' picker lists the client's own buckets by `id` and name, not three kinds. Its fixtures follow the contract.
+  - **FAM-10, FAM-03:** draw the client's buckets, any number, including none.
+  - **FAM-11:** wires the Edit budget page (all its actions), not a single add-or-remove form. Lane F rewrites its PRD, ACs and TEST_PLAN when it starts.
+  - **ADM-11:** renders the same Edit budget page inside the admin layout.
+  - **INT-01 (budget warning emails):** names the bucket by its name.
+  - **PL-10:** "multiple funding sources" is now in scope as named buckets; restrictions, categories, several periods and transfers stay parked.
+  - **PRD.md:** REQ-29 updated; REQ-27 notes the open bucket model.
+- Human confirmation: Dhruv Verma, 2026-09-25 (in-session).
+- Docs updated: DECISIONS.md (PD-059, this entry, amendment notes on PD-033 and PD-058); PRD.md (REQ-27, REQ-29, PL-10); DEVELOPMENT_PLAN.md (totals, CHG-021 notes on FAM-UI-05, FAM-UI-08, FAM-10, FAM-11, F0-12); FAM-UI-05 PRD.md, ACCEPTANCE_CRITERIA.md, TEST_PLAN.md, DECISIONS.md, PROGRESS.md, SESSION_STATE.md.
+
+### CHG-022 — Budget: pending costs section, entry details, recorder and note, paying pending costs, History export
+- Date / requested by: 2026-09-25 / Dhruv Verma (human, project lead)
+- Type: new requirement, scope change
+- Description: records PD-060. The Budget screen gains a Pending costs section, a details dialog for each History and pending row, a stated recorder ("Recorded by you" in Phase 1) and kept note on rows made by a save, automatic payment of pending costs when funds are added (strictly oldest first, whole), and an Export button that downloads History as CSV.
+- Source / justification: PD-060 (human answers in-session, 2026-09-25).
+- Impact:
+  - **Types and contracts (this branch, same route as CHG-019 to CHG-021):** a fund entry gains an optional `note` (the save's note) and an optional `paidOn` (the date a pending cost was paid). The exact fields are recorded in FAM-UI-05 DECISIONS.md when built.
+  - **FAM-UI-05 (this branch, Phase 1, fixtures):** new AC-13 (Pending costs section), AC-14 (paying pending costs), AC-15 (entry details), AC-16 (recorder and note on saved rows), AC-17 (Export). Payment is simulated in the route's local state; nothing is saved. The section, the dialog and the Export button are undesigned (PD-052): flagged for design review. The "Out of Scope" line "paying pending costs … the local form does not simulate it" is removed. Five existing assertions change because they state the old behaviour: two cards, not three; no recorder on a saved row; adding funds does not pay pending costs. Each is listed, before and after, in FAM-UI-05 DECISIONS.md FD-13 and flagged HUMAN REVIEW (corrected 2026-09-25 when the tests were written; this entry first said no assertion changes).
+  - **F0-12 (not started):** a top-up pays the bucket's pending costs whole, strictly oldest first, stopping at the first that does not fit, and records the paid date on the cost; each entry stores who recorded it and the save's note.
+  - **FAM-10:** connects the Pending costs section, the details dialog and Export to real data; Export writes the client's whole History from the database, not only the rows on screen.
+  - **FAM-11, ADM-11:** a save records its note on each row and the real signed-in person as the recorder.
+  - **PRD.md:** REQ-29 notes entry details and export; REQ-37 notes that payment stops at the first cost that does not fit.
+- Human confirmation: Dhruv Verma, 2026-09-25 (in-session).
+- Docs updated: DECISIONS.md (PD-060, this entry); PRD.md (REQ-29, REQ-37); DEVELOPMENT_PLAN.md (totals, CHG-022 notes on FAM-UI-05, F0-12, FAM-10, FAM-11); FAM-UI-05 PRD.md, ACCEPTANCE_CRITERIA.md, PROGRESS.md, SESSION_STATE.md.
+
+### CHG-023 — Contact details contract and fixtures for Family · Settings
+- Date / requested by: 2026-09-25 / Dhruv Verma (human, project lead)
+- Type: scope change (contract and fixtures)
+- Description: adds the `getFamilyContactDetails(profileId)` contract in `src/server/profiles/queries.ts` (mock data source; Supabase mode throws the not-implemented error until FAM-12), backed by `src/mocks/queries/profiles.ts`. `ProfileSchema` gains an optional `address`. The `profile-helen` fixture gains phone '0412 345 678', contact email 'helen@example.com' and address '12 Wattle St, Preston VIC 3072'. The Family info card shows the full name 'Helen Doyle' (PD-038).
+- Source / justification: the Settings design needs the signed-in family member's contact details, and no contract returned them. Decided in-session with the human while building FAM-UI-06.
+- Impact: FAM-UI-06 AC-01 and T-12; FAM-12 implements the contract for Supabase. Recorded at the time in FAM-UI-06 DECISIONS.md only; this entry mirrors it (docs sync, 2026-09-25).
+- Human confirmation: Dhruv Verma, 2026-09-25 (in-session).
+- Docs updated: FAM-UI-06 PRD.md, ACCEPTANCE_CRITERIA.md, TEST_PLAN.md, DECISIONS.md, PROGRESS.md; DECISIONS.md (this entry).
+
+### CHG-024 — Family · Settings: Family info is read-only until 'Edit', with 'Cancel'
+- Date / requested by: 2026-09-25 / Dhruv Verma (human, project lead)
+- Type: new requirement (UI behaviour)
+- Description: the Family info inputs start read-only with an 'Edit' button. 'Edit' unlocks them and the button becomes 'Save', with 'Cancel' beside it. A valid Save locks the inputs again; 'Cancel' restores the last saved values, clears errors and locks the inputs. The card is built locally in `src/features/family-settings/` because the kit card has no Cancel slot (FAM-UI-06 FD-10); `src/components/shared/**` is unchanged.
+- Source / justification: human request in-session, so Family info cannot be changed by accident.
+- Impact: FAM-UI-06 new AC-10 and AC-11, T-13 and T-14; T-06, T-07 and T-11 click 'Edit' first (no assertion removed; FD-09). FAM-12 keeps this flow when it wires saving. Recorded at the time in FAM-UI-06 DECISIONS.md only; this entry mirrors it (docs sync, 2026-09-25).
+- Human confirmation: Dhruv Verma, 2026-09-25 (in-session).
+- Docs updated: FAM-UI-06 ACCEPTANCE_CRITERIA.md, TEST_PLAN.md, DECISIONS.md (FD-09, FD-10), PROGRESS.md, SESSION_STATE.md; DECISIONS.md (this entry).
 
 Template for future entries:
 ```

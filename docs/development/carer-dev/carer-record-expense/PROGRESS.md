@@ -1,14 +1,15 @@
 # Progress — CAR-08 Carer — Record an expense
 
-Status: NOT STARTED
+Status: RETIRED (CHG-020)
 Owner: unclaimed
 Lane: C — Carer
 Sprint: POST-SPRINT · planned —
 Branch: `feature/carer-record-expense` (not yet created)
 PR target: `carer-dev`
-Last updated: 2026-09-17 (planning pack generated)
+Last updated: 2026-09-25 (retired by CHG-020)
 
 ## Blockers
+- **Retired by CHG-020 / PD-058 (2026-09-25):** carers never change the budget by hand. Spending is recorded as an event's cost (FAM-UI-08, F0-12) or a Family/admin removal (FAM-11). Do not start this feature.
 - OQ-19 — Figma access and remaining design gaps
 - OQ-04 — Funding model: buckets, categories and periods
 - OQ-05 — Who can add funds and record spending; Budget History contents

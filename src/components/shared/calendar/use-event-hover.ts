@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import type { Occurrence } from "@/types/domain";
+import type { AnyOccurrence } from "@/types/domain";
 
 import type { FocusEvent, PointerEvent } from "react";
 
@@ -15,7 +15,7 @@ const OPEN_DELAY_MS = 120;
 const CLOSE_DELAY_MS = 200;
 
 export interface HoveredEvent {
-  occurrence: Occurrence;
+  occurrence: AnyOccurrence;
   anchor: HTMLElement;
 }
 
@@ -23,9 +23,9 @@ export interface EventHover {
   /** The event whose card is showing, if any. */
   hovered: HoveredEvent | null;
   /** The card's DOM id, for the block's `aria-describedby`. */
-  describedBy: (occurrence: Occurrence) => string | undefined;
+  describedBy: (occurrence: AnyOccurrence) => string | undefined;
   /** Spread onto an event block. */
-  blockProps: (occurrence: Occurrence) => {
+  blockProps: (occurrence: AnyOccurrence) => {
     onPointerEnter: (event: PointerEvent<HTMLElement>) => void;
     onPointerLeave: () => void;
     onPointerDown: () => void;
@@ -64,7 +64,7 @@ export function useEventHover(idPrefix = "event-detail"): EventHover {
   useEffect(() => cancel, [cancel]);
 
   const open = useCallback(
-    (occurrence: Occurrence, anchor: HTMLElement, delay: number) => {
+    (occurrence: AnyOccurrence, anchor: HTMLElement, delay: number) => {
       cancel();
       if (delay === 0) {
         setHovered({ occurrence, anchor });

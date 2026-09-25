@@ -4,7 +4,7 @@ import { Icon } from "@/components/ui/icon";
 import { layoutBlocks } from "@/lib/dates/layout-blocks";
 import type { LocalDate } from "@/lib/dates/week-range";
 import { cn } from "@/lib/utils";
-import type { Occurrence } from "@/types/domain";
+import type { AnyOccurrence, Occurrence } from "@/types/domain";
 
 import {
   BLOCK_CHROME_PX,
@@ -17,7 +17,7 @@ import {
 import { CurrentTimeLine, useCurrentTime } from "./current-time-line";
 import { EventPopover } from "./event-popover";
 import { melbourneDateTime, melbourneTimeRange } from "./melbourne-time";
-import { STATUS_CUE } from "./status-cue";
+import { occurrenceCue } from "./status-cue";
 import { TimeGridScroller } from "./time-grid-scroller";
 import { useEventHover } from "./use-event-hover";
 
@@ -28,13 +28,17 @@ const BLOCK_GAP_PX = 2;
 /** Smallest height a block is rendered at (see `layoutBlocks`). */
 const MIN_BLOCK_PX = 22;
 
-export interface WeekGridProps {
+/**
+ * `T` is the occurrence type passed in: tasks only by default, or tasks and
+ * plain events (`AnyOccurrence`, UI-05) — the callbacks get the same type.
+ */
+export interface WeekGridProps<T extends AnyOccurrence = Occurrence> {
   /** Monday of the visible week. */
   weekStart: LocalDate;
-  occurrences: Occurrence[];
+  occurrences: T[];
   today?: LocalDate;
   /** Overrides the default block title (e.g. carer "Margaret — Morning m…"). */
-  labelFormat?: (occurrence: Occurrence) => string;
+  labelFormat?: (occurrence: T) => string;
   /** First hour shown when the grid opens (default 7 = 07:00). */
   startHour?: number;
   /** Last hour shown when the grid opens (default 18 = 18:00). */
@@ -48,7 +52,7 @@ export interface WeekGridProps {
   now?: Date | null;
   onSelectDay?: (date: LocalDate) => void;
   /** Fired when a block is clicked — the event is being opened for editing. */
-  onSelectOccurrence?: (occurrence: Occurrence) => void;
+  onSelectOccurrence?: (occurrence: T) => void;
   className?: string;
 }
 
@@ -77,7 +81,7 @@ function percent(value: number): string {
  * renders only the detail its height affords (`blockDensity`) — the rest is in
  * the card it raises on hover, because a click opens the event for editing.
  */
-export function WeekGrid({
+export function WeekGrid<T extends AnyOccurrence = Occurrence>({
   weekStart,
   occurrences,
   today,
@@ -91,7 +95,7 @@ export function WeekGrid({
   onSelectDay,
   onSelectOccurrence,
   className,
-}: WeekGridProps) {
+}: WeekGridProps<T>) {
   const hover = useEventHover("week-grid");
   // One clock for the line and the gutter label, so they cannot disagree.
   const clock = useCurrentTime(now);
@@ -99,7 +103,7 @@ export function WeekGrid({
   const days = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
   const canvasHeight = (dayEndHour - dayStartHour) * rowPx;
 
-  const occurrencesByDay = new Map<LocalDate, Occurrence[]>();
+  const occurrencesByDay = new Map<LocalDate, T[]>();
   for (const day of days) occurrencesByDay.set(day, []);
   for (const occurrence of occurrences) {
     const { date } = melbourneDateTime(occurrence.start);
@@ -188,7 +192,7 @@ export function WeekGrid({
                   const density = blockDensity(clampedHeight);
                   const label = labelFormat ? labelFormat(item) : item.title;
                   const { time } = melbourneDateTime(item.start);
-                  const cue = STATUS_CUE[item.status];
+                  const cue = occurrenceCue(item);
                   // Everything but the title: the block's own chrome, the time
                   // row, and the assignee line the `full` tier adds when there
                   // is one.
