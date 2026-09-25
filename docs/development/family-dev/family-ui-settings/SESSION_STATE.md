@@ -1,14 +1,14 @@
 # Session State — FAM-UI-06 Family Settings screen (UI)
 
 Last session date: 2026-09-25
-Current branch: `feature/family-ui-settings` (from `family-dev` at `e10f4ba`, pushed; up to date with `origin/family-dev`)
-Worked on: tests first, T-01 to T-12. No production code.
-What changed: new `src/server/profiles/queries.test.ts` (6 cases), `src/features/family-settings/settings-schema.test.ts` (13), `src/features/family-settings/family-settings.test.tsx` (18); TEST_PLAN.md (results, "Red run"); PROGRESS.md. Commit `900cf1c` `test(family): …`.
-Tests run: `npx vitest run src/features/family-settings src/server/profiles`; `tsc --noEmit`; ESLint on the new files.
-Test results: 37 cases red. All 3 files fail at import on missing modules, the expected reason. `tsc` reports only those missing modules. ESLint clean. Red CI on this commit is expected.
-Current blocker: None
-Important discoveries: the tests fix the names the code must use. `getFamilyContactDetails` and type `FamilyContactDetails` from `@/server/profiles/queries`. `familyInfoSchema` (fields `name`, `phone`, `email`, `address`) from `@/features/family-settings/settings-schema`, used through the kit's `fieldErrors`. `FamilySettingsView({ header: ClientHeaderSummary, contact: FamilyContactDetails })` from `family-settings-view`. `SettingsErrorState` (no props, Retry → `router.refresh()`) from `settings-error-state`. `loading.tsx` renders exactly one `status` named 'Loading' and no headings. The screen has at least one `role="status"` live region on the page from the start, and every status is empty until something is announced. The 'Settings' heading, the 'Family info', 'Change organisation' and 'Reset username / password' headings, and the buttons 'Change', 'Reset', 'Save' are found by role and name. Test files in `src/features` cannot import `@/mocks` (lint), so the component test gets its data through the contract with `DATA_SOURCE=mock`. The fixture check sits in the server test, so there is no `src/mocks/queries/profiles.test.ts`.
-Important decisions: none new.
-Exact next action: implement CHG-023 (`ProfileSchema.address`; Helen's phone, email and address; `src/mocks/queries/profiles.ts`; `src/server/profiles/queries.ts`), then the schema, view, error state, `page.tsx` (read `node_modules/next/dist/docs/` first) and `loading.tsx`, until green. Then the full suite, lint, typecheck, build, family e2e with `--grep-invert "F0-07"`, and the width sweep from 1920 to 768.
-Files likely to be touched next: `src/types/domain.ts`, `src/mocks/fixtures.ts`, `src/mocks/queries/profiles.ts`, `src/server/profiles/queries.ts`, `src/features/family-settings/*.tsx|ts`, `src/app/(family)/family/[clientId]/settings/{page,loading}.tsx`.
-Warning for next session: CHG-019 to CHG-022 are on `feature/family-ui-budget` (PR open), so root DECISIONS.md may conflict on merge. Keep CHG-023 at the end of §5. Do not edit `src/components/shared/**`. `.claude/settings.json` has local uncommitted hook changes that belong to the human; leave them out of commits.
+Current branch: `feature/family-ui-settings` (from `family-dev`, merged with `origin/family-dev`, which was already up to date)
+Worked on: implementation until the red tests from `900cf1c` passed.
+What changed: CHG-023 (`ProfileSchema.address`, Helen's fixture, `src/mocks/queries/profiles.ts`, `src/server/profiles/queries.ts`); `src/features/family-settings/{settings-schema.ts,family-settings-view.tsx,settings-error-state.tsx,settings-skeleton.tsx}`; route `settings/page.tsx` (reads `getCurrentUser("family")`, `getClientHeaderSummary`, `getFamilyContactDetails`; on error logs `[family-settings] …` with the error's class only) and `loading.tsx`. FD-08 added. ACs 9/9 MET.
+Tests run: feature tests; full vitest suite; lint; `tsc --noEmit`; `npm run build`; family e2e `--grep-invert "F0-07"` (3 runs); Playwright Chromium width sweep from 1920 to 768.
+Test results: 37/37 feature cases pass. Full suite 1277 pass, 5 fail (F0-07/F0-04 integration, Supabase `Invalid API key`, environment). Lint 0 errors, tsc clean, build passes. e2e 30/30 on three runs (one flaky calendar failure on the first run). Sweep clean.
+Current blocker: none. The PR waits for human approval.
+Important discoveries: the dev server on :3000 returns 403 for JS chunks at `127.0.0.1`, so use `http://localhost:3000`. Stale `.next/types` from another branch break `tsc`; delete them and rebuild.
+Important decisions: FD-08 (a visually hidden `h2` between the `h1` and the kit's `h3` card titles).
+Exact next action: after approval, open PR `FAM-UI-06 Family Settings screen (UI)` to `family-dev`, body from `docs/DEVELOPMENT_WORKFLOW.md` §8, naming the design differences in PROGRESS.md and that CI is down (checks run locally).
+Files likely to be touched next: none (PR only).
+Warning for next session: CHG-019 to CHG-022 are on `feature/family-ui-budget`, so root DECISIONS.md may conflict on merge; keep CHG-023 at the end of §5. `.claude/settings.json` has the human's local changes; keep them out of commits.

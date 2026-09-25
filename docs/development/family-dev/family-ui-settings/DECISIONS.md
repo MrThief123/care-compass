@@ -86,6 +86,16 @@ Record feature-level decisions here using the template below. Project-wide decis
 - Decision: screen code lives in `src/features/family-settings/`. The route is `src/app/(family)/family/[clientId]/settings/page.tsx` (it replaces the "Coming soon." placeholder) plus `loading.tsx`. The contract is `src/server/profiles/queries.ts` with a mock in `src/mocks/queries/profiles.ts` (CHG-023). The Next.js guides in `node_modules/next/dist/docs/` are read before touching the route files (CLAUDE.md §14).
 - Human confirmation required: no.
 
+### FD-08 — A visually hidden h2 keeps the heading order
+- Date: 2026-09-25
+- Context: the page title 'Settings' is the screen's `h1` (as on Task log). The kit's `DetailsFormCard` and `SettingsActionCard` title their cards with `h3`, so axe `heading-order` fails (AC-09). `src/components/shared/**` may not be edited.
+- Decision: a `sr-only` `h2` 'Your account and organisation' sits between the title and the cards, the same approach as `family-event-form` ('Event details').
+- Reason: passes AC-09 without editing the shared kit or adding a second card pattern.
+- Alternatives considered: a local copy of the kit cards with `h2` (a second pattern); an `h2` page title (the other family screens use `h1`).
+- Consequences: screen-reader users hear one extra heading. If the kit gains a heading-level prop, drop this `h2`.
+- Human confirmation required: no.
+- Test changes caused: none.
+
 <!-- Template
 ### FD-xx — <title>
 - Date:

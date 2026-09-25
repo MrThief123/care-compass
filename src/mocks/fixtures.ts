@@ -131,7 +131,9 @@ export const FAMILY_PROFILES: Profile[] = [
     role: "family",
     firstName: "Helen",
     lastName: "Doyle",
-    email: "helen.doyle@example.com",
+    email: "helen@example.com",
+    phone: "0412 345 678",
+    address: "12 Wattle St, Preston VIC 3072",
     isActive: true,
   },
   {
