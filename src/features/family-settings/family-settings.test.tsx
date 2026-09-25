@@ -308,6 +308,59 @@ describe("[FAM-UI-06] read-only until Edit (CHG-024)", () => {
     expect(input("Name")).not.toHaveAttribute("readonly");
     expect(screen.getByRole("button", { name: "Save" })).toBeInTheDocument();
   });
+
+  it("[FAM-UI-06][AC-11] 'Cancel' shows only in edit mode, next to 'Save'", async () => {
+    const user = userEvent.setup();
+    renderSettings();
+
+    expect(screen.queryByRole("button", { name: "Cancel" })).not.toBeInTheDocument();
+    await startEditing(user);
+
+    const cancel = screen.getByRole("button", { name: "Cancel" });
+    expect(cancel.parentElement).toContainElement(screen.getByRole("button", { name: "Save" }));
+  });
+
+  it("[FAM-UI-06][AC-11] 'Cancel' reverts every change and errors, locks the inputs and says nothing", async () => {
+    const user = userEvent.setup();
+    renderSettings();
+
+    await startEditing(user);
+    await user.clear(input("Name"));
+    await user.clear(input("Phone"));
+    await user.type(input("Phone"), "abc");
+    await user.click(screen.getByRole("button", { name: "Save" }));
+    expect(screen.getByText("Enter your name.")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
+
+    expect(input("Name")).toHaveValue("Helen Doyle");
+    expect(input("Phone")).toHaveValue("0412 345 678");
+    for (const label of ["Name", "Phone", "Email", "Address"]) {
+      expect(input(label)).toHaveAttribute("readonly");
+      expect(input(label)).not.toHaveAttribute("aria-invalid");
+    }
+    expect(screen.queryByText("Enter your name.")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Cancel" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Edit" })).toHaveFocus();
+    expect(announced()).toBe("");
+  });
+
+  it("[FAM-UI-06][AC-11] 'Cancel' goes back to the last saved values, not the fixture", async () => {
+    const user = userEvent.setup();
+    renderSettings();
+
+    await startEditing(user);
+    await user.clear(input("Phone"));
+    await user.type(input("Phone"), "0400 000 000");
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    await startEditing(user);
+    await user.clear(input("Phone"));
+    await user.type(input("Phone"), "0499 999 999");
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
+
+    expect(input("Phone")).toHaveValue("0400 000 000");
+  });
 });
 
 describe("[FAM-UI-06] states (States sheet, FD-05)", () => {
