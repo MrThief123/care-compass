@@ -3,9 +3,11 @@
  *
  * Deliberately awkward: overlapping events, 10-minute events, back-to-back
  * runs, long titles and days with more events than a month cell can show, so
- * the preview exercises the cases the reference calendars handle.
+ * the preview exercises the cases the reference calendars handle. Specs marked
+ * `plain` are plain events (UI-05, CHG-009): no status, drawn with the neutral
+ * "Event" look beside the tasks.
  */
-import type { Occurrence, OccurrenceStatus } from "@/types/domain";
+import type { AnyOccurrence, OccurrenceStatus } from "@/types/domain";
 
 export const TODAY = "2026-09-18";
 export const WEEK_START = "2026-09-14";
@@ -20,11 +22,13 @@ interface Spec {
   assignee?: string;
   actor?: string;
   description?: string;
+  /** A plain event (UI-05): no status, actor or completion. */
+  plain?: boolean;
 }
 
-function occurrence(spec: Spec): Occurrence {
+function occurrence(spec: Spec): AnyOccurrence {
   const start = `${spec.date}T${spec.time}:00+10:00`;
-  return {
+  const base = {
     key: `${spec.title.toLowerCase().replace(/\W+/g, "-")}:${start}`,
     eventId: spec.title.toLowerCase().replace(/\W+/g, "-"),
     clientId: "client-margaret",
@@ -32,6 +36,12 @@ function occurrence(spec: Spec): Occurrence {
     description: spec.description ?? "",
     start,
     durationMinutes: spec.minutes,
+  };
+  if (spec.plain) {
+    return { ...base, kind: "event", ...(spec.assignee ? { assignee: spec.assignee } : {}) };
+  }
+  return {
+    ...base,
     status: spec.status ?? "planned",
     ...(spec.assignee ? { assignee: spec.assignee } : {}),
     ...(spec.actor ? { actor: spec.actor } : {}),
@@ -96,6 +106,17 @@ const DAY_SPECS: Spec[] = [
     minutes: 20,
     title: "Phone call with plan manager",
   },
+  { date: TODAY, time: "11:15", minutes: 30, title: "Short walk", plain: true },
+  {
+    date: TODAY,
+    time: "15:40",
+    minutes: 120,
+    title: "Garden walk",
+    assignee: "Aisha Rahman",
+    description: "Around the garden, or the park if it is fine.",
+    plain: true,
+  },
+  { date: TODAY, time: "16:00", minutes: 60, title: "Music in the lounge", plain: true },
   { date: TODAY, time: "18:00", minutes: 30, title: "Evening medication" },
   {
     date: TODAY,
@@ -164,6 +185,8 @@ const WEEK_EXTRA_SPECS: Spec[] = [
     assignee: "Chris Doyle",
   },
   { date: "2026-09-17", time: "17:00", minutes: 60, title: "Swimming", assignee: "Sarah Nguyen" },
+  { date: "2026-09-15", time: "15:00", minutes: 60, title: "Garden walk", plain: true },
+  { date: "2026-09-19", time: "14:30", minutes: 45, title: "Picnic in the park", plain: true },
   { date: "2026-09-19", time: "10:00", minutes: 15, title: "Weekly weigh-in" },
   { date: "2026-09-19", time: "11:00", minutes: 180, title: "Family visit" },
   { date: "2026-09-20", time: "09:00", minutes: 10, title: "Morning medication" },
@@ -182,7 +205,9 @@ const MONTH_EXTRA_SPECS: Spec[] = [
   { date: "2026-09-10", time: "15:00", minutes: 60, title: "Community access" },
   { date: "2026-09-10", time: "17:00", minutes: 60, title: "Swimming" },
   { date: "2026-09-11", time: "09:00", minutes: 30, title: "Blood test at Dorevitch" },
+  { date: "2026-09-10", time: "16:00", minutes: 45, title: "Garden walk", plain: true },
   { date: "2026-09-22", time: "10:00", minutes: 60, title: "GP appointment" },
+  { date: "2026-09-22", time: "14:00", minutes: 45, title: "Garden walk", plain: true },
   { date: "2026-09-23", time: "09:00", minutes: 60, title: "Speech therapy" },
   { date: "2026-09-24", time: "11:00", minutes: 90, title: "Support coordination review" },
   { date: "2026-09-25", time: "09:00", minutes: 60, title: "Physiotherapy" },
@@ -192,9 +217,11 @@ const MONTH_EXTRA_SPECS: Spec[] = [
   { date: "2026-10-01", time: "09:00", minutes: 60, title: "Physiotherapy" },
 ];
 
-export const DAY_OCCURRENCES: Occurrence[] = DAY_SPECS.map(occurrence);
-export const WEEK_OCCURRENCES: Occurrence[] = [...DAY_SPECS, ...WEEK_EXTRA_SPECS].map(occurrence);
-export const MONTH_OCCURRENCES: Occurrence[] = [
+export const DAY_OCCURRENCES: AnyOccurrence[] = DAY_SPECS.map(occurrence);
+export const WEEK_OCCURRENCES: AnyOccurrence[] = [...DAY_SPECS, ...WEEK_EXTRA_SPECS].map(
+  occurrence,
+);
+export const MONTH_OCCURRENCES: AnyOccurrence[] = [
   ...DAY_SPECS,
   ...WEEK_EXTRA_SPECS,
   ...MONTH_EXTRA_SPECS,

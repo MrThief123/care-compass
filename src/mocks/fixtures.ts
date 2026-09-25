@@ -16,7 +16,7 @@
  * `src/features` (lint-enforced, see eslint.config.mjs) — screens read
  * data through `src/server/<domain>/queries.ts` instead.
  */
-import { generateCompletedHistory } from "@/mocks/history";
+import { generateCompletedHistory, generatePlainEventOccurrences } from "@/mocks/history";
 import type {
   BudgetBucketKind,
   BudgetBucketState,
@@ -24,11 +24,13 @@ import type {
   CarerNotification,
   CareEvent,
   Client,
+  ClientInfoSection,
   DocumentRef,
   EventDocument,
   FundEntry,
   Occurrence,
   Organisation,
+  PlainEventOccurrence,
   Profile,
   Shift,
   StaffMember,
@@ -47,6 +49,15 @@ export const ORGANISATION: Organisation = {
   phone: "(03) 5550 1234",
   address: "24 Wattle Street, Ringwood VIC 3134",
 };
+
+/**
+ * Other organisations registered with Care Compass, for the Change organisation
+ * picker (FAM-13). Only `id` and `name` are ever shown there.
+ */
+export const OTHER_ORGANISATIONS: Organisation[] = [
+  { id: "org-wattle", name: "Wattle Care" },
+  { id: "org-eucalyptus", name: "Eucalyptus Community Care" },
+];
 
 // ---------------------------------------------------------------------------
 // Clients
@@ -129,7 +140,9 @@ export const FAMILY_PROFILES: Profile[] = [
     role: "family",
     firstName: "Helen",
     lastName: "Doyle",
-    email: "helen.doyle@example.com",
+    email: "helen@example.com",
+    phone: "0412 345 678",
+    address: "12 Wattle St, Preston VIC 3072",
     isActive: true,
   },
   {
@@ -295,6 +308,9 @@ const PHYSIO: CareEvent = {
   durationMinutes: 90,
   recurrenceFrequency: "weekly",
   completionMode: "manual",
+  // FAM-UI-08 (PD-058): each session costs $90, paid from NDIS.
+  cost: 90,
+  bucketId: "bucket-margaret-ndis",
 };
 
 const AFTERNOON_CHECK_IN: CareEvent = {
@@ -357,13 +373,17 @@ const EYE_DROPS: CareEvent = {
   completionMode: "manual",
 };
 
-/** Automatic completion mode example (PD-044); starts after the reference week, so it has no rows yet. */
+/**
+ * The plain event (CHG-009): `automatic` completion mode (PD-044), never ticked
+ * off. Starts on the first day of the reference week, so it has a row on every
+ * day of that week (UI-05, `PLAIN_EVENT_OCCURRENCES_BY_CLIENT_ID`).
+ */
 const AFTERNOON_WALK: CareEvent = {
   id: "event-margaret-walk",
   clientId: MARGARET_CLIENT_ID,
   title: "Afternoon walk",
   description: "Accompany Margaret on a short walk around the garden.",
-  start: "2026-12-01T14:00:00+11:00",
+  start: "2026-11-26T14:00:00+11:00",
   durationMinutes: 45,
   recurrenceFrequency: "daily",
   completionMode: "automatic",
@@ -481,6 +501,9 @@ const MARGARET_DESIGN_WEEK: Occurrence[] = [
 /** The generated history stops here (exclusive), so the design week above stays exactly nine rows. */
 const HISTORY_END_EXCLUSIVE = "2026-11-26T00:00";
 
+/** Plain-event rows run to the end of the reference day (exclusive). */
+const HISTORY_END_OF_WEEK = "2026-12-01T00:00";
+
 /**
  * 128 completed occurrences before the design week, going back to Sat 5 Sep
  * 2026 (so the daylight-saving change on Sun 4 Oct is crossed and both +10:00
@@ -524,6 +547,39 @@ export const OCCURRENCES_BY_CLIENT_ID: Record<string, Occurrence[]> = {
   [ROBERT_CLIENT_ID]: ROBERT_OCCURRENCES,
 };
 
+/**
+ * The rest of the calendar's design week, Tue 1 to Sat 5 Dec 2026, exactly as
+ * drawn in `family-02-calendar.png` (CHG-012). All Planned. Hand-written, not
+ * expanded from the rules above: the drawing is a snapshot, and real expansion
+ * arrives with F0-11. Kept apart from `OCCURRENCES_BY_CLIENT_ID` because they
+ * are in the future: `getOccurrences` and `getOccurrence` read them, the Task
+ * log does not.
+ */
+const MARGARET_UPCOMING: Occurrence[] = [
+  occurrenceOf(MORNING_MEDS, "2026-12-01T09:00:00+11:00", { status: "planned" }),
+  occurrenceOf(WOUND_DRESSING, "2026-12-02T10:00:00+11:00", { status: "planned" }),
+  occurrenceOf(WEIGH_IN, "2026-12-03T09:30:00+11:00", { status: "planned" }),
+  occurrenceOf(PHYSIO, "2026-12-04T11:30:00+11:00", { status: "planned" }),
+  occurrenceOf(MED_REVIEW, "2026-12-05T14:00:00+11:00", { status: "planned" }),
+];
+
+/** Occurrences after the reference day, by client (CHG-012). Not part of any Task log. */
+export const UPCOMING_OCCURRENCES_BY_CLIENT_ID: Record<string, Occurrence[]> = {
+  [MARGARET_CLIENT_ID]: MARGARET_UPCOMING,
+};
+
+/**
+ * Plain-event occurrences (UI-05, CHG-009): Margaret's Afternoon walk, 14:00
+ * on each day of the reference week (Thu 26 to Mon 30 Nov 2026), with Aisha
+ * as the assignee as on the design week's tasks. No status, actor or
+ * completion time. Kept apart from `OCCURRENCES_BY_CLIENT_ID`, so the task
+ * rows (and Margaret's 137-row log) are unchanged; the contract merges them
+ * only when a `type` option asks for plain events (FD-01, FD-03).
+ */
+export const PLAIN_EVENT_OCCURRENCES_BY_CLIENT_ID: Record<string, PlainEventOccurrence[]> = {
+  [MARGARET_CLIENT_ID]: generatePlainEventOccurrences(AFTERNOON_WALK, AISHA, HISTORY_END_OF_WEEK),
+};
+
 // ---------------------------------------------------------------------------
 // Shifts
 // ---------------------------------------------------------------------------
@@ -560,6 +616,8 @@ export function deriveBudgetBucketState(percentUsed: number): BudgetBucketState 
 }
 
 interface RawBudgetBucket {
+  /** `bucket-<client>-<kind>` (CHG-021): stable, so fund entries can point at it. */
+  id: string;
   kind: BudgetBucketKind;
   label: string;
   total: number;
@@ -583,14 +641,44 @@ const BUDGET_LABELS: Record<BudgetBucketKind, string> = {
  */
 export const RAW_BUDGET_BUCKETS_BY_CLIENT_ID: Record<string, RawBudgetBucket[]> = {
   [MARGARET_CLIENT_ID]: [
-    { kind: "ndis", label: BUDGET_LABELS.ndis, total: 24000, used: 9120 },
-    { kind: "fixed", label: BUDGET_LABELS.fixed, total: 5000, used: 2250 },
-    { kind: "government", label: BUDGET_LABELS.government, total: 3000, used: 2760 },
+    {
+      id: "bucket-margaret-ndis",
+      kind: "ndis",
+      label: BUDGET_LABELS.ndis,
+      total: 24000,
+      used: 9120,
+    },
+    {
+      id: "bucket-margaret-fixed",
+      kind: "fixed",
+      label: BUDGET_LABELS.fixed,
+      total: 5000,
+      used: 2250,
+    },
+    {
+      id: "bucket-margaret-government",
+      kind: "government",
+      label: BUDGET_LABELS.government,
+      total: 3000,
+      used: 2760,
+    },
   ],
   "client-robert": [
-    { kind: "ndis", label: BUDGET_LABELS.ndis, total: 18000, used: 4000 },
-    { kind: "fixed", label: BUDGET_LABELS.fixed, total: 4000, used: 1200 },
-    { kind: "government", label: BUDGET_LABELS.government, total: 2500, used: 500 },
+    { id: "bucket-robert-ndis", kind: "ndis", label: BUDGET_LABELS.ndis, total: 18000, used: 4000 },
+    {
+      id: "bucket-robert-fixed",
+      kind: "fixed",
+      label: BUDGET_LABELS.fixed,
+      total: 4000,
+      used: 1200,
+    },
+    {
+      id: "bucket-robert-government",
+      kind: "government",
+      label: BUDGET_LABELS.government,
+      total: 2500,
+      used: 500,
+    },
   ],
 };
 
@@ -598,6 +686,7 @@ export function deriveBudgetBucketSummary(raw: RawBudgetBucket): BudgetBucketSum
   const remaining = raw.total - raw.used;
   const percentUsed = raw.total === 0 ? 0 : Math.round((raw.used / raw.total) * 100);
   return {
+    id: raw.id,
     kind: raw.kind,
     label: raw.label,
     total: raw.total,
@@ -612,22 +701,99 @@ export const FUND_ENTRIES: FundEntry[] = [
   {
     id: "fund-margaret-1",
     clientId: MARGARET_CLIENT_ID,
+    bucketId: "bucket-margaret-ndis",
     bucketKind: "ndis",
     type: "topup",
     amount: 6000,
-    date: "2026-11-01",
-    description: "Quarterly NDIS plan top-up",
+    date: "2026-11-03",
+    description: "NDIS quarterly plan top-up",
     recordedBy: "Helen Doyle",
   },
   {
     id: "fund-margaret-2",
     clientId: MARGARET_CLIENT_ID,
-    bucketKind: "ndis",
+    bucketId: "bucket-margaret-fixed",
+    bucketKind: "fixed",
+    type: "topup",
+    amount: 1000,
+    date: "2026-10-15",
+    description: "Fixed funding top-up",
+    recordedBy: "Helen Doyle",
+  },
+  {
+    id: "fund-margaret-3",
+    clientId: MARGARET_CLIENT_ID,
+    bucketId: "bucket-margaret-government",
+    bucketKind: "government",
+    type: "topup",
+    amount: 750,
+    date: "2026-10-01",
+    description: "Government subsidy payment",
+    recordedBy: "Helen Doyle",
+  },
+  // CHG-020 (PD-058): a cost Government could not cover (it has $240), listed
+  // as pending and not deducted. Dated before 3 Nov so the design's first row stays first.
+  {
+    id: "fund-margaret-4",
+    clientId: MARGARET_CLIENT_ID,
+    bucketId: "bucket-margaret-government",
+    bucketKind: "government",
     type: "expense",
-    amount: -320,
-    date: "2026-11-15",
-    description: "Physiotherapy session",
+    amount: -310,
+    date: "2026-10-27",
+    description: "Physiotherapy",
     recordedBy: "Aisha Rahman",
+    pending: true,
+  },
+  {
+    id: "fund-robert-1",
+    clientId: ROBERT_CLIENT_ID,
+    bucketId: "bucket-robert-ndis",
+    bucketKind: "ndis",
+    type: "topup",
+    amount: 4500,
+    date: "2026-10-20",
+    description: "NDIS quarterly plan top-up",
+    recordedBy: "Michael Hale",
+  },
+];
+
+// ---------------------------------------------------------------------------
+// Client information (Family · Info)
+// ---------------------------------------------------------------------------
+
+/**
+ * The three text sections of `family-04-info.png`, word for word (FAM-UI-04,
+ * CHG-018). Read through `getClientInfoSections`, which returns them in this
+ * order: Description, Habits, Medical history. Only Margaret has any.
+ */
+export const CLIENT_INFO_SECTIONS: ClientInfoSection[] = [
+  {
+    id: "info-margaret-description",
+    clientId: MARGARET_CLIENT_ID,
+    kind: "description",
+    title: "Description",
+    content:
+      "Margaret lives independently with regular support from Banksia Home Care. She uses a walking frame for mobility outside the home and prefers morning appointments.",
+    updatedAt: "2026-09-01T10:00:00+10:00",
+  },
+  {
+    id: "info-margaret-habits",
+    clientId: MARGARET_CLIENT_ID,
+    kind: "habits",
+    title: "Habits",
+    content:
+      "Enjoys gardening and radio in the afternoon. Prefers tea over coffee. Sleeps 9pm–7am — morning routine should not be rushed.",
+    updatedAt: "2026-09-01T10:00:00+10:00",
+  },
+  {
+    id: "info-margaret-medical-history",
+    clientId: MARGARET_CLIENT_ID,
+    kind: "medicalHistory",
+    title: "Medical history",
+    content:
+      "Type 2 diabetes (diagnosed 2019), mild osteoarthritis. Known allergy: penicillin. See attached care plan for full medication schedule.",
+    updatedAt: "2026-09-01T10:00:00+10:00",
   },
 ];
 
@@ -635,13 +801,25 @@ export const FUND_ENTRIES: FundEntry[] = [
 // Documents
 // ---------------------------------------------------------------------------
 
+/**
+ * Client-level documents, read through `getClientDocuments` (FAM-UI-04, CHG-018):
+ * the two tiles on `family-04-info.png`. Neither is attached to an event.
+ */
 export const DOCUMENTS: DocumentRef[] = [
   {
     id: "doc-margaret-care-plan",
     clientId: MARGARET_CLIENT_ID,
-    name: "Care plan 2026.pdf",
+    name: "Care plan.pdf",
     url: "https://example.invalid/documents/doc-margaret-care-plan",
     uploadedAt: "2026-10-01T10:00:00+11:00",
+    uploadedBy: "Helen Doyle",
+  },
+  {
+    id: "doc-margaret-medication-schedule",
+    clientId: MARGARET_CLIENT_ID,
+    name: "Medication schedule.pdf",
+    url: "https://example.invalid/documents/doc-margaret-medication-schedule",
+    uploadedAt: "2026-10-02T09:30:00+11:00",
     uploadedBy: "Helen Doyle",
   },
 ];

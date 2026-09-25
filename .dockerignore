@@ -1,0 +1,5 @@
+# Keep local env files (hosted keys, including the service-role key) out of
+# the build context, so `COPY . .` in the dockerfile never bakes them into an
+# image. The image gets its public Supabase values as build args instead.
+.env*
+!.env.example
