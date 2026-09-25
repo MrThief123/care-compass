@@ -9,11 +9,13 @@ function TitleBar({ className }: { className: string }) {
 /**
  * Loading state (States sheet): the screen's own shape, with the kit's row and
  * card skeletons in place of data, so nothing jumps when the content arrives.
+ * Below 768px the right column stacks under Today, so its 340px width can't
+ * push the page wider than a phone screen.
  */
 export function HomeSkeleton() {
   return (
     <div aria-busy="true" className="flex flex-col gap-4 px-6 py-5">
-      <div className="flex items-stretch gap-4">
+      <div className="flex flex-col gap-4 md:flex-row md:items-stretch">
         <CardShell className="min-w-0 flex-1 p-5">
           <TitleBar className="h-5 w-16" />
           <div className="mt-4 flex flex-col gap-4">
@@ -22,7 +24,7 @@ export function HomeSkeleton() {
             ))}
           </div>
         </CardShell>
-        <div className="flex w-[340px] shrink-0 flex-col gap-4">
+        <div className="flex min-w-0 flex-col gap-4 md:w-[340px] md:shrink-0">
           <div aria-hidden className="h-13 animate-pulse rounded-control bg-bg-inset" />
           <CardShell>
             <TitleBar className="h-5 w-20" />
