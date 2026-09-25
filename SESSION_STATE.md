@@ -128,3 +128,38 @@ Root session state is a **team-level log**. Update it only in daily sync PRs or 
 
 **Warnings**
 - Merged PRs keep leaving feature `Status:` stale (ADM-UI-01 to 03 this time). The post-merge step suggested on 2026-09-18 is still not in `docs/DEVELOPMENT_WORKFLOW.md`.
+
+---
+
+### 2026-09-25 — Checkpoint: `family-dev` to `main`, all dev branches synced (Claude Code, repository access)
+**Worked on**
+- #112 (Family Home skeleton stacks below 768px, FD-23) and #113 (week grid test clock pinned, FD-09) merged to `family-dev`. Together they fixed the F0-15 header test that failed at 338px and 480px.
+- #62 `family-dev` → `main` merged as a merge commit (`c83c7cf`). Lane F's UI and wiring work is now on `main`.
+- #114 synced `main` into `admin-dev`. Two calendar test conflicts differed only in comments, and `main`'s comments were kept. #115 synced `main` into `carer-dev` with no conflicts.
+- Result: `family-dev` has the same tree as `main`. `admin-dev` and `carer-dev` contain all of `main`.
+
+**Held back on purpose**
+- #63 `admin-dev` → `main` stays open. The human judged the admin pages not ready. A browser sweep from 1920px to 338px found:
+  - Staff scrolls 126px sideways at 338px, which needs a lane A fix.
+  - Clients and Settings are still placeholders (ADM-UI-04 and 05 not started).
+- So on `main`, `plan-status` lists ADM-UI-01 to 03 as ready to start. **They are not.** They are merged to `admin-dev`. Lane A reads status on `admin-dev`.
+- #64 `carer-dev` → `main` has nothing to add: `carer-dev` has no work of its own yet.
+
+**Tests run** (locally, against local Supabase; CI minutes are limited)
+- Each sync branch:
+  - lint, typecheck and format passed
+  - Vitest passed (1,850 on `admin-dev` with 2 load timeouts that passed on re-run; 1,817 on `carer-dev`)
+  - pgTAP 134 of 134
+  - clean build passed
+  - Playwright e2e 38 of 38
+- #114 CI: `db-test` hit the GitHub API rate limit resolving the Supabase CLI `version: latest`, and `build` failed to download Google Fonts. Both passed on re-run.
+- `node scripts/plan-status.mjs --write` on `main`: the generated block was already current.
+
+**Exact next action**
+- Lane A: fix the Staff overflow at 338px on a branch into `admin-dev`. Build ADM-UI-04 and 05. Merge #63 only after a human review of the admin pages.
+- Lane C: CAR-UI-01 to 04 are ready and unclaimed.
+- After #63 merges: sync `main` back into all three dev branches.
+
+**Warnings**
+- `ci.yaml` pins the Supabase CLI to `version: latest`, which calls the GitHub API on every run and can hit the rate limit. Pinning a version would stop this (a `chore(ci)` change, not yet made).
+- Merge dev → `main` and sync PRs with **Create a merge commit**, never squash, or the next sync conflicts.
