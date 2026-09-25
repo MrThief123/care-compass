@@ -11,12 +11,12 @@ Tests are written before production code (TESTING.md §2). Run them and confirm 
 ## Test cases
 | Test ID | Covers | Level | Test description | Written first? | Result |
 |---|---|---|---|---|---|
-| T-01 | AC-01 | component | Entering a cost and picking NDIS holds $90.00 from NDIS; each bucket option shows its remaining balance | ☐ | NOT RUN |
-| T-02 | AC-02 | unit | Cost/bucket schema refuses 0, negatives, 3 decimals, and a cost with no bucket; accepts no cost and no bucket | ☐ | NOT RUN |
-| T-03 | AC-03 | component | A $0 bucket and a bucket with pending costs are struck through, read "No funds left", and cannot be chosen by click or keyboard | ☐ | NOT RUN |
-| T-04 | AC-04 | component | A cost above a selectable bucket's balance shows the pending warning and keeps the selection | ☐ | NOT RUN |
-| T-05 | AC-05 | component | A recurring event with a cost reads "Charged each time it's completed" | ☐ | NOT RUN |
-| T-06 | AC-06 | component | Edit event opens with the fixture event's $90 NDIS cost and the future-only note | ☐ | NOT RUN |
+| T-01 | AC-01 | component | Entering a cost and picking NDIS holds $90.00 from NDIS; each bucket option shows its remaining balance | ☑ | FAIL (module missing) |
+| T-02 | AC-02 | unit | Cost/bucket schema refuses 0, negatives, 3 decimals, and a cost with no bucket; accepts no cost and no bucket | ☑ | FAIL (module missing) |
+| T-03 | AC-03 | component | A $0 bucket and a bucket with pending costs are struck through, read "No funds left", and cannot be chosen by click or keyboard | ☑ | FAIL (module missing) |
+| T-04 | AC-04 | component | A cost above a selectable bucket's balance shows the pending warning and keeps the selection | ☑ | FAIL (module missing) |
+| T-05 | AC-05 | component | A recurring event with a cost reads "Charged each time it's completed" | ☑ | FAIL (module missing) |
+| T-06 | AC-06 | component | Edit event opens with the fixture event's $90 NDIS cost and the future-only note | ☑ | FAIL (module missing) |
 
 Test titles must start with `[FAM-UI-08][AC-xx]`.
 

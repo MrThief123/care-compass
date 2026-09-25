@@ -23,14 +23,14 @@ Last updated: 2026-09-25
 - AC-01 to AC-06
 
 ## Acceptance criteria status
-- 0 / 6 MET
+- 0 / 6 MET (tests written and failing for the right reason)
 
 ## Tests
-- Written: 0 / 6
+- Written: 6 / 6 (T-01 to T-06, in `event-cost.test.ts`, `event-cost-fields.test.tsx`, `event-form-cost.test.tsx`)
 - Passing: 0
-- Failing: 0
-- Last run: —
-- Tests-first evidence: —
+- Failing: 3 suites, all on "Failed to resolve import @/features/family-event-form/event-cost" (the module does not exist yet)
+- Last run: 2026-09-25 `npx vitest run src/features/family-event-form`
+- Tests-first evidence: the run above, before any production code
 
 ## Files changed
 - None
