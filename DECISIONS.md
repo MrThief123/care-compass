@@ -591,9 +591,9 @@ Docs updated: DECISIONS.md
   - **Detail page.** Opening a plain event from the Care log shows the same page as a task, except the Status card reads "Event" with "No tick-off needed" and no pill or completion time. Description, Edit and Documents work as for a task; documents on a plain event are attachments, not proof of completion.
 - Source / justification: human instruction in-session, 2026-09-24, refining PD-044: "tasks" are events with the extra function of being ticked off by hand; plain events "would just exist" (a walk vs picking up a prescription); only tasks belong in the task (checkbox) sections; all events and tasks go into the log. Decided question by question in a grilling session with the human on 2026-09-24.
 - Impact:
-  - **Shared (Lane S, all shared features are merged):** needs a **shared follow-up feature**, not yet planned. `src/types/domain.ts` (an occurrence of a plain event has no status; `TaskLogQuerySchema` gains a type filter), `src/mocks/**` (plain-event fixtures in the log and calendar), UI-01 calendar kit (neutral "Event" block look in `status-cue` and day, week and month grids, event popover), UI-03 lists (a neutral "Event" label where a status pill would go), `getTaskLog` / `getOccurrence` / `getTodayOccurrences` contract semantics (UI-04). Until it merges, dashboard features cannot show plain events correctly.
+  - **Shared (Lane S, all shared features are merged):** needs a **shared follow-up feature**, not yet planned. `src/types/domain.ts` (an occurrence of a plain event has no status; `TaskLogQuerySchema` gains a type filter), `src/mocks/**` (plain-event fixtures in the log and calendar), UI-01 calendar kit (neutral "Event" block look in `status-cue` and day, week and month grids, event popover), UI-03 lists (a neutral "Event" label where a status pill would go), UI-02 forms kit (a shared switch control; a way for `EventForm` to hide the Status chips when the switch is off, since a plain event has no status), `getTaskLog` / `getOccurrence` / `getTodayOccurrences` contract semantics (UI-04). Until it merges, dashboard features cannot show plain events correctly.
   - **Backend (Lane B):** F0-11 keeps `completion_mode`; status derivation returns no status for a plain-event occurrence; `set_occurrence_done` rejects plain-event occurrences; per-occurrence mode overrides; mode changes never apply before now. F0-16 seeds plain events.
-  - **Family:** FAM-UI-01 / FAM-01 (Today timeline shows both), FAM-02 (Overdue tasks only; Recent activity unchanged: Done or Overdue rows, so tasks only), FAM-UI-02 / FAM-04 (neutral event look), FAM-05 (Tasks panel tasks only; Log panel both), FAM-06 / FAM-07 (the switch, default on, scope rules; FAM-UI-03 needs no change), FAM-UI-07 / FAM-14 / FAM-15 (Care log name, type filter, "Event" label, plain-event detail).
+  - **Family:** FAM-UI-01 / FAM-01 (Today timeline shows both), FAM-02 (Overdue tasks only; Recent activity unchanged: Done or Overdue rows, so tasks only), FAM-UI-02 / FAM-04 (neutral event look), FAM-05 (Tasks panel tasks only; Log panel both), FAM-UI-03 (the switch on the Add and Edit event screens, local state only, as a local component through `EventForm` `extraFields`), FAM-06 / FAM-07 (saving the switch, default on, scope rules), FAM-UI-07 / FAM-14 / FAM-15 (Care log name, type filter, "Event" label, plain-event detail).
   - **Carer:** CAR-UI-01 / CAR-01 (Today's calendar both; Tasks checklist tasks only), CAR-UI-03 / CAR-05 (blocks both; selected-shift tasks only), CAR-06 (tick-off applies to tasks only), CAR-07 (the switch).
   - **Admin:** ADM-01 overdue list is tasks only by definition; no change.
   - **Tests:** each affected feature adds cases for plain events (no status, excluded from checklists and Overdue, included in schedule views and the Care log, type filter, forward-only switching, per-occurrence switch).
@@ -762,6 +762,24 @@ Docs updated: DECISIONS.md
   - **PRD.md:** REQ-29 notes entry details and export; REQ-37 notes that payment stops at the first cost that does not fit.
 - Human confirmation: Dhruv Verma, 2026-09-25 (in-session).
 - Docs updated: DECISIONS.md (PD-060, this entry); PRD.md (REQ-29, REQ-37); DEVELOPMENT_PLAN.md (totals, CHG-022 notes on FAM-UI-05, F0-12, FAM-10, FAM-11); FAM-UI-05 PRD.md, ACCEPTANCE_CRITERIA.md, PROGRESS.md, SESSION_STATE.md.
+
+### CHG-023 — Contact details contract and fixtures for Family · Settings
+- Date / requested by: 2026-09-25 / Dhruv Verma (human, project lead)
+- Type: scope change (contract and fixtures)
+- Description: adds the `getFamilyContactDetails(profileId)` contract in `src/server/profiles/queries.ts` (mock data source; Supabase mode throws the not-implemented error until FAM-12), backed by `src/mocks/queries/profiles.ts`. `ProfileSchema` gains an optional `address`. The `profile-helen` fixture gains phone '0412 345 678', contact email 'helen@example.com' and address '12 Wattle St, Preston VIC 3072'. The Family info card shows the full name 'Helen Doyle' (PD-038).
+- Source / justification: the Settings design needs the signed-in family member's contact details, and no contract returned them. Decided in-session with the human while building FAM-UI-06.
+- Impact: FAM-UI-06 AC-01 and T-12; FAM-12 implements the contract for Supabase. Recorded at the time in FAM-UI-06 DECISIONS.md only; this entry mirrors it (docs sync, 2026-09-25).
+- Human confirmation: Dhruv Verma, 2026-09-25 (in-session).
+- Docs updated: FAM-UI-06 PRD.md, ACCEPTANCE_CRITERIA.md, TEST_PLAN.md, DECISIONS.md, PROGRESS.md; DECISIONS.md (this entry).
+
+### CHG-024 — Family · Settings: Family info is read-only until 'Edit', with 'Cancel'
+- Date / requested by: 2026-09-25 / Dhruv Verma (human, project lead)
+- Type: new requirement (UI behaviour)
+- Description: the Family info inputs start read-only with an 'Edit' button. 'Edit' unlocks them and the button becomes 'Save', with 'Cancel' beside it. A valid Save locks the inputs again; 'Cancel' restores the last saved values, clears errors and locks the inputs. The card is built locally in `src/features/family-settings/` because the kit card has no Cancel slot (FAM-UI-06 FD-10); `src/components/shared/**` is unchanged.
+- Source / justification: human request in-session, so Family info cannot be changed by accident.
+- Impact: FAM-UI-06 new AC-10 and AC-11, T-13 and T-14; T-06, T-07 and T-11 click 'Edit' first (no assertion removed; FD-09). FAM-12 keeps this flow when it wires saving. Recorded at the time in FAM-UI-06 DECISIONS.md only; this entry mirrors it (docs sync, 2026-09-25).
+- Human confirmation: Dhruv Verma, 2026-09-25 (in-session).
+- Docs updated: FAM-UI-06 ACCEPTANCE_CRITERIA.md, TEST_PLAN.md, DECISIONS.md (FD-09, FD-10), PROGRESS.md, SESSION_STATE.md; DECISIONS.md (this entry).
 
 Template for future entries:
 ```
