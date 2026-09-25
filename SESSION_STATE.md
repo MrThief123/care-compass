@@ -106,3 +106,25 @@ Root session state is a **team-level log**. Update it only in daily sync PRs or 
 **Warnings**
 - `plan-status.mjs` reads the working tree only, so on `main` FAM-UI-01 and FAM-UI-07 still read "ready to start" until Checkpoint 1 merges `family-dev`. Lane F sessions read it on `family-dev`. Starting FAM-UI-01 or FAM-UI-07 from `main` would collide with the merged branches.
 - The stale-`Status:` problem has now recurred three times: add the explicit post-merge step to `docs/DEVELOPMENT_WORKFLOW.md` (a controlled-workflow change, so the human decides).
+
+---
+
+### 2026-09-25 — Docs sync after PRs #78 to #109 (Claude Code, repository access)
+**Worked on**
+- Catch-up log for PRs merged since 2026-09-20. To `main`: #78 CHG-009 (tasks and plain events), #80 CHG-010 (self-serve sign-up), #81 UI-05, #82/#94 CI off then on, #83 Docker env ignore, #90 F0-10 status sync, #91 F0-08. To `family-dev`: #79 FAM-UI-03, #84 `main` sync, #85 to #88 CHG-014 to CHG-017, #89 FAM-UI-04, #92 FAM-UI-05, #93 FAM-UI-06, #98 status sync, #99 FAM-UI-08, #100 status strings, #102/#104 FAM-12, #103/#105/#108 FAM-13, #107 F0-11, #109 events contract fix. To `admin-dev`: #95 ADM-UI-01, #96 ADM-UI-02, #97 ADM-UI-03.
+- Stale docs found: root `PROGRESS.md` Overall and Known risks dated 2026-09-20 (listed answered OQs as open); CHG-023 and CHG-024 confirmed only in FAM-UI-06 DECISIONS.md; the CHG-009 follow-up commit on `docs/chg-009-tasks-vs-events` never landed; ADM-UI-01 to 03 docs on `admin-dev` still `IN PROGRESS` after merging.
+
+**What changed**
+- Landed the CHG-009 follow-up (FAM-UI-03 shows the task switch; forms-kit follow-up listed); PRD REQ-35 conflict resolved by keeping REQ-36 to 38 and adding FAM-UI-03.
+- Root DECISIONS.md §5: CHG-023 and CHG-024 mirrored from FAM-UI-06.
+- Root `PROGRESS.md`: Overall and Known risks rewritten. Generated Status block left as is.
+- `admin-dev` status sync goes in a separate PR to `admin-dev` (lane A's tree).
+
+**Tests run**
+- None — docs only. `node scripts/plan-status.mjs` run to confirm statuses.
+
+**Exact next action**
+- Human: review and merge this PR and the `admin-dev` status PR; merge `main` into `admin-dev` and `carer-dev` (52 commits behind); assign lane owners in `docs/SPRINT_PLAN.md` §2.
+
+**Warnings**
+- Merged PRs keep leaving feature `Status:` stale (ADM-UI-01 to 03 this time). The post-merge step suggested on 2026-09-18 is still not in `docs/DEVELOPMENT_WORKFLOW.md`.
