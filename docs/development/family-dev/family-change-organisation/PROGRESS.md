@@ -1,6 +1,6 @@
 # Progress — FAM-13 Family — Change organisation
 
-Status: READY FOR PR
+Status: MERGED TO DEV
 Owner: Dhruv Verma
 Lane: F — Family
 Sprint: SPRINT · planned D11
