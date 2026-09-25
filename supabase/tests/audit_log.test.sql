@@ -50,32 +50,32 @@ select is(
   '[T-01][AC-01] one UPDATE audit row exists for Margaret''s client row'
 );
 select is(
-  (select actor_id from audit_log where table_name = 'clients' and action = 'UPDATE'),
+  (select actor_id from audit_log where table_name = 'clients' and action = 'UPDATE' and record_id = 'b1111111-1111-1111-1111-111111111111'),
   'a1111111-1111-1111-1111-111111111111'::uuid,
   '[T-01][AC-01] the audit row records Helen as actor_id'
 );
 select is(
-  (select action from audit_log where table_name = 'clients' and action = 'UPDATE'),
+  (select action from audit_log where table_name = 'clients' and action = 'UPDATE' and record_id = 'b1111111-1111-1111-1111-111111111111'),
   'UPDATE',
   '[T-01][AC-01] the audit row action is UPDATE'
 );
 select is(
-  (select actor_role from audit_log where table_name = 'clients' and action = 'UPDATE'),
+  (select actor_role from audit_log where table_name = 'clients' and action = 'UPDATE' and record_id = 'b1111111-1111-1111-1111-111111111111'),
   'family',
   '[T-01][AC-01] the audit row records Helen''s role (family) as actor_role'
 );
 select is(
-  (select before ->> 'suburb' from audit_log where table_name = 'clients' and action = 'UPDATE'),
+  (select before ->> 'suburb' from audit_log where table_name = 'clients' and action = 'UPDATE' and record_id = 'b1111111-1111-1111-1111-111111111111'),
   'Carlton',
   '[T-01][AC-01] the before image holds the old value'
 );
 select is(
-  (select after ->> 'suburb' from audit_log where table_name = 'clients' and action = 'UPDATE'),
+  (select after ->> 'suburb' from audit_log where table_name = 'clients' and action = 'UPDATE' and record_id = 'b1111111-1111-1111-1111-111111111111'),
   'Fitzroy',
   '[T-01][AC-01] the after image holds the new value'
 );
 select is(
-  (select client_id from audit_log where table_name = 'clients' and action = 'UPDATE'),
+  (select client_id from audit_log where table_name = 'clients' and action = 'UPDATE' and record_id = 'b1111111-1111-1111-1111-111111111111'),
   'b1111111-1111-1111-1111-111111111111'::uuid,
   '[T-01][AC-01] client_id scopes the audit row to Margaret'
 );
@@ -122,12 +122,12 @@ update clients set suburb = 'Brunswick' where id = 'b1111111-1111-1111-1111-1111
 set local role postgres;
 
 select is(
-  (select actor_role from audit_log where table_name = 'clients' and action = 'UPDATE' and after ->> 'suburb' = 'Brunswick'),
+  (select actor_role from audit_log where table_name = 'clients' and action = 'UPDATE' and record_id = 'b1111111-1111-1111-1111-111111111111' and after ->> 'suburb' = 'Brunswick'),
   'system',
   '[T-03][AC-03] a service-role change records actor_role system'
 );
 select is(
-  (select actor_id from audit_log where table_name = 'clients' and action = 'UPDATE' and after ->> 'suburb' = 'Brunswick'),
+  (select actor_id from audit_log where table_name = 'clients' and action = 'UPDATE' and record_id = 'b1111111-1111-1111-1111-111111111111' and after ->> 'suburb' = 'Brunswick'),
   null::uuid,
   '[T-03][AC-03] a service-role change records a null actor_id'
 );
@@ -141,12 +141,12 @@ insert into client_info_sections (client_id, key, body) values
 
 select is(
   (select action || ':' || coalesce(record_id::text, 'null') || ':' || coalesce(before::text, 'null')
-     from audit_log where table_name = 'client_info_sections'),
+     from audit_log where table_name = 'client_info_sections' and client_id = 'b1111111-1111-1111-1111-111111111111'),
   'INSERT:null:null',
   '[T-04][AC-01] an INSERT is captured with a null before image and null record_id for a composite-key table'
 );
 select is(
-  (select client_id from audit_log where table_name = 'client_info_sections'),
+  (select client_id from audit_log where table_name = 'client_info_sections' and client_id = 'b1111111-1111-1111-1111-111111111111'),
   'b1111111-1111-1111-1111-111111111111'::uuid,
   '[T-04][AC-01] a composite-key table row is still scoped by client_id'
 );
@@ -155,7 +155,7 @@ delete from client_info_sections where client_id = 'b1111111-1111-1111-1111-1111
 
 select is(
   (select (before is not null and after is null)::text from audit_log
-    where table_name = 'client_info_sections' and action = 'DELETE'),
+    where table_name = 'client_info_sections' and action = 'DELETE' and client_id = 'b1111111-1111-1111-1111-111111111111'),
   'true',
   '[T-04][AC-01] a DELETE is captured with a before image and a null after image'
 );

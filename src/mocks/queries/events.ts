@@ -106,6 +106,24 @@ export function occurrencesOnDay<T extends AnyOccurrence>(
     .sort(oldestFirst);
 }
 
+/**
+ * Every fixture row of the client that starts in `[from, to)`, tasks and plain events, oldest first
+ * (F0-11). The contract's `getOccurrences` filters by `type` afterwards, as the Supabase source does.
+ */
+export async function getOccurrences(
+  clientId: string,
+  range: { from: string; to: string },
+): Promise<AnyOccurrence[]> {
+  const from = Date.parse(range.from);
+  const to = Date.parse(range.to);
+  return rowsOfType(clientId, "all")
+    .filter((occurrence) => {
+      const start = Date.parse(occurrence.start);
+      return start >= from && start < to;
+    })
+    .sort(oldestFirst);
+}
+
 export async function getTodayOccurrences(
   clientId: string,
   options: OccurrenceTypeOptions = {},
