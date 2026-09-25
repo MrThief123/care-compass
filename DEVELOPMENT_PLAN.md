@@ -411,6 +411,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Acceptance criteria summary:** 3 criteria — Name 'Helen', Phone '0412 345 678', Email 'helen@example.com', Address '12 Wattle St, Preston VIC 3072' are shown; its title is 'Change organisation?' and the body states Banksia Home Care will lose access immediately; it closes and nothing else happens
 - **Testing summary:** 3 component
 - **Requirements:** REQ-02, REQ-N1, REQ-N2, REQ-N3
+- **CHG-023:** adds the `getFamilyContactDetails` contract and Helen's Settings fixtures, and AC-01 shows 'Helen Doyle' (PD-038). The feature also gains criteria for the Phase 1 behaviour of the Change confirm, Reset, the per-card Save (PD-054), validation and states: AC-04 to AC-09.
 - **Docs:** `docs/development/family-dev/family-ui-settings/` · **Status:** NOT STARTED
 
 ### FAM-UI-07 — Family Task log and Task detail screens (UI)
