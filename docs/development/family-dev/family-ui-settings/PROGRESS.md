@@ -6,7 +6,7 @@ Lane: F — Family
 Sprint: SPRINT · planned D6
 Branch: `feature/family-ui-settings`
 PR target: `family-dev`
-Last updated: 2026-09-25 (implemented; all 37 cases green; waiting for approval to open the PR)
+Last updated: 2026-09-25 (CHG-024 Edit/Save flow added; all 40 cases green; waiting for approval to open the PR)
 
 ## Blockers
 - None
@@ -21,7 +21,8 @@ Last updated: 2026-09-25 (implemented; all 37 cases green; waiting for approval 
 - Tests first: T-01 to T-12 (37 cases), red for the right reason (commit `900cf1c`).
 - CHG-023: `ProfileSchema.address`; Helen's phone, contact email and address in the fixtures; `src/mocks/queries/profiles.ts`; `src/server/profiles/queries.ts`.
 - Screen: `src/features/family-settings/` (`settings-schema.ts`, `family-settings-view.tsx`, `settings-error-state.tsx`, `settings-skeleton.tsx`); route `settings/page.tsx` and `loading.tsx`.
-- Checks: see TEST_PLAN.md "Green run". Width sweep from 1920 to 768 and side-by-side with `family-05-settings.png` done.
+- CHG-024 (human request): Family info is read-only until 'Edit' (AC-10, FD-09, T-13). Tests changed first (red), then the view.
+- Checks: see TEST_PLAN.md "Green run" and "CHG-024 run". Width sweep from 1920 to 768 and side-by-side with `family-05-settings.png` done.
 
 ## In progress
 - None
@@ -30,11 +31,11 @@ Last updated: 2026-09-25 (implemented; all 37 cases green; waiting for approval 
 - Open the PR to `family-dev` once the human approves.
 
 ## Acceptance criteria status
-- 9 / 9 MET
+- 10 / 10 MET
 
 ## Tests
-- Written: 12 / 12 test-plan rows (37 cases)
-- Passing: 37
+- Written: 13 / 13 test-plan rows (40 cases)
+- Passing: 40
 - Failing: 0
 
 ## Files changed
@@ -42,12 +43,15 @@ Last updated: 2026-09-25 (implemented; all 37 cases green; waiting for approval 
 - `src/features/family-settings/**`, `src/app/(family)/family/[clientId]/settings/{page,loading}.tsx`
 
 ## Decisions
-- See DECISIONS.md (FD-01 to FD-08) and root CHG-023.
+- See DECISIONS.md (FD-01 to FD-09) and root CHG-023, CHG-024.
 
 ## Design differences to name in the PR
 - Name reads 'Helen Doyle', not 'Helen' (CHG-023, PD-038).
-- Family info has a Save button (PD-054, FD-03).
+- Family info has a button: 'Edit', which becomes 'Save' in edit mode (PD-054, CHG-024).
 - The live-region messages, the validation messages and the no-organisation text are undesigned and flagged for design review (FD-01 to FD-03, FD-05).
+
+## HUMAN REVIEW: test expectation changed
+- CHG-024: T-06, T-07 and T-11 now click 'Edit' first. In T-07's 'clears the Saved. message' case, clicking 'Edit' now clears 'Saved.' (it used to be typing in a field). No assertion was removed. Details in FD-09.
 
 ## Problems encountered
 - The full suite's 5 F0-07/F0-04 integration tests fail with `Invalid API key` (Supabase auth, environment). Unrelated to this feature.

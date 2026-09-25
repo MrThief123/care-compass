@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import {
   ConfirmationModal,
@@ -51,6 +51,8 @@ export function FamilySettingsView({ header, contact }: FamilySettingsViewProps)
   const [errors, setErrors] = useState<FieldErrors>({});
   const [message, setMessage] = useState("");
   const [confirmOpen, setConfirmOpen] = useState(false);
+  // Read-only until 'Edit', so details can't be changed by accident (CHG-024).
+  const [editing, setEditing] = useState(false);
   const formRef = useRef<HTMLDivElement>(null);
 
   function edit(key: keyof FamilyInfoValues, value: string) {
@@ -63,6 +65,16 @@ export function FamilySettingsView({ header, contact }: FamilySettingsViewProps)
     setMessage((current) => (current === SAVED ? "" : current));
   }
 
+  function startEditing() {
+    setEditing(true);
+    setMessage((current) => (current === SAVED ? "" : current));
+  }
+
+  // Focus Name once the inputs have lost readOnly.
+  useEffect(() => {
+    if (editing) formRef.current?.querySelector<HTMLElement>('[name="name"]')?.focus();
+  }, [editing]);
+
   function save() {
     const result = fieldErrors(familyInfoSchema, values);
     if (!result.ok) {
@@ -74,6 +86,7 @@ export function FamilySettingsView({ header, contact }: FamilySettingsViewProps)
     }
     setValues(result.data);
     setErrors({});
+    setEditing(false);
     setMessage(SAVED);
   }
 
@@ -106,7 +119,11 @@ export function FamilySettingsView({ header, contact }: FamilySettingsViewProps)
       )}
 
       <div ref={formRef}>
-        <DetailsFormCard title="Family info" onSave={save}>
+        <DetailsFormCard
+          title="Family info"
+          onSave={editing ? save : startEditing}
+          saveLabel={editing ? "Save" : "Edit"}
+        >
           {FIELDS.map(({ key, label, type }) => (
             <Field
               key={key}
@@ -117,6 +134,7 @@ export function FamilySettingsView({ header, contact }: FamilySettingsViewProps)
               onChange={(value) => edit(key, value)}
               error={errors[key]}
               required={key === "name"}
+              readOnly={!editing}
             />
           ))}
         </DetailsFormCard>

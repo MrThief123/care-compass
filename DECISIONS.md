@@ -661,6 +661,16 @@ Docs updated: DECISIONS.md
 - Human confirmation: Dhruv Verma, 2026-09-25 (in-session).
 - Docs updated: DECISIONS.md (this entry); DEVELOPMENT_PLAN.md (CHG-023 note on FAM-UI-06); FAM-UI-06 PRD.md, ACCEPTANCE_CRITERIA.md, TEST_PLAN.md, DECISIONS.md, PROGRESS.md, SESSION_STATE.md.
 
+### CHG-024 — FAM-UI-06: Family info is read-only until 'Edit'
+- Date / requested by: 2026-09-25 / Dhruv Verma (human, project lead)
+- Type: acceptance-criterion change
+- Description: the Family info inputs on Family · Settings start read-only, and the card's button reads 'Edit'. 'Edit' makes them editable and the button becomes 'Save'. A valid Save keeps the changes and locks the inputs again. This adds AC-10 and makes AC-06's precondition edit mode. PD-054's per-card Save stays; it is shown after 'Edit'.
+- Source / justification: human request in-session, 2026-09-25: "family info should be read only and have an edit button where save is … Just ensures no one accidently deleted information".
+- Impact: FAM-UI-06 only (`src/features/family-settings/family-settings-view.tsx`, its tests). FAM-12 (Settings wiring) keeps this flow. No shared-kit change: it uses `DetailsFormCard.saveLabel` and `Field.readOnly`.
+- Numbering: CHG-024 was free on every local and remote branch when this was written. Whichever branch merges second renumbers.
+- Human confirmation: Dhruv Verma, 2026-09-25 (in-session).
+- Docs updated: DECISIONS.md (this entry); FAM-UI-06 ACCEPTANCE_CRITERIA.md (AC-06, AC-10), TEST_PLAN.md (T-13), DECISIONS.md (FD-09), PROGRESS.md, SESSION_STATE.md.
+
 Template for future entries:
 ```
 ### CHG-xxx — <title>

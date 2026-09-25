@@ -96,6 +96,16 @@ Record feature-level decisions here using the template below. Project-wide decis
 - Human confirmation required: no.
 - Test changes caused: none.
 
+### FD-09 — Family info is read-only until 'Edit' (CHG-024)
+- Date: 2026-09-25
+- Context: the human asked that Family info can't be changed by accident.
+- Decision: the inputs render `readOnly` and the kit card's button reads 'Edit'. 'Edit' unlocks the inputs, focuses Name and relabels the button 'Save' (the kit's `saveLabel`). A valid Save keeps the values and locks the inputs again; an invalid Save stays in edit mode. 'Edit' also clears a 'Saved.' message. There is no Cancel: the human didn't ask for one.
+- Reason: this uses the existing kit props `DetailsFormCard.saveLabel` and `Field.readOnly`, so `src/components/shared/**` is unchanged.
+- Alternatives considered: plain text instead of read-only inputs (a second display pattern, and it breaks the layout match with the design).
+- Consequences: read-only inputs look the same as editable ones (the kit's `read-only:` style only changes the cursor). FAM-12 keeps this flow when it wires saving.
+- Human confirmation required: yes. Given in-session by Dhruv Verma, 2026-09-25.
+- Test changes caused (recorded requirement change, CHG-024): T-06, T-07 and T-11 click 'Edit' before typing. Before: they typed straight into the inputs. After: 'Edit' first. No assertion was removed. In T-07's 'clears the Saved. message' case, the trigger for clearing 'Saved.' changed from typing in a field to clicking 'Edit', because the inputs are read-only after a save. T-11 also runs axe in edit mode. T-13 is new (AC-10).
+
 <!-- Template
 ### FD-xx — <title>
 - Date:
