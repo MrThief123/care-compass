@@ -29,6 +29,190 @@ export type Database = {
 
   public: {
     Tables: {
+      care_event_completions: {
+        Row: {
+          action: string;
+          actor_display_name: string;
+          actor_id: string;
+          client_id: string;
+          event_id: string;
+          id: string;
+          occurred_at: string;
+          organisation_id: string | null;
+          original_start: string;
+          seq: number;
+        };
+        Insert: {
+          action: string;
+          actor_display_name: string;
+          actor_id: string;
+          client_id: string;
+          event_id: string;
+          id?: string;
+          occurred_at?: string;
+          organisation_id?: string | null;
+          original_start: string;
+          seq?: never;
+        };
+        Update: {
+          action?: string;
+          actor_display_name?: string;
+          actor_id?: string;
+          client_id?: string;
+          event_id?: string;
+          id?: string;
+          occurred_at?: string;
+          organisation_id?: string | null;
+          original_start?: string;
+          seq?: never;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "care_event_completions_client_id_fkey";
+            columns: ["client_id"];
+            isOneToOne: false;
+            referencedRelation: "clients";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "care_event_completions_event_id_fkey";
+            columns: ["event_id"];
+            isOneToOne: false;
+            referencedRelation: "care_events";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+
+      care_event_overrides: {
+        Row: {
+          client_id: string;
+          created_at: string;
+          created_by: string | null;
+          event_id: string;
+          id: string;
+          kind: string;
+          new_completion_mode: string | null;
+          new_duration_minutes: number | null;
+          new_starts_at: string | null;
+          original_start: string;
+        };
+        Insert: {
+          client_id: string;
+          created_at?: string;
+          created_by?: string | null;
+          event_id: string;
+          id?: string;
+          kind: string;
+          new_completion_mode?: string | null;
+          new_duration_minutes?: number | null;
+          new_starts_at?: string | null;
+          original_start: string;
+        };
+        Update: {
+          client_id?: string;
+          created_at?: string;
+          created_by?: string | null;
+          event_id?: string;
+          id?: string;
+          kind?: string;
+          new_completion_mode?: string | null;
+          new_duration_minutes?: number | null;
+          new_starts_at?: string | null;
+          original_start?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "care_event_overrides_client_id_fkey";
+            columns: ["client_id"];
+            isOneToOne: false;
+            referencedRelation: "clients";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "care_event_overrides_created_by_fkey";
+            columns: ["created_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "care_event_overrides_event_id_fkey";
+            columns: ["event_id"];
+            isOneToOne: false;
+            referencedRelation: "care_events";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+
+      care_events: {
+        Row: {
+          client_id: string;
+          completion_mode: string;
+          created_at: string;
+          created_by: string | null;
+          deactivated_at: string | null;
+          description: string;
+          duration_minutes: number;
+          id: string;
+          is_active: boolean;
+          recurrence: Json | null;
+          recurrence_until: string | null;
+          starts_at: string;
+          title: string;
+          updated_at: string;
+        };
+        Insert: {
+          client_id: string;
+          completion_mode?: string;
+          created_at?: string;
+          created_by?: string | null;
+          deactivated_at?: string | null;
+          description?: string;
+          duration_minutes?: number;
+          id?: string;
+          is_active?: boolean;
+          recurrence?: Json | null;
+          recurrence_until?: string | null;
+          starts_at: string;
+          title: string;
+          updated_at?: string;
+        };
+        Update: {
+          client_id?: string;
+          completion_mode?: string;
+          created_at?: string;
+          created_by?: string | null;
+          deactivated_at?: string | null;
+          description?: string;
+          duration_minutes?: number;
+          id?: string;
+          is_active?: boolean;
+          recurrence?: Json | null;
+          recurrence_until?: string | null;
+          starts_at?: string;
+          title?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "care_events_client_id_fkey";
+            columns: ["client_id"];
+            isOneToOne: false;
+            referencedRelation: "clients";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "care_events_created_by_fkey";
+            columns: ["created_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+
       carer_client_assignments: {
         Row: {
           carer_id: string;
@@ -345,6 +529,73 @@ export type Database = {
           p_client_id: string;
         };
         Returns: boolean;
+      };
+
+      can_edit_care_events: {
+        Args: {
+          p_client_id: string;
+        };
+        Returns: boolean;
+      };
+
+      can_read_care_events: {
+        Args: {
+          p_client_id: string;
+        };
+        Returns: boolean;
+      };
+
+      client_shift_carers: {
+        Args: {
+          p_client_id: string;
+          p_from: string;
+          p_to: string;
+        };
+        Returns: {
+          shift_id: string;
+          carer_id: string;
+          carer_display_name: string;
+          starts_at: string;
+          ends_at: string;
+        }[];
+      };
+
+      set_occurrence_done: {
+        Args: {
+          p_event_id: string;
+          p_original_start: string;
+        };
+        Returns: {
+          action: string;
+          actor_display_name: string;
+          actor_id: string;
+          client_id: string;
+          event_id: string;
+          id: string;
+          occurred_at: string;
+          organisation_id: string | null;
+          original_start: string;
+          seq: number;
+        };
+      };
+
+      set_occurrence_undone: {
+        Args: {
+          p_event_id: string;
+          p_original_start: string;
+        };
+        Returns: {
+          action: string;
+          actor_display_name: string;
+          actor_id: string;
+          client_id: string;
+          event_id: string;
+          id: string;
+          occurred_at: string;
+          organisation_id: string | null;
+          original_start: string;
+          seq: number;
+        };
       };
     };
 
