@@ -1,53 +1,56 @@
 # Progress — F0-08 Append-only audit log capture
 
-Status: NOT STARTED
-Owner: unclaimed
+Status: READY FOR PR
+Owner: Prajeet
 Lane: B — Backend
 Sprint: SPRINT · planned D4
-Branch: `feature/shared-audit-log-capture` (not yet created)
+Branch: `feature/shared-audit-log-capture`
 PR target: `main (per OQ-01 — shared work)`
-Last updated: 2026-09-17 (planning pack generated)
+Last updated: 2026-09-25
 
 ## Blockers
-- OQ-01 — Branch parent and naming for shared (foundation and cross-cutting) work
+- None — OQ-01 ANSWERED (see root DECISIONS.md)
 
 ## Dependencies status
-- F0-06 — NOT STARTED
+- F0-06 — MERGED TO DEV (merged to `main`)
 
 ## Completed
 - Feature documentation drafted (Claude Chat planning pack)
+- Tests first: `supabase/tests/audit_log.test.sql` (16 assertions) — confirmed failing (`relation "audit_log" does not exist`) before implementation
+- `supabase/migrations/20260925000000_audit_log.sql`: `audit_log` table, RLS enabled with no policies, all grants revoked from anon/authenticated, append-only guard triggers (UPDATE/DELETE/TRUNCATE rejected for every role), generic `audit_row_change()` SECURITY DEFINER trigger function, and triggers attached to organisations, profiles, clients, client_family_members, carer_client_assignments, client_info_sections and shifts
+- Attach pattern documented in ARCHITECTURE.md §6.1
 
 ## In progress
 - None
 
 ## Remaining
-- `audit_log` table: id, occurred_at, actor_id, actor_role, table_name, record_id, action (INSERT/UPDATE/DELETE), before jsonb, after jsonb, client_id (nullable, for scoping).
-- Generic trigger function `audit_row_change()` using `auth.uid()`.
-- Attach to tables from F0-06; document the one-line attach pattern in ARCHITECTURE.md for later tables.
-- RLS: no UPDATE or DELETE policy for any role; INSERT only via trigger; SELECT policy none by default (viewer is parked PL-06).
+- Human review, then PR to `main`
 
 ## Acceptance criteria status
-- 0 / 3 MET
+- 3 / 3 MET
 
 ## Tests
-- Written: 0 / 3
-- Passing: 0
+- Written: 5 / 5 (T-01..T-03 plus supplementary T-04, T-02b)
+- Passing: 5 (`supabase test db`: 31 assertions across 3 files, all green)
 - Failing: 0
 
 ## Files changed
-- None yet. Likely files: `supabase/migrations/*_audit_log.sql`, `supabase/tests/audit_log.test.sql`
+- `supabase/migrations/20260925000000_audit_log.sql`
+- `supabase/tests/audit_log.test.sql`
+- `ARCHITECTURE.md` (§6.1 attach pattern, as the PRD scope requires)
+- Feature docs (PROGRESS, SESSION_STATE, DECISIONS, TEST_PLAN, ACCEPTANCE_CRITERIA)
 
 ## Decisions
 - See DECISIONS.md
 
 ## Problems encountered
-- None
+- `database.types.ts` on `main` is stale: it still has a `test` table no migration creates and lacks `shifts`. Regenerating it (`npm run db:types`) adds `audit_log` and `shifts` but breaks `typecheck` because `src/app/api/test/route.ts` (F0-04 smoke route) queries `from("test")`. That folder is outside this lane (CLAUDE.md §4.2), so the regeneration was reverted and left for a human decision (see DECISIONS.md FD-04).
 
 ## Assumptions
 - PROPOSED items in PRD.md are unconfirmed until validated in F0-01 or answered in DECISIONS.md.
 
 ## Next action
-- Wait for answers to OQ-01; then complete dependencies, run START FEATURE F0-08, and write the tests in TEST_PLAN.md first.
+- Human review of the diff; then open the PR to `main` (CLAUDE.md §8 — only with human approval).
 
 ## Ready for PR
-- No
+- Yes — `npm run verify` green (515 unit tests), `supabase test db` green (31 assertions)
