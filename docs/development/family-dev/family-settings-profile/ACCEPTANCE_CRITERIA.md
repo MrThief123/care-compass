@@ -4,9 +4,9 @@ Each criterion is observable and maps to at least one test in TEST_PLAN.md. Crit
 
 | ID | Story | Type | Criterion (Given / When / Then) | Status |
 |---|---|---|---|---|
-| AC-01 | US-01 | happy | Given Helen's phone '0412 345 678', when she changes it and saves (per OQ-35), then the new number is shown after reload. | NOT MET |
-| AC-02 | US-01 | validation | Given an invalid email 'helen@', when saved, then an email error is shown. | NOT MET |
-| AC-03 | US-01 | happy | Given Helen clicks Reset, when the action runs, then a reset email is requested for her address and a confirmation message is shown. | NOT MET |
-| AC-04 | US-01 | permission | Given Helen, when she updates another profile's row, then RLS rejects it. | NOT MET |
+| AC-01 | US-01 | happy | Given Helen's phone '0412 345 678', when she changes it and saves (per OQ-35), then the new number is shown after reload. | MET |
+| AC-02 | US-01 | validation | Given an invalid email 'helen@', when saved, then an email error is shown. | MET |
+| AC-03 | US-01 | happy | Given Helen clicks Reset, when the action runs, then a reset email is requested for her address and a confirmation message is shown. | MET |
+| AC-04 | US-01 | permission | Given Helen, when she updates another profile's row, then RLS rejects it. | MET |
 
 Status values: NOT MET · MET (test passing) · BLOCKED (cite OQ/PD).

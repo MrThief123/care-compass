@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { CardShell } from "@/components/ui/card-shell";
 import type { ClientHeaderSummary } from "@/server/clients/queries";
+import { requestOwnPasswordReset, updateFamilyContactDetails } from "@/server/profiles/actions";
 import type { FamilyContactDetails } from "@/server/profiles/queries";
 
 import { familyInfoSchema, type FamilyInfoValues } from "./settings-schema";
@@ -24,6 +25,9 @@ export interface FamilySettingsViewProps {
 const NOT_AVAILABLE = "Choosing a new organisation is not available yet.";
 const RESET_SENT = "We've emailed you a link to reset your password.";
 const SAVED = "Saved.";
+// Shown when the action itself could not be reached; the server's own messages match these.
+const SAVE_FAILED = "Couldn't save your details. Try again.";
+const RESET_FAILED = "Couldn't send the reset link. Try again.";
 
 /** Display order, which is also the order focus looks for the first bad field. */
 const FIELDS: ReadonlyArray<{
@@ -39,7 +43,8 @@ const FIELDS: ReadonlyArray<{
 
 /**
  * Family · Settings (FAM-UI-06): Change organisation, Family info and Reset
- * username / password. Phase 1: nothing is persisted or sent (FD-01 to FD-03).
+ * username / password. Save and Reset go through the `profiles` Server Actions
+ * (FAM-12); Change organisation is still FAM-13's (FD-01).
  */
 export function FamilySettingsView({ header, contact }: FamilySettingsViewProps) {
   // What Cancel goes back to: the fixture, then whatever was last saved (CHG-024).
@@ -53,6 +58,9 @@ export function FamilySettingsView({ header, contact }: FamilySettingsViewProps)
   const [errors, setErrors] = useState<FieldErrors>({});
   const [message, setMessage] = useState("");
   const [confirmOpen, setConfirmOpen] = useState(false);
+  // One request at a time, so a double press saves or emails once.
+  const [saving, setSaving] = useState(false);
+  const [resetting, setResetting] = useState(false);
   // Read-only until 'Edit', so details can't be changed by accident (CHG-024).
   const [editing, setEditing] = useState(false);
   const formRef = useRef<HTMLDivElement>(null);
@@ -85,20 +93,71 @@ export function FamilySettingsView({ header, contact }: FamilySettingsViewProps)
     if (editing) formRef.current?.querySelector<HTMLElement>('[name="name"]')?.focus();
   }, [editing]);
 
-  function save() {
+  function focusField(key: string | undefined) {
+    formRef.current?.querySelector<HTMLElement>(`[name="${key}"]`)?.focus();
+  }
+
+  async function save() {
+    if (saving) return;
     const result = fieldErrors(familyInfoSchema, values);
     if (!result.ok) {
       setErrors(result.errors);
       setMessage("");
-      const first = FIELDS.find(({ key }) => result.errors[key]);
-      formRef.current?.querySelector<HTMLElement>(`[name="${first?.key}"]`)?.focus();
+      focusField(FIELDS.find(({ key }) => result.errors[key])?.key);
       return;
     }
-    setValues(result.data);
-    setSaved(result.data);
+
+    setSaving(true);
+    setMessage("");
+    let outcome: Awaited<ReturnType<typeof updateFamilyContactDetails>>;
+    try {
+      outcome = await updateFamilyContactDetails(result.data);
+    } catch {
+      // A rejected action is a failed save, not a crash; the edits stay.
+      outcome = { ok: false, error: { code: "UNEXPECTED", message: SAVE_FAILED } };
+    }
+    setSaving(false);
+
+    if (!outcome.ok) {
+      const messages = outcome.error.fieldErrors;
+      if (messages && Object.keys(messages).length > 0) {
+        setErrors(messages);
+        focusField(FIELDS.find(({ key }) => messages[key])?.key);
+      } else {
+        setMessage(outcome.error.message);
+      }
+      return;
+    }
+
+    // What was stored is what Cancel goes back to, and what the inputs show.
+    const stored: FamilyInfoValues = {
+      name: outcome.data.name,
+      phone: outcome.data.phone ?? "",
+      email: outcome.data.email ?? "",
+      address: outcome.data.address ?? "",
+    };
+    setValues(stored);
+    setSaved(stored);
     setErrors({});
     setEditing(false);
     setMessage(SAVED);
+  }
+
+  async function reset() {
+    if (resetting) return;
+    setResetting(true);
+    setMessage("");
+    let sent = false;
+    let failure = RESET_FAILED;
+    try {
+      const outcome = await requestOwnPasswordReset();
+      sent = outcome.ok;
+      if (!outcome.ok) failure = outcome.error.message;
+    } catch {
+      // Not sent: never say it was.
+    }
+    setResetting(false);
+    setMessage(sent ? RESET_SENT : failure);
   }
 
   const { organisationName, firstName } = header;
@@ -154,7 +213,11 @@ export function FamilySettingsView({ header, contact }: FamilySettingsViewProps)
                 Cancel
               </Button>
             )}
-            <Button data-family-info-action onClick={editing ? save : startEditing}>
+            <Button
+              data-family-info-action
+              disabled={saving}
+              onClick={editing ? save : startEditing}
+            >
               {editing ? "Save" : "Edit"}
             </Button>
           </div>
@@ -165,7 +228,7 @@ export function FamilySettingsView({ header, contact }: FamilySettingsViewProps)
         title="Reset username / password"
         description="We'll email you a secure link to reset your credentials."
         actionLabel="Reset"
-        onAction={() => setMessage(RESET_SENT)}
+        onAction={reset}
       />
 
       {/* On the page from the start so screen readers pick up what is announced (FD-01). */}
