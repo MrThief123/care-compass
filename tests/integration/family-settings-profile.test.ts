@@ -5,14 +5,17 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import type { Database } from "@/lib/supabase/database.types";
 import { createAdminClient } from "@/server/jobs/supabase-admin";
 
-// Requires a running local Supabase stack (`supabase start`, migrations applied)
-// and `.env.local` populated from `supabase status` — same convention as
-// shared-authentication.test.ts. Skips cleanly wherever that isn't set up.
-const hasLocalSupabase = Boolean(
-  process.env.NEXT_PUBLIC_SUPABASE_URL &&
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY &&
-    process.env.SUPABASE_SERVICE_ROLE_KEY,
+// Requires a running local Supabase stack (`supabase start`, migrations applied).
+// These tests create, change and delete users, and they need this feature's
+// migration, so they run only when NEXT_PUBLIC_SUPABASE_URL is a local address and
+// skip against a hosted project. If `.env.local` points at a hosted project,
+// override the three variables from `supabase status -o env` for the run.
+const isLocalUrl = /^https?:\/\/(127\.0\.0\.1|localhost)(:|\/|$)/.test(
+  process.env.NEXT_PUBLIC_SUPABASE_URL ?? "",
 );
+const hasLocalSupabase =
+  isLocalUrl &&
+  Boolean(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY && process.env.SUPABASE_SERVICE_ROLE_KEY);
 
 const PASSWORD = "correct horse battery staple 1!";
 

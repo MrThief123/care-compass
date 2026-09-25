@@ -183,6 +183,8 @@ describe("[FAM-UI-06] Family Settings", () => {
     await user.type(input("Phone"), "0400 000 000");
     await user.click(screen.getByRole("button", { name: "Save" }));
 
+    // Save is asynchronous since FAM-12 (it awaits the Server Action), so wait for it.
+    await screen.findByText("Saved.");
     expect(input("Phone")).toHaveValue("0400 000 000");
     expect(announced()).toContain("Saved.");
 

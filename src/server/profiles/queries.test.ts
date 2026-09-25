@@ -5,6 +5,16 @@ import { FAMILY_PROFILES } from "@/mocks/fixtures";
 import { getFamilyContactDetails } from "@/server/profiles/queries";
 import { ProfileSchema } from "@/types/domain";
 
+const fake = vi.hoisted(() => {
+  const maybeSingle = vi.fn();
+  const eq = vi.fn(() => ({ maybeSingle }));
+  const select = vi.fn(() => ({ eq }));
+  const from = vi.fn(() => ({ select }));
+  return { maybeSingle, eq, select, from };
+});
+
+vi.mock("@/lib/supabase/server", () => ({ createClient: async () => ({ from: fake.from }) }));
+
 // Helen's details as drawn in docs/design/screens/family-05-settings.png, with the
 // full name (CHG-023, PD-038).
 const HELEN = {
@@ -64,12 +74,58 @@ describe("[FAM-UI-06][CHG-023] Helen's profile fixture", () => {
   });
 });
 
-describe("[FAM-UI-06][CHG-023] supabase mode", () => {
-  it("[FAM-UI-06][CHG-023] getFamilyContactDetails throws the not-implemented error naming its domain and function", async () => {
+/*
+ * FAM-12 implements the Supabase branch, so the FAM-UI-06 test that expected a
+ * "not implemented" error is replaced by these two (FAM-12 DECISIONS FD-06,
+ * flagged HUMAN REVIEW). The real database is covered in
+ * tests/integration/family-settings-profile.test.ts.
+ */
+describe("[FAM-12][CHG-023] supabase mode", () => {
+  it("[FAM-12][CHG-023] getFamilyContactDetails reads the profile row as the signed-in user and maps it", async () => {
     vi.stubEnv("DATA_SOURCE", "supabase");
+    fake.maybeSingle.mockResolvedValue({
+      data: {
+        id: "profile-helen",
+        first_name: "Helen",
+        last_name: "Doyle",
+        phone: "0412 345 678",
+        email: "helen@example.com",
+        address: "12 Wattle St, Preston VIC 3072",
+      },
+      error: null,
+    });
 
-    await expect(getFamilyContactDetails("profile-helen")).rejects.toThrow(
-      /profiles\.getFamilyContactDetails: DATA_SOURCE="supabase" is not implemented yet/,
-    );
+    await expect(getFamilyContactDetails("profile-helen")).resolves.toEqual(HELEN);
+    expect(fake.from).toHaveBeenCalledWith("profiles");
+    expect(fake.eq).toHaveBeenCalledWith("id", "profile-helen");
+  });
+
+  it("[FAM-12][CHG-023] getFamilyContactDetails leaves out a missing phone, email or address", async () => {
+    vi.stubEnv("DATA_SOURCE", "supabase");
+    fake.maybeSingle.mockResolvedValue({
+      data: {
+        id: "profile-helen",
+        first_name: "Helen",
+        last_name: "Doyle",
+        phone: null,
+        email: null,
+        address: null,
+      },
+      error: null,
+    });
+
+    await expect(getFamilyContactDetails("profile-helen")).resolves.toEqual({
+      profileId: "profile-helen",
+      name: "Helen Doyle",
+    });
+  });
+
+  it("[FAM-12][CHG-023] getFamilyContactDetails throws, naming no profile, when no row comes back", async () => {
+    vi.stubEnv("DATA_SOURCE", "supabase");
+    fake.maybeSingle.mockResolvedValue({ data: null, error: null });
+
+    const rejection = getFamilyContactDetails("profile-secret-id");
+    await expect(rejection).rejects.toThrow("getFamilyContactDetails: profile not found.");
+    await expect(rejection).rejects.not.toThrow(/profile-secret-id/);
   });
 });
