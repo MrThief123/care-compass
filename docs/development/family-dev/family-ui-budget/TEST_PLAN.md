@@ -113,6 +113,21 @@ No test was skipped, marked `.only`, or deleted to get green. `fund-update.test.
 - Update pressed: "Updating funds is not available yet." appears on its own line under the card header, and nothing else moves.
 - Not viewed by eye: the loading skeleton (covered by its unit and axe tests).
 
+### After CHG-021 implementation (2026-09-25)
+**CI is down, so every check below ran locally.** No test was changed, skipped, marked `.only` or deleted after the CHG-021 red run; the six test and showcase files given ids only are listed in FD-12.
+
+- `npx vitest run src/features/family-budget src/features/family-home src/server/budget src/mocks/queries/budget.test.ts`: 15 files, **380 of 380 pass**. Every AC (AC-01 to AC-12) has passing tests with its tag.
+- `npx vitest run src tests/unit`: 110 files, **1480 of 1480 pass**.
+- `npx tsc --noEmit`: clean. `npx eslint .`: 0 errors, the same 3 warnings as before, none in this feature's files. `npx prettier --check .`: clean.
+- `next build`: succeeds; `/family/[clientId]/budget` and `/family/[clientId]/budget/edit` are dynamic routes.
+- Playwright e2e on the production build (`next start` on :3100, because a dev server held :3000), `--grep-invert "F0-07"`: **36 of 36 pass**. The two `[F0-15]` header tests at 480px and 338px passed this time, which fits the flakiness recorded above; still flag them for the shell owner.
+- `supabase test db`: not run. This feature changes no migration or SQL.
+
+**Real-browser width sweep** (Playwright, Chromium against the dev server on :3000; the Chrome extension was not connected). The widths were 1920, 1600, 1440, 1280, 1152, 1024, 900, 800 and 768. At each one the sweep measured horizontal page scroll, overlap between any two visible text boxes, text past the viewport, and clipped overflow. Screenshots at 1920, 1280 and 768 were checked by eye.
+- Budget, Edit budget and Home with the fixtures: no page scroll, no overlap, nothing off screen, at every width.
+- The Edit budget stress case had unique 40-character names on every bucket, `9999999999.99` in every amount, and a new bucket and a note. It was clean at every width, and so was the same page with every field in error (the error messages sit under their fields).
+- Saving that stress case gave a four-bucket Budget with `$10,000,014,879.99` cards, 40-character labels and four `+$9,999,999,999.99` History rows. It was clean at every width, including 768, where the cards sit two across and pending stays on its own line.
+
 ## Regression scope
 - Run the full unit/component suite and `supabase test db` before marking READY FOR PR.
 - Run Playwright e2e tests for this dashboard before opening the PR.
