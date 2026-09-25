@@ -1,12 +1,12 @@
 # Progress — FAM-UI-06 Family Settings screen (UI)
 
-Status: IN REVIEW
+Status: MERGED TO DEV
 Owner: Dhruv Verma
 Lane: F — Family
 Sprint: SPRINT · planned D6
 Branch: `feature/family-ui-settings`
 PR target: `family-dev`
-Last updated: 2026-09-25 (CHG-024 Edit/Save/Cancel flow added; all 43 cases green; PR #93 opened)
+Last updated: 2026-09-25
 
 ## Blockers
 - None

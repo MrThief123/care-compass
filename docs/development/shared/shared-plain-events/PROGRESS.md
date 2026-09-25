@@ -1,12 +1,12 @@
 # Progress — UI-05 Plain events in the shared kit and contracts (CHG-009)
 
-Status: PR OPEN
+Status: MERGED TO DEV
 Owner: Dhruv Verma
 Lane: S — Shared kit
 Sprint: SPRINT · planned D8
 Branch: `feature/shared-plain-events`
 PR target: `main (per OQ-01 — shared work, ANSWERED PD-030)`
-Last updated: 2026-09-24
+Last updated: 2026-09-25
 
 ## Blockers
 - None. OQ-01 ANSWERED (PD-030); authorised by CHG-009; feature and plan card approved by the human in-session (2026-09-24).
