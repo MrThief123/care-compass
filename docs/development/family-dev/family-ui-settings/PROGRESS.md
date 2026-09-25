@@ -6,7 +6,7 @@ Lane: F — Family
 Sprint: SPRINT · planned D6
 Branch: `feature/family-ui-settings`
 PR target: `family-dev`
-Last updated: 2026-09-25 (tests written and red; implementation next)
+Last updated: 2026-09-25 (session ended after the red test commit; implementation next)
 
 ## Blockers
 - None

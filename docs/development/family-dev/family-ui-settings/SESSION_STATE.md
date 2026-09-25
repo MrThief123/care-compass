@@ -1,14 +1,14 @@
 # Session State — FAM-UI-06 Family Settings screen (UI)
 
 Last session date: 2026-09-25
-Current branch: `feature/family-ui-settings` (from `family-dev` at `e10f4ba`, pushed)
-Worked on: claim, docs and decisions. No code yet.
-What changed: PRD.md, ACCEPTANCE_CRITERIA.md (AC-01 amended, AC-04 to AC-09 new), TEST_PLAN.md (T-01 to T-12), DECISIONS.md (FD-01 to FD-07), PROGRESS.md; root DECISIONS.md CHG-023; DEVELOPMENT_PLAN.md note.
-Tests run: none
-Test results: n/a
+Current branch: `feature/family-ui-settings` (from `family-dev` at `e10f4ba`, pushed; up to date with `origin/family-dev`)
+Worked on: tests first, T-01 to T-12. No production code.
+What changed: new `src/server/profiles/queries.test.ts` (6 cases), `src/features/family-settings/settings-schema.test.ts` (13), `src/features/family-settings/family-settings.test.tsx` (18); TEST_PLAN.md (results, "Red run"); PROGRESS.md. Commit `900cf1c` `test(family): …`.
+Tests run: `npx vitest run src/features/family-settings src/server/profiles`; `tsc --noEmit`; ESLint on the new files.
+Test results: 37 cases red. All 3 files fail at import on missing modules, the expected reason. `tsc` reports only those missing modules. ESLint clean. Red CI on this commit is expected.
 Current blocker: None
-Important discoveries: the `profiles` table already has `phone`, `email` and `address` columns, so CHG-023 needs no migration. `SettingsActionCard` requires an action, so the no-organisation card is built locally (FD-05). The dialog wording is in the FAM-13 PRD (FD-04).
-Important decisions: CHG-023, FD-01, FD-02 confirmed by Dhruv Verma in-session.
-Exact next action: write the tests in TEST_PLAN.md (T-01 to T-12), run them, confirm the red is for the right reason, update PROGRESS.md, commit `test(family): …`.
-Files likely to be touched next: `src/server/profiles/queries.test.ts`, `src/mocks/queries/profiles.test.ts`, `src/features/family-settings/family-settings.test.tsx`, `src/features/family-settings/settings-schema.test.ts`.
-Warning for next session: CHG-019 to CHG-022 are on `feature/family-ui-budget` (PR open), so root DECISIONS.md may conflict on merge. Keep CHG-023 at the end of §5. Do not edit `src/components/shared/**`.
+Important discoveries: the tests fix the names the code must use. `getFamilyContactDetails` and type `FamilyContactDetails` from `@/server/profiles/queries`. `familyInfoSchema` (fields `name`, `phone`, `email`, `address`) from `@/features/family-settings/settings-schema`, used through the kit's `fieldErrors`. `FamilySettingsView({ header: ClientHeaderSummary, contact: FamilyContactDetails })` from `family-settings-view`. `SettingsErrorState` (no props, Retry → `router.refresh()`) from `settings-error-state`. `loading.tsx` renders exactly one `status` named 'Loading' and no headings. The screen has at least one `role="status"` live region on the page from the start, and every status is empty until something is announced. The 'Settings' heading, the 'Family info', 'Change organisation' and 'Reset username / password' headings, and the buttons 'Change', 'Reset', 'Save' are found by role and name. Test files in `src/features` cannot import `@/mocks` (lint), so the component test gets its data through the contract with `DATA_SOURCE=mock`. The fixture check sits in the server test, so there is no `src/mocks/queries/profiles.test.ts`.
+Important decisions: none new.
+Exact next action: implement CHG-023 (`ProfileSchema.address`; Helen's phone, email and address; `src/mocks/queries/profiles.ts`; `src/server/profiles/queries.ts`), then the schema, view, error state, `page.tsx` (read `node_modules/next/dist/docs/` first) and `loading.tsx`, until green. Then the full suite, lint, typecheck, build, family e2e with `--grep-invert "F0-07"`, and the width sweep from 1920 to 768.
+Files likely to be touched next: `src/types/domain.ts`, `src/mocks/fixtures.ts`, `src/mocks/queries/profiles.ts`, `src/server/profiles/queries.ts`, `src/features/family-settings/*.tsx|ts`, `src/app/(family)/family/[clientId]/settings/{page,loading}.tsx`.
+Warning for next session: CHG-019 to CHG-022 are on `feature/family-ui-budget` (PR open), so root DECISIONS.md may conflict on merge. Keep CHG-023 at the end of §5. Do not edit `src/components/shared/**`. `.claude/settings.json` has local uncommitted hook changes that belong to the human; leave them out of commits.
