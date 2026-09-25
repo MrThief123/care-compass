@@ -1,3 +1,7 @@
-export default function AdminHomePage() {
-  return <div className="p-6 text-body-default text-text-secondary">Coming soon.</div>;
+﻿import { AdminHomeScreen } from "@/features/admin-home/admin-home-screen";
+import { getAdminHome } from "@/server/admin/queries";
+
+export default async function AdminHomePage() {
+  const data = await getAdminHome();
+  return <AdminHomeScreen data={data} />;
 }

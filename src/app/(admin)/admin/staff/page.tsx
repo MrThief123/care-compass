@@ -1,3 +1,6 @@
-export default function AdminStaffPage() {
-  return <div className="p-6 text-body-default text-text-secondary">Coming soon.</div>;
+import { StaffScreen } from "@/features/admin-staff/staff-screen";
+import { getAdminStaff } from "@/server/admin/staff-queries";
+
+export default async function AdminStaffPage() {
+  return <StaffScreen data={await getAdminStaff()} />;
 }

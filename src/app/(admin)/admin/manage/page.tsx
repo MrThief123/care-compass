@@ -1,3 +1,6 @@
-export default function AdminManagePage() {
-  return <div className="p-6 text-body-default text-text-secondary">Coming soon.</div>;
+﻿import { ManageScreen } from "@/features/admin-manage/manage-screen";
+import { getAdminManage } from "@/server/admin/manage-queries";
+
+export default async function AdminManagePage() {
+  return <ManageScreen data={await getAdminManage()} />;
 }
