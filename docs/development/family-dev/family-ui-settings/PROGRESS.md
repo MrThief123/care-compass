@@ -1,12 +1,12 @@
 # Progress — FAM-UI-06 Family Settings screen (UI)
 
-Status: NOT STARTED
-Owner: unclaimed
+Status: IN PROGRESS
+Owner: Dhruv Verma
 Lane: F — Family
 Sprint: SPRINT · planned D6
-Branch: `feature/family-ui-settings` (not yet created)
+Branch: `feature/family-ui-settings`
 PR target: `family-dev`
-Last updated: 2026-09-17 (planning pack generated)
+Last updated: 2026-09-25 (claimed)
 
 ## Blockers
 - None recorded at planning time
