@@ -1,6 +1,6 @@
 # Progress — FAM-13 Family — Change organisation
 
-Status: IN PROGRESS
+Status: READY FOR PR
 Owner: Dhruv Verma
 Lane: F — Family
 Sprint: SPRINT · planned D11
@@ -17,39 +17,50 @@ Last updated: 2026-09-25
 - FAM-UI-06 — MERGED TO DEV
 
 ## Completed
-- Feature documentation drafted (Claude Chat planning pack)
+- Tests first (T-01 to T-06 plus supporting tests), then implementation, 2026-09-25 (commits `test(family): …`, `feat(family): …`).
+- Migration `20260925020000_transfer_client_organisation.sql`: `transfer_client_organisation` and `list_organisations_for_transfer` (FD-01, FD-03, FD-04).
+- `src/server/clients/`: `changeClientOrganisation` action, `getOrganisationChoices` contract (mock and Supabase).
+- Settings screen: organisation picker, then the destructive confirmation, then the change with success and failure states (FD-02).
 
 ## In progress
 - None
 
 ## Remaining
-- Change organisation card: 'Currently registered with Banksia Home Care.' and 'Change' button.
-- Organisation picker listing organisations registered with Care Compass (UI not designed — OQ-06).
-- Confirmation modal (destructive tone): title 'Change organisation?', body 'Switching Margaret's care to a new organisation keeps her routines, events, budget, documents and history. Assigned nurses and all future shifts will be cleared, and Banksia Home Care will lose access immediately. This can't be undone from your side.', buttons Cancel / Change organisation, close X.
-- Postgres function `transfer_client_organisation(client_id, new_org_id)`: verify family authority; update clients.organisation_id; end active carer assignments; cancel shifts starting after now(); audit; single transaction.
+- Human review, then PR (needs the human's approval to open it).
+- When F0-11, F0-12 and F0-13 merge: extend the pgTAP AC-03 counts to events, budget entries, documents and completions (FD-05).
 
 ## Acceptance criteria status
-- 0 / 6 MET
+- 6 / 6 MET (AC-01 to AC-06); AC-03 for the tables that exist today (FD-05)
 
 ## Tests
-- Written: 0 / 6
-- Passing: 0
-- Failing: 0
+- Written: 6 / 6 planned (T-01 to T-06) plus supporting tests: pgTAP 26, server 11, component 17, integration 3
+- Passing: all. `supabase test db`: 66 (5 files). `npx vitest run src/features/family-settings src/server/clients`: 5 files, 80 tests. `tests/integration/family-change-organisation.test.ts` against the local stack: 3 (with FAM-12's 4, 7 pass)
+- Failing: 0. Full `npm run test` (default env): 1723 passed, 7 skipped (the local-only integration tests)
 
 ## Files changed
-- None yet. Likely files: `src/features/family-settings/change-organisation.tsx`, `src/components/shared/confirmation-modal.tsx`, `supabase/migrations/*_transfer_client.sql`, `supabase/tests/transfer_client.test.sql`
+- `supabase/migrations/20260925020000_transfer_client_organisation.sql`, `supabase/tests/transfer_client_organisation.test.sql` (Lane B folder, FD-01)
+- `src/lib/supabase/database.types.ts` (two function types)
+- `src/server/clients/`: `actions.ts`, `queries.ts`, `actions.test.ts`
+- `src/mocks/fixtures.ts`, `src/mocks/queries/clients.ts` (Lane S, FD-06)
+- `src/features/family-settings/`: `family-settings-view.tsx`, `organisation-choices.tsx`, `change-organisation.test.tsx`, `family-settings.test.tsx` (helpers, FD-07)
+- `src/app/(family)/family/[clientId]/settings/page.tsx`
+- `tests/integration/family-change-organisation.test.ts`
+- This feature's docs
 
 ## Decisions
-- See DECISIONS.md
+- FD-01 functions from Lane F (HUMAN REVIEW); FD-02 picker flow (design review); FD-03 list is a function; FD-04 shifts and assignments; FD-05 AC-03 on current tables (HUMAN REVIEW); FD-06 mock mode and Lane S fixtures (HUMAN REVIEW); FD-07 FAM-UI-06 helpers changed (HUMAN REVIEW); FD-08 defaults and wording.
 
 ## Problems encountered
-- None
+- `.env.local` points at a hosted Supabase project (see FAM-12 PROGRESS). This feature's integration test runs only against a local URL; run it with the three variables from `supabase status -o env`. **The FAM-13 migration is applied to the local database only.**
+- The local database holds leftover organisations from F0-07's integration tests (they never delete theirs), so the pgTAP listing test looks only at its own two organisations.
+- Zod's `z.uuid()` rejects seed-style ids (no RFC variant bits); the action uses `z.guid()`.
+- One earlier run of `day-timeline.test.tsx` failed and later passed with no change (time-of-day dependent); not touched.
 
 ## Assumptions
-- PROPOSED items in PRD.md are unconfirmed until validated in F0-01 or answered in DECISIONS.md.
+- The in-progress shift is ended at now() (the PRD's PROPOSED default, FD-04).
 
 ## Next action
-- Wait for answers to OQ-06, OQ-15; then complete dependencies, run START FEATURE FAM-13, and write the tests in TEST_PLAN.md first.
+- Human reviews (migration, AC-03 scope, picker design and wording, test helper changes), then approves opening the PR to `family-dev`.
 
 ## Ready for PR
 - No
