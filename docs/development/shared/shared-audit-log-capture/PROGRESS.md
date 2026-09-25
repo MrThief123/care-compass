@@ -1,6 +1,6 @@
 # Progress — F0-08 Append-only audit log capture
 
-Status: READY FOR PR
+Status: MERGED TO DEV
 Owner: Prajeet
 Lane: B — Backend
 Sprint: SPRINT · planned D4

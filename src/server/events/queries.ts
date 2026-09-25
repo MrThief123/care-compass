@@ -1,6 +1,7 @@
 /**
  * `events` domain query contract (UI-00 — see feature DECISIONS.md FD-02;
- * extended by UI-04 under CHG-004, per CHG-002 "extend, not recreate").
+ * extended by UI-04 under CHG-004 and by FAM-UI-02 under CHG-012, per CHG-002
+ * "extend, not recreate").
  * Screens must import from here, never from `src/mocks` directly
  * (lint-enforced).
  */
@@ -11,7 +12,9 @@ import { getDataSourceMode, notImplementedForSupabase } from "@/server/data-sour
 import { isPlainEvent, OccurrenceTypeFilterSchema, TaskLogQuerySchema } from "@/types/domain";
 import type {
   AnyOccurrence,
+  CareEvent,
   Occurrence,
+  OccurrenceRange,
   OccurrenceStatus,
   OccurrenceTypeFilter,
   TaskLogResult,

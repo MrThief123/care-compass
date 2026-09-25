@@ -12,6 +12,8 @@
 | Sprint | POST-SPRINT · planned — |
 | Status / owner | See PROGRESS.md |
 
+> **RETIRED by CHG-020 / PD-058 (2026-09-25).** Carers never change the budget by hand; do not build this feature. Kept for traceability.
+
 > **Plan v0.2 — post-sprint.** No design exists; needs design and decisions OQ-04/OQ-05/OQ-19 before UI or wiring.
 
 ## Purpose

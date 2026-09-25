@@ -8,18 +8,105 @@ Record feature-level decisions here using the template below. Project-wide decis
 |---|---|---|---|
 | OQ-10 | Status behaviour and undo | no | Overdue derived when due time passes without Done (not selectable); Done can be undone by the same actor or family via an append-only 'undone' entry. |
 
+**OQ-10 proposed default used:** a Done task starts ticked in the Tasks panel and family can untick it (local state only here; the append-only 'undone' entry is FAM-05 / F0-11).
+
 ## Feature decisions log
 
-_No decisions recorded yet._
+### FD-01 — The calendar range read is added on this branch (root CHG-012)
+- Date: 2026-09-24
+- Context: the events contract had no range read (`getTodayOccurrences`, `getTaskLog`, `getOccurrence` only) and the fixtures stopped at Mon 30 Nov, so no week but the reference day could be drawn and AC-02 (Physiotherapy on FRI 4) could not be met.
+- Decision: add `getOccurrences(clientId, { from, to })` and `getToday()` to `src/server/events/queries.ts`, their mocks, `OccurrenceRangeSchema` in `src/types/domain.ts`, and the Tue 1 – Sat 5 Dec design rows in `src/mocks/fixtures.ts`, all on this feature branch.
+- Reason: the human's instruction ("make on this feature branch"). F0-11 already names `getOccurrences(clientId, range)` for the database; this is its Phase 1 mock with the same shape, so wiring (FAM-04) changes no screen code.
+- Alternatives considered: a separate shared PR first (cleaner ownership, slower); screen-local fixtures (breaks "data only via `src/server/**`").
+- Consequences: this family PR touches Lane S / Lane B folders (`src/server/events`, `src/mocks`, `src/types`). The edits only add code. Existing tests are unchanged and pass.
+- Human confirmation required: yes. Given by Dhruv Verma, 2026-09-24.
+- Test changes caused: none.
 
-<!-- Template
-### FD-01 — <title>
-- Date:
-- Context:
-- Decision:
-- Reason:
-- Alternatives considered:
-- Consequences:
-- Human confirmation required: yes/no (who, when)
-- Test changes caused (if any): test ID, reason, flagged for review yes/no
--->
+### FD-02 — Future design rows are kept out of the Task log
+- Date: 2026-09-24
+- Decision: the Tue 1 – Sat 5 Dec rows live in `UPCOMING_OCCURRENCES_BY_CLIENT_ID`. `getOccurrences` and `getOccurrence` read them; `getTaskLog` does not.
+- Reason: a log is what has happened, and perpetual events have no end, so a log over the future cannot be finite. It also keeps the Task log fixtures at exactly 137 rows (7 pages) and their tests unchanged. Task detail still opens a future occurrence (CHG-005).
+- Human confirmation required: no (within CHG-012).
+
+### FD-03 — The URL is the calendar's state: `?view=&date=&month=`
+- Date: 2026-09-24
+- Decision: `view` = `day` | `week` | `month` (default `week`). `date` = the selected day (default `getToday()`). `month` = `YYYY-MM`, drawn by the month view. A value that does not parse (unknown view, impossible date, year outside 1900–2199, repeated param) falls back to its default; nothing unchecked is echoed back into a link. Changing view or stepping Previous/Next navigates (`router.push`), and the server reads the new range. Selecting a day already on screen only rewrites the URL (`history.replaceState`, which Next.js 16 syncs with its router, per `node_modules/next/dist/docs/01-app/01-getting-started/04-linking-and-navigating.md`), so a reload lands on the same day with no extra read.
+- Reason: PRD Scope ("D/W/M (URL param)"); a real calendar must be navigable and shareable.
+- Human confirmation required: no.
+
+### FD-04 — Local toolbar instead of the kit's `CalendarHeader`
+- Date: 2026-09-24
+- Context: `CalendarHeader` can only label a week range ("x – y"), and its arrows are named "Previous"/"Next" in every view.
+- Decision: `src/features/family-calendar/calendar-toolbar.tsx` reuses the kit's `SegmentedControl` and `Icon`. Its heading (the page's h1) reads "30 Nov – 6 Dec 2026", "Friday 4 December 2026" or "December 2026", and the arrows say what they move by ("Next week"). The Previous/Next arrows are not in the design; they are the kit's pattern and are needed to reach any other week.
+- Kit need (not edited here, CLAUDE.md §4.2): `CalendarHeader` could take a `label` prop and view-aware arrow names. Suggest a shared PR.
+- Human confirmation required: no. Flagged in the PR.
+
+### FD-05 — Log rows reuse Home's `ActivityLinkRow`
+- Date: 2026-09-24
+- Decision: the Log panel uses `src/features/family-home/activity-link-row.tsx` and `home-format.ts#shortDate` (both Lane F), not the kit's `ActivityRow`, for the same reasons as FAM-UI-01 FD-15: a real link, a title that wraps, a pill that is never squeezed. Three rows: the newest Done or Overdue rows from `getTaskLog` page 1; Planned rows are left out because they have not happened. The pill names the carer in full ("Aisha Rahman", PD-038), where the design writes "Aisha R.", as on Home.
+- Human confirmation required: no.
+
+### FD-06 — Loading skeleton built from tokens
+- Date: 2026-09-24
+- Decision: `loading.tsx` renders `CalendarSkeleton`, the same frame as the screen (toolbar, grid card, two panels with `ListRowSkeleton`s), because the States sheet only draws a list-row skeleton. Error is `error.tsx` with the kit's `ErrorState` and Next.js 16 `retry`. The empty states are "No tasks on this day" in the Tasks panel (the grid still draws) and "No activity yet" in the Log.
+- Human confirmation required: no.
+
+### FD-07 — The current-time line is shown only on the real day
+- Date: 2026-09-24
+- Context: the kit's `TimeGridScroller` labels the current time in the gutter whatever week is shown, so a red "13:24" sat beside a week that does not contain today.
+- Decision: the view passes the clock to `WeekGrid` / `DayTimeline` only while the real Melbourne day is in the visible range, and `null` otherwise. In mock mode the grid opens on the fixtures' reference week (30 Nov), so no line shows until that date. The page header's date comes from the shell (real clock) and is unchanged.
+- Kit need: `TimeGridScroller` could hide its gutter label when no column is today. Suggest a shared PR.
+- Human confirmation required: no.
+
+### FD-08 — M opens the month that holds most of the week
+- Date: 2026-09-24
+- Context: AC-05 expects M, pressed on 30 Nov – 6 Dec with Mon 30 Nov selected, to show December.
+- Decision: switching to the month view opens the month of the selected date's Thursday (the month holding at least four of the week's days), and keeps the selected day. That row is always inside the month's 6×7 grid, so the selection stays visible. In the month view Previous/Next moves a month and keeps the selection if the new grid still shows it, otherwise selects the 1st; picking a leading or trailing day does not move the grid.
+- Human confirmation required: no. Flagged in the PR.
+
+### FD-09 — Clicking a calendar block opens that task's detail
+- Date: 2026-09-24
+- Context: the kit's blocks are buttons ("opens the event for editing"), but the Edit event route (FAM-UI-03) does not exist yet and the design does not say (OQ-19).
+- Decision: a block opens `/family/[clientId]/tasks/[occurrenceKey]` (Task detail, which has an Edit link). Change to the edit route when FAM-UI-03 lands if the human prefers.
+- Human confirmation: answered by Dhruv Verma, 2026-09-24 (in-session), after FAM-UI-03 landed. Keep it: a block opens the read-only Task detail, and editing goes through Task detail's edit control. Not the Edit event route, which edits the whole series rather than the clicked day.
+- Follow-up (separate branch from `family-dev` after this PR, CHG-014): Task detail gets a clearer "Edit event" button, and its back link returns to where the task was opened from (Calendar, Home or Task log) instead of always the Task log.
+
+### FD-10 — Kit differences from the design, left as the kit draws them
+- Date: 2026-09-24
+- Differences: `WeekGrid` highlights today's column, not the selected day (it has no selected-day prop), so picking TUE 1 changes the Tasks panel but not the grid. Blocks show title then time range ("Physiotherapy / 11:30–13:00"); the design shows the start time then the title. Short blocks truncate the title (UI-01's density tiers). `Checkbox` is a native input; the Tasks panel sets `accent-primary` locally so it is brand teal.
+- Kit need: a `selected` prop on `WeekGrid`. Suggest a shared PR.
+- Human confirmation required: no. Flagged in the PR.
+
+### FD-11 — `src/app/dev-preview-calendar-kit` not deleted
+- Date: 2026-09-24
+- Context: that route's comment says to delete it once a real screen renders the three grids against `src/server/**` data, which this screen now does.
+- Decision: left in place. It is outside Lane F's folders. Raise with Lane S.
+- Human confirmation required: no.
+
+### FD-12 — Keyboard shortcuts and Today (CHG-013)
+- Date: 2026-09-24
+- Decision: a window `keydown` listener (`use-calendar-shortcuts.ts`, no new dependency). D/W/M change view (pressing the current view's key does nothing), ←/→ step, T goes to today. Skipped when a modifier is held (so Cmd+← and browser shortcuts still work), on key repeat (each step is a server navigation), and when focus is in a text input, textarea, select or contenteditable; checkboxes and buttons do not block them. Keys act on the day picked on screen, not only the URL's first date.
+- Today uses the contract's `getToday()` (the fixtures' 30 Nov in mock mode, the real Melbourne day once wired), so in mock mode it disagrees with the shell's header date, as FD-07 already notes. In the month view Today opens today's own month (30 Nov → November), unlike M, which opens the month of the selected week's Thursday (FD-08). If today is already in the visible range, Today selects it locally with no navigation.
+- The Today button is the kit `Button` (secondary, 44px) after the Next arrow. The arrows and Today carry `aria-keyshortcuts` and a `title` tooltip. The kit `SegmentedControl` does not accept `aria-keyshortcuts` on its radios; not edited (shared folder).
+- Human confirmation required: no. Flagged in the PR.
+
+### FD-13 — CHG-016: the Tasks panel's ticks drawn on the grids, with who ticked them
+- Date: 2026-09-24
+- Context: root CHG-016 (human-confirmed in-session). A tick changed only `ticks` in `family-calendar-view.tsx`, which the Tasks panel read and the grids did not, so a ticked block still read Planned on the same page. The human asked for the grids to follow the tick and to "record the person who ticked it".
+- Decision: `apply-ticks.ts` `applyTick(occurrence, ticked, actorName)`: no tick, or a plain event, returns the occurrence as it is; a tick on a task that was not Done gives `status: "done"` and `actor: actorName`; an untick on a task that was Done gives `status: "planned"` with no `actor` or `completedAt` (PROPOSED: whether a past task is Overdue is FAM-04 / FAM-05's rule); a tick that matches the original (a Done task unticked and ticked again, an untouched task) returns the original, so the original carer's name comes back. The view maps the loaded occurrences through it once and passes the result to WeekGrid, DayTimeline, MonthGrid and the Tasks panel; the Tasks panel still reads `ticks` first, so its behaviour is unchanged. `actorName` is `"First Last"` from `getCurrentUser("family")` (`src/server/auth/queries.ts`, the contract the family layout already uses), read in `loadFamilyCalendar` and passed by the page. The kit grids are unchanged: they already draw `status` and `actor`. The Log panel is unchanged (it lists what has been saved).
+- Where the name shows: in the block's detail card (hover or keyboard focus) in every view, and on the block itself only where the kit draws the `full` density with its status pill. At 1440px the fixture blocks are below that size, so the block shows the check icon and "Done" and the card shows "Done · Helen Doyle", the same as a Done task's carer.
+- Reason: display only (CLAUDE.md §6, Phase 1), lane F only, and the lifted state is what FAM-05's optimistic update needs when it calls `setOccurrenceDone`.
+- Alternatives considered: keep the ticks in the Tasks panel only (the human chose not to); show "Done" with no name (the human asked for the name); edit the kit grids to take a ticks map (a shared change, not needed).
+- Consequences: the ticks are still lost on reload or on moving to another range. When FAM-05 wires saving, the server's `actor` replaces the local one.
+- Human confirmation required: done (Dhruv Verma, 2026-09-24, CHG-016); the untick rule (fixture-Done to Planned) is PROPOSED.
+- Test changes caused: none to existing assertions. The calendar test file gained mocks for `getCurrentUser` (Helen Doyle) and `setOccurrenceDone` (to assert it is never called). Two of the new AC-08 tests were corrected before they first passed: jsdom has no layout, so the day block renders compact and the name is read from its detail card (opened by focus); the e2e day test reads the name from the hover card for the same reason at 1440px.
+
+### FD-14 — CHG-017: 'Enter event' on the Calendar toolbar
+- Date: 2026-09-24
+- Context: root CHG-017 (human-confirmed in-session). Home has a primary 'Enter event' action; the Calendar had no way to add an event. `family-02-calendar.png` has no such button.
+- Decision: `calendar-toolbar.tsx` renders a `next/link` 'Enter event' in a right-hand group just before the D/W/M `SegmentedControl` (12px gap), 44px tall (`h-11`), with the kit primary Button's classes (`bg-primary text-primary-foreground`, `text-sm font-medium`, the same focus ring), the same pattern as Home's `EnterEventLink` (FAM-UI-01 FD-05: the kit Button renders a `<button>` and cannot wrap a link; `buttonVariants` is not exported and is lane S). Its href is `addEventHrefFrom(clientId, { from: "calendar", view: current })` (FAM-UI-03 FD-11), so it carries the view, the selected day (including one picked in the range) and the month. The form is not prefilled (the human chose no prefill).
+- Reason: the wording and style the human chose ("Enter event", primary), one origin pattern with Task detail (CHG-014 / CHG-015), lane F only.
+- Alternatives considered: "Add event" as the label (not chosen); prefill the selected date (not chosen, would need an event-form AC); export `buttonVariants` from the kit (a lane S change).
+- Consequences: the toolbar's right side is wider by the button; the width sweep 1920–768 in each view shows no overlap and no horizontal scroll. Design review: the button is not in Figma.
+- Human confirmation required: done (Dhruv Verma, 2026-09-24, CHG-017).
+- Test changes caused: none to existing assertions. Four T-09 component tests; one T-09 e2e; the existing overflow sweep now also asserts the button is visible.
