@@ -510,3 +510,11 @@ Template for future entries:
 - Human confirmation: <name, date>
 - Docs updated:
 ```
+
+### CHG-006 — Admin Home upcoming shifts and overdue presentation
+- Date: 2026-09-22
+- Confirmed by: explicit human request in the Admin preview session.
+- Scope: ADM-UI-01 local dummy preview gains Upcoming shifts with Client, Carer, Date and Time columns and the four synthetic rows shown in Screenshot 2026-09-22 123736.png. Overdue rows use equal horizontal padding; caption is exactly Across all Clients.
+- Implementation: extend the approved Admin mock query/fixture and compose the existing DataTable inside an Admin-local card. No live shift queries, persistence or row navigation.
+- Acceptance: AC-04 added to ADM-UI-01; test-first rendering and empty-shift checks. Prior ACs remain unchanged.
+- All changes remain local and uncommitted pending human visual approval.
