@@ -1,19 +1,19 @@
 # Progress — FAM-12 Family — Settings: family info and password reset
 
-Status: NOT STARTED
-Owner: unclaimed
+Status: IN PROGRESS
+Owner: Dhruv Verma
 Lane: F — Family
 Sprint: SPRINT · planned D10
-Branch: `feature/family-settings-profile` (not yet created)
+Branch: `feature/family-settings-profile` (created from `origin/family-dev` at 9f4de15)
 PR target: `family-dev`
-Last updated: 2026-09-17 (planning pack generated)
+Last updated: 2026-09-25
 
 ## Blockers
-- OQ-35 — Settings forms save behaviour
+- None. Blocking decisions are ANSWERED in DECISIONS.md (FAM-12: OQ-35; FAM-13: OQ-06, OQ-15).
 
 ## Dependencies status
-- F0-07 — NOT STARTED
-- FAM-UI-06 — NOT STARTED
+- F0-07 — MERGED TO DEV
+- FAM-UI-06 — MERGED TO DEV
 
 ## Completed
 - Feature documentation drafted (Claude Chat planning pack)
