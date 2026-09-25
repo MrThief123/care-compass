@@ -6,6 +6,7 @@ import type { BudgetBucketSummary } from "@/types/domain";
 import { BudgetBucketCard } from "./budget-bucket-card";
 
 const GOVERNMENT_ALERT: BudgetBucketSummary = {
+  id: "bucket-government",
   kind: "government",
   label: "Government",
   total: 3000,
@@ -28,6 +29,7 @@ describe("BudgetBucketCard", () => {
     render(
       <BudgetBucketCard
         summary={{
+          id: "bucket-ndis",
           kind: "ndis",
           label: "NDIS",
           total: 24000,

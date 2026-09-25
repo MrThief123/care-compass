@@ -61,9 +61,9 @@ export function BudgetStrip({ clientId, buckets }: BudgetStripProps) {
           />
         ) : (
           <ul className="mt-4 grid grid-cols-[repeat(auto-fit,minmax(min(100%,15rem),1fr))] gap-4">
-            {buckets.map((bucket, index) => (
-              // A client can hold several buckets of one kind, so the kind alone is not a key.
-              <li key={`${index}:${bucket.kind}:${bucket.label}`} className="min-w-0">
+            {buckets.map((bucket) => (
+              // Keyed by the bucket's id (CHG-021): names and kinds can repeat.
+              <li key={bucket.id} className="min-w-0">
                 <BudgetBucketTile summary={bucket} />
               </li>
             ))}

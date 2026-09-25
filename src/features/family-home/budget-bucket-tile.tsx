@@ -30,12 +30,17 @@ const STATUS_WORD: Record<BudgetBucketState, string | null> = {
  * on hover; an amount that is too wide for its card wraps rather than losing
  * digits. The progress bar is capped at 100%, so an overspend is also written
  * out as "over budget".
+ *
+ * Costs the bucket could not cover are listed, not deducted (CHG-020, PD-058):
+ * "Pending $310 · 1 cost" under the totals, in words, and only when there are
+ * any. The remaining figure is not reduced by them.
  */
 export function BudgetBucketTile({ summary }: BudgetBucketTileProps) {
   const { label, total, remaining, state } = summary;
   const percentUsed = Number.isFinite(summary.percentUsed) ? summary.percentUsed : 0;
   const isAlertGround = state === "alert" || state === "exhausted";
   const statusWord = STATUS_WORD[state];
+  const pendingCount = summary.pendingCount ?? 0;
 
   return (
     <CardShell
@@ -75,6 +80,11 @@ export function BudgetBucketTile({ summary }: BudgetBucketTileProps) {
       <p className="text-body-small text-text-secondary [overflow-wrap:anywhere]">
         {`of ${formatDollars(total)} · ${percentUsed}% used${remaining < 0 ? " · over budget" : ""}`}
       </p>
+      {pendingCount > 0 && (
+        <p className="text-body-small font-medium text-text-alert-strong [overflow-wrap:anywhere]">
+          {`Pending ${formatDollars(summary.pendingTotal ?? 0)} · ${pendingCount} ${pendingCount === 1 ? "cost" : "costs"}`}
+        </p>
+      )}
       <ProgressBar
         value={percentUsed}
         tone={isAlertGround ? "alert" : "normal"}

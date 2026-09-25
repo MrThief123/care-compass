@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import type { BudgetBucketSummary, Occurrence } from "@/types/domain";
+import type { BudgetBucketKind, BudgetBucketSummary, Occurrence } from "@/types/domain";
 
 import {
   RECENT_ACTIVITY_LIMIT,
@@ -23,13 +23,10 @@ function occurrence(
   };
 }
 
-function bucket(
-  kind: BudgetBucketSummary["kind"],
-  total: number,
-  used: number,
-): BudgetBucketSummary {
+function bucket(kind: BudgetBucketKind, total: number, used: number): BudgetBucketSummary {
   const percentUsed = total === 0 ? 0 : Math.round((used / total) * 100);
   return {
+    id: `bucket-margaret-${kind}`,
     kind,
     label: kind,
     total,

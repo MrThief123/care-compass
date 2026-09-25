@@ -3,6 +3,7 @@ import { describe, expect, expectTypeOf, it } from "vitest";
 
 import {
   AnyOccurrenceSchema,
+  FundEntrySchema,
   isPlainEvent,
   OccurrenceSchema,
   PlainEventOccurrenceSchema,
@@ -97,5 +98,39 @@ describe("TaskLogQuerySchema type filter", () => {
   it("[UI-05][AC-02] rejects an unknown type as it rejects an unknown status", () => {
     expect(TaskLogQuerySchema.safeParse({ type: "bogus" }).success).toBe(false);
     expect(TaskLogQuerySchema.safeParse({ status: "bogus" }).success).toBe(false);
+  });
+});
+
+describe("fund entries (CHG-022)", () => {
+  const entry = {
+    id: "fund-margaret-4",
+    clientId: "client-margaret",
+    bucketId: "bucket-margaret-government",
+    type: "expense",
+    amount: -310,
+    date: "2026-10-27",
+    description: "Physiotherapy",
+    recordedBy: "Aisha Rahman",
+  };
+
+  it("[FAM-UI-05][AC-15] keeps a paid cost's date and a save's note, rather than stripping them", () => {
+    const parsed = FundEntrySchema.parse({
+      ...entry,
+      paidOn: "2026-11-30",
+      note: "Q3 plan review",
+    });
+
+    expect(parsed.paidOn).toBe("2026-11-30");
+    expect(parsed.note).toBe("Q3 plan review");
+  });
+
+  it("[FAM-UI-05][AC-15] both are optional, so existing entries still parse", () => {
+    expect(FundEntrySchema.safeParse(entry).success).toBe(true);
+    expect(FundEntrySchema.safeParse({ ...entry, pending: true }).success).toBe(true);
+  });
+
+  it("[FAM-UI-05][AC-15] a paid date must be an ISO date", () => {
+    expect(FundEntrySchema.safeParse({ ...entry, paidOn: "30 Nov 2026" }).success).toBe(false);
+    expect(FundEntrySchema.safeParse({ ...entry, paidOn: "2026-11-30" }).success).toBe(true);
   });
 });

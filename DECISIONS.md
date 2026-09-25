@@ -88,6 +88,7 @@ CONFIRMED.
 ### PD-022 — No recurring shifts (UI-D31). CONFIRMED.
 
 ### PD-023 — Admin cannot edit client information (UI-D28). CONFIRMED by design; creation flow OQ-07.
+- **Superseded by PD-058 / CHG-020 (2026-09-25):** after talking to the client, an admin can do everything Family can for their own organisation's clients, including editing client information.
 
 ### PD-024 — Confluence "Database Model" ERD superseded (PROPOSED)
 - Reason: integer money, no user/family/role tables, no recurrence/completions/audit — contradicts ADR-01 consequences. ARCHITECTURE.md §6 replaces it.
@@ -155,6 +156,7 @@ CONFIRMED.
 - Alternatives: full brief model with multiple sources, categories and restrictions (rejected — larger scope, not designed, Client Information Sheet No 4 on budgeting was never supplied).
 - Consequences: categories/restrictions/multiple funding sources go to the parking lot (PL-10). F0-12, FAM-03, FAM-10, FAM-11, CAR-08 proceed against the 3-bucket model.
 - Human confirmation: CONFIRMED 2026-09-17.
+- **Amended 2026-09-25 by PD-059 (CHG-021):** buckets are no longer three fixed kinds. A client has the buckets someone added, named freely; NDIS, Fixed and Government are suggestions. One accounting period each, no categories and no restrictions still hold.
 
 ### PD-034 — Fund/budget edit rights: Family and organisation admins can both edit
 - Date: 2026-09-17 · Decided by: Dhruv Verma (answering OQ-05)
@@ -163,6 +165,7 @@ CONFIRMED.
 - Alternatives: Family-only edit rights per UI-D1 (rejected — superseded by CM-0409); admin read-only per the original proposed default (rejected by human).
 - Consequences: the Admin Budget screen needs edit controls, not just read access — the "Update" interaction UI-D19 flagged as undesigned still needs a design (raise as a design gap alongside OQ-19). RLS policies must allow admin writes to budget tables for their organisation's clients. Resolves C-02.
 - Human confirmation: CONFIRMED 2026-09-17.
+- **Amended by PD-058 / CHG-020 (2026-09-25):** carers no longer record expenses (CAR-08 retired). Carers affect the budget only through the cost of an event they create, charged when an occurrence is completed. Family and admins add or remove funds with one Update form.
 
 ### PD-035 — Budget email recipients: Family + current org admins; period = bucket period
 - Date: 2026-09-17 · Decided by: Dhruv Verma (answering OQ-28)
@@ -367,6 +370,49 @@ CONFIRMED.
 - Alternatives: carer join request approved by an admin (rejected: human kept admin invite); carer join code (not chosen); admin joins an existing organisation by request (not chosen); no admin self-sign-up (not chosen); family picks carers (rejected: it would change PD-041); email confirmation required (rejected: human chose immediate sign-in).
 - Consequences: see CHG-010.
 - Human confirmation: CONFIRMED 2026-09-24 (Prajeet, in-session).
+
+### PD-058 — Event costs, pending costs, the simple Update form, and admins act as Family
+- Date: 2026-09-25 · Decided by: Dhruv Verma (in-session; amends PD-034 and PD-023)
+- Decision:
+  - **Who changes the budget.** Only Family and the client's current organisation admins change the budget by hand. Carers never do: CAR-08 (Record an expense) is retired. A carer affects the budget only through the cost of an event they create.
+  - **Update form.** One form on the Budget screen: bucket, Add or Remove, amount, and an optional note. The date is today. An empty note shows in History as "Funds added" or "Funds removed". A removal larger than the bucket's balance is refused ("Only $X available"), so a manual change never takes a bucket below $0.
+  - **Event cost.** An event or task may have an optional cost and the bucket it is paid from. Whoever creates the event sets them, carers included. Afterwards the cost and bucket can be changed by Family, admins, or the carer who created the event. A change applies to future completions only; costs already charged or pending keep their amount.
+  - **When a cost is charged.** Once per occurrence, when that occurrence is completed. Skipped or missed occurrences cost nothing. A recurring event is charged each time.
+  - **Bucket picker.** In the event form a bucket is struck through, cannot be picked, and says "No funds left" (in words, not colour alone) when its balance is $0 or it already has pending costs. When the balance is above $0 but below the event's cost, a warning shows and the bucket can still be picked.
+  - **Pending costs.** If the bucket cannot cover a completed occurrence's cost in full, the occurrence still completes and the whole cost is held as **pending** against that bucket. Nothing is part-paid. The bucket card shows the pending total and count, History lists the item as Pending, and Family and the organisation's admins get an email (the PD-035 recipients).
+  - **Paying pending costs.** When funds are added to a bucket, its pending costs are paid automatically, oldest first, each only when the bucket can cover it in full. A cost it cannot cover stays pending, and so do the ones after it.
+  - **Admins act as Family.** An admin can always do everything Family can for their own organisation's clients, including editing client information. The one exception is changing the client's organisation, which stays Family only (human, 2026-09-25). In Admin · Clients, clicking a client's name opens that client's Family screens (Home, Info, Calendar, Budget, Care log) inside the admin layout at `/admin/clients/<id>/…`, with a way back to the list. Every change records who made it.
+- Reason: human instruction in-session, 2026-09-25, after talking to the client: carers should not edit the budget; costs should come off automatically when care is done; an admin must be able to stand in for a family that is no longer there. The human chose each rule above from offered options.
+- Alternatives: on an empty bucket, overdraft (balance goes negative), part-pay and log the rest, pay from another bucket automatically, or block completion (all rejected: pending chosen; blocking completion was advised against because money would stop care being recorded); pay pending costs by hand or part-pay them (rejected); carers keep manual expenses (rejected); cost locked once set, or editable by Family and admins only (rejected); admins write to Budget only, or full access only once no family is linked (rejected); admins sent into the `/family` routes (rejected: one copy of each screen, rendered inside the admin layout).
+- Consequences: see CHG-020.
+- Human confirmation: CONFIRMED 2026-09-25 (Dhruv Verma, in-session).
+- **Amended 2026-09-25 by PD-059 (CHG-021):** the "Update form" becomes the Edit budget page, which also adds, renames and removes buckets.
+
+### PD-059 — A client's buckets are open: add, rename and remove them on an Edit budget page
+- Date: 2026-09-25 · Decided by: Dhruv Verma (in-session; amends PD-033 and PD-058)
+- Decision:
+  - **Buckets are open.** A client has the buckets someone has added, each with a free name (for example a "Council grant"). NDIS, Fixed and Government (the labels the design draws) are offered as suggestions for a bucket the client does not have, not given to every client. A client may have none.
+  - **Edit budget page.** The Budget screen's button is 'Edit' (was 'Update'). It opens a separate page, `/family/<clientId>/budget/edit`, titled "Edit budget", with Save and Cancel. There, in one save: add or remove funds on any bucket, rename a bucket, add a bucket (a name and a starting amount, $0 allowed), and remove a bucket. One optional note covers the save. Cancel or Escape leaves with nothing changed; Save returns to Budget, which shows the result.
+  - **Removing a bucket.** Allowed only when nothing has been spent from it and it has no pending costs; otherwise the control is absent and the page says why. The money left in it leaves with it and is recorded, so the records still add up.
+  - **Rules.** A name is required, at most 40 characters, and unique for the client ignoring case and surrounding spaces. Amounts are more than $0 with at most 2 decimals (a starting amount may be $0). A removal of funds cannot exceed the balance ("Only $X available"). A save with any wrong field is refused whole, each field saying what to fix.
+  - **History.** Adding or removing funds records "Funds added" / "Funds removed" (or the note) and the amount. A new bucket records "Bucket added" and its starting amount. A removed bucket records "Bucket removed" and minus the money left in it. A rename records no row: History is a record of money.
+- Reason: human instruction in-session, 2026-09-25: a client may gain a new source of income (a grant) and some clients have no NDIS, so the budget must not be stuck to three buckets; the inline Update form left it unclear whether the screen was being edited. The human chose each rule above from offered options.
+- Alternatives: every client always starts with the three buckets (rejected: a client without NDIS would carry an empty NDIS card); adding a bucket only when one of the three kinds is missing (rejected: no grants); building custom buckets as a separate later feature (rejected: built on FAM-UI-05); keeping the inline form (rejected: unclear edit mode); an edit page whose Save shows nothing on return, like Edit event in Phase 1 (rejected: Budget shows the change until reload).
+- Consequences: see CHG-021.
+- Human confirmation: CONFIRMED 2026-09-25 (Dhruv Verma, in-session).
+
+### PD-060 — Budget: a Pending costs section, entry details, "Recorded by you", paying pending costs, and History export
+- Date: 2026-09-25 · Decided by: Dhruv Verma (in-session; builds on PD-058 and PD-059)
+- Decision:
+  - **Pending costs section.** The Budget screen has a "Pending costs" section between the bucket cards and History: one row per unpaid cost (date, bucket, description, amount), oldest first. With none it says "No pending costs."
+  - **Entry details.** Selecting a History row or a pending row (mouse or keyboard) opens a dialog titled with the entry's description: date, bucket, amount, status (Paid, Pending, or "Paid on <date>" for a pending cost since paid), who recorded it, and the save's note when there was one. Close or Escape closes it and returns focus to the row.
+  - **The note and the recorder are stated, not empty.** The optional note of a save is kept on every History row that save makes (the funds rows also keep using it as their description, PD-059), and shown in the details. Every change records who made it (REQ-38); in Phase 1, with no signed-in user, rows made on Edit budget read "Recorded by you".
+  - **Paying pending costs when funds are added.** After a bucket gains funds, its pending costs are paid whole, strictly oldest first, stopping at the first one the balance cannot cover (a newer, smaller cost never jumps an older one). A paid cost is taken off the bucket's remaining. Its existing History row loses "Pending" and its details say "Paid on <date>"; no new row is added, so each cost is counted once.
+  - **Export.** History has an "Export" button that downloads the client's History as a CSV file (Date, Bucket, Description, Amount, Status, Recorded by, Note), one line per row in the order shown. Text that a spreadsheet would read as a formula is neutralised. With no History rows the button is absent.
+- Reason: human questions in-session, 2026-09-25, while reviewing FAM-UI-05: where the optional note is kept, who made a change (blank "Recorded by"), whether adding money clears pending costs, where pending costs can be seen, how to see more about a cost, and how to manage History outside the app. The human chose each rule above from offered options, and chose to build them on FAM-UI-05 now rather than as a later feature, with Export built now rather than left to FAM-10.
+- Alternatives: pending costs listed only inside each bucket card (rejected); details expanding in place under the row (rejected); paying every cost that fits, skipping ones too large (rejected: the oldest could wait longest); adding a separate "Pending cost paid" row (rejected: the cost would appear twice); Export left to FAM-10 (rejected: FAM-10 connects data only and is blocked on F0-12, OQ-04 and OQ-05); opening the FAM-UI-05 PR first and building this as a follow-up (rejected).
+- Consequences: see CHG-022.
+- Human confirmation: CONFIRMED 2026-09-25 (Dhruv Verma, in-session).
 
 ---
 
@@ -651,25 +697,71 @@ Docs updated: DECISIONS.md
 - Human confirmation: Dhruv Verma, 2026-09-25 (in-session).
 - Docs updated: DECISIONS.md (this entry); `docs/development/family-dev/family-ui-info/DECISIONS.md` FD-01 and FD-02.
 
-### CHG-023 — Family contact details contract, the Family · Settings design fixtures, and AC-01 shows the full name
+### CHG-019 — Fund history contract, and the Family · Budget design fixtures
 - Date / requested by: 2026-09-25 / Dhruv Verma (human, project lead)
-- Type: contract extension (shared folders changed from a dashboard feature branch) and acceptance-criterion change
-- Description: no Phase 1 contract returned the signed-in family member's contact details, `ProfileSchema` had no `address` (the `profiles` table already has one, `20260922053821_tenancy.sql`), and Helen's fixture had no phone and a different email from `family-05-settings.png`. Added, read-only: `getFamilyContactDetails(profileId): Promise<FamilyContactDetails>` in a new `src/server/profiles/queries.ts`, with its mock in `src/mocks/queries/profiles.ts`. `FamilyContactDetails` is `{ profileId: string; name: string; phone?: string; email?: string; address?: string }`. `name` is the full name (first and last, PD-038); a missing phone, email or address is left out, not an empty string. An unknown `profileId` throws, as `getClientHeaderSummary` does. Supabase mode throws the standard not-implemented error. `ProfileSchema` gains `address: z.string().optional()`. Helen's fixture (`profile-helen`) gains phone `0412 345 678` and address `12 Wattle St, Preston VIC 3072`, and her `email` becomes `helen@example.com`. `Profile.email` maps to `profiles.email`, the contact email, never the Supabase Auth login email (PD-054). AC-01 of FAM-UI-06 changes from Name 'Helen' to Name 'Helen Doyle' (PD-038 shows the full name everywhere). The rest of AC-01 is unchanged. AC-04 to AC-09 are added. They test what the PRD Scope already lists (Reset card, states), PD-054 (a Save button per card) and the in-session answers recorded in FAM-UI-06 FD-01 to FD-03. No scope is added beyond those.
-- Source / justification: human answers in-session, 2026-09-25: "CHG-023 on this branch" over a separate shared PR, the same route as CHG-018; and "full name, separate contact email" over matching the design's 'Helen'.
-- Impact: FAM-UI-06 (`src/features/family-settings/**`, AC-01). FAM-12 (Settings wiring) reads and saves through this contract. It must keep `email` as the contact email and must not touch the login email (PD-054). F0-06 already has the columns, so no migration is needed. No existing test uses `helen.doyle@example.com`.
-- Numbering: CHG-019 to CHG-022 are on `feature/family-ui-budget` (PR open, not yet on `family-dev`). CHG-023 was free on every local and remote branch when this was written. Whichever branch merges second renumbers.
-- Human confirmation: Dhruv Verma, 2026-09-25 (in-session).
-- Docs updated: DECISIONS.md (this entry); DEVELOPMENT_PLAN.md (CHG-023 note on FAM-UI-06); FAM-UI-06 PRD.md, ACCEPTANCE_CRITERIA.md, TEST_PLAN.md, DECISIONS.md, PROGRESS.md, SESSION_STATE.md.
+- Type: contract extension (shared folders changed from a dashboard feature branch)
+- Description: no Phase 1 contract returned a client's fund entries, and `FUND_ENTRIES` did not hold what the design draws. Added, read-only: `getFundHistory(clientId): Promise<FundEntry[]>` to `src/server/budget/queries.ts` (extended, not recreated, per CHG-002): the client's entries, newest date first; `[]` for a client with none or an unknown id. Its mock is in `src/mocks/queries/budget.ts`. `src/mocks/fixtures.ts`: `FUND_ENTRIES` now holds Margaret's three top-ups exactly as `family-06-budget.png` draws them (3 Nov 2026 "NDIS quarterly plan top-up" +$6,000; 15 Oct 2026 "Fixed funding top-up" +$1,000; 1 Oct 2026 "Government subsidy payment" +$750) and one entry for Robert, so client scoping is testable. Every entry names who recorded it (`recordedBy`: Helen Doyle for Margaret's three, Michael Hale for Robert's), because the screen draws it (see Impact). The two earlier entries (a 1 Nov top-up worded "Quarterly NDIS plan top-up" and a 15 Nov physiotherapy expense of -$320) are replaced; only `fixtures.test.ts` referenced them, and it only parses them against the schema. No types change (`FundEntry` exists). Supabase mode throws the standard not-implemented error. Nothing here writes: Update on the Budget screen changes nothing (Phase 1).
+- Source / justification: human answer in-session, 2026-09-25 (chose "On this branch as CHG-019" over a separate shared PR), same route as CHG-008, CHG-012 and CHG-018.
+- Impact: FAM-UI-05 (`src/features/family-budget/**`). F0-12 owns the budget tables. FAM-10 (Budget overview and history) reads and wires through this contract and must keep the newest-first order and the client scoping, and supply each entry's recorder (PD-034: "each attributed to the actor who recorded it"). The Budget screen draws it as a "Recorded by <name>" line under the description, which `family-06-budget.png` does not draw: the human chose to show it, 2026-09-25 (FAM-UI-05 FD-05). FAM-11 (Update funds) writes the entries this reads. The Admin Budget screen and CAR-08 should extend this contract, not add a second pattern. The fixtures are display data, not a ledger: the three top-ups do not reconcile with the buckets' totals.
+- Numbering: CHG-018 (FAM-UI-04, PR #89) was unmerged when this was written; this is CHG-019 so the two do not collide. PR #89 merged first; both entries kept in number order when `family-dev` was merged into this branch (2026-09-25).
+- Human confirmation: Dhruv Verma, 2026-09-25 (in-session). Amended the same day at the human's request: entries name their recorder, and the screen draws it (FD-05).
+- Docs updated: DECISIONS.md (this entry); `docs/development/family-dev/family-ui-budget/DECISIONS.md` FD-02, FD-05.
 
-### CHG-024 — FAM-UI-06: Family info is read-only until 'Edit'
+### CHG-020 — Event costs with pending deduction, a simple add-or-remove Update form, carers never edit the budget, and admins act as Family
 - Date / requested by: 2026-09-25 / Dhruv Verma (human, project lead)
-- Type: acceptance-criterion change
-- Description: the Family info inputs on Family · Settings start read-only, and the card's button reads 'Edit'. 'Edit' makes them editable and the button becomes 'Save'. A valid Save keeps the changes and locks the inputs again. In edit mode, 'Cancel' next to 'Save' reverts every field to its last saved value and goes back to read mode with nothing announced. This adds AC-10 and AC-11 and makes AC-06's precondition edit mode. PD-054's per-card Save stays; it is shown after 'Edit'.
-- Source / justification: human request in-session, 2026-09-25: "family info should be read only and have an edit button where save is … Just ensures no one accidently deleted information"; then "next to the save should be a cancel button which just reverts all changes and goes back to read mode as if nothing happened".
-- Impact: FAM-UI-06 only (`src/features/family-settings/family-settings-view.tsx`, its tests). FAM-12 (Settings wiring) keeps this flow. No shared-kit change: `Field.readOnly`, and a local Family info card, because `DetailsFormCard` has no Cancel slot (FAM-UI-06 FD-10 records that need for the shared kit).
-- Numbering: CHG-024 was free on every local and remote branch when this was written. Whichever branch merges second renumbers.
+- Type: new requirement, new features, scope change
+- Description: records PD-058. In short: events and tasks can carry a cost and a bucket; the cost is charged when an occurrence is completed; a cost the bucket cannot cover is held as pending and paid automatically, oldest first, once funds arrive; the event form strikes through a bucket at $0 or with pending costs; Family and admins change funds with one add-or-remove form; carers never change the budget by hand; admins can do everything Family can and reach a client's Family screens from Admin · Clients.
+- Source / justification: PD-058 (human answers in-session, 2026-09-25).
+- Impact:
+  - **FAM-UI-05 (this branch, Phase 1, fixtures):** scope grows. 'Update' opens the simplified form (bucket, Add or Remove, amount, optional note), which changes local state only and refuses a removal larger than the balance. Bucket cards show a pending total and count, and History lists pending items marked Pending. New AC-04 to AC-08 and T-04 to T-08. The budget types, contracts and fixtures gain what the screen needs to draw pending costs; the exact fields are recorded in the feature's DECISIONS.md when built (contract extension on a dashboard branch, same route as CHG-019). Status goes back to IN PROGRESS.
+  - **New FAM-UI-08 — Event cost fields (UI)** (Lane F, `feature/family-ui-event-cost`, PR → `family-dev`, Phase 1, fixtures): optional Cost and Bucket fields in the Add/Edit event form built by FAM-UI-03 (merged). The picker strikes through a bucket at $0 or with pending costs and warns when the balance is below the cost. Depends on FAM-UI-03 and FAM-UI-05.
+  - **New ADM-11 — Admin client view: a client's Family screens with full access** (Lane A, `feature/admin-client-view`, PR → `admin-dev`, Phase 3): a client's name in Admin · Clients links to `/admin/clients/<id>/…`, which renders the Family screens inside the admin layout with every Family action available. Reusing the Family screens from the admin routes needs the screens to take their client from the route rather than the family layout; if that means moving code out of `src/features/family-*`, it goes through a shared PR (§4.2). Depends on ADM-04 and the Family wiring features it renders (FAM-01 to FAM-15).
+  - **F0-12 (not started):** scope extended. Event cost and bucket columns, per-occurrence charges on completion, the pending state and its automatic oldest-first settlement when funds are added, removals that cannot go below $0, and admin RLS writes equal to Family's. Its AC "remaining is negative and threshold_state is 'depleted'" no longer holds for event costs (pending replaces overdraft); Lane B rewrites its PRD, ACs and TEST_PLAN when it starts F0-12 and records it in that feature's DECISIONS.md. Not decided yet, to raise when F0-12 starts: what happens to a pending cost when its event is deleted, and whether pending costs carry across a bucket's accounting period.
+  - **F0-11:** events gain `cost numeric(12,2)` (nullable) and the bucket; changes apply to future completions only. Lane B records it when it starts, together with F0-12.
+  - **FAM-06, FAM-07, CAR-07:** save and edit the cost and bucket. On edit, only Family, admins, or the carer who created the event may change them.
+  - **CAR-06, FAM-15 (completion):** completing an occurrence charges its cost or makes it pending, through the F0-12 function, never in the client.
+  - **FAM-11:** the Update form becomes bucket, Add or Remove, amount, optional note, with today's date; amount > 0 with at most 2 decimals; a removal over the balance is refused. A top-up settles pending costs (F0-12). Its "Date in the future → reject" edge case no longer applies (there is no date field). Lane F updates its PRD, ACs and TEST_PLAN when it starts FAM-11.
+  - **CAR-08:** retired. No carer expense entry. REQ-30 is covered by Family and admin removals and by event costs; receipts on an expense are dropped.
+  - **ADM-04, PD-023:** admins may now edit client information; the "No edit of client info (D28)" line in ADM-04 no longer applies. Lane A records it when it starts ADM-04.
+  - **INT-01:** a new email when a cost goes pending, to the PD-035 recipients.
+  - **PRD.md:** REQ-28, REQ-29, REQ-30, REQ-07 and the §8 permissions matrix updated; new REQ-37 (event costs and pending) and REQ-38 (admin acts as Family).
 - Human confirmation: Dhruv Verma, 2026-09-25 (in-session).
-- Docs updated: DECISIONS.md (this entry); FAM-UI-06 ACCEPTANCE_CRITERIA.md (AC-06, AC-10, AC-11), TEST_PLAN.md (T-13, T-14), DECISIONS.md (FD-09, FD-10), PROGRESS.md, SESSION_STATE.md.
+- Docs updated: DECISIONS.md (PD-058, this entry, amendment notes on PD-023 and PD-034); PRD.md; DEVELOPMENT_PLAN.md (FAM-UI-08 and ADM-11 rows and cards, CAR-08 retired, CHG-020 notes on the affected cards, totals, next numbers); FAM-UI-05 ACCEPTANCE_CRITERIA.md, TEST_PLAN.md, PRD.md, DECISIONS.md, PROGRESS.md, SESSION_STATE.md; new `docs/development/family-dev/family-ui-event-cost/` and `docs/development/admin-dev/admin-client-view/`; CAR-08 PRD.md and PROGRESS.md (retired); `docs/AGENT_REFERENCE.md` (status value `RETIRED (CHG-xxx)`). `docs/JIRA_BACKLOG.csv` not updated (same as CHG-010).
+
+### CHG-021 — Open buckets and an Edit budget page (replaces the inline Update form)
+- Date / requested by: 2026-09-25 / Dhruv Verma (human, project lead)
+- Type: new requirement, scope change
+- Description: records PD-059. A client's buckets are no longer three fixed kinds: they are added, renamed and removed by Family (and, through PD-058, admins), with NDIS, Fixed and Government as suggestions. 'Update' is renamed 'Edit' and opens an "Edit budget" page instead of an inline form.
+- Source / justification: PD-059 (human answers in-session, 2026-09-25).
+- Impact:
+  - **Types and contracts (this branch, same route as CHG-019 and CHG-020):** a bucket gains a stable `id`; its `label` is its free name; `kind` becomes optional and marks only a bucket made from a suggestion. A fund entry names its bucket by `bucketId` (two custom buckets are never confused); `bucketKind` becomes optional. The exact fields are recorded in FAM-UI-05 DECISIONS.md FD-12 when built. Consumers that key a bucket by kind move to `id`.
+  - **FAM-UI-05 (this branch, Phase 1, fixtures):** the inline Update form built under CHG-020 is replaced by the Edit budget page (`budget/edit`), holding its changes in local state across Budget and Edit budget until reload. AC-04 to AC-06 rewritten for the page; new AC-09 (add a bucket), AC-10 (rename), AC-11 (remove a bucket) and AC-12 (no buckets). AC-07 and AC-08 (pending) unchanged. The CHG-020 form tests are replaced (HUMAN REVIEW). The page and its copy are undesigned (PD-052): flagged for design review.
+  - **Family · Home (FAM-UI-01's tiles, lane F):** reads buckets by `id` and draws however many a client has; Phase 1 edits do not reach Home (no persistence).
+  - **F0-12 (not started):** buckets become rows with a name (unique per client, case-insensitive) and an optional kind, not a fixed enum; a bucket can be deleted only with no charges and no pending costs, its remaining funds recorded as a "Bucket removed" entry; renames keep entries attached by id. Lane B records it when it starts F0-12.
+  - **FAM-UI-08:** the 'Paid from' picker lists the client's own buckets by `id` and name, not three kinds. Its fixtures follow the contract.
+  - **FAM-10, FAM-03:** draw the client's buckets, any number, including none.
+  - **FAM-11:** wires the Edit budget page (all its actions), not a single add-or-remove form. Lane F rewrites its PRD, ACs and TEST_PLAN when it starts.
+  - **ADM-11:** renders the same Edit budget page inside the admin layout.
+  - **INT-01 (budget warning emails):** names the bucket by its name.
+  - **PL-10:** "multiple funding sources" is now in scope as named buckets; restrictions, categories, several periods and transfers stay parked.
+  - **PRD.md:** REQ-29 updated; REQ-27 notes the open bucket model.
+- Human confirmation: Dhruv Verma, 2026-09-25 (in-session).
+- Docs updated: DECISIONS.md (PD-059, this entry, amendment notes on PD-033 and PD-058); PRD.md (REQ-27, REQ-29, PL-10); DEVELOPMENT_PLAN.md (totals, CHG-021 notes on FAM-UI-05, FAM-UI-08, FAM-10, FAM-11, F0-12); FAM-UI-05 PRD.md, ACCEPTANCE_CRITERIA.md, TEST_PLAN.md, DECISIONS.md, PROGRESS.md, SESSION_STATE.md.
+
+### CHG-022 — Budget: pending costs section, entry details, recorder and note, paying pending costs, History export
+- Date / requested by: 2026-09-25 / Dhruv Verma (human, project lead)
+- Type: new requirement, scope change
+- Description: records PD-060. The Budget screen gains a Pending costs section, a details dialog for each History and pending row, a stated recorder ("Recorded by you" in Phase 1) and kept note on rows made by a save, automatic payment of pending costs when funds are added (strictly oldest first, whole), and an Export button that downloads History as CSV.
+- Source / justification: PD-060 (human answers in-session, 2026-09-25).
+- Impact:
+  - **Types and contracts (this branch, same route as CHG-019 to CHG-021):** a fund entry gains an optional `note` (the save's note) and an optional `paidOn` (the date a pending cost was paid). The exact fields are recorded in FAM-UI-05 DECISIONS.md when built.
+  - **FAM-UI-05 (this branch, Phase 1, fixtures):** new AC-13 (Pending costs section), AC-14 (paying pending costs), AC-15 (entry details), AC-16 (recorder and note on saved rows), AC-17 (Export). Payment is simulated in the route's local state; nothing is saved. The section, the dialog and the Export button are undesigned (PD-052): flagged for design review. The "Out of Scope" line "paying pending costs … the local form does not simulate it" is removed. Five existing assertions change because they state the old behaviour: two cards, not three; no recorder on a saved row; adding funds does not pay pending costs. Each is listed, before and after, in FAM-UI-05 DECISIONS.md FD-13 and flagged HUMAN REVIEW (corrected 2026-09-25 when the tests were written; this entry first said no assertion changes).
+  - **F0-12 (not started):** a top-up pays the bucket's pending costs whole, strictly oldest first, stopping at the first that does not fit, and records the paid date on the cost; each entry stores who recorded it and the save's note.
+  - **FAM-10:** connects the Pending costs section, the details dialog and Export to real data; Export writes the client's whole History from the database, not only the rows on screen.
+  - **FAM-11, ADM-11:** a save records its note on each row and the real signed-in person as the recorder.
+  - **PRD.md:** REQ-29 notes entry details and export; REQ-37 notes that payment stops at the first cost that does not fit.
+- Human confirmation: Dhruv Verma, 2026-09-25 (in-session).
+- Docs updated: DECISIONS.md (PD-060, this entry); PRD.md (REQ-29, REQ-37); DEVELOPMENT_PLAN.md (totals, CHG-022 notes on FAM-UI-05, F0-12, FAM-10, FAM-11); FAM-UI-05 PRD.md, ACCEPTANCE_CRITERIA.md, PROGRESS.md, SESSION_STATE.md.
 
 Template for future entries:
 ```

@@ -65,4 +65,4 @@ Full day-by-day schedule and staffing: `docs/SPRINT_PLAN.md`. Full stage-gate ta
 
 ## Status values (used in PROGRESS.md)
 
-`NOT STARTED` → `PLANNED` → `IN PROGRESS` → `IMPLEMENTED` → `READY FOR PR` → `PR OPEN` → `MERGED TO DEV` (for shared features: merged to `main`) → `IN DEVELOPMENT TESTING` → `READY FOR PRODUCTION` → `COMPLETE`, plus `BLOCKED (<DECISION OQ-xx | DEPENDENCY <ID> | DESIGN | TECHNICAL>; was <status>)`.
+`NOT STARTED` → `PLANNED` → `IN PROGRESS` → `IMPLEMENTED` → `READY FOR PR` → `PR OPEN` → `MERGED TO DEV` (for shared features: merged to `main`) → `IN DEVELOPMENT TESTING` → `READY FOR PRODUCTION` → `COMPLETE`, plus `BLOCKED (<DECISION OQ-xx | DEPENDENCY <ID> | DESIGN | TECHNICAL>; was <status>)`, and `RETIRED (CHG-xxx)` for a feature a controlled change removed from scope.

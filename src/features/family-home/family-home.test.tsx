@@ -118,6 +118,7 @@ const TASK_LOG = [
 
 const BUDGET: BudgetBucketSummary[] = [
   {
+    id: "bucket-margaret-ndis",
     kind: "ndis",
     label: "NDIS",
     total: 24000,
@@ -127,6 +128,7 @@ const BUDGET: BudgetBucketSummary[] = [
     state: "ok",
   },
   {
+    id: "bucket-margaret-fixed",
     kind: "fixed",
     label: "Fixed",
     total: 5000,
@@ -136,6 +138,7 @@ const BUDGET: BudgetBucketSummary[] = [
     state: "ok",
   },
   {
+    id: "bucket-margaret-government",
     kind: "government",
     label: "Government",
     total: 3000,

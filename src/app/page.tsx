@@ -345,6 +345,7 @@ function App() {
 
           <BudgetBucketCard
             summary={{
+              id: "bucket-ndis",
               kind: "ndis",
               label: "Core Supports",
               total: 10000,
