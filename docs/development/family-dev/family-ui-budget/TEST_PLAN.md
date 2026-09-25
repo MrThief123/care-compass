@@ -10,18 +10,18 @@ Tests are written **before** production code (TESTING.md §2). Run them, confirm
 
 | Test ID | Covers | Level | Test description | Written first? | Result |
 |---|---|---|---|---|---|
-| T-01 | AC-01 | component | Given fixtures, when Budget renders, then NDIS '$14,880', Fixed '$2,750' and Government '$240' cards are shown. | ☑ | FAIL (red, expected) |
-| T-02 | AC-02 | component | Given fixtures, when History renders, then the first row is '3 Nov 2026', 'NDIS quarterly plan top-up', '+$6,000'. | ☑ | FAIL (red, expected) |
-| T-03 | AC-03 | component | Given no fund entries, when History renders, then an empty state is shown. | ☑ | FAIL (red, expected) |
-| T-04 | AC-04 | component | 'Edit' opens Edit budget; NDIS +500, no note, Save → Budget NDIS '$15,380', first History row reference day, 'Funds added', '+$500', "Budget updated." (CHG-020, CHG-021) | ☑ | FAIL (red, expected) |
-| T-05 | AC-05 | component | Remove 40 from Government → '$200', 'Funds removed', '-$40'; remove 300 → 'Only $240 available', page stays, nothing changes (CHG-020, CHG-021) | ☑ | FAIL (red, expected) |
-| T-06 | AC-06 | unit + component | Edit budget schema and page: bad amounts, empty / too long / duplicate names, a new bucket with no starting amount are refused, a message per field, focus on the first; Cancel and Escape change nothing (CHG-020, CHG-021) | ☑ | FAIL (red, expected) |
-| T-07 | AC-07 | component | Government card reads 'Pending $310 · 1 cost' in words (CHG-020) | ☑ | FAIL (red, expected) |
-| T-08 | AC-08 | component | History lists the pending cost with '-$310' and a 'Pending' text label (CHG-020) | ☑ | FAIL (red, expected) |
-| T-09 | AC-09 | component | 'Add bucket' 'Council grant' 1200 → fourth card '$1,200', first row 'Bucket added', '+$1,200' (CHG-021) | ☑ | FAIL (red, expected) |
-| T-10 | AC-10 | component | Rename 'Fixed' to 'Fixed support' → same figures, no new History row (CHG-021) | ☑ | FAIL (red, expected) |
-| T-11 | AC-11 | component | Remove the added 'Council grant' → card gone, 'Bucket removed', '-$1,200'; NDIS and Government have no 'Remove bucket' and say why (CHG-021) | ☑ | FAIL (red, expected) |
-| T-12 | AC-12 | component | No buckets → empty Funds card pointing to 'Edit'; Edit budget suggests 'NDIS', 'Fixed', 'Government' (CHG-021) | ☑ | FAIL (red, expected) |
+| T-01 | AC-01 | component | Given fixtures, when Budget renders, then NDIS '$14,880', Fixed '$2,750' and Government '$240' cards are shown. | ☑ | PASS |
+| T-02 | AC-02 | component | Given fixtures, when History renders, then the first row is '3 Nov 2026', 'NDIS quarterly plan top-up', '+$6,000'. | ☑ | PASS |
+| T-03 | AC-03 | component | Given no fund entries, when History renders, then an empty state is shown. | ☑ | PASS |
+| T-04 | AC-04 | component | 'Edit' opens Edit budget; NDIS +500, no note, Save → Budget NDIS '$15,380', first History row reference day, 'Funds added', '+$500', "Budget updated." (CHG-020, CHG-021) | ☑ | PASS |
+| T-05 | AC-05 | component | Remove 40 from Government → '$200', 'Funds removed', '-$40'; remove 300 → 'Only $240 available', page stays, nothing changes (CHG-020, CHG-021) | ☑ | PASS |
+| T-06 | AC-06 | unit + component | Edit budget schema and page: bad amounts, empty / too long / duplicate names, a new bucket with no starting amount are refused, a message per field, focus on the first; Cancel and Escape change nothing (CHG-020, CHG-021) | ☑ | PASS |
+| T-07 | AC-07 | component | Government card reads 'Pending $310 · 1 cost' in words (CHG-020) | ☑ | PASS |
+| T-08 | AC-08 | component | History lists the pending cost with '-$310' and a 'Pending' text label (CHG-020) | ☑ | PASS |
+| T-09 | AC-09 | component | 'Add bucket' 'Council grant' 1200 → fourth card '$1,200', first row 'Bucket added', '+$1,200' (CHG-021) | ☑ | PASS |
+| T-10 | AC-10 | component | Rename 'Fixed' to 'Fixed support' → same figures, no new History row (CHG-021) | ☑ | PASS |
+| T-11 | AC-11 | component | Remove the added 'Council grant' → card gone, 'Bucket removed', '-$1,200'; NDIS and Government have no 'Remove bucket' and say why (CHG-021) | ☑ | PASS |
+| T-12 | AC-12 | component | No buckets → empty Funds card pointing to 'Edit'; Edit budget suggests 'NDIS', 'Fixed', 'Government' (CHG-021) | ☑ | PASS |
 | T-13 | AC-13 | component | 'Pending costs' section between the cards and History lists '27 Oct 2026', 'Government', 'Physiotherapy', '$310', oldest first; none → 'No pending costs.' (CHG-022) | ☑ | PASS |
 | T-14 | AC-14 | unit + component | Add 100 to Government → '$30', no pending line, 'No pending costs.', row no longer 'Pending'; add 50 → '$290', still pending; older cost that does not fit blocks a newer one (CHG-022) | ☑ | PASS |
 | T-15 | AC-15 | unit + component | A row opens by click, Enter or Space a dialog titled with its description: date, bucket, amount, status, recorder, note; Close or Escape returns focus to the row (CHG-022) | ☑ | PASS |
