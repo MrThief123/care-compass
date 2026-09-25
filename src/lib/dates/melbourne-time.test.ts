@@ -29,8 +29,9 @@ describe("[F0-11] instantToMelbourneLocal", () => {
     expect(instantToMelbourneLocal(instant)).toBe(local);
   });
 
-  it("[F0-11] follows daylight saving: 03:00 AEDT on 5 April 2026 is 16:00 UTC the day before", () => {
-    expect(instantToMelbourneLocal("2026-04-04T16:00:00Z")).toBe("2026-04-05T03:00:00");
+  it("[F0-11] follows daylight saving: the clocks go back at 16:00 UTC on 4 April 2026, from 03:00 AEDT to 02:00 AEST", () => {
+    expect(instantToMelbourneLocal("2026-04-04T15:59:59Z")).toBe("2026-04-05T02:59:59");
+    expect(instantToMelbourneLocal("2026-04-04T16:00:00Z")).toBe("2026-04-05T02:00:00");
   });
 
   it("[F0-11] gives the same wall-clock time for the repeated hour when the clocks go back", () => {
