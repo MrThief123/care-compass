@@ -28,7 +28,9 @@ const HEAD_CELL = "min-w-0 text-left text-label-caps text-text-secondary";
 
 /**
  * The fund History: DATE, DESCRIPTION and AMOUNT, the description cell also
- * naming who recorded the entry (DECISIONS.md FD-05).
+ * naming who recorded the entry (DECISIONS.md FD-05). A pending cost
+ * (CHG-020, PD-058) is labelled "Pending" in words under its amount, in the
+ * same three columns.
  *
  * Why this is not the shared `DataTable`: that is an auto-layout `<table>`, so
  * a long description would squeeze DATE and AMOUNT or push the amount past the
@@ -103,7 +105,12 @@ export function HistoryTable({ headingId, entries }: HistoryTableProps) {
                   role="cell"
                   className="min-w-0 [grid-area:amount] text-right [overflow-wrap:anywhere]"
                 >
-                  {formatSignedDollars(entry.amount)}
+                  <span className="block">{formatSignedDollars(entry.amount)}</span>
+                  {entry.pending && (
+                    <span className="mt-1 inline-flex rounded-pill border border-border-alert px-2 text-body-small font-medium text-text-alert-strong">
+                      Pending
+                    </span>
+                  )}
                 </td>
               </tr>
             );

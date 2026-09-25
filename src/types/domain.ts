@@ -207,7 +207,12 @@ export type BudgetBucketKind = z.infer<typeof BudgetBucketKindSchema>;
 export const BudgetBucketStateSchema = z.enum(["ok", "warning", "alert", "exhausted"]);
 export type BudgetBucketState = z.infer<typeof BudgetBucketStateSchema>;
 
-/** PRD.md Scope, verbatim field list: `{kind, label, total, used, remaining, percentUsed, state}`. */
+/**
+ * PRD.md Scope, verbatim field list: `{kind, label, total, used, remaining, percentUsed, state}`,
+ * plus the bucket's pending costs (CHG-020, PD-058): costs of completed care it
+ * could not cover, not yet taken off `used` or `remaining`. Optional, so a
+ * source without them reads as none.
+ */
 export const BudgetBucketSummarySchema = z.object({
   kind: BudgetBucketKindSchema,
   label: z.string(),
@@ -216,6 +221,10 @@ export const BudgetBucketSummarySchema = z.object({
   remaining: z.number(),
   percentUsed: z.number().nonnegative(),
   state: BudgetBucketStateSchema,
+  /** Sum of the pending costs, as a positive amount. */
+  pendingTotal: z.number().nonnegative().optional(),
+  /** How many pending costs there are. */
+  pendingCount: z.number().int().nonnegative().optional(),
 });
 export type BudgetBucketSummary = z.infer<typeof BudgetBucketSummarySchema>;
 
@@ -233,6 +242,11 @@ export const FundEntrySchema = z.object({
   date: z.string(),
   description: z.string().optional(),
   recordedBy: z.string().optional(),
+  /**
+   * An expense the bucket could not cover when the care was completed: listed,
+   * not yet deducted (CHG-020, PD-058). Absent means paid.
+   */
+  pending: z.boolean().optional(),
 });
 export type FundEntry = z.infer<typeof FundEntrySchema>;
 

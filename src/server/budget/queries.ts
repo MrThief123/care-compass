@@ -8,6 +8,10 @@ import * as mock from "@/mocks/queries/budget";
 import { getDataSourceMode, notImplementedForSupabase } from "@/server/data-source";
 import type { BudgetBucketSummary, FundEntry } from "@/types/domain";
 
+/**
+ * The client's buckets, each with its pending costs (CHG-020, PD-058):
+ * `pendingTotal` and `pendingCount`, not taken off `used` or `remaining`.
+ */
 export async function getBudgetSummary(clientId: string): Promise<BudgetBucketSummary[]> {
   const mode = getDataSourceMode();
   if (mode === "mock") {
@@ -16,7 +20,10 @@ export async function getBudgetSummary(clientId: string): Promise<BudgetBucketSu
   notImplementedForSupabase("budget", "getBudgetSummary");
 }
 
-/** The client's fund entries (top-ups and expenses), newest first; `[]` for none. */
+/**
+ * The client's fund entries (top-ups and expenses), newest first; `[]` for
+ * none. Pending costs (`pending: true`, CHG-020) are among them by date.
+ */
 export async function getFundHistory(clientId: string): Promise<FundEntry[]> {
   const mode = getDataSourceMode();
   if (mode === "mock") {

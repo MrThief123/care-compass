@@ -681,6 +681,19 @@ export const FUND_ENTRIES: FundEntry[] = [
     description: "Government subsidy payment",
     recordedBy: "Helen Doyle",
   },
+  // CHG-020 (PD-058): a cost Government could not cover (it has $240), listed
+  // as pending and not deducted. Dated before 3 Nov so the design's first row stays first.
+  {
+    id: "fund-margaret-4",
+    clientId: MARGARET_CLIENT_ID,
+    bucketKind: "government",
+    type: "expense",
+    amount: -310,
+    date: "2026-10-27",
+    description: "Physiotherapy",
+    recordedBy: "Aisha Rahman",
+    pending: true,
+  },
   {
     id: "fund-robert-1",
     clientId: ROBERT_CLIENT_ID,
