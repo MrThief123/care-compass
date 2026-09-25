@@ -1,56 +1,41 @@
-# Progress — ADM-UI-03 Admin Staff screen (UI)
+# Progress - ADM-UI-03 Admin Staff screen (UI)
 
-Status: NOT STARTED
-Owner: unclaimed
-Lane: A — Admin
-Sprint: SPRINT · planned D5–D6
-Branch: `feature/admin-ui-staff` (not yet created)
-PR target: `admin-dev`
-Last updated: 2026-09-17 (planning pack generated)
-
-## Blockers
-- None recorded at planning time
-
-## Dependencies status
-- F0-15 — NOT STARTED
-- UI-02 — NOT STARTED
-- UI-03 — NOT STARTED
+Status: IN PROGRESS
+Owner: Kavis
+Lane: A - Admin
+Branch: feature/admin-ui-staff
+PR target: admin-dev
+Last updated: 2026-09-23
 
 ## Completed
-- Feature documentation drafted (Claude Chat planning pack)
-
-## In progress
-- None
-
-## Remaining
-- Route `/admin/staff` inside the admin layout.
-- Staff list `DataTable` NAME · ROLE · EDIT with '+ Add staff'.
-- Add / edit staff `SidePanelForm`: Name, Phone, Email, Role select; Save (local only). Edit prefills.
-- Loading skeleton, empty state and error state (States sheet) wired to the query contract's states.
-- Data only via `src/server/**` contract functions (mock data source).
-
-## Acceptance criteria status
-- 0 / 3 MET
+- Built Staff list and always-visible Add / edit staff panel from the supplied screenshot.
+- Full names in the table, edit controls and Admin header; synthetic contacts only.
+- Local add/edit saving, name/email validation, role selection, empty/loading/error states.
+- Approved mock query and fixture; screen reads exclusively through the server contract.
+- AC-01, AC-02 and AC-03 implemented and covered by tests.
 
 ## Tests
-- Written: 0 / 3
-- Passing: 0
-- Failing: 0
+- Tests first: Staff screen suite failed because implementation was absent; loading/error suite likewise failed before implementation.
+- 10 Staff tests pass, including accessibility, validation, editing, adding, fixture immutability and reset on remount.
+- Relevant suite: 81 tests across 14 Staff/shared form/list/header files pass.
+- Targeted ESLint and TypeScript checks pass.
+- HTTP GET /admin/staff returns 200 with all five full staff names and Priya Iyer.
+- Human reviewed the preview and requested commit/push. Google Font download fails locally due certificate verification; fallback font used.
+- Full verification run: lint has zero errors (three baseline warnings), TypeScript passes. Repository formatting reports baseline files. Full tests: 429 passed; one existing clock-dependent DayTimeline assertion failed (18:00), and Supabase integration suite lacks environment variables.
 
-## Files changed
-- None yet. Likely files: `src/app/(admin)/admin/staff/page.tsx`
-
-## Decisions
-- See DECISIONS.md
-
-## Problems encountered
-- None
-
-## Assumptions
-- PROPOSED items in PRD.md are unconfirmed until validated in F0-01 or answered in DECISIONS.md.
-
-## Next action
-- complete dependencies, run START FEATURE ADM-UI-03, and write the tests in TEST_PLAN.md first.
+## Remaining
+- Human preview review complete; requested label changes applied.
+- Human authorized commit/push on 2026-09-23.
+- No PR opened. No shared component or Family feature changes.
 
 ## Ready for PR
-- No
+No - baseline verification failures remain; PR not requested.
+
+- Review feedback applied: Staff List, Add Staff and Add / Edit Staff capitalization.
+- Removed Edit column heading as requested; row actions retained. All 10 Staff tests pass after copy revisions.
+
+## CI follow-up - 2026-09-24
+- Fixed live-clock interference in two static calendar label tests; all original assertions retained.
+- Calendar and Staff regression suite: 105 tests passed across 12 files.
+- Synced origin/admin-dev; retained full-name header and upstream sign-out control.
+- User requested local fix commit. No push requested for this follow-up.

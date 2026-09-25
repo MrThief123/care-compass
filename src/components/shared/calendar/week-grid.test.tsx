@@ -92,7 +92,8 @@ describe("[UI-01][AC-03] WeekGrid", () => {
   });
 
   it("[AC-02] renders the whole day and opens on the 07:00–18:00 focus window", () => {
-    render(<WeekGrid weekStart="2026-11-30" occurrences={[]} />);
+    // Static hour labels must not depend on the live current-time label.
+    render(<WeekGrid weekStart="2026-11-30" occurrences={[]} now={null} />);
 
     // Full-day canvas: every hour of the day can be scrolled to.
     expect(screen.getByText("00:00")).toBeInTheDocument();
