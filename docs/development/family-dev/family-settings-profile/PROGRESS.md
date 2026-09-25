@@ -1,6 +1,6 @@
 # Progress — FAM-12 Family — Settings: family info and password reset
 
-Status: READY FOR PR
+Status: MERGED TO DEV
 Owner: Dhruv Verma
 Lane: F — Family
 Sprint: SPRINT · planned D10
