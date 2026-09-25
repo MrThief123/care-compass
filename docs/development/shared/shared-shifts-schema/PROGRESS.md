@@ -1,6 +1,7 @@
 # Progress — F0-10 Shifts schema, active-shift function and conflict query
 
-Status: MERGED TO DEV (merged to `main`, PR #69)
+Status: MERGED TO DEV
+Merged: to `main`, PR #69
 Owner: Prajeet
 Lane: B — Backend
 Sprint: SPRINT · planned D4–D5
