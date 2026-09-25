@@ -47,20 +47,17 @@ Last updated: 2026-09-25
 - CHG-022 checks: 474 of 475 feature tests pass, and the full unit run passes 1565 of 1567. The failures are the export test bug below and a FAM-UI-07 timeout under load that passes alone. tsc, eslint (0 errors) and prettier are clean, and `next build` succeeds. e2e passes 35 of 36; the one failure is the known `[F0-15]` 338px shell flake. The width sweep, 1920 to 768 with the fixtures and two stress cases, is clean, and so are the dialogs.
 
 ## In progress
-- Waiting on the human: one CHG-022 test is wrong (below). Once that is settled, the human's "yes" to open the PR.
-
-**Question for the human (test bug, CLAUDE.md §5).** `budget-export.test.ts`, "a field with a comma, a double quote or a line break is quoted…". Its `lineOf({ note: "Line one\r\nLine two" })` splits the file on CRLF and expects one line. A correctly quoted note with an embedded CRLF splits into two, so the test cannot pass without breaking RFC 4180. The CSV itself is right.
-- Proposed fix: assert on the whole file, `expect(budgetHistoryCsv([row({ note: "Line one\r\nLine two" })], BUCKETS)).toContain(',"Line one\r\nLine two"\r\n')`. Record it in FD-13 as a genuine test bug, and flag it **HUMAN REVIEW: test expectation changed** here and in the PR. The asserted behaviour does not change; only how the test reads the file.
+- Waiting on the human's "yes" to open the PR.
 
 ## Remaining
-- Settle the CHG-022 export test bug (above) and re-run the feature suite.
+- CHG-022 export test bug: fixed as the human chose (FD-13). The feature suites pass 475 of 475.
 - The human's "yes", then open the PR to `family-dev` (the docs update ships in it).
 
 ## Acceptance criteria status
-- 16 / 17 MET. AC-01 to AC-16 have every tagged test passing. AC-17 (Export) is built and every tagged test but one passes. That one is a test bug (above), so AC-17 is NOT MET until it is settled.
+- 17 / 17 MET. Every tagged test passes for AC-01 to AC-17. One AC-17 test was a test bug; the human chose the fix (FD-13).
 
 ## Tests
-- Feature-related suites: 474 of 475 pass. Full unit run (`src`, `tests/unit`): 1565 of 1567 pass. The failures are the export test bug and the `[FAM-UI-07][AC-05]` paging timeout under load, which passes alone.
+- Feature-related suites: 475 of 475 pass. Full unit run (`src`, `tests/unit`): 1565 of 1567 passed before the export test fix. The failures were that test and the `[FAM-UI-07][AC-05]` paging timeout under load, which passes alone.
 - e2e (production build, `--grep-invert "F0-07"`): 35 of 36 pass. The failure is the `[F0-15]` 338px header test, a known shell flake (it also fails on a clean `origin/family-dev`).
 
 ## Files changed
@@ -80,6 +77,7 @@ Last updated: 2026-09-25
 - See DECISIONS.md (FD-01 to FD-10; FD-10 is new in the build: History column sizes). Root `DECISIONS.md`: CHG-019 (amended 2026-09-25: entries name their recorder).
 
 ## HUMAN REVIEW: test expectation changed
+- CHG-022 test bug: in `budget-export.test.ts`, the RFC 4180 test's CRLF-note line now checks the whole file instead of splitting it on CRLF. The same behaviour is asserted. The human chose this fix. Before and after: FD-13.
 - CHG-022 (PD-060): five assertions changed.
   - The screen is three cards, not two.
   - A saved row says "Recorded by you": the screen test, and `recordedBy` in `applyBudgetEdit`.
@@ -102,8 +100,7 @@ Last updated: 2026-09-25
 - OQ-24 (empty-state wording) is open; the default wording in use is flagged in FD-07.
 
 ## Next action
-- On the human's answer about the export test bug: apply it (or leave the test as it is), re-run the feature suite, and record it in FD-13.
 - Later, on the human's "yes": open the PR `FAM-UI-05 Family Budget screen (UI)` to `family-dev`, with the flags below and the note that CI is down so every check ran locally.
 
 ## Ready for PR
-- No: CHG-022 is built, but one export test is a test bug waiting on the human (In progress). The PR body also flags the undesigned Pending costs section, details dialog and Export button (PD-052) and CHG-022's contract fields. The PR body flags: the six test and showcase files given ids only, including the Lane S tests `budget-bucket-card.test.tsx` and `lists-cards-kit.axe.test.tsx` (FD-12); the undesigned Edit budget page and its copy, open buckets (PD-059, CHG-021) changing `src/types/**`, `src/server/**` and `src/mocks/**`, the replaced CHG-020 form tests (HUMAN REVIEW); the undesigned Update form and pending display (PD-052), the replaced FD-06 tests (HUMAN REVIEW), CHG-020. Earlier list: PR body flags: local `BudgetBucketTile` and local History table instead of the kit's `BudgetBucketCard` and `DataTable` (FD-01, FD-03); the "Recorded by" line the design does not draw (FD-05); copy needing review (FD-06 Update message, FD-07 empty and error wording, FD-09 "No description"; OQ-24 stays open); CHG-019 touching `src/server/**` and `src/mocks/**`; the checks ran locally because CI is down; the two shell e2e failures that also fail on `family-dev`; the `[FAM-UI-07][AC-05]` paging timeout under full-run load (FAM-UI-07's test, passes alone).
+- Yes, pending the human's "yes". The PR body also flags: the CHG-022 export test fix (FD-13, HUMAN REVIEW); the undesigned Pending costs section, details dialog and Export button (PD-052) and CHG-022's contract fields. The PR body flags: the six test and showcase files given ids only, including the Lane S tests `budget-bucket-card.test.tsx` and `lists-cards-kit.axe.test.tsx` (FD-12); the undesigned Edit budget page and its copy, open buckets (PD-059, CHG-021) changing `src/types/**`, `src/server/**` and `src/mocks/**`, the replaced CHG-020 form tests (HUMAN REVIEW); the undesigned Update form and pending display (PD-052), the replaced FD-06 tests (HUMAN REVIEW), CHG-020. Earlier list: PR body flags: local `BudgetBucketTile` and local History table instead of the kit's `BudgetBucketCard` and `DataTable` (FD-01, FD-03); the "Recorded by" line the design does not draw (FD-05); copy needing review (FD-06 Update message, FD-07 empty and error wording, FD-09 "No description"; OQ-24 stays open); CHG-019 touching `src/server/**` and `src/mocks/**`; the checks ran locally because CI is down; the two shell e2e failures that also fail on `family-dev`; the `[FAM-UI-07][AC-05]` paging timeout under full-run load (FAM-UI-07's test, passes alone).

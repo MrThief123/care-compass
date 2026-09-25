@@ -247,6 +247,11 @@ Record feature-level decisions here using the template below. Project-wide decis
   - **`family-budget.test.tsx` "the screen is two cards".** Before: headings "Funds by source", "History"; 2 regions. After: `[AC-13]`, "Funds by source", "Pending costs", "History"; 3 regions. The FD-08 no-client-name assertions are kept.
   - **`family-budget.test.tsx` "a row made on Edit budget does not say who recorded it".** Before: no "Recorded by" line. After: `[AC-16]`, "Recorded by you".
   - **`family-budget.test.tsx` "adding funds does not pay pending costs (F0-12's)".** Before: +$500 gives $740, "Pending $310 · 1 cost" and a "Pending" label. After: `[AC-14]`, $430, no pending line, no "Pending" label.
+- Test change after the build (2026-09-25; a genuine test bug; the human chose the fix in-session; flagged HUMAN REVIEW):
+  - **`budget-export.test.ts` "[FAM-UI-05][AC-17] a field with a comma, a double quote or a line break is quoted, with quotes doubled (RFC 4180)".**
+    - Before: `expect(lineOf({ note: "Line one\r\nLine two" })).toContain(',"Line one\r\nLine two"')`.
+    - After: `expect(budgetHistoryCsv([row({ note: "Line one\r\nLine two" })], BUCKETS)).toContain(',"Line one\r\nLine two"\r\n')`.
+    - Reason: `lineOf` splits the file on CRLF and expects one line. A correctly quoted field with an embedded CRLF holds that CRLF, so the split always gives two pieces, and no RFC 4180 output could pass. The behaviour asserted is the same: the note is quoted, and its CRLF is kept inside the quotes. The new check is stricter, since the field must also end the line. No other assertion in the test changed.
 
 <!-- Template
 ### FD-01 — <title>
