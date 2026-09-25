@@ -3,6 +3,7 @@ import { EventFormScreen } from "@/features/family-event-form/event-form-screen"
 import { EMPTY_EVENT_VALUES, isTaskEvent } from "@/features/family-event-form/event-form-values";
 import { resolveTaskDetailOrigin } from "@/features/family-task-detail/task-detail-origin";
 import { melbourneDateKey } from "@/features/family-task-log/melbourne-time";
+import { getBudgetSummary } from "@/server/budget/queries";
 import { getToday } from "@/server/events/queries";
 
 /**
@@ -20,7 +21,10 @@ export default async function NewEventPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { clientId } = await params;
-  const origin = await resolveTaskDetailOrigin(await searchParams, () => getToday());
+  const [origin, buckets] = await Promise.all([
+    searchParams.then((raw) => resolveTaskDetailOrigin(raw, () => getToday())),
+    getBudgetSummary(clientId),
+  ]);
   return (
     <EventFormScreen
       mode="add"
@@ -28,6 +32,7 @@ export default async function NewEventPage({
       initialIsTask={isTaskEvent()}
       month={melbourneDateKey(new Date().toISOString())}
       documents={[]}
+      buckets={buckets}
       returnHref={addEventReturnHref(clientId, origin)}
     />
   );

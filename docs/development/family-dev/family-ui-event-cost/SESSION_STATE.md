@@ -1,14 +1,11 @@
 # Session State — FAM-UI-08 Family event cost fields (UI)
 
 Last session date: 2026-09-25
-Current branch: none (not started)
-Worked on: feature docs created by CHG-020 on `feature/family-ui-budget`
-What changed: this folder
-Tests run: none
-Test results: —
-Current blocker: FAM-UI-05 not merged
-Important discoveries: —
-Important decisions: PD-058, CHG-020
-Exact next action: START FEATURE FAM-UI-08 once FAM-UI-05 is merged to `family-dev`
-Files likely to be touched next: `src/features/family-event-form/**`, `src/server/events/queries.ts`, `src/mocks/fixtures.ts`
-Warning for next session: do not edit the shared UI-02 form kit; extend FAM-UI-03's form locally
+Current branch: `feature/family-ui-event-cost` (from `origin/family-dev` at 2411316)
+Worked on: FD-01 (human left the data-layer choice to Claude), tests first, implementation, verification, docs.
+What changed: see PROGRESS.md "Files changed".
+Tests run: FAM-UI-08 suites, full `npm run test`, typecheck, lint, prettier, FAM-UI-03 e2e, real-browser width sweep.
+Test results: all green except one pre-existing failure (`day-timeline.test.tsx`, fails without these changes).
+Current blocker: none. Waiting for the human's review and approval to open the PR.
+Important discoveries: `EventForm`'s `extraFields` slot needed no kit change. The Cost and Paid from wording is proposed (OQ-39, PD-052): flag HUMAN REVIEW in the PR. The PR must also flag that Lane S's `src/types/domain.ts` and `src/mocks/fixtures.ts` were edited (FD-01).
+Exact next action: on the human's "yes", open the PR `FAM-UI-08 Family event cost fields (UI)` to `family-dev` using the body in `docs/DEVELOPMENT_WORKFLOW.md` §8.

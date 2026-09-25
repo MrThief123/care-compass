@@ -120,6 +120,14 @@ export const CareEventSchema = z.object({
   /** ISO date; absent means the series repeats indefinitely (PD-046). */
   recurrenceEndDate: z.string().optional(),
   completionMode: CompletionModeSchema,
+  /**
+   * What each completion costs, in dollars (PD-058, FAM-UI-08): optional, and
+   * positive with at most 2 decimals when set. Charged to `bucketId` each time
+   * the care is completed; a change applies to future completions only.
+   */
+  cost: z.number().positive().optional(),
+  /** The budget bucket that pays `cost` (`BudgetBucketSummary.id`); set with it. */
+  bucketId: z.string().optional(),
 });
 export type CareEvent = z.infer<typeof CareEventSchema>;
 
