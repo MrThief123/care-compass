@@ -401,6 +401,19 @@ CONFIRMED.
 - Consequences: see CHG-021.
 - Human confirmation: CONFIRMED 2026-09-25 (Dhruv Verma, in-session).
 
+### PD-060 — Budget: a Pending costs section, entry details, "Recorded by you", paying pending costs, and History export
+- Date: 2026-09-25 · Decided by: Dhruv Verma (in-session; builds on PD-058 and PD-059)
+- Decision:
+  - **Pending costs section.** The Budget screen has a "Pending costs" section between the bucket cards and History: one row per unpaid cost (date, bucket, description, amount), oldest first. With none it says "No pending costs."
+  - **Entry details.** Selecting a History row or a pending row (mouse or keyboard) opens a dialog titled with the entry's description: date, bucket, amount, status (Paid, Pending, or "Paid on <date>" for a pending cost since paid), who recorded it, and the save's note when there was one. Close or Escape closes it and returns focus to the row.
+  - **The note and the recorder are stated, not empty.** The optional note of a save is kept on every History row that save makes (the funds rows also keep using it as their description, PD-059), and shown in the details. Every change records who made it (REQ-38); in Phase 1, with no signed-in user, rows made on Edit budget read "Recorded by you".
+  - **Paying pending costs when funds are added.** After a bucket gains funds, its pending costs are paid whole, strictly oldest first, stopping at the first one the balance cannot cover (a newer, smaller cost never jumps an older one). A paid cost is taken off the bucket's remaining. Its existing History row loses "Pending" and its details say "Paid on <date>"; no new row is added, so each cost is counted once.
+  - **Export.** History has an "Export" button that downloads the client's History as a CSV file (Date, Bucket, Description, Amount, Status, Recorded by, Note), one line per row in the order shown. Text that a spreadsheet would read as a formula is neutralised. With no History rows the button is absent.
+- Reason: human questions in-session, 2026-09-25, while reviewing FAM-UI-05: where the optional note is kept, who made a change (blank "Recorded by"), whether adding money clears pending costs, where pending costs can be seen, how to see more about a cost, and how to manage History outside the app. The human chose each rule above from offered options, and chose to build them on FAM-UI-05 now rather than as a later feature, with Export built now rather than left to FAM-10.
+- Alternatives: pending costs listed only inside each bucket card (rejected); details expanding in place under the row (rejected); paying every cost that fits, skipping ones too large (rejected: the oldest could wait longest); adding a separate "Pending cost paid" row (rejected: the cost would appear twice); Export left to FAM-10 (rejected: FAM-10 connects data only and is blocked on F0-12, OQ-04 and OQ-05); opening the FAM-UI-05 PR first and building this as a follow-up (rejected).
+- Consequences: see CHG-022.
+- Human confirmation: CONFIRMED 2026-09-25 (Dhruv Verma, in-session).
+
 ---
 
 ## 3. Open decisions (human input required)
@@ -734,6 +747,21 @@ Docs updated: DECISIONS.md
   - **PRD.md:** REQ-29 updated; REQ-27 notes the open bucket model.
 - Human confirmation: Dhruv Verma, 2026-09-25 (in-session).
 - Docs updated: DECISIONS.md (PD-059, this entry, amendment notes on PD-033 and PD-058); PRD.md (REQ-27, REQ-29, PL-10); DEVELOPMENT_PLAN.md (totals, CHG-021 notes on FAM-UI-05, FAM-UI-08, FAM-10, FAM-11, F0-12); FAM-UI-05 PRD.md, ACCEPTANCE_CRITERIA.md, TEST_PLAN.md, DECISIONS.md, PROGRESS.md, SESSION_STATE.md.
+
+### CHG-022 — Budget: pending costs section, entry details, recorder and note, paying pending costs, History export
+- Date / requested by: 2026-09-25 / Dhruv Verma (human, project lead)
+- Type: new requirement, scope change
+- Description: records PD-060. The Budget screen gains a Pending costs section, a details dialog for each History and pending row, a stated recorder ("Recorded by you" in Phase 1) and kept note on rows made by a save, automatic payment of pending costs when funds are added (strictly oldest first, whole), and an Export button that downloads History as CSV.
+- Source / justification: PD-060 (human answers in-session, 2026-09-25).
+- Impact:
+  - **Types and contracts (this branch, same route as CHG-019 to CHG-021):** a fund entry gains an optional `note` (the save's note) and an optional `paidOn` (the date a pending cost was paid). The exact fields are recorded in FAM-UI-05 DECISIONS.md when built.
+  - **FAM-UI-05 (this branch, Phase 1, fixtures):** new AC-13 (Pending costs section), AC-14 (paying pending costs), AC-15 (entry details), AC-16 (recorder and note on saved rows), AC-17 (Export). Payment is simulated in the route's local state; nothing is saved. The section, the dialog and the Export button are undesigned (PD-052): flagged for design review. The "Out of Scope" line "paying pending costs … the local form does not simulate it" is removed. No existing assertion changes.
+  - **F0-12 (not started):** a top-up pays the bucket's pending costs whole, strictly oldest first, stopping at the first that does not fit, and records the paid date on the cost; each entry stores who recorded it and the save's note.
+  - **FAM-10:** connects the Pending costs section, the details dialog and Export to real data; Export writes the client's whole History from the database, not only the rows on screen.
+  - **FAM-11, ADM-11:** a save records its note on each row and the real signed-in person as the recorder.
+  - **PRD.md:** REQ-29 notes entry details and export; REQ-37 notes that payment stops at the first cost that does not fit.
+- Human confirmation: Dhruv Verma, 2026-09-25 (in-session).
+- Docs updated: DECISIONS.md (PD-060, this entry); PRD.md (REQ-29, REQ-37); DEVELOPMENT_PLAN.md (totals, CHG-022 notes on FAM-UI-05, F0-12, FAM-10, FAM-11); FAM-UI-05 PRD.md, ACCEPTANCE_CRITERIA.md, PROGRESS.md, SESSION_STATE.md.
 
 Template for future entries:
 ```

@@ -1,7 +1,7 @@
 # DEVELOPMENT PLAN — Care Compass
 
 Version 0.2 · 17 September 2026 · Status: DRAFT (controlled after planning freeze) · Supersedes v0.1 dashboard-by-dashboard phases
-Totals: **82 active features** (83 listed; CAR-08 retired) · **359 acceptance criteria** across 5 phases (UI-04 and its 10 criteria added by CHG-004, 2026-09-19; UI-05 and its 13 criteria added under CHG-009, 2026-09-24; F0-17 and its 8 criteria added by CHG-010, 2026-09-24; CHG-020, 2026-09-25: FAM-UI-08 (6 criteria) and ADM-11 (5) added, FAM-UI-05 +5 criteria, CAR-08 and its 2 criteria retired; CHG-021, 2026-09-25: FAM-UI-05 +4 criteria; the Jira import `docs/JIRA_BACKLOG.csv` predates all four). Jira import: `docs/JIRA_BACKLOG.csv`.
+Totals: **82 active features** (83 listed; CAR-08 retired) · **364 acceptance criteria** across 5 phases (UI-04 and its 10 criteria added by CHG-004, 2026-09-19; UI-05 and its 13 criteria added under CHG-009, 2026-09-24; F0-17 and its 8 criteria added by CHG-010, 2026-09-24; CHG-020, 2026-09-25: FAM-UI-08 (6 criteria) and ADM-11 (5) added, FAM-UI-05 +5 criteria, CAR-08 and its 2 criteria retired; CHG-021, 2026-09-25: FAM-UI-05 +4 criteria; CHG-022, 2026-09-25: FAM-UI-05 +5 criteria; the Jira import `docs/JIRA_BACKLOG.csv` predates all five). Jira import: `docs/JIRA_BACKLOG.csv`.
 
 ---
 
@@ -404,6 +404,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Requirements:** REQ-02, REQ-N1, REQ-N2, REQ-N3
 - **CHG-020 (PD-058):** 'Update' opens a simple form (bucket, Add or Remove, amount, optional note; local state only; a removal over the balance is refused); bucket cards show pending costs and History lists them marked Pending. +5 criteria (AC-04 to AC-08).
 - **CHG-021 (PD-059):** 'Update' becomes 'Edit' and opens an Edit budget page (`budget/edit`) replacing the inline form: add or remove funds, add, rename or remove a bucket; buckets are open (NDIS, Fixed, Government are suggestions). AC-04 to AC-06 rewritten; +4 criteria (AC-09 to AC-12).
+- **CHG-022 (PD-060):** a Pending costs section; each History and pending row opens a details dialog (note, recorder, paid or pending); rows made on Edit budget read "Recorded by you" and keep the save's note; adding funds pays pending costs whole, strictly oldest first (simulated in local state); an 'Export' button downloads History as CSV. +5 criteria (AC-13 to AC-17).
 - **Docs:** `docs/development/family-dev/family-ui-budget/` · **Status:** NOT STARTED
 
 ### FAM-UI-06 — Family Settings screen (UI)
@@ -634,6 +635,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Requirements:** REQ-27, REQ-28, REQ-29, REQ-N12
 - **CHG-020 (PD-058, REQ-37, REQ-38):** charge an event's cost once per completed occurrence; a cost the bucket cannot cover in full is held whole as pending (no overdraft from event costs, replacing the 'remaining is negative' criterion); a top-up pays pending costs oldest first, each only in full; a manual removal cannot go below $0; admins of the client's organisation get the same writes as Family; carers get no direct budget writes. Lane B rewrites the PRD/ACs/TEST_PLAN on start. Not yet decided: a pending cost whose event is deleted; pending costs across a bucket's period.
 - **CHG-021 (PD-059):** buckets are rows with a name (unique per client, case-insensitive) and an optional kind, not a fixed enum; fund entries reference the bucket by id; a bucket is deleted only with no charges and no pending costs, its remaining funds recorded as a 'Bucket removed' entry. Lane B records it on start.
+- **CHG-022 (PD-060):** a top-up pays the bucket's pending costs whole, strictly oldest first, stopping at the first that does not fit, recording the paid date on the cost; each entry stores its recorder and the save's note.
 - **Docs:** `docs/development/shared/shared-budget-schema/` · **Status:** NOT STARTED
 
 ### F0-13 — Client document storage
@@ -790,6 +792,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Requirements:** REQ-27, REQ-28, REQ-29
 - **CHG-020 (PD-058):** show pending costs on bucket cards and in History (FAM-UI-05 layout).
 - **CHG-021 (PD-059):** draw the client's buckets, any number including none; 'Edit' opens the Edit budget page.
+- **CHG-022 (PD-060):** connect the Pending costs section, the entry details dialog and Export to real data; Export writes the client's whole History from the database.
 - **Docs:** `docs/development/family-dev/family-budget-overview/` · **Status:** NOT STARTED
 
 ### FAM-11 — Family — Update funds
@@ -803,6 +806,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Requirements:** REQ-29
 - **CHG-020 (PD-058):** the form is bucket, Add or Remove, amount, optional note, dated today; a removal over the balance is refused; a top-up settles pending costs via F0-12; Family and admins only. The future-date edge case no longer applies. Lane F rewrites the PRD/ACs/TEST_PLAN on start.
 - **CHG-021 (PD-059):** wires the Edit budget page instead: add or remove funds, add, rename or remove a bucket, one note per save.
+- **CHG-022 (PD-060):** each save records its note on every row and the signed-in person as the recorder.
 - **Docs:** `docs/development/family-dev/family-budget-update-funds/` · **Status:** NOT STARTED
 
 ### FAM-12 — Family — Settings: family info and password reset
