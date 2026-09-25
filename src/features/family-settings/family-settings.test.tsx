@@ -6,7 +6,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import Loading from "@/app/(family)/family/[clientId]/settings/loading";
 import { FamilySettingsView } from "@/features/family-settings/family-settings-view";
 import { SettingsErrorState } from "@/features/family-settings/settings-error-state";
-import { getClientHeaderSummary, type ClientHeaderSummary } from "@/server/clients/queries";
+import {
+  getClientHeaderSummary,
+  getOrganisationChoices,
+  type ClientHeaderSummary,
+  type OrganisationChoice,
+} from "@/server/clients/queries";
 import { getFamilyContactDetails, type FamilyContactDetails } from "@/server/profiles/queries";
 
 const mocks = vi.hoisted(() => ({ refresh: vi.fn() }));
@@ -30,11 +35,13 @@ const RESET_SENT = "We've emailed you a link to reset your password.";
 
 let header: ClientHeaderSummary;
 let contact: FamilyContactDetails;
+let organisations: OrganisationChoice[];
 
 beforeEach(async () => {
   vi.stubEnv("DATA_SOURCE", "mock");
   header = await getClientHeaderSummary(CLIENT_ID);
   contact = await getFamilyContactDetails(PROFILE_ID);
+  organisations = await getOrganisationChoices(CLIENT_ID);
 });
 
 afterEach(() => {
@@ -49,6 +56,7 @@ function renderSettings(
     <FamilySettingsView
       header={overrides.header ?? header}
       contact={overrides.contact ?? contact}
+      organisations={organisations}
     />,
   );
 }
@@ -71,8 +79,15 @@ async function startEditing(user: ReturnType<typeof userEvent.setup>) {
   await user.click(screen.getByRole("button", { name: "Edit" }));
 }
 
+/**
+ * 'Change' opens the organisation picker first (FAM-13); choosing one and pressing
+ * Continue opens the confirmation this returns.
+ */
 async function openChangeDialog(user: ReturnType<typeof userEvent.setup>) {
   await user.click(screen.getByRole("button", { name: "Change" }));
+  const picker = screen.getByRole("dialog", { name: "Choose a new organisation" });
+  await user.click(within(picker).getByRole("radio", { name: /Wattle Care/ }));
+  await user.click(within(picker).getByRole("button", { name: "Continue" }));
   return screen.getByRole("dialog", { name: "Change organisation?" });
 }
 
@@ -153,6 +168,8 @@ describe("[FAM-UI-06] Family Settings", () => {
     await user.click(within(dialog).getByRole("button", { name: "Change organisation" }));
 
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    // The action is asynchronous since FAM-13, so wait for its answer.
+    await screen.findByText(NOT_AVAILABLE);
     expect(announced()).toContain(NOT_AVAILABLE);
     expect(screen.getByText(ORGANISATION_TEXT)).toBeInTheDocument();
   });

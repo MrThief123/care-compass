@@ -9,7 +9,7 @@ import * as mock from "@/mocks/queries/clients";
 import { getDataSourceMode, notImplementedForSupabase } from "@/server/data-source";
 import type { ClientInfoSection } from "@/types/domain";
 
-export type { ClientHeaderSummary } from "@/mocks/queries/clients";
+export type { ClientHeaderSummary, OrganisationChoice } from "@/mocks/queries/clients";
 
 export async function getClientHeaderSummary(clientId: string): Promise<mock.ClientHeaderSummary> {
   const mode = getDataSourceMode();
@@ -31,4 +31,27 @@ export async function getClientInfoSections(clientId: string): Promise<ClientInf
     return mock.getClientInfoSections(clientId);
   }
   notImplementedForSupabase("clients", "getClientInfoSections");
+}
+
+/**
+ * The organisations a family can move the client to (FAM-13): every organisation
+ * registered with Care Compass by name, with the client's current one flagged
+ * (`isCurrent`, not choosable). Only id and name leave the database. With
+ * `DATA_SOURCE=supabase` it calls `list_organisations_for_transfer`, which answers
+ * only for a family member of the client; otherwise it throws.
+ */
+export async function getOrganisationChoices(clientId: string): Promise<mock.OrganisationChoice[]> {
+  const mode = getDataSourceMode();
+  if (mode === "mock") {
+    return mock.getOrganisationChoices(clientId);
+  }
+
+  const { createClient } = await import("@/lib/supabase/server");
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("list_organisations_for_transfer", {
+    p_client_id: clientId,
+  });
+  // The message names no client (ARCHITECTURE.md §12.5).
+  if (error || !data) throw new Error("getOrganisationChoices: could not load organisations.");
+  return data.map(({ id, name, is_current }) => ({ id, name, isCurrent: is_current }));
 }
