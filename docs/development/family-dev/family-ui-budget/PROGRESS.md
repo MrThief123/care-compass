@@ -29,10 +29,10 @@ Last updated: 2026-09-25
 - Full local checks run (CI is down): all green except two shell e2e tests that fail the same way on a clean `origin/family-dev` (TEST_PLAN.md Results).
 
 ## In progress
-- CHG-020 docs recorded (PD-058, CHG-020, FD-11, AC-04 to AC-08). Waiting for the human to review them before any code.
+- CHG-020: T-04 to T-08 written first and run red for the right reasons (37 fail, 67 pass in the four files that load; `fund-update.test.ts` fails at import). The FD-06 'Update' tests are replaced (HUMAN REVIEW, below). See TEST_PLAN.md "Red run for CHG-020".
 
 ## Remaining
-- AC-04 to AC-08: tests first (T-04 to T-08, replacing the FD-06 'Update' tests), then the form and the pending display, full local checks, real-browser width sweep.
+- AC-04 to AC-08: implement the form and the pending display (types, contract, fixtures per CHG-002), then full local checks and a real-browser width sweep.
 - Then the human's "yes", and open the PR to `family-dev` (the docs update ships in it).
 
 ## Acceptance criteria status
@@ -59,7 +59,7 @@ Last updated: 2026-09-25
 - See DECISIONS.md (FD-01 to FD-10; FD-10 is new in the build: History column sizes). Root `DECISIONS.md`: CHG-019 (amended 2026-09-25: entries name their recorder).
 
 ## HUMAN REVIEW: test expectation changed
-- CHG-020: the FD-06 'Update' tests (announces "not available yet", changes nothing) will be replaced by the form's tests T-04 to T-06. Recorded requirement change; before and after in DECISIONS.md FD-11.
+- CHG-020: the FD-06 'Update' tests (announces "not available yet", changes nothing) are replaced by the form's tests T-04 to T-06. Existing loader, contract and fixture tests now also expect `today` and Margaret's pending cost. Recorded requirement change; each before and after is in DECISIONS.md FD-11.
 - `[FAM-UI-05][PRD] FD-05: a row is date, description and amount only, with no 'recorded by' text drawn` asserted the opposite of the human's decision of 2026-09-25 (show who recorded each entry), so it was replaced by attribution tests before any implementation began. No other assertion changed. Before and after: DECISIONS.md FD-05, TEST_PLAN.md.
 - The design (`family-06-budget.png`) does not draw the "Recorded by" line: flag for design review in the PR.
 

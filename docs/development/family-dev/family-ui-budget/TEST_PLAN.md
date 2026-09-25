@@ -13,11 +13,13 @@ Tests are written **before** production code (TESTING.md §2). Run them, confirm
 | T-01 | AC-01 | component | Given fixtures, when Budget renders, then NDIS '$14,880', Fixed '$2,750' and Government '$240' cards are shown. | ☑ | FAIL (red, expected) |
 | T-02 | AC-02 | component | Given fixtures, when History renders, then the first row is '3 Nov 2026', 'NDIS quarterly plan top-up', '+$6,000'. | ☑ | FAIL (red, expected) |
 | T-03 | AC-03 | component | Given no fund entries, when History renders, then an empty state is shown. | ☑ | FAIL (red, expected) |
-| T-04 | AC-04 | component | Update → NDIS, Add, 500, no note → NDIS card '$15,380', first History row reference day, 'Funds added', '+$500' (CHG-020) | ☐ | NOT RUN |
-| T-05 | AC-05 | component | Remove 40 from Government → '$200', 'Funds removed', '-$40'; remove 300 → 'Only $240 available', nothing changes (CHG-020) | ☐ | NOT RUN |
-| T-06 | AC-06 | unit + component | Update form schema and form: empty, 0, negative, 3-decimal amounts and no bucket are refused with a field message (CHG-020) | ☐ | NOT RUN |
-| T-07 | AC-07 | component | Government card reads 'Pending $310 · 1 cost' in words (CHG-020) | ☐ | NOT RUN |
-| T-08 | AC-08 | component | History lists the pending cost with '-$310' and a 'Pending' text label (CHG-020) | ☐ | NOT RUN |
+| T-04 | AC-04 | component | Update → NDIS, Add, 500, no note → NDIS card '$15,380', first History row reference day, 'Funds added', '+$500' (CHG-020) | ☑ | FAIL (red, expected) |
+| T-05 | AC-05 | component | Remove 40 from Government → '$200', 'Funds removed', '-$40'; remove 300 → 'Only $240 available', nothing changes (CHG-020) | ☑ | FAIL (red, expected) |
+| T-06 | AC-06 | unit + component | Update form schema and form: empty, 0, negative, 3-decimal amounts and no bucket are refused with a field message (CHG-020) | ☑ | FAIL (red, expected) |
+| T-07 | AC-07 | component | Government card reads 'Pending $310 · 1 cost' in words (CHG-020) | ☑ | FAIL (red, expected) |
+| T-08 | AC-08 | component | History lists the pending cost with '-$310' and a 'Pending' text label (CHG-020) | ☑ | FAIL (red, expected) |
+
+T-04 to T-06 are the `[FAM-UI-05][AC-04]`, `[AC-05]` and `[AC-06]` tests in the "'Update' opens the simple form" group of `family-budget.test.tsx` (the form's fields, save, the status message and focus, local state only, the balance limit following the screen, removing the whole balance, each refused amount and no bucket, focus on the first field to fix, Cancel, keyboard, adding funds does not pay pending costs), and `src/features/family-budget/fund-update.test.ts` (unit: `validateFundUpdate` accepted and refused amounts with their messages, the bucket, the balance limit with cents and for an empty or overspent bucket, the note trimmed; `applyFundUpdate` totals, percent and state, the new row, cents arithmetic, pending figures kept, same-kind buckets, no mutation). T-07 and T-08 are the "pending costs" group of `family-budget.test.tsx`, plus the pending tests in `queries.test.ts`, `mocks/queries/budget.test.ts` and `budget-data.test.ts`.
 
 T-01 is `[FAM-UI-05][AC-01]` in `family-budget.test.tsx` (cards, order, totals, percent used, progress bars, Government's warning in words). T-02 is `[FAM-UI-05][AC-02]` in `family-budget.test.tsx` (columns, first row, all three rows) with the contract and fixture tests below. T-03 is `[FAM-UI-05][AC-03]` in `family-budget.test.tsx` (empty History shows the empty state and no table; cards and 'Update' stay).
 
@@ -60,6 +62,19 @@ Not tested here, by design: saving an entry to the database with its recorder (F
 | `src/mocks/queries/budget.test.ts` | 7 | 2 fail: Margaret's fixtures have 2 entries, not the design's 3, and no other client has an entry. The other 5 pass on the current fixtures (which already set `recordedBy`) and must stay green after they are reshaped. |
 
 The failing tests fail for the right reason: the code they test does not exist yet. No test was skipped, marked `.only`, or weakened. The throwaway stubbed copy of the screen test used for the per-test check was deleted, not committed.
+
+### Red run for CHG-020, before its implementation (2026-09-25)
+`npx vitest run src/features/family-budget src/server/budget src/mocks/queries/budget.test.ts`: 5 of 6 files fail. **37 fail and 67 pass** in the four files that load; `fund-update.test.ts` fails at import (`./fund-update` does not exist yet), so its tests do not run.
+
+| File | Failed / total | Red because |
+|---|---|---|
+| `family-budget.test.tsx` | 27 / 70 | No form named "Update funds" (the button still shows the FD-06 message and has no `aria-expanded`); no "Pending …" line on a card or "Pending" label in History; `getToday` is not read, so it is never called and a rejection does not give the error state. |
+| `budget-data.test.ts` | 4 / 8 | The loader returns no `today` and does not call `getToday`. |
+| `src/server/budget/queries.test.ts` | 5 / 17 | The summaries have no `pendingTotal` / `pendingCount`, and the fixtures have no pending cost. |
+| `src/mocks/queries/budget.test.ts` | 1 / 9 | No pending cost in `FUND_ENTRIES`. |
+| `fund-update.test.ts` | fails at import | `./fund-update` does not exist. |
+
+The new tests that already pass are guards that the implementation must keep green: the live region starts empty (kept from FD-06), a bucket without pending costs has no pending line, the pending row keeps three cells and its "Recorded by" line, axe with pending data, the loader passes pending fields through, a pending cost does not lower Government's $240, and "a pending entry is always an expense" (true for now only because no pending entries exist). No test was skipped, marked `.only`, or deleted to get here. Changed test expectations: DECISIONS.md FD-11.
 
 ### After implementation (2026-09-25)
 **CI is down (GitHub Actions limits), so every check below ran locally.** No test was changed, skipped, marked `.only` or deleted: the 92 tests are the ones written first (FD-05 amendment aside, above).

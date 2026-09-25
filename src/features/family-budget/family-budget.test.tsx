@@ -12,6 +12,7 @@ const mocks = vi.hoisted(() => ({
   getBudgetSummary: vi.fn(),
   getFundHistory: vi.fn(),
   getClientHeaderSummary: vi.fn(),
+  getToday: vi.fn(),
 }));
 
 vi.mock("next/navigation", () => ({
@@ -20,6 +21,10 @@ vi.mock("next/navigation", () => ({
 vi.mock("@/server/budget/queries", () => ({
   getBudgetSummary: mocks.getBudgetSummary,
   getFundHistory: mocks.getFundHistory,
+}));
+// The reference day a saved update is dated (CHG-020); the mock answers Mon 30 Nov 2026.
+vi.mock("@/server/events/queries", () => ({
+  getToday: mocks.getToday,
 }));
 vi.mock("@/server/clients/queries", () => ({
   getClientHeaderSummary: mocks.getClientHeaderSummary,
@@ -83,9 +88,39 @@ const HISTORY = [
   ),
 ];
 
+/** A cost a bucket could not cover when its occurrence was completed (CHG-020, PD-058). */
+function pendingCost(id: string, amount: number, date: string, description: string): FundEntry {
+  return {
+    id,
+    clientId: CLIENT_ID,
+    bucketKind: "government",
+    type: "expense",
+    amount: -amount,
+    date,
+    description,
+    recordedBy: "Aisha Rahman",
+    pending: true,
+  };
+}
+
+/** Government holding one pending cost of $310, which is more than its $240. */
+const BUCKETS_WITH_PENDING = [
+  BUCKETS[0]!,
+  BUCKETS[1]!,
+  { ...BUCKETS[2]!, pendingTotal: 310, pendingCount: 1 },
+];
+
+const HISTORY_WITH_PENDING = [
+  HISTORY[0]!,
+  pendingCost("pending-1", 310, "2026-10-27", "Physiotherapy"),
+  HISTORY[1]!,
+  HISTORY[2]!,
+];
+
 beforeEach(() => {
   mocks.getBudgetSummary.mockResolvedValue(BUCKETS);
   mocks.getFundHistory.mockResolvedValue(HISTORY);
+  mocks.getToday.mockResolvedValue("2026-11-30");
   mocks.getClientHeaderSummary.mockResolvedValue({
     id: CLIENT_ID,
     firstName: "Margaret",
@@ -147,6 +182,42 @@ function historyRows() {
 /** Each row's "Recorded by …" element, or null when the row has none. */
 function historyAttributions() {
   return dataRows().map((row) => within(row).getAllByRole("cell")[1]!.children[1] ?? null);
+}
+
+/** The bucket card whose name is `label`. */
+function bucketCard(label: string) {
+  const card = within(fundsCard())
+    .getAllByRole("listitem")
+    .find((item) => within(item).queryByText(label, { exact: true }));
+  if (!card) throw new Error(`no bucket card named ${label}`);
+  return card;
+}
+
+type User = ReturnType<typeof userEvent.setup>;
+
+function updateForm() {
+  return within(fundsCard()).getByRole("form", { name: "Update funds" });
+}
+
+async function openUpdateForm(user: User) {
+  await user.click(within(fundsCard()).getByRole("button", { name: "Update" }));
+  return updateForm();
+}
+
+/** Fills the Update form; a field left out keeps its starting value. */
+async function fillUpdateForm(
+  user: User,
+  fields: { bucket?: string; change?: "Add" | "Remove"; amount?: string; note?: string },
+) {
+  const form = updateForm();
+  if (fields.bucket) await user.selectOptions(within(form).getByLabelText("Bucket"), fields.bucket);
+  if (fields.change) await user.click(within(form).getByRole("radio", { name: fields.change }));
+  if (fields.amount) await user.type(within(form).getByLabelText("Amount"), fields.amount);
+  if (fields.note) await user.type(within(form).getByLabelText("Note (optional)"), fields.note);
+}
+
+async function saveUpdateForm(user: User) {
+  await user.click(within(updateForm()).getByRole("button", { name: "Save" }));
 }
 
 describe("[FAM-UI-05] Family Budget", () => {
@@ -389,30 +460,261 @@ describe("[FAM-UI-05] History rows (PD-034: top-ups and expenses)", () => {
   });
 });
 
-describe("[FAM-UI-05] 'Update' (FD-06: the flow is FAM-11)", () => {
+describe("[FAM-UI-05] 'Update' opens the simple form (CHG-020, FD-11)", () => {
   it("[FAM-UI-05][PRD] has a live region on the page from the start, so a message will be announced, and it is empty", async () => {
     await renderBudget();
 
     expect(within(fundsCard()).getByRole("status")).toBeEmptyDOMElement();
   });
 
-  it("[FAM-UI-05][PRD] pressing 'Update' says updating funds is not available yet, and changes nothing", async () => {
+  it("[FAM-UI-05][PRD] the form is closed at first; 'Update' says so and opens it", async () => {
     const user = userEvent.setup();
     await renderBudget();
+    const update = within(fundsCard()).getByRole("button", { name: "Update" });
 
-    await user.click(within(fundsCard()).getByRole("button", { name: "Update" }));
+    expect(within(fundsCard()).queryByRole("form")).not.toBeInTheDocument();
+    expect(update).toHaveAttribute("aria-expanded", "false");
 
-    expect(within(fundsCard()).getByRole("status")).toHaveTextContent(
-      "Updating funds is not available yet.",
-    );
-    // No card and no History row is added or changed.
-    expect(within(fundsCard()).getAllByRole("listitem")).toHaveLength(3);
-    expect(within(fundsCard()).getByText("$14,880")).toBeInTheDocument();
-    expect(historyRows()).toHaveLength(3);
-    expect(mocks.refresh).not.toHaveBeenCalled();
+    await user.click(update);
+
+    expect(updateForm()).toBeInTheDocument();
+    expect(update).toHaveAttribute("aria-expanded", "true");
   });
 
-  it("[FAM-UI-05][PRD] can be pressed from the keyboard", async () => {
+  it("[FAM-UI-05][AC-04] the form has a bucket, Add or Remove, an amount and an optional note, and Save and Cancel", async () => {
+    const user = userEvent.setup();
+    await renderBudget();
+    const form = await openUpdateForm(user);
+
+    const bucket = within(form).getByLabelText("Bucket");
+    expect(
+      within(bucket)
+        .getAllByRole("option")
+        .map((option) => option.textContent),
+    ).toEqual(["Choose a bucket", "NDIS", "Fixed", "Government"]);
+    expect(bucket).toHaveValue("");
+
+    const change = within(form).getByRole("radiogroup", { name: "Change" });
+    expect(within(change).getByRole("radio", { name: "Add" })).toHaveAttribute(
+      "aria-checked",
+      "true",
+    );
+    expect(within(change).getByRole("radio", { name: "Remove" })).toHaveAttribute(
+      "aria-checked",
+      "false",
+    );
+
+    expect(within(form).getByLabelText("Amount")).toHaveValue("");
+    expect(within(form).getByLabelText("Note (optional)")).toHaveValue("");
+    // No date field: an update is dated today (PD-058).
+    expect(within(form).queryByLabelText(/date/i)).not.toBeInTheDocument();
+    expect(within(form).getByRole("button", { name: "Save" })).toHaveAttribute("type", "submit");
+    expect(within(form).getByRole("button", { name: "Cancel" })).toHaveAttribute("type", "button");
+  });
+
+  it("[FAM-UI-05][AC-04] adding $500 to NDIS with no note: NDIS shows $15,380 and History's first row is today, 'Funds added', '+$500'", async () => {
+    const user = userEvent.setup();
+    await renderBudget();
+    await openUpdateForm(user);
+
+    await fillUpdateForm(user, { bucket: "NDIS", change: "Add", amount: "500" });
+    await saveUpdateForm(user);
+
+    expect(within(bucketCard("NDIS")).getByText("$15,380")).toBeInTheDocument();
+    expect(within(bucketCard("NDIS")).getByText("of $24,500 · 37% used")).toBeInTheDocument();
+    expect(historyRows()[0]).toEqual(["30 Nov 2026", "Funds added", "+$500"]);
+    expect(historyRows()).toHaveLength(4);
+    // The other cards are unchanged.
+    expect(within(bucketCard("Fixed")).getByText("$2,750")).toBeInTheDocument();
+    expect(within(bucketCard("Government")).getByText("$240")).toBeInTheDocument();
+  });
+
+  it("[FAM-UI-05][AC-04] a saved update closes the form, says what changed, and gives focus back to 'Update'", async () => {
+    const user = userEvent.setup();
+    await renderBudget();
+    await openUpdateForm(user);
+
+    await fillUpdateForm(user, { bucket: "NDIS", amount: "500" });
+    await saveUpdateForm(user);
+
+    expect(within(fundsCard()).queryByRole("form")).not.toBeInTheDocument();
+    expect(within(fundsCard()).getByRole("status")).toHaveTextContent("$500 added to NDIS.");
+    expect(within(fundsCard()).getByRole("button", { name: "Update" })).toHaveFocus();
+  });
+
+  it("[FAM-UI-05][AC-04] a note becomes the row's description", async () => {
+    const user = userEvent.setup();
+    await renderBudget();
+    await openUpdateForm(user);
+
+    await fillUpdateForm(user, {
+      bucket: "Fixed",
+      amount: "120.50",
+      note: "Birthday money from Tom",
+    });
+    await saveUpdateForm(user);
+
+    expect(historyRows()[0]).toEqual(["30 Nov 2026", "Birthday money from Tom", "+$120.50"]);
+  });
+
+  it("[FAM-UI-05][AC-04] local state only: nothing is written or re-read, and a reload shows the fixtures again", async () => {
+    const user = userEvent.setup();
+    const first = await renderBudget();
+    await openUpdateForm(user);
+    await fillUpdateForm(user, { bucket: "NDIS", amount: "500" });
+    await saveUpdateForm(user);
+
+    expect(mocks.getBudgetSummary).toHaveBeenCalledTimes(1);
+    expect(mocks.getFundHistory).toHaveBeenCalledTimes(1);
+    expect(mocks.refresh).not.toHaveBeenCalled();
+
+    first.unmount();
+    await renderBudget();
+
+    expect(within(bucketCard("NDIS")).getByText("$14,880")).toBeInTheDocument();
+    expect(historyRows()).toHaveLength(3);
+  });
+
+  it("[FAM-UI-05][AC-05] removing $40 from Government: Government shows $200 and History's first row reads 'Funds removed', '-$40'", async () => {
+    const user = userEvent.setup();
+    await renderBudget();
+    await openUpdateForm(user);
+
+    await fillUpdateForm(user, { bucket: "Government", change: "Remove", amount: "40" });
+    await saveUpdateForm(user);
+
+    expect(within(bucketCard("Government")).getByText("$200")).toBeInTheDocument();
+    expect(within(bucketCard("Government")).getByText("of $2,960 · 93% used")).toBeInTheDocument();
+    expect(historyRows()[0]).toEqual(["30 Nov 2026", "Funds removed", "-$40"]);
+    expect(within(fundsCard()).getByRole("status")).toHaveTextContent(
+      "$40 removed from Government.",
+    );
+  });
+
+  it("[FAM-UI-05][AC-05] removing $300 from Government says 'Only $240 available' on the amount, and nothing changes", async () => {
+    const user = userEvent.setup();
+    await renderBudget();
+    await openUpdateForm(user);
+
+    await fillUpdateForm(user, { bucket: "Government", change: "Remove", amount: "300" });
+    await saveUpdateForm(user);
+
+    const amount = within(updateForm()).getByLabelText("Amount");
+    expect(amount).toHaveAccessibleDescription(/Only \$240 available/);
+    expect(amount).toHaveAttribute("aria-invalid", "true");
+    expect(within(bucketCard("Government")).getByText("$240")).toBeInTheDocument();
+    expect(historyRows()).toHaveLength(3);
+    expect(within(fundsCard()).getByRole("status")).toBeEmptyDOMElement();
+  });
+
+  it("[FAM-UI-05][AC-05] the limit follows the balance on screen: after removing $40, $300 is refused as 'Only $200 available'", async () => {
+    const user = userEvent.setup();
+    await renderBudget();
+    await openUpdateForm(user);
+    await fillUpdateForm(user, { bucket: "Government", change: "Remove", amount: "40" });
+    await saveUpdateForm(user);
+
+    await openUpdateForm(user);
+    await fillUpdateForm(user, { bucket: "Government", change: "Remove", amount: "300" });
+    await saveUpdateForm(user);
+
+    expect(within(updateForm()).getByLabelText("Amount")).toHaveAccessibleDescription(
+      /Only \$200 available/,
+    );
+  });
+
+  it("[FAM-UI-05][AC-05] the whole balance can be removed, leaving $0", async () => {
+    const user = userEvent.setup();
+    await renderBudget();
+    await openUpdateForm(user);
+
+    await fillUpdateForm(user, { bucket: "Government", change: "Remove", amount: "240" });
+    await saveUpdateForm(user);
+
+    expect(within(bucketCard("Government")).getByText("$0")).toBeInTheDocument();
+    expect(within(bucketCard("Government")).getByText("Budget exhausted")).toBeInTheDocument();
+  });
+
+  it.each([
+    ["an empty amount", "", "Enter an amount."],
+    ["'0'", "0", "Enter an amount more than $0."],
+    ["'-5'", "-5", "Enter an amount more than $0."],
+    ["'12.345'", "12.345", "Use no more than 2 decimal places."],
+  ])(
+    "[FAM-UI-05][AC-06] %s is refused with a message on the amount, and nothing changes",
+    async (_case, amount, message) => {
+      const user = userEvent.setup();
+      await renderBudget();
+      await openUpdateForm(user);
+
+      await fillUpdateForm(user, { bucket: "NDIS", amount });
+      await saveUpdateForm(user);
+
+      const field = within(updateForm()).getByLabelText("Amount");
+      expect(field).toHaveAccessibleDescription(new RegExp(message.replace(/[.$]/g, "\\$&")));
+      expect(field).toHaveAttribute("aria-invalid", "true");
+      expect(within(bucketCard("NDIS")).getByText("$14,880")).toBeInTheDocument();
+      expect(historyRows()).toHaveLength(3);
+    },
+  );
+
+  it("[FAM-UI-05][AC-06] no bucket chosen is refused with a message on the bucket, and nothing changes", async () => {
+    const user = userEvent.setup();
+    await renderBudget();
+    await openUpdateForm(user);
+
+    await fillUpdateForm(user, { amount: "500" });
+    await saveUpdateForm(user);
+
+    const bucket = within(updateForm()).getByLabelText("Bucket");
+    expect(bucket).toHaveAccessibleDescription(/Choose a bucket\./);
+    expect(bucket).toHaveAttribute("aria-invalid", "true");
+    expect(within(updateForm()).getByLabelText("Amount")).not.toHaveAttribute("aria-invalid");
+    expect(within(bucketCard("NDIS")).getByText("$14,880")).toBeInTheDocument();
+    expect(historyRows()).toHaveLength(3);
+  });
+
+  it("[FAM-UI-05][AC-06] a refused save moves focus to the first field that needs fixing", async () => {
+    const user = userEvent.setup();
+    await renderBudget();
+    await openUpdateForm(user);
+
+    await saveUpdateForm(user);
+
+    expect(within(updateForm()).getByLabelText("Bucket")).toHaveFocus();
+  });
+
+  it("[FAM-UI-05][AC-06] once fixed, the same form saves and the messages go", async () => {
+    const user = userEvent.setup();
+    await renderBudget();
+    await openUpdateForm(user);
+    await fillUpdateForm(user, { bucket: "NDIS", amount: "12.345" });
+    await saveUpdateForm(user);
+
+    const amount = within(updateForm()).getByLabelText("Amount");
+    await user.clear(amount);
+    await user.type(amount, "12.34");
+    await saveUpdateForm(user);
+
+    expect(within(fundsCard()).queryByRole("form")).not.toBeInTheDocument();
+    expect(historyRows()[0]).toEqual(["30 Nov 2026", "Funds added", "+$12.34"]);
+  });
+
+  it("[FAM-UI-05][PRD] Cancel closes the form, changes nothing, and gives focus back to 'Update'", async () => {
+    const user = userEvent.setup();
+    await renderBudget();
+    await openUpdateForm(user);
+    await fillUpdateForm(user, { bucket: "NDIS", amount: "500" });
+
+    await user.click(within(updateForm()).getByRole("button", { name: "Cancel" }));
+
+    expect(within(fundsCard()).queryByRole("form")).not.toBeInTheDocument();
+    expect(within(bucketCard("NDIS")).getByText("$14,880")).toBeInTheDocument();
+    expect(historyRows()).toHaveLength(3);
+    expect(within(fundsCard()).getByRole("button", { name: "Update" })).toHaveFocus();
+  });
+
+  it("[FAM-UI-05][PRD] works from the keyboard: Enter on 'Update' opens the form with focus on the bucket", async () => {
     const user = userEvent.setup();
     await renderBudget();
 
@@ -420,9 +722,90 @@ describe("[FAM-UI-05] 'Update' (FD-06: the flow is FAM-11)", () => {
     expect(within(fundsCard()).getByRole("button", { name: "Update" })).toHaveFocus();
     await user.keyboard("{Enter}");
 
-    expect(within(fundsCard()).getByRole("status")).toHaveTextContent(
-      "Updating funds is not available yet.",
-    );
+    expect(within(updateForm()).getByLabelText("Bucket")).toHaveFocus();
+  });
+
+  it("[FAM-UI-05][PRD] adding funds does not pay pending costs (F0-12's): the pending line and row stay", async () => {
+    mocks.getBudgetSummary.mockResolvedValue(BUCKETS_WITH_PENDING);
+    mocks.getFundHistory.mockResolvedValue(HISTORY_WITH_PENDING);
+    const user = userEvent.setup();
+    await renderBudget();
+    await openUpdateForm(user);
+
+    await fillUpdateForm(user, { bucket: "Government", amount: "500" });
+    await saveUpdateForm(user);
+
+    expect(within(bucketCard("Government")).getByText("$740")).toBeInTheDocument();
+    expect(within(bucketCard("Government")).getByText("Pending $310 · 1 cost")).toBeInTheDocument();
+    expect(within(historyTable()).getByText("Pending")).toBeInTheDocument();
+  });
+});
+
+describe("[FAM-UI-05] pending costs (CHG-020, PD-058)", () => {
+  it("[FAM-UI-05][AC-07] the Government card reads 'Pending $310 · 1 cost' in words", async () => {
+    mocks.getBudgetSummary.mockResolvedValue(BUCKETS_WITH_PENDING);
+    await renderBudget();
+
+    expect(within(bucketCard("Government")).getByText("Pending $310 · 1 cost")).toBeInTheDocument();
+    // The remaining figure is not reduced by a cost that has not been paid.
+    expect(within(bucketCard("Government")).getByText("$240")).toBeInTheDocument();
+  });
+
+  it("[FAM-UI-05][AC-07] a bucket with no pending costs has no pending line", async () => {
+    mocks.getBudgetSummary.mockResolvedValue([
+      { ...BUCKETS[0]!, pendingTotal: 0, pendingCount: 0 },
+      BUCKETS[1]!,
+      BUCKETS_WITH_PENDING[2]!,
+    ]);
+    await renderBudget();
+
+    expect(within(bucketCard("NDIS")).queryByText(/Pending/)).not.toBeInTheDocument();
+    expect(within(bucketCard("Fixed")).queryByText(/Pending/)).not.toBeInTheDocument();
+  });
+
+  it("[FAM-UI-05][AC-07] several pending costs are counted in the plural, and cents are kept", async () => {
+    mocks.getBudgetSummary.mockResolvedValue([
+      BUCKETS[0]!,
+      BUCKETS[1]!,
+      { ...BUCKETS[2]!, pendingTotal: 1020.5, pendingCount: 2 },
+    ]);
+    await renderBudget();
+
+    expect(
+      within(bucketCard("Government")).getByText("Pending $1,020.50 · 2 costs"),
+    ).toBeInTheDocument();
+  });
+
+  it("[FAM-UI-05][AC-08] History lists the pending cost with its description, '-$310' and a 'Pending' label in text", async () => {
+    mocks.getBudgetSummary.mockResolvedValue(BUCKETS_WITH_PENDING);
+    mocks.getFundHistory.mockResolvedValue(HISTORY_WITH_PENDING);
+    await renderBudget();
+
+    const rows = dataRows();
+    expect(rows).toHaveLength(4);
+    // In the contract's order: the pending cost is the second row.
+    const [date, description, amount] = within(rows[1]!).getAllByRole("cell");
+    expect(date).toHaveTextContent("27 Oct 2026");
+    expect(description!.firstElementChild).toHaveTextContent("Physiotherapy");
+    expect(amount).toHaveTextContent("-$310");
+    expect(within(rows[1]!).getByText("Pending")).toBeInTheDocument();
+  });
+
+  it("[FAM-UI-05][AC-08] only the pending row is labelled 'Pending'", async () => {
+    mocks.getFundHistory.mockResolvedValue(HISTORY_WITH_PENDING);
+    await renderBudget();
+
+    const labelled = dataRows().filter((row) => within(row).queryByText("Pending"));
+    expect(labelled).toHaveLength(1);
+    expect(within(labelled[0]!).getByText("Physiotherapy")).toBeInTheDocument();
+  });
+
+  it("[FAM-UI-05][AC-08] the pending row still names who completed the care, and keeps the table's three columns", async () => {
+    mocks.getFundHistory.mockResolvedValue(HISTORY_WITH_PENDING);
+    await renderBudget();
+
+    expect(within(dataRows()[1]!).getAllByRole("cell")).toHaveLength(3);
+    expect(historyAttributions()[1]).toHaveTextContent("Recorded by Aisha Rahman");
   });
 });
 
@@ -474,6 +857,7 @@ describe("[FAM-UI-05] states (States sheet, OQ-24 defaults, FD-07)", () => {
   it.each([
     ["getBudgetSummary", () => mocks.getBudgetSummary.mockRejectedValue(new Error("x"))],
     ["getFundHistory", () => mocks.getFundHistory.mockRejectedValue(new Error("x"))],
+    ["getToday", () => mocks.getToday.mockRejectedValue(new Error("x"))],
   ])(
     "[FAM-UI-05][PRD] error state: shows 'Something went wrong' with Retry when %s rejects",
     async (_contractFunction, rejectIt) => {
@@ -521,6 +905,12 @@ describe("[FAM-UI-05] the screen reads through the contract", () => {
 
     expect(mocks.getBudgetSummary).toHaveBeenCalledExactlyOnceWith(CLIENT_ID);
     expect(mocks.getFundHistory).toHaveBeenCalledExactlyOnceWith(CLIENT_ID);
+  });
+
+  it("[FAM-UI-05][AC-04] reads today through the contract, once, for dating a saved update", async () => {
+    await renderBudget();
+
+    expect(mocks.getToday).toHaveBeenCalledTimes(1);
   });
 
   it("[FAM-UI-05][PRD] does not read the client's header summary: the shell header owns it", async () => {
@@ -622,12 +1012,23 @@ describe("[FAM-UI-05] long and unusual content stays inside its card (no overlap
 });
 
 describe("[FAM-UI-05] accessibility", () => {
-  it("[FAM-UI-05][PRD] the screen, before and after pressing 'Update', has no axe violations", async () => {
+  it("[FAM-UI-05][PRD] the screen, with the Update form closed, open, and showing errors, has no axe violations", async () => {
     const user = userEvent.setup();
     const { container } = await renderBudget();
     expect(await axe(container)).toHaveNoViolations();
 
-    await user.click(within(fundsCard()).getByRole("button", { name: "Update" }));
+    await openUpdateForm(user);
+    expect(await axe(container)).toHaveNoViolations();
+
+    await saveUpdateForm(user);
+    expect(await axe(container)).toHaveNoViolations();
+  });
+
+  it("[FAM-UI-05][PRD] pending costs on a card and in History have no axe violations", async () => {
+    mocks.getBudgetSummary.mockResolvedValue(BUCKETS_WITH_PENDING);
+    mocks.getFundHistory.mockResolvedValue(HISTORY_WITH_PENDING);
+    const { container } = await renderBudget();
+
     expect(await axe(container)).toHaveNoViolations();
   });
 

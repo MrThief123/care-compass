@@ -44,8 +44,11 @@ describe("[FAM-UI-05][PRD] FUND_ENTRIES fixtures (CHG-019)", () => {
     }
   });
 
-  it("[FAM-UI-05][AC-02] Margaret has exactly the three top-ups the design draws", () => {
-    const margaret = FUND_ENTRIES.filter((entry) => entry.clientId === MARGARET_CLIENT_ID);
+  it("[FAM-UI-05][AC-02] Margaret's paid entries are exactly the three top-ups the design draws", () => {
+    // CHG-020: her pending cost is covered by its own test below.
+    const margaret = FUND_ENTRIES.filter(
+      (entry) => entry.clientId === MARGARET_CLIENT_ID && !entry.pending,
+    );
 
     expect(
       margaret
@@ -76,6 +79,33 @@ describe("[FAM-UI-05][PRD] FUND_ENTRIES fixtures (CHG-019)", () => {
     for (const entry of FUND_ENTRIES) {
       expect(entry.recordedBy?.trim()).toBeTruthy();
       expect(people.has(entry.recordedBy!)).toBe(true);
+    }
+  });
+
+  it("[FAM-UI-05][AC-07] Margaret has one pending cost: Physiotherapy, $310 on Government, more than its $240 (CHG-020)", () => {
+    const pending = FUND_ENTRIES.filter((entry) => entry.pending);
+
+    expect(pending).toEqual([
+      expect.objectContaining({
+        clientId: MARGARET_CLIENT_ID,
+        bucketKind: "government",
+        type: "expense",
+        amount: -310,
+        date: "2026-10-27",
+        description: "Physiotherapy",
+        recordedBy: "Aisha Rahman",
+      }),
+    ]);
+
+    const government = RAW_BUDGET_BUCKETS_BY_CLIENT_ID[MARGARET_CLIENT_ID]!.find(
+      (bucket) => bucket.kind === "government",
+    )!;
+    expect(-pending[0]!.amount).toBeGreaterThan(government.total - government.used);
+  });
+
+  it("[FAM-UI-05][PRD] a pending entry is always an expense (PD-058: only a cost can be pending)", () => {
+    for (const entry of FUND_ENTRIES.filter((e) => e.pending)) {
+      expect(entry.type).toBe("expense");
     }
   });
 

@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { MARGARET_CLIENT_ID, ROBERT_CLIENT_ID } from "@/mocks/fixtures";
 import { getBudgetSummary, getFundHistory } from "@/server/budget/queries";
-import { FundEntrySchema } from "@/types/domain";
+import { BudgetBucketSummarySchema, FundEntrySchema } from "@/types/domain";
 
 beforeEach(() => {
   vi.stubEnv("DATA_SOURCE", "mock");
@@ -30,6 +30,42 @@ describe("[FAM-UI-05][AC-01] getBudgetSummary (the three cards' data)", () => {
 
     expect(buckets.map((bucket) => bucket.state)).toEqual(["ok", "ok", "alert"]);
   });
+
+  it("[FAM-UI-05][AC-07] gives each bucket its pending total and count: Margaret's Government holds $310 in 1 cost (CHG-020)", async () => {
+    const buckets = await getBudgetSummary(MARGARET_CLIENT_ID);
+
+    expect(
+      buckets.map((bucket) => [bucket.label, bucket.pendingTotal, bucket.pendingCount]),
+    ).toEqual([
+      ["NDIS", 0, 0],
+      ["Fixed", 0, 0],
+      ["Government", 310, 1],
+    ]);
+  });
+
+  it("[FAM-UI-05][AC-07] a pending cost is not taken off the remaining figure: Government still has $240", async () => {
+    const buckets = await getBudgetSummary(MARGARET_CLIENT_ID);
+
+    expect(buckets[2]).toMatchObject({ remaining: 240, used: 2760, percentUsed: 92 });
+  });
+
+  it("[FAM-UI-05][AC-07] another client's buckets have no pending costs of Margaret's", async () => {
+    const buckets = await getBudgetSummary(ROBERT_CLIENT_ID);
+
+    expect(buckets.map((bucket) => [bucket.pendingTotal, bucket.pendingCount])).toEqual([
+      [0, 0],
+      [0, 0],
+      [0, 0],
+    ]);
+  });
+
+  it("[FAM-UI-05][PRD] every summary is valid against the domain schema", async () => {
+    for (const clientId of [MARGARET_CLIENT_ID, ROBERT_CLIENT_ID]) {
+      (await getBudgetSummary(clientId)).forEach((bucket) =>
+        BudgetBucketSummarySchema.parse(bucket),
+      );
+    }
+  });
 });
 
 describe("[FAM-UI-05][AC-02] getFundHistory (CHG-019)", () => {
@@ -47,7 +83,8 @@ describe("[FAM-UI-05][AC-02] getFundHistory (CHG-019)", () => {
   });
 
   it("[FAM-UI-05][AC-02] returns the three rows the design draws, word for word, in the design's order", async () => {
-    const history = await getFundHistory(MARGARET_CLIENT_ID);
+    // CHG-020: the pending cost sits among them by date; the design's rows are the paid ones.
+    const history = (await getFundHistory(MARGARET_CLIENT_ID)).filter((entry) => !entry.pending);
 
     expect(history.map((entry) => [entry.date, entry.description, entry.amount])).toEqual([
       ["2026-11-03", "NDIS quarterly plan top-up", 6000],
@@ -68,9 +105,29 @@ describe("[FAM-UI-05][AC-02] getFundHistory (CHG-019)", () => {
     const margaret = await getFundHistory(MARGARET_CLIENT_ID);
     expect(margaret.map((entry) => entry.recordedBy)).toEqual([
       "Helen Doyle",
+      "Aisha Rahman",
       "Helen Doyle",
       "Helen Doyle",
     ]);
+  });
+
+  it("[FAM-UI-05][AC-08] lists Margaret's pending cost by its date: 27 Oct 2026, Physiotherapy, -$310 on Government (CHG-020)", async () => {
+    const history = await getFundHistory(MARGARET_CLIENT_ID);
+
+    expect(history.map((entry) => [entry.date, Boolean(entry.pending)])).toEqual([
+      ["2026-11-03", false],
+      ["2026-10-27", true],
+      ["2026-10-15", false],
+      ["2026-10-01", false],
+    ]);
+    expect(history[1]).toMatchObject({
+      bucketKind: "government",
+      type: "expense",
+      amount: -310,
+      description: "Physiotherapy",
+      recordedBy: "Aisha Rahman",
+      pending: true,
+    });
   });
 
   it("[FAM-UI-05][PRD] is ordered newest date first, whatever the fixtures' own order", async () => {
@@ -120,7 +177,12 @@ describe("[FAM-UI-05][AC-02] getFundHistory (CHG-019)", () => {
     const second = await getFundHistory(MARGARET_CLIENT_ID);
 
     expect(second[0]).toMatchObject({ description: "NDIS quarterly plan top-up", amount: 6000 });
-    expect(second.map((entry) => entry.date)).toEqual(["2026-11-03", "2026-10-15", "2026-10-01"]);
+    expect(second.map((entry) => entry.date)).toEqual([
+      "2026-11-03",
+      "2026-10-27",
+      "2026-10-15",
+      "2026-10-01",
+    ]);
   });
 });
 
