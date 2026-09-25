@@ -66,6 +66,11 @@ function announced() {
     .trim();
 }
 
+/** Family info is read-only until 'Edit' is clicked (CHG-024). */
+async function startEditing(user: ReturnType<typeof userEvent.setup>) {
+  await user.click(screen.getByRole("button", { name: "Edit" }));
+}
+
 async function openChangeDialog(user: ReturnType<typeof userEvent.setup>) {
   await user.click(screen.getByRole("button", { name: "Change" }));
   return screen.getByRole("dialog", { name: "Change organisation?" });
@@ -173,6 +178,7 @@ describe("[FAM-UI-06] Family Settings", () => {
     const user = userEvent.setup();
     const first = renderSettings();
 
+    await startEditing(user);
     await user.clear(input("Phone"));
     await user.type(input("Phone"), "0400 000 000");
     await user.click(screen.getByRole("button", { name: "Save" }));
@@ -190,6 +196,7 @@ describe("[FAM-UI-06] Family Settings", () => {
     const user = userEvent.setup();
     renderSettings();
 
+    await startEditing(user);
     await user.clear(input("Address"));
     await user.type(input("Address"), "  1 Oak Rd  ");
     await user.click(screen.getByRole("button", { name: "Save" }));
@@ -201,6 +208,7 @@ describe("[FAM-UI-06] Family Settings", () => {
     const user = userEvent.setup();
     renderSettings();
 
+    await startEditing(user);
     await user.clear(input("Name"));
     await user.clear(input("Email"));
     await user.type(input("Email"), "helen@");
@@ -234,13 +242,14 @@ describe("[FAM-UI-06] Family Settings", () => {
     expect(announced()).toContain("Saved.");
   });
 
-  it("[FAM-UI-06][AC-07] editing a field clears that field's error and the 'Saved.' message", async () => {
+  it("[FAM-UI-06][AC-07] editing a field clears that field's error, and 'Edit' clears the 'Saved.' message", async () => {
     const user = userEvent.setup();
     renderSettings();
 
+    await startEditing(user);
     await user.click(screen.getByRole("button", { name: "Save" }));
     expect(announced()).toContain("Saved.");
-    await user.type(input("Address"), " Unit 2");
+    await startEditing(user);
     expect(announced()).not.toContain("Saved.");
 
     await user.clear(input("Name"));
@@ -248,6 +257,56 @@ describe("[FAM-UI-06] Family Settings", () => {
     expect(screen.getByText("Enter your name.")).toBeInTheDocument();
     await user.type(input("Name"), "H");
     expect(screen.queryByText("Enter your name.")).not.toBeInTheDocument();
+  });
+});
+
+describe("[FAM-UI-06] read-only until Edit (CHG-024)", () => {
+  it("[FAM-UI-06][AC-10] Family info starts read-only with an 'Edit' button and no 'Save'", async () => {
+    const user = userEvent.setup();
+    renderSettings();
+
+    for (const label of ["Name", "Phone", "Email", "Address"]) {
+      expect(input(label)).toHaveAttribute("readonly");
+    }
+    expect(screen.getByRole("button", { name: "Edit" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Save" })).not.toBeInTheDocument();
+
+    await user.type(input("Name"), "X");
+    expect(input("Name")).toHaveValue("Helen Doyle");
+  });
+
+  it("[FAM-UI-06][AC-10] 'Edit' opens the fields, focuses Name and becomes 'Save'; a valid Save locks them again", async () => {
+    const user = userEvent.setup();
+    renderSettings();
+
+    await startEditing(user);
+
+    for (const label of ["Name", "Phone", "Email", "Address"]) {
+      expect(input(label)).not.toHaveAttribute("readonly");
+    }
+    expect(input("Name")).toHaveFocus();
+    expect(screen.queryByRole("button", { name: "Edit" })).not.toBeInTheDocument();
+
+    await user.clear(input("Phone"));
+    await user.type(input("Phone"), "0400 000 000");
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    expect(input("Phone")).toHaveValue("0400 000 000");
+    expect(input("Phone")).toHaveAttribute("readonly");
+    expect(screen.getByRole("button", { name: "Edit" })).toHaveFocus();
+    expect(announced()).toContain("Saved.");
+  });
+
+  it("[FAM-UI-06][AC-10] an invalid Save stays in edit mode", async () => {
+    const user = userEvent.setup();
+    renderSettings();
+
+    await startEditing(user);
+    await user.clear(input("Name"));
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    expect(input("Name")).not.toHaveAttribute("readonly");
+    expect(screen.getByRole("button", { name: "Save" })).toBeInTheDocument();
   });
 });
 
@@ -289,12 +348,16 @@ describe("[FAM-UI-06] states (States sheet, FD-05)", () => {
 });
 
 describe("[FAM-UI-06] accessibility and long content (FD-06)", () => {
-  it("[FAM-UI-06][AC-09] the screen, and the screen with the dialog open, have no axe violations", async () => {
+  it("[FAM-UI-06][AC-09] the screen, with the dialog open, and in edit mode, has no axe violations", async () => {
     const user = userEvent.setup();
     const { container } = renderSettings();
     expect(await axe(container)).toHaveNoViolations();
 
     await openChangeDialog(user);
+    expect(await axe(container)).toHaveNoViolations();
+    await user.keyboard("{Escape}");
+
+    await startEditing(user);
     expect(await axe(container)).toHaveNoViolations();
   });
 
