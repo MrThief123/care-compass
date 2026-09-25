@@ -1,6 +1,6 @@
 # Progress — FAM-UI-08 Family event cost fields (UI)
 
-Status: READY FOR PR
+Status: MERGED TO DEV
 Owner: Dhruv Verma
 Branch: `feature/family-ui-event-cost` (created from `origin/family-dev` at 2411316)
 PR target: `family-dev`
