@@ -3,7 +3,7 @@
 -- plus the CHG-001 / CHG-009 rules: plain events cannot be ticked off, per-occurrence mode overrides,
 -- and OQ-10 undo. AC-01 to AC-03 and AC-08 (occurrence listing, status) are TypeScript, tested elsewhere.
 begin;
-select plan(58);
+select plan(66);
 
 -- ---------------------------------------------------------------------------
 -- Seed: two organisations, five people, three clients, shifts, events
@@ -333,6 +333,55 @@ select ok(
 select ok(
   exists (select 1 from audit_log where table_name = 'care_events' and action = 'UPDATE' and actor_id = 'a1111111-1111-1111-1111-111111111111'),
   'an event edit is in the audit log with the editor');
+
+-- ---------------------------------------------------------------------------
+-- Deactivation (AC-08): a deactivated event stops generating occurrences from that moment
+-- ---------------------------------------------------------------------------
+reset role;
+insert into care_events (id, client_id, title, starts_at, recurrence, created_by) values
+  ('e5555555-5555-5555-5555-555555555555', 'b1111111-1111-1111-1111-111111111111', 'Stretches', '2026-11-30 07:00:00+11', '{"frequency":"daily","interval":1}', 'a1111111-1111-1111-1111-111111111111');
+select pg_temp.login('a1111111-1111-1111-1111-111111111111');
+update care_events set is_active = false where id = 'e5555555-5555-5555-5555-555555555555';
+select ok(
+  (select deactivated_at is not null and deactivated_at <= now() from care_events where id = 'e5555555-5555-5555-5555-555555555555'),
+  'AC-08: deactivating an event records when');
+update care_events set is_active = true where id = 'e5555555-5555-5555-5555-555555555555';
+select ok(
+  (select deactivated_at is null from care_events where id = 'e5555555-5555-5555-5555-555555555555'),
+  'reactivating an event clears that');
+
+-- ---------------------------------------------------------------------------
+-- Who is on shift (OQ-29): a family member cannot read carer profiles, so the
+-- carer's name for an occurrence comes from a function that answers readers of the client's events.
+-- ---------------------------------------------------------------------------
+select results_eq(
+  $$ select carer_id, carer_display_name from client_shift_carers('b1111111-1111-1111-1111-111111111111', now() - interval '2 hours', now() + interval '2 hours') $$,
+  $$ values ('a3333333-3333-3333-3333-333333333333'::uuid, 'Aisha Rahman'::text) $$,
+  'Helen sees Aisha (full name) for a window her shift overlaps; the cancelled shift and tomorrow''s are not in it');
+
+select is(
+  (select count(*)::int from client_shift_carers('b1111111-1111-1111-1111-111111111111', now() + interval '10 days', now() + interval '11 days')),
+  0, 'a window with no shift returns nothing');
+
+select pg_temp.login('a2222222-2222-2222-2222-222222222222');
+select is(
+  (select count(*)::int from client_shift_carers('b1111111-1111-1111-1111-111111111111', now() - interval '2 hours', now() + interval '2 hours')),
+  1, 'Priya (admin of the organisation) can read who is on shift');
+
+select pg_temp.login('a6666666-6666-6666-6666-666666666666');
+select throws_ok(
+  $$ select * from client_shift_carers('b1111111-1111-1111-1111-111111111111', now() - interval '2 hours', now() + interval '2 hours') $$,
+  '42501', null, 'another client''s family cannot read who is on Margaret''s shifts');
+
+select pg_temp.login('a7777777-7777-7777-7777-777777777777');
+select throws_ok(
+  $$ select * from client_shift_carers('b1111111-1111-1111-1111-111111111111', now() - interval '2 hours', now() + interval '2 hours') $$,
+  '42501', null, 'a carer with no assignment to Margaret cannot either');
+
+select pg_temp.login('a1111111-1111-1111-1111-111111111111');
+select throws_ok(
+  $$ select * from client_shift_carers('b1111111-1111-1111-1111-111111111111', null, now()) $$,
+  '22023', null, 'a window without a start is refused');
 
 select * from finish();
 rollback;
