@@ -1,12 +1,12 @@
 # Progress — CAR-UI-03 Carer Calendar screen (UI)
 
-Status: NOT STARTED
-Owner: unclaimed
+Status: IN PROGRESS
+Owner: Dhruv Verma
 Lane: C — Carer
 Sprint: SPRINT · planned D5–D6
-Branch: `feature/carer-ui-calendar` (not yet created)
+Branch: `feature/carer-ui-calendar`
 PR target: `carer-dev`
-Last updated: 2026-09-17 (planning pack generated)
+Last updated: 2026-09-26 (claimed)
 
 ## Blockers
 - None recorded at planning time
