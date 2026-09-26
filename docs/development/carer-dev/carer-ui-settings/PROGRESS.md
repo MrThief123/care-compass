@@ -6,7 +6,7 @@ Lane: C — Carer
 Sprint: SPRINT · planned D6
 Branch: `feature/carer-ui-settings`
 PR target: `carer-dev`
-Last updated: 2026-09-26 (implemented, green, browser-checked)
+Last updated: 2026-09-26 (Edit/Save added on the human's request, FD-06)
 
 ## Blockers
 - None recorded at planning time
@@ -23,6 +23,9 @@ Last updated: 2026-09-26 (implemented, green, browser-checked)
 - Implemented to green: the `staff-aisha` fixture (FD-01), the `getCarerContactDetails` contract with a Supabase branch (FD-02), `/carer/settings` page and loading, and `src/features/carer-settings/` (view, skeleton). The error state reuses `CarerHomeErrorState` (FD-05)
 - Browser check (Playwright against the dev server, mock data): 1920, 1440, 1280, 1024, 900 and 768 px. No horizontal scroll, no overlapping elements, no clipped field values. Pressing Reset shows the status message. Matches `docs/design/screens/carer-04-settings.png`. The only differences are in the F0-15 shell (Patients icon, sign-out button)
 
+- My info Edit/Save/Cancel added (FD-06), following Family Settings. Role stays read-only; Save is local in Phase 1. T-02 changed, and T-09 and T-10 were written first and failed on the missing 'Edit' button. Browser sweep from 1920 to 768 px in edit mode with an error showing: no horizontal scroll, no overlapping elements, and 'Saved.' is announced
+- **HUMAN REVIEW: test expectation changed.** T-02 now expects an 'Edit' button (FD-06)
+
 ## In progress
 - None
 
@@ -33,9 +36,10 @@ Last updated: 2026-09-26 (implemented, green, browser-checked)
 - 2 / 2 MET
 
 ## Tests
-- Written: 8 / 8 (T-01 to T-07: `src/features/carer-settings/carer-settings.test.tsx`; T-08: 4 cases in `src/server/profiles/queries.test.ts`)
-- Passing: 8 / 8 (36 tests across the feature file and `src/server/profiles/queries.test.ts`)
-- Full `vitest run`: 1840 passed, 12 skipped, 5 failed. The 5 failures are F0-04/F0-07 integration tests against hosted Supabase that fail with `AuthApiError: Invalid API key`. That is an environment problem, not caused by this change
+- Written: 10 / 10 (T-01 to T-07, T-09, T-10: `src/features/carer-settings/carer-settings.test.tsx`; T-08: 4 cases in `src/server/profiles/queries.test.ts`)
+- Passing: 10 / 10 (38 tests across the feature file and `src/server/profiles/queries.test.ts`)
+- After FD-06: `vitest run src/features src/server src/app` 1341 / 1341 passed; lint and typecheck clean on the change
+- Full `vitest run` (before FD-06): 1840 passed, 12 skipped, 5 failed. The 5 failures are F0-04/F0-07 integration tests against hosted Supabase that fail with `AuthApiError: Invalid API key`. That is an environment problem, not caused by this change
 - Lint: 0 errors (3 existing warnings in files this feature does not touch). Typecheck: clean
 - e2e: `tests/e2e/shared-app-shell.spec.ts --grep-invert "F0-07"` 5 / 5 passed
 
