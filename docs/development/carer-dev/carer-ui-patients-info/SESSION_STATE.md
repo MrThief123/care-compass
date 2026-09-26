@@ -9,7 +9,6 @@ Test results: feature 34/34 green; full vitest 1864 passed, 5 F0-04/F0-07 enviro
 Current blocker: none
 Important decisions: FD-04 amended (reuse `CarerHomeErrorState`); FD-05 (fixtures test change, test typing, streamed notFound, OQ-09 default); FD-06 / CHG-029 (T-03, T-07 expectations changed)
 Exact next action:
-1. Wait for human approval, then open PR `CAR-UI-02 Carer Patients and patient info screens (UI)` to `carer-dev` (body from `docs/DEVELOPMENT_WORKFLOW.md` §8; flag HUMAN REVIEW items; note CI not triggered, suite run locally; attach side-by-side screenshot).
-2. After the PR number exists: record it in PROGRESS.md (`docs(carer-ui-patients-info): record PR #n`).
+1. PR #125 open to `carer-dev`; wait for review. Address any review comments on this branch.
 Files likely to be touched next: PROGRESS.md only
 Warning for next session: FD-01 request to Lane F (base path + read-only mode for Home/Calendar/Care log) must be raised with the human; CAR-04 depends on it.

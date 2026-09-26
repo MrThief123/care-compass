@@ -1,11 +1,11 @@
 # Progress — CAR-UI-02 Carer Patients and patient info screens (UI)
 
-Status: READY FOR PR
+Status: IN REVIEW
 Owner: Dhruv Verma
 Lane: C — Carer
 Sprint: SPRINT · planned D4–D5
 Branch: `feature/carer-ui-patients-info`
-PR target: `carer-dev`
+PR target: `carer-dev` · PR #125
 Last updated: 2026-09-26 (CHG-029 implemented, green)
 
 ## Blockers
@@ -34,7 +34,7 @@ Last updated: 2026-09-26 (CHG-029 implemented, green)
 - Browser check at 1920 → 768: no horizontal scroll, no overlaps; badges sit top-right of each card; Margaret opens on Home with tabs Home | Info | Calendar | Care log; Robert's Info shows the notice.
 
 ## Remaining
-- Human approval, then open the PR to `carer-dev` with the side-by-side screenshot.
+- Review and merge of PR #125 (human).
 
 ## Acceptance criteria status
 - 13 / 13 MET
