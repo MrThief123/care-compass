@@ -6,52 +6,51 @@ Lane: C — Carer
 Sprint: SPRINT · planned D5–D6
 Branch: `feature/carer-ui-calendar`
 PR target: `carer-dev`
-Last updated: 2026-09-26 (claimed)
+Last updated: 2026-09-26 (docs rewritten for CHG-025/CHG-030; tests written, red)
 
 ## Blockers
-- None recorded at planning time
+- None. `/carer/patients/[clientId]` (AC-04's target) ships with CAR-UI-02 (PR #125); the link 404s in the preview until that merges to `carer-dev`.
 
 ## Dependencies status
-- F0-15 — NOT STARTED
-- UI-01 — NOT STARTED
-- UI-03 — NOT STARTED
+- F0-15, UI-01, UI-03 — merged (plan-status: Ready to start)
 
 ## Completed
-- Feature documentation drafted (Claude Chat planning pack)
+- Claimed (Dhruv Verma).
+- CHG-030 recorded; PRD Scope, ACCEPTANCE_CRITERIA (AC-01/02 rewritten, AC-04 to AC-10 added), TEST_PLAN and DECISIONS (FD-01, FD-02) updated before implementation.
+- Tests written first: `src/server/shifts/queries.test.ts` (6 new, T-07) and `src/features/carer-calendar/carer-calendar.test.tsx` (T-01 to T-06, T-08 to T-10).
 
 ## In progress
 - None
 
 ## Remaining
-- Route `/carer/calendar` inside the carer layout.
-- Title 'Calendar', section 'Shifts', D/W/M.
-- `WeekGrid` with carer label format '<Client> — <title>' truncated.
-- 'Tasks for the selected shift' with subtitle and `TaskChecklist` (fixture sub-steps per design; semantics pending OQ-33).
-- Loading skeleton, empty state and error state (States sheet) wired to the query contract's states.
-- Data only via `src/server/**` contract functions (mock data source).
+- `getCarerShifts(carerId, range)` in `src/server/shifts/queries.ts` + `src/mocks/queries/shifts.ts` (flag in PR: outside Lane C, CHG-030).
+- `src/app/(carer)/carer/calendar/page.tsx` and `loading.tsx`; `src/features/carer-calendar/` view, toolbar (FD-02), skeleton, error state.
+- Green, full suite, e2e (`--grep-invert "F0-07"`), preview + browser width sweep 1920→768, side-by-side screenshot.
 
 ## Acceptance criteria status
-- 0 / 3 MET
+- 0 / 10 MET
 
 ## Tests
-- Written: 0 / 3
+- Written: 27 (6 contract, 21 component)
 - Passing: 0
-- Failing: 0
+- Failing: 27 — red for the expected reason: `TypeError: getCarerShifts is not a function` (contract); `Failed to resolve import "@/app/(carer)/carer/calendar/loading"` (screen file, route not built yet). The 6 existing CAR-UI-01 contract tests still pass.
 
 ## Files changed
-- None yet. Likely files: `src/app/(carer)/carer/calendar/page.tsx`
+- DECISIONS.md (CHG-030), DEVELOPMENT_PLAN.md (CAR-UI-03 card), feature docs, the two test files above.
 
 ## Decisions
-- See DECISIONS.md
+- See DECISIONS.md (FD-01, FD-02) and root CHG-030.
 
 ## Problems encountered
 - None
 
 ## Assumptions
-- PROPOSED items in PRD.md are unconfirmed until validated in F0-01 or answered in DECISIONS.md.
+- Block title is the client's first name and the kit block shows the time range, as on Carer Home (CAR-UI-01).
+- Empty state copy: 'No shifts' / 'Shifts assigned to you will appear here.'
+- Error state reuses the Carer Home look ('Something went wrong', 'Try again').
 
 ## Next action
-- complete dependencies, run START FEATURE CAR-UI-03, and write the tests in TEST_PLAN.md first.
+- Implement `getCarerShifts`, then the screen, until the 27 tests pass.
 
 ## Ready for PR
 - No

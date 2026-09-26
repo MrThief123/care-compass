@@ -13,16 +13,16 @@ Rewritten by CHG-025 and CHG-030 (2026-09-26), before implementation started: T-
 
 | Test ID | Covers | Level | Test description | Written first? | Result |
 |---|---|---|---|---|---|
-| T-01 | AC-01 | component | Week of 30 Nov: three 'Margaret' blocks, MON 30 '08:00–12:00', TUE 1 '09:00–11:00', WED 2 '13:00–17:00'; no status word, no event title. | ☐ | NOT RUN |
-| T-02 | AC-02 | component | No 'Tasks for the selected shift' heading, no checkbox. | ☐ | NOT RUN |
-| T-03 | AC-03 | component | No params: W checked, 'Shifts' heading, `getCarerShifts('staff-aisha', {from: '2026-11-30', to: '2026-12-06'})`. | ☐ | NOT RUN |
-| T-04 | AC-04 | component | Clicking the TUE 1 block pushes `/carer/patients/client-margaret`. | ☐ | NOT RUN |
-| T-05 | AC-05 | component | `view=day&date=2026-12-01`: D checked, one day-timeline block 'Margaret' '09:00–11:00'; `view=month&month=2026-12`: M checked, 'Margaret' chips on 30 Nov, 1 Dec, 2 Dec. | ☐ | NOT RUN |
-| T-06 | AC-06 | component | Next week, Previous week, Today (from the week of 9 Dec) and M push the expected `/carer/calendar?…` URLs. | ☐ | NOT RUN |
-| T-07 | AC-07 | contract | `getCarerShifts`: Aisha's week gives three rows earliest first with `clientFirstName`; Sarah's shift excluded; a one-day range gives only that day; unknown carer `[]`; `to` before `from` rejects. | ☐ | NOT RUN |
-| T-08 | AC-08 | component | No shifts: 'No shifts' shows, D/W/M and the arrows remain. | ☐ | NOT RUN |
-| T-09 | AC-09 | component | A rejected `getCarerShifts` or `getToday` shows 'Something went wrong'; 'Try again' calls `router.refresh`; the log holds no message text. Loading skeleton has status 'Loading' and no data. | ☐ | NOT RUN |
-| T-10 | AC-10 | component | axe: populated, empty, error, loading. | ☐ | NOT RUN |
+| T-01 | AC-01 | component | Week of 30 Nov: three 'Margaret' blocks, MON 30 '08:00–12:00', TUE 1 '09:00–11:00', WED 2 '13:00–17:00'; no status word, no event title. | ☑ | FAIL (red, expected) |
+| T-02 | AC-02 | component | No 'Tasks for the selected shift' heading, no checkbox. | ☑ | FAIL (red, expected) |
+| T-03 | AC-03 | component | No params: W checked, 'Shifts' heading, `getCarerShifts('staff-aisha', {from: '2026-11-30', to: '2026-12-06'})`. | ☑ | FAIL (red, expected) |
+| T-04 | AC-04 | component | Clicking the TUE 1 block pushes `/carer/patients/client-margaret`. | ☑ | FAIL (red, expected) |
+| T-05 | AC-05 | component | `view=day&date=2026-12-01`: D checked, one day-timeline block 'Margaret' '09:00–11:00'; `view=month&month=2026-12`: M checked, 'Margaret' chips on 30 Nov, 1 Dec, 2 Dec. | ☑ | FAIL (red, expected) |
+| T-06 | AC-06 | component | Next week, Previous week, Today (from the week of 9 Dec) and M push the expected `/carer/calendar?…` URLs. | ☑ | FAIL (red, expected) |
+| T-07 | AC-07 | contract | `getCarerShifts`: Aisha's week gives three rows earliest first with `clientFirstName`; Sarah's shift excluded; a one-day range gives only that day; unknown carer `[]`; `to` before `from` rejects. | ☑ | FAIL (red, expected) |
+| T-08 | AC-08 | component | No shifts: 'No shifts' shows, D/W/M and the arrows remain. | ☑ | FAIL (red, expected) |
+| T-09 | AC-09 | component | A rejected `getCarerShifts` or `getToday` shows 'Something went wrong'; 'Try again' calls `router.refresh`; the log holds no message text. Loading skeleton has status 'Loading' and no data. | ☑ | FAIL (red, expected) |
+| T-10 | AC-10 | component | axe: populated, empty, error, loading. | ☑ | FAIL (red, expected) |
 
 ## Regression scope
 - Run the full unit/component suite before marking READY FOR PR (`supabase test db` not affected: no migration).
