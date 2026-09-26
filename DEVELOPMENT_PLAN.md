@@ -466,7 +466,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Acceptance criteria summary:** 4 criteria — 7 cards appear including 'Margaret' '78 years · Preston VIC' and 'Jean' '88 years · Fairfield VIC'; 'No patients assigned yet' is shown; the patient info page for Margaret opens …
 - **Testing summary:** 4 component
 - **Requirements:** REQ-02, REQ-N1, REQ-N2, REQ-N3
-- **CHG-026 (carer ticks from the patient's screens):** opening a patient shows the patient's Home, Calendar, Info and Care log (family-style screens, no Budget, no Settings) through the carer's account.
+- **CHG-026 (carer ticks from the patient's screens):** opening a patient shows the patient's Home, Calendar, Info and Care log (family-style screens; Home includes the Budget strip read-only; no Budget screen, no Settings) through the carer's account.
 - **Docs:** `docs/development/carer-dev/carer-ui-patients-info/` · **Status:** NOT STARTED
 
 ### CAR-UI-03 — Carer Calendar screen (UI)
