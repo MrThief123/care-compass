@@ -5,7 +5,7 @@ Current branch: `feature/carer-ui-patients-info` (from carer-dev at a80db7a, aft
 Worked on: CHG-029 (Home landing, tab order, view-only notice and card labels), tests first then implementation, suite, e2e, browser check
 What changed: `getCarerPatients` (contract + mock), fixtures (FD-02), carer patients routes, `src/features/carer-patients/*`, type-only test fixes, docs
 Tests run: `npm run lint`, `npm run typecheck`, `npx prettier --check src`, `npm test`, `npx playwright test --grep-invert "F0-07"`
-Test results: feature 36/36 green; full vitest 1864 passed, 5 F0-04/F0-07 environment failures + 2 load timeouts that pass alone; e2e 36/36
+Test results: feature 34/34 green; full vitest 1864 passed, 5 F0-04/F0-07 environment failures + 2 load timeouts that pass alone; e2e 36/36
 Current blocker: none
 Important decisions: FD-04 amended (reuse `CarerHomeErrorState`); FD-05 (fixtures test change, test typing, streamed notFound, OQ-09 default); FD-06 / CHG-029 (T-03, T-07 expectations changed)
 Exact next action:

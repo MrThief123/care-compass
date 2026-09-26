@@ -30,7 +30,7 @@ Last updated: 2026-09-26 (CHG-029 implemented, green)
 - Home landing, tab order Home · Info · Calendar · Care log, off-shift 'View only' notice on Info, 'On shift · can edit' / 'View only' labels on Patients cards. Docs: PRD, AC-03/AC-07 reworded, AC-14/AC-15, T-14/T-15, FD-06, root CHG-029.
 - Red run 2026-09-26: 4 failing as expected (redirect still `…/info`, old tab order, no notice, no card labels). Green after implementing (`edit-status.tsx`, tab order, redirect, Info notice).
 - **HUMAN REVIEW: test expectation changed** — T-03 (redirect `…/info` → `…/home`) and T-07 (tab order), FD-06.
-- Suite (run locally; CI not triggered): feature 36/36; lint 0 errors (same 3 warnings); `tsc` clean; prettier clean; full vitest 1864 passed, 7 failed: the same 5 F0-04/F0-07 `Invalid API key` failures plus FAM-UI-07 generated-rows and UI-00 import-boundary timing out under full-suite load (both pass when re-run alone: 44/44). Playwright `--grep-invert "F0-07"`: 36/36.
+- Suite (run locally; CI not triggered): feature 34/34; lint 0 errors (same 3 warnings); `tsc` clean; prettier clean; full vitest 1864 passed, 7 failed: the same 5 F0-04/F0-07 `Invalid API key` failures plus FAM-UI-07 generated-rows and UI-00 import-boundary timing out under full-suite load (both pass when re-run alone: 44/44). Playwright `--grep-invert "F0-07"`: 36/36.
 - Browser check at 1920 → 768: no horizontal scroll, no overlaps; badges sit top-right of each card; Margaret opens on Home with tabs Home | Info | Calendar | Care log; Robert's Info shows the notice.
 
 ## Remaining
