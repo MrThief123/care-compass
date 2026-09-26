@@ -5,7 +5,7 @@ Current branch: `feature/carer-ui-calendar` (from `carer-dev`)
 Worked on: claim, docs for CHG-025/CHG-030, tests first
 What changed: CHG-030 in root DECISIONS.md; feature PRD/ACs/TEST_PLAN/DECISIONS rewritten; tests in `src/server/shifts/queries.test.ts` and `src/features/carer-calendar/carer-calendar.test.tsx`
 Tests run: `npx vitest run src/features/carer-calendar src/server/shifts`
-Test results: 27 new tests red for the expected reason; 6 existing CAR-UI-01 contract tests pass
+Test results: 25 new tests red for the expected reason; 6 existing CAR-UI-01 contract tests pass
 Current blocker: None
 Important discoveries: Family's `CalendarToolbar` always renders 'Enter event', so carer needs a local toolbar (FD-02). Family `calendar-params` has everything the URL needs except a carer href: use `calendarQuery` and prefix `/carer/calendar?`. `WeekGrid`/`DayTimeline`/`MonthGrid` take `PlainEventOccurrence`; map shifts the same way as `carer-home-view.tsx` `toCalendarEvent`.
 Important decisions: CHG-030 (contract, Family-style navigation, block opens the patient)

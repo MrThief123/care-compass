@@ -31,9 +31,9 @@ Last updated: 2026-09-26 (docs rewritten for CHG-025/CHG-030; tests written, red
 - 0 / 10 MET
 
 ## Tests
-- Written: 27 (6 contract, 21 component)
+- Written: 25 (6 contract, 19 component)
 - Passing: 0
-- Failing: 27 — red for the expected reason: `TypeError: getCarerShifts is not a function` (contract); `Failed to resolve import "@/app/(carer)/carer/calendar/loading"` (screen file, route not built yet). The 6 existing CAR-UI-01 contract tests still pass.
+- Failing: 25 — red for the expected reason: `TypeError: getCarerShifts is not a function` (contract); `Failed to resolve import "@/app/(carer)/carer/calendar/loading"` (screen file, route not built yet). The 6 existing CAR-UI-01 contract tests still pass.
 
 ## Files changed
 - DECISIONS.md (CHG-030), DEVELOPMENT_PLAN.md (CAR-UI-03 card), feature docs, the two test files above.
@@ -50,7 +50,7 @@ Last updated: 2026-09-26 (docs rewritten for CHG-025/CHG-030; tests written, red
 - Error state reuses the Carer Home look ('Something went wrong', 'Try again').
 
 ## Next action
-- Implement `getCarerShifts`, then the screen, until the 27 tests pass.
+- Implement `getCarerShifts`, then the screen, until the 25 tests pass.
 
 ## Ready for PR
 - No
