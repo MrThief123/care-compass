@@ -175,10 +175,10 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 | 15 | FAM-15 | Family — Task detail | F | D11 | SPRINT | F0-11, F0-13, FAM-UI-07 | OQ-29, OQ-10 | `feature/family-task-detail` | NOT STARTED |
 | 16 | CAR-01 | Carer Home — Today's calendar and Tasks | C | D8 | SPRINT | F0-10, F0-11, CAR-UI-01 | OQ-33, OQ-09 | `feature/carer-home-today` | NOT STARTED |
 | 17 | CAR-02 | Carer — Notifications card and bell | C | D9 | SPRINT | F0-10, F0-13, CAR-UI-01 | OQ-14 | `feature/carer-notifications` | NOT STARTED |
-| 18 | CAR-03 | Carer — Patients | C | D8 | SPRINT | F0-06, F0-10, CAR-UI-02 | OQ-09 | `feature/carer-patients` | NOT STARTED |
-| 19 | CAR-04 | Carer — Client info | C | D9 | SPRINT | F0-06, F0-10, F0-13, CAR-UI-02 | OQ-09 | `feature/carer-client-info` | NOT STARTED |
+| 18 | CAR-03 | Carer — Patients | C | D8 | SPRINT | F0-06, F0-10, F0-18, CAR-UI-02 | OQ-09 | `feature/carer-patients` | NOT STARTED |
+| 19 | CAR-04 | Carer — Client info | C | D9 | SPRINT | F0-06, F0-10, F0-13, F0-18, CAR-UI-02 | OQ-09 | `feature/carer-client-info` | NOT STARTED |
 | 20 | CAR-05 | Carer — Calendar (shifts) and selected-shift tasks | C | D9–D10 | SPRINT | F0-10, F0-11, CAR-UI-03 | OQ-33 | `feature/carer-calendar-shifts` | NOT STARTED |
-| 21 | CAR-06 | Carer — Mark tasks done | C | D10 | SPRINT | F0-10, F0-11, CAR-UI-01, CAR-UI-03 | OQ-09, OQ-10, OQ-33 | `feature/carer-complete-task` | NOT STARTED |
+| 21 | CAR-06 | Carer — Mark tasks done | C | D10 | SPRINT | F0-10, F0-11, F0-18, CAR-UI-01, CAR-UI-03 | OQ-09, OQ-10, OQ-33 | `feature/carer-complete-task` | NOT STARTED |
 | 22 | CAR-07 | Carer — Add and edit events for a patient | C | — | POST-SPRINT | CAR-04, F0-11, UI-02 | OQ-09, OQ-22, OQ-19 | `feature/carer-manage-events` | NOT STARTED |
 | 23 | CAR-08 | ~~Carer — Record an expense~~ (retired, CHG-020) | C | — | POST-SPRINT | F0-12, F0-13 | OQ-19, OQ-04, OQ-05 | `feature/carer-record-expense` | RETIRED (CHG-020) |
 | 24 | CAR-09 | Carer — Settings | C | D10 | SPRINT | F0-07, CAR-UI-04 | OQ-35 | `feature/carer-settings` | NOT STARTED |
@@ -898,7 +898,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Dashboard / stream:** carer · **Lane:** C · **Days:** D8 · **Sprint:** SPRINT · **PR target:** `carer-dev` · **Branch:** `feature/carer-patients`
 - **Description:** The Carer Patients screen listing clients the carer is currently assigned to.
 - **User value:** Carers find the person they're caring for quickly.
-- **Dependencies:** F0-06, F0-10, CAR-UI-02 · **Blocking decisions:** OQ-09
+- **Dependencies:** F0-06, F0-10, F0-18, CAR-UI-02 · **Blocking decisions:** OQ-09
 - **Jira summary:** Searchable grid of assigned patients (avatar, name, age, suburb); opens client info
 - **Acceptance criteria summary:** 4 criteria — 7 cards are shown including 'Margaret' '78 years · Preston VIC'; only Elsie is shown; 'No patients assigned yet' is shown …
 - **Testing summary:** 3 integration, 1 component
@@ -909,7 +909,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Dashboard / stream:** carer · **Lane:** C · **Days:** D9 · **Sprint:** SPRINT · **PR target:** `carer-dev` · **Branch:** `feature/carer-client-info`
 - **Description:** Reuses the Family Info view for a patient opened from Patients, with edit controls present only when the carer is on an active shift for that client.
 - **User value:** Carers read the same care information as the family and can update it while working.
-- **Dependencies:** F0-06, F0-10, F0-13, CAR-UI-02 · **Blocking decisions:** OQ-09
+- **Dependencies:** F0-06, F0-10, F0-13, F0-18, CAR-UI-02 · **Blocking decisions:** OQ-09
 - **Jira summary:** Carer view of client info (same view as Family minus organisation/payment controls); edits only during active shift
 - **Acceptance criteria summary:** 4 criteria — no Edit links or Add file tile exist; the change is shown; RLS rejects it …
 - **Testing summary:** 1 component, 1 e2e, 1 db, 1 integration
@@ -932,7 +932,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Dashboard / stream:** carer · **Lane:** C · **Days:** D10 · **Sprint:** SPRINT · **PR target:** `carer-dev` · **Branch:** `feature/carer-complete-task`
 - **Description:** Lets carers complete occurrences with their identity recorded, respecting shift-based edit rights.
 - **User value:** Accurate, safeguarded record of who provided care and when (brief II, item 7).
-- **Dependencies:** F0-10, F0-11, CAR-UI-01, CAR-UI-03 · **Blocking decisions:** OQ-09, OQ-10, OQ-33
+- **Dependencies:** F0-10, F0-11, F0-18, CAR-UI-01, CAR-UI-03 · **Blocking decisions:** OQ-09, OQ-10, OQ-33
 - **Jira summary:** Tick tasks on Carer Home and the selected-shift panel, recording actor and time, only during an active shift
 - **Acceptance criteria summary:** 3 criteria — Family Home shows 'Done · Aisha R.' for Physiotherapy; task checkboxes are not interactive; the checkbox reverts and an error is shown
 - **Testing summary:** 1 e2e, 2 component
