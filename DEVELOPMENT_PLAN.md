@@ -178,7 +178,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 | 18 | CAR-03 | Carer — Patients | C | D8 | SPRINT | F0-06, F0-10, F0-18, CAR-UI-02 | OQ-09 | `feature/carer-patients` | NOT STARTED |
 | 19 | CAR-04 | Carer — Client info | C | D9 | SPRINT | F0-06, F0-10, F0-13, F0-18, CAR-UI-02 | OQ-09 | `feature/carer-client-info` | NOT STARTED |
 | 20 | CAR-05 | Carer — Calendar (shifts) and selected-shift tasks | C | D9–D10 | SPRINT | F0-10, F0-11, CAR-UI-03 | OQ-33 | `feature/carer-calendar-shifts` | NOT STARTED |
-| 21 | CAR-06 | Carer — Mark tasks done | C | D10 | SPRINT | F0-10, F0-11, F0-18, CAR-UI-01, CAR-UI-03 | OQ-09, OQ-10, OQ-33 | `feature/carer-complete-task` | NOT STARTED |
+| 21 | CAR-06 | Carer — Mark tasks done | C | D10 | SPRINT | F0-10, F0-11, F0-18, CAR-UI-02, CAR-04 | OQ-09, OQ-10, OQ-33 | `feature/carer-complete-task` | NOT STARTED |
 | 22 | CAR-07 | Carer — Add and edit events for a patient | C | — | POST-SPRINT | CAR-04, F0-11, UI-02 | OQ-09, OQ-22, OQ-19 | `feature/carer-manage-events` | NOT STARTED |
 | 23 | CAR-08 | ~~Carer — Record an expense~~ (retired, CHG-020) | C | — | POST-SPRINT | F0-12, F0-13 | OQ-19, OQ-04, OQ-05 | `feature/carer-record-expense` | RETIRED (CHG-020) |
 | 24 | CAR-09 | Carer — Settings | C | D10 | SPRINT | F0-07, CAR-UI-04 | OQ-35 | `feature/carer-settings` | NOT STARTED |
@@ -932,7 +932,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Dashboard / stream:** carer · **Lane:** C · **Days:** D10 · **Sprint:** SPRINT · **PR target:** `carer-dev` · **Branch:** `feature/carer-complete-task`
 - **Description:** Lets carers complete occurrences with their identity recorded, respecting shift-based edit rights.
 - **User value:** Accurate, safeguarded record of who provided care and when (brief II, item 7).
-- **Dependencies:** F0-10, F0-11, F0-18, CAR-UI-01, CAR-UI-03 · **Blocking decisions:** OQ-09, OQ-10, OQ-33
+- **Dependencies:** F0-10, F0-11, F0-18, CAR-UI-02, CAR-04 · **Blocking decisions:** OQ-09, OQ-10, OQ-33
 - **Jira summary:** Tick tasks on Carer Home and the selected-shift panel, recording actor and time, only during an active shift
 - **Acceptance criteria summary:** 3 criteria — Family Home shows 'Done · Aisha R.' for Physiotherapy; task checkboxes are not interactive; the checkbox reverts and an error is shown
 - **Testing summary:** 1 e2e, 2 component

@@ -17,8 +17,8 @@ Last updated: 2026-09-17 (planning pack generated)
 - F0-18 — NOT STARTED (added by CHG-027)
 - F0-10 — NOT STARTED
 - F0-11 — NOT STARTED
-- CAR-UI-01 — NOT STARTED
-- CAR-UI-03 — NOT STARTED
+- CAR-UI-02 — NOT STARTED
+- CAR-04 — NOT STARTED
 
 ## Completed
 - Feature documentation drafted (Claude Chat planning pack)
