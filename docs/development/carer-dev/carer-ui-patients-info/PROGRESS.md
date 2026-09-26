@@ -1,12 +1,12 @@
 # Progress — CAR-UI-02 Carer Patients and patient info screens (UI)
 
-Status: IN PROGRESS
+Status: READY FOR PR
 Owner: Dhruv Verma
 Lane: C — Carer
 Sprint: SPRINT · planned D4–D5
 Branch: `feature/carer-ui-patients-info`
 PR target: `carer-dev`
-Last updated: 2026-09-26 (claimed)
+Last updated: 2026-09-26 (implemented, green)
 
 ## Blockers
 - None. Lane F request (FD-01) blocks only CAR-04's wiring of the Home, Calendar and Care log tabs, not this feature.
@@ -19,31 +19,38 @@ Last updated: 2026-09-26 (claimed)
 - Docs updated for CHG-026 and CHG-028 (human answers 2026-09-26: split scope; carer rail + patient tabs; branch from carer-dev after #124 merged): PRD Scope, 13 ACs, TEST_PLAN, FD-01 to FD-04, root DECISIONS CHG-028, DEVELOPMENT_PLAN card note.
 - Tests written first: `src/features/carer-patients/carer-patients.test.tsx` (component, T-01 to T-12) and `getCarerPatients` block in `src/server/shifts/queries.test.ts` (T-13). Red run 2026-09-26: component file fails to resolve `@/app/(carer)/carer/patients/[clientId]/calendar/page` (routes not built); contract tests fail with `getCarerPatients is not a function`. Both expected.
 
+- Implemented (2026-09-26): `getCarerPatients` contract + mock; fixtures (FD-02); routes under `src/app/(carer)/carer/patients/`; screen components in `src/features/carer-patients/`.
+- Suite (2026-09-26, run locally; CI not triggered): lint 0 errors (3 warnings: 2 pre-existing, 1 on unused holding-tab props by design, FD-05); `tsc` clean; prettier clean on tracked files; vitest 1861 passed, 5 failed: F0-04/F0-07 integration tests get `AuthApiError: Invalid API key` from the Supabase project in `.env.local` (environment, no auth code touched). Playwright `--grep-invert "F0-07"`: 36/36 passed.
+- Browser check (Playwright/Chromium against the dev server) at 1920, 1600, 1440, 1280, 1024, 900, 768: no horizontal scroll, no overlapping elements; grid 4 → 3 → 2 columns; search 'je' → Jean only; clicking Margaret opens her Info with 3 Edit buttons; Robert's Info has none.
+
 ## In progress
 - None
 
 ## Remaining
-- Implement per SESSION_STATE.md "Exact next action".
+- Human approval, then open the PR to `carer-dev` with the side-by-side screenshot.
 
 ## Acceptance criteria status
-- 0 / 13 MET
+- 13 / 13 MET
 
 ## Tests
 - Written: 13 / 13 test IDs (37 cases)
-- Passing: 0 new
-- Failing: all new (expected red)
+- Passing: all (29 component + 5 contract; fixtures tests green)
+- Failing: none in this feature
 
 ## Files changed
-- Docs above; the two test files.
+- `src/server/shifts/queries.ts`, `src/mocks/queries/shifts.ts`, `src/mocks/fixtures.ts`, `src/mocks/fixtures.test.ts` (HUMAN REVIEW, FD-05)
+- `src/app/(carer)/carer/patients/**` (page, loading, `[clientId]` layout/page, info page+loading, home/calendar/tasks)
+- `src/features/carer-patients/*` (view, skeleton, header, tabs, coming-soon, find-patient, patient-meta)
+- Test type fixes: `carer-patients.test.tsx`, `src/server/shifts/queries.test.ts` (FD-05)
 
 ## Decisions
-- See DECISIONS.md (FD-01 to FD-04). HUMAN REVIEW in PR: `src/mocks/**` edited from Lane C (FD-02).
+- See DECISIONS.md (FD-01 to FD-05). HUMAN REVIEW in PR: `src/mocks/**` edited from Lane C (FD-02); **HUMAN REVIEW: test expectation changed** (`fixtures.test.ts` Robert dob/suburb, FD-05).
 
 ## Problems encountered
 - None
 
 ## Next action
-- Implement until green (new session).
+- Ask the human before opening the PR.
 
 ## Ready for PR
-- No
+- Yes (awaiting approval)

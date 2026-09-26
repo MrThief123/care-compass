@@ -90,7 +90,7 @@ describe("[CAR-UI-02][AC-13] getCarerPatients", () => {
       ["Harold", 79, "Coburg VIC"],
       ["Jean", 88, "Fairfield VIC"],
     ]);
-    expect(rows[0].clientId).toBe(MARGARET_CLIENT_ID);
+    expect(rows[0]!.clientId).toBe(MARGARET_CLIENT_ID);
   });
 
   it("[CAR-UI-02][AC-13] Aisha is on shift with Margaret only", async () => {

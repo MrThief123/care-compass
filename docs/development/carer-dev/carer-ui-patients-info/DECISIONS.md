@@ -36,8 +36,17 @@ Record feature-level decisions here using the template below. Project-wide decis
 
 ### FD-04 — Error state wording
 - Date: 2026-09-26
-- Decision: reuse the CAR-UI-01 wording ('Something went wrong', 'Try again', `router.refresh()`) in a local `src/features/carer-patients/` component; the kit's `ErrorState` says 'Retry' (CAR-UI-01 FD-05).
+- Decision: reuse the CAR-UI-01 wording ('Something went wrong', 'Try again', `router.refresh()`); the kit's `ErrorState` says 'Retry' (CAR-UI-01 FD-05).
+- Amended at implementation (2026-09-26): the routes import CAR-UI-01's `CarerHomeErrorState` (same lane, same copy) instead of a second local copy. Rename it to a lane-wide name if a third carer screen needs it.
 - Human confirmation required: no.
+
+### FD-05 — Implementation notes
+- Date: 2026-09-26
+- `src/mocks/fixtures.test.ts` `[UI-04][AC-10]` expected Robert `dob: "1945-03-18", suburb: "Croydon"`; now `"1944-03-18"`, `"Reservoir VIC"`. Reason: FD-02 sets the design's age and suburb (recorded requirement change). **HUMAN REVIEW: test expectation changed.** Other dobs moved by whole years only (Elsie 1936, Frank 1950, Harold 1947, Jean 1938; Doris unchanged).
+- Type-only test fixes, no assertion changed: non-null `!` on indexed array reads in `carer-patients.test.tsx` (three lines) and `queries.test.ts` (one line), required by `noUncheckedIndexedAccess` in `tsc`. Genuine test bug.
+- The Home, Calendar and Care log holding pages keep an unused `params` prop (with an eslint-disable line) so every tab has the same signature; CAR-04 uses it.
+- Because `/carer/patients/loading.tsx` streams, `notFound()` and the `[clientId]` redirect reach the browser as streamed fallbacks (HTTP 200 with the not-found UI; client-side redirect), as `node_modules/next/dist/docs/.../not-found.md` describes. Behaviour is correct; revisit the status code in CAR-04 if it matters.
+- `canEdit` = `onShift` uses OQ-09's proposed default (non-blocking): carers edit client info only during a shift.
 
 <!-- Template
 ### FD-01 — <title>

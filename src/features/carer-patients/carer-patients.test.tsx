@@ -83,7 +83,11 @@ const PATIENTS: CarerPatientRow[] = [
 const MARGARET = "client-margaret";
 const ROBERT = "client-robert";
 
-function section(clientId: string, kind: ClientInfoSection["kind"], title: string): ClientInfoSection {
+function section(
+  clientId: string,
+  kind: ClientInfoSection["kind"],
+  title: string,
+): ClientInfoSection {
   return {
     id: `info-${clientId}-${kind}`,
     clientId,
@@ -156,9 +160,9 @@ async function renderLayout(clientId: string, tab = "info") {
 }
 
 function cardLinks() {
-  return screen.queryAllByRole("link").filter((link) =>
-    link.getAttribute("href")?.startsWith("/carer/patients/"),
-  );
+  return screen
+    .queryAllByRole("link")
+    .filter((link) => link.getAttribute("href")?.startsWith("/carer/patients/"));
 }
 
 describe("[CAR-UI-02] Carer Patients grid", () => {
@@ -177,8 +181,8 @@ describe("[CAR-UI-02] Carer Patients grid", () => {
       "Harold",
       "Jean",
     ]);
-    expect(within(links[0]).getByText("78 years · Preston VIC")).toBeInTheDocument();
-    expect(within(links[6]).getByText("88 years · Fairfield VIC")).toBeInTheDocument();
+    expect(within(links[0]!).getByText("78 years · Preston VIC")).toBeInTheDocument();
+    expect(within(links[6]!).getByText("88 years · Fairfield VIC")).toBeInTheDocument();
   });
 
   it("[CAR-UI-02][AC-02] with no patients shows 'No patients assigned yet' and no search field", async () => {
@@ -240,7 +244,7 @@ describe("[CAR-UI-02] Carer Patients grid", () => {
     mocks.getCarerPatients.mockResolvedValue([{ ...PATIENTS[0], firstName: long }]);
     await renderPatients();
 
-    const card = cardLinks()[0];
+    const card = cardLinks()[0]!;
     expect(within(card).getByText(long)).toBeInTheDocument();
     expect(card).toHaveAccessibleName(new RegExp(long));
   });
@@ -372,12 +376,15 @@ describe("[CAR-UI-02] error and loading states", () => {
   it.each([
     ["Patients", PatientsLoading],
     ["Info", InfoLoading],
-  ])("[CAR-UI-02][AC-11] the %s skeleton announces 'Loading' and holds no data", (_name, Loading) => {
-    render(<Loading />);
+  ])(
+    "[CAR-UI-02][AC-11] the %s skeleton announces 'Loading' and holds no data",
+    (_name, Loading) => {
+      render(<Loading />);
 
-    expect(screen.getAllByRole("status", { name: "Loading" }).length).toBeGreaterThan(0);
-    expect(screen.queryByText(/Margaret|Jean|years/)).not.toBeInTheDocument();
-  });
+      expect(screen.getAllByRole("status", { name: "Loading" }).length).toBeGreaterThan(0);
+      expect(screen.queryByText(/Margaret|Jean|years/)).not.toBeInTheDocument();
+    },
+  );
 });
 
 describe("[CAR-UI-02] accessibility (REQ-N2)", () => {

@@ -11,19 +11,19 @@ Tests are written **before** production code (TESTING.md §2). Run them, confirm
 
 | Test ID | Covers | Level | Test description | Written first? | Result |
 |---|---|---|---|---|---|
-| T-01 | AC-01 | component | 7 cards in design order; Margaret '78 years · Preston VIC', Jean '88 years · Fairfield VIC' | ☑ | FAILING (red, expected) |
-| T-02 | AC-02 | component | No patients: 'No patients assigned yet', no search field | ☑ | FAILING (red, expected) |
-| T-03 | AC-03 | component | Margaret's card is a link to `/carer/patients/client-margaret`; that route redirects to `…/info` | ☑ | FAILING (red, expected) |
-| T-04 | AC-04 | component | Off shift (Robert): Info has no Edit buttons and no 'Add file' | ☑ | FAILING (red, expected) |
-| T-05 | AC-05 | component | On shift (Margaret): Info has three Edit buttons and 'Add file' | ☑ | FAILING (red, expected) |
-| T-06 | AC-06 | component | Search 'je' leaves Jean only; 'zz' leaves no cards and the no-results message | ☑ | FAILING (red, expected) |
-| T-07 | AC-07 | component | Patient layout: back link, name, meta, four tabs with hrefs, current tab `aria-current` | ☑ | FAILING (red, expected) |
-| T-08 | AC-08 | component | Home, Calendar and Care log tabs show 'Coming soon' and no buttons | ☑ | FAILING (red, expected) |
-| T-09 | AC-09 | component | Layout calls `notFound()` for a patient not in the carer's list | ☑ | FAILING (red, expected) |
-| T-10 | AC-10 | component | Patients and Info reads rejecting: 'Something went wrong' + 'Try again'; log has no client data | ☑ | FAILING (red, expected) |
-| T-11 | AC-11 | component | Patients and Info `loading.tsx`: status 'Loading', no patient names | ☑ | FAILING (red, expected) |
-| T-12 | AC-12 | component | axe: populated, empty, error, loading, Info | ☑ | FAILING (red, expected) |
-| T-13 | AC-13 | unit | `getCarerPatients`: 7 for Aisha in order, `onShift` Margaret only; unknown carer `[]`; carer with only an ended shift `[]` | ☑ | FAILING (red, expected) |
+| T-01 | AC-01 | component | 7 cards in design order; Margaret '78 years · Preston VIC', Jean '88 years · Fairfield VIC' | ☑ | PASSING |
+| T-02 | AC-02 | component | No patients: 'No patients assigned yet', no search field | ☑ | PASSING |
+| T-03 | AC-03 | component | Margaret's card is a link to `/carer/patients/client-margaret`; that route redirects to `…/info` | ☑ | PASSING |
+| T-04 | AC-04 | component | Off shift (Robert): Info has no Edit buttons and no 'Add file' | ☑ | PASSING |
+| T-05 | AC-05 | component | On shift (Margaret): Info has three Edit buttons and 'Add file' | ☑ | PASSING |
+| T-06 | AC-06 | component | Search 'je' leaves Jean only; 'zz' leaves no cards and the no-results message | ☑ | PASSING |
+| T-07 | AC-07 | component | Patient layout: back link, name, meta, four tabs with hrefs, current tab `aria-current` | ☑ | PASSING |
+| T-08 | AC-08 | component | Home, Calendar and Care log tabs show 'Coming soon' and no buttons | ☑ | PASSING |
+| T-09 | AC-09 | component | Layout calls `notFound()` for a patient not in the carer's list | ☑ | PASSING |
+| T-10 | AC-10 | component | Patients and Info reads rejecting: 'Something went wrong' + 'Try again'; log has no client data | ☑ | PASSING |
+| T-11 | AC-11 | component | Patients and Info `loading.tsx`: status 'Loading', no patient names | ☑ | PASSING |
+| T-12 | AC-12 | component | axe: populated, empty, error, loading, Info | ☑ | PASSING |
+| T-13 | AC-13 | unit | `getCarerPatients`: 7 for Aisha in order, `onShift` Margaret only; unknown carer `[]`; carer with only an ended shift `[]` | ☑ | PASSING |
 
 ## Regression scope
 - Run the full unit/component suite before marking READY FOR PR (`supabase test db` unaffected: no migrations).
