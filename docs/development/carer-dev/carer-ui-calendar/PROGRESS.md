@@ -1,6 +1,6 @@
 # Progress — CAR-UI-03 Carer Calendar screen (UI)
 
-Status: READY FOR PR
+Status: PR OPEN
 Owner: Dhruv Verma
 Lane: C — Carer
 Sprint: SPRINT · planned D5–D6
@@ -68,7 +68,7 @@ Last updated: 2026-09-26 (CHG-031: calendar merged into Carer Home; green)
 - Month chips are not clickable (the kit's `MonthGrid` chip has no select handler); a day cell does nothing. Week and day blocks open the patient.
 
 ## Next action
-- Human approval, then open PR `CAR-UI-03 Carer Calendar screen (UI)` to `carer-dev`, flagging CHG-030 and CHG-031 edits outside Lane C and the changed tests.
+- PR #126 open to `carer-dev` (https://github.com/MrThief123/care-compass/pull/126); awaiting review and merge.
 
 ## Ready for PR
 - Yes

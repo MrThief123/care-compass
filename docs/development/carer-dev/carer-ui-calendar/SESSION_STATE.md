@@ -9,6 +9,6 @@ Test results: full suite 1853 passed, 5 unrelated F0-07/F0-04 integration failur
 Current blocker: None
 Important discoveries: After deleting a route, `tsc` fails on stale `.next/types/validator.ts` until a `next build` (the e2e run) regenerates it.
 Important decisions: CHG-031, FD-04, FD-05, FD-06
-Exact next action: With human approval, open PR `CAR-UI-03 Carer Calendar screen (UI)` to `carer-dev`, flagging the edits outside Lane C (CHG-030: `src/server/shifts`, `src/mocks/queries/shifts.ts`; CHG-031: `src/components/shared/nav-config.ts`, `rail.test.tsx`, `tests/e2e/shared-app-shell.spec.ts`) and **HUMAN REVIEW: test expectation changed**.
+Exact next action: PR #126 (https://github.com/MrThief123/care-compass/pull/126) open to `carer-dev`; address review comments, then the human merges.
 Files likely to be touched next: none
 Warning for next session: `/carer/patients/[clientId]` 404s in the preview until CAR-UI-02 (PR #125) merges to `carer-dev`.
