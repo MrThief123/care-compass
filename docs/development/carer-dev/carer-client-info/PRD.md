@@ -46,7 +46,7 @@ Carers read the same care information as the family and can update it while work
 - Controls absent, not disabled (DD NFR-3).
 
 ## Dependencies
-- Features: F0-06 (Identity, organisation and client access schema with RLS), F0-10 (Shifts schema, active-shift function and conflict query), F0-13 (Client document storage), CAR-UI-02 (Carer Patients and patient info screens (UI))
+- Features: F0-06 (Identity, organisation and client access schema with RLS), F0-10 (Shifts schema, active-shift function and conflict query), F0-13 (Client document storage), F0-18 (Carer view access derived from shifts, CHG-027), CAR-UI-02 (Carer Patients and patient info screens (UI))
 - Blocking open decisions (must be answered before START FEATURE): OQ-09
 - Non-blocking open decisions (proposed defaults apply, confirm when possible): OQ-19
 
