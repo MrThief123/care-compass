@@ -9,7 +9,7 @@ import { getDataSourceMode } from "@/server/data-source";
 
 import { CONTACT_COLUMNS, contactFromRow } from "./contact-details";
 
-export type { FamilyContactDetails } from "@/mocks/queries/profiles";
+export type { CarerContactDetails, FamilyContactDetails } from "@/mocks/queries/profiles";
 
 /**
  * The signed-in family member's contact details, as Family · Settings shows them.
@@ -33,4 +33,34 @@ export async function getFamilyContactDetails(
   // The message names no profile or value: it may reach a log (ARCHITECTURE.md §12.5).
   if (error || !data) throw new Error("getFamilyContactDetails: profile not found.");
   return contactFromRow(data);
+}
+
+/**
+ * The signed-in carer's own details, as Carer · Settings shows them (CAR-UI-04
+ * FD-02). With `DATA_SOURCE=supabase` this reads the `profiles` row as the
+ * signed-in user; CAR-09 verifies it against RLS.
+ */
+export async function getCarerContactDetails(
+  profileId: string,
+): Promise<mock.CarerContactDetails> {
+  const mode = getDataSourceMode();
+  if (mode === "mock") {
+    return mock.getCarerContactDetails(profileId);
+  }
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("id, first_name, last_name, phone, email, job_title")
+    .eq("id", profileId)
+    .maybeSingle();
+  // The message names no profile or value: it may reach a log (ARCHITECTURE.md §12.5).
+  if (error || !data) throw new Error("getCarerContactDetails: profile not found.");
+  return {
+    profileId: data.id,
+    name: [data.first_name, data.last_name].filter(Boolean).join(" "),
+    ...(data.phone && { phone: data.phone }),
+    ...(data.email && { email: data.email }),
+    ...(data.job_title && { role: data.job_title }),
+  };
 }

@@ -193,7 +193,9 @@ export const STAFF_MEMBERS: StaffMember[] = [
     firstName: "Aisha",
     lastName: "Rahman",
     jobTitle: "Registered Nurse",
-    email: "aisha.rahman@banksiahomecare.example",
+    // As drawn in docs/design/screens/carer-04-settings.png (CAR-UI-04 FD-01).
+    email: "aisha.r@banksiahomecare.com.au",
+    phone: "0423 987 654",
     isActive: true,
   },
   {
@@ -241,6 +243,7 @@ export const CARER_PROFILES: Profile[] = STAFF_MEMBERS.map((staff) => ({
   firstName: staff.firstName,
   lastName: staff.lastName,
   email: staff.email,
+  ...(staff.phone && { phone: staff.phone }),
   jobTitle: staff.jobTitle,
   isActive: staff.isActive,
 }));
