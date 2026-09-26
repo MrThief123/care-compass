@@ -9,48 +9,41 @@ PR target: `carer-dev`
 Last updated: 2026-09-26 (claimed)
 
 ## Blockers
-- None recorded at planning time
+- None. Lane F request (FD-01) blocks only CAR-04's wiring of the Home, Calendar and Care log tabs, not this feature.
 
 ## Dependencies status
-- F0-15 — NOT STARTED
-- UI-03 — NOT STARTED
+- F0-15 — MERGED · UI-03 — MERGED · CAR-UI-01 (PR #124) — MERGED to carer-dev
 
 ## Completed
-- Feature documentation drafted (Claude Chat planning pack)
+- Claimed (2026-09-26).
+- Docs updated for CHG-026 and CHG-028 (human answers 2026-09-26: split scope; carer rail + patient tabs; branch from carer-dev after #124 merged): PRD Scope, 13 ACs, TEST_PLAN, FD-01 to FD-04, root DECISIONS CHG-028, DEVELOPMENT_PLAN card note.
+- Tests written first: `src/features/carer-patients/carer-patients.test.tsx` (component, T-01 to T-12) and `getCarerPatients` block in `src/server/shifts/queries.test.ts` (T-13). Red run 2026-09-26: component file fails to resolve `@/app/(carer)/carer/patients/[clientId]/calendar/page` (routes not built); contract tests fail with `getCarerPatients is not a function`. Both expected.
 
 ## In progress
 - None
 
 ## Remaining
-- Route `/carer/patients` inside the carer layout.
-- Search field 'Search patients' (client-side on fixtures).
-- `PersonCard` grid, 4 columns.
-- Patient info `/carer/patients/[clientId]` with `ClientInfoView` (canEdit from fixture flag `onShift`; no organisation or payment controls — D10). No carer patient-info frame exists; reuse the Family Info layout (PROPOSED).
-- Loading skeleton, empty state and error state (States sheet) wired to the query contract's states.
-- Data only via `src/server/**` contract functions (mock data source).
+- Implement per SESSION_STATE.md "Exact next action".
 
 ## Acceptance criteria status
-- 0 / 4 MET
+- 0 / 13 MET
 
 ## Tests
-- Written: 0 / 4
-- Passing: 0
-- Failing: 0
+- Written: 13 / 13 test IDs (37 cases)
+- Passing: 0 new
+- Failing: all new (expected red)
 
 ## Files changed
-- None yet. Likely files: `src/app/(carer)/carer/patients/page.tsx`, `src/app/(carer)/carer/patients/[clientId]/page.tsx`
+- Docs above; the two test files.
 
 ## Decisions
-- See DECISIONS.md
+- See DECISIONS.md (FD-01 to FD-04). HUMAN REVIEW in PR: `src/mocks/**` edited from Lane C (FD-02).
 
 ## Problems encountered
 - None
 
-## Assumptions
-- PROPOSED items in PRD.md are unconfirmed until validated in F0-01 or answered in DECISIONS.md.
-
 ## Next action
-- complete dependencies, run START FEATURE CAR-UI-02, and write the tests in TEST_PLAN.md first.
+- Implement until green (new session).
 
 ## Ready for PR
 - No
