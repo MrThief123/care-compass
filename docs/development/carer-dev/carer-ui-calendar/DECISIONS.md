@@ -53,6 +53,15 @@ Record feature-level decisions here using the template below. Project-wide decis
   - CAR-UI-01 `carer-home.test.tsx`: mocks `getCarerShifts` and `getToday` instead of `getCarerTodayShifts`, and AC-01 asserts the call with today's one-day range; the region is 'Shifts' (was "Today's calendar"); the empty title is 'No shifts' (was 'No shifts today'); the page is called with `searchParams`.
   - F0-15 `rail.test.tsx` AC-03: Carer items Home, Patients, Settings (was with Calendar). `tests/e2e/shared-app-shell.spec.ts` AC-06: active item checked on `/carer/patients` (was `/carer/calendar`).
 
+### FD-05 — One calendar size for Day, Week and Month; scrollable notifications
+- Date: 2026-09-26
+- Context: On Home, Month (6 rows of at least 120px) was ~100px taller than Week and Day, whose kit scroller sizes itself to the focus hours. The human asked for one size for all three views and a scrollable notifications list.
+- Decision: The calendar body is one 640px box for every view and the empty state (card 748px at every width). Day and Week fill it: the kit sets its scroll viewport's height inline, so `carer-home-view.tsx` overrides it from the page with `h-auto!` and `flex-1` on the scroller's last child. Month's rows drop their 120px minimum and share the box (~100px each) with at most 3 chips per day. From 1280px the Notifications card matches the calendar card's height (`xl:items-stretch`; the list has `contain: size` so its length does not set the row height) and its list scrolls; below 1280px the list scrolls past 640px. The list is focusable (`tabIndex=0`, labelled by the heading) so a keyboard can scroll it.
+- Reason: human request in-session, 2026-09-26.
+- Alternatives considered: a `height` prop on the kit's `TimeGridScroller`, which would be the cleaner fix but is outside Lane C (`src/components/shared/**`); a fixed height for the whole page.
+- Consequences: the override depends on the scroller's markup (viewport = last child). If a shared PR adds a height prop, use it and drop `FILL_TIME_GRID`. CSS-only: no test changes; checked with a Playwright sweep (1920 to 768).
+- Human confirmation required: no (human request)
+
 <!-- Template
 ### FD-01 — <title>
 - Date:

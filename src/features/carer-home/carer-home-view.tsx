@@ -48,6 +48,13 @@ function toCalendarEvent(shift: CarerShiftRow): PlainEventOccurrence {
   };
 }
 
+/**
+ * Day and Week fill the calendar box (CHG-031, FD-05): the kit sizes their
+ * scroll viewport inline to the focus hours, so the override is `!important`.
+ */
+const FILL_TIME_GRID =
+  "min-h-0 flex-1 [&>div:last-child]:h-auto! [&>div:last-child]:min-h-0 [&>div:last-child]:flex-1";
+
 const href = (params: CalendarParams) => `/carer/home?${calendarQuery(params)}`;
 
 /**
@@ -56,7 +63,9 @@ const href = (params: CalendarParams) => `/carer/home?${calendarQuery(params)}`;
  * the carer's shift notifications. Every change of view or range navigates, so
  * the server reads that range; a shift opens its patient's page. Notifications
  * sit to the right from 1280px and below the calendar under that, so the week
- * grid keeps its width. Every grid item is `min-w-0`, so a long name or
+ * grid keeps its width. Day, Week and Month share one 640px box, and the
+ * Notifications list scrolls inside a card as tall as the calendar's (from
+ * 1280px; 640px tall below that). Every grid item is `min-w-0`, so a long name or
  * message wraps instead of widening the page.
  */
 export function CarerHomeView({ today, params, shifts, notifications }: CarerHomeViewProps) {
@@ -81,7 +90,7 @@ export function CarerHomeView({ today, params, shifts, notifications }: CarerHom
   useCalendarShortcuts({ onViewChange: changeView, onStep: step, onToday: goToday });
 
   return (
-    <div className="grid min-w-0 grid-cols-1 items-start gap-4 px-6 py-5 xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+    <div className="grid min-w-0 grid-cols-1 items-start gap-4 px-6 py-5 xl:items-stretch xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
       <section aria-labelledby="carer-home-shifts" className="min-w-0">
         <CardShell className="flex min-w-0 flex-col gap-4 overflow-hidden p-5">
           <CarerShiftsToolbar
@@ -92,35 +101,49 @@ export function CarerHomeView({ today, params, shifts, notifications }: CarerHom
             onStep={step}
             onToday={goToday}
           />
-          {shifts.length === 0 ? (
-            <EmptyState
-              icon="calendar"
-              title="No shifts"
-              body="Shifts assigned to you will appear here."
-            />
-          ) : (
-            <>
-              {params.view === "day" && (
-                <DayTimeline occurrences={occurrences} now={now} onSelect={openPatient} />
-              )}
-              {params.view === "week" && (
-                <WeekGrid
-                  weekStart={range.from}
-                  today={today}
-                  occurrences={occurrences}
-                  now={now}
-                  onSelectOccurrence={openPatient}
-                />
-              )}
-              {params.view === "month" && (
-                <MonthGrid month={`${params.month}-01`} today={today} occurrences={occurrences} />
-              )}
-            </>
-          )}
+          <div className="flex h-[640px] min-h-0 flex-col">
+            {shifts.length === 0 ? (
+              <EmptyState
+                icon="calendar"
+                title="No shifts"
+                body="Shifts assigned to you will appear here."
+              />
+            ) : (
+              <>
+                {params.view === "day" && (
+                  <DayTimeline
+                    occurrences={occurrences}
+                    now={now}
+                    onSelect={openPatient}
+                    className={FILL_TIME_GRID}
+                  />
+                )}
+                {params.view === "week" && (
+                  <WeekGrid
+                    weekStart={range.from}
+                    today={today}
+                    occurrences={occurrences}
+                    now={now}
+                    onSelectOccurrence={openPatient}
+                    className={FILL_TIME_GRID}
+                  />
+                )}
+                {params.view === "month" && (
+                  <MonthGrid
+                    month={`${params.month}-01`}
+                    today={today}
+                    occurrences={occurrences}
+                    maxChipsPerDay={3}
+                    className="[&>div:not(:first-child)]:min-h-0"
+                  />
+                )}
+              </>
+            )}
+          </div>
         </CardShell>
       </section>
       <section aria-labelledby="carer-home-notifications" className="min-w-0">
-        <CardShell className="p-5">
+        <CardShell className="flex h-full min-w-0 flex-col p-5">
           <h2 id="carer-home-notifications" className="text-title-card text-text-primary">
             Notifications
           </h2>
@@ -131,7 +154,12 @@ export function CarerHomeView({ today, params, shifts, notifications }: CarerHom
               body="Changes to your shifts will appear here."
             />
           ) : (
-            <ul className="mt-2">
+            <ul
+              aria-labelledby="carer-home-notifications"
+              // Focusable so a keyboard can scroll it (axe scrollable-region-focusable).
+              tabIndex={0}
+              className="mt-2 max-h-[640px] min-h-0 flex-1 overflow-y-auto rounded-inset outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 xl:max-h-none xl:contain-size"
+            >
               {notifications.map((notification) => (
                 <li key={notification.id} className="min-w-0 break-words">
                   <NotificationRow source={notification.source} message={notification.message} />
