@@ -824,6 +824,19 @@ Docs updated: DECISIONS.md
 - Human confirmation: Dhruv Verma, 2026-09-26 (in-session).
 - Docs updated: DECISIONS.md (this entry; CHG-025 open question closed), DEVELOPMENT_PLAN.md (CHG-026 notes on CAR-UI-02, CAR-04, CAR-06, INT-03), CAR-UI-01 PROGRESS.md.
 
+### CHG-030 — Carer Calendar: a range query for shifts, Family-style navigation, a shift block opens the patient
+- Date / requested by: 2026-09-26 / Dhruv Verma (human, project lead)
+- Type: scope change (CAR-UI-03; applies CHG-025 to the Carer Calendar)
+- Description:
+  - **Blocks are shifts (CHG-025).** Each block is one of the signed-in carer's shifts, titled with the client's first name and showing the time range (e.g. 'Margaret', '08:00–12:00'), as on Carer Home. No status pill, no event titles. The 'Tasks for the selected shift' panel and its checklist are not built.
+  - **Contract.** CAR-UI-03 adds `getCarerShifts(carerId, range)` to `src/server/shifts/queries.ts` (range `{from, to}` validated with `OccurrenceRangeSchema`; the carer's shifts starting on those Melbourne days, earliest first, with `clientFirstName`) and its mock in `src/mocks/queries/shifts.ts`. Both are outside Lane C's folders, allowed by this entry and flagged for review in the PR (as CHG-025 did for CAR-UI-01). The `SHIFTS` fixture is unchanged.
+  - **Navigation.** Same as Family · Calendar: the URL holds `?view=&date=&month=`, with D/W/M, Previous/Next and Today; no view param means Week. Family's `calendar-params` helpers are imported, not edited. The arrows and Today are not in the design: built from tokens and flagged "design gap, built from tokens — please review" (OQ-19 pattern).
+  - **Clicking a shift block** opens `/carer/patients/[clientId]`, the patient's Home tab (CHG-029), where tasks are ticked off (CHG-026).
+- Source / justification: human answers in-session, 2026-09-26 ("Yes, add it", "Same as Family", "Open the patient").
+- Impact: CAR-UI-03 PRD Scope; ACCEPTANCE_CRITERIA (AC-01 and AC-02 rewritten, AC-04 to AC-10 added); TEST_PLAN; feature DECISIONS. CAR-05 wires `getCarerShifts` to Supabase.
+- Human confirmation: Dhruv Verma, 2026-09-26 (in-session).
+- Docs updated: DECISIONS.md (this entry), DEVELOPMENT_PLAN.md (CAR-UI-03 card), CAR-UI-03 PRD.md, ACCEPTANCE_CRITERIA.md, TEST_PLAN.md, DECISIONS.md, PROGRESS.md, SESSION_STATE.md.
+
 Template for future entries:
 ```
 ### CHG-xxx — <title>

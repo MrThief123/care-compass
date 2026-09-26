@@ -480,6 +480,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Requirements:** REQ-02, REQ-N1, REQ-N2, REQ-N3
 - **CHG-009 (tasks and plain events, REQ-35):** calendar blocks show tasks and plain events; "Tasks for the selected shift" lists tasks only.
 - **CHG-025 (carer shifts and notifications):** calendar blocks are the carer's shifts (client + time range); the 'Tasks for the selected shift' panel is removed.
+- **CHG-030:** adds `getCarerShifts(carerId, range)`; Family-style D/W/M, Previous/Next and Today via the URL; a shift block opens the patient.
 - **Docs:** `docs/development/carer-dev/carer-ui-calendar/` · **Status:** NOT STARTED
 
 ### CAR-UI-04 — Carer Settings screen (UI)

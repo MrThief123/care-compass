@@ -28,11 +28,14 @@ A clickable, reviewable screen that matches the design, ready for data wiring in
 - Carer
 
 ## Scope
+Rewritten by CHG-025 and CHG-030 (2026-09-26), before implementation started.
 - Route `/carer/calendar` inside the carer layout.
-- Title 'Calendar', section 'Shifts', D/W/M.
-- `WeekGrid` with carer label format '<Client> — <title>' truncated.
-- 'Tasks for the selected shift' with subtitle and `TaskChecklist` (fixture sub-steps per design; semantics pending OQ-33).
-- Loading skeleton, empty state and error state (States sheet) wired to the query contract's states.
+- Section 'Shifts' with D/W/M, Previous/Next and Today; the URL holds `?view=&date=&month=` as on Family · Calendar (default Week, today). Family's `calendar-params` helpers are imported, not edited. The arrows and Today are a design gap, built from tokens.
+- Blocks are the signed-in carer's shifts: client first name and time range, no status pill, no event titles (`WeekGrid` in Week, `DayTimeline` in Day, `MonthGrid` in Month).
+- Clicking a shift block opens `/carer/patients/[clientId]`.
+- No 'Tasks for the selected shift' panel and no checklist (CHG-025).
+- New contract `getCarerShifts(carerId, range)` in `src/server/shifts/queries.ts` with its mock (CHG-030, flagged for review).
+- Loading skeleton, empty state and error state (States sheet).
 - Data only via `src/server/**` contract functions (mock data source).
 
 ## Out of Scope
@@ -48,7 +51,7 @@ A clickable, reviewable screen that matches the design, ready for data wiring in
 ## Dependencies
 - Features: F0-15 (Role app shell: rail, header and layouts), UI-01 (Calendar kit: week/day/month grids, event blocks, date picker), UI-03 (Lists and cards kit: tables, rows, person/stat/budget/alert cards, client info view)
 - Blocking open decisions (must be answered before START FEATURE): None
-- Non-blocking open decisions (proposed defaults apply, confirm when possible): OQ-33
+- Non-blocking open decisions: none (OQ-33 is ANSWERED; PD-043 (a) is amended by CHG-025)
 
 ## Inputs
 - Fixtures
