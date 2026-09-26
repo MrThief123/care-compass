@@ -6,7 +6,7 @@
  */
 import * as mock from "@/mocks/queries/shifts";
 import { getDataSourceMode, notImplementedForSupabase } from "@/server/data-source";
-import type { Shift } from "@/types/domain";
+import { OccurrenceRangeSchema, type OccurrenceRange, type Shift } from "@/types/domain";
 
 /** A shift with the client's first name, which is all Carer Home shows of the client. */
 export type CarerShiftRow = Shift & { clientFirstName: string };
@@ -22,4 +22,22 @@ export async function getCarerTodayShifts(carerId: string): Promise<CarerShiftRo
     return mock.getCarerTodayShifts(carerId);
   }
   notImplementedForSupabase("shifts", "getCarerTodayShifts");
+}
+
+/**
+ * The carer's shifts that start on a Melbourne day from `range.from` to
+ * `range.to`, both inclusive, earliest first (CAR-UI-03, CHG-030). `range` is
+ * parsed with `OccurrenceRangeSchema`, so a backwards or over-long range
+ * rejects. An unknown carer returns `[]`.
+ */
+export async function getCarerShifts(
+  carerId: string,
+  range: OccurrenceRange,
+): Promise<CarerShiftRow[]> {
+  const parsed = OccurrenceRangeSchema.parse(range);
+  const mode = getDataSourceMode();
+  if (mode === "mock") {
+    return mock.getCarerShifts(carerId, parsed);
+  }
+  notImplementedForSupabase("shifts", "getCarerShifts");
 }

@@ -824,6 +824,37 @@ Docs updated: DECISIONS.md
 - Human confirmation: Dhruv Verma, 2026-09-26 (in-session).
 - Docs updated: DECISIONS.md (this entry; CHG-025 open question closed), DEVELOPMENT_PLAN.md (CHG-026 notes on CAR-UI-02, CAR-04, CAR-06, INT-03), CAR-UI-01 PROGRESS.md.
 
+### CHG-030 — Carer Calendar: a range query for shifts, Family-style navigation, a shift block opens the patient
+- Date / requested by: 2026-09-26 / Dhruv Verma (human, project lead)
+- Type: scope change (CAR-UI-03; applies CHG-025 to the Carer Calendar)
+- Description:
+  - **Blocks are shifts (CHG-025).** Each block is one of the signed-in carer's shifts, titled with the client's first name and showing the time range (e.g. 'Margaret', '08:00–12:00'), as on Carer Home. No status pill, no event titles. The 'Tasks for the selected shift' panel and its checklist are not built.
+  - **Contract.** CAR-UI-03 adds `getCarerShifts(carerId, range)` to `src/server/shifts/queries.ts` (range `{from, to}` validated with `OccurrenceRangeSchema`; the carer's shifts starting on those Melbourne days, earliest first, with `clientFirstName`) and its mock in `src/mocks/queries/shifts.ts`. Both are outside Lane C's folders, allowed by this entry and flagged for review in the PR (as CHG-025 did for CAR-UI-01). The `SHIFTS` fixture is unchanged.
+  - **Navigation.** Same as Family · Calendar: the URL holds `?view=&date=&month=`, with D/W/M, Previous/Next and Today; no view param means Week. Family's `calendar-params` helpers are imported, not edited. The arrows and Today are not in the design: built from tokens and flagged "design gap, built from tokens — please review" (OQ-19 pattern).
+  - **Clicking a shift block** opens `/carer/patients/[clientId]`, the patient's Home tab (CHG-029), where tasks are ticked off (CHG-026).
+- Source / justification: human answers in-session, 2026-09-26 ("Yes, add it", "Same as Family", "Open the patient").
+- Impact: CAR-UI-03 PRD Scope; ACCEPTANCE_CRITERIA (AC-01 and AC-02 rewritten, AC-04 to AC-10 added); TEST_PLAN; feature DECISIONS. CAR-05 wires `getCarerShifts` to Supabase.
+- Human confirmation: Dhruv Verma, 2026-09-26 (in-session).
+- Docs updated: DECISIONS.md (this entry), DEVELOPMENT_PLAN.md (CAR-UI-03 card), CAR-UI-03 PRD.md, ACCEPTANCE_CRITERIA.md, TEST_PLAN.md, DECISIONS.md, PROGRESS.md, SESSION_STATE.md.
+
+### CHG-031 — Carer Calendar merged into Carer Home; no Carer Calendar rail item
+- Date / requested by: 2026-09-26 / Dhruv Verma (human, project lead)
+- Type: scope change (CAR-UI-03, CAR-UI-01, F0-15; amends CHG-030's route and default view)
+- Description:
+  - **One screen.** Carer Home's calendar card becomes the 'Shifts' calendar with D/W/M, Previous/Next and Today (CHG-030's navigation). The URL holds `/carer/home?view=&date=&month=`; **no view param means Day** (today), so Home still opens on today's shifts.
+  - **Notifications stay beside it** from 1280px wide and move below it under 1280px, so the week grid keeps its width.
+  - **`/carer/calendar` is removed**, with no redirect, and the Carer rail loses its Calendar item: Home · Patients · Settings. Family's rail is unchanged.
+  - **Rail edit.** `src/components/shared/nav-config.ts` is outside Lane C; editing it on the CAR-UI-03 branch is allowed by this entry and flagged in the PR, with the F0-15 tests that named the Carer Calendar item.
+  - Everything else from CHG-030 stands: shift blocks, `getCarerShifts(carerId, range)`, a block opens `/carer/patients/[clientId]`.
+- Source / justification: human in-session, 2026-09-26: "there isn't enough to justify a separate [screen]"; "remove the calendar in the sidebar, not redirect it"; "Default view on home should be day view"; notifications "on the side of the calendar"; "do it on this branch".
+- Impact:
+  - **CAR-UI-03:** builds the D/W/M calendar inside Carer Home instead of a `/carer/calendar` route; AC-03, AC-06, AC-09, AC-10 changed (FD-04 lists the test changes).
+  - **CAR-UI-01:** Home reads `getCarerShifts` for the visible range; the calendar section is titled 'Shifts' (was "Today's calendar"); empty copy 'No shifts'. AC-01, AC-05, AC-07 reworded; `getCarerTodayShifts` is no longer read by a screen (its contract stays; CAR-01 decides whether to drop it).
+  - **F0-15:** AC-03's Carer rail becomes Home, Patients, Settings; AC-06 checks the active item on `/carer/patients`.
+  - **CAR-01 / CAR-05:** wire `getCarerShifts` for Carer Home's calendar; CAR-05 no longer has a screen of its own.
+- Human confirmation: Dhruv Verma, 2026-09-26 (in-session).
+- Docs updated: DECISIONS.md (this entry), DEVELOPMENT_PLAN.md (CAR-UI-03, CAR-05 cards), CAR-UI-03 PRD, ACCEPTANCE_CRITERIA, TEST_PLAN, DECISIONS (FD-04), PROGRESS, SESSION_STATE; CAR-UI-01 ACCEPTANCE_CRITERIA; F0-15 ACCEPTANCE_CRITERIA.
+
 Template for future entries:
 ```
 ### CHG-xxx — <title>

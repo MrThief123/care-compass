@@ -480,6 +480,8 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Requirements:** REQ-02, REQ-N1, REQ-N2, REQ-N3
 - **CHG-009 (tasks and plain events, REQ-35):** calendar blocks show tasks and plain events; "Tasks for the selected shift" lists tasks only.
 - **CHG-025 (carer shifts and notifications):** calendar blocks are the carer's shifts (client + time range); the 'Tasks for the selected shift' panel is removed.
+- **CHG-030:** adds `getCarerShifts(carerId, range)`; Family-style D/W/M, Previous/Next and Today via the URL; a shift block opens the patient.
+- **CHG-031:** the calendar lives on Carer Home (`/carer/home?view=&date=&month=`, Day by default, notifications beside it); `/carer/calendar` and the Carer rail's Calendar item are removed.
 - **Docs:** `docs/development/carer-dev/carer-ui-calendar/` · **Status:** NOT STARTED
 
 ### CAR-UI-04 — Carer Settings screen (UI)
@@ -919,6 +921,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Acceptance criteria summary:** 3 criteria — MON 30 shows blocks at 09:00, 11:30 and 15:00 labelled with 'Margaret —'; its subtitle reads '09:00 · Margaret — Morning medication'; none of Daniel's shifts appear
 - **Testing summary:** 2 component, 1 integration
 - **Requirements:** REQ-25
+- **CHG-031:** there is no Carer Calendar screen; this wires `getCarerShifts` for Carer Home's D/W/M calendar.
 - **CHG-009 (tasks and plain events, REQ-35):** calendar blocks show tasks and plain events; "Tasks for the selected shift" lists tasks only.
 - **CHG-025 (carer shifts and notifications):** blocks are shifts, not events; no selected-shift tasks.
 - **Docs:** `docs/development/carer-dev/carer-calendar-shifts/` · **Status:** NOT STARTED
