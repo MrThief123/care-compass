@@ -1,12 +1,12 @@
 # Progress — CAR-UI-02 Carer Patients and patient info screens (UI)
 
-Status: NOT STARTED
-Owner: unclaimed
+Status: IN PROGRESS
+Owner: Dhruv Verma
 Lane: C — Carer
 Sprint: SPRINT · planned D4–D5
-Branch: `feature/carer-ui-patients-info` (not yet created)
+Branch: `feature/carer-ui-patients-info`
 PR target: `carer-dev`
-Last updated: 2026-09-17 (planning pack generated)
+Last updated: 2026-09-26 (claimed)
 
 ## Blockers
 - None recorded at planning time
