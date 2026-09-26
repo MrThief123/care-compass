@@ -833,6 +833,19 @@ Docs updated: DECISIONS.md
 - Human confirmation: Dhruv Verma, 2026-09-26 (in-session).
 - Docs updated: DECISIONS.md (this entry), DEVELOPMENT_PLAN.md (CAR-UI-02 card), CAR-UI-02 feature docs.
 
+### CHG-029 — Carer patient pages open on Home; view-only status shown to the carer
+- Date / requested by: 2026-09-26 / Dhruv Verma (human, project lead)
+- Type: scope change (CAR-UI-02)
+- Description:
+  - `/carer/patients/[clientId]` opens on the **Home** tab instead of Info.
+  - Tab order becomes **Home · Info · Calendar · Care log**.
+  - Off shift, patient Info shows a 'View only' notice saying the carer can edit once their shift with the patient starts. On shift, no notice.
+  - Each Patients card says in text whether the patient is 'On shift · can edit' or 'View only' (icon + text, never colour alone).
+- Source / justification: human review of the CAR-UI-02 preview, 2026-09-26 ("make the patients home screen the default landing place", "move info 2nd and calendar 3rd", "it should say somewhere that you can only view not edit until shift has started", "say on the actual client section ... which ones are view only").
+- Impact: CAR-UI-02 PRD Scope, AC-03 and AC-07 reworded, AC-14 and AC-15 added, T-03 and T-07 expectations changed, T-14 and T-15 added. CAR-04: Home is the landing tab once wired.
+- Human confirmation: Dhruv Verma, 2026-09-26 (in-session).
+- Docs updated: DECISIONS.md (this entry), CAR-UI-02 PRD.md, ACCEPTANCE_CRITERIA.md, TEST_PLAN.md, DECISIONS.md, PROGRESS.md, SESSION_STATE.md.
+
 Template for future entries:
 ```
 ### CHG-xxx — <title>

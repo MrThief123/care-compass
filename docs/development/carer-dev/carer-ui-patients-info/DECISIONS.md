@@ -48,6 +48,13 @@ Record feature-level decisions here using the template below. Project-wide decis
 - Because `/carer/patients/loading.tsx` streams, `notFound()` and the `[clientId]` redirect reach the browser as streamed fallbacks (HTTP 200 with the not-found UI; client-side redirect), as `node_modules/next/dist/docs/.../not-found.md` describes. Behaviour is correct; revisit the status code in CAR-04 if it matters.
 - `canEdit` = `onShift` uses OQ-09's proposed default (non-blocking): carers edit client info only during a shift.
 
+### FD-06 — Home landing, tab order and view-only labels (CHG-029)
+- Date: 2026-09-26
+- T-03 `[AC-03] the patient page opens on the Info tab`: expected redirect to `…/info`; now `…/home`. Reason: recorded requirement change (CHG-029). **HUMAN REVIEW: test expectation changed.**
+- T-07 `[AC-07] has tabs …`: expected order Home, Calendar, Info, Care log; now Home, Info, Calendar, Care log (hrefs reordered to match). Reason: recorded requirement change (CHG-029). **HUMAN REVIEW: test expectation changed.**
+- The 'View only' notice and card labels are local components in `src/features/carer-patients/`; kit `PersonCard` and `FamilyInfoView` are not edited (CLAUDE.md §4.2).
+- Until CAR-04 wires Home, the landing tab shows 'Coming soon'.
+
 <!-- Template
 ### FD-01 — <title>
 - Date:

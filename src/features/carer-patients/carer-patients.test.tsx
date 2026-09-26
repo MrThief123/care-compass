@@ -202,9 +202,9 @@ describe("[CAR-UI-02] Carer Patients grid", () => {
     expect(margaret).toHaveAccessibleName(/Margaret/);
   });
 
-  it("[CAR-UI-02][AC-03] the patient page opens on the Info tab", async () => {
+  it("[CAR-UI-02][AC-03] the patient page opens on the Home tab", async () => {
     await expect(PatientPage(params(MARGARET))).rejects.toThrow("NEXT_REDIRECT");
-    expect(mocks.redirect).toHaveBeenCalledWith(`/carer/patients/${MARGARET}/info`);
+    expect(mocks.redirect).toHaveBeenCalledWith(`/carer/patients/${MARGARET}/home`);
   });
 
   it("[CAR-UI-02][AC-06] typing 'je' in 'Search patients' leaves only Jean", async () => {
@@ -250,6 +250,25 @@ describe("[CAR-UI-02] Carer Patients grid", () => {
   });
 });
 
+describe("[CAR-UI-02] Patients edit status", () => {
+  it("[CAR-UI-02][AC-15] Margaret's card reads 'On shift · can edit' and the other six read 'View only'", async () => {
+    await renderPatients();
+
+    const links = cardLinks();
+    expect(within(links[0]!).getByText("On shift · can edit")).toBeInTheDocument();
+    expect(within(links[0]!).queryByText("View only")).not.toBeInTheDocument();
+    for (const link of links.slice(1)) {
+      expect(within(link).getByText("View only")).toBeInTheDocument();
+      expect(within(link).queryByText("On shift · can edit")).not.toBeInTheDocument();
+    }
+  });
+
+  it("[CAR-UI-02][AC-15] Patients with edit status labels has no axe violations", async () => {
+    const { container } = await renderPatients();
+    expect(await axe(container)).toHaveNoViolations();
+  });
+});
+
 describe("[CAR-UI-02] Patient header and tabs", () => {
   it("[CAR-UI-02][AC-07] shows 'Back to patients', Margaret and '78 years · Preston VIC'", async () => {
     await renderLayout(MARGARET);
@@ -263,16 +282,16 @@ describe("[CAR-UI-02] Patient header and tabs", () => {
     expect(screen.getByText("tab content")).toBeInTheDocument();
   });
 
-  it("[CAR-UI-02][AC-07] has tabs Home, Calendar, Info, Care log linking to the patient's routes", async () => {
+  it("[CAR-UI-02][AC-07] has tabs Home, Info, Calendar, Care log linking to the patient's routes", async () => {
     await renderLayout(MARGARET);
 
     const nav = screen.getByRole("navigation", { name: /Margaret/ });
     const tabs = within(nav).getAllByRole("link");
-    expect(tabs.map((tab) => tab.textContent)).toEqual(["Home", "Calendar", "Info", "Care log"]);
+    expect(tabs.map((tab) => tab.textContent)).toEqual(["Home", "Info", "Calendar", "Care log"]);
     expect(tabs.map((tab) => tab.getAttribute("href"))).toEqual([
       `/carer/patients/${MARGARET}/home`,
-      `/carer/patients/${MARGARET}/calendar`,
       `/carer/patients/${MARGARET}/info`,
+      `/carer/patients/${MARGARET}/calendar`,
       `/carer/patients/${MARGARET}/tasks`,
     ]);
   });
@@ -303,6 +322,28 @@ describe("[CAR-UI-02] Patient header and tabs", () => {
 });
 
 describe("[CAR-UI-02] Patient Info tab", () => {
+  it("[CAR-UI-02][AC-14] off shift (Robert), Info says it is view only until his shift starts", async () => {
+    await renderInfo(ROBERT);
+
+    const notice = screen.getByRole("note");
+    expect(notice).toHaveTextContent("View only");
+    expect(notice).toHaveTextContent(
+      "You can edit Robert's information once your shift with them starts.",
+    );
+  });
+
+  it("[CAR-UI-02][AC-14] on shift (Margaret), Info shows no view-only notice", async () => {
+    await renderInfo(MARGARET);
+
+    expect(screen.queryByRole("note")).not.toBeInTheDocument();
+    expect(screen.queryByText("View only")).not.toBeInTheDocument();
+  });
+
+  it("[CAR-UI-02][AC-14] the off-shift Info notice has no axe violations", async () => {
+    const { container } = await renderInfo(ROBERT);
+    expect(await axe(container)).toHaveNoViolations();
+  });
+
   it("[CAR-UI-02][AC-04] off shift (Robert), Info shows the cards with no Edit button and no 'Add file'", async () => {
     await renderInfo(ROBERT);
 

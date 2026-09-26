@@ -1,12 +1,12 @@
 # Progress — CAR-UI-02 Carer Patients and patient info screens (UI)
 
-Status: READY FOR PR
+Status: IN PROGRESS
 Owner: Dhruv Verma
 Lane: C — Carer
 Sprint: SPRINT · planned D4–D5
 Branch: `feature/carer-ui-patients-info`
 PR target: `carer-dev`
-Last updated: 2026-09-26 (implemented, green)
+Last updated: 2026-09-26 (CHG-029 tests red)
 
 ## Blockers
 - None. Lane F request (FD-01) blocks only CAR-04's wiring of the Home, Calendar and Care log tabs, not this feature.
@@ -24,7 +24,8 @@ Last updated: 2026-09-26 (implemented, green)
 - Browser check (Playwright/Chromium against the dev server) at 1920, 1600, 1440, 1280, 1024, 900, 768: no horizontal scroll, no overlapping elements; grid 4 → 3 → 2 columns; search 'je' → Jean only; clicking Margaret opens her Info with 3 Edit buttons; Robert's Info has none.
 
 ## In progress
-- None
+- CHG-029 (human review of the preview, 2026-09-26): Home landing, tab order Home · Info · Calendar · Care log, off-shift 'View only' notice on Info, edit status on Patients cards. Docs updated (PRD, AC-03/AC-07 reworded, AC-14/AC-15, T-14/T-15, FD-06). Red run 2026-09-26: 4 failing as expected (redirect still `…/info`, old tab order, no notice, no card labels); the axe and 'no notice on shift' tests pass already.
+- **HUMAN REVIEW: test expectation changed** — T-03 (redirect `…/info` → `…/home`) and T-07 (tab order), FD-06.
 
 ## Remaining
 - Human approval, then open the PR to `carer-dev` with the side-by-side screenshot.
