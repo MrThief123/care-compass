@@ -466,6 +466,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Acceptance criteria summary:** 4 criteria — 7 cards appear including 'Margaret' '78 years · Preston VIC' and 'Jean' '88 years · Fairfield VIC'; 'No patients assigned yet' is shown; the patient info page for Margaret opens …
 - **Testing summary:** 4 component
 - **Requirements:** REQ-02, REQ-N1, REQ-N2, REQ-N3
+- **CHG-026 (carer ticks from the patient's screens):** opening a patient shows the patient's Home, Calendar, Info and Care log (family-style screens, no Budget, no Settings) through the carer's account.
 - **Docs:** `docs/development/carer-dev/carer-ui-patients-info/` · **Status:** NOT STARTED
 
 ### CAR-UI-03 — Carer Calendar screen (UI)
@@ -906,6 +907,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Acceptance criteria summary:** 4 criteria — no Edit links or Add file tile exist; the change is shown; RLS rejects it …
 - **Testing summary:** 1 component, 1 e2e, 1 db, 1 integration
 - **Requirements:** REQ-05, REQ-10
+- **CHG-026 (carer ticks from the patient's screens):** covers the patient's Home, Calendar, Info and Care log, not Info alone; edit and tick-off only during an active shift (PD-041).
 - **Docs:** `docs/development/carer-dev/carer-client-info/` · **Status:** NOT STARTED
 
 ### CAR-05 — Carer — Calendar (shifts) and selected-shift tasks
@@ -932,7 +934,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Requirements:** REQ-18, REQ-19, REQ-05
 - **CHG-009 (tasks and plain events, REQ-35):** only tasks can be ticked off; plain events have no status.
 - **CHG-020 (PD-058):** marking a task done charges its cost or makes it pending through F0-12; the carer never edits the budget directly.
-- **CHG-025 (carer shifts and notifications):** blocked: where a carer ticks off a task is undecided now Carer Home and Carer Calendar show no tasks (open question in CHG-025).
+- **CHG-025 / CHG-026:** tick-off happens from the patient's own Calendar (opened from Patients), recording the signed-in carer, only during an active shift with that patient. Never from Carer Home or the Carer Calendar.
 - **Docs:** `docs/development/carer-dev/carer-complete-task/` · **Status:** NOT STARTED
 
 ### CAR-07 — Carer — Add and edit events for a patient
@@ -1128,6 +1130,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Acceptance criteria summary:** 2 criteria — the block shows 'Done · Aisha R.'; it cannot be completed
 - **Testing summary:** 2 e2e
 - **Requirements:** REQ-18, REQ-19
+- **CHG-026 (carer ticks from the patient's screens):** carer flow: Patients → patient Calendar → tick a task → family sees the carer's name.
 - **Docs:** `docs/development/carer-dev/carer-care-delivery-e2e/` · **Status:** NOT STARTED
 
 ### INT-04 — End-to-end: admin rostering journey

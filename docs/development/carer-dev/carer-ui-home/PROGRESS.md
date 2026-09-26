@@ -9,7 +9,7 @@ PR target: `carer-dev`
 Last updated: 2026-09-26
 
 ## Blockers
-- None for this feature. CHG-025 leaves "where carers tick off tasks" open; that blocks CAR-06, not this screen.
+- None. Where carers tick off tasks was settled by CHG-026: from the patient's own screens, not Carer Home.
 
 ## Dependencies status
 - F0-15 — MERGED TO DEV
