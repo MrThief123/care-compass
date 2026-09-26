@@ -226,6 +226,7 @@ CONFIRMED.
 - Alternatives: a persistent assignment table created on first shift and explicitly ended by admin/transfer (rejected — proposed default, superseded); completion-only edit rights during shift (rejected).
 - Consequences: ADR-03's mention of "a separate assignment table" is superseded — access-control queries and RLS policies for F0-06, F0-10, F0-11, CAR-01, CAR-03, CAR-04, CAR-06, CAR-07, ADM-07, ADM-08, INT-04 derive carer↔client access directly from the shifts table (start_time/end_time) rather than a join through an assignment table. Flag as an architecture update to ARCHITECTURE.md §6 (controlled change). Resolves C-05 in full (previously PARTLY RESOLVED).
 - Human confirmation: CONFIRMED 2026-09-17.
+- **Implemented by CHG-027 / F0-18 (2026-09-26):** read access was built on an assignment table in F0-06; F0-18 moves it onto shifts as this decision requires.
 
 ### PD-042 — Single Family role with full authority
 - Date: 2026-09-17 · Decided by: Dhruv Verma (answering OQ-16)
@@ -780,6 +781,16 @@ Docs updated: DECISIONS.md
 - Impact: FAM-UI-06 new AC-10 and AC-11, T-13 and T-14; T-06, T-07 and T-11 click 'Edit' first (no assertion removed; FD-09). FAM-12 keeps this flow when it wires saving. Recorded at the time in FAM-UI-06 DECISIONS.md only; this entry mirrors it (docs sync, 2026-09-25).
 - Human confirmation: Dhruv Verma, 2026-09-25 (in-session).
 - Docs updated: FAM-UI-06 ACCEPTANCE_CRITERIA.md, TEST_PLAN.md, DECISIONS.md (FD-09, FD-10), PROGRESS.md, SESSION_STATE.md; DECISIONS.md (this entry).
+
+### CHG-027 — Carer read access follows shifts (implement PD-041; retire `carer_client_assignments`)
+- Date / requested by: 2026-09-26 / Dhruv Verma (human, project lead)
+- Type: architectural change (corrects the database to an answered decision)
+- Description: PD-041 says a carer can read a client while they have any current or future shift with that client, and edit only while a shift with that client is in progress. Edit access already does this (`carer_on_active_shift()`, F0-10). Read access does not: `is_assigned_carer()` (F0-06) reads a `carer_client_assignments` table that nothing fills from shifts, because ARCHITECTURE.md still described an assignment table. New feature **F0-18** redefines `is_assigned_carer()` over `shifts` (non-cancelled, not yet ended, active carer), keeping its name so every policy picks up the rule, and retires `carer_client_assignments`.
+- Source / justification: human, in-session 2026-09-26, restating the rule with a worked example: for a 09:00–15:00 shift, at 08:00 the carer can view but not edit; from 09:00 they can edit; after 15:00 they lose edit, and lose view too unless they have a later shift with that client. "The carer should be able to see all of the clients who they are assigned to from the current time onwards." Confirmed as a controlled change the same session.
+- Impact: new feature F0-18 (Lane B, `docs/development/shared/shared-carer-shift-access/`). F0-06 and F0-08 artefacts change (assignment table, its policy and audit trigger dropped); `transfer_client_organisation()` loses its assignment step (it already cancels the old organisation's future shifts). pgTAP setups using the table move to shifts. ARCHITECTURE.md §5/§6 updated by F0-18. CAR-03, CAR-04 and CAR-06 take F0-18 as a hard dependency (human, 2026-09-26). CAR-06 also swaps CAR-UI-01 and CAR-UI-03 for CAR-UI-02 and CAR-04, because under CHG-026 (on `feature/carer-ui-home`) carers tick tasks off from the patient's screens (human, 2026-09-26).
+- Numbering: CHG-025 and CHG-026 are used on the unmerged branch `feature/carer-ui-home`, so this entry takes CHG-027.
+- Human confirmation: Dhruv Verma, 2026-09-26 (in-session).
+- Docs updated: DECISIONS.md (this entry; note on PD-041), DEVELOPMENT_PLAN.md (F0-18 row and card, totals; F0-18 added to CAR-03, CAR-04, CAR-06 dependencies), F0-18 feature docs, CAR-03/CAR-04/CAR-06 PRD.md and PROGRESS.md.
 
 Template for future entries:
 ```
