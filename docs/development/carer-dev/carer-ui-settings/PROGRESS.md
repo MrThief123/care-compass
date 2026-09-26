@@ -1,19 +1,19 @@
 # Progress — CAR-UI-04 Carer Settings screen (UI)
 
-Status: NOT STARTED
-Owner: unclaimed
+Status: IN PROGRESS
+Owner: Dhruv Verma
 Lane: C — Carer
 Sprint: SPRINT · planned D6
-Branch: `feature/carer-ui-settings` (not yet created)
+Branch: `feature/carer-ui-settings`
 PR target: `carer-dev`
-Last updated: 2026-09-17 (planning pack generated)
+Last updated: 2026-09-26 (claimed)
 
 ## Blockers
 - None recorded at planning time
 
 ## Dependencies status
-- F0-15 — NOT STARTED
-- UI-02 — NOT STARTED
+- F0-15 — MERGED
+- UI-02 — MERGED
 
 ## Completed
 - Feature documentation drafted (Claude Chat planning pack)
