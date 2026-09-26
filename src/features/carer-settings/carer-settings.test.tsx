@@ -81,14 +81,55 @@ describe("[CAR-UI-04] Carer Settings", () => {
     expect(mocks.getCarerContactDetails).toHaveBeenCalledWith(CARER_ID);
   });
 
-  it("[CAR-UI-04][AC-01] My info is read-only with no Edit or Save button (FD-03, PD-054)", async () => {
+  it("[CAR-UI-04][AC-01] My info starts read-only with an 'Edit' button and no 'Save' (FD-06, PD-054)", async () => {
     await renderSettings();
 
     for (const label of ["Name", "Phone", "Email", "Role"]) {
       expect(field(label)).toHaveAttribute("readonly");
     }
-    expect(screen.queryByRole("button", { name: "Edit" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Edit" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Save" })).not.toBeInTheDocument();
+  });
+
+  it("[CAR-UI-04][AC-01] 'Edit' opens Name, Phone and Email but never Role; Save keeps the edit and says 'Saved.' (FD-06)", async () => {
+    const user = userEvent.setup();
+    await renderSettings();
+
+    await user.click(screen.getByRole("button", { name: "Edit" }));
+    for (const label of ["Name", "Phone", "Email"]) {
+      expect(field(label)).not.toHaveAttribute("readonly");
+    }
+    expect(field("Role")).toHaveAttribute("readonly");
+    expect(field("Name")).toHaveFocus();
+
+    await user.clear(field("Phone"));
+    await user.type(field("Phone"), "0400 111 222");
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    expect(field("Phone")).toHaveValue("0400 111 222");
+    expect(field("Phone")).toHaveAttribute("readonly");
+    expect(screen.getByRole("button", { name: "Edit" })).toHaveFocus();
+    expect(screen.getByRole("status")).toHaveTextContent("Saved.");
+  });
+
+  it("[CAR-UI-04][AC-01] Cancel puts back the last saved values; an invalid Save shows the message and stays in edit mode (FD-06)", async () => {
+    const user = userEvent.setup();
+    await renderSettings();
+
+    await user.click(screen.getByRole("button", { name: "Edit" }));
+    await user.clear(field("Email"));
+    await user.type(field("Email"), "not-an-email");
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    expect(screen.getByText("Enter an email address like name@example.com.")).toBeInTheDocument();
+    expect(field("Email")).toHaveFocus();
+    expect(screen.getByRole("button", { name: "Save" })).toBeInTheDocument();
+    expect(screen.getByRole("status")).not.toHaveTextContent("Saved.");
+
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
+    expect(field("Email")).toHaveValue("aisha.r@banksiahomecare.com.au");
+    expect(field("Email")).toHaveAttribute("readonly");
+    expect(screen.queryByRole("button", { name: "Cancel" })).not.toBeInTheDocument();
   });
 
   it("[CAR-UI-04][AC-02] the Reset card reads the secure-link copy with a 'Reset' button, and pressing it announces the link was sent", async () => {
