@@ -1,57 +1,55 @@
 # Progress — CAR-UI-01 Carer Home screen (UI)
 
-Status: NOT STARTED
-Owner: unclaimed
+Status: IN PROGRESS
+Owner: Dhruv Verma
 Lane: C — Carer
 Sprint: SPRINT · planned D4
-Branch: `feature/carer-ui-home` (not yet created)
+Branch: `feature/carer-ui-home`
 PR target: `carer-dev`
-Last updated: 2026-09-17 (planning pack generated)
+Last updated: 2026-09-26
 
 ## Blockers
-- None recorded at planning time
+- None for this feature. CHG-025 leaves "where carers tick off tasks" open; that blocks CAR-06, not this screen.
 
 ## Dependencies status
-- F0-15 — NOT STARTED
-- UI-03 — NOT STARTED
+- F0-15 — MERGED TO DEV
+- UI-03 — MERGED TO DEV
 
 ## Completed
-- Feature documentation drafted (Claude Chat planning pack)
+- Claimed; scope rewritten under CHG-025 (PRD, ACs, TEST_PLAN, DECISIONS).
+- Tests written first (see Tests).
 
 ## In progress
-- None
+- Implementation (next session).
 
 ## Remaining
-- Route `/carer/home` inside the carer layout.
-- 'Today's calendar' card: rows '09:00 · Margaret — Morning medication · pill'.
-- 'Tasks' card: `TaskChecklist` (local toggle).
-- 'Notifications' card: `NotificationRow`s (Admin/Family).
-- Header 'Home' with bell.
-- Loading skeleton, empty state and error state (States sheet) wired to the query contract's states.
-- Data only via `src/server/**` contract functions (mock data source).
+- `getCarerTodayShifts` and `getCarerNotifications` contracts + mock queries; fixture updates (FD-02).
+- `/carer/home` page, `loading.tsx`, error state; screen components in `src/features/carer-home/`.
+- Browser width sweep (T-13); side-by-side screenshot for the PR.
 
 ## Acceptance criteria status
-- 0 / 3 MET
+- 0 / 10 MET
 
 ## Tests
-- Written: 0 / 3
-- Passing: 0
-- Failing: 0
+- Written: 12 / 13 (T-13 is manual)
+- Passing: see SESSION_STATE.md
+- Failing: see SESSION_STATE.md
 
 ## Files changed
-- None yet. Likely files: `src/app/(carer)/carer/home/page.tsx`
+- Docs: root DECISIONS.md (CHG-025), DEVELOPMENT_PLAN.md (CHG-025 notes), this feature folder.
+- Tests: `src/features/carer-home/carer-home.test.tsx`, `src/server/shifts/queries.test.ts`, `src/server/notifications/queries.test.ts`.
 
 ## Decisions
-- See DECISIONS.md
+- See DECISIONS.md (FD-01 to FD-04).
 
 ## Problems encountered
 - None
 
 ## Assumptions
-- PROPOSED items in PRD.md are unconfirmed until validated in F0-01 or answered in DECISIONS.md.
+- None beyond DECISIONS.md.
 
 ## Next action
-- complete dependencies, run START FEATURE CAR-UI-01, and write the tests in TEST_PLAN.md first.
+- Implement until the tests pass (see SESSION_STATE.md).
 
 ## Ready for PR
 - No
