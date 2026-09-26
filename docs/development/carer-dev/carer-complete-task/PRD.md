@@ -46,7 +46,8 @@ Accurate, safeguarded record of who provided care and when (brief II, item 7).
 - Checked items struck through and muted.
 
 ## Dependencies
-- Features: F0-10 (Shifts schema, active-shift function and conflict query), F0-11 (Care events, occurrence overrides and append-only completions), F0-18 (Carer view access derived from shifts, CHG-027), CAR-UI-01 (Carer Home screen (UI)), CAR-UI-03 (Carer Calendar screen (UI))
+- Features: F0-10 (Shifts schema, active-shift function and conflict query), F0-11 (Care events, occurrence overrides and append-only completions), F0-18 (Carer view access derived from shifts, CHG-027), CAR-UI-02 (Carer Patients and patient info screens (UI)), CAR-04 (Carer — Client info)
+- Dependency note: the Carer Home and Carer Calendar UI features were dropped as dependencies, because carers tick tasks off from the patient's screens (CHG-026).
 - Blocking open decisions (must be answered before START FEATURE): OQ-09, OQ-10, OQ-33
 - Non-blocking open decisions (proposed defaults apply, confirm when possible): OQ-34
 
