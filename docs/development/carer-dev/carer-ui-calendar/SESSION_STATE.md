@@ -2,13 +2,13 @@
 
 Last session date: 2026-09-26
 Current branch: `feature/carer-ui-calendar` (from `carer-dev`)
-Worked on: implementation until green, full suite, e2e, browser sweep, docs
-What changed: `getCarerShifts` contract + mock; `/carer/calendar` page and loading; `src/features/carer-calendar/` view, toolbar, skeleton; FD-03 (reuse Carer Home error state); ACs all MET
-Tests run: `npm test`, `npm run test:e2e -- --grep-invert "F0-07"`, `npm run lint`, `npm run typecheck`
-Test results: 25/25 feature tests green; full suite 1852 passed, 5 unrelated F0-07/F0-04 integration failures ("Invalid API key"); e2e 36 passed
+Worked on: CHG-031, merging the Carer Calendar into Carer Home
+What changed: Carer Home holds the D/W/M 'Shifts' calendar (Day by default) with notifications beside it from 1280px; `/carer/calendar`, `src/features/carer-calendar/` and the Carer rail Calendar item removed; tests rewritten first (FD-04)
+Tests run: `npm test`, `npm run test:e2e -- --grep-invert "F0-07"`, `npx eslint .`, `npx tsc --noEmit`, Prettier on changed files
+Test results: full suite 1853 passed, 5 unrelated F0-07/F0-04 integration failures ("Invalid API key"); e2e 36 passed; lint 0 errors; typecheck clean
 Current blocker: None
-Important discoveries: Stale `.next/types` from another branch break `tsc` until a `next build` regenerates them. The Chrome extension was not connected, so the sweep ran in Playwright against the dev server on :3107.
-Important decisions: FD-03
-Exact next action: With human approval, open PR `CAR-UI-03 Carer Calendar screen (UI)` to `carer-dev`, flagging the `src/server/shifts` and `src/mocks/queries/shifts.ts` edits (CHG-030).
+Important discoveries: After deleting a route, `tsc` fails on stale `.next/types/validator.ts` until a `next build` (the e2e run) regenerates it.
+Important decisions: CHG-031, FD-04
+Exact next action: With human approval, open PR `CAR-UI-03 Carer Calendar screen (UI)` to `carer-dev`, flagging the edits outside Lane C (CHG-030: `src/server/shifts`, `src/mocks/queries/shifts.ts`; CHG-031: `src/components/shared/nav-config.ts`, `rail.test.tsx`, `tests/e2e/shared-app-shell.spec.ts`) and **HUMAN REVIEW: test expectation changed**.
 Files likely to be touched next: none
 Warning for next session: `/carer/patients/[clientId]` 404s in the preview until CAR-UI-02 (PR #125) merges to `carer-dev`.

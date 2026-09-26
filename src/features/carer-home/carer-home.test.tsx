@@ -203,10 +203,7 @@ describe("[CAR-UI-01] Carer Home empty, error and loading states", () => {
   });
 
   it.each([
-    [
-      "shifts",
-      () => mocks.getCarerShifts.mockRejectedValue(new Error("Margaret Doyle secret")),
-    ],
+    ["shifts", () => mocks.getCarerShifts.mockRejectedValue(new Error("Margaret Doyle secret"))],
     [
       "notifications",
       () => mocks.getCarerNotifications.mockRejectedValue(new Error("Margaret Doyle secret")),

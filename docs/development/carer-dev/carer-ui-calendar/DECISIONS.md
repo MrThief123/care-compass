@@ -23,7 +23,7 @@ Record feature-level decisions here using the template below. Project-wide decis
 ### FD-02 — Local toolbar, not Family's `CalendarToolbar`
 - Date: 2026-09-26
 - Context: Family's `CalendarToolbar` always renders an 'Enter event' link, which carers must not have.
-- Decision: A small toolbar in `src/features/carer-calendar/` ('Shifts' heading, range label, Previous/Next <unit>, Today, the kit's `SegmentedControl`). Lane F files are not edited.
+- Decision: A small toolbar, now `src/features/carer-home/carer-shifts-toolbar.tsx` (CHG-031; was `src/features/carer-calendar/`) ('Shifts' heading, range label, Previous/Next <unit>, Today, the kit's `SegmentedControl`). Lane F files are not edited.
 - Human confirmation required: no
 
 ### FD-03 — Reuse Carer Home's error state
@@ -35,6 +35,23 @@ Record feature-level decisions here using the template below. Project-wide decis
 - Consequences: If the carer screens grow more error states, move it to a carer-wide name then.
 - Human confirmation required: no
 - Test changes caused (if any): none
+
+### FD-04 — Apply CHG-031: the calendar moves into Carer Home
+- Date: 2026-09-26
+- Context: After implementation the human merged the Carer Calendar into Carer Home (CHG-031): Day by default, notifications beside the calendar from 1280px, `/carer/calendar` and the rail's Calendar item removed with no redirect.
+- Decision: `CarerHomeView` holds the D/W/M calendar and the notifications; the Home page parses `?view=&date=&month=` with Family's `parseCalendarParams`, passing `view: "day"` when the URL has none. `src/features/carer-calendar/` and `src/app/(carer)/carer/calendar/` are deleted; the toolbar moves to `src/features/carer-home/carer-shifts-toolbar.tsx` with an `h2` (the header already titles the page). Home's side-by-side grid starts at `xl` (1280px) instead of `lg`, so a week never gets less than ~690px. The Carer item is removed from `src/components/shared/nav-config.ts` (outside Lane C, allowed by CHG-031).
+- Reason: human request in-session, 2026-09-26 (CHG-031).
+- Alternatives considered: redirecting `/carer/calendar` to Home (rejected by the human); notifications below the calendar at every width, or only in the bell.
+- Consequences: FD-03's error state is now simply Home's. `getCarerTodayShifts` has no screen caller; left for CAR-01 to drop or keep.
+- Human confirmation required: no (confirmed, Dhruv Verma, 2026-09-26)
+- Test changes caused (recorded requirement change, CHG-031; **HUMAN REVIEW: test expectation changed**):
+  - `carer-calendar.test.tsx` → `src/features/carer-home/carer-home-calendar.test.tsx`; renders `CarerHomePage` (mocks `getCarerNotifications`) instead of the calendar page.
+  - T-03: before "no params → W, reads 30 Nov–6 Dec"; after "no params → D, reads 30 Nov only", plus a new `view=week` case with the old assertion.
+  - T-06: URLs `/carer/calendar?…` → `/carer/home?…`; new Next-day case.
+  - T-04: new day-block click case.
+  - T-09, T-10: the loading-skeleton cases removed here, because the route's loading is Carer Home's, still tested by CAR-UI-01 AC-09 and AC-10.
+  - CAR-UI-01 `carer-home.test.tsx`: mocks `getCarerShifts` and `getToday` instead of `getCarerTodayShifts`, and AC-01 asserts the call with today's one-day range; the region is 'Shifts' (was "Today's calendar"); the empty title is 'No shifts' (was 'No shifts today'); the page is called with `searchParams`.
+  - F0-15 `rail.test.tsx` AC-03: Carer items Home, Patients, Settings (was with Calendar). `tests/e2e/shared-app-shell.spec.ts` AC-06: active item checked on `/carer/patients` (was `/carer/calendar`).
 
 <!-- Template
 ### FD-01 — <title>

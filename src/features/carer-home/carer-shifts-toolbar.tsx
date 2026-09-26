@@ -12,7 +12,9 @@ const FROM_OPTION: Record<SegmentedControlOption, CalendarView> = {
   M: "month",
 };
 
-export interface CarerCalendarToolbarProps {
+export interface CarerShiftsToolbarProps {
+  /** Labels the calendar region. */
+  headingId: string;
   label: string;
   view: CalendarView;
   onViewChange: (view: CalendarView) => void;
@@ -21,25 +23,29 @@ export interface CarerCalendarToolbarProps {
 }
 
 /**
- * 'Shifts' heading, range label with Previous/Next <unit>, Today, and D/W/M.
- * Family's `CalendarToolbar` always renders 'Enter event', which carers must
- * not have, so this is a local copy without it (DECISIONS.md FD-02). The
+ * Carer Home's 'Shifts' heading, range label with Previous/Next <unit>, Today,
+ * and D/W/M (CHG-031). Family's `CalendarToolbar` always renders 'Enter
+ * event', which carers must not have, so this is a local copy without it
+ * (CAR-UI-03 DECISIONS.md FD-02). The
  * arrows and Today are a design gap, built from tokens (FD-01).
  */
-export function CarerCalendarToolbar({
+export function CarerShiftsToolbar({
+  headingId,
   label,
   view,
   onViewChange,
   onStep,
   onToday,
-}: CarerCalendarToolbarProps) {
+}: CarerShiftsToolbarProps) {
   const arrow =
     "flex h-11 w-11 shrink-0 items-center justify-center rounded-control text-text-secondary outline-none hover:bg-bg-inset focus-visible:ring-[3px] focus-visible:ring-ring/50";
 
   return (
     <div className="flex flex-wrap items-center justify-between gap-3">
       <div className="flex min-w-0 flex-wrap items-center gap-x-4 gap-y-2">
-        <h1 className="text-title-section text-text-primary">Shifts</h1>
+        <h2 id={headingId} className="text-title-card text-text-primary">
+          Shifts
+        </h2>
         <div className="flex min-w-0 items-center gap-1">
           <button
             type="button"

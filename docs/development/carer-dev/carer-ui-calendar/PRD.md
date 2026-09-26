@@ -28,9 +28,9 @@ A clickable, reviewable screen that matches the design, ready for data wiring in
 - Carer
 
 ## Scope
-Rewritten by CHG-025 and CHG-030 (2026-09-26), before implementation started.
-- Route `/carer/calendar` inside the carer layout.
-- Section 'Shifts' with D/W/M, Previous/Next and Today; the URL holds `?view=&date=&month=` as on Family · Calendar (default Week, today). Family's `calendar-params` helpers are imported, not edited. The arrows and Today are a design gap, built from tokens.
+Rewritten by CHG-025 and CHG-030 (2026-09-26), before implementation started; amended by CHG-031 (2026-09-26): the calendar is part of Carer Home, not a route of its own.
+- Carer Home's calendar card (`/carer/home`), with Notifications beside it from 1280px and below it under that. No `/carer/calendar` route and no Carer rail Calendar item.
+- Section 'Shifts' with D/W/M, Previous/Next and Today; the URL holds `?view=&date=&month=` as on Family · Calendar (default Day, today). Family's `calendar-params` helpers are imported, not edited. The arrows and Today are a design gap, built from tokens.
 - Blocks are the signed-in carer's shifts: client first name and time range, no status pill, no event titles (`WeekGrid` in Week, `DayTimeline` in Day, `MonthGrid` in Month).
 - Clicking a shift block opens `/carer/patients/[clientId]`.
 - No 'Tasks for the selected shift' panel and no checklist (CHG-025).

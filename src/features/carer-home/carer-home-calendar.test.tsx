@@ -253,9 +253,7 @@ describe("[CAR-UI-03][AC-06] navigation writes the URL", () => {
 
     await user.click(screen.getByRole("radio", { name: "M" }));
 
-    expect(mocks.push).toHaveBeenCalledWith(
-      "/carer/home?view=month&date=2026-11-30&month=2026-12",
-    );
+    expect(mocks.push).toHaveBeenCalledWith("/carer/home?view=month&date=2026-11-30&month=2026-12");
   });
 });
 
