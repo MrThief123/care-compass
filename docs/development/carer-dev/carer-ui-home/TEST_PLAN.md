@@ -12,19 +12,19 @@ Tests are written **before** production code (TESTING.md §2). Run them, confirm
 
 | Test ID | Covers | Level | Test description | Written first? | Result |
 |---|---|---|---|---|---|
-| T-01 | AC-01 | component | Today's calendar shows one row '08:00–12:00' with 'Margaret'; no 'Done'/'Planned' pill, no event title; the contract is asked for the signed-in carer's id. | ☑ | FAIL (module missing, expected) |
-| T-02 | AC-02 | component | Notifications include 'New shift assigned: Tuesday 1 Dec, 09:00–11:00 (Margaret).' and that row's chip reads 'Admin'. | ☑ | FAIL (module missing, expected) |
-| T-03 | AC-03 | component | The carer layout renders a 'Notifications' bell button in the header. | ☑ | FAIL (module missing, expected) |
-| T-04 | AC-04 | component | No 'Tasks' heading and no checkbox anywhere on the screen. | ☑ | FAIL (module missing, expected) |
-| T-05 | AC-05 | component | The 'Today's calendar' and 'Notifications' regions share one row container, calendar first. | ☑ | FAIL (module missing, expected) |
-| T-06 | AC-06 | contract | `getCarerNotifications('staff-aisha')` returns 3 shift notifications (assigned, changed, cancelled), newest first, all source 'admin', each naming Margaret; the first is the AC-02 text. Unknown carer → []. Supabase mode → not-implemented error. | ☑ | FAIL (module missing, expected) |
-| T-07 | AC-01 | contract | `getCarerTodayShifts('staff-aisha')` returns only today's Margaret shift 08:00–12:00 with `clientFirstName` 'Margaret' (not Tuesday's shift, not Sarah's); Sarah gets her 13:00–17:00 shift; unknown carer → []; rows ordered by start; Supabase mode → not-implemented error. | ☑ | FAIL (module missing, expected) |
-| T-08 | AC-06 | component | Every rendered notification chip reads 'Admin'; no 'Family' chip. | ☑ | FAIL (module missing, expected) |
-| T-09 | AC-07 | component | Empty shifts → 'No shifts today'; empty notifications → 'No notifications'. | ☑ | FAIL (module missing, expected) |
-| T-10 | AC-08 | component | Either contract rejecting → error state; 'Try again' calls router.refresh; console.error receives no error message text. | ☑ | FAIL (module missing, expected) |
-| T-11 | AC-09 | component | Loading skeleton has role status 'Loading' and no regions or data. | ☑ | FAIL (module missing, expected) |
-| T-12 | AC-10 | component | axe: populated, empty, error and loading states have no violations. | ☑ | FAIL (module missing, expected) |
-| T-13 | PRD edge case | manual | Width sweep 1920 → 768 px: cards never overlap, a long client name wraps or truncates, notifications wrap. | n/a | NOT RUN |
+| T-01 | AC-01 | component | Today's calendar shows one row '08:00–12:00' with 'Margaret'; no 'Done'/'Planned' pill, no event title; the contract is asked for the signed-in carer's id. | ☑ | PASS |
+| T-02 | AC-02 | component | Notifications include 'New shift assigned: Tuesday 1 Dec, 09:00–11:00 (Margaret).' and that row's chip reads 'Admin'. | ☑ | PASS |
+| T-03 | AC-03 | component | The carer layout renders a 'Notifications' bell button in the header. | ☑ | PASS |
+| T-04 | AC-04 | component | No 'Tasks' heading and no checkbox anywhere on the screen. | ☑ | PASS |
+| T-05 | AC-05 | component | The 'Today's calendar' and 'Notifications' regions share one row container, calendar first. | ☑ | PASS |
+| T-06 | AC-06 | contract | `getCarerNotifications('staff-aisha')` returns 3 shift notifications (assigned, changed, cancelled), newest first, all source 'admin', each naming Margaret; the first is the AC-02 text. Unknown carer → []. Supabase mode → not-implemented error. | ☑ | PASS |
+| T-07 | AC-01 | contract | `getCarerTodayShifts('staff-aisha')` returns only today's Margaret shift 08:00–12:00 with `clientFirstName` 'Margaret' (not Tuesday's shift, not Sarah's); Sarah gets her 13:00–17:00 shift; unknown carer → []; rows ordered by start; Supabase mode → not-implemented error. | ☑ | PASS |
+| T-08 | AC-06 | component | Every rendered notification chip reads 'Admin'; no 'Family' chip. | ☑ | PASS |
+| T-09 | AC-07 | component | Empty shifts → 'No shifts today'; empty notifications → 'No notifications'. | ☑ | PASS |
+| T-10 | AC-08 | component | Either contract rejecting → error state; 'Try again' calls router.refresh; console.error receives no error message text. | ☑ | PASS |
+| T-11 | AC-09 | component | Loading skeleton has role status 'Loading' and no regions or data. | ☑ | PASS |
+| T-12 | AC-10 | component | axe: populated, empty, error and loading states have no violations. | ☑ | PASS |
+| T-13 | PRD edge case | manual | Width sweep 1920 → 768 px: cards never overlap, a long client name wraps or truncates, notifications wrap. | n/a | PASS (2026-09-26, Playwright Chromium at 1920/1440/1280/1024/900/768, normal and long-name stress: no overlap, no horizontal scroll, nothing overflows its card; side by side from 1024px, stacked below) |
 
 ## Regression scope
 - Run the full unit/component suite and `supabase test db` before marking READY FOR PR.

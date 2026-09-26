@@ -40,6 +40,19 @@ Record feature-level decisions here using the template below. Project-wide decis
 - Date: 2026-09-26
 - Decision: 'No shifts today' and 'No notifications', following Family Home's 'No care events today' style (no full stop).
 
+### FD-05 — Local error state for the 'Try again' label
+- Date: 2026-09-26
+- Context: AC-08 and T-10 name the retry button 'Try again'; the kit's `ErrorState` (`src/components/shared/states.tsx`) hard-codes 'Retry' and takes no label prop. Lane C may not edit the shared kit, and the human asked for no test changes.
+- Decision: `src/features/carer-home/carer-home-error-state.tsx` renders the same markup and tokens as `ErrorState` with a 'Try again' button (§4.2 local wrapper).
+- Alternatives considered: change T-10 to 'Retry' (needs human sign-off); add a label prop to the kit `ErrorState` (shared PR).
+- Consequences: two error-state copies until the human picks one wording. Flagged in the PR.
+- Human confirmation required: yes (which wording the product uses).
+- Test changes caused: none.
+
+### FD-06 — Layout breakpoints
+- Date: 2026-09-26
+- Decision: the two cards sit side by side from 1024px (equal columns; 1.6 : 1 from 1280px, close to the design's Today/Tasks split) and stack below 1024px, like Family Home (FAM FD-18).
+
 <!-- Template
 ### FD-xx — <title>
 - Date:

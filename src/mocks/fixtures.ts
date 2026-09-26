@@ -599,6 +599,21 @@ export const SHIFTS: Shift[] = [
     start: "2026-11-30T13:00:00+11:00",
     end: "2026-11-30T17:00:00+11:00",
   },
+  // The shifts Aisha's notifications refer to (CHG-025).
+  {
+    id: "shift-aisha-margaret-2",
+    carerId: "staff-aisha",
+    clientId: MARGARET_CLIENT_ID,
+    start: "2026-12-01T09:00:00+11:00",
+    end: "2026-12-01T11:00:00+11:00",
+  },
+  {
+    id: "shift-aisha-margaret-3",
+    carerId: "staff-aisha",
+    clientId: MARGARET_CLIENT_ID,
+    start: "2026-12-02T13:00:00+11:00",
+    end: "2026-12-02T17:00:00+11:00",
+  },
 ];
 
 // ---------------------------------------------------------------------------
@@ -898,21 +913,30 @@ export const EVENT_DOCUMENTS: EventDocument[] = [
 // Carer notifications
 // ---------------------------------------------------------------------------
 
+/** CHG-025 (amending PD-048): shift assigned, changed and cancelled only, each naming the client. */
 export const CARER_NOTIFICATIONS: CarerNotification[] = [
   {
     id: "notif-aisha-1",
     carerId: "staff-aisha",
     source: "admin",
-    message: "New shift assigned: Margaret Doyle, Mon 30 Nov, 08:00–12:00.",
-    createdAt: "2026-11-29T17:00:00+11:00",
+    message: "New shift assigned: Tuesday 1 Dec, 09:00–11:00 (Margaret).",
+    createdAt: "2026-11-30T08:30:00+11:00",
     read: false,
   },
   {
     id: "notif-aisha-2",
     carerId: "staff-aisha",
-    source: "family",
-    message: "Helen Doyle added a new document: Care plan 2026.pdf.",
-    createdAt: "2026-11-29T18:30:00+11:00",
+    source: "admin",
+    message: "Shift changed: Wednesday 2 Dec now 13:00–17:00 (Margaret).",
+    createdAt: "2026-11-29T17:00:00+11:00",
     read: false,
+  },
+  {
+    id: "notif-aisha-3",
+    carerId: "staff-aisha",
+    source: "admin",
+    message: "Shift cancelled: Friday 4 Dec, 08:00–12:00 (Margaret).",
+    createdAt: "2026-11-28T10:00:00+11:00",
+    read: true,
   },
 ];
