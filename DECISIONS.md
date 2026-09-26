@@ -824,6 +824,15 @@ Docs updated: DECISIONS.md
 - Human confirmation: Dhruv Verma, 2026-09-26 (in-session).
 - Docs updated: DECISIONS.md (this entry; CHG-025 open question closed), DEVELOPMENT_PLAN.md (CHG-026 notes on CAR-UI-02, CAR-04, CAR-06, INT-03), CAR-UI-01 PROGRESS.md.
 
+### CHG-028 — CAR-UI-02 split: Patients, patient tabs and Info now; Home, Calendar, Care log later
+- Date / requested by: 2026-09-26 / Dhruv Verma (human, project lead)
+- Type: scope change (narrows how CAR-UI-02 delivers CHG-026)
+- Description: CAR-UI-02 builds the Patients grid, a patient area under the carer rail (header with 'Back to patients' and tabs Home · Calendar · Info · Care log), and the Info tab (`FamilyInfoView`, editable only on shift). Home, Calendar and Care log have routes with a 'Coming soon' holding state. The Family components for those three hardcode `/family/…` links and have no read-only mode; Lane F adds a base path and read-only mode, then CAR-04 wires the tabs. CAR-UI-02's acceptance criteria are extended (AC-04 reworded, AC-05 to AC-13 added).
+- Source / justification: human answers in-session, 2026-09-26 ("Split", "Carer rail + tabs").
+- Impact: CAR-UI-02 PRD, ACCEPTANCE_CRITERIA, TEST_PLAN, DECISIONS (FD-01 to FD-04); CAR-04 (wires the three tabs); a Lane F change request (FD-01).
+- Human confirmation: Dhruv Verma, 2026-09-26 (in-session).
+- Docs updated: DECISIONS.md (this entry), DEVELOPMENT_PLAN.md (CAR-UI-02 card), CAR-UI-02 feature docs.
+
 Template for future entries:
 ```
 ### CHG-xxx — <title>

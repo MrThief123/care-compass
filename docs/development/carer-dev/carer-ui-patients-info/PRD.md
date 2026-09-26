@@ -28,16 +28,16 @@ A clickable, reviewable screen that matches the design, ready for data wiring in
 - Carer
 
 ## Scope
-- Route `/carer/patients` inside the carer layout.
-- Search field 'Search patients' (client-side on fixtures).
-- `PersonCard` grid, 4 columns.
-- Patient info `/carer/patients/[clientId]` with `ClientInfoView` (canEdit from fixture flag `onShift`; no organisation or payment controls — D10). No carer patient-info frame exists; reuse the Family Info layout (PROPOSED).
-- Loading skeleton, empty state and error state (States sheet) wired to the query contract's states.
-- Data only via `src/server/**` contract functions (mock data source).
-
-## Out of Scope
-- Real data, permissions and persistence (Phase 3 wiring features)
-- Undesigned flows (listed in DECISIONS.md OQ-19)
+Updated by CHG-026 and CHG-028 (human, 2026-09-26).
+- Route `/carer/patients` inside the carer layout: `PersonCard` grid, 4 columns, one card per patient the carer can see, i.e. has a current or future shift with (PD-041). Card meta is `<age> years · <suburb>`. Order: soonest shift first (FD-03).
+- Search field 'Search patients': client-side filter on first name, case-insensitive; zero matches shows the kit's no-results message.
+- Each card is a link to `/carer/patients/[clientId]`, which redirects to the patient's Info tab until Home is wired (CHG-028).
+- Patient area `/carer/patients/[clientId]/…`: the carer rail stays with Patients active. A patient header shows 'Back to patients', the avatar, first name and `<age> years · <suburb>`, and a tab strip: **Home · Calendar · Info · Care log** (`home`, `calendar`, `info`, `tasks`). The current tab has `aria-current="page"`.
+- **Info** tab reuses `FamilyInfoView` (Family Info layout) with `canEdit` = the carer is on a shift with this patient right now. Off shift, the Edit and Add file controls are absent, not disabled.
+- **Home, Calendar, Care log** tabs have routes that show a holding state ('Coming soon') for now. The Family components hardcode `/family/…` links and have no read-only mode, and Lane C may not edit them (CHG-026), so they are wired later by CAR-04 after a Lane F change (CHG-028).
+- A patient the carer can't see (no current or future shift, or an unknown id) renders Next.js not-found.
+- Loading skeleton, empty state ('No patients assigned yet') and error state ('Something went wrong' / 'Try again'), for the grid and for Info.
+- Data only via `src/server/**` contract functions (mock data source): a new `getCarerPatients(carerId)` in `src/server/shifts/queries.ts`.
 
 ## Functional Requirements
 - Interactions (ticks, selections, toggles, form input) update local state only and are clearly reset on reload.

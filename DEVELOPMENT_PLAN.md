@@ -467,6 +467,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Testing summary:** 4 component
 - **Requirements:** REQ-02, REQ-N1, REQ-N2, REQ-N3
 - **CHG-026 (carer ticks from the patient's screens):** opening a patient shows the patient's Home, Calendar, Info and Care log (family-style screens; Home includes the Budget strip read-only; no Budget screen, no Settings) through the carer's account.
+- **CHG-028 (split):** this feature builds the Patients grid, the patient header and tabs under the carer rail, and Info (editable only on shift); Home, Calendar and Care log tabs hold 'Coming soon' until a Lane F read-only/base-path change, then CAR-04 wires them. 13 criteria.
 - **Docs:** `docs/development/carer-dev/carer-ui-patients-info/` · **Status:** NOT STARTED
 
 ### CAR-UI-03 — Carer Calendar screen (UI)
