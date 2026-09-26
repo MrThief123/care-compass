@@ -11,7 +11,8 @@ import type { CarerNotification } from "@/types/domain";
 const mocks = vi.hoisted(() => ({
   refresh: vi.fn(),
   getCurrentUser: vi.fn(),
-  getCarerTodayShifts: vi.fn(),
+  getToday: vi.fn(),
+  getCarerShifts: vi.fn(),
   getCarerNotifications: vi.fn(),
 }));
 
@@ -25,8 +26,11 @@ vi.mock("@/server/auth/queries", () => ({
 vi.mock("@/server/auth/actions", () => ({
   signOut: vi.fn(),
 }));
+vi.mock("@/server/events/queries", () => ({
+  getToday: mocks.getToday,
+}));
 vi.mock("@/server/shifts/queries", () => ({
-  getCarerTodayShifts: mocks.getCarerTodayShifts,
+  getCarerShifts: mocks.getCarerShifts,
 }));
 vi.mock("@/server/notifications/queries", () => ({
   getCarerNotifications: mocks.getCarerNotifications,
@@ -35,8 +39,10 @@ vi.mock("@/server/notifications/queries", () => ({
 /*
  * The screen reads only through the `src/server/**` contract, so these tests
  * replace that contract with fixtures shaped like CHG-025's Carer Home:
- * today's shifts in "Today's calendar", shift notifications beside it, no
- * Tasks card. The contract's own tests run against `src/mocks`.
+ * today's shifts in the 'Shifts' calendar (Day view by default, CHG-031),
+ * shift notifications beside it, no Tasks card. The calendar's D/W/M views
+ * are tested in `carer-home-calendar.test.tsx`. The contract's own tests run
+ * against `src/mocks`.
  */
 const CARER_ID = "staff-aisha";
 
@@ -87,13 +93,14 @@ function captureErrorLog() {
 }
 
 async function renderHome() {
-  const page = await CarerHomePage();
+  const page = await CarerHomePage({ searchParams: Promise.resolve({}) });
   return render(page);
 }
 
 beforeEach(() => {
   mocks.getCurrentUser.mockResolvedValue(AISHA);
-  mocks.getCarerTodayShifts.mockResolvedValue([MARGARET_SHIFT]);
+  mocks.getToday.mockResolvedValue("2026-11-30");
+  mocks.getCarerShifts.mockResolvedValue([MARGARET_SHIFT]);
   mocks.getCarerNotifications.mockResolvedValue(NOTIFICATIONS);
 });
 
@@ -103,9 +110,9 @@ afterEach(() => {
 });
 
 describe("[CAR-UI-01] Carer Home", () => {
-  it("[CAR-UI-01][AC-01] Today's calendar shows one timeline block, 08:00–12:00 Margaret, with no status pill or event title", async () => {
+  it("[CAR-UI-01][AC-01] Shifts (Day view, today) shows one timeline block, 08:00–12:00 Margaret, with no status pill or event title", async () => {
     await renderHome();
-    const calendar = screen.getByRole("region", { name: "Today's calendar" });
+    const calendar = screen.getByRole("region", { name: "Shifts" });
     const blocks = within(calendar).getAllByTestId(/^day-timeline-block-/);
 
     expect(blocks).toHaveLength(1);
@@ -116,7 +123,10 @@ describe("[CAR-UI-01] Carer Home", () => {
       within(calendar).queryByText(/medication|Physiotherapy|check-in/i),
     ).not.toBeInTheDocument();
     expect(mocks.getCurrentUser).toHaveBeenCalledWith("carer");
-    expect(mocks.getCarerTodayShifts).toHaveBeenCalledWith(CARER_ID);
+    expect(mocks.getCarerShifts).toHaveBeenCalledWith(CARER_ID, {
+      from: "2026-11-30",
+      to: "2026-11-30",
+    });
   });
 
   it("[CAR-UI-01][AC-02] Notifications include 'New shift assigned: Tuesday 1 Dec, 09:00–11:00 (Margaret).' with an 'Admin' chip", async () => {
@@ -146,9 +156,9 @@ describe("[CAR-UI-01] Carer Home", () => {
     expect(screen.queryByRole("checkbox")).not.toBeInTheDocument();
   });
 
-  it("[CAR-UI-01][AC-05] Notifications sits beside Today's calendar in the same row, calendar first", async () => {
+  it("[CAR-UI-01][AC-05] Notifications sits beside Shifts in the same row, calendar first", async () => {
     await renderHome();
-    const calendar = screen.getByRole("region", { name: "Today's calendar" });
+    const calendar = screen.getByRole("region", { name: "Shifts" });
     const notifications = screen.getByRole("region", { name: "Notifications" });
 
     expect(calendar.parentElement).toBe(notifications.parentElement);
@@ -174,12 +184,12 @@ describe("[CAR-UI-01] Carer Home", () => {
 });
 
 describe("[CAR-UI-01] Carer Home empty, error and loading states", () => {
-  it("[CAR-UI-01][AC-07] Today's calendar shows 'No shifts today' when the carer has no shifts", async () => {
-    mocks.getCarerTodayShifts.mockResolvedValue([]);
+  it("[CAR-UI-01][AC-07] Shifts shows 'No shifts' when the carer has no shifts today", async () => {
+    mocks.getCarerShifts.mockResolvedValue([]);
     await renderHome();
-    const calendar = screen.getByRole("region", { name: "Today's calendar" });
+    const calendar = screen.getByRole("region", { name: "Shifts" });
 
-    expect(within(calendar).getByText("No shifts today")).toBeInTheDocument();
+    expect(within(calendar).getByText("No shifts")).toBeInTheDocument();
     expect(within(calendar).queryByRole("listitem")).not.toBeInTheDocument();
   });
 
@@ -195,7 +205,7 @@ describe("[CAR-UI-01] Carer Home empty, error and loading states", () => {
   it.each([
     [
       "shifts",
-      () => mocks.getCarerTodayShifts.mockRejectedValue(new Error("Margaret Doyle secret")),
+      () => mocks.getCarerShifts.mockRejectedValue(new Error("Margaret Doyle secret")),
     ],
     [
       "notifications",
@@ -209,7 +219,7 @@ describe("[CAR-UI-01] Carer Home empty, error and loading states", () => {
       await renderHome();
 
       expect(screen.getByText("Something went wrong")).toBeInTheDocument();
-      expect(screen.queryByRole("region", { name: "Today's calendar" })).not.toBeInTheDocument();
+      expect(screen.queryByRole("region", { name: "Shifts" })).not.toBeInTheDocument();
 
       await userEvent.click(screen.getByRole("button", { name: "Try again" }));
       expect(mocks.refresh).toHaveBeenCalledTimes(1);
@@ -236,7 +246,7 @@ describe("[CAR-UI-01] Carer Home accessibility (REQ-N2)", () => {
   });
 
   it("[CAR-UI-01][AC-10] empty screen has no axe violations", async () => {
-    mocks.getCarerTodayShifts.mockResolvedValue([]);
+    mocks.getCarerShifts.mockResolvedValue([]);
     mocks.getCarerNotifications.mockResolvedValue([]);
     const { container } = await renderHome();
 
@@ -245,7 +255,7 @@ describe("[CAR-UI-01] Carer Home accessibility (REQ-N2)", () => {
 
   it("[CAR-UI-01][AC-10] error state has no axe violations", async () => {
     captureErrorLog();
-    mocks.getCarerTodayShifts.mockRejectedValue(new Error("x"));
+    mocks.getCarerShifts.mockRejectedValue(new Error("x"));
     const { container } = await renderHome();
 
     expect(await axe(container)).toHaveNoViolations();

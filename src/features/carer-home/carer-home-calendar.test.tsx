@@ -3,8 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { axe } from "jest-axe";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import Loading from "@/app/(carer)/carer/calendar/loading";
-import CarerCalendarPage from "@/app/(carer)/carer/calendar/page";
+import CarerHomePage from "@/app/(carer)/carer/home/page";
 
 const mocks = vi.hoisted(() => ({
   push: vi.fn(),
@@ -12,11 +11,12 @@ const mocks = vi.hoisted(() => ({
   getCurrentUser: vi.fn(),
   getToday: vi.fn(),
   getCarerShifts: vi.fn(),
+  getCarerNotifications: vi.fn(),
 }));
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: mocks.push, replace: vi.fn(), refresh: mocks.refresh }),
-  usePathname: () => "/carer/calendar",
+  usePathname: () => "/carer/home",
 }));
 vi.mock("@/server/auth/queries", () => ({
   getCurrentUser: mocks.getCurrentUser,
@@ -27,10 +27,15 @@ vi.mock("@/server/events/queries", () => ({
 vi.mock("@/server/shifts/queries", () => ({
   getCarerShifts: mocks.getCarerShifts,
 }));
+vi.mock("@/server/notifications/queries", () => ({
+  getCarerNotifications: mocks.getCarerNotifications,
+}));
 
 /*
- * The screen reads only through the `src/server/**` contract, so these tests
- * replace that contract with rows shaped like `SHIFTS` (CHG-025, CHG-030):
+ * Carer Home's 'Shifts' calendar in D/W/M (CHG-031: the Carer Calendar screen
+ * was merged into Home; Home opens on Day). The screen reads only through the
+ * `src/server/**` contract, so these tests replace that contract with rows
+ * shaped like `SHIFTS` (CHG-025, CHG-030):
  * Aisha's three shifts with Margaret in the week of Mon 30 Nov 2026. The
  * contract's own tests (`src/server/shifts/queries.test.ts`) run against
  * `src/mocks`.
@@ -67,8 +72,9 @@ const WED = shift(
 );
 const WEEK = [MON, TUE, WED];
 
-async function renderCalendar(search: Record<string, string> = {}) {
-  const ui = await CarerCalendarPage({ searchParams: Promise.resolve(search) });
+/** Renders Carer Home; Week unless the test passes its own params. */
+async function renderCalendar(search: Record<string, string> = { view: "week" }) {
+  const ui = await CarerHomePage({ searchParams: Promise.resolve(search) });
   return render(ui);
 }
 
@@ -84,6 +90,7 @@ beforeEach(() => {
   mocks.getCurrentUser.mockResolvedValue(AISHA);
   mocks.getToday.mockResolvedValue("2026-11-30");
   mocks.getCarerShifts.mockResolvedValue(WEEK);
+  mocks.getCarerNotifications.mockResolvedValue([]);
 });
 
 afterEach(() => {
@@ -91,7 +98,7 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-describe("[CAR-UI-03] Carer Calendar week of shifts", () => {
+describe("[CAR-UI-03] Carer Home week of shifts", () => {
   it("[CAR-UI-03][AC-01] MON 30, TUE 1 and WED 2 each show one 'Margaret' shift block with its time range", async () => {
     await renderCalendar();
 
@@ -125,25 +132,46 @@ describe("[CAR-UI-03] Carer Calendar week of shifts", () => {
     expect(screen.queryByRole("checkbox")).not.toBeInTheDocument();
   });
 
-  it("[CAR-UI-03][AC-03] with no view param, W is selected, 'Shifts' shows and today's week is read", async () => {
-    await renderCalendar();
+  it("[CAR-UI-03][AC-03] with no view param, D is selected, 'Shifts' shows and only today is read", async () => {
+    mocks.getCarerShifts.mockResolvedValue([MON]);
+    await renderCalendar({});
 
     expect(screen.getByRole("heading", { name: "Shifts" })).toBeInTheDocument();
-    expect(screen.getByRole("radio", { name: "W" })).toHaveAttribute("aria-checked", "true");
-    expect(screen.getByRole("radio", { name: "D" })).toHaveAttribute("aria-checked", "false");
+    expect(screen.getByRole("radio", { name: "D" })).toHaveAttribute("aria-checked", "true");
+    expect(screen.getByRole("radio", { name: "W" })).toHaveAttribute("aria-checked", "false");
     expect(screen.getByRole("radio", { name: "M" })).toHaveAttribute("aria-checked", "false");
     expect(mocks.getCurrentUser).toHaveBeenCalledWith("carer");
+    expect(mocks.getCarerShifts).toHaveBeenCalledWith(CARER_ID, {
+      from: "2026-11-30",
+      to: "2026-11-30",
+    });
+  });
+
+  it("[CAR-UI-03][AC-03] view=week reads today's week and selects W", async () => {
+    await renderCalendar({ view: "week" });
+
+    expect(screen.getByRole("radio", { name: "W" })).toHaveAttribute("aria-checked", "true");
     expect(mocks.getCarerShifts).toHaveBeenCalledWith(CARER_ID, {
       from: "2026-11-30",
       to: "2026-12-06",
     });
   });
 
-  it("[CAR-UI-03][AC-04] clicking a shift block opens that patient's page", async () => {
+  it("[CAR-UI-03][AC-04] clicking a week shift block opens that patient's page", async () => {
     const user = userEvent.setup();
     await renderCalendar();
 
     await user.click(blocksOn("2026-12-01")[0]!);
+
+    expect(mocks.push).toHaveBeenCalledWith(`/carer/patients/${CLIENT_ID}`);
+  });
+
+  it("[CAR-UI-03][AC-04] clicking a day shift block opens that patient's page", async () => {
+    const user = userEvent.setup();
+    mocks.getCarerShifts.mockResolvedValue([MON]);
+    await renderCalendar({});
+
+    await user.click(screen.getAllByTestId(/^day-timeline-block-/)[0]!);
 
     expect(mocks.push).toHaveBeenCalledWith(`/carer/patients/${CLIENT_ID}`);
   });
@@ -188,7 +216,7 @@ describe("[CAR-UI-03][AC-06] navigation writes the URL", () => {
 
     await user.click(screen.getByRole("button", { name: /Next week/ }));
 
-    expect(mocks.push).toHaveBeenCalledWith("/carer/calendar?view=week&date=2026-12-07");
+    expect(mocks.push).toHaveBeenCalledWith("/carer/home?view=week&date=2026-12-07");
   });
 
   it("[CAR-UI-03][AC-06] Previous week goes to the week of 23 Nov", async () => {
@@ -197,7 +225,7 @@ describe("[CAR-UI-03][AC-06] navigation writes the URL", () => {
 
     await user.click(screen.getByRole("button", { name: /Previous week/ }));
 
-    expect(mocks.push).toHaveBeenCalledWith("/carer/calendar?view=week&date=2026-11-23");
+    expect(mocks.push).toHaveBeenCalledWith("/carer/home?view=week&date=2026-11-23");
   });
 
   it("[CAR-UI-03][AC-06] Today returns to today's week", async () => {
@@ -207,7 +235,16 @@ describe("[CAR-UI-03][AC-06] navigation writes the URL", () => {
 
     await user.click(screen.getByRole("button", { name: /Today/ }));
 
-    expect(mocks.push).toHaveBeenCalledWith("/carer/calendar?view=week&date=2026-11-30");
+    expect(mocks.push).toHaveBeenCalledWith("/carer/home?view=week&date=2026-11-30");
+  });
+
+  it("[CAR-UI-03][AC-06] Next day from today's Day view goes to 1 Dec", async () => {
+    const user = userEvent.setup();
+    await renderCalendar({});
+
+    await user.click(screen.getByRole("button", { name: /Next day/ }));
+
+    expect(mocks.push).toHaveBeenCalledWith("/carer/home?view=day&date=2026-12-01");
   });
 
   it("[CAR-UI-03][AC-06] pressing M opens December 2026's month", async () => {
@@ -217,12 +254,12 @@ describe("[CAR-UI-03][AC-06] navigation writes the URL", () => {
     await user.click(screen.getByRole("radio", { name: "M" }));
 
     expect(mocks.push).toHaveBeenCalledWith(
-      "/carer/calendar?view=month&date=2026-11-30&month=2026-12",
+      "/carer/home?view=month&date=2026-11-30&month=2026-12",
     );
   });
 });
 
-describe("[CAR-UI-03] Carer Calendar empty, error and loading states", () => {
+describe("[CAR-UI-03] Carer Home calendar empty and error states", () => {
   it("[CAR-UI-03][AC-08] no shifts in range shows 'No shifts', with D/W/M and the arrows still there", async () => {
     mocks.getCarerShifts.mockResolvedValue([]);
     await renderCalendar();
@@ -254,16 +291,9 @@ describe("[CAR-UI-03] Carer Calendar empty, error and loading states", () => {
       expect(logged).not.toContain("Margaret Doyle secret");
     },
   );
-
-  it("[CAR-UI-03][AC-09] loading skeleton announces itself as loading and holds no data", () => {
-    render(<Loading />);
-
-    expect(screen.getAllByRole("status", { name: "Loading" }).length).toBeGreaterThan(0);
-    expect(screen.queryByText("Margaret")).not.toBeInTheDocument();
-  });
 });
 
-describe("[CAR-UI-03] Carer Calendar accessibility (REQ-N2)", () => {
+describe("[CAR-UI-03] Carer Home calendar accessibility (REQ-N2)", () => {
   it("[CAR-UI-03][AC-10] populated screen has no axe violations", async () => {
     const { container } = await renderCalendar();
 
@@ -281,12 +311,6 @@ describe("[CAR-UI-03] Carer Calendar accessibility (REQ-N2)", () => {
     captureErrorLog();
     mocks.getCarerShifts.mockRejectedValue(new Error("x"));
     const { container } = await renderCalendar();
-
-    expect(await axe(container)).toHaveNoViolations();
-  });
-
-  it("[CAR-UI-03][AC-10] loading skeleton has no axe violations", async () => {
-    const { container } = render(<Loading />);
 
     expect(await axe(container)).toHaveNoViolations();
   });
