@@ -26,6 +26,16 @@ Record feature-level decisions here using the template below. Project-wide decis
 - Decision: A small toolbar in `src/features/carer-calendar/` ('Shifts' heading, range label, Previous/Next <unit>, Today, the kit's `SegmentedControl`). Lane F files are not edited.
 - Human confirmation required: no
 
+### FD-03 — Reuse Carer Home's error state
+- Date: 2026-09-26
+- Context: AC-09 asks for the same error state as Carer Home ('Something went wrong', 'Try again' refreshes the route). `CarerHomeErrorState` in `src/features/carer-home/` (Lane C) already does exactly that.
+- Decision: The page imports `CarerHomeErrorState` rather than adding a copy under `src/features/carer-calendar/`.
+- Reason: one component for one state; the copy is generic ("We couldn't load this page").
+- Alternatives considered: a duplicate `carer-calendar-error-state.tsx`.
+- Consequences: If the carer screens grow more error states, move it to a carer-wide name then.
+- Human confirmation required: no
+- Test changes caused (if any): none
+
 <!-- Template
 ### FD-01 — <title>
 - Date:
