@@ -1,6 +1,6 @@
 # Progress — CAR-UI-01 Carer Home screen (UI)
 
-Status: READY FOR PR
+Status: IN REVIEW (PR #124 to carer-dev)
 
 **HUMAN REVIEW: test expectation changed.** AC-01 now asserts a DayTimeline block rather than a list row (FD-07).
 Owner: Dhruv Verma
