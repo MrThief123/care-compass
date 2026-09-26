@@ -1,7 +1,7 @@
 # DEVELOPMENT PLAN — Care Compass
 
 Version 0.2 · 17 September 2026 · Status: DRAFT (controlled after planning freeze) · Supersedes v0.1 dashboard-by-dashboard phases
-Totals: **82 active features** (83 listed; CAR-08 retired) · **364 acceptance criteria** across 5 phases (UI-04 and its 10 criteria added by CHG-004, 2026-09-19; UI-05 and its 13 criteria added under CHG-009, 2026-09-24; F0-17 and its 8 criteria added by CHG-010, 2026-09-24; CHG-020, 2026-09-25: FAM-UI-08 (6 criteria) and ADM-11 (5) added, FAM-UI-05 +5 criteria, CAR-08 and its 2 criteria retired; CHG-021, 2026-09-25: FAM-UI-05 +4 criteria; CHG-022, 2026-09-25: FAM-UI-05 +5 criteria; the Jira import `docs/JIRA_BACKLOG.csv` predates all five). Jira import: `docs/JIRA_BACKLOG.csv`.
+Totals: **83 active features** (84 listed; CAR-08 retired) · **373 acceptance criteria** across 5 phases (UI-04 and its 10 criteria added by CHG-004, 2026-09-19; UI-05 and its 13 criteria added under CHG-009, 2026-09-24; F0-17 and its 8 criteria added by CHG-010, 2026-09-24; CHG-020, 2026-09-25: FAM-UI-08 (6 criteria) and ADM-11 (5) added, FAM-UI-05 +5 criteria, CAR-08 and its 2 criteria retired; CHG-021, 2026-09-25: FAM-UI-05 +4 criteria; CHG-022, 2026-09-25: FAM-UI-05 +5 criteria; CHG-027, 2026-09-26: F0-18 and its 9 criteria added; the Jira import `docs/JIRA_BACKLOG.csv` predates all five). Jira import: `docs/JIRA_BACKLOG.csv`.
 
 ---
 
@@ -152,6 +152,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 | 9 | F0-13 | Client document storage | B | D6–D7 | SPRINT | F0-06, F0-11 | OQ-01, OQ-26 | `feature/shared-document-storage` | NOT STARTED |
 | 10 | F0-16 | Development seed data from the design content | B | D7 | SPRINT | F0-11, F0-12, F0-13, F0-10 | OQ-01 | `feature/shared-dev-seed-data` | NOT STARTED |
 | 11 | F0-17 | Self-serve sign-up for Family and Organisation accounts | B | D8 | SPRINT | F0-06, F0-07 | OQ-01, OQ-07, OQ-08 | `feature/shared-sign-up` | NOT STARTED |
+| 12 | F0-18 | Carer view access derived from shifts | B | D8 | SPRINT | F0-06, F0-10, F0-08 | — | `feature/shared-carer-shift-access` | NOT STARTED |
 
 ### Phase 3 — Data wiring & behaviour (parallel: Family · Carer · Admin)
 
@@ -673,6 +674,17 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Testing summary:** 2 e2e, 4 integration, 2 db
 - **Requirements:** REQ-01, REQ-36
 - **Docs:** `docs/development/shared/shared-sign-up/` · **Status:** NOT STARTED
+
+### F0-18 — Carer view access derived from shifts
+- **Dashboard / stream:** shared · **Lane:** B · **Days:** D8 · **Sprint:** SPRINT · **PR target:** `main (per OQ-01 — shared work)` · **Branch:** `feature/shared-carer-shift-access`
+- **Description:** Redefines `is_assigned_carer()` over shifts (any non-cancelled shift with the client that has not ended) and retires `carer_client_assignments`, so carer read access follows PD-041. Added by CHG-027.
+- **User value:** A carer sees exactly the clients they're rostered to from now on; access ends the moment their last shift with a client ends.
+- **Dependencies:** F0-06, F0-10, F0-08 · **Blocking decisions:** None
+- **Jira summary:** Carer read access from shifts; drop the assignment table; update pgTAP and ARCHITECTURE.md
+- **Acceptance criteria summary:** 9 criteria — view-not-edit before a shift, edit during it, view after it only with a later shift, no access after the last shift, cancelled/deactivated/other-client cases, transfer, table removed
+- **Testing summary:** 9 db
+- **Requirements:** REQ-05
+- **Docs:** `docs/development/shared/shared-carer-shift-access/` · **Status:** NOT STARTED
 
 ## Phase 3 — Data wiring & behaviour (parallel: Family · Carer · Admin) — feature detail
 
