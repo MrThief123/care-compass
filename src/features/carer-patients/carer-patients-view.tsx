@@ -9,6 +9,7 @@ import { EmptyState } from "@/components/shared/states";
 import { CardShell } from "@/components/ui/card-shell";
 import type { CarerPatientRow } from "@/server/shifts/queries";
 
+import { EditStatusBadge } from "./edit-status";
 import { patientMeta } from "./patient-meta";
 
 /**
@@ -51,13 +52,16 @@ export function CarerPatientsView({ patients }: { patients: CarerPatientRow[] })
             <li key={patient.clientId} className="min-w-0">
               <Link
                 href={`/carer/patients/${patient.clientId}`}
-                className="block rounded-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring [&>div]:hover:bg-bg-inset"
+                className="relative block rounded-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring [&>div]:hover:bg-bg-inset"
               >
                 <PersonCard
                   name={patient.firstName}
                   meta={patientMeta(patient)}
                   className="min-h-56 justify-center break-words"
                 />
+                <span className="absolute top-3 right-3">
+                  <EditStatusBadge onShift={patient.onShift} />
+                </span>
               </Link>
             </li>
           ))}

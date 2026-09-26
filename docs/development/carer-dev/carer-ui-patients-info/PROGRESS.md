@@ -1,12 +1,12 @@
 # Progress — CAR-UI-02 Carer Patients and patient info screens (UI)
 
-Status: IN PROGRESS
+Status: READY FOR PR
 Owner: Dhruv Verma
 Lane: C — Carer
 Sprint: SPRINT · planned D4–D5
 Branch: `feature/carer-ui-patients-info`
 PR target: `carer-dev`
-Last updated: 2026-09-26 (CHG-029 tests red)
+Last updated: 2026-09-26 (CHG-029 implemented, green)
 
 ## Blockers
 - None. Lane F request (FD-01) blocks only CAR-04's wiring of the Home, Calendar and Care log tabs, not this feature.
@@ -24,8 +24,14 @@ Last updated: 2026-09-26 (CHG-029 tests red)
 - Browser check (Playwright/Chromium against the dev server) at 1920, 1600, 1440, 1280, 1024, 900, 768: no horizontal scroll, no overlapping elements; grid 4 → 3 → 2 columns; search 'je' → Jean only; clicking Margaret opens her Info with 3 Edit buttons; Robert's Info has none.
 
 ## In progress
-- CHG-029 (human review of the preview, 2026-09-26): Home landing, tab order Home · Info · Calendar · Care log, off-shift 'View only' notice on Info, edit status on Patients cards. Docs updated (PRD, AC-03/AC-07 reworded, AC-14/AC-15, T-14/T-15, FD-06). Red run 2026-09-26: 4 failing as expected (redirect still `…/info`, old tab order, no notice, no card labels); the axe and 'no notice on shift' tests pass already.
+- None
+
+## CHG-029 (human review of the preview, 2026-09-26)
+- Home landing, tab order Home · Info · Calendar · Care log, off-shift 'View only' notice on Info, 'On shift · can edit' / 'View only' labels on Patients cards. Docs: PRD, AC-03/AC-07 reworded, AC-14/AC-15, T-14/T-15, FD-06, root CHG-029.
+- Red run 2026-09-26: 4 failing as expected (redirect still `…/info`, old tab order, no notice, no card labels). Green after implementing (`edit-status.tsx`, tab order, redirect, Info notice).
 - **HUMAN REVIEW: test expectation changed** — T-03 (redirect `…/info` → `…/home`) and T-07 (tab order), FD-06.
+- Suite (run locally; CI not triggered): feature 36/36; lint 0 errors (same 3 warnings); `tsc` clean; prettier clean; full vitest 1864 passed, 7 failed: the same 5 F0-04/F0-07 `Invalid API key` failures plus FAM-UI-07 generated-rows and UI-00 import-boundary timing out under full-suite load (both pass when re-run alone: 44/44). Playwright `--grep-invert "F0-07"`: 36/36.
+- Browser check at 1920 → 768: no horizontal scroll, no overlaps; badges sit top-right of each card; Margaret opens on Home with tabs Home | Info | Calendar | Care log; Robert's Info shows the notice.
 
 ## Remaining
 - Human approval, then open the PR to `carer-dev` with the side-by-side screenshot.
