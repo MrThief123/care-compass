@@ -62,6 +62,15 @@ Record feature-level decisions here using the template below. Project-wide decis
 - Consequences: the override depends on the scroller's markup (viewport = last child). If a shared PR adds a height prop, use it and drop `FILL_TIME_GRID`. CSS-only: no test changes; checked with a Playwright sweep (1920 to 768).
 - Human confirmation required: no (human request)
 
+### FD-06 — Red current-time line on the app's today, and the grid stays when empty
+- Date: 2026-09-26
+- Context: The human asked for the red current-time line. The kit already draws it, but Home passed the clock only when the real day was on screen (Family's rule) and replaced the grid with 'No shifts' on an empty range, so in the mock (today = Mon 30 Nov 2026) the line never showed.
+- Decision: The line is the current Melbourne time of day drawn on the app's `today` (the real day outside the mock), passed to Day and Week only while `today` is on screen (AC-11). With no shifts the grid stays and a one-line 'No shifts · Shifts assigned to you will appear here.' sits above it, so an empty today still shows the hours and the line.
+- Reason: human request in-session, 2026-09-26.
+- Alternatives considered: keep Family's real-day rule (the line would never show in the mock preview).
+- Consequences: a tab left open past midnight keeps the previous today until the next navigation (`ponytail:` note in the code). The calendar still opens scrolled to 07:00, so an evening line is below the fold until scrolled. No existing test changed; T-11 added.
+- Human confirmation required: no (human request)
+
 <!-- Template
 ### FD-01 — <title>
 - Date:

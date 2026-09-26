@@ -47,13 +47,17 @@ Last updated: 2026-09-26 (CHG-031: calendar merged into Carer Home; green)
 - `src/app/(carer)/carer/home/page.tsx`; `src/features/carer-home/carer-home-view.tsx`, `carer-shifts-toolbar.tsx`, `carer-home-skeleton.tsx`, `carer-home.test.tsx`, `carer-home-calendar.test.tsx`.
 
 ## Decisions
-- See DECISIONS.md (FD-01 to FD-05) and root CHG-030, CHG-031.
+- See DECISIONS.md (FD-01 to FD-06) and root CHG-030, CHG-031.
 - **HUMAN REVIEW: test expectation changed** (CHG-031, FD-04).
 
 ## Calendar size and scrollable notifications (FD-05, 2026-09-26)
 - Day, Week, Month and the empty state share one 640px body (card 748px at every width); Notifications matches the calendar card from 1280px and its list scrolls.
 - Checks: full suite 1853 passed, same 5 unrelated F0-07/F0-04 failures; e2e 36 passed; lint and typecheck clean.
 - Playwright sweep 1920/1440/1280/1024/900/768 x day/week/month/empty: no horizontal scroll, nothing spilling out of the box, no month cell clipped; a 28-item list scrolls (678 of 1164px shown) and PageDown scrolls it when focused.
+
+## Current-time line (AC-11, FD-06, 2026-09-26)
+- Tests first: T-11 red (`a80c74e`), then green. Full suite 1856 passed, same 5 unrelated F0-07/F0-04 failures; e2e 36 passed; lint and typecheck clean.
+- Playwright at 1920/1280/1024/768: one line, in today's column in Week and on Day; none when today is off screen; card stays 748px with the 'No shifts' line; no horizontal scroll.
 
 ## Problems encountered
 - Stale `.next/types` from another branch broke `tsc`; fixed by the e2e `next build`, which regenerates them.
