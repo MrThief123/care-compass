@@ -1,6 +1,6 @@
 # Progress — CAR-UI-04 Carer Settings screen (UI)
 
-Status: READY FOR PR
+Status: PR OPEN
 Owner: Dhruv Verma
 Lane: C — Carer
 Sprint: SPRINT · planned D6
@@ -30,7 +30,7 @@ Last updated: 2026-09-26 (Edit/Save added on the human's request, FD-06)
 - None
 
 ## Remaining
-- Open the PR to `carer-dev` after the human approves
+- Review and merge of PR #127 (human)
 
 ## Acceptance criteria status
 - 2 / 2 MET
@@ -58,7 +58,7 @@ Last updated: 2026-09-26 (Edit/Save added on the human's request, FD-06)
 - PROPOSED items in PRD.md are unconfirmed until validated in F0-01 or answered in DECISIONS.md.
 
 ## Next action
-- Human approval, then open the PR `CAR-UI-04 Carer Settings screen (UI)` to `carer-dev`.
+- Wait for review of PR #127: https://github.com/MrThief123/care-compass/pull/127
 
 ## Ready for PR
-- Yes, waiting for human approval
+- Yes. PR #127 opened to `carer-dev` on 2026-09-26

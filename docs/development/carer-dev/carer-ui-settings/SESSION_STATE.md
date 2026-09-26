@@ -8,5 +8,5 @@ Tests run: `npx vitest run` (full), `npm run lint`, `npx tsc --noEmit`, `npx pla
 Test results: the feature's 8 tests are green. Full suite: 5 hosted-Supabase integration tests fail with Invalid API key (environment, unrelated). Lint and typecheck are clean. e2e 5/5
 Current blocker: none
 Important decisions: FD-05 (error state reuses `CarerHomeErrorState`), FD-06 (My info Edit/Save/Cancel like Family Settings, Role read-only, local save; T-02 changed, HUMAN REVIEW)
-Exact next action: once the human approves, open the PR to `carer-dev`. Flag the three shared-folder edits and the T-02 test change (HUMAN REVIEW) and attach the side-by-side screenshot.
+Exact next action: PR #127 (https://github.com/MrThief123/care-compass/pull/127) is open to `carer-dev`; address review comments.
 Warning for next session: the Edit/Save UI is in place (FD-06). CAR-09 only connects Save and Reset to the server.
