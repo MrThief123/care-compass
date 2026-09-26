@@ -32,8 +32,8 @@ Last updated: 2026-09-26
 
 ## Tests
 - Written: 12 / 13 (T-13 is manual)
-- Passing: see SESSION_STATE.md
-- Failing: see SESSION_STATE.md
+- Passing: 0
+- Failing: 3 files (all fail on missing modules: route page/loading, `src/server/shifts/queries`, `src/server/notifications/queries`), the expected red state
 
 ## Files changed
 - Docs: root DECISIONS.md (CHG-025), DEVELOPMENT_PLAN.md (CHG-025 notes), this feature folder.
