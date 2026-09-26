@@ -54,6 +54,10 @@ Record feature-level decisions here using the template below. Project-wide decis
 - Decision: the two cards sit side by side from 1024px (equal columns; 1.6 : 1 from 1280px, close to the design's Today/Tasks split) and stack below 1024px, like Family Home (FAM FD-18).
 
 <!-- Template
+### FD-07 — Today's calendar uses the shared DayTimeline (human, 26 Sep 2026)
+The human asked for Today's calendar to be the same scrollable day calendar as the other home screens, not a list. Each shift is drawn on `DayTimeline` (`src/components/shared/calendar/`, used as it is) as a plain event. The title is the client's first name and the block shows the shift's time range. Because it is a plain event it shows the neutral "Event" pill and never a status.
+**Test change (HUMAN REVIEW):** T-01 / AC-01 `[CAR-UI-01][AC-01]`. Before: `getAllByRole("listitem")` inside the region, length 1. After: `getAllByTestId(/^day-timeline-block-/)`, length 1. The "08:00–12:00", "Margaret" and no-status assertions are unchanged. Reason: the human changed the requirement, and the timeline draws buttons rather than list items.
+
 ### FD-xx — <title>
 - Date:
 - Context:

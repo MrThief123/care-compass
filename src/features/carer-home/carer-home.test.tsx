@@ -103,14 +103,14 @@ afterEach(() => {
 });
 
 describe("[CAR-UI-01] Carer Home", () => {
-  it("[CAR-UI-01][AC-01] Today's calendar shows one row, 08:00–12:00 Margaret, with no status pill or event title", async () => {
+  it("[CAR-UI-01][AC-01] Today's calendar shows one timeline block, 08:00–12:00 Margaret, with no status pill or event title", async () => {
     await renderHome();
     const calendar = screen.getByRole("region", { name: "Today's calendar" });
-    const rows = within(calendar).getAllByRole("listitem");
+    const blocks = within(calendar).getAllByTestId(/^day-timeline-block-/);
 
-    expect(rows).toHaveLength(1);
-    expect(within(rows[0]!).getByText("08:00–12:00")).toBeInTheDocument();
-    expect(within(rows[0]!).getByText("Margaret")).toBeInTheDocument();
+    expect(blocks).toHaveLength(1);
+    expect(within(blocks[0]!).getByText("08:00–12:00")).toBeInTheDocument();
+    expect(within(blocks[0]!).getByText("Margaret")).toBeInTheDocument();
     expect(within(calendar).queryByText(/Done|Planned|Overdue/)).not.toBeInTheDocument();
     expect(
       within(calendar).queryByText(/medication|Physiotherapy|check-in/i),

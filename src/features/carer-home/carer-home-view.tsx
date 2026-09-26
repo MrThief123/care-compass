@@ -1,17 +1,31 @@
-import { melbourneDateTime } from "@/components/shared/calendar/melbourne-time";
+import { DayTimeline } from "@/components/shared/calendar/day-timeline";
 import { NotificationRow } from "@/components/shared/lists/notification-row";
 import { EmptyState } from "@/components/shared/states";
 import { CardShell } from "@/components/ui/card-shell";
 import type { CarerShiftRow } from "@/server/shifts/queries";
-import type { CarerNotification } from "@/types/domain";
+import type { CarerNotification, PlainEventOccurrence } from "@/types/domain";
 
 export interface CarerHomeViewProps {
   shifts: CarerShiftRow[];
   notifications: CarerNotification[];
 }
 
+/** A shift drawn on the day timeline: a plain event titled with the client's first name. */
+function toCalendarEvent(shift: CarerShiftRow): PlainEventOccurrence {
+  return {
+    kind: "event",
+    key: shift.id,
+    eventId: shift.id,
+    clientId: shift.clientId,
+    title: shift.clientFirstName,
+    description: "",
+    start: shift.start,
+    durationMinutes: (Date.parse(shift.end) - Date.parse(shift.start)) / 60_000,
+  };
+}
+
 /**
- * Carer · Home (CHG-025): today's shifts beside the carer's shift
+ * Carer · Home (CHG-025): today's shifts on the shared scrollable day timeline, beside the carer's shift
  * notifications, where the design's Tasks card was. Stacks below 1024px.
  * Every grid item is `min-w-0`, so a long name or message wraps instead of
  * widening the page.
@@ -31,21 +45,7 @@ export function CarerHomeView({ shifts, notifications }: CarerHomeViewProps) {
               body="Shifts assigned to you for today will appear here."
             />
           ) : (
-            <ul className="mt-4 flex flex-col gap-3">
-              {shifts.map((shift) => (
-                <li
-                  key={shift.id}
-                  className="flex min-w-0 flex-wrap items-center gap-x-8 gap-y-1 rounded-card border border-border-subtle px-5 py-4"
-                >
-                  <span className="text-body-emphasis text-text-primary tabular-nums">
-                    {`${melbourneDateTime(shift.start).time}–${melbourneDateTime(shift.end).time}`}
-                  </span>
-                  <span className="min-w-0 break-words text-body-default text-text-primary">
-                    {shift.clientFirstName}
-                  </span>
-                </li>
-              ))}
-            </ul>
+            <DayTimeline occurrences={shifts.map(toCalendarEvent)} className="mt-4" />
           )}
         </CardShell>
       </section>
