@@ -41,6 +41,14 @@ Record feature-level decisions here using the template below. Project-wide decis
 - Decision: the loading, error and empty-phone tests (T-04 to T-06) cover PRD Scope states that have no AC of their own. They are tagged `[AC-01]` because they are states of the My info read. No AC was added, since the ACs are controlled.
 - Human confirmation required: no.
 
+### FD-05: The error state reuses CarerHomeErrorState
+- Date: 2026-09-26
+- Context: T-04 needs 'Try again', and the kit's `ErrorState` reads 'Retry' (CAR-UI-01 FD-05).
+- Decision: `/carer/settings` renders `CarerHomeErrorState` from `src/features/carer-home/`. Its copy names no screen, so it is not copied into `src/features/carer-settings/`. The carer lane owns both folders.
+- Consequences: if the two screens ever need different error copy, split it then.
+- Human confirmation required: no.
+- Test changes caused: none. No existing test asserted Aisha's old email (FD-01), so no test was edited.
+
 <!-- Template
 ### FD-01 — <title>
 - Date:
