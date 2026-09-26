@@ -6,7 +6,7 @@ Lane: C — Carer
 Sprint: SPRINT · planned D6
 Branch: `feature/carer-ui-settings`
 PR target: `carer-dev`
-Last updated: 2026-09-26 (claimed)
+Last updated: 2026-09-26 (tests written, red)
 
 ## Blockers
 - None recorded at planning time
@@ -17,6 +17,8 @@ Last updated: 2026-09-26 (claimed)
 
 ## Completed
 - Feature documentation drafted (Claude Chat planning pack)
+- Claimed. FD-01 to FD-04 recorded (fixture phone/email, `getCarerContactDetails` contract, read-only My info with a local Reset confirmation, how the state tests are tagged)
+- Tests T-01 to T-08 written first. All fail for the expected reason: `app/(carer)/carer/settings/loading.tsx` does not exist and `getCarerContactDetails` is not a function
 
 ## In progress
 - None
@@ -32,12 +34,13 @@ Last updated: 2026-09-26 (claimed)
 - 0 / 2 MET
 
 ## Tests
-- Written: 0 / 2
+- Written: 8 / 8 (T-01 to T-07: `src/features/carer-settings/carer-settings.test.tsx`; T-08: 4 cases in `src/server/profiles/queries.test.ts`)
 - Passing: 0
-- Failing: 0
+- Failing: 8 (red, expected)
 
 ## Files changed
-- None yet. Likely files: `src/app/(carer)/carer/settings/page.tsx`
+- Tests: `src/features/carer-settings/carer-settings.test.tsx`, `src/server/profiles/queries.test.ts`
+- Next: `src/mocks/fixtures.ts` (shared), `src/mocks/queries/profiles.ts` (shared), `src/server/profiles/queries.ts`, `src/app/(carer)/carer/settings/{page,loading}.tsx`, `src/features/carer-settings/*`
 
 ## Decisions
 - See DECISIONS.md
@@ -49,7 +52,7 @@ Last updated: 2026-09-26 (claimed)
 - PROPOSED items in PRD.md are unconfirmed until validated in F0-01 or answered in DECISIONS.md.
 
 ## Next action
-- complete dependencies, run START FEATURE CAR-UI-04, and write the tests in TEST_PLAN.md first.
+- Implement to green (see SESSION_STATE.md), then run the carer suite, check in a browser and do END SESSION.
 
 ## Ready for PR
 - No
