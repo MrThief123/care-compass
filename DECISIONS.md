@@ -245,6 +245,7 @@ CONFIRMED.
 - Alternatives: blocks = shift slots with separate admin-authored checklist sub-tasks (rejected — bigger scope, no confirmed authoring workflow).
 - Consequences: F0-11, CAR-01, CAR-05, CAR-06, INT-03, INT-04 build the carer calendar against the events data model already used elsewhere (Home, Task log), not a new shift-block or checklist model. Resolves C-17.
 - Human confirmation: CONFIRMED 2026-09-17.
+- **Amended by CHG-025 (2026-09-26):** (a) is reversed: carer calendars (Carer Home "Today's calendar" and the Carer Calendar screen) show the carer's **shifts**, naming the client and time, not the client's events. (c) no longer applies. (b) stands. Read CHG-025.
 
 ### PD-044 — Per-event completion mode: Manual (tick-off + optional proof) vs Automatic (self-completing)
 - Date: 2026-09-17 · Decided by: Dhruv Verma (answering OQ-10, extended per human's own design)
@@ -288,6 +289,7 @@ CONFIRMED.
 - Alternatives: broader scope including budget/status-change notifications (not chosen — not designed, adds scope).
 - Consequences: CAR-02 implements this fixed set of trigger types; retention/read-unread mechanics still need basic definition during implementation (not further specified here).
 - Human confirmation: CONFIRMED 2026-09-17.
+- **Amended by CHG-025 (2026-09-26):** triggers narrow to shift assigned, changed and cancelled, each naming the client and time. Family document and event notifications are dropped. The bell behaviour is unchanged. Read CHG-025.
 
 ### PD-049 — Incoming organisation sees full client history, labelled by recording organisation
 - Date: 2026-09-17 · Decided by: Dhruv Verma (answering OQ-15)
@@ -780,6 +782,47 @@ Docs updated: DECISIONS.md
 - Impact: FAM-UI-06 new AC-10 and AC-11, T-13 and T-14; T-06, T-07 and T-11 click 'Edit' first (no assertion removed; FD-09). FAM-12 keeps this flow when it wires saving. Recorded at the time in FAM-UI-06 DECISIONS.md only; this entry mirrors it (docs sync, 2026-09-25).
 - Human confirmation: Dhruv Verma, 2026-09-25 (in-session).
 - Docs updated: FAM-UI-06 ACCEPTANCE_CRITERIA.md, TEST_PLAN.md, DECISIONS.md (FD-09, FD-10), PROGRESS.md, SESSION_STATE.md; DECISIONS.md (this entry).
+
+### CHG-025 — Carer: calendars show shifts, not client events; notifications are shift changes only; Carer Home drops the Tasks card
+- Date / requested by: 2026-09-26 / Dhruv Verma (human, project lead)
+- Type: scope change (amends PD-043 (a) and (c), PD-048 and CHG-009's carer rows)
+- Description:
+  - **Calendars show shifts.** Both carer calendars show the carer's **shifts** as blocks, one per shift, naming the client and the time range (e.g. "08:00–12:00 · Margaret"). They no longer show the client's individual events or tasks. This covers Carer Home "Today's calendar" (today's shifts) and the Carer Calendar screen (shift blocks across the week). A shift block has no status pill. This reverses PD-043 (a); PD-043 (c) ("Carer Home shows events for rostered clients") no longer applies.
+  - **No tasks on the calendars.** Clicking a shift block does not list that shift's tasks. The Carer Calendar "Tasks for the selected shift" panel is dropped.
+  - **Carer Home layout.** The "Tasks" card is removed. "Notifications" moves into its place, to the right of "Today's calendar". Nothing sits under them.
+  - **Notifications are shift changes only.** A carer is notified when a shift of theirs is assigned, changed or cancelled, and each notification names the client and the time (e.g. "New shift assigned: Tuesday 1 Dec, 09:00–11:00 (Margaret)."). Family document and event notifications are dropped, so every notification carries the 'Admin' chip. The bell stays (PD-048's unread count and scroll-to-card are unchanged).
+  - **Contracts and fixtures.** CAR-UI-01 adds `getCarerTodayShifts(carerId)` (`src/server/shifts/queries.ts`) and `getCarerNotifications(carerId)` (`src/server/notifications/queries.ts`) with matching mock queries in `src/mocks/queries/`, and rewrites `CARER_NOTIFICATIONS` in `src/mocks/fixtures.ts` to three shift notifications for Aisha, adding the shifts they refer to to `SHIFTS`. These are edits outside Lane C's folders, allowed by this entry and flagged for review in the CAR-UI-01 PR. `src/types/**` is unchanged: the `family` notification source stays in the type but no fixture uses it.
+- Open question raised: where a carer ticks off a task, with no Tasks card and no tasks on the carer calendars. **Answered by CHG-026 (2026-09-26):** from the patient's own screens, opened from Patients.
+- Source / justification: human instruction in-session, 2026-09-26: the carer should only be notified about shifts, "when they've been assigned to a shift and who the shift is with"; the calendar should show "just that she is assigned to Margaret from 6 to 5", not Margaret's activities; "instead of having the task section, we can just move the notification section to that side". Changed and cancelled shifts were confirmed as part of the notification scope; tasks shown "nowhere on the calendar" was confirmed.
+- Impact:
+  - **CAR-UI-01:** AC-01 rewritten (shift rows), Tasks card removed, notifications beside the calendar; new ACs for the layout, the dropped Tasks card and the states. The design image `carer-01-home.png` no longer matches: built from tokens and flagged "design gap, built from tokens — please review" (PD pattern of OQ-19).
+  - **CAR-01:** becomes "Carer Home — Today's shifts" (wiring the shifts query); its event/Tasks ACs and the "no Robert occurrences" AC need rewriting when it starts.
+  - **CAR-02:** trigger set narrows to shift assigned/changed/cancelled.
+  - **CAR-UI-03 / CAR-05:** blocks are shifts; the selected-shift Tasks panel is removed.
+  - **CAR-06:** blocked on the open tick-off question above.
+  - **INT-03 / INT-04:** carer steps that tick tasks from Home or Calendar need rewriting once the tick-off location is decided.
+  - Each carer feature updates its own PRD, ACCEPTANCE_CRITERIA and TEST_PLAN when it starts, and records it in that feature's DECISIONS.md (same approach as CHG-009).
+- Human confirmation: Dhruv Verma, 2026-09-26 (in-session).
+- Docs updated: DECISIONS.md (this entry; amendment notes on PD-043 and PD-048), DEVELOPMENT_PLAN.md (CHG-025 notes on the affected cards), CAR-UI-01 PRD.md, ACCEPTANCE_CRITERIA.md, TEST_PLAN.md, DECISIONS.md, PROGRESS.md, SESSION_STATE.md.
+
+### CHG-026 — Carers tick off tasks from the patient's screens (family view through the carer's account)
+- Date / requested by: 2026-09-26 / Dhruv Verma (human, project lead)
+- Type: scope change (answers CHG-025's open question; extends CAR-04 and CAR-06)
+- Description:
+  - **Patient view.** Opening a patient from Carer · Patients shows that patient's family-style screens through the carer's own account: **Home, Calendar, Info and Care log**. The Budget screen and family Settings are not shown to carers; the Home Budget strip is (read-only).
+  - **Tick-off happens there.** A carer ticks off a task from the patient's screens (the Calendar Tasks panel, as the family does). Carer Home and the Carer Calendar never tick anything (CHG-025).
+  - **Their name is recorded.** Every tick-off stores the signed-in carer as the actor, with the time (REQ-19, PD-005 append-only completions, PD-006 audit log). The family then sees it, e.g. "Done · Aisha Rahman". No sign-in/sign-out history is added.
+  - **Only during their shift.** A carer can tick off, or otherwise edit, only while a shift with that patient is in progress; outside it the patient's screens are read-only, and a patient with no current or future shift is not visible at all (PD-041, unchanged).
+  - **Home is the full Family Home.** The carer sees everything the family sees on the patient's Home, the Budget strip included, read-only: a carer can never change budget figures, on shift or not. The strip's 'View breakdown' link is absent for carers, because the Budget screen is not one of their four screens. (Confirmed by the human, 2026-09-26.)
+- Source / justification: human instruction in-session, 2026-09-26: when a carer clicks a patient's profile "they essentially see the family view, but it's through their account"; "whenever they tick off a task, we should be able to see that it was them"; "this shouldn't be done through their calendar", but "by looking into the screen of the patient's calendar". Screens (Home, Calendar, Info, Care log), shift-only tick-off and name-recording (not sign-in logging) confirmed by the human in the same session.
+- Impact:
+  - **CAR-UI-02:** patient info becomes the entry to the patient's Home, Calendar, Info and Care log screens for carers (routes under `/carer/patients/[clientId]/…`), reusing the Family screen components; view-only controls when not on shift (absent, not disabled, per ARCHITECTURE §12).
+  - **CAR-04:** extends from Info alone to the four patient screens.
+  - **CAR-06:** tick-off lives in the patient's Calendar Tasks panel (and wherever the Family screens tick), recording the carer; no longer blocked.
+  - **FAM-UI-01/02/07 components:** reused by carer routes. If they need a role-aware change, that is a shared or Lane F change, raised through DECISIONS rather than edited by Lane C (CLAUDE.md §4.2).
+  - **INT-03:** carer flow becomes sign in → Patients → patient Calendar → tick → family sees the carer's name.
+- Human confirmation: Dhruv Verma, 2026-09-26 (in-session).
+- Docs updated: DECISIONS.md (this entry; CHG-025 open question closed), DEVELOPMENT_PLAN.md (CHG-026 notes on CAR-UI-02, CAR-04, CAR-06, INT-03), CAR-UI-01 PROGRESS.md.
 
 Template for future entries:
 ```
