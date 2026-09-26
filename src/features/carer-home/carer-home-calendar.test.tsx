@@ -313,3 +313,39 @@ describe("[CAR-UI-03] Carer Home calendar accessibility (REQ-N2)", () => {
     expect(await axe(container)).toHaveNoViolations();
   });
 });
+
+describe("[CAR-UI-03] Carer Home calendar current-time line", () => {
+  // The real clock: 10:30 in Melbourne on Sat 26 Sep 2026, a different day
+  // from the app's today (the mock's Mon 30 Nov 2026).
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date("2026-09-26T10:30:00+10:00"));
+  });
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("[CAR-UI-03][AC-11] Week draws the red line in today's column only", async () => {
+    await renderCalendar();
+
+    const line = await screen.findByTestId("current-time-line");
+    expect(
+      within(screen.getByTestId("week-grid-day-2026-11-30")).getByTestId("current-time-line"),
+    ).toBe(line);
+  });
+
+  it("[CAR-UI-03][AC-11] Day draws the red line on today, even with no shifts", async () => {
+    mocks.getCarerShifts.mockResolvedValue([]);
+    await renderCalendar({});
+
+    expect(await screen.findByTestId("current-time-line")).toBeInTheDocument();
+    expect(screen.getByText("No shifts")).toBeInTheDocument();
+  });
+
+  it("[CAR-UI-03][AC-11] no red line when today is not on screen", async () => {
+    await renderCalendar({ view: "week", date: "2026-12-07" });
+
+    await screen.findByTestId("week-grid-day-2026-12-07");
+    expect(screen.queryByTestId("current-time-line")).not.toBeInTheDocument();
+  });
+});

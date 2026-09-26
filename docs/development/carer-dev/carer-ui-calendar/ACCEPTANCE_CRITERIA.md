@@ -20,5 +20,6 @@ Fixtures: the carer Aisha (`staff-aisha`), today Mon 30 Nov 2026. Her shifts: Mo
 | AC-08 | US-01 | edge | Given the carer has no shifts in the visible range, then 'No shifts' shows, and the D/W/M and arrows are still there. | MET |
 | AC-09 | US-01 | error | Given a contract query rejects, then the States-sheet error state shows, 'Try again' re-runs the route (router refresh), and the error log holds no message text (no PII). Loading is Carer Home's skeleton (CAR-UI-01 AC-09). | MET |
 | AC-10 | US-01 | a11y | Given the populated, empty and error states, then axe reports no violations (loading: CAR-UI-01 AC-10). | MET |
+| AC-11 | US-01 | happy | Given today is on screen in Day or Week, with or without shifts, then the red current-time line is drawn at the current Melbourne time on today's column only (added at the human's request, 2026-09-26, FD-06). | NOT MET |
 
 Status values: NOT MET · MET (test passing) · BLOCKED (cite OQ/PD).

@@ -23,6 +23,7 @@ Rewritten by CHG-025 and CHG-030 (2026-09-26), before implementation started: T-
 | T-08 | AC-08 | component | No shifts: 'No shifts' shows, D/W/M and the arrows remain. | ☑ | PASS |
 | T-09 | AC-09 | component | A rejected `getCarerShifts` or `getToday` shows 'Something went wrong'; 'Try again' calls `router.refresh`; the log holds no message text. | ☑ | PASS |
 | T-10 | AC-10 | component | axe: populated, empty, error. | ☑ | PASS |
+| T-11 | AC-11 | component | Clock pinned to another real day: Week draws the line only in today's column; Day draws it with no shifts; no line when today is off screen. | ☑ | FAIL (red) |
 
 ## Regression scope
 - Run the full unit/component suite before marking READY FOR PR (`supabase test db` not affected: no migration).
