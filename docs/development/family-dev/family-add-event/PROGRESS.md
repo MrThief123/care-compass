@@ -1,12 +1,12 @@
 # Progress — FAM-06 Family — Add event (Enter event)
 
-Status: NOT STARTED
-Owner: unclaimed
+Status: IN PROGRESS
+Owner: MrThief123
 Lane: F — Family
 Sprint: SPRINT · planned D9
-Branch: `feature/family-add-event` (not yet created)
+Branch: `feature/family-add-event`
 PR target: `family-dev`
-Last updated: 2026-09-17 (planning pack generated)
+Last updated: 2026-09-27
 
 ## Blockers
 - OQ-22 — Event fields
