@@ -1,12 +1,12 @@
 # Progress — F0-12 Budget buckets, fund top-ups, spending and summary calculation
 
-Status: NOT STARTED
-Owner: unclaimed
+Status: IN PROGRESS
+Owner: Prajeet
 Lane: B — Backend
 Sprint: SPRINT · planned D6
-Branch: `feature/shared-budget-schema` (not yet created)
+Branch: `feature/shared-budget-schema`
 PR target: `main (per OQ-01 — shared work)`
-Last updated: 2026-09-17 (planning pack generated)
+Last updated: 2026-09-27 (claimed)
 
 ## Blockers
 - OQ-01 — Branch parent and naming for shared (foundation and cross-cutting) work
