@@ -44,8 +44,9 @@ insert into client_family_members (client_id, profile_id, relationship_label) va
   ('b1111111-1111-1111-1111-111111111111', 'a1111111-1111-1111-1111-111111111111', 'Daughter'),
   ('b2222222-2222-2222-2222-222222222222', 'a5555555-5555-5555-5555-555555555555', 'Daughter');
 
-insert into carer_client_assignments (carer_id, client_id, organisation_id, started_at, ended_at) values
-  ('a3333333-3333-3333-3333-333333333333', 'b1111111-1111-1111-1111-111111111111', '11111111-1111-1111-1111-111111111111', now() - interval '1 day', null);
+-- F0-18: read access follows shifts, not a separate assignment table.
+insert into shifts (client_id, carer_id, organisation_id, starts_at, ends_at) values
+  ('b1111111-1111-1111-1111-111111111111', 'a3333333-3333-3333-3333-333333333333', '11111111-1111-1111-1111-111111111111', now() - interval '1 hour', now() + interval '3 hours');
 
 create or replace function pg_temp.login(p_user_id uuid) returns void as $$
 begin

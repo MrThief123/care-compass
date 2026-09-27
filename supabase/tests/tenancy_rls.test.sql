@@ -22,7 +22,7 @@ insert into profiles (id, role, organisation_id, first_name, last_name, is_activ
   ('a3333333-3333-3333-3333-333333333333', 'carer', '11111111-1111-1111-1111-111111111111', 'Aisha', 'Rahman', true),
   ('a5555555-5555-5555-5555-555555555555', 'carer', '11111111-1111-1111-1111-111111111111', 'Deactivated', 'Carer', false);
 
--- Seed: clients — Margaret (Banksia, Helen's), Nell (Banksia, ended assignment), Robert (Wattle, another org)
+-- Seed: clients — Margaret (Banksia, Helen's), Nell (Banksia, Aisha's shift with her ended), Robert (Wattle, another org)
 insert into clients (id, organisation_id, first_name, last_name, date_of_birth) values
   ('b1111111-1111-1111-1111-111111111111', '11111111-1111-1111-1111-111111111111', 'Margaret', 'Wells', '1945-03-01'),
   ('b3333333-3333-3333-3333-333333333333', '11111111-1111-1111-1111-111111111111', 'Nell', 'Ford', '1938-01-01'),
@@ -32,12 +32,13 @@ insert into clients (id, organisation_id, first_name, last_name, date_of_birth) 
 insert into client_family_members (client_id, profile_id, relationship_label) values
   ('b1111111-1111-1111-1111-111111111111', 'a1111111-1111-1111-1111-111111111111', 'Daughter');
 
--- Seed: Aisha has an active assignment to Margaret, an ended assignment to Nell;
--- the deactivated carer has an active assignment to Margaret too (to prove is_active blocks it)
-insert into carer_client_assignments (carer_id, client_id, organisation_id, started_at, ended_at) values
-  ('a3333333-3333-3333-3333-333333333333', 'b1111111-1111-1111-1111-111111111111', '11111111-1111-1111-1111-111111111111', now() - interval '2 hours', null),
-  ('a3333333-3333-3333-3333-333333333333', 'b3333333-3333-3333-3333-333333333333', '11111111-1111-1111-1111-111111111111', now() - interval '5 days', now() - interval '1 day'),
-  ('a5555555-5555-5555-5555-555555555555', 'b1111111-1111-1111-1111-111111111111', '11111111-1111-1111-1111-111111111111', now() - interval '1 hour', null);
+-- Seed (F0-18: read access follows shifts): Aisha has a shift with Margaret in progress,
+-- and a shift with Nell that has already ended; the deactivated carer has a shift with
+-- Margaret in progress too (to prove is_active still blocks it).
+insert into shifts (client_id, carer_id, organisation_id, starts_at, ends_at) values
+  ('b1111111-1111-1111-1111-111111111111', 'a3333333-3333-3333-3333-333333333333', '11111111-1111-1111-1111-111111111111', now() - interval '2 hours', now() + interval '2 hours'),
+  ('b3333333-3333-3333-3333-333333333333', 'a3333333-3333-3333-3333-333333333333', '11111111-1111-1111-1111-111111111111', now() - interval '5 days', now() - interval '4 days 20 hours'),
+  ('b1111111-1111-1111-1111-111111111111', 'a5555555-5555-5555-5555-555555555555', '11111111-1111-1111-1111-111111111111', now() - interval '1 hour', now() + interval '3 hours');
 
 -- Impersonation helper: switches to the `authenticated` role with the given user's JWT sub claim
 create or replace function pg_temp.login(p_user_id uuid) returns void as $$
@@ -78,29 +79,29 @@ select is(
   'AC-04: Priya selecting another organisation''s client returns zero rows'
 );
 
--- AC-05: Aisha (carer, active assignment to Margaret) selects clients -> Margaret returned
+-- AC-05: Aisha (carer, shift in progress with Margaret) selects clients -> Margaret returned
 select pg_temp.login('a3333333-3333-3333-3333-333333333333');
 select is(
   (select count(*)::int from clients where id = 'b1111111-1111-1111-1111-111111111111'),
   1,
-  'AC-05: Aisha with an active assignment sees Margaret'
+  'AC-05: Aisha with a shift in progress sees Margaret'
 );
 
--- AC-06: Aisha selects Robert (same lane, no assignment, different org) -> zero rows
+-- AC-06: Aisha selects Robert (no shift with him, different org) -> zero rows
 select is(
   (select count(*)::int from clients where id = 'b2222222-2222-2222-2222-222222222222'),
   0,
-  'AC-06: Aisha selecting an unassigned client returns zero rows'
+  'AC-06: Aisha selecting a client she has no shift with returns zero rows'
 );
 
--- AC-07: Aisha's assignment to Nell has ended_at in the past -> zero rows
+-- AC-07: Aisha's only shift with Nell has already ended -> zero rows
 select is(
   (select count(*)::int from clients where id = 'b3333333-3333-3333-3333-333333333333'),
   0,
-  'AC-07: Aisha selecting a client with an ended assignment returns zero rows'
+  'AC-07: Aisha selecting a client whose only shift with her has ended returns zero rows'
 );
 
--- AC-08: Deactivated carer (is_active = false, active assignment to Margaret) -> zero rows
+-- AC-08: Deactivated carer (is_active = false, shift in progress with Margaret) -> zero rows
 select pg_temp.login('a5555555-5555-5555-5555-555555555555');
 select is(
   (select count(*)::int from clients),

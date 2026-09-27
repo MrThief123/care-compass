@@ -11,10 +11,10 @@ export type Database = {
     Functions: {
       graphql: {
         Args: {
-          extensions?: Json;
           operationName?: string;
           query?: string;
           variables?: Json;
+          extensions?: Json;
         };
         Returns: Json;
       };
@@ -26,9 +26,47 @@ export type Database = {
       [_ in never]: never;
     };
   };
-
   public: {
     Tables: {
+      audit_log: {
+        Row: {
+          action: string;
+          actor_id: string | null;
+          actor_role: string;
+          after: Json | null;
+          before: Json | null;
+          client_id: string | null;
+          id: number;
+          occurred_at: string;
+          record_id: string | null;
+          table_name: string;
+        };
+        Insert: {
+          action: string;
+          actor_id?: string | null;
+          actor_role: string;
+          after?: Json | null;
+          before?: Json | null;
+          client_id?: string | null;
+          id?: never;
+          occurred_at?: string;
+          record_id?: string | null;
+          table_name: string;
+        };
+        Update: {
+          action?: string;
+          actor_id?: string | null;
+          actor_role?: string;
+          after?: Json | null;
+          before?: Json | null;
+          client_id?: string | null;
+          id?: never;
+          occurred_at?: string;
+          record_id?: string | null;
+          table_name?: string;
+        };
+        Relationships: [];
+      };
       care_event_completions: {
         Row: {
           action: string;
@@ -83,7 +121,6 @@ export type Database = {
           },
         ];
       };
-
       care_event_overrides: {
         Row: {
           client_id: string;
@@ -145,7 +182,6 @@ export type Database = {
           },
         ];
       };
-
       care_events: {
         Row: {
           client_id: string;
@@ -212,57 +248,6 @@ export type Database = {
           },
         ];
       };
-
-      carer_client_assignments: {
-        Row: {
-          carer_id: string;
-          client_id: string;
-          ended_at: string | null;
-          id: string;
-          organisation_id: string;
-          started_at: string;
-        };
-        Insert: {
-          carer_id: string;
-          client_id: string;
-          ended_at?: string | null;
-          id?: string;
-          organisation_id: string;
-          started_at?: string;
-        };
-        Update: {
-          carer_id?: string;
-          client_id?: string;
-          ended_at?: string | null;
-          id?: string;
-          organisation_id?: string;
-          started_at?: string;
-        };
-        Relationships: [
-          {
-            foreignKeyName: "carer_client_assignments_carer_id_fkey";
-            columns: ["carer_id"];
-            isOneToOne: false;
-            referencedRelation: "profiles";
-            referencedColumns: ["id"];
-          },
-          {
-            foreignKeyName: "carer_client_assignments_client_id_fkey";
-            columns: ["client_id"];
-            isOneToOne: false;
-            referencedRelation: "clients";
-            referencedColumns: ["id"];
-          },
-          {
-            foreignKeyName: "carer_client_assignments_organisation_id_fkey";
-            columns: ["organisation_id"];
-            isOneToOne: false;
-            referencedRelation: "organisations";
-            referencedColumns: ["id"];
-          },
-        ];
-      };
-
       client_family_members: {
         Row: {
           client_id: string;
@@ -296,7 +281,6 @@ export type Database = {
           },
         ];
       };
-
       client_info_sections: {
         Row: {
           body: string | null;
@@ -336,7 +320,6 @@ export type Database = {
           },
         ];
       };
-
       clients: {
         Row: {
           avatar_path: string | null;
@@ -381,7 +364,67 @@ export type Database = {
           },
         ];
       };
-
+      documents: {
+        Row: {
+          client_id: string;
+          detached_at: string | null;
+          event_id: string | null;
+          filename: string;
+          id: string;
+          mime_type: string;
+          size_bytes: number;
+          storage_path: string;
+          uploaded_at: string;
+          uploaded_by: string | null;
+        };
+        Insert: {
+          client_id: string;
+          detached_at?: string | null;
+          event_id?: string | null;
+          filename: string;
+          id?: string;
+          mime_type: string;
+          size_bytes: number;
+          storage_path: string;
+          uploaded_at?: string;
+          uploaded_by?: string | null;
+        };
+        Update: {
+          client_id?: string;
+          detached_at?: string | null;
+          event_id?: string | null;
+          filename?: string;
+          id?: string;
+          mime_type?: string;
+          size_bytes?: number;
+          storage_path?: string;
+          uploaded_at?: string;
+          uploaded_by?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "documents_client_id_fkey";
+            columns: ["client_id"];
+            isOneToOne: false;
+            referencedRelation: "clients";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "documents_event_id_fkey";
+            columns: ["event_id"];
+            isOneToOne: false;
+            referencedRelation: "care_events";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "documents_uploaded_by_fkey";
+            columns: ["uploaded_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       organisations: {
         Row: {
           abn: string | null;
@@ -409,7 +452,6 @@ export type Database = {
         };
         Relationships: [];
       };
-
       profiles: {
         Row: {
           address: string | null;
@@ -457,94 +499,100 @@ export type Database = {
           },
         ];
       };
-
-      test: {
+      shifts: {
         Row: {
-          id: string;
-          name: string;
+          cancelled_at: string | null;
+          carer_id: string;
+          client_id: string;
           created_at: string;
+          created_by: string | null;
+          ends_at: string;
+          id: string;
+          organisation_id: string;
+          starts_at: string;
         };
         Insert: {
-          id?: string;
-          name: string;
+          cancelled_at?: string | null;
+          carer_id: string;
+          client_id: string;
           created_at?: string;
+          created_by?: string | null;
+          ends_at: string;
+          id?: string;
+          organisation_id: string;
+          starts_at: string;
         };
         Update: {
-          id?: string;
-          name?: string;
+          cancelled_at?: string | null;
+          carer_id?: string;
+          client_id?: string;
           created_at?: string;
+          created_by?: string | null;
+          ends_at?: string;
+          id?: string;
+          organisation_id?: string;
+          starts_at?: string;
         };
-        Relationships: [];
+        Relationships: [
+          {
+            foreignKeyName: "shifts_carer_id_fkey";
+            columns: ["carer_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "shifts_client_id_fkey";
+            columns: ["client_id"];
+            isOneToOne: false;
+            referencedRelation: "clients";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "shifts_created_by_fkey";
+            columns: ["created_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "shifts_organisation_id_fkey";
+            columns: ["organisation_id"];
+            isOneToOne: false;
+            referencedRelation: "organisations";
+            referencedColumns: ["id"];
+          },
+        ];
       };
     };
-
     Views: {
       [_ in never]: never;
     };
-
     Functions: {
-      current_organisation_id: {
-        Args: never;
-        Returns: string;
-      };
-
-      current_profile: {
-        Args: never;
-        Returns: {
-          address: string | null;
-          email: string | null;
-          first_name: string | null;
-          id: string;
-          is_active: boolean;
-          job_title: string | null;
-          last_name: string | null;
-          organisation_id: string | null;
-          phone: string | null;
-          role: Database["public"]["Enums"]["app_role"];
-        };
-        SetofOptions: {
-          from: "*";
-          to: "profiles";
-          isOneToOne: true;
-          isSetofReturn: false;
-        };
-      };
-
-      is_admin_of_client: {
+      can_access_client_documents: {
         Args: {
           p_client_id: string;
         };
         Returns: boolean;
       };
-
-      is_assigned_carer: {
-        Args: {
-          p_client_id: string;
-        };
-        Returns: boolean;
-      };
-
-      is_family_of: {
-        Args: {
-          p_client_id: string;
-        };
-        Returns: boolean;
-      };
-
       can_edit_care_events: {
         Args: {
           p_client_id: string;
         };
         Returns: boolean;
       };
-
       can_read_care_events: {
         Args: {
           p_client_id: string;
         };
         Returns: boolean;
       };
-
+      carer_on_active_shift: {
+        Args: {
+          p_client_id: string;
+        };
+        Returns: boolean;
+      };
       client_shift_carers: {
         Args: {
           p_client_id: string;
@@ -559,7 +607,86 @@ export type Database = {
           ends_at: string;
         }[];
       };
-
+      current_organisation_id: {
+        Args: Record<PropertyKey, never>;
+        Returns: string;
+      };
+      current_profile: {
+        Args: Record<PropertyKey, never>;
+        Returns: {
+          address: string | null;
+          email: string | null;
+          first_name: string | null;
+          id: string;
+          is_active: boolean;
+          job_title: string | null;
+          last_name: string | null;
+          organisation_id: string | null;
+          phone: string | null;
+          role: Database["public"]["Enums"]["app_role"];
+        };
+      };
+      discard_unregistered_account: {
+        Args: Record<PropertyKey, never>;
+        Returns: undefined;
+      };
+      is_admin_of_client: {
+        Args: {
+          p_client_id: string;
+        };
+        Returns: boolean;
+      };
+      is_assigned_carer: {
+        Args: {
+          p_client_id: string;
+        };
+        Returns: boolean;
+      };
+      is_family_of: {
+        Args: {
+          p_client_id: string;
+        };
+        Returns: boolean;
+      };
+      list_organisations_for_transfer: {
+        Args: {
+          p_client_id: string;
+        };
+        Returns: {
+          id: string;
+          name: string;
+          is_current: boolean;
+        }[];
+      };
+      overlapping_shifts: {
+        Args: {
+          p_carer_id: string;
+          p_starts_at: string;
+          p_ends_at: string;
+        };
+        Returns: {
+          cancelled_at: string | null;
+          carer_id: string;
+          client_id: string;
+          created_at: string;
+          created_by: string | null;
+          ends_at: string;
+          id: string;
+          organisation_id: string;
+          starts_at: string;
+        }[];
+      };
+      register_account: {
+        Args: {
+          p_role: Database["public"]["Enums"]["app_role"];
+          p_first_name: string;
+          p_last_name: string;
+          p_client_first_name?: string;
+          p_client_last_name?: string;
+          p_organisation_name?: string;
+        };
+        Returns: Json;
+      };
       set_occurrence_done: {
         Args: {
           p_event_id: string;
@@ -578,7 +705,6 @@ export type Database = {
           seq: number;
         };
       };
-
       set_occurrence_undone: {
         Args: {
           p_event_id: string;
@@ -597,18 +723,6 @@ export type Database = {
           seq: number;
         };
       };
-
-      list_organisations_for_transfer: {
-        Args: {
-          p_client_id: string;
-        };
-        Returns: {
-          id: string;
-          name: string;
-          is_current: boolean;
-        }[];
-      };
-
       transfer_client_organisation: {
         Args: {
           p_client_id: string;
@@ -617,42 +731,34 @@ export type Database = {
         Returns: undefined;
       };
     };
-
     Enums: {
       app_role: "family" | "carer" | "admin";
     };
-
     CompositeTypes: {
       [_ in never]: never;
     };
   };
 };
 
-type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">;
-
-type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">];
+type PublicSchema = Database[Extract<keyof Database, "public">];
 
 export type Tables<
-  DefaultSchemaTableNameOrOptions extends
-    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
-    | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals;
-  }
-    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+  PublicTableNameOrOptions extends
+    | keyof (PublicSchema["Tables"] & PublicSchema["Views"])
+    | { schema: keyof Database },
+  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
+    ? keyof (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
+        Database[PublicTableNameOrOptions["schema"]]["Views"])
     : never = never,
-> = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals;
-}
-  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+> = PublicTableNameOrOptions extends { schema: keyof Database }
+  ? (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
+      Database[PublicTableNameOrOptions["schema"]]["Views"])[TableName] extends {
       Row: infer R;
     }
     ? R
     : never
-  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
-    ? (DefaultSchema["Tables"] & DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+  : PublicTableNameOrOptions extends keyof (PublicSchema["Tables"] & PublicSchema["Views"])
+    ? (PublicSchema["Tables"] & PublicSchema["Views"])[PublicTableNameOrOptions] extends {
         Row: infer R;
       }
       ? R
@@ -660,24 +766,18 @@ export type Tables<
     : never;
 
 export type TablesInsert<
-  DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema["Tables"]
-    | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals;
-  }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+  PublicTableNameOrOptions extends keyof PublicSchema["Tables"] | { schema: keyof Database },
+  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
+    ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals;
-}
-  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = PublicTableNameOrOptions extends { schema: keyof Database }
+  ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Insert: infer I;
     }
     ? I
     : never
-  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
+    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
         Insert: infer I;
       }
       ? I
@@ -685,24 +785,18 @@ export type TablesInsert<
     : never;
 
 export type TablesUpdate<
-  DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema["Tables"]
-    | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals;
-  }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+  PublicTableNameOrOptions extends keyof PublicSchema["Tables"] | { schema: keyof Database },
+  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
+    ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals;
-}
-  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = PublicTableNameOrOptions extends { schema: keyof Database }
+  ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Update: infer U;
     }
     ? U
     : never
-  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
+    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
         Update: infer U;
       }
       ? U
@@ -710,46 +804,27 @@ export type TablesUpdate<
     : never;
 
 export type Enums<
-  DefaultSchemaEnumNameOrOptions extends
-    | keyof DefaultSchema["Enums"]
-    | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends DefaultSchemaEnumNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals;
-  }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+  PublicEnumNameOrOptions extends keyof PublicSchema["Enums"] | { schema: keyof Database },
+  EnumName extends PublicEnumNameOrOptions extends { schema: keyof Database }
+    ? keyof Database[PublicEnumNameOrOptions["schema"]]["Enums"]
     : never = never,
-> = DefaultSchemaEnumNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals;
-}
-  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
-  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
-    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
+> = PublicEnumNameOrOptions extends { schema: keyof Database }
+  ? Database[PublicEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : PublicEnumNameOrOptions extends keyof PublicSchema["Enums"]
+    ? PublicSchema["Enums"][PublicEnumNameOrOptions]
     : never;
 
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
-    | keyof DefaultSchema["CompositeTypes"]
-    | { schema: keyof DatabaseWithoutInternals },
+    | keyof PublicSchema["CompositeTypes"]
+    | { schema: keyof Database },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals;
+    schema: keyof Database;
   }
-    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    ? keyof Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
     : never = never,
-> = PublicCompositeTypeNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals;
-}
-  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
-  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
-    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+> = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
+  ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof PublicSchema["CompositeTypes"]
+    ? PublicSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never;
-
-export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
-  public: {
-    Enums: {
-      app_role: ["family", "carer", "admin"],
-    },
-  },
-} as const;
