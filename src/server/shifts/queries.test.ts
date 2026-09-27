@@ -2,7 +2,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { MARGARET_CLIENT_ID } from "@/mocks/fixtures";
-import { getCarerShifts, getCarerTodayShifts } from "@/server/shifts/queries";
+import { getCarerPatients, getCarerShifts, getCarerTodayShifts } from "@/server/shifts/queries";
 
 /**
  * Contract tests for the carer's shifts today (CHG-025): Carer Home's
@@ -79,36 +79,21 @@ describe("[CAR-UI-01][PRD] supabase mode", () => {
 const AISHA_WEEK = { from: "2026-11-30", to: "2026-12-06" };
 
 describe("[CAR-UI-03][AC-07] getCarerShifts", () => {
-  it("[CAR-UI-03][AC-07] Aisha's week of 30 Nov gives her three Margaret shifts, earliest first, with the client's first name", async () => {
+  it("[CAR-UI-03][AC-07] Aisha's week of 30 Nov gives her nine shifts, earliest first, with the client's first name", async () => {
     const rows = await getCarerShifts("staff-aisha", AISHA_WEEK);
 
-    expect(
-      rows.map(({ start, end, clientId, clientFirstName }) => ({
-        start,
-        end,
-        clientId,
-        clientFirstName,
-      })),
-    ).toEqual([
-      {
-        start: "2026-11-30T08:00:00+11:00",
-        end: "2026-11-30T12:00:00+11:00",
-        clientId: MARGARET_CLIENT_ID,
-        clientFirstName: "Margaret",
-      },
-      {
-        start: "2026-12-01T09:00:00+11:00",
-        end: "2026-12-01T11:00:00+11:00",
-        clientId: MARGARET_CLIENT_ID,
-        clientFirstName: "Margaret",
-      },
-      {
-        start: "2026-12-02T13:00:00+11:00",
-        end: "2026-12-02T17:00:00+11:00",
-        clientId: MARGARET_CLIENT_ID,
-        clientFirstName: "Margaret",
-      },
+    expect(rows.map(({ start, end, clientFirstName }) => [start, end, clientFirstName])).toEqual([
+      ["2026-11-30T08:00:00+11:00", "2026-11-30T12:00:00+11:00", "Margaret"],
+      ["2026-12-01T09:00:00+11:00", "2026-12-01T11:00:00+11:00", "Margaret"],
+      ["2026-12-01T13:00:00+11:00", "2026-12-01T15:00:00+11:00", "Robert"],
+      ["2026-12-02T09:00:00+11:00", "2026-12-02T11:00:00+11:00", "Elsie"],
+      ["2026-12-02T13:00:00+11:00", "2026-12-02T17:00:00+11:00", "Margaret"],
+      ["2026-12-03T09:00:00+11:00", "2026-12-03T11:00:00+11:00", "Frank"],
+      ["2026-12-03T13:00:00+11:00", "2026-12-03T15:00:00+11:00", "Doris"],
+      ["2026-12-04T09:00:00+11:00", "2026-12-04T11:00:00+11:00", "Harold"],
+      ["2026-12-04T13:00:00+11:00", "2026-12-04T15:00:00+11:00", "Jean"],
     ]);
+    expect(rows[0]).toMatchObject({ clientId: MARGARET_CLIENT_ID });
   });
 
   it("[CAR-UI-03][AC-07] another carer's shift is not listed; Sarah gets her own", async () => {
@@ -123,11 +108,10 @@ describe("[CAR-UI-03][AC-07] getCarerShifts", () => {
   it("[CAR-UI-03][AC-07] a one-day range gives only that day's shifts (Tue 1 Dec)", async () => {
     const rows = await getCarerShifts("staff-aisha", { from: "2026-12-01", to: "2026-12-01" });
 
-    expect(rows).toHaveLength(1);
-    expect(rows[0]).toMatchObject({
-      start: "2026-12-01T09:00:00+11:00",
-      end: "2026-12-01T11:00:00+11:00",
-    });
+    expect(rows.map((row) => [row.start, row.clientFirstName])).toEqual([
+      ["2026-12-01T09:00:00+11:00", "Margaret"],
+      ["2026-12-01T13:00:00+11:00", "Robert"],
+    ]);
   });
 
   it("[CAR-UI-03][AC-07] an unknown carer has no shifts", async () => {
@@ -146,5 +130,45 @@ describe("[CAR-UI-03][AC-07] getCarerShifts", () => {
     await expect(getCarerShifts("staff-aisha", AISHA_WEEK)).rejects.toThrow(
       /shifts\.getCarerShifts: DATA_SOURCE="supabase" is not implemented yet/,
     );
+  });
+});
+
+/**
+ * CAR-UI-02 (FD-02, PD-041): the patients a carer can see are the clients they
+ * have a shift with that hasn't ended, soonest shift first. `onShift` means a
+ * shift is in progress at the reference now, Mon 30 Nov 2026 09:00.
+ */
+describe("[CAR-UI-02][AC-13] getCarerPatients", () => {
+  it("[CAR-UI-02][AC-13] Aisha sees the design's 7 patients, in order, with age and suburb", async () => {
+    const rows = await getCarerPatients("staff-aisha");
+
+    expect(rows.map((row) => [row.firstName, row.age, row.suburb])).toEqual([
+      ["Margaret", 78, "Preston VIC"],
+      ["Robert", 82, "Reservoir VIC"],
+      ["Elsie", 90, "Thornbury VIC"],
+      ["Frank", 76, "Northcote VIC"],
+      ["Doris", 85, "Preston VIC"],
+      ["Harold", 79, "Coburg VIC"],
+      ["Jean", 88, "Fairfield VIC"],
+    ]);
+    expect(rows[0]!.clientId).toBe(MARGARET_CLIENT_ID);
+  });
+
+  it("[CAR-UI-02][AC-13] Aisha is on shift with Margaret only", async () => {
+    const rows = await getCarerPatients("staff-aisha");
+
+    expect(rows.filter((row) => row.onShift).map((row) => row.firstName)).toEqual(["Margaret"]);
+  });
+
+  it("[CAR-UI-02][AC-13] an unknown carer gets no patients", async () => {
+    expect(await getCarerPatients("staff-nobody")).toEqual([]);
+  });
+
+  it("[CAR-UI-02][AC-13] a carer whose only shift has ended gets no patients (Daniel)", async () => {
+    expect(await getCarerPatients("staff-daniel")).toEqual([]);
+  });
+
+  it("[CAR-UI-02][AC-13] adding patients leaves Aisha's Carer Home unchanged: one shift today", async () => {
+    expect(await getCarerTodayShifts("staff-aisha")).toHaveLength(1);
   });
 });

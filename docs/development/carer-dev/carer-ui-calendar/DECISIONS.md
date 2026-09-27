@@ -71,6 +71,15 @@ Record feature-level decisions here using the template below. Project-wide decis
 - Consequences: a tab left open past midnight keeps the previous today until the next navigation (`ponytail:` note in the code). The calendar still opens scrolled to 07:00, so an evening line is below the fold until scrolled. No existing test changed; T-11 added.
 - Human confirmation required: no (human request)
 
+### FD-07 — Two T-07 expectations updated after merging CAR-UI-02's fixtures
+- Date: 2026-09-27
+- Context: Merging `carer-dev` brought CAR-UI-02's extra `SHIFTS` (six future Aisha shifts, Tue 1 to Fri 4 Dec). Two `getCarerShifts` tests in `src/server/shifts/queries.test.ts` assumed Aisha's only shifts that week were three with Margaret.
+- Decision: `[CAR-UI-03][AC-07]` week test now expects her nine shifts of 30 Nov to 6 Dec, earliest first; the one-day test for Tue 1 Dec now expects two (Margaret 09:00, Robert 13:00). Before: 3 shifts in the week, 1 on Tue 1 Dec. The contract and mock are unchanged.
+- Reason: test assumption invalidated by a fixture change on another branch, not a behaviour change.
+- Alternatives considered: pointing the tests at a carer with no other shifts (Sarah has one shift, so it would lose the ordering check).
+- Consequences: none for screens; the Carer Home tests were unaffected and the full suite is green.
+- Human confirmation required: no (flagged HUMAN REVIEW in PROGRESS.md)
+
 <!-- Template
 ### FD-01 — <title>
 - Date:

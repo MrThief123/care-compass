@@ -1,14 +1,14 @@
 # Session State — CAR-UI-02 Carer Patients and patient info screens (UI)
 
-Last session date: none (no implementation session yet)
-Current branch: n/a — `feature/carer-ui-patients-info` not created
-Worked on: n/a
-What changed: n/a
-Tests run: none
-Test results: n/a
-Current blocker: None
-Important discoveries: none
-Important decisions: none
-Exact next action: Run `START FEATURE CAR-UI-02` once dependencies are MERGED TO DEV (or COMPLETE) and blocking decisions are answered.
-Files likely to be touched next: `src/app/(carer)/carer/patients/page.tsx`, `src/app/(carer)/carer/patients/[clientId]/page.tsx`
-Warning for next session: Read PRD.md, ACCEPTANCE_CRITERIA.md and TEST_PLAN.md before writing any code. Do not create the branch from the wrong parent (`carer-dev`).
+Last session date: 2026-09-26
+Current branch: `feature/carer-ui-patients-info` (from carer-dev at a80db7a, after PR #124)
+Worked on: CHG-029 (Home landing, tab order, view-only notice and card labels), tests first then implementation, suite, e2e, browser check
+What changed: `getCarerPatients` (contract + mock), fixtures (FD-02), carer patients routes, `src/features/carer-patients/*`, type-only test fixes, docs
+Tests run: `npm run lint`, `npm run typecheck`, `npx prettier --check src`, `npm test`, `npx playwright test --grep-invert "F0-07"`
+Test results: feature 34/34 green; full vitest 1864 passed, 5 F0-04/F0-07 environment failures + 2 load timeouts that pass alone; e2e 36/36
+Current blocker: none
+Important decisions: FD-04 amended (reuse `CarerHomeErrorState`); FD-05 (fixtures test change, test typing, streamed notFound, OQ-09 default); FD-06 / CHG-029 (T-03, T-07 expectations changed)
+Exact next action:
+1. PR #125 open to `carer-dev`; wait for review. Address any review comments on this branch.
+Files likely to be touched next: PROGRESS.md only
+Warning for next session: FD-01 request to Lane F (base path + read-only mode for Home/Calendar/Care log) must be raised with the human; CAR-04 depends on it.

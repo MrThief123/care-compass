@@ -49,6 +49,7 @@ Last updated: 2026-09-26 (CHG-031: calendar merged into Carer Home; green)
 ## Decisions
 - See DECISIONS.md (FD-01 to FD-06) and root CHG-030, CHG-031.
 - **HUMAN REVIEW: test expectation changed** (CHG-031, FD-04).
+- **HUMAN REVIEW: test expectation changed** (FD-07): two `getCarerShifts` expectations after the `carer-dev` merge added Aisha shifts.
 
 ## Calendar size and scrollable notifications (FD-05, 2026-09-26)
 - Day, Week, Month and the empty state share one 640px body (card 748px at every width); Notifications matches the calendar card from 1280px and its list scrolls.

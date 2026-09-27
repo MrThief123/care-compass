@@ -41,3 +41,25 @@ export async function getCarerShifts(
   }
   notImplementedForSupabase("shifts", "getCarerShifts");
 }
+
+/** One card on Carer · Patients (CAR-UI-02 FD-02). */
+export interface CarerPatientRow {
+  clientId: string;
+  firstName: string;
+  age: number;
+  suburb: string;
+  /** A shift with this client is in progress now: the carer may edit their Info. */
+  onShift: boolean;
+}
+
+/**
+ * The clients the carer has a shift with that hasn't ended (PD-041), soonest
+ * shift first (FD-03). An unknown carer returns `[]`.
+ */
+export async function getCarerPatients(carerId: string): Promise<CarerPatientRow[]> {
+  const mode = getDataSourceMode();
+  if (mode === "mock") {
+    return mock.getCarerPatients(carerId);
+  }
+  notImplementedForSupabase("shifts", "getCarerPatients");
+}

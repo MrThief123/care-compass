@@ -2,7 +2,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { FAMILY_PROFILES } from "@/mocks/fixtures";
-import { getFamilyContactDetails } from "@/server/profiles/queries";
+import { getCarerContactDetails, getFamilyContactDetails } from "@/server/profiles/queries";
 import { ProfileSchema } from "@/types/domain";
 
 const fake = vi.hoisted(() => {
@@ -127,5 +127,39 @@ describe("[FAM-12][CHG-023] supabase mode", () => {
     const rejection = getFamilyContactDetails("profile-secret-id");
     await expect(rejection).rejects.toThrow("getFamilyContactDetails: profile not found.");
     await expect(rejection).rejects.not.toThrow(/profile-secret-id/);
+  });
+});
+
+// Aisha's details as drawn in docs/design/screens/carer-04-settings.png (CAR-UI-04
+// FD-01): full name (PD-038), contact email (PD-054), job title as the role.
+const AISHA = {
+  profileId: "staff-aisha",
+  name: "Aisha Rahman",
+  phone: "0423 987 654",
+  email: "aisha.r@banksiahomecare.com.au",
+  role: "Registered Nurse",
+};
+
+describe("[CAR-UI-04] getCarerContactDetails", () => {
+  it("[CAR-UI-04][AC-01] returns Aisha's full name, phone, contact email and role", async () => {
+    expect(await getCarerContactDetails("staff-aisha")).toEqual(AISHA);
+  });
+
+  it("[CAR-UI-04][AC-01] rejects an unknown profile id", async () => {
+    await expect(getCarerContactDetails("staff-does-not-exist")).rejects.toThrow();
+  });
+
+  it("[CAR-UI-04][AC-01] leaves out a missing phone rather than returning an empty string", async () => {
+    const daniel = await getCarerContactDetails("staff-daniel");
+
+    expect(daniel.role).toBe("Enrolled Nurse");
+    expect("phone" in daniel).toBe(false);
+  });
+
+  it("[CAR-UI-04][AC-01] does not let a caller change the fixtures by editing what it was given", async () => {
+    const first = await getCarerContactDetails("staff-aisha");
+    first.name = "changed";
+
+    expect(await getCarerContactDetails("staff-aisha")).toEqual(AISHA);
   });
 });
