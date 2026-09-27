@@ -11,6 +11,7 @@ import { CardShell } from "@/components/ui/card-shell";
 import { addEventHrefFrom } from "@/features/family-event-form/event-form-return";
 import { taskDetailHrefFrom } from "@/features/family-task-detail/task-detail-origin";
 import type { LocalDate } from "@/lib/dates/week-range";
+import { setOccurrenceDone, setOccurrenceUndone } from "@/server/events/actions";
 import type { Occurrence } from "@/types/domain";
 
 import { applyTick } from "./apply-ticks";
@@ -79,9 +80,23 @@ export function FamilyCalendarView({
   const now = clockDay && clockDay >= range.from && clockDay <= range.to ? clock : null;
 
   const [ticks, setTicks] = useState<Record<string, boolean>>({});
+  // FAM-05 AC-02: the last tick or untick's save error, if any (cleared on the next attempt).
+  const [tickError, setTickError] = useState<string | undefined>(undefined);
   const occurrences = loaded.map((occurrence) =>
     applyTick(occurrence, ticks[occurrence.key], actorName),
   );
+
+  // FAM-05: applies the tick at once (CHG-016), then saves it; a failed save reverts the
+  // checkbox and shows an inline error (AC-02), same as the design's PROPOSED copy.
+  async function toggleTick(key: string, ticked: boolean) {
+    setTickError(undefined);
+    setTicks((previous) => ({ ...previous, [key]: ticked }));
+    const result = ticked ? await setOccurrenceDone(key) : await setOccurrenceUndone(key);
+    if (!result.ok) {
+      setTicks((previous) => ({ ...previous, [key]: !ticked }));
+      setTickError(result.error.message);
+    }
+  }
 
   const navigate = (next: CalendarParams) => router.push(calendarHref(clientId, next));
 
@@ -158,7 +173,8 @@ export function FamilyCalendarView({
           dateLabel={dayHeading(selected)}
           occurrences={dayOccurrences}
           isTicked={(occurrence) => ticks[occurrence.key] ?? occurrence.status === "done"}
-          onToggle={(key, ticked) => setTicks((previous) => ({ ...previous, [key]: ticked }))}
+          onToggle={toggleTick}
+          errorMessage={tickError}
         />
         <LogPanel clientId={clientId} occurrences={log} calendar={current} />
       </div>
