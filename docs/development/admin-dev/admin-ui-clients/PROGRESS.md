@@ -1,56 +1,38 @@
-# Progress — ADM-UI-04 Admin Clients screen (UI)
-
-Status: NOT STARTED
-Owner: unclaimed
-Lane: A — Admin
-Sprint: SPRINT · planned D6
-Branch: `feature/admin-ui-clients` (not yet created)
-PR target: `admin-dev`
-Last updated: 2026-09-17 (planning pack generated)
-
-## Blockers
-- None recorded at planning time
-
-## Dependencies status
-- F0-15 — NOT STARTED
-- UI-02 — NOT STARTED
-- UI-03 — NOT STARTED
+# Progress - ADM-UI-04 Admin Clients UI
+Status: PR OPEN
+Owner: Kavis
+Branch: feature/admin-ui-clients
+PR target: admin-dev
+Last updated: 2026-09-27
 
 ## Completed
-- Feature documentation drafted (Claude Chat planning pack)
+- Ready-to-start gate verified on current admin-dev.
+- Clients table with synthetic full names and family contacts; Remove buttons with a confirmation dialog.
+- Local Add client form, Zod validation, empty/loading/error and retry states.
+- Human approved Add client for this preview only despite PD-037; production decision unchanged.
+- Human approved Admin query and synthetic fixture additions outside lane-owned folders.
+- Screen and query tests written first and failed for missing modules.
+- All three original UI ACs covered by passing tests. No client edit action.
+- 130 relevant tests passed across 21 Admin and shared form/list files.
+- TypeScript and scoped ESLint pass.
+- HTTP GET /admin/clients: 200, client/contact fixture content and form confirmed.
+- No Family code or shared components edited. Human authorized commit/push, then clarified the normal feature branch workflow on 2026-09-27.
 
-## In progress
-- None
+## Limitations
+- Browser runtime reports no available browser; human visual review needed.
+- Google Font certificate failure: preview uses fallback font.
+- npm run verify passes lint/typecheck but stops at repository formatting (424 files).
+- Scoped new-code formatting checked separately.
+- Full suite: 1787 tests passed, 3 timed out in existing server event/profile tests; 8 suites could not load without Supabase environment values (10 failed files total). No Clients tests failed.
+- No schema changes; database suite not run for this local UI preview.
+- Human authorized opening the PR into admin-dev on 2026-09-27; do not merge.
+- GitHub CI at 4d8461e: 7 passed, 0 failed, 3 skipped. Lint, typecheck, format, unit, build, audit and db-test all passed.
+- CI evidence: https://github.com/MrThief123/care-compass/actions/runs/36300256004
 
-## Remaining
-- Route `/admin/clients` inside the admin layout.
-- Client list `DataTable` NAME · FAMILY CONTACT · REMOVE with '+ Add client'; Remove links styled alert (no action — OQ-06/07).
-- Add client `SidePanelForm`: Client name, Family contact name, Family contact email, Notes; 'Add client' (local only).
-- Loading skeleton, empty state and error state (States sheet) wired to the query contract's states.
-- Data only via `src/server/**` contract functions (mock data source).
-
-## Acceptance criteria status
-- 0 / 3 MET
-
-## Tests
-- Written: 0 / 3
-- Passing: 0
-- Failing: 0
-
-## Files changed
-- None yet. Likely files: `src/app/(admin)/admin/clients/page.tsx`
-
-## Decisions
-- See DECISIONS.md
-
-## Problems encountered
-- None
-
-## Assumptions
-- PROPOSED items in PRD.md are unconfirmed until validated in F0-01 or answered in DECISIONS.md.
-
-## Next action
-- complete dependencies, run START FEATURE ADM-UI-04, and write the tests in TEST_PLAN.md first.
-
-## Ready for PR
-- No
+## PR review revision
+- Removed table-toolbar Add Client button and visible REMOVE heading; retained side-panel form.
+- Confirmed removal changes local state only. Cancel/Escape preserve rows; last removal shows empty state; reload restores fixtures.
+- HUMAN REVIEW: test expectation changed per FD-08 and explicit user request.
+- Revised screen tests failed first (7 failures), then all 135 relevant Admin/shared tests passed. TypeScript and scoped lint pass.
+- Refreshed preview verified HTTP 200 at http://127.0.0.1:3103/admin/clients; obsolete toolbar button absent.
+- Browser unavailable; dialog interaction verified by component tests.
