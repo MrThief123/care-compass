@@ -1,9 +1,9 @@
 # Progress - ADM-UI-04 Admin Clients UI
-Status: PR OPEN
+Status: MERGED TO DEV
 Owner: Kavis
 Branch: feature/admin-ui-clients
 PR target: admin-dev
-Last updated: 2026-09-27
+Last updated: 2026-09-28
 
 ## Completed
 - Ready-to-start gate verified on current admin-dev.
@@ -36,3 +36,6 @@ Last updated: 2026-09-27
 - Revised screen tests failed first (7 failures), then all 135 relevant Admin/shared tests passed. TypeScript and scoped lint pass.
 - Refreshed preview verified HTTP 200 at http://127.0.0.1:3103/admin/clients; obsolete toolbar button absent.
 - Browser unavailable; dialog interaction verified by component tests.
+
+## Merged — 2026-09-28
+- PR #130 (https://github.com/MrThief123/care-compass/pull/130) merged to `admin-dev`. Status set to MERGED TO DEV in a docs sync, since the merge left it at PR OPEN.

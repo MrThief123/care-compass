@@ -1,6 +1,6 @@
 # Session State - ADM-UI-05
-Date: 2026-09-27
-Status: PR OPEN
+Date: 2026-09-28
+Status: MERGED TO DEV
 Branch: feature/admin-ui-settings
 PR target: admin-dev
 Worktree: .claude/worktrees/admin-ui-settings
@@ -13,3 +13,5 @@ Tests: 12 Settings tests and 131 relevant regression tests pass; TypeScript and 
 Preview: http://127.0.0.1:3104/admin/settings
 Limitations: synthetic local data only; resets on reload; no reset email sent. Browser unavailable and font download uses fallback after certificate failure.
 Next action: verify pushed branch CI; if no failures, open PR to admin-dev with validation results. Keep unmerged.
+
+Merged 2026-09-28: PR #134 merged to `admin-dev`. Status set to MERGED TO DEV in a docs sync.
