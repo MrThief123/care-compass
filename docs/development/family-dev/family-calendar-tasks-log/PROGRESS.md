@@ -1,17 +1,17 @@
 # Progress — FAM-05 Family Calendar — Tasks panel and Log panel
 
-Status: READY FOR PR
+Status: MERGED TO DEV
 Owner: MrThief123
 Lane: F — Family
 Sprint: SPRINT · planned D9
 Branch: `feature/family-calendar-tasks-log`
-PR target: `family-dev`
+PR target: `family-dev` — merged as PR #137 directly to `main` (`family-dev` is behind `main`
+and no longer the merge target in practice; see root PROGRESS.md)
 Last updated: 2026-09-27
 
-**HUMAN REVIEW requested (FD-01):** implemented unticking (undo) alongside ticking, even
-though no FAM-05 AC names it directly — the PRD Scope lists it conditional on OQ-10, which is
-now answered specifically to unblock it, and the UI already presents it as bidirectional. See
-DECISIONS.md FD-01 for the full reasoning; please confirm this reading of scope.
+**FD-01 (undo scope) merged as implemented.** Flagged for human review before merge; the PR
+was merged with the undo/unticking wiring in place, so the scope reading in DECISIONS.md FD-01
+stands as accepted. Recorded here for traceability, not as an open item.
 
 ## Blockers
 - None — OQ-10 is ANSWERED (root DECISIONS.md).
@@ -79,8 +79,7 @@ DECISIONS.md FD-01 for the full reasoning; please confirm this reading of scope.
 - The error copy "Couldn't save. Please try again." is PRD.md's own PROPOSED text.
 
 ## Next action
-- Human reviews FD-01 (undo scope reading); then open the PR to `family-dev` once CI is green
-  (human authorises PR creation per DEVELOPMENT_WORKFLOW.md §7).
+- None — merged (PR #137).
 
 ## Ready for PR
-- Yes, pending FD-01 review.
+- Merged.

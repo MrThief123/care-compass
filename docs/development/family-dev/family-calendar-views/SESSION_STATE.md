@@ -15,6 +15,6 @@ Important discoveries:
 - FAM-UI-02 (Phase 1) already built the calendar loader against the real `src/server/events` contract, not raw fixtures, and F0-11 had already given `getOccurrences` a complete Supabase implementation (far-future recurrence via `src/lib/recurrence`, RLS via `loadOccurrences`). FAM-04's PRD-scoped wiring gap did not exist by the time this session started.
 - Confirmed empirically: creating a real weekly event anchored in 2026 and reading the week of 5 Jan 2060 against local Supabase returns exactly one occurrence, on the correct Sunday within that Monday-start week.
 Important decisions: FD-01 (no production code changed) in this feature's DECISIONS.md.
-Exact next action: Push, open the PR to `family-dev` (human authorises PR creation).
-Files likely to be touched next: none expected before PR.
+Exact next action: None — merged (PR #136, directly to `main`).
+Files likely to be touched next: none.
 Warning for next session: same local-Supabase env override note as FAM-02 (`.env.local` points at a hosted project — override `NEXT_PUBLIC_SUPABASE_URL`/`NEXT_PUBLIC_SUPABASE_ANON_KEY`/`SUPABASE_SERVICE_ROLE_KEY` from `supabase status -o env` for integration/e2e runs). Playwright e2e needs a fresh `npm run build` before `npx playwright test` if source changed since the last build.

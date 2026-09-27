@@ -1,11 +1,12 @@
 # Progress — FAM-04 Family Calendar — day, week and month views
 
-Status: READY FOR PR
+Status: MERGED TO DEV
 Owner: MrThief123
 Lane: F — Family
 Sprint: SPRINT · planned D8–D9
 Branch: `feature/family-calendar-views`
-PR target: `family-dev`
+PR target: `family-dev` — merged as PR #136 directly to `main` (`family-dev` is behind `main`
+and no longer the merge target in practice; see root PROGRESS.md)
 Last updated: 2026-09-27
 
 ## Blockers

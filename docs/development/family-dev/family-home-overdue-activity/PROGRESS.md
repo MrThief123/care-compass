@@ -1,11 +1,12 @@
 # Progress — FAM-02 Family Home — Overdue card and Recent activity
 
-Status: READY FOR PR
+Status: MERGED TO DEV
 Owner: MrThief123
 Lane: F — Family
 Sprint: SPRINT · planned D8
 Branch: `feature/family-home-overdue-activity`
-PR target: `family-dev`
+PR target: `family-dev` — merged as PR #133 directly to `main` (`family-dev` is behind `main`
+and no longer the merge target in practice; see root PROGRESS.md)
 Last updated: 2026-09-27
 
 ## Blockers
