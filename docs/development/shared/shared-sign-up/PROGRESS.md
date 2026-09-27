@@ -21,18 +21,18 @@ Last updated: 2026-09-27
 - None
 
 ## Remaining
-- Write T-01..T-08 first, then implement
+- Migration, `signUp` action, `/sign-up` page, sign-in link; e2e run against a build
 
 ## Acceptance criteria status
 - 0 / 8 MET
 
 ## Tests
-- Written: 0 / 8
+- Written: 8 / 8 (T-01 to T-08), plus extra PRD tests (signed-in redirect, no direct inserts, discard of a half-made account)
 - Passing: 0
-- Failing: 0
+- Failing: all, for the expected reason (2026-09-27): pgTAP `register_account` / `discard_unregistered_account` do not exist; integration `signUp` is not exported; e2e `/sign-up` not built (not run red: needs `npm run build`)
 
 ## Files changed
-- None yet
+- `supabase/tests/sign_up.test.sql`, `tests/integration/shared-sign-up.test.ts`, `tests/e2e/sign-up.spec.ts`
 
 ## Decisions
 - PD-057, CHG-010 (root DECISIONS.md)
@@ -44,7 +44,7 @@ Last updated: 2026-09-27
 - PROPOSED copy in PRD.md is unconfirmed until reviewed in the PR.
 
 ## Next action
-- Write T-01..T-08 from TEST_PLAN.md, run them red, commit `test(auth): …`.
+- Implement: migration (`register_account`, `discard_unregistered_account`), `signUp` action, `/sign-up` page and the sign-in link; run until green.
 
 ## Ready for PR
 - No
