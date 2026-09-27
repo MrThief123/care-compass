@@ -6,13 +6,17 @@ import type { Page } from "@playwright/test";
 
 loadEnv({ path: ".env.local" });
 
-// Requires a running local Supabase stack (`supabase start`) and `.env.local`
-// populated from `supabase status` (same convention as tests/e2e/auth.spec.ts).
-const hasLocalSupabase = Boolean(
-  process.env.NEXT_PUBLIC_SUPABASE_URL &&
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY &&
-    process.env.SUPABASE_SERVICE_ROLE_KEY,
+// The tests that create accounts need a local Supabase stack (`supabase start`, migrations applied)
+// because they need this feature's migration (`register_account`); against a hosted project that
+// lacks it they skip, as the integration tests do. If `.env.local` points at a hosted project,
+// override the three variables from `npx supabase status -o env` for the build and the run. The
+// page-only tests below write nothing and always run.
+const isLocalUrl = /^https?:\/\/(127\.0\.0\.1|localhost)(:|\/|$)/.test(
+  process.env.NEXT_PUBLIC_SUPABASE_URL ?? "",
 );
+const hasLocalSupabase =
+  isLocalUrl &&
+  Boolean(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY && process.env.SUPABASE_SERVICE_ROLE_KEY);
 
 const PASSWORD = "correct horse battery staple 1!";
 
@@ -48,7 +52,10 @@ async function fillFamilySignUp(page: Page, email: string, clientLastName: strin
 }
 
 test.describe(() => {
-  test.skip(!hasLocalSupabase, "Requires a running local Supabase stack — see README.");
+  test.skip(
+    !hasLocalSupabase,
+    "Creates accounts and needs this feature's migration: local Supabase stack only — see README.",
+  );
 
   test("[F0-17][AC-01] a family sign-up lands on /family/<Harold id>/home, with Harold unlinked to an organisation and Grace as his family member", async ({
     page,
