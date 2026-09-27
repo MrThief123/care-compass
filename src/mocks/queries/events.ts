@@ -241,9 +241,8 @@ export interface SetOccurrenceDoneResult {
  * PD-044 (Manual completion mode): marks an occurrence Done, recording the
  * actor's name (safeguarding requirement, REQ-19). This is a Phase 1 mock
  * mutation over an in-memory copy of the fixture — it does not persist
- * across requests; real persistence lands with the `events` Phase 3
- * wiring feature (F0-11) via the `set_occurrence_done` RPC
- * (ARCHITECTURE.md §4).
+ * across requests; real persistence is the `events` Phase 3 wiring feature
+ * (FAM-05) via the `set_occurrence_done` RPC (ARCHITECTURE.md §4).
  */
 export async function setOccurrenceDone(
   key: string,
@@ -259,4 +258,29 @@ export async function setOccurrenceDone(
     }
   }
   throw new Error(`setOccurrenceDone: no occurrence found for key "${key}".`);
+}
+
+export interface SetOccurrenceUndoneResult {
+  ok: true;
+  occurrence: Occurrence;
+}
+
+/**
+ * OQ-10: undoes a Done occurrence, matching the client's own optimistic
+ * simplification (`apply-ticks.ts`) — it always reads Planned afterwards
+ * here, rather than recomputing Overdue, since the mock has no clock-driven
+ * derivation to recompute it with. Real persistence: FAM-05, the
+ * `set_occurrence_undone` RPC.
+ */
+export async function setOccurrenceUndone(key: string): Promise<SetOccurrenceUndoneResult> {
+  for (const occurrences of Object.values(OCCURRENCES_BY_CLIENT_ID)) {
+    const occurrence = occurrences.find((item) => item.key === key);
+    if (occurrence) {
+      occurrence.status = "planned";
+      occurrence.actor = undefined;
+      occurrence.completedAt = undefined;
+      return { ok: true, occurrence };
+    }
+  }
+  throw new Error(`setOccurrenceUndone: no occurrence found for key "${key}".`);
 }
