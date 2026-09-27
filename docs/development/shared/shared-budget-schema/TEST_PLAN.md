@@ -3,27 +3,41 @@
 ## Approach
 Tests are written **before** production code (TESTING.md §2). Run them, confirm they fail for the expected reason, then implement.
 
+Rewritten 2026-09-27 for CHG-020 / CHG-021 / CHG-022 (see DECISIONS.md FD-01).
+
 ## Test levels used
-- **db** → `supabase/tests/<feature>.test.sql` (pgTAP via `supabase test db`)
-- **unit** → `src/**/<module>.test.ts` (Vitest)
+- **db** → `supabase/tests/budget.test.sql` (pgTAP via `supabase test db`)
+- **unit** → `src/lib/money/schema.test.ts`, `src/lib/format/money.test.ts` (Vitest)
 
 ## Test cases
 
 | Test ID | Covers | Level | Test description | Written first? | Result |
 |---|---|---|---|---|---|
-| T-01 | AC-01 | db | Given NDIS total $24,000 and expenses $9,120, when the summary runs, then remaining is 14880.00 and percent_used is 38. | ☐ | NOT RUN |
-| T-02 | AC-02 | db | Given Government total $3,000 and expenses $2,760, when the summary runs, then percent_used is 92 and threshold_state is 'alert' (under 70/90/100 thresholds; recalculated once OQ-03 is answered). | ☐ | NOT RUN |
-| T-03 | AC-03 | db | Given expenses exceed the total, when the summary runs, then remaining is negative and threshold_state is 'depleted'. | ☐ | NOT RUN |
-| T-04 | AC-04 | db | Given `record_expense` is called with amount 0 or -5, when executed, then it raises a validation error and nothing is inserted. | ☐ | NOT RUN |
-| T-05 | AC-05 | db | Given a user not linked to Margaret, when they select Margaret's buckets, then zero rows are returned. | ☐ | NOT RUN |
-| T-06 | AC-06 | unit | Given the decimal string '12.345', when parsed by the money schema, then validation fails (max 2 decimal places). | ☐ | NOT RUN |
+| T-01 | AC-01 | db | Summary of a bucket with $24,000 funds and $9,120 paid costs: remaining 14880.00, percent_used 38. | ☑ | NOT RUN |
+| T-02 | AC-02 | db | Summary of $3,000 funds and $2,760 paid: percent 92, state 'alert'. Boundaries 74 normal, 75 warning, 85 alert, 100 depleted; $0 funds gives percent null, 'normal'. | ☑ | NOT RUN |
+| T-03 | AC-03 | db | `remove_funds` above the balance raises 'Only $X available' and inserts nothing; exactly the balance succeeds and leaves 0.00. | ☑ | NOT RUN |
+| T-04 | AC-04 | db | `add_funds` / `remove_funds` with 0, -5 and 12.345 raise 22023 and insert nothing. | ☑ | NOT RUN |
+| T-05 | AC-05 | db | Unlinked user selects zero rows from buckets, entries, costs and summary; family and admin can change funds; assigned carer and other-organisation admin get 42501 from every change function. | ☑ | NOT RUN |
+| T-06 | AC-06 | unit | Money schema rejects '12.345', '-5', '0', 'abc', '1e3' and accepts '12', '12.5', '12.50'. | ☑ | NOT RUN |
+| T-07 | AC-07 | db | Completing an occurrence of a costed event charges it once as paid; re-doing after undo charges nothing more; a second occurrence is charged again. | ☑ | NOT RUN |
+| T-08 | AC-08 | db | Completing when the bucket cannot cover the cost records the whole cost pending, occurrence still Done; a later smaller cost is also pending while any is pending; summary shows pending totals and 'depleted'. | ☑ | NOT RUN |
+| T-09 | AC-09 | db | Adding funds pays pending costs whole, oldest first, stopping at the first that does not fit; no new History row; paid_on set. | ☑ | NOT RUN |
+| T-10 | AC-10 | db | Bucket name rules (required, 40 max, unique ignoring case and spaces), $0 starting amount, rename keeps entries and writes no row, kind check. | ☑ | NOT RUN |
+| T-11 | AC-11 | db | `remove_bucket` succeeds only with no charges, records 'bucket_removed' of minus the leftover, clears events' cost/bucket, frees the name; refused otherwise. | ☑ | NOT RUN |
+| T-12 | AC-12 | db | Deactivating an event leaves its costs untouched; the cost's event foreign key is `on delete set null`. | ☑ | NOT RUN |
+| T-13 | AC-13 | db | A pending cost stays pending across unrelated later activity and is paid by a later top-up. | ☑ | NOT RUN |
+| T-14 | AC-14 | db | RLS enabled on all three tables; direct insert/update/delete refused; fund entries append-only; a cost can only go pending to paid; audit_log rows written. | ☑ | NOT RUN |
+| T-15 | AC-15 | db | Rows record the signed-in user and name snapshot and the note; the actor cannot be passed in. | ☑ | NOT RUN |
+| T-16 | AC-06 | unit | `formatMoney` shows cents only when the amount is not whole (unchanged for whole dollars). | ☑ | NOT RUN |
+
+Test titles start `[F0-12][AC-xx]`.
 
 ## Regression scope
-- Run the full unit/component suite and `supabase test db` before marking READY FOR PR.
-- Run Playwright e2e tests for this dashboard before opening the PR.
+- Run the full unit/component suite and `supabase test db` before marking READY FOR PR (care_events, audit_log and tenancy tests must stay green: this feature adds columns to `care_events` and an AFTER INSERT trigger on `care_event_completions`).
+- Run Playwright e2e tests against local Supabase only.
 
 ## Test data
-- Use `F0-16` seed data (Banksia Home Care, Margaret, Helen, Aisha R., Priya) unless a test creates its own fixtures.
+- Each pgTAP file creates its own fixtures (two organisations, family, admin, carers, clients), as `care_events.test.sql` does. F0-16 seed data does not exist yet.
 
 ## Coverage mapping rule
 Every AC must have ≥1 test. Tests may only be modified after implementation begins for reasons in TESTING.md §6, recorded in DECISIONS.md.
