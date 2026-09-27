@@ -21,9 +21,8 @@ Test results: full suite green (1936 passed / 30 skipped); new integration file 
 family-calendar e2e 10/10 passed (after killing a stale `next start` process left on :3000 from
 an earlier session's Playwright run — that caused 6 spurious failures on the first attempt, not
 a real regression).
-Current blocker: None — **but see HUMAN REVIEW in PROGRESS.md / DECISIONS.md FD-01**: undo was
-implemented beyond FAM-05's literal AC list, on the reasoning that the PRD Scope already covers
-it pending OQ-10 (now answered) and that a tick-only save would leave untick silently broken.
+Current blocker: None. FD-01 (undo scope, see DECISIONS.md) was flagged for human review and
+merged as implemented (PR #137) — treated as accepted.
 Important discoveries:
 - FAM-UI-02 had already built the Tasks panel, Log panel and optimistic tick display, with its
   own doc comments explicitly deferring persistence to FAM-05 — the real gap matched the PRD
@@ -36,9 +35,8 @@ Important discoveries:
   not e2e as TEST_PLAN originally specified — recorded in that doc.
 Important decisions: FD-01 (undo scope — HUMAN REVIEW), FD-02 (test expectation change) in this
 feature's DECISIONS.md.
-Exact next action: human reviews FD-01; then push (already done) and open the PR to `family-dev`.
-Files likely to be touched next: none expected before PR, unless FD-01's review asks for the
-undo wiring to be removed/deferred.
+Exact next action: None — merged (PR #137, directly to `main`).
+Files likely to be touched next: none.
 Warning for next session: if reusing `npm run start` + Playwright locally, check `lsof -i :3000`
 first — `reuseExistingServer: !CI` means Playwright silently reuses a stale server from an
 earlier branch's build if one is still running, producing confusing, unrelated-looking failures.

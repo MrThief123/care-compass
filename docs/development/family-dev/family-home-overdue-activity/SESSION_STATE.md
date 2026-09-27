@@ -15,6 +15,6 @@ Important discoveries:
 - FAM-UI-01 had already built the Overdue/Recent activity cards' UI, empty states and routing on the mock data source (`home-data.ts`, `overdue-card.tsx`, `recent-activity-card.tsx`, `home-routes.ts`) — closer to a Phase 3 shape than a typical fixture screen. The real remaining FAM-02 gap was just `getTaskLog`'s Supabase implementation and one copy string.
 - `getOccurrences`'s existing Supabase path (F0-11) already returns plain events uniformly via `buildOccurrences`; `getTaskLog`'s Supabase branch reuses `loadOccurrences` directly rather than re-deriving that logic.
 Important decisions: FD-01 (empty-state copy), FD-02 (task-log range sentinel) — both in this feature's DECISIONS.md.
-Exact next action: Push, open the PR to `family-dev` (human authorises PR creation).
-Files likely to be touched next: none expected before PR; if CI surfaces something, check `src/server/events/queries.ts` and the new integration test first.
+Exact next action: None — merged (PR #133, directly to `main`).
+Files likely to be touched next: none.
 Warning for next session: local Supabase's `.env.local` points at a hosted project — integration tests need `NEXT_PUBLIC_SUPABASE_URL`/`NEXT_PUBLIC_SUPABASE_ANON_KEY`/`SUPABASE_SERVICE_ROLE_KEY` overridden from `supabase status -o env` for a local run (see `tests/integration/care-events.test.ts`'s header comment).
