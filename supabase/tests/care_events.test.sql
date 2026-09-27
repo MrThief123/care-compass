@@ -3,7 +3,7 @@
 -- plus the CHG-001 / CHG-009 rules: plain events cannot be ticked off, per-occurrence mode overrides,
 -- and OQ-10 undo. AC-01 to AC-03 and AC-08 (occurrence listing, status) are TypeScript, tested elsewhere.
 begin;
-select plan(68);
+select plan(69);
 
 -- ---------------------------------------------------------------------------
 -- Seed: two organisations, five people, three clients, shifts, events
@@ -40,11 +40,8 @@ insert into client_family_members (client_id, profile_id) values
   ('b1111111-1111-1111-1111-111111111111', 'a1111111-1111-1111-1111-111111111111'),
   ('b2222222-2222-2222-2222-222222222222', 'a6666666-6666-6666-6666-666666666666');
 
-insert into carer_client_assignments (carer_id, client_id, organisation_id, started_at) values
-  ('a3333333-3333-3333-3333-333333333333', 'b1111111-1111-1111-1111-111111111111', '11111111-1111-1111-1111-111111111111', now() - interval '3 days'),
-  ('a4444444-4444-4444-4444-444444444444', 'b1111111-1111-1111-1111-111111111111', '11111111-1111-1111-1111-111111111111', now() - interval '3 days'),
-  ('a5555555-5555-5555-5555-555555555555', 'b1111111-1111-1111-1111-111111111111', '11111111-1111-1111-1111-111111111111', now() - interval '3 days');
-
+-- F0-18: read access follows these shifts alone now — Bea's future shift already gives her
+-- read (not edit); Cara's shift being cancelled now means no read either, not just no edit.
 insert into shifts (client_id, carer_id, starts_at, ends_at, cancelled_at) values
   ('b1111111-1111-1111-1111-111111111111', 'a3333333-3333-3333-3333-333333333333', now() - interval '1 hour', now() + interval '1 hour', null),
   ('b1111111-1111-1111-1111-111111111111', 'a4444444-4444-4444-4444-444444444444', now() + interval '1 day', now() + interval '1 day 4 hours', null),
@@ -178,6 +175,11 @@ select pg_temp.login('a5555555-5555-5555-5555-555555555555');
 select throws_ok(
   $$ insert into care_events (client_id, title, starts_at, created_by) values ('b1111111-1111-1111-1111-111111111111', 'Cancelled shift', now(), 'a5555555-5555-5555-5555-555555555555') $$,
   '42501', null, 'Cara (her current shift is cancelled) cannot create an event');
+select is(
+  (select count(*)::int from care_events),
+  0,
+  'F0-18: Cara cannot read Margaret''s events either — her only shift is cancelled'
+);
 
 select pg_temp.login('a2222222-2222-2222-2222-222222222222');
 select throws_ok(

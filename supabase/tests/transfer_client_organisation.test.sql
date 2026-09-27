@@ -2,7 +2,7 @@
 -- Covers AC-01, AC-02, AC-03 and AC-06 (docs/development/family-dev/family-change-organisation/ACCEPTANCE_CRITERIA.md)
 -- for transfer_client_organisation(), plus list_organisations_for_transfer() for the picker.
 begin;
-select plan(26);
+select plan(27);
 
 insert into organisations (id, name) values
   ('11111111-1111-1111-1111-111111111111', 'Banksia Home Care'),
@@ -39,10 +39,9 @@ insert into client_info_sections (client_id, key, body) values
   ('b1111111-1111-1111-1111-111111111111', 'description', 'Margaret likes tea.'),
   ('b1111111-1111-1111-1111-111111111111', 'habits', 'Walks at 9.');
 
--- Aisha: an active assignment to Margaret and one to Nell
-insert into carer_client_assignments (id, carer_id, client_id, organisation_id, started_at, ended_at) values
-  ('c1111111-1111-1111-1111-111111111111', 'a3333333-3333-3333-3333-333333333333', 'b1111111-1111-1111-1111-111111111111', '11111111-1111-1111-1111-111111111111', now() - interval '2 hours', null),
-  ('c3333333-3333-3333-3333-333333333333', 'a3333333-3333-3333-3333-333333333333', 'b3333333-3333-3333-3333-333333333333', '11111111-1111-1111-1111-111111111111', now() - interval '2 hours', null);
+-- F0-18: Aisha's read access to Margaret and to Nell comes from the shifts below alone
+-- (no separate assignment table); the in-progress Margaret shift (d...004) and the future
+-- Nell shift (d0000003...) are what give her that access.
 
 -- Margaret's shifts: 3 in the future, 1 in progress, 1 finished, 1 already cancelled (future); Nell: 1 in the future
 insert into shifts (id, client_id, carer_id, starts_at, ends_at, cancelled_at) values
@@ -67,8 +66,7 @@ create temp table before_counts as
 select
   (select count(*) from client_info_sections where client_id = 'b1111111-1111-1111-1111-111111111111') as info_sections,
   (select count(*) from client_family_members where client_id = 'b1111111-1111-1111-1111-111111111111') as family_links,
-  (select count(*) from shifts where client_id = 'b1111111-1111-1111-1111-111111111111') as shifts,
-  (select count(*) from carer_client_assignments where client_id = 'b1111111-1111-1111-1111-111111111111') as assignments;
+  (select count(*) from shifts where client_id = 'b1111111-1111-1111-1111-111111111111') as shifts;
 grant select on before_counts to authenticated;
 
 -- ---------------------------------------------------------------------------
@@ -186,11 +184,12 @@ select is(
   'AC-01: the three future shifts are cancelled'
 );
 
-select is(
-  (select count(*)::int from carer_client_assignments where client_id = 'b1111111-1111-1111-1111-111111111111' and (ended_at is null or ended_at > now())),
-  0,
-  'AC-01: the active assignment is ended'
+select pg_temp.login('a3333333-3333-3333-3333-333333333333');
+select ok(
+  not is_assigned_carer('b1111111-1111-1111-1111-111111111111'),
+  'F0-18/AC-01: Aisha''s read access to Margaret ends too (her shifts were cancelled/ended by the transfer)'
 );
+reset role;
 
 select results_eq(
   $$ select cancelled_at is null, ends_at = now() from shifts where id = 'd0000001-0000-0000-0000-000000000004' $$,
@@ -210,11 +209,17 @@ select ok(
 );
 
 select is(
-  (select count(*)::int from shifts where client_id = 'b3333333-3333-3333-3333-333333333333' and cancelled_at is null)
-  + (select count(*)::int from carer_client_assignments where client_id = 'b3333333-3333-3333-3333-333333333333' and ended_at is null),
-  2,
-  'another client (Nell) at Banksia keeps her shift and assignment'
+  (select count(*)::int from shifts where client_id = 'b3333333-3333-3333-3333-333333333333' and cancelled_at is null),
+  1,
+  'another client (Nell) at Banksia keeps her shift'
 );
+
+select pg_temp.login('a3333333-3333-3333-3333-333333333333');
+select ok(
+  is_assigned_carer('b3333333-3333-3333-3333-333333333333'),
+  'F0-18: ...and Aisha''s read access to Nell, an untouched client, is unaffected'
+);
+reset role;
 
 -- ---------------------------------------------------------------------------
 -- AC-02: the outgoing organisation loses access at once; the new one gains it.
@@ -241,16 +246,15 @@ select results_eq(
   $$ select
        (select count(*) from client_info_sections where client_id = 'b1111111-1111-1111-1111-111111111111'),
        (select count(*) from client_family_members where client_id = 'b1111111-1111-1111-1111-111111111111'),
-       (select count(*) from shifts where client_id = 'b1111111-1111-1111-1111-111111111111'),
-       (select count(*) from carer_client_assignments where client_id = 'b1111111-1111-1111-1111-111111111111') $$,
-  $$ select info_sections, family_links, shifts, assignments from before_counts $$,
-  'AC-03: information sections, family links, shifts and assignments are all still there'
+       (select count(*) from shifts where client_id = 'b1111111-1111-1111-1111-111111111111') $$,
+  $$ select info_sections, family_links, shifts from before_counts $$,
+  'AC-03: information sections, family links and shifts are all still there'
 );
 
 select is(
-  (select organisation_id from carer_client_assignments where id = 'c1111111-1111-1111-1111-111111111111'),
+  (select organisation_id from shifts where id = 'd0000001-0000-0000-0000-000000000004'),
   '11111111-1111-1111-1111-111111111111'::uuid,
-  'AC-03: the ended assignment still names the organisation that made it (history is kept)'
+  'AC-03: the ended shift still names the organisation it was made under (history is kept)'
 );
 
 -- ---------------------------------------------------------------------------
