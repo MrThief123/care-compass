@@ -1,7 +1,8 @@
 # Progress - ADM-UI-04 Admin Clients UI
 Status: IN PROGRESS
 Owner: Kavis
-Branch: admin-dev
+Branch: feature/admin-ui-clients
+PR target: admin-dev
 Last updated: 2026-09-27
 
 ## Completed
@@ -15,7 +16,7 @@ Last updated: 2026-09-27
 - 130 relevant tests passed across 21 Admin and shared form/list files.
 - TypeScript and scoped ESLint pass.
 - HTTP GET /admin/clients: 200, client/contact fixture content and form confirmed.
-- No Family code or shared components edited. Human authorized commit and push to admin-dev on 2026-09-27.
+- No Family code or shared components edited. Human authorized commit/push, then clarified the normal feature branch workflow on 2026-09-27.
 
 ## Limitations
 - Browser runtime reports no available browser; human visual review needed.

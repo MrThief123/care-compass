@@ -56,3 +56,10 @@ _No decisions recorded yet._
 - The prior no-commit/no-push restriction is superseded.
 - Add client remains fixture-only; PD-037 production workflow is unchanged.
 - Report actual remote check results for the pushed SHA, distinguishing passes, skips and failures.
+
+### FD-06 - Restore normal Admin UI feature branch workflow
+- Human clarified: "do it how the other admin-ui stuff is done."
+- Work is on feature/admin-ui-clients, based on origin/admin-dev; PR target admin-dev.
+- The initial implementation commit 6ce0735 is preserved intact. No admin-dev push reached origin, verified with ls-remote.
+- Local admin-dev now points back at unchanged origin/admin-dev (697c646); no remote history rewritten.
+- This supersedes FD-05's direct-admin-dev branch instruction.
