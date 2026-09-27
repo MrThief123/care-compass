@@ -7,7 +7,7 @@ Last updated: 2026-09-27
 
 ## Completed
 - Ready-to-start gate verified on current admin-dev.
-- Clients table with synthetic full names and family contacts; inactive Remove links.
+- Clients table with synthetic full names and family contacts; Remove buttons with a confirmation dialog.
 - Local Add client form, Zod validation, empty/loading/error and retry states.
 - Human approved Add client for this preview only despite PD-037; production decision unchanged.
 - Human approved Admin query and synthetic fixture additions outside lane-owned folders.
@@ -28,3 +28,11 @@ Last updated: 2026-09-27
 - Human authorized opening the PR into admin-dev on 2026-09-27; do not merge.
 - GitHub CI at 4d8461e: 7 passed, 0 failed, 3 skipped. Lint, typecheck, format, unit, build, audit and db-test all passed.
 - CI evidence: https://github.com/MrThief123/care-compass/actions/runs/36300256004
+
+## PR review revision
+- Removed table-toolbar Add Client button and visible REMOVE heading; retained side-panel form.
+- Confirmed removal changes local state only. Cancel/Escape preserve rows; last removal shows empty state; reload restores fixtures.
+- HUMAN REVIEW: test expectation changed per FD-08 and explicit user request.
+- Revised screen tests failed first (7 failures), then all 135 relevant Admin/shared tests passed. TypeScript and scoped lint pass.
+- Refreshed preview verified HTTP 200 at http://127.0.0.1:3103/admin/clients; obsolete toolbar button absent.
+- Browser unavailable; dialog interaction verified by component tests.

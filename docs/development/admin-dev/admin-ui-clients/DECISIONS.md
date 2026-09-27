@@ -68,3 +68,11 @@ _No decisions recorded yet._
 - Human explicitly requested opening the PR into admin-dev and prohibited merging.
 - PR status records updated on the feature branch per workflow section 7.
 - Record verified CI separately from local environment limitations; 4d8461e passed all 7 executed checks.
+
+### FD-08 - Human-requested Clients review changes
+- Human requested removing the Add Client button above the table's action column and the visible REMOVE column heading.
+- Human requested a confirmation step before removal: Yes removes the selected client; Cancel leaves it unchanged.
+- This explicit request supersedes the original inactive-Remove preview behavior. Removal is local state only and resets on reload, consistent with the ongoing fixture-only UI scope. No database records are deleted.
+- Use the existing shared ConfirmationModal; no shared component edits.
+- HUMAN REVIEW: test expectation changed. AC-01 row test now expects an enabled Remove button and confirmation, replacing its inactive-link assertion. Empty-state test now checks the retained side-panel Add client form instead of the removed toolbar button's focus shortcut.
+- Added coverage for confirm/cancel/Escape, only-selected-row removal, last-row empty state, reload reset, heading cleanup and accessible dialog.

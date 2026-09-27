@@ -1,15 +1,15 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
 
+import { ConfirmationModal } from "@/components/shared/forms/confirmation-modal";
 import { Field } from "@/components/shared/forms/field";
 import { SidePanelForm } from "@/components/shared/forms/side-panel-form";
 import { DataTable } from "@/components/shared/lists/data-table";
 import { EmptyState } from "@/components/shared/states";
 import { Button } from "@/components/ui/button";
 import { CardShell } from "@/components/ui/card-shell";
-import { Icon } from "@/components/ui/icon";
 
 export interface ClientRow {
   id: string;
@@ -31,6 +31,15 @@ export function ClientsScreen({ data }: { data: { clients: ClientRow[] } }) {
   const [errors, setErrors] = useState<Partial<Record<keyof Draft, string>>>({});
   const [notice, setNotice] = useState("");
   const panel = useRef<HTMLDivElement>(null);
+  const listHeading = useRef<HTMLHeadingElement>(null);
+  const [pendingRemoval, setPendingRemoval] = useState<ClientRow | null>(null);
+  const restoreListFocus = useRef(false);
+  useEffect(() => {
+    if (pendingRemoval === null && restoreListFocus.current) {
+      restoreListFocus.current = false;
+      listHeading.current?.focus();
+    }
+  }, [pendingRemoval]);
   function change(key: keyof Draft, value: string) {
     setDraft((current) => ({ ...current, [key]: value }));
     setErrors((current) => ({ ...current, [key]: undefined }));
@@ -53,26 +62,29 @@ export function ClientsScreen({ data }: { data: { clients: ClientRow[] } }) {
     setErrors({});
     setNotice(result.data.name + " added. Changes reset when you reload.");
   }
-  function startAdding() {
-    setDraft({ ...blank });
-    setErrors({});
-    setNotice("");
-    panel.current?.querySelector("input")?.focus();
+  function confirmRemoval() {
+    if (!pendingRemoval) return;
+    setClients((current) => current.filter((client) => client.id !== pendingRemoval.id));
+    setNotice(pendingRemoval.name + " removed. Changes reset when you reload.");
+    restoreListFocus.current = true;
+    setPendingRemoval(null);
   }
   return (
     <div className="grid min-h-[calc(100vh-76px)] grid-cols-1 gap-5 p-6 lg:grid-cols-[minmax(0,1fr)_360px]">
       <CardShell className="min-w-0 border-transparent p-5">
         <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-title-card text-text-primary">Client List</h2>
-          <Button onClick={startAdding} aria-label="Add a new client">
-            <Icon name="plus" aria-hidden />
-            Add Client
-          </Button>
+          <h2
+            ref={listHeading}
+            tabIndex={-1}
+            className="text-title-card text-text-primary outline-none focus-visible:outline-2 focus-visible:outline-ring"
+          >
+            Client List
+          </h2>
         </div>
         {clients.length ? (
           <div className="overflow-x-auto">
             <DataTable
-              className="min-w-[440px] [&_td]:py-1 [&_td]:break-words [&_td:last-child]:text-right [&_th:last-child]:text-right"
+              className="min-w-[440px] [&_td]:py-1 [&_td]:break-words [&_td:last-child]:text-right [&_th:last-child]:sr-only"
               rows={clients}
               rowKey={(client) => client.id}
               columns={[
@@ -96,16 +108,16 @@ export function ClientsScreen({ data }: { data: { clients: ClientRow[] } }) {
                 },
                 {
                   key: "remove",
-                  header: "Remove",
+                  header: "Actions",
                   render: (client) => (
-                    <a
-                      role="link"
-                      aria-disabled="true"
+                    <Button
+                      variant="ghost"
+                      onClick={() => setPendingRemoval(client)}
                       aria-label={"Remove " + client.name}
-                      className="inline-flex min-h-11 min-w-11 items-center justify-center px-4 text-body-default text-text-alert-strong"
+                      className="text-body-default text-text-alert-strong"
                     >
                       Remove
-                    </a>
+                    </Button>
                   ),
                 },
               ]}
@@ -156,6 +168,16 @@ export function ClientsScreen({ data }: { data: { clients: ClientRow[] } }) {
           </p>
         </SidePanelForm>
       </div>
+      <ConfirmationModal
+        open={pendingRemoval !== null}
+        title="Remove client?"
+        body={<>Are you sure you want to remove {pendingRemoval?.name}?</>}
+        confirmLabel="Yes, remove"
+        cancelLabel="Cancel"
+        tone="destructive"
+        onConfirm={confirmRemoval}
+        onCancel={() => setPendingRemoval(null)}
+      />
     </div>
   );
 }

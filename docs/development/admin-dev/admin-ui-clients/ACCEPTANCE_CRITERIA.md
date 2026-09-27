@@ -4,8 +4,10 @@ Each criterion is observable and maps to at least one test in TEST_PLAN.md. Crit
 
 | ID | Story | Type | Criterion (Given / When / Then) | Status |
 |---|---|---|---|---|
-| AC-01 | US-01 | happy | Given fixtures, when Clients renders, then rows include 'Margaret · Helen' and 'Doris · Tom' with 'Remove' links. | NOT MET |
+| AC-01 | US-01 | happy | Given fixtures, when Clients renders, then rows include 'Margaret · Helen' and 'Doris · Tom' with 'Remove' buttons. | NOT MET |
 | AC-02 | US-01 | validation | Given Add client with empty Client name, when submitted, then an error is shown. | NOT MET |
 | AC-03 | US-01 | permission | Given the Clients screen, when rendered, then no edit control for client information exists (D28). | NOT MET |
+
+| AC-04 | US-01 | confirmation | Given a client row, Remove asks for confirmation naming that client; Yes removes only that row locally, while Cancel or Escape preserves it. Reload restores fixtures. The toolbar Add Client button and visible REMOVE heading are absent. | MET |
 
 Status values: NOT MET · MET (test passing) · BLOCKED (cite OQ/PD).
