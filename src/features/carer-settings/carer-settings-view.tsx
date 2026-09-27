@@ -2,7 +2,12 @@
 
 import { useEffect, useRef, useState } from "react";
 
-import { Field, fieldErrors, SettingsActionCard, type FieldErrors } from "@/components/shared/forms";
+import {
+  Field,
+  fieldErrors,
+  SettingsActionCard,
+  type FieldErrors,
+} from "@/components/shared/forms";
 import { Button } from "@/components/ui/button";
 import { CardShell } from "@/components/ui/card-shell";
 import { familyInfoSchema } from "@/server/profiles/contact-schema";
@@ -16,7 +21,11 @@ const myInfoSchema = familyInfoSchema.omit({ address: true });
 type MyInfoValues = { name: string; phone: string; email: string };
 
 /** Display order, which is also the order focus looks for the first bad field. */
-const FIELDS: ReadonlyArray<{ key: keyof MyInfoValues; label: string; type: "text" | "tel" | "email" }> = [
+const FIELDS: ReadonlyArray<{
+  key: keyof MyInfoValues;
+  label: string;
+  type: "text" | "tel" | "email";
+}> = [
   { key: "name", label: "Name", type: "text" },
   { key: "phone", label: "Phone", type: "tel" },
   { key: "email", label: "Email", type: "email" },

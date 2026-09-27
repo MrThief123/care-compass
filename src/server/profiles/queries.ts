@@ -40,9 +40,7 @@ export async function getFamilyContactDetails(
  * FD-02). With `DATA_SOURCE=supabase` this reads the `profiles` row as the
  * signed-in user; CAR-09 verifies it against RLS.
  */
-export async function getCarerContactDetails(
-  profileId: string,
-): Promise<mock.CarerContactDetails> {
+export async function getCarerContactDetails(profileId: string): Promise<mock.CarerContactDetails> {
   const mode = getDataSourceMode();
   if (mode === "mock") {
     return mock.getCarerContactDetails(profileId);
