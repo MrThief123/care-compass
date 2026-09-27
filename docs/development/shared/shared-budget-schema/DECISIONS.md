@@ -28,3 +28,52 @@ _No decisions recorded yet._
 - Human confirmation required: yes/no (who, when)
 - Test changes caused (if any): test ID, reason, flagged for review yes/no
 -->
+
+### FD-01 — Scope rewritten for CHG-020 / CHG-021 / CHG-022
+- Date: 2026-09-27
+- Context: PRD.md, ACCEPTANCE_CRITERIA.md, TEST_PLAN.md and DATA_MODEL.md described the original model (three fixed kinds, overdraft, expenses recorded by carers). PD-058, PD-059 and PD-060 changed it, and CHG-020 / CHG-021 say Lane B rewrites them when F0-12 starts.
+- Decision: rewrite them as listed in the PRD Scope. AC-03 (negative remaining) is replaced by "a removal cannot exceed the balance"; AC-02 uses 75 / 85 / 100; AC-07 to AC-15 are new. The original AC-01, 02, 04, 05, 06 keep their intent.
+- Reason: the plan itself instructs this; the earlier ACs would now assert behaviour the human removed.
+- Alternatives considered: leave the ACs and note the exceptions (rejected: tests would assert overdraft).
+- Consequences: F0-11 gains `cost` and `bucket_id` on `care_events`, done here in the F0-12 migration as CHG-020 asks. INT-01 reads pending costs for its email.
+- Human confirmation required: yes (Prajeet, review of this rewrite before implementation).
+- Test changes caused: none (no tests existed).
+
+### FD-02 — Human answers to the two questions CHG-020 left open, and no accounting period yet
+- Date: 2026-09-27 · Decided by: Prajeet (in-session)
+- Decision: (1) deleting or deactivating an event never deletes its costs: the care was already done; a cost can be removed separately if needed. (2) A pending cost carries over until it is paid; it never expires or resets.
+- SUPERSEDED by FD-06. The follow-on Claude proposed (no period) was replaced by the human's answer: a month. The original `period_start` / `period_end` are NOT built. PD-059's Edit budget form has no period field, no decision says how a period starts or ends, and period filtering would make a top-up dated outside the period fail to raise the balance. The PRD edge case "entries outside the period excluded" is therefore dropped and pending carry-over is trivially true. INT-01's "period = bucket period" (PD-035) will need a period decision later.
+- Human confirmation required: yes for the follow-on.
+
+### FD-03 — Assumptions made where the decisions are silent (each needs confirmation)
+- A cost is charged once per occurrence (unique `(event_id, original_start)`). Undoing a completion does not refund or cancel the cost, and re-completing does not charge again.
+- Strict oldest-first also applies to new costs: while any cost is pending on a bucket, a newer cost is pending too, even if the balance could cover it.
+- An event's cost and bucket are set together or not at all, and the bucket must be the same client's.
+- Removing a bucket clears `cost` and `bucket_id` on events pointing at it (future completions then cost nothing).
+- Admin writes to `care_events` (so an admin can set an event's cost, PD-058) are not part of this feature: F0-11's RLS still says an admin never writes events. Raised for the human; needs its own change.
+- The UI amount parser in `src/features/family-budget/budget-edit.ts` already validates amounts; `src/lib/money/schema.ts` is the server-side twin. Deduplicating is a follow-up (lib cannot import features).
+- Human confirmation required: yes.
+
+### FD-04 — Generated database types not regenerated
+- Date: 2026-09-27
+- Context: `npm run db:types` replaces the stub `database.types.ts` with all tables, and `src/app/api/test/route.ts` (queries a nonexistent `test` table) then fails typecheck. That file is outside this feature's lane.
+- Decision: leave `database.types.ts` unchanged in this PR; nothing in F0-12 needs it (no TypeScript reads the new tables yet).
+- Consequences: whoever wires data (FAM-10 / FAM-03) regenerates the types and removes or fixes the test route.
+- Human confirmation required: yes.
+
+### FD-05 — Human answers to FD-02, FD-03 and FD-04
+- Date: 2026-09-27 · Decided by: Prajeet (in-session)
+- FD-03, removing a bucket (CHANGED): events pointing at a removed bucket keep their cost and move to a "Miscellaneous" bucket, created with a $0 start when the client has none. Future completions still cost. Replaces "clears cost and bucket_id".
+  - Test change (recorded requirement change): T-11 / AC-11. Before: `cost` and `bucket_id` of an event were null after `remove_bucket`. After: the event is in the Miscellaneous bucket with its cost kept, the bucket is created once and reused. Flagged HUMAN REVIEW: test expectation changed.
+- FD-03, carers create events with a cost: confirmed. Checked against earlier decisions: consistent with PD-058 ("whoever creates the event sets them, carers included") and OQ-09 (a carer writes events only during an active shift), so no conflict. Added AC-16 / T-17 to prove it. One gap to raise: PD-058 says afterwards only Family, admins or the creating carer may change an event's cost, but F0-11's update policy lets any carer on an active shift update any event. Not changed here.
+- FD-03, everything else: confirmed as written.
+- FD-04: left as is (types not regenerated).
+- FD-02: accounting periods last a month (commercial billing). Flagged as changeable. NOT IMPLEMENTED yet: what a month period does to a balance is not stated (see the question raised in-session).
+
+### FD-06 — A budget period is a calendar month; the balance carries over; who changes an event's cost
+- Date: 2026-09-27 · Decided by: Prajeet (in-session)
+- Decision (period): a period lasts a month, as commercial billing does. Flagged: this is a default that can change in future; it is defined in one place (`budget_bucket_summary`). Human chose "balance carries over": total, used and remaining are cumulative; percent_used and the thresholds use this month's paid costs against the funds available at the month's start plus anything added since; a bucket whose funds are all gone is depleted.
+- Claude's assumptions inside that (change on request): the month is the calendar month in Australia/Melbourne (not a month from when a bucket was created); "used this month" is by the date a cost was paid, so a pending cost paid this month counts this month; the period is not stored on the bucket. INT-01's "period = bucket period" (PD-035) now means this month.
+- Decision (event cost): only the carer who created an event (while on an active shift), the family, or an admin of the client's organisation can change its cost and bucket. Any other carer on shift cannot, though F0-11 still lets them edit the rest of the event. Admins cannot write events (F0-11), so `set_event_cost` exists for them. This closes the gap raised under FD-05.
+- Test change: AC-01 / AC-02 seeds now date their paid costs this month (they were dated in the past, which under a monthly period would count as spent in an earlier month). Assertions unchanged. Not flagged as changed behaviour, since the ACs said "paid" without a date.
+- Human confirmation: CONFIRMED 2026-09-27 (period and carry-over, event-cost rule); assumptions above pending.
