@@ -1,9 +1,10 @@
 import { expect, test } from "@playwright/test";
 
-test("[F0-15][AC-06] marks the Calendar rail item active on /carer/calendar", async ({ page }) => {
-  await page.goto("/carer/calendar");
+// CHG-031: /carer/calendar was removed (merged into Carer Home), so Patients stands in.
+test("[F0-15][AC-06] marks the Patients rail item active on /carer/patients", async ({ page }) => {
+  await page.goto("/carer/patients");
 
-  await expect(page.getByRole("link", { name: "Calendar" })).toHaveAttribute(
+  await expect(page.getByRole("link", { name: "Patients" })).toHaveAttribute(
     "aria-current",
     "page",
   );

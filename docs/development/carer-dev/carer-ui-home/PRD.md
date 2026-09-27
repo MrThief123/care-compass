@@ -28,13 +28,14 @@ A clickable, reviewable screen that matches the design, ready for data wiring in
 - Carer
 
 ## Scope
+_Rewritten by CHG-025 (2026-09-26); the original scope listed event rows, a Tasks card and Admin/Family notifications._
 - Route `/carer/home` inside the carer layout.
-- 'Today's calendar' card: rows '09:00 · Margaret — Morning medication · pill'.
-- 'Tasks' card: `TaskChecklist` (local toggle).
-- 'Notifications' card: `NotificationRow`s (Admin/Family).
-- Header 'Home' with bell.
+- 'Today's calendar' card: one row per shift the signed-in carer has today, showing the time range and the client's first name (e.g. '08:00–12:00 · Margaret'). No status pill, no event rows.
+- 'Notifications' card to the right of 'Today's calendar' (where the design's 'Tasks' card was): `NotificationRow`s, shift assigned/changed/cancelled only, each with the 'Admin' chip.
+- No 'Tasks' card and no checkboxes on the screen.
+- Header 'Home' with bell (already rendered by the carer layout, F0-15).
 - Loading skeleton, empty state and error state (States sheet) wired to the query contract's states.
-- Data only via `src/server/**` contract functions (mock data source).
+- Data only via `src/server/**` contract functions (mock data source): `getCarerTodayShifts(carerId)` and `getCarerNotifications(carerId)`, added by this feature under CHG-025.
 
 ## Out of Scope
 - Real data, permissions and persistence (Phase 3 wiring features)
@@ -44,12 +45,12 @@ A clickable, reviewable screen that matches the design, ready for data wiring in
 - Interactions (ticks, selections, toggles, form input) update local state only and are clearly reset on reload.
 
 ## UI / UX Requirements
-- Pixel-level match to the design image in `docs/design/screens/`; attach side-by-side screenshot to the PR.
+- Match the design image in `docs/design/screens/carer-01-home.png` for header, card, row and chip styling. The layout and calendar rows differ from the image under CHG-025 (design gap, built from tokens — flag for review); attach side-by-side screenshot to the PR.
 
 ## Dependencies
 - Features: F0-15 (Role app shell: rail, header and layouts), UI-03 (Lists and cards kit: tables, rows, person/stat/budget/alert cards, client info view)
 - Blocking open decisions (must be answered before START FEATURE): None
-- Non-blocking open decisions (proposed defaults apply, confirm when possible): OQ-14, OQ-33
+- Decisions: OQ-14 (PD-048) and OQ-33 (PD-043) are ANSWERED, both amended by CHG-025. CHG-009 (tasks and plain events) no longer reaches this screen, which shows no events.
 
 ## Inputs
 - Fixtures

@@ -455,6 +455,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Testing summary:** 3 component
 - **Requirements:** REQ-02, REQ-N1, REQ-N2, REQ-N3
 - **CHG-009 (tasks and plain events, REQ-35):** Today's calendar shows tasks and plain events; the Tasks checklist lists tasks only.
+- **CHG-025 (carer shifts and notifications):** Today's calendar lists today's shifts (client + time range), not events; the Tasks card is removed and Notifications sits to its right; notifications are shift assigned/changed/cancelled only.
 - **Docs:** `docs/development/carer-dev/carer-ui-home/` · **Status:** NOT STARTED
 
 ### CAR-UI-02 — Carer Patients and patient info screens (UI)
@@ -466,6 +467,8 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Acceptance criteria summary:** 4 criteria — 7 cards appear including 'Margaret' '78 years · Preston VIC' and 'Jean' '88 years · Fairfield VIC'; 'No patients assigned yet' is shown; the patient info page for Margaret opens …
 - **Testing summary:** 4 component
 - **Requirements:** REQ-02, REQ-N1, REQ-N2, REQ-N3
+- **CHG-026 (carer ticks from the patient's screens):** opening a patient shows the patient's Home, Calendar, Info and Care log (family-style screens; Home includes the Budget strip read-only; no Budget screen, no Settings) through the carer's account.
+- **CHG-028 (split):** this feature builds the Patients grid, the patient header and tabs under the carer rail, and Info (editable only on shift); Home, Calendar and Care log tabs hold 'Coming soon' until a Lane F read-only/base-path change, then CAR-04 wires them. 13 criteria.
 - **Docs:** `docs/development/carer-dev/carer-ui-patients-info/` · **Status:** NOT STARTED
 
 ### CAR-UI-03 — Carer Calendar screen (UI)
@@ -478,6 +481,9 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Testing summary:** 3 component
 - **Requirements:** REQ-02, REQ-N1, REQ-N2, REQ-N3
 - **CHG-009 (tasks and plain events, REQ-35):** calendar blocks show tasks and plain events; "Tasks for the selected shift" lists tasks only.
+- **CHG-025 (carer shifts and notifications):** calendar blocks are the carer's shifts (client + time range); the 'Tasks for the selected shift' panel is removed.
+- **CHG-030:** adds `getCarerShifts(carerId, range)`; Family-style D/W/M, Previous/Next and Today via the URL; a shift block opens the patient.
+- **CHG-031:** the calendar lives on Carer Home (`/carer/home?view=&date=&month=`, Day by default, notifications beside it); `/carer/calendar` and the Carer rail's Calendar item are removed.
 - **Docs:** `docs/development/carer-dev/carer-ui-calendar/` · **Status:** NOT STARTED
 
 ### CAR-UI-04 — Carer Settings screen (UI)
@@ -881,6 +887,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Testing summary:** 2 component, 1 integration
 - **Requirements:** REQ-05, REQ-17, REQ-25
 - **CHG-009 (tasks and plain events, REQ-35):** Today's calendar shows tasks and plain events; the Tasks checklist lists tasks only.
+- **CHG-025 (carer shifts and notifications):** becomes Today's shifts: wires the shifts query behind Carer Home's calendar card; no event rows and no Tasks checklist. ACs rewritten when it starts.
 - **Docs:** `docs/development/carer-dev/carer-home-today/` · **Status:** NOT STARTED
 
 ### CAR-02 — Carer — Notifications card and bell
@@ -892,6 +899,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Acceptance criteria summary:** 4 criteria — a notification for Aisha with source 'admin' and message 'New shift assigned: Tuesday 1 Dec, 09:00–11:00 (Margaret).' exists; each carer assigned to Margaret receives a 'family' notification; Aisha's notifications are not returned …
 - **Testing summary:** 3 db, 1 component
 - **Requirements:** REQ-32
+- **CHG-025 (carer shifts and notifications):** triggers are shift assigned, changed and cancelled only, naming the client and time; no Family notifications.
 - **Docs:** `docs/development/carer-dev/carer-notifications/` · **Status:** NOT STARTED
 
 ### CAR-03 — Carer — Patients
@@ -914,6 +922,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Acceptance criteria summary:** 4 criteria — no Edit links or Add file tile exist; the change is shown; RLS rejects it …
 - **Testing summary:** 1 component, 1 e2e, 1 db, 1 integration
 - **Requirements:** REQ-05, REQ-10
+- **CHG-026 (carer ticks from the patient's screens):** covers the patient's Home, Calendar, Info and Care log, not Info alone; edit and tick-off only during an active shift (PD-041).
 - **Docs:** `docs/development/carer-dev/carer-client-info/` · **Status:** NOT STARTED
 
 ### CAR-05 — Carer — Calendar (shifts) and selected-shift tasks
@@ -925,7 +934,9 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Acceptance criteria summary:** 3 criteria — MON 30 shows blocks at 09:00, 11:30 and 15:00 labelled with 'Margaret —'; its subtitle reads '09:00 · Margaret — Morning medication'; none of Daniel's shifts appear
 - **Testing summary:** 2 component, 1 integration
 - **Requirements:** REQ-25
+- **CHG-031:** there is no Carer Calendar screen; this wires `getCarerShifts` for Carer Home's D/W/M calendar.
 - **CHG-009 (tasks and plain events, REQ-35):** calendar blocks show tasks and plain events; "Tasks for the selected shift" lists tasks only.
+- **CHG-025 (carer shifts and notifications):** blocks are shifts, not events; no selected-shift tasks.
 - **Docs:** `docs/development/carer-dev/carer-calendar-shifts/` · **Status:** NOT STARTED
 
 ### CAR-06 — Carer — Mark tasks done
@@ -939,6 +950,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Requirements:** REQ-18, REQ-19, REQ-05
 - **CHG-009 (tasks and plain events, REQ-35):** only tasks can be ticked off; plain events have no status.
 - **CHG-020 (PD-058):** marking a task done charges its cost or makes it pending through F0-12; the carer never edits the budget directly.
+- **CHG-025 / CHG-026:** tick-off happens from the patient's own Calendar (opened from Patients), recording the signed-in carer, only during an active shift with that patient. Never from Carer Home or the Carer Calendar.
 - **Docs:** `docs/development/carer-dev/carer-complete-task/` · **Status:** NOT STARTED
 
 ### CAR-07 — Carer — Add and edit events for a patient
@@ -1134,6 +1146,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Acceptance criteria summary:** 2 criteria — the block shows 'Done · Aisha R.'; it cannot be completed
 - **Testing summary:** 2 e2e
 - **Requirements:** REQ-18, REQ-19
+- **CHG-026 (carer ticks from the patient's screens):** carer flow: Patients → patient Calendar → tick a task → family sees the carer's name.
 - **Docs:** `docs/development/carer-dev/carer-care-delivery-e2e/` · **Status:** NOT STARTED
 
 ### INT-04 — End-to-end: admin rostering journey
