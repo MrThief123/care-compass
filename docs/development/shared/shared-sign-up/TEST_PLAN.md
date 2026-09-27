@@ -16,10 +16,18 @@ Tests are written **before** production code (TESTING.md §2). Run them, confirm
 | T-02 | AC-02 | integration | Organisation sign-up creates 'Wattle Care' and an `admin` profile with that `organisation_id`; `redirectTo` equals what `signIn` returns for an existing admin.  | ☑ | RED (expected) |
 | T-03 | AC-03 | integration | Missing field, mismatched passwords and short password each return a field error; no auth user or table rows are created.  | ☑ | RED (expected) |
 | T-04 | AC-04 | integration | Sign-up with an existing email returns the 'already exists' error; row counts in `profiles`, `clients`, `organisations` are unchanged.  | ☑ | RED (expected) |
-| T-05 | AC-05 | db | The registration function called with role `carer` raises; no `profiles` row exists for the caller.  | ☑ | RED (expected) |
+| T-05 | AC-05 | db | The registration function called with role `carer` raises; no `profiles` row exists for the caller.  | ☑ | PASS |
 | T-06 | AC-06 | integration | A crafted sign-up carrying Banksia's organisation id and Margaret's client id creates an account linked to neither; the new session reads zero Banksia/Margaret rows.  | ☑ | RED (expected) |
-| T-07 | AC-07 | db | As a signed-up family user and as a signed-up admin, updating own `role`, `organisation_id` or `is_active` is rejected; rows unchanged. Calling the registration function a second time is rejected.  | ☑ | RED (expected) |
+| T-07 | AC-07 | db | As a signed-up family user and as a signed-up admin, updating own `role`, `organisation_id` or `is_active` is rejected; rows unchanged. Calling the registration function a second time is rejected.  | ☑ | PASS |
 | T-08 | AC-08 | e2e | `/sign-up` renders in the auth layout with the shared components; conditional fields switch with account type; no carer option; carer help text; the links between the sign-in and sign-up pages work.  | ☑ | RED (expected) |
+
+## Added tests (not in the original plan)
+All tagged `[F0-17][PRD]` or `[F0-17][AC-nn]` and live in the same files as the planned tests.
+- e2e: a signed-in user who opens `/sign-up` is sent to their own home (PRD Error / Edge Cases); field errors shown on `/sign-up` for a missing field and short, mismatched passwords (AC-03 at the UI).
+- pgTAP: family and admin registration create the right rows and nothing else (AC-01, AC-02, AC-06); blank names and a missing client or organisation name are rejected (AC-03); authenticated users cannot insert into `organisations` or `profiles` directly; `discard_unregistered_account()` removes only a caller's own profile-less auth user.
+
+## Test changes after writing
+- `supabase/tests/sign_up.test.sql`: `plan(38)` corrected to `plan(42)`. A miscount of my own assertions; no assertion was changed or removed (FD-07).
 
 ## Regression scope
 - Re-run F0-07's tests (`tests/integration/shared-authentication.test.ts`, `tests/e2e/auth.spec.ts`). `/sign-in` gains a link, and nothing else in it may change.
