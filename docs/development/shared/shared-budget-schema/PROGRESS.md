@@ -19,34 +19,33 @@ Last updated: 2026-09-27 (tests written first)
 - Tests written first and run: all fail for the expected reason
 
 ## In progress
-- Awaiting human review of the rewritten ACs and FD-02 / FD-03 before implementing
+- Awaiting human review of FD-02 / FD-03 and the PR
 
 ## Remaining
-- Migration `supabase/migrations/*_budget.sql` (tables, functions, completion trigger, RLS, audit triggers)
-- `src/lib/money/schema.ts`, cents in `src/lib/format/money.ts`
-- `npm run db:types`, `src/server/budget/queries.ts` contract for supabase mode (only if in scope: FAM-10 connects data)
+- Regenerating `src/lib/supabase/database.types.ts` (see Problems); `src/server/budget/queries.ts` supabase mode is FAM-10's (connects data)
+- Run e2e against local Supabase before the PR
 
 ## Acceptance criteria status
-- 0 / 15 MET
+- 15 / 15 MET
 
 ## Tests
-- Written: 16 / 16 (T-01 to T-16; 132 pgTAP assertions in `supabase/tests/budget.test.sql`, 12 Vitest cases)
-- Passing: 0
-- Failing: all. pgTAP: `relation "budget_buckets" does not exist`. Vitest: `./schema` not found; `formatMoney(12.5)` gives `$13`, not `$12.50`.
+- Written: 16 / 16 (T-01 to T-16)
+- Passing: 16 / 16. `supabase test db`: 7 files, 266 tests pass (budget.test.sql 132). `npm run verify`: lint 0 errors, typecheck, format, 1839 Vitest tests pass.
+- Failing: 0
 
 ## Files changed
-- `docs/development/shared/shared-budget-schema/*`, `supabase/tests/budget.test.sql`, `src/lib/money/schema.test.ts`, `src/lib/format/money.test.ts`
+- `supabase/migrations/20260927000000_budget.sql`, `supabase/tests/budget.test.sql`, `src/lib/money/schema.ts` (+ test), `src/lib/format/money.ts` (+ test), docs in this folder
 
 ## Decisions
 - See DECISIONS.md (FD-01 to FD-03)
 
 ## Problems encountered
-- None
+- `npm run db:types` regenerates `database.types.ts` from an empty stub to all 14 tables (about 1,500 changed lines) and then `src/app/api/test/route.ts` fails typecheck because it queries a table `test` that does not exist. That file is outside this lane, so I reverted the regeneration; the types file is unchanged. Needs a decision (FD-04).
 
 ## Assumptions
 - PROPOSED items in PRD.md are unconfirmed until validated in F0-01 or answered in DECISIONS.md.
 
 ## Next action
-- Human reviews FD-01 to FD-03; then implement the migration and money helpers until the tests pass.
+- Human reviews FD-01 to FD-04; on approval, push and open the PR to `main`.
 ## Ready for PR
 - No

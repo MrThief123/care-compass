@@ -53,3 +53,10 @@ _No decisions recorded yet._
 - Admin writes to `care_events` (so an admin can set an event's cost, PD-058) are not part of this feature: F0-11's RLS still says an admin never writes events. Raised for the human; needs its own change.
 - The UI amount parser in `src/features/family-budget/budget-edit.ts` already validates amounts; `src/lib/money/schema.ts` is the server-side twin. Deduplicating is a follow-up (lib cannot import features).
 - Human confirmation required: yes.
+
+### FD-04 — Generated database types not regenerated
+- Date: 2026-09-27
+- Context: `npm run db:types` replaces the stub `database.types.ts` with all tables, and `src/app/api/test/route.ts` (queries a nonexistent `test` table) then fails typecheck. That file is outside this feature's lane.
+- Decision: leave `database.types.ts` unchanged in this PR; nothing in F0-12 needs it (no TypeScript reads the new tables yet).
+- Consequences: whoever wires data (FAM-10 / FAM-03) regenerates the types and removes or fixes the test route.
+- Human confirmation required: yes.
