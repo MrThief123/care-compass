@@ -1,6 +1,6 @@
 # Session State - ADM-UI-04
-Date: 2026-09-27
-Status: PR OPEN
+Date: 2026-09-28
+Status: MERGED TO DEV
 Branch: feature/admin-ui-clients
 PR target: admin-dev
 Worktree: .claude/worktrees/admin-ui-clients
@@ -14,3 +14,5 @@ Limitations: no browser screenshot comparison available; local preview uses fall
 Exact next action: human PR review. Keep PR open; do not merge.
 
 Latest review: toolbar Add Client and visible REMOVE heading removed; named confirmation dialog with Yes, remove / Cancel. AC-04 and FD-08 record the human-requested scope revision. PR #130 remains open; do not merge. Preview restarted and verified.
+
+Merged 2026-09-28: PR #130 merged to `admin-dev`. Status set to MERGED TO DEV in a docs sync.
