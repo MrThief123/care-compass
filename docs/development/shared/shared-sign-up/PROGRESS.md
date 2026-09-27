@@ -1,9 +1,11 @@
 # Progress — F0-17 Self-serve sign-up for Family and Organisation accounts
 
-Status: NOT STARTED
-Branch: `feature/shared-sign-up` (not yet created)
+Status: IN PROGRESS
+Owner: MrThief123
+Lane: B — Backend
+Branch: `feature/shared-sign-up`
 PR target: `main (per OQ-01 — shared work)`
-Last updated: 2026-09-24
+Last updated: 2026-09-27
 
 ## Blockers
 - None — OQ-01, OQ-07, OQ-08 ANSWERED
@@ -19,7 +21,7 @@ Last updated: 2026-09-24
 - None
 
 ## Remaining
-- Claim, write T-01..T-08 first, implement
+- Write T-01..T-08 first, then implement
 
 ## Acceptance criteria status
 - 0 / 8 MET
@@ -42,7 +44,7 @@ Last updated: 2026-09-24
 - PROPOSED copy in PRD.md is unconfirmed until reviewed in the PR.
 
 ## Next action
-- START FEATURE F0-17: create `feature/shared-sign-up` from `main`, claim, write T-01..T-08.
+- Write T-01..T-08 from TEST_PLAN.md, run them red, commit `test(auth): …`.
 
 ## Ready for PR
 - No
