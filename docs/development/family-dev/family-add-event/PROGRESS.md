@@ -1,12 +1,12 @@
 # Progress — FAM-06 Family — Add event (Enter event)
 
-Status: READY FOR PR
+Status: MERGED TO DEV
 Owner: MrThief123
 Lane: F — Family
 Sprint: SPRINT · planned D9
 Branch: `feature/family-add-event`
 PR target: `family-dev`
-Last updated: 2026-09-27
+Last updated: 2026-09-28
 
 ## Blockers
 - None — OQ-22, OQ-12 and OQ-10 are all ANSWERED (root DECISIONS.md).
@@ -101,3 +101,6 @@ Last updated: 2026-09-27
 
 ## Ready for PR
 - Yes.
+
+## Merged — 2026-09-28
+- PR #140 (https://github.com/MrThief123/care-compass/pull/140) merged to `main`. Status set to MERGED TO DEV in a docs sync, since the merge left it at READY FOR PR.
