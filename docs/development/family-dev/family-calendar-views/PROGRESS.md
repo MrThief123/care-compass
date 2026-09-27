@@ -1,57 +1,57 @@
 # Progress — FAM-04 Family Calendar — day, week and month views
 
-Status: NOT STARTED
-Owner: unclaimed
+Status: READY FOR PR
+Owner: MrThief123
 Lane: F — Family
 Sprint: SPRINT · planned D8–D9
-Branch: `feature/family-calendar-views` (not yet created)
+Branch: `feature/family-calendar-views`
 PR target: `family-dev`
-Last updated: 2026-09-17 (planning pack generated)
+Last updated: 2026-09-27
 
 ## Blockers
-- None recorded at planning time
+- None
 
 ## Dependencies status
-- F0-11 — NOT STARTED
-- FAM-UI-02 — NOT STARTED
+- F0-11 — MERGED TO DEV
+- FAM-UI-02 — MERGED TO DEV
 
 ## Completed
-- Feature documentation drafted (Claude Chat planning pack)
+- Traced the screen's data path (`load-calendar.ts` → `getOccurrences`/`getToday`) and confirmed it already reads through the real contract, and that `getOccurrences`'s Supabase branch (F0-11) already handles every AC: week/day/month ranges, far-future recurrence, invalid-param fallback and RLS scoping.
+- Wrote FAM-04-labelled tests for all 6 ACs (component: AC-01, AC-03, AC-04, AC-06; unit: AC-02; integration against local Supabase: AC-05, plus an RLS negative case) (FD-01).
+- Ran the existing `family-calendar` Playwright e2e suite (10/10 pass) to confirm no regression.
 
 ## In progress
 - None
 
 ## Remaining
-- Route `/family/[clientId]/calendar` with URL params `view` (day|week|month) and `date`.
-- Header range label ('30 Nov – 6 Dec 2026') and prev/next navigation (not drawn — PROPOSED chevrons; confirm).
-- Segmented control D / W / M, default W.
-- Week view: columns MON–SUN with day number, today column highlighted (brand-pale), hour gutter 07:00–18:00, event blocks with time and title and left stripe.
-- Day view: single column with the same block style.
-- Month view: calendar cells (default, today, selected, has-events, out-of-month).
-- Selecting a day sets `date` (consumed by FAM-05 Tasks panel).
+- None in FAM-04's scope.
 
 ## Acceptance criteria status
-- 0 / 6 MET
+- 6 / 6 MET
 
 ## Tests
-- Written: 0 / 6
-- Passing: 0
+- Written: 8 (T-01–T-06 plus an RLS negative case)
+- Passing: all (`npx vitest run src/features/family-calendar src/lib/dates/week-range.test.ts` and `tests/integration/family-calendar-views.test.ts` with local Supabase env; full suite and Playwright e2e also green)
 - Failing: 0
 
 ## Files changed
-- None yet. Likely files: `src/app/(family)/family/[clientId]/calendar/page.tsx`, `src/components/shared/calendar/week-view.tsx`, `src/components/shared/calendar/month-view.tsx`, `src/lib/dates/ranges.ts`
+- `src/features/family-calendar/family-calendar.test.tsx` — FAM-04 component tests
+- `src/lib/dates/week-range.test.ts` — FAM-04 unit test
+- `tests/integration/family-calendar-views.test.ts` — new, FAM-04 integration suite
+- No production code changed (FD-01).
 
 ## Decisions
-- See DECISIONS.md
+- See DECISIONS.md (FD-01)
 
 ## Problems encountered
-- None
+- None — this feature's real gap had already been closed by F0-11 and FAM-UI-02.
 
 ## Assumptions
 - PROPOSED items in PRD.md are unconfirmed until validated in F0-01 or answered in DECISIONS.md.
+- OQ-32 (Timezone) stays OPEN; its non-blocking default (Australia/Melbourne) is already how the contract behaves.
 
 ## Next action
-- complete dependencies, run START FEATURE FAM-04, and write the tests in TEST_PLAN.md first.
+- Open the PR to `family-dev` once CI is green (human authorises PR creation per DEVELOPMENT_WORKFLOW.md §7).
 
 ## Ready for PR
-- No
+- Yes
