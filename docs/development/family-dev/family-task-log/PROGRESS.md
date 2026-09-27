@@ -1,19 +1,19 @@
 # Progress — FAM-14 Family — Task log
 
-Status: NOT STARTED
-Owner: unclaimed
+Status: IN PROGRESS
+Owner: MrThief123
 Lane: F — Family
 Sprint: SPRINT · planned D11
-Branch: `feature/family-task-log` (not yet created)
+Branch: `feature/family-task-log`
 PR target: `family-dev`
-Last updated: 2026-09-17 (planning pack generated)
+Last updated: 2026-09-27
 
 ## Blockers
-- OQ-29 — Which nurse is shown on an event
+- None — OQ-29 is ANSWERED (root DECISIONS.md).
 
 ## Dependencies status
-- F0-11 — NOT STARTED
-- FAM-UI-07 — NOT STARTED
+- F0-11 — MERGED TO DEV
+- FAM-UI-07 — MERGED TO DEV
 
 ## Completed
 - Feature documentation drafted (Claude Chat planning pack)
