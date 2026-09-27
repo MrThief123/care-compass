@@ -29,7 +29,7 @@ export function OverdueCard({ clientId, occurrences, total }: OverdueCardProps) 
       <section aria-label="Overdue">
         <CardShell className="flex flex-col gap-2">
           <p className="text-title-card text-text-primary">Overdue</p>
-          <EmptyState title="All caught up" body="Nothing is overdue right now." />
+          <EmptyState title="All caught up" body="There are no overdue tasks right now." />
         </CardShell>
       </section>
     );
