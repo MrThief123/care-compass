@@ -824,6 +824,28 @@ Docs updated: DECISIONS.md
 - Human confirmation: Dhruv Verma, 2026-09-26 (in-session).
 - Docs updated: DECISIONS.md (this entry; CHG-025 open question closed), DEVELOPMENT_PLAN.md (CHG-026 notes on CAR-UI-02, CAR-04, CAR-06, INT-03), CAR-UI-01 PROGRESS.md.
 
+### CHG-028 — CAR-UI-02 split: Patients, patient tabs and Info now; Home, Calendar, Care log later
+- Date / requested by: 2026-09-26 / Dhruv Verma (human, project lead)
+- Type: scope change (narrows how CAR-UI-02 delivers CHG-026)
+- Description: CAR-UI-02 builds the Patients grid, a patient area under the carer rail (header with 'Back to patients' and tabs Home · Calendar · Info · Care log), and the Info tab (`FamilyInfoView`, editable only on shift). Home, Calendar and Care log have routes with a 'Coming soon' holding state. The Family components for those three hardcode `/family/…` links and have no read-only mode; Lane F adds a base path and read-only mode, then CAR-04 wires the tabs. CAR-UI-02's acceptance criteria are extended (AC-04 reworded, AC-05 to AC-13 added).
+- Source / justification: human answers in-session, 2026-09-26 ("Split", "Carer rail + tabs").
+- Impact: CAR-UI-02 PRD, ACCEPTANCE_CRITERIA, TEST_PLAN, DECISIONS (FD-01 to FD-04); CAR-04 (wires the three tabs); a Lane F change request (FD-01).
+- Human confirmation: Dhruv Verma, 2026-09-26 (in-session).
+- Docs updated: DECISIONS.md (this entry), DEVELOPMENT_PLAN.md (CAR-UI-02 card), CAR-UI-02 feature docs.
+
+### CHG-029 — Carer patient pages open on Home; view-only status shown to the carer
+- Date / requested by: 2026-09-26 / Dhruv Verma (human, project lead)
+- Type: scope change (CAR-UI-02)
+- Description:
+  - `/carer/patients/[clientId]` opens on the **Home** tab instead of Info.
+  - Tab order becomes **Home · Info · Calendar · Care log**.
+  - Off shift, patient Info shows a 'View only' notice saying the carer can edit once their shift with the patient starts. On shift, no notice.
+  - Each Patients card says in text whether the patient is 'On shift · can edit' or 'View only' (icon + text, never colour alone).
+- Source / justification: human review of the CAR-UI-02 preview, 2026-09-26 ("make the patients home screen the default landing place", "move info 2nd and calendar 3rd", "it should say somewhere that you can only view not edit until shift has started", "say on the actual client section ... which ones are view only").
+- Impact: CAR-UI-02 PRD Scope, AC-03 and AC-07 reworded, AC-14 and AC-15 added, T-03 and T-07 expectations changed, T-14 and T-15 added. CAR-04: Home is the landing tab once wired.
+- Human confirmation: Dhruv Verma, 2026-09-26 (in-session).
+- Docs updated: DECISIONS.md (this entry), CAR-UI-02 PRD.md, ACCEPTANCE_CRITERIA.md, TEST_PLAN.md, DECISIONS.md, PROGRESS.md, SESSION_STATE.md.
+
 Template for future entries:
 ```
 ### CHG-xxx — <title>
