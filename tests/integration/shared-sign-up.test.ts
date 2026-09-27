@@ -295,7 +295,10 @@ describe.skipIf(!hasLocalSupabase)("[F0-17] sign-up", () => {
           expect(outcome.error.code).toBe("EMAIL_EXISTS");
           expect(outcome.error.message).toContain("An account with this email already exists");
         }
-        expect(cookieStore.size).toBe(0);
+        // PKCE writes `...-code-verifier` cookies even for a rejected sign-up; what must not exist is a session.
+        expect([...cookieStore.keys()].filter((name) => !name.includes("code-verifier"))).toEqual(
+          [],
+        );
       }
 
       expect(await countRows("clients", "last_name", familyAttempt.clientLastName)).toBe(0);
