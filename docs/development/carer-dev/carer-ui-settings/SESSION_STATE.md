@@ -10,3 +10,5 @@ Current blocker: none
 Important decisions: FD-05 (error state reuses `CarerHomeErrorState`), FD-06 (My info Edit/Save/Cancel like Family Settings, Role read-only, local save; T-02 changed, HUMAN REVIEW)
 Exact next action: PR #127 (https://github.com/MrThief123/care-compass/pull/127) is open to `carer-dev`; address review comments.
 Warning for next session: the Edit/Save UI is in place (FD-06). CAR-09 only connects Save and Reset to the server.
+
+Merged 2026-09-28: PR #127 merged to `carer-dev`. Status set to MERGED TO DEV in a docs sync.

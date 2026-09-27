@@ -1,6 +1,6 @@
 # Progress — CAR-UI-01 Carer Home screen (UI)
 
-Status: IN REVIEW (PR #124 to carer-dev)
+Status: MERGED TO DEV
 
 **HUMAN REVIEW: test expectation changed.** AC-01 now asserts a DayTimeline block rather than a list row (FD-07).
 Owner: Dhruv Verma
@@ -8,7 +8,7 @@ Lane: C — Carer
 Sprint: SPRINT · planned D4
 Branch: `feature/carer-ui-home`
 PR target: `carer-dev`
-Last updated: 2026-09-26
+Last updated: 2026-09-28
 
 ## Blockers
 - None. Where carers tick off tasks was settled by CHG-026: from the patient's own screens, not Carer Home.
@@ -59,3 +59,6 @@ Last updated: 2026-09-26
 
 ## Ready for PR
 - Yes, pending human approval
+
+## Merged — 2026-09-28
+- PR #124 (https://github.com/MrThief123/care-compass/pull/124) merged to `carer-dev`. Status set to MERGED TO DEV in a docs sync, since the merge left it at IN REVIEW.
