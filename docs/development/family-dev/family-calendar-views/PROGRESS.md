@@ -1,12 +1,12 @@
 # Progress — FAM-04 Family Calendar — day, week and month views
 
-Status: NOT STARTED
-Owner: unclaimed
+Status: IN PROGRESS
+Owner: MrThief123
 Lane: F — Family
 Sprint: SPRINT · planned D8–D9
-Branch: `feature/family-calendar-views` (not yet created)
+Branch: `feature/family-calendar-views`
 PR target: `family-dev`
-Last updated: 2026-09-17 (planning pack generated)
+Last updated: 2026-09-27
 
 ## Blockers
 - None recorded at planning time
