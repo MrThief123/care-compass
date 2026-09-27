@@ -96,7 +96,9 @@ describe("[FAM-UI-03] /family/[clientId]/events/[eventId]/edit (real mock contra
 
     await user.click(screen.getByRole("button", { name: "Add file" }));
 
-    expect(screen.getByRole("status")).toHaveTextContent(/not available yet/i);
+    // FAM-06 added its own Save-error status region, so this one is scoped to Documents.
+    const documents = screen.getByRole("region", { name: "Documents" });
+    expect(within(documents).getByRole("status")).toHaveTextContent(/not available yet/i);
     expect(screen.getAllByRole("listitem")).toHaveLength(3);
   });
 
