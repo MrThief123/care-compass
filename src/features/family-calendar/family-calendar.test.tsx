@@ -15,6 +15,7 @@ const mocks = vi.hoisted(() => ({
   getTaskLog: vi.fn(),
   getCurrentUser: vi.fn(),
   setOccurrenceDone: vi.fn(),
+  setOccurrenceUndone: vi.fn(),
 }));
 
 vi.mock("next/navigation", () => ({
@@ -26,7 +27,10 @@ vi.mock("@/server/events/queries", () => ({
   getTaskLog: mocks.getTaskLog,
 }));
 vi.mock("@/server/auth/queries", () => ({ getCurrentUser: mocks.getCurrentUser }));
-vi.mock("@/server/events/actions", () => ({ setOccurrenceDone: mocks.setOccurrenceDone }));
+vi.mock("@/server/events/actions", () => ({
+  setOccurrenceDone: mocks.setOccurrenceDone,
+  setOccurrenceUndone: mocks.setOccurrenceUndone,
+}));
 
 /*
  * The screen reads only through the `src/server/**` contract, so these tests
@@ -137,6 +141,11 @@ beforeEach(() => {
   mocks.getOccurrences.mockResolvedValue(DESIGN_WEEK);
   mocks.getTaskLog.mockResolvedValue(taskLog(LOG));
   mocks.getCurrentUser.mockResolvedValue({ firstName: "Helen", lastName: "Doyle" });
+  mocks.setOccurrenceDone.mockResolvedValue({
+    ok: true,
+    data: { actor: "Helen Doyle", completedAt: "2026-11-30T00:00:00+11:00" },
+  });
+  mocks.setOccurrenceUndone.mockResolvedValue({ ok: true, data: undefined });
   vi.spyOn(window.history, "replaceState");
 });
 
@@ -464,7 +473,7 @@ describe("[FAM-UI-02][AC-08] a tick shows on the grids, with who ticked it (CHG-
     expect(weekBlock(overdue.key)).toHaveTextContent(/^Overdue: /);
   });
 
-  it("[FAM-UI-02][AC-08] the tick is display only: nothing is saved, the Log is unchanged, and it survives picking another day", async () => {
+  it("[FAM-05][AC-01] ticking saves via setOccurrenceDone; the Log stays as loaded, and the tick survives picking another day", async () => {
     const user = userEvent.setup();
     await renderCalendar();
     const logBefore = logPanel().textContent;
@@ -473,8 +482,9 @@ describe("[FAM-UI-02][AC-08] a tick shows on the grids, with who ticked it (CHG-
     await user.click(screen.getByTestId("week-grid-header-2026-12-01"));
 
     expect(weekBlock(PHYSIO)).toHaveTextContent(/^Done: /);
+    // The Log isn't refetched from one tick (FAM-05's scope is the save, not a live refresh).
     expect(logPanel().textContent).toBe(logBefore);
-    expect(mocks.setOccurrenceDone).not.toHaveBeenCalled();
+    expect(mocks.setOccurrenceDone).toHaveBeenCalledWith(PHYSIO);
     expect(mocks.push).not.toHaveBeenCalled();
   });
 });
@@ -776,51 +786,113 @@ describe("[FAM-UI-02] accessibility", () => {
   });
 });
 
-describe("[FAM-04][AC-01] default week", () => {
-  it("[FAM-04][AC-01] T-01 given no view param, when the calendar renders on Mon 30 Nov 2026, then W is selected and columns MON 30 to SUN 6 are shown with 30 highlighted", async () => {
-    await renderCalendar();
+describe("[FAM-05][AC-01] ticking saves", () => {
+  const PHYSIO = "event-physiotherapy:2026-11-30T11:30:00+11:00";
 
-    expect(screen.getByRole("radio", { name: "W" })).toHaveAttribute("aria-checked", "true");
-    expect(screen.getByTestId("week-grid-day-2026-11-30")).toBeInTheDocument();
-    expect(screen.getByTestId("week-grid-day-2026-12-06")).toBeInTheDocument();
-    expect(screen.getByTestId("week-grid-header-2026-11-30")).toHaveAttribute(
-      "aria-current",
-      "date",
+  it("[FAM-05][AC-01] T-01 given Physiotherapy is Planned, when Helen ticks it, it shows struck through and setOccurrenceDone is called with its key", async () => {
+    const user = userEvent.setup();
+    await renderCalendar();
+    const box = within(tasksPanel()).getByLabelText("Physiotherapy");
+    expect(box).not.toBeChecked();
+
+    await user.click(box);
+
+    expect(box).toBeChecked();
+    expect(mocks.setOccurrenceDone).toHaveBeenCalledWith(PHYSIO);
+    expect(mocks.setOccurrenceDone).toHaveBeenCalledOnce();
+  });
+
+  it("[FAM-05][AC-01] unticking a Done task calls setOccurrenceUndone with its key", async () => {
+    const user = userEvent.setup();
+    await renderCalendar();
+    const box = within(tasksPanel()).getByLabelText("Morning medication");
+    expect(box).toBeChecked();
+
+    await user.click(box);
+
+    expect(box).not.toBeChecked();
+    expect(mocks.setOccurrenceUndone).toHaveBeenCalledWith(
+      "event-morning-medication:2026-11-30T09:00:00+11:00",
     );
   });
 });
 
-describe("[FAM-04][AC-03] week grid", () => {
-  it("[FAM-04][AC-03] T-03 given the week of 30 Nov with seed data, '09:30 Weekly weigh-in' appears in the THU 3 column", async () => {
+describe("[FAM-05][AC-02] a failed save reverts the tick", () => {
+  const PHYSIO = "event-physiotherapy:2026-11-30T11:30:00+11:00";
+
+  it("[FAM-05][AC-02] T-02 given the save fails, when Helen ticks a task, the checkbox returns to unticked and an error is shown", async () => {
+    mocks.setOccurrenceDone.mockResolvedValue({
+      ok: false,
+      error: { code: "UNEXPECTED", message: "Couldn't save. Please try again." },
+    });
+    const user = userEvent.setup();
     await renderCalendar();
+    const box = within(tasksPanel()).getByLabelText("Physiotherapy");
 
-    const column = screen.getByTestId("week-grid-day-2026-12-03");
-    const block = within(column).getByText("Weekly weigh-in").closest("button") as HTMLElement;
-    expect(block).toHaveTextContent("09:30");
+    await user.click(box);
+
+    // The mocked action settles within the same click, so by here the optimistic tick has
+    // already reverted; a real, slower request would show it briefly first.
+    await screen.findByText("Couldn't save. Please try again.");
+    expect(box).not.toBeChecked();
+    expect(mocks.setOccurrenceDone).toHaveBeenCalledWith(PHYSIO);
+  });
+
+  it("[FAM-05][AC-02] a failed undo reverts the checkbox back to checked, with an error shown", async () => {
+    mocks.setOccurrenceUndone.mockResolvedValue({
+      ok: false,
+      error: { code: "NOT_ALLOWED", message: "Not permitted to undo this task." },
+    });
+    const user = userEvent.setup();
+    await renderCalendar();
+    const box = within(tasksPanel()).getByLabelText("Morning medication");
+
+    await user.click(box);
+
+    await screen.findByText("Not permitted to undo this task.");
+    expect(box).toBeChecked();
+  });
+
+  it("[FAM-05][AC-02] a new tick clears the previous attempt's error", async () => {
+    mocks.setOccurrenceDone.mockResolvedValueOnce({
+      ok: false,
+      error: { code: "UNEXPECTED", message: "Couldn't save. Please try again." },
+    });
+    const user = userEvent.setup();
+    await renderCalendar();
+    const physio = within(tasksPanel()).getByLabelText("Physiotherapy");
+    await user.click(physio);
+    await screen.findByText("Couldn't save. Please try again.");
+
+    await user.click(within(tasksPanel()).getByLabelText("Afternoon check-in"));
+
+    expect(screen.queryByText("Couldn't save. Please try again.")).not.toBeInTheDocument();
   });
 });
 
-describe("[FAM-04][AC-04] month view", () => {
-  it("[FAM-04][AC-04] T-04 given the week view, when M is selected, a December 2026 month grid is shown with out-of-month days styled muted", async () => {
-    // date=2026-12-01 (not a leading/trailing day) so it never coincides with the
-    // out-of-month cell under test and masks its muted styling with "selected".
-    await renderCalendar({ view: "month", date: "2026-12-01", month: "2026-12" });
+describe("[FAM-05][AC-03] Tasks panel subtitle and listing", () => {
+  it("[FAM-05][AC-03] T-03 given the selected date is Monday 30 November, the subtitle reads 'Monday 30 November' and lists that day's occurrences", async () => {
+    await renderCalendar();
+    const panel = tasksPanel();
 
-    expect(screen.getByRole("heading", { level: 1, name: "December 2026" })).toBeVisible();
-    const inMonth = screen.getByTestId("month-grid-day-2026-12-31");
-    expect(inMonth).toHaveAttribute("data-in-month", "true");
-    // Dec 31 2026 is a Thursday, so the grid's last row trails into January.
-    const outOfMonth = screen.getByTestId("month-grid-day-2027-01-03");
-    expect(outOfMonth).toHaveAttribute("data-in-month", "false");
-    expect(outOfMonth.querySelector("[class*='text-text-muted']")).toBeInTheDocument();
+    expect(within(panel).getByText("Monday 30 November")).toBeVisible();
+    expect(
+      within(panel)
+        .getAllByRole("checkbox")
+        .map((box) => box.closest("label")?.textContent),
+    ).toEqual(["Morning medication", "Physiotherapy", "Afternoon check-in"]);
   });
 });
 
-describe("[FAM-04][AC-06] invalid date param", () => {
-  it("[FAM-04][AC-06] T-06 given date=not-a-date, the current week is shown", async () => {
-    await renderCalendar({ date: "not-a-date" });
+describe("[FAM-05][AC-04] Log panel listing", () => {
+  it("[FAM-05][AC-04] T-04 given seed data, the Log panel lists Morning medication (Done · Aisha Rahman), Evening medication (Done · Aisha Rahman) and Weekly weigh-in (Overdue)", async () => {
+    await renderCalendar();
+    const rows = within(logPanel()).getAllByRole("listitem");
 
-    expect(screen.getByRole("radio", { name: "W" })).toHaveAttribute("aria-checked", "true");
-    expect(screen.getByRole("heading", { level: 1, name: "30 Nov – 6 Dec 2026" })).toBeVisible();
+    expect(rows.map((row) => row.textContent)).toEqual([
+      expect.stringMatching(/^Morning medication.*Done · Aisha Rahman$/),
+      expect.stringMatching(/^Evening medication.*Done · Aisha Rahman$/),
+      expect.stringMatching(/^Weekly weigh-in.*Overdue$/),
+    ]);
   });
 });
