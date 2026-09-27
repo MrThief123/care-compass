@@ -1,55 +1,30 @@
-# Progress — ADM-UI-05 Admin Settings screen (UI)
-
-Status: NOT STARTED
-Owner: unclaimed
-Lane: A — Admin
-Sprint: SPRINT · planned D6
-Branch: `feature/admin-ui-settings` (not yet created)
-PR target: `admin-dev`
-Last updated: 2026-09-17 (planning pack generated)
-
-## Blockers
-- None recorded at planning time
-
-## Dependencies status
-- F0-15 — NOT STARTED
-- UI-02 — NOT STARTED
+# Progress - ADM-UI-05 Admin Settings UI
+Status: PR OPEN
+Owner: Kavis
+Lane: A - Admin
+Branch: feature/admin-ui-settings
+PR target: admin-dev
+Last updated: 2026-09-27
 
 ## Completed
-- Feature documentation drafted (Claude Chat planning pack)
+- Ready-to-start gate and origin/admin-dev parentage verified.
+- Organisation info card with name, ABN, phone and address; local Save and inline validation.
+- Reset username / password card with preview-only feedback; no email sent.
+- Mock query/fixture, loading, empty, error/retry states.
+- Actual Admin header tested with no bell.
+- AC-01 and AC-02 covered by passing tests.
+- Screen/query/state suites written first and failed for absent implementation before coding.
 
-## In progress
-- None
+## Verification
+- 12 Settings tests pass; 131 relevant Admin/shared form/list tests pass across 21 files.
+- TypeScript, scoped ESLint and Prettier pass.
+- HTTP /admin/settings: 200; Banksia Home Care, ABN, phone, address and Reset card confirmed; no Notifications bell.
 
-## Remaining
-- Route `/admin/settings` inside the admin layout.
-- 'Organisation info' `DetailsFormCard`: Organisation name, ABN, Phone, Address.
-- Reset `SettingsActionCard`.
-- Loading skeleton, empty state and error state (States sheet) wired to the query contract's states.
-- Data only via `src/server/**` contract functions (mock data source).
-
-## Acceptance criteria status
-- 0 / 2 MET
-
-## Tests
-- Written: 0 / 2
-- Passing: 0
-- Failing: 0
-
-## Files changed
-- None yet. Likely files: `src/app/(admin)/admin/settings/page.tsx`
-
-## Decisions
-- See DECISIONS.md
-
-## Problems encountered
-- None
-
-## Assumptions
-- PROPOSED items in PRD.md are unconfirmed until validated in F0-01 or answered in DECISIONS.md.
-
-## Next action
-- complete dependencies, run START FEATURE ADM-UI-05, and write the tests in TEST_PLAN.md first.
-
-## Ready for PR
-- No
+## Preview
+- http://127.0.0.1:3104/admin/settings
+- Data is synthetic and local; reload restores fixture details.
+- Browser unavailable for automated visual QA; human reviewed preview and requested capitalization changes, now applied.
+- Exact Admin Settings design image not in repository.
+- No schema changes. GitHub unit/build/database and other branch checks must pass before PR creation.
+- Human authorized commit/push and opening the PR into admin-dev only if branch checks have no failures. PR status prepared per workflow section 7; creation is conditional on green CI. Do not merge.
+- Review copy updated: Reset Username / Password, Organisation Info, Organisation Name. Settings suite: 12 tests passed.
