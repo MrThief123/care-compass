@@ -1,15 +1,15 @@
 # Progress — FAM-05 Family Calendar — Tasks panel and Log panel
 
-Status: NOT STARTED
-Owner: unclaimed
+Status: IN PROGRESS
+Owner: MrThief123
 Lane: F — Family
 Sprint: SPRINT · planned D9
-Branch: `feature/family-calendar-tasks-log` (not yet created)
+Branch: `feature/family-calendar-tasks-log`
 PR target: `family-dev`
-Last updated: 2026-09-17 (planning pack generated)
+Last updated: 2026-09-27
 
 ## Blockers
-- OQ-10 — Status behaviour and undo
+- None — OQ-10 is ANSWERED (root DECISIONS.md): Overdue derived when due time passes without Done; Done can be undone by the same actor or family via an append-only 'undone' entry.
 
 ## Dependencies status
 - F0-11 — NOT STARTED
