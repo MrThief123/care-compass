@@ -2,13 +2,14 @@
 
 Last session date: 2026-09-27
 Current branch: `feature/shared-sign-up` (from `main`; claimed and pushed)
-Worked on: claim, tests first (red), migration with `register_account()` and `discard_unregistered_account()`, shared Zod schema
-What changed: `supabase/migrations/20260927010000_sign_up.sql`; `supabase/tests/sign_up.test.sql`; `tests/integration/shared-sign-up.test.ts`; `tests/e2e/sign-up.spec.ts`; `src/server/auth/sign-up-schema.ts`; feature docs
-Tests run: `supabase test db` (whole suite); `vitest run tests/integration/shared-sign-up.test.ts` (red)
-Test results: pgTAP PASS (`sign_up.test.sql` 42 assertions, T-05 and T-07). Integration T-02/T-03/T-04/T-06 FAIL as expected (`signUp` is not exported). e2e T-01/T-08 not run yet (needs `npm run build`).
+Worked on: everything: tests first, migration, `signUp` action, `/sign-up` page and form, sign-in link, docs
+What changed: see PROGRESS.md "Files changed"
+Tests run: `supabase test db`; full Vitest; `npm run build` then Playwright `sign-up.spec.ts` and `auth.spec.ts`; eslint, tsc, prettier
+Test results: all F0-17 tests pass (pgTAP 42 assertions, integration 4/4, e2e 7/7 plus F0-07 regression 2/2). One unrelated failure: F0-07 AC-10 TOTP (stale local container, fails identically without F0-17's changes).
 Current blocker: none
 Important discoveries: admin TOTP MFA is live on `main` (F0-07 CHG-001) although PD-040 says no mandatory MFA. CHG-010 decided MFA stays not mandatory; its removal is a separate shared follow-up fix. Until that lands a new admin hits MFA enrolment after sign-up.
-Important decisions: PD-057, CHG-010; feature FD-01 to FD-08 (DECISIONS.md)
-Exact next action: add `signUp(input)` to `src/server/auth/actions.ts` (parse with `SignUpInputSchema`; `supabase.auth.signUp`; map an existing email to `EMAIL_EXISTS`; call the `register_account` RPC; on failure call `discard_unregistered_account` then sign out; return `redirectTo` via `resolvePostSignInPath`), extend `AuthActionResult` with `fieldErrors` and the new codes; then build `src/app/(auth)/sign-up/` and the sign-in link. Before relying on `SignUpInputSchema`, check that the password-mismatch refinement still reports alongside other field errors (Zod 4 skips a refinement when the object already has issues); if it does not, move the check into a `superRefine` or into the form.
-Files likely to be touched next: `src/server/auth/actions.ts`, `src/server/auth/sign-up-schema.ts`, `src/app/(auth)/sign-up/`, `src/app/(auth)/sign-in/sign-in-form.tsx` (link only), tests as needed (record any change in DECISIONS.md)
-Warning for next session: never let public sign-up create a `carer` or attach to an existing organisation/client; keep `/sign-in` behaviour unchanged apart from the new link. Do not edit ARCHITECTURE.md (controlled; FD-08). Do not regenerate `database.types.ts` (FD-06). Run `npx supabase migration up --local` after pulling any new migration, then `supabase test db`.
+Also discovered: `.env.local` points at a hosted Supabase project, not the local stack (PROGRESS.md, Problems). Run integration and e2e tests with the three Supabase variables exported from `npx supabase status -o env`.
+Important decisions: PD-057, CHG-010; feature FD-01 to FD-08 (DECISIONS.md). FD-01 and FD-08 need the human.
+Exact next action: human reviews FD-01 and FD-08; on approval, push the branch (already pushed up to the docs commit) and open the PR to `main`. After merge, apply `20260927010000_sign_up.sql` to any shared Supabase project.
+Files likely to be touched next: none, unless review asks for changes.
+Warning for next session: never let public sign-up create a `carer` or attach to an existing organisation/client; keep `/sign-in` behaviour unchanged apart from the new link. Do not edit ARCHITECTURE.md (controlled; FD-08). Do not regenerate `database.types.ts` (FD-06). After pulling any new migration run `npx supabase migration up --local`, then `supabase test db`.

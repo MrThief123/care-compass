@@ -66,20 +66,20 @@ Record feature-level decisions here using the template below. Project-wide decis
 ### FD-06 — `database.types.ts` is not regenerated
 - Date: 2026-09-27
 - Context: `register_account` and `discard_unregistered_account` are not in `src/lib/supabase/database.types.ts`. F0-12 found that regenerating the file changes about 1,500 lines and then breaks typecheck in `src/app/api/test/route.ts`, outside this lane (its FD-04, still awaiting a decision).
-- Decision: leave the file alone; call the two RPCs through a small typed wrapper inside `src/server/auth/`.
+- Decision: leave the file alone; call the two RPCs through a small typed wrapper, `src/server/auth/registration.ts`.
 - Reason: avoids a large unrelated change and a conflict with F0-12's branch.
 - Alternatives considered: regenerate and fix the route (outside this lane).
 - Consequences: remove the wrapper when the types are regenerated (F0-12's decision, or a shared follow-up).
 - Human confirmation required: no (follows F0-12's open question)
 
-### FD-07 — Test change: pgTAP plan count
+### FD-07 — Test changes found on the first green runs
 - Date: 2026-09-27
-- Context: `supabase/tests/sign_up.test.sql` declared `plan(38)` but has 42 assertions; the run reported 'planned 38 but ran 42' while all 42 passed.
-- Decision: `plan(42)`. No assertion was added, changed or removed.
-- Reason: genuine test bug (a miscount), found on the first green run.
+- Context: two bugs in my own tests, found when they first ran against the implementation. (1) `supabase/tests/sign_up.test.sql` declared `plan(38)` but has 42 assertions; all 42 passed. (2) T-04 in `tests/integration/shared-sign-up.test.ts` asserted the cookie jar was empty after a rejected sign-up, but Supabase's PKCE flow always writes `...-code-verifier` cookies.
+- Decision: (1) `plan(42)`. (2) assert that no cookie other than a `code-verifier` one exists, which is what "no session" means. No assertion was removed and no behaviour was relaxed.
+- Reason: genuine test bugs, not requirement changes.
 - Alternatives considered: none.
 - Consequences: none.
-- Test changes caused: T-05 and T-07 file, count only. Not flagged HUMAN REVIEW (no behaviour or assertion changed).
+- Test changes caused: T-05 and T-07 (count only); T-04 (cookie assertion, same intent). Not flagged HUMAN REVIEW: no behaviour was relaxed and no assertion removed.
 - Human confirmation required: no
 
 ### FD-08 — ARCHITECTURE.md would list the new function (needs a controlled change)

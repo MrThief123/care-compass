@@ -1,11 +1,11 @@
 # Progress — F0-17 Self-serve sign-up for Family and Organisation accounts
 
-Status: IN PROGRESS
+Status: IMPLEMENTED
 Owner: MrThief123
 Lane: B — Backend
 Branch: `feature/shared-sign-up`
 PR target: `main (per OQ-01 — shared work)`
-Last updated: 2026-09-27 (database side done; action and page next)
+Last updated: 2026-09-27 (implemented; awaiting human review)
 
 ## Blockers
 - None — OQ-01, OQ-07, OQ-08 ANSWERED
@@ -17,31 +17,30 @@ Last updated: 2026-09-27 (database side done; action and page next)
 ## Completed
 - Feature documentation drafted (CHG-010, 2026-09-24)
 - Claimed on `feature/shared-sign-up` (2026-09-27)
-- Tests written first and run red (T-01 to T-08, plus extra PRD tests); committed `test(auth): …`
-- Database side (2026-09-27): migration `20260927010000_sign_up.sql` with `register_account()` and `discard_unregistered_account()`; `supabase test db` passes (`sign_up.test.sql`, 42 assertions)
-- Shared Zod schema `src/server/auth/sign-up-schema.ts` written (not yet run against tests)
+- Tests written first and run red (T-01 to T-08, plus extra PRD tests)
+- Migration `20260927010000_sign_up.sql`: `register_account()` and `discard_unregistered_account()`
+- `signUp` Server Action, `src/server/auth/registration.ts` (RPC wrapper, FD-06), shared schema `src/server/auth/sign-up-schema.ts`
+- `/sign-up` page and form, the 'Create an account' link on `/sign-in`, and the signed-in redirect
 
 ## In progress
-- `signUp` Server Action in `src/server/auth/actions.ts` (FD-01, FD-04, FD-05)
+- None
 
 ## Remaining
-- `signUp` action, then integration tests T-02, T-03, T-04, T-06 green
-- `/sign-up` page and form under `src/app/(auth)/sign-up/`; 'Create an account' link on `/sign-in`; signed-in redirect (PRD Error / Edge Cases)
-- e2e T-01, T-08 (and the redirect test) against a production build (`npm run build`), plus F0-07 regression (`auth.spec.ts`, `shared-authentication.test.ts`)
-- `npm run verify` and `supabase test db` before READY FOR PR
+- Human review of FD-01 and FD-08; then push and open the PR to `main` (only with the human's approval)
 
 ## Acceptance criteria status
-- 2 / 8 MET (AC-05, AC-07: database tests pass). AC-01 to AC-04, AC-06, AC-08 NOT MET until the action and page exist; the database rules they rest on are already covered by `sign_up.test.sql`.
+- 8 / 8 MET
 
 ## Tests
 - Written: 8 / 8 (T-01 to T-08), plus extra PRD tests (signed-in redirect, no direct inserts into tenancy tables, discard of a half-made account, blank-name and second-registration rejection)
-- Passing (2026-09-27): T-05 and T-07, in `supabase test db` (`sign_up.test.sql`: 42 assertions; whole suite PASS)
-- Failing, for the expected reason: T-02, T-03, T-04, T-06 (`signUp` is not exported yet); T-01, T-08 and the redirect test (`/sign-up` not built; e2e not run yet, needs `npm run build`)
+- Passing (2026-09-27): all of them. pgTAP `sign_up.test.sql` (42 assertions; whole `supabase test db` PASS); integration `shared-sign-up.test.ts` 4 / 4; e2e `sign-up.spec.ts` 7 / 7 and F0-07's `auth.spec.ts` 2 / 2 (run against a build)
+- Failing: none of F0-17's. Whole Vitest suite: 1930 passed, 1 failed: `[F0-07][AC-10]` TOTP in `tests/integration/shared-authentication.test.ts`. It fails identically on a clean checkout with F0-17's changes stashed: the running local Supabase container answers 'MFA enroll is disabled' although `supabase/config.toml` has `enroll_enabled = true` (a stale container; `supabase stop && supabase start` should fix it). Not caused by this feature.
+- Lint: 0 errors; 3 warnings, all in files this feature does not touch (`scripts/plan-status.mjs`, `src/app/page.tsx`)
 
 ## Files changed
 - Tests: `supabase/tests/sign_up.test.sql`, `tests/integration/shared-sign-up.test.ts`, `tests/e2e/sign-up.spec.ts`
 - Migration: `supabase/migrations/20260927010000_sign_up.sql`
-- Code: `src/server/auth/sign-up-schema.ts` (new); `src/server/auth/actions.ts`, `src/app/(auth)/sign-up/`, `src/app/(auth)/sign-in/sign-in-form.tsx` (link only) still to do
+- Code: `src/server/auth/sign-up-schema.ts`, `src/server/auth/registration.ts` (new); `src/server/auth/actions.ts` (`signUp`, extended `AuthActionResult`); `src/app/(auth)/sign-up/page.tsx`, `sign-up-form.tsx` (new); `src/app/(auth)/sign-in/sign-in-form.tsx` (link only)
 - Docs: this folder
 
 ## Decisions
@@ -51,6 +50,7 @@ Last updated: 2026-09-27 (database side done; action and page next)
 ## Problems encountered
 - The service-role client is limited to `src/server/jobs/**` (ADR-02), so the sign-up action cannot delete a half-made auth user itself. Solved in the database with `discard_unregistered_account()` (FD-01).
 - `src/lib/supabase/database.types.ts` does not know the new functions. Regenerating it is the same problem F0-12 recorded (its FD-04: about 1,500 changed lines, and `src/app/api/test/route.ts` then fails typecheck). Not regenerated here; the action calls the RPC through a narrow typed wrapper (FD-06).
+- **`.env.local` points at a hosted Supabase project** (`https://<ref>.supabase.co`), not the local stack that the integration and e2e tests are documented to need. Against it, `signUp` fails (the hosted project lacks this migration), and every integration test in the repo reads and writes that project. Nothing of F0-17's was left behind there (checked read-only: 0 users, 0 test organisations or clients). I ran the F0-17 tests against the local stack by exporting the three variables from `npx supabase status -o env` for the command, and did not edit `.env.local`. The owner should decide which project `.env.local` should point at, and apply this migration to any shared project (`supabase db push`) when the PR merges.
 - A new admin is still sent to `/mfa/enroll` after sign-up: forced admin TOTP enrolment is live from F0-07 and its removal is a separate shared follow-up (CHG-010 risk 1). AC-02 only requires the same routing as an existing admin.
 
 ## Assumptions
@@ -58,7 +58,7 @@ Last updated: 2026-09-27 (database side done; action and page next)
 - Password minimum is 6 characters, matching `minimum_password_length` in `supabase/config.toml` (PRD: "Supabase's minimum").
 
 ## Next action
-- Implement the `signUp` action (see SESSION_STATE.md "Exact next action"), then the page and link; run T-01 to T-08 until green.
+- Human reviews FD-01 and FD-08; on approval, push and open the PR to `main`.
 
 ## Ready for PR
-- No
+- Not yet: READY FOR PR once the human has reviewed FD-01 and FD-08. Definition of Done met except that `npm run verify`'s test step has one failure that is not this feature's (see Tests). PR not opened: needs the human's approval (CLAUDE.md §8).
