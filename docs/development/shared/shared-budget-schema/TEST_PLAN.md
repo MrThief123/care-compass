@@ -29,6 +29,8 @@ Rewritten 2026-09-27 for CHG-020 / CHG-021 / CHG-022 (see DECISIONS.md FD-01).
 | T-14 | AC-14 | db | RLS enabled on all three tables; direct insert/update/delete refused; fund entries append-only; a cost can only go pending to paid; audit_log rows written. | ☑ | PASS |
 | T-15 | AC-15 | db | Rows record the signed-in user and name snapshot and the note; the actor cannot be passed in. | ☑ | PASS |
 | T-17 | AC-16 | db | A carer on an active shift creates a costed event, completes it and is charged to the chosen bucket; another client's bucket is refused. | ☑ | PASS |
+| T-18 | AC-17 | db | Only the creating carer, family or an admin can change an event's cost; other carers and outsiders get 42501; clearing and the both-or-neither rule. | ☑ | PASS |
+| T-19 | AC-18 | db | Monthly period: bounds, cumulative total/used/remaining, period_used, percent against the month's available funds, depleted when funds are gone. | ☑ | PASS |
 | T-16 | AC-06 | unit | `formatMoney` shows cents only when the amount is not whole (unchanged for whole dollars). | ☑ | PASS |
 
 Test titles start `[F0-12][AC-xx]`.

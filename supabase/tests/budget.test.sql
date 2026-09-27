@@ -5,7 +5,7 @@
 -- never), PD-059 (open buckets), PD-060 (pending costs are paid whole, oldest first), FD-02 (an event's
 -- deletion never deletes a cost; a pending cost carries over until paid).
 begin;
-select plan(141);
+select plan(163);
 
 -- ---------------------------------------------------------------------------
 -- Seed: two organisations, six people, two clients, one costed event
@@ -74,7 +74,7 @@ begin
   end if;
   if p_paid > 0 then
     insert into budget_costs (bucket_id, client_id, description, amount, status, original_start, incurred_on, paid_on, recorded_by, recorded_by_name)
-    values (pg_temp.bid(p_n), p_client, 'Seeded cost', p_paid, 'paid', '2026-01-05 09:00:00+11', '2026-01-05', '2026-01-05', 'a1111111-1111-1111-1111-111111111111', 'Helen Doyle');
+    values (pg_temp.bid(p_n), p_client, 'Seeded cost', p_paid, 'paid', '2026-01-05 09:00:00+11', (now() at time zone 'Australia/Melbourne')::date, (now() at time zone 'Australia/Melbourne')::date, 'a1111111-1111-1111-1111-111111111111', 'Helen Doyle');
   end if;
 end;
 $$ language plpgsql;
@@ -103,6 +103,12 @@ select pg_temp.seed_bucket(13, 'old', 0, 0);
 select pg_temp.seed_bucket(14, 'rm2', 50, 0);
 select pg_temp.seed_bucket(15, 'st3', 0, 0);
 select pg_temp.seed_bucket(17, 'rm3', 0, 0);
+select pg_temp.seed_bucket(18, 'mo', 1000, 100);
+select pg_temp.seed_bucket(19, 'moex', 300, 0);
+-- Paid last month: $400 on mo (with its $100 this month), $300 on moex (all of it).
+insert into budget_costs (bucket_id, client_id, description, amount, status, original_start, incurred_on, paid_on, recorded_by, recorded_by_name) values
+  (pg_temp.bid(18), 'b1111111-1111-1111-1111-111111111111', 'Last month', 400, 'paid', '2026-01-06 09:00:00+11', (date_trunc('month', now() at time zone 'Australia/Melbourne') - interval '1 day')::date, (date_trunc('month', now() at time zone 'Australia/Melbourne') - interval '1 day')::date, 'a1111111-1111-1111-1111-111111111111', 'Helen Doyle'),
+  (pg_temp.bid(19), 'b1111111-1111-1111-1111-111111111111', 'Last month', 300, 'paid', '2026-01-06 09:00:00+11', (date_trunc('month', now() at time zone 'Australia/Melbourne') - interval '1 day')::date, (date_trunc('month', now() at time zone 'Australia/Melbourne') - interval '1 day')::date, 'a1111111-1111-1111-1111-111111111111', 'Helen Doyle');
 select pg_temp.seed_bucket(16, 'Robert bucket', 500, 0, 'b2222222-2222-2222-2222-222222222222');
 
 -- st: pending 40 (oldest), 10, 30. st2: pending 60, then 10. old: pending since 2024. st3: one pending, for the update test.
@@ -142,6 +148,23 @@ select is((select percent_used from budget_bucket_summary('b1111111-1111-1111-11
   '[F0-12][AC-02] a bucket with no funds has a null percent');
 select is((select threshold_state from budget_bucket_summary('b1111111-1111-1111-1111-111111111111') where name = 'Zero'), 'normal',
   '[F0-12][AC-02] a bucket with no funds and no pending cost is normal');
+
+-- ---------------------------------------------------------------------------
+-- AC-18: a month is the period; the balance carries over (FD-02, human 2026-09-27)
+-- ---------------------------------------------------------------------------
+select is((select period_start from budget_bucket_summary('b1111111-1111-1111-1111-111111111111') where name = 'mo'), date_trunc('month', now() at time zone 'Australia/Melbourne')::date,
+  '[F0-12][AC-18] the period starts on the 1st of this month, Melbourne time');
+select is((select period_end from budget_bucket_summary('b1111111-1111-1111-1111-111111111111') where name = 'mo'), (date_trunc('month', now() at time zone 'Australia/Melbourne') + interval '1 month - 1 day')::date,
+  '[F0-12][AC-18] and ends on the last day of it');
+select is((select total from budget_bucket_summary('b1111111-1111-1111-1111-111111111111') where name = 'mo'), 1000.00::numeric, '[F0-12][AC-18] total is cumulative: funds carry over');
+select is((select used from budget_bucket_summary('b1111111-1111-1111-1111-111111111111') where name = 'mo'), 500.00::numeric, '[F0-12][AC-18] used counts every paid cost, last month''s too');
+select is((select remaining from budget_bucket_summary('b1111111-1111-1111-1111-111111111111') where name = 'mo'), 500.00::numeric, '[F0-12][AC-18] remaining carries over: 1000 less 500');
+select is((select period_used from budget_bucket_summary('b1111111-1111-1111-1111-111111111111') where name = 'mo'), 100.00::numeric, '[F0-12][AC-18] period_used is this month''s paid costs only');
+select is((select percent_used from budget_bucket_summary('b1111111-1111-1111-1111-111111111111') where name = 'mo'), 17::numeric, '[F0-12][AC-18] percent is this month''s $100 of the $600 available at the month''s start');
+select is((select threshold_state from budget_bucket_summary('b1111111-1111-1111-1111-111111111111') where name = 'mo'), 'normal', '[F0-12][AC-18] 17 percent is normal');
+select is((select percent_used from budget_bucket_summary('b1111111-1111-1111-1111-111111111111') where name = 'moex'), null::numeric, '[F0-12][AC-18] a bucket spent entirely last month has no funds to measure this month against');
+select is((select threshold_state from budget_bucket_summary('b1111111-1111-1111-1111-111111111111') where name = 'moex'), 'depleted', '[F0-12][AC-18] but is depleted: its funds are gone');
+select is((select remaining from budget_bucket_summary('b1111111-1111-1111-1111-111111111111') where name = 'moex'), 0.00::numeric, '[F0-12][AC-18] with 0.00 remaining');
 
 -- ---------------------------------------------------------------------------
 -- AC-03: a removal cannot exceed the balance
@@ -350,6 +373,22 @@ select is((select status || ':' || amount || ':' || recorded_by_name from budget
 select throws_ok($$ insert into care_events (client_id, title, starts_at, completion_mode, cost, bucket_id, created_by)
   values ('b1111111-1111-1111-1111-111111111111', 'Wrong client bucket', '2026-12-02 10:00:00+11', 'manual', 5, 'c0000000-0000-0000-0000-000000000016', 'a3333333-3333-3333-3333-333333333333') $$,
   '22023', null, '[F0-12][AC-05] a carer cannot charge another client''s bucket');
+
+-- AC-17: only the creating carer, the family or an admin can change an event's cost (human, 2026-09-27)
+select lives_ok($$ update care_events set cost = 20 where id = 'e5555555-5555-5555-5555-555555555555' $$, '[F0-12][AC-17] the carer who created an event can change its cost');
+select is((select cost from care_events where id = 'e5555555-5555-5555-5555-555555555555'), 20.00::numeric, '[F0-12][AC-17] and it changed');
+select throws_ok($$ update care_events set cost = 20, bucket_id = 'c0000000-0000-0000-0000-000000000009' where id = 'e1111111-1111-1111-1111-111111111111' $$, '42501', null, '[F0-12][AC-17] a carer on shift cannot change the cost of an event someone else created');
+select throws_ok($$ select set_event_cost('e1111111-1111-1111-1111-111111111111', 20, 'c0000000-0000-0000-0000-000000000009') $$, '42501', null, '[F0-12][AC-17] nor through set_event_cost');
+select pg_temp.login('a2222222-2222-2222-2222-222222222222');
+select lives_ok($$ select set_event_cost('e5555555-5555-5555-5555-555555555555', 30, 'c0000000-0000-0000-0000-000000000009') $$, '[F0-12][AC-17] an admin of the client''s organisation can change it');
+select is((select cost from care_events where id = 'e5555555-5555-5555-5555-555555555555'), 30.00::numeric, '[F0-12][AC-17] and it changed');
+select pg_temp.login('a6666666-6666-6666-6666-666666666666');
+select throws_ok($$ select set_event_cost('e5555555-5555-5555-5555-555555555555', 1, 'c0000000-0000-0000-0000-000000000009') $$, '42501', null, '[F0-12][AC-17] another organisation''s admin cannot');
+select pg_temp.login('a1111111-1111-1111-1111-111111111111');
+select lives_ok($$ update care_events set cost = 35 where id = 'e5555555-5555-5555-5555-555555555555' $$, '[F0-12][AC-17] the family can change it directly');
+select lives_ok($$ select set_event_cost('e5555555-5555-5555-5555-555555555555', null, null) $$, '[F0-12][AC-17] or clear it');
+select is((select cost::text || bucket_id::text from care_events where id = 'e5555555-5555-5555-5555-555555555555'), null, '[F0-12][AC-17] a cleared event has neither cost nor bucket');
+select throws_ok($$ select set_event_cost('e5555555-5555-5555-5555-555555555555', 5, null) $$, '22023', null, '[F0-12][AC-17] a cost needs a bucket, and a bucket a cost');
 
 select pg_temp.login('a4444444-4444-4444-4444-444444444444');
 select is((select count(*) from budget_buckets), 0::bigint, '[F0-12][AC-05] a carer not assigned to Margaret sees no buckets');

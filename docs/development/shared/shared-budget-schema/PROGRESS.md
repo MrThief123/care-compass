@@ -26,13 +26,13 @@ Last updated: 2026-09-27 (tests written first)
 - Run e2e against local Supabase before the PR
 
 ## Acceptance criteria status
-- 16 / 16 MET (FD-02 monthly period not yet implemented)
+- 18 / 18 MET
 
 **HUMAN REVIEW: test expectation changed** — T-11 / AC-11 (events move to a Miscellaneous bucket instead of losing their cost); see DECISIONS.md FD-05.
 
 ## Tests
-- Written: 17 / 17 (T-01 to T-17)
-- Passing: 17 / 17. `supabase test db`: 7 files, 266 tests pass (budget.test.sql 132). `npm run verify`: lint 0 errors, typecheck, format, 1839 Vitest tests pass.
+- Written: 19 / 19 (T-01 to T-19; 163 pgTAP assertions)
+- Passing: 19 / 19. `supabase test db`: 7 files, 266 tests pass (budget.test.sql 132). `npm run verify`: lint 0 errors, typecheck, format, 1839 Vitest tests pass.
 - Failing: 0
 
 ## Files changed

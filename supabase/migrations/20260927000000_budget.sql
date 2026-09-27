@@ -235,14 +235,15 @@ as $$
   select (now() at time zone 'Australia/Melbourne')::date;
 $$;
 
--- PD-032: the one place the thresholds live. 100 or any pending cost is depleted, 85 alert, 75 warning.
-create or replace function budget_threshold_state(p_percent numeric, p_pending_count bigint)
+-- PD-032: the one place the thresholds live. 100, any pending cost, or funds all gone is depleted;
+-- 85 alert; 75 warning.
+create or replace function budget_threshold_state(p_percent numeric, p_pending_count bigint, p_exhausted boolean default false)
 returns text
 language sql
 immutable
 as $$
   select case
-    when coalesce(p_pending_count, 0) > 0 then 'depleted'
+    when coalesce(p_pending_count, 0) > 0 or coalesce(p_exhausted, false) then 'depleted'
     when p_percent is null then 'normal'
     when p_percent >= 100 then 'depleted'
     when p_percent >= 85 then 'alert'
@@ -594,7 +595,14 @@ create trigger care_event_completions_charge_cost_trg
 -- The summary
 -- ---------------------------------------------------------------------------
 -- One row per current bucket. SECURITY INVOKER, so RLS decides who sees rows: a user not linked to
--- the client gets none. percent_used is round(used / total * 100), null when total is 0.
+-- the client gets none.
+--
+-- FD-02 (human, 2026-09-27): a period is a calendar month in Australia/Melbourne, and the balance carries
+-- over. total, used and remaining are cumulative, so unspent money never lapses at month end. percent_used
+-- and the thresholds measure this month's paid costs (period_used) against the funds available at the
+-- month's start plus anything added since: total less what was paid before this month. It is null when
+-- nothing was available. A bucket whose funds are all gone is depleted. The month is a default that can
+-- change (billing periods are a commercial choice); it is defined only here.
 create or replace function budget_bucket_summary(p_client_id uuid)
 returns table (
   bucket_id uuid,
@@ -606,7 +614,10 @@ returns table (
   percent_used numeric,
   threshold_state text,
   pending_total numeric,
-  pending_count bigint
+  pending_count bigint,
+  period_start date,
+  period_end date,
+  period_used numeric
 )
 language sql
 stable
@@ -620,21 +631,31 @@ as $$
          c.used,
          f.total - c.used,
          pct.percent_used,
-         budget_threshold_state(pct.percent_used, c.pending_count),
+         budget_threshold_state(pct.percent_used, c.pending_count, f.total > 0 and f.total - c.used <= 0),
          c.pending_total,
-         c.pending_count
+         c.pending_count,
+         p.period_start,
+         p.period_end,
+         c.period_used
   from budget_buckets b
+  cross join lateral (
+    select date_trunc('month', budget_today())::date as period_start,
+           (date_trunc('month', budget_today()) + interval '1 month - 1 day')::date as period_end
+  ) p
   cross join lateral (
     select coalesce(sum(e.amount), 0) as total from budget_fund_entries e where e.bucket_id = b.id
   ) f
   cross join lateral (
     select coalesce(sum(k.amount) filter (where k.status = 'paid'), 0) as used,
+           coalesce(sum(k.amount) filter (where k.status = 'paid' and k.paid_on >= p.period_start), 0) as period_used,
            coalesce(sum(k.amount) filter (where k.status = 'pending'), 0) as pending_total,
            count(*) filter (where k.status = 'pending') as pending_count
     from budget_costs k where k.bucket_id = b.id
   ) c
   cross join lateral (
-    select case when f.total > 0 then round(c.used * 100 / f.total) end as percent_used
+    select case when f.total - (c.used - c.period_used) > 0
+                then round(c.period_used * 100 / (f.total - (c.used - c.period_used)))
+           end as percent_used
   ) pct
   where b.client_id = p_client_id and b.removed_at is null
   order by b.created_at, b.name;
@@ -642,6 +663,71 @@ $$;
 
 revoke all on function budget_bucket_summary(uuid) from public, anon, authenticated;
 grant execute on function budget_bucket_summary(uuid) to authenticated;
+
+-- ---------------------------------------------------------------------------
+-- Who may change an event's cost (human, 2026-09-27)
+-- ---------------------------------------------------------------------------
+-- Only the carer who created the event (still on an active shift, as any carer edit, OQ-09), the client's
+-- family, or an admin of the client's organisation. F0-11's update policy lets any carer on shift edit an
+-- event, so cost and bucket_id are guarded here. No session user (a job, a migration) passes.
+create or replace function care_events_guard_cost()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if auth.uid() is null
+     or is_family_of(new.client_id)
+     or is_admin_of_client(new.client_id)
+     or (old.created_by = auth.uid() and can_edit_care_events(new.client_id)) then
+    return new;
+  end if;
+  raise exception 'only the carer who created this event, the family or an admin can change its cost' using errcode = '42501';
+end;
+$$;
+
+create trigger care_events_guard_cost_trg
+  before update of cost, bucket_id on care_events
+  for each row
+  when (old.cost is distinct from new.cost or old.bucket_id is distinct from new.bucket_id)
+  execute function care_events_guard_cost();
+
+-- set_event_cost(event, cost, bucket): sets or clears (null, null) an event's cost and bucket. It exists so an
+-- admin, who has no write on care_events (F0-11), can do what family can. Applies to future completions only.
+-- Errors: 42501 not permitted, 22023 a cost needs a bucket and a bucket a cost, or a bad amount or bucket.
+create or replace function set_event_cost(p_event_id uuid, p_cost numeric, p_bucket_id uuid)
+returns care_events
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_event care_events;
+begin
+  if auth.uid() is null then
+    raise exception 'not signed in' using errcode = '42501';
+  end if;
+  if (p_cost is null) <> (p_bucket_id is null) then
+    raise exception 'a cost needs a bucket, and a bucket needs a cost' using errcode = '22023';
+  end if;
+  if p_cost is not null then
+    perform budget_check_amount(p_cost);
+  end if;
+
+  select * into v_event from care_events where id = p_event_id for update;
+  if not found or not can_read_care_events(v_event.client_id) then
+    raise exception 'not permitted to change this event' using errcode = '42501';
+  end if;
+
+  update care_events set cost = p_cost, bucket_id = p_bucket_id where id = p_event_id
+  returning * into v_event;
+  return v_event;
+end;
+$$;
+
+revoke all on function set_event_cost(uuid, numeric, uuid) from public, anon, authenticated;
+grant execute on function set_event_cost(uuid, numeric, uuid) to authenticated;
 
 -- ---------------------------------------------------------------------------
 -- Audit (F0-08)

@@ -6,8 +6,8 @@ Each criterion is observable and maps to at least one test in TEST_PLAN.md. Crit
 
 | ID | Story | Type | Criterion (Given / When / Then) | Status |
 |---|---|---|---|---|
-| AC-01 | US-01 | happy | Given a bucket with $24,000 in funds and $9,120 of paid costs, when the summary runs, then remaining is 14880.00 and percent_used is 38. | MET |
-| AC-02 | US-01 | happy | Given a bucket with $3,000 in funds and $2,760 of paid costs, when the summary runs, then percent_used is 92 and threshold_state is 'alert'. Boundaries: 74% is 'normal', 75% 'warning', 85% 'alert', 100% 'depleted'. A bucket with $0 in funds has percent_used null and state 'normal'. | MET |
+| AC-01 | US-01 | happy | Given a bucket with $24,000 in funds and $9,120 of costs paid this month, when the summary runs, then remaining is 14880.00 and percent_used is 38. | MET |
+| AC-02 | US-01 | happy | Given a bucket with $3,000 in funds and $2,760 of costs paid this month, when the summary runs, then percent_used is 92 and threshold_state is 'alert'. Boundaries: 74% is 'normal', 75% 'warning', 85% 'alert', 100% 'depleted'. A bucket with $0 in funds has percent_used null and state 'normal'. | MET |
 | AC-03 | US-01 | edge | Given a bucket with $500 remaining, when `remove_funds` asks for $500.01, then it raises "Only $500.00 available", nothing is inserted and remaining stays 500.00; asking for exactly $500.00 succeeds and leaves remaining 0.00. Remaining is never negative. | MET |
 | AC-04 | US-01 | validation | Given `add_funds` or `remove_funds` is called with amount 0, -5, or 12.345, when executed, then it raises a validation error and nothing is inserted. | MET |
 | AC-05 | US-01 | permission | Given a user not linked to Margaret, when they select Margaret's buckets, funds entries, costs or summary, then zero rows are returned. Margaret's family and her organisation's admins can change funds and buckets; an assigned carer can read but every change function raises 42501; another organisation's admin can neither read nor change. | MET |
@@ -23,5 +23,7 @@ Each criterion is observable and maps to at least one test in TEST_PLAN.md. Crit
 | AC-15 | US-01 | happy | Given each change (funds, bucket, completion charge), then the row records who made it (`recorded_by`, display-name snapshot) and the save's optional note; the actor is always the signed-in user, never a parameter. | MET |
 
 | AC-16 | US-02 | permission | Given a carer on an active shift for the client, when they create an event with a cost and a bucket, then it is saved, completing it charges that bucket, and another client's bucket is refused (22023). | MET |
+| AC-17 | US-02 | permission | Given an event with a cost, when its cost or bucket is changed, then only the carer who created it (while on an active shift), the client's family, or an admin of the client's organisation can do so (`set_event_cost` for an admin, who cannot write events directly); any other carer on shift, and anyone unlinked, is refused with 42501. Clearing sets both to null; a cost without a bucket, or a bucket without a cost, is refused (22023). | MET |
+| AC-18 | US-01 | happy | Given a period is a calendar month in Australia/Melbourne and the balance carries over, when the summary runs, then total, used and remaining are cumulative; period_used is this month's paid costs; percent_used is period_used over the funds available at the month's start (total less what was paid before this month) plus anything added since, and null when none were available; a bucket whose funds are all gone is 'depleted'. E.g. $1,000 funds, $400 paid last month and $100 this month: remaining 500, period_used 100, percent 17. | MET |
 
 Status values: NOT MET · MET (test passing) · BLOCKED (cite OQ/PD).

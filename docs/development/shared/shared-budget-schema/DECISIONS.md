@@ -42,7 +42,7 @@ _No decisions recorded yet._
 ### FD-02 — Human answers to the two questions CHG-020 left open, and no accounting period yet
 - Date: 2026-09-27 · Decided by: Prajeet (in-session)
 - Decision: (1) deleting or deactivating an event never deletes its costs: the care was already done; a cost can be removed separately if needed. (2) A pending cost carries over until it is paid; it never expires or resets.
-- Follow-on (Claude's proposal, needs confirmation): the original `period_start` / `period_end` are NOT built. PD-059's Edit budget form has no period field, no decision says how a period starts or ends, and period filtering would make a top-up dated outside the period fail to raise the balance. The PRD edge case "entries outside the period excluded" is therefore dropped and pending carry-over is trivially true. INT-01's "period = bucket period" (PD-035) will need a period decision later.
+- SUPERSEDED by FD-06. The follow-on Claude proposed (no period) was replaced by the human's answer: a month. The original `period_start` / `period_end` are NOT built. PD-059's Edit budget form has no period field, no decision says how a period starts or ends, and period filtering would make a top-up dated outside the period fail to raise the balance. The PRD edge case "entries outside the period excluded" is therefore dropped and pending carry-over is trivially true. INT-01's "period = bucket period" (PD-035) will need a period decision later.
 - Human confirmation required: yes for the follow-on.
 
 ### FD-03 — Assumptions made where the decisions are silent (each needs confirmation)
@@ -69,3 +69,11 @@ _No decisions recorded yet._
 - FD-03, everything else: confirmed as written.
 - FD-04: left as is (types not regenerated).
 - FD-02: accounting periods last a month (commercial billing). Flagged as changeable. NOT IMPLEMENTED yet: what a month period does to a balance is not stated (see the question raised in-session).
+
+### FD-06 — A budget period is a calendar month; the balance carries over; who changes an event's cost
+- Date: 2026-09-27 · Decided by: Prajeet (in-session)
+- Decision (period): a period lasts a month, as commercial billing does. Flagged: this is a default that can change in future; it is defined in one place (`budget_bucket_summary`). Human chose "balance carries over": total, used and remaining are cumulative; percent_used and the thresholds use this month's paid costs against the funds available at the month's start plus anything added since; a bucket whose funds are all gone is depleted.
+- Claude's assumptions inside that (change on request): the month is the calendar month in Australia/Melbourne (not a month from when a bucket was created); "used this month" is by the date a cost was paid, so a pending cost paid this month counts this month; the period is not stored on the bucket. INT-01's "period = bucket period" (PD-035) now means this month.
+- Decision (event cost): only the carer who created an event (while on an active shift), the family, or an admin of the client's organisation can change its cost and bucket. Any other carer on shift cannot, though F0-11 still lets them edit the rest of the event. Admins cannot write events (F0-11), so `set_event_cost` exists for them. This closes the gap raised under FD-05.
+- Test change: AC-01 / AC-02 seeds now date their paid costs this month (they were dated in the past, which under a monthly period would count as spent in an earlier month). Assertions unchanged. Not flagged as changed behaviour, since the ACs said "paid" without a date.
+- Human confirmation: CONFIRMED 2026-09-27 (period and carry-over, event-cost rule); assumptions above pending.

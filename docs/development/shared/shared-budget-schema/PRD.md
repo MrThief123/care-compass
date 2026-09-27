@@ -37,7 +37,8 @@ Rewritten 2026-09-27 for CHG-020 / CHG-021 / CHG-022 (PD-058, PD-059, PD-060); s
 - `care_events.cost` and `care_events.bucket_id` (both or neither): the optional cost of an event and the bucket it is paid from.
 - Completing an occurrence (a `done` row in `care_event_completions`) charges the cost once: paid if the bucket can cover it in full and nothing is pending, otherwise the whole cost is held pending. The occurrence always completes.
 - `add_funds` pays the bucket's pending costs whole, oldest first, stopping at the first the balance cannot cover. `remove_funds` is refused above the balance.
-- `budget_bucket_summary(client_id)` → per bucket: total, used, remaining, percent_used, threshold_state ('normal' | 'warning' | 'alert' | 'depleted', 75 / 85 / 100), pending_total, pending_count.
+- `budget_bucket_summary(client_id)` → per bucket: total, used, remaining (cumulative: the balance carries over), period_start, period_end, period_used (a period is a calendar month, Melbourne, FD-06), percent_used (this month's spend against the funds available at its start), threshold_state ('normal' | 'warning' | 'alert' | 'depleted', 75 / 85 / 100), pending_total, pending_count.
+- Only the carer who created an event, the family or an admin can change its cost and bucket (`set_event_cost`, and a guard on `care_events`).
 - RLS: family and the client's organisation admins change the budget (PD-058); family, admins and assigned carers read it; carers never change it by hand.
 - TypeScript money helpers: a Zod decimal-string schema (max 2 dp) and cents in `formatMoney` when the amount is not whole. Display only; arithmetic stays in SQL.
 
@@ -68,7 +69,7 @@ Rewritten 2026-09-27 for CHG-020 / CHG-021 / CHG-022 (PD-058, PD-059, PD-060); s
 
 ## Error / Edge Cases
 - Bucket with zero total → percent_used null and state 'normal' (display per OQ-24), or 'depleted' if it has a pending cost.
-- Accounting periods are not modelled in this feature (FD-02).
+- A period is a calendar month (FD-06): unspent funds carry over; a pending cost carries over until paid.
 
 ## Security / Permissions
 - Amounts never accepted as floats from clients; validated as decimal strings with max 2 dp.

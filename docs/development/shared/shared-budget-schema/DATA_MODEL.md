@@ -16,11 +16,13 @@ Status: DESIGNED 2026-09-27 against `supabase/migrations/*` (tenancy, audit_log,
 - `can_read_budget(client_id)`: family, assigned carer, admin of the client's organisation. `can_edit_budget(client_id)`: family or admin (PD-058).
 - `add_bucket(client_id, name, starting_amount, kind default null, note default null)`, `rename_bucket(bucket_id, name)`, `remove_bucket(bucket_id, note default null)` (events pointing at it move, cost kept, to the client's Miscellaneous bucket).
 - `add_funds(bucket_id, amount, note default null)` (then settles pending costs oldest first, whole), `remove_funds(bucket_id, amount, note default null)` (refused above the balance).
-- `budget_bucket_summary(client_id)` (SECURITY INVOKER so RLS applies): bucket_id, name, kind, total, used, remaining, percent_used, threshold_state, pending_total, pending_count.
+- `budget_bucket_summary(client_id)` (SECURITY INVOKER so RLS applies): bucket_id, name, kind, total, used, remaining, percent_used, threshold_state, pending_total, pending_count, period_start, period_end, period_used.
+- `set_event_cost(event_id, cost, bucket_id)`: sets or clears an event's cost; a BEFORE UPDATE guard on `care_events` lets only the creating carer, family or an admin change `cost` / `bucket_id`.
 - Trigger on `care_event_completions` (AFTER INSERT, action = 'done') charges the event's cost, once per occurrence.
 - `budget_threshold_state(percent, pending_count)`: the one place the 75 / 85 / 100 constants live (PD-032).
 
 ## Rules
-- total = sum(fund entry amounts); used = sum(paid costs); remaining = total − used (never below 0); percent_used = round(used / total × 100), null when total = 0.
-- threshold_state: 'depleted' when percent ≥ 100 or any cost is pending; 'alert' ≥ 85; 'warning' ≥ 75; else 'normal'.
+- Period = calendar month, Australia/Melbourne (FD-06). The balance carries over.
+- total = sum(fund entry amounts); used = sum(paid costs); remaining = total − used (never below 0); period_used = paid costs with paid_on this month; percent_used = round(period_used / (total − paid before this month) × 100), null when that is 0.
+- threshold_state: 'depleted' when percent ≥ 100, any cost is pending, or total > 0 and remaining = 0; 'alert' ≥ 85; 'warning' ≥ 75; else 'normal'.
 - Every table has RLS enabled in the same migration; authenticated users can only select; all writes go through the functions; money is numeric(12,2); timestamps timestamptz; F0-08 audit trigger attached to all three tables.
