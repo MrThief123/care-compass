@@ -23,11 +23,12 @@ Rewritten 2026-09-27 for CHG-020 / CHG-021 / CHG-022 (see DECISIONS.md FD-01).
 | T-08 | AC-08 | db | Completing when the bucket cannot cover the cost records the whole cost pending, occurrence still Done; a later smaller cost is also pending while any is pending; summary shows pending totals and 'depleted'. | ☑ | PASS |
 | T-09 | AC-09 | db | Adding funds pays pending costs whole, oldest first, stopping at the first that does not fit; no new History row; paid_on set. | ☑ | PASS |
 | T-10 | AC-10 | db | Bucket name rules (required, 40 max, unique ignoring case and spaces), $0 starting amount, rename keeps entries and writes no row, kind check. | ☑ | PASS |
-| T-11 | AC-11 | db | `remove_bucket` succeeds only with no charges, records 'bucket_removed' of minus the leftover, clears events' cost/bucket, frees the name; refused otherwise. | ☑ | PASS |
+| T-11 | AC-11 | db | `remove_bucket` succeeds only with no charges, records 'bucket_removed' of minus the leftover, moves events (keeping their cost) to a Miscellaneous bucket, frees the name; refused otherwise. | ☑ | PASS |
 | T-12 | AC-12 | db | Deactivating an event leaves its costs untouched; the cost's event foreign key is `on delete set null`. | ☑ | PASS |
 | T-13 | AC-13 | db | A pending cost stays pending across unrelated later activity and is paid by a later top-up. | ☑ | PASS |
 | T-14 | AC-14 | db | RLS enabled on all three tables; direct insert/update/delete refused; fund entries append-only; a cost can only go pending to paid; audit_log rows written. | ☑ | PASS |
 | T-15 | AC-15 | db | Rows record the signed-in user and name snapshot and the note; the actor cannot be passed in. | ☑ | PASS |
+| T-17 | AC-16 | db | A carer on an active shift creates a costed event, completes it and is charged to the chosen bucket; another client's bucket is refused. | ☑ | PASS |
 | T-16 | AC-06 | unit | `formatMoney` shows cents only when the amount is not whole (unchanged for whole dollars). | ☑ | PASS |
 
 Test titles start `[F0-12][AC-xx]`.

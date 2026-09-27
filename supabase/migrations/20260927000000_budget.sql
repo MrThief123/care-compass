@@ -483,7 +483,8 @@ end;
 $$;
 
 -- remove_bucket(bucket, note): only when no cost, paid or pending, was ever charged to it. The money left
--- leaves with it and is recorded as "bucket_removed"; events that pointed at it lose their cost and bucket.
+-- leaves with it and is recorded as "bucket_removed". Events that pointed at it keep their cost and move to
+-- the client's "Miscellaneous" bucket, created with a $0 start when there is none (FD-03, human 2026-09-27).
 create or replace function remove_bucket(p_bucket_id uuid, p_note text default null)
 returns budget_buckets
 language plpgsql
@@ -493,6 +494,7 @@ as $$
 declare
   v_bucket budget_buckets;
   v_note text := nullif(btrim(coalesce(p_note, '')), '');
+  v_misc budget_buckets;
 begin
   v_bucket := budget_bucket_for_write(p_bucket_id);
 
@@ -503,10 +505,27 @@ begin
   insert into budget_fund_entries (bucket_id, client_id, kind, amount, description, note, recorded_by, recorded_by_name)
   values (v_bucket.id, v_bucket.client_id, 'bucket_removed', -budget_bucket_balance(v_bucket.id), coalesce(v_note, 'Bucket removed'), v_note, auth.uid(), budget_actor_name());
 
-  update care_events set cost = null, bucket_id = null where bucket_id = v_bucket.id;
-
   update budget_buckets set removed_at = now(), updated_at = now() where id = v_bucket.id
   returning * into v_bucket;
+
+  -- Future completions of those events must still cost something, so they move rather than lose their cost.
+  -- The removal comes first so removing "Miscellaneous" itself makes a fresh one.
+  if exists (select 1 from care_events where bucket_id = v_bucket.id) then
+    select * into v_misc
+    from budget_buckets
+    where client_id = v_bucket.client_id and lower(name) = 'miscellaneous' and removed_at is null;
+
+    if not found then
+      insert into budget_buckets (client_id, name) values (v_bucket.client_id, 'Miscellaneous')
+      returning * into v_misc;
+      insert into budget_fund_entries (bucket_id, client_id, kind, amount, description, note, recorded_by, recorded_by_name)
+      values (v_misc.id, v_misc.client_id, 'bucket_added', 0, 'Bucket added',
+              'Created when the "' || v_bucket.name || '" bucket was removed', auth.uid(), budget_actor_name());
+    end if;
+
+    update care_events set bucket_id = v_misc.id where bucket_id = v_bucket.id;
+  end if;
+
   return v_bucket;
 end;
 $$;

@@ -60,3 +60,12 @@ _No decisions recorded yet._
 - Decision: leave `database.types.ts` unchanged in this PR; nothing in F0-12 needs it (no TypeScript reads the new tables yet).
 - Consequences: whoever wires data (FAM-10 / FAM-03) regenerates the types and removes or fixes the test route.
 - Human confirmation required: yes.
+
+### FD-05 — Human answers to FD-02, FD-03 and FD-04
+- Date: 2026-09-27 · Decided by: Prajeet (in-session)
+- FD-03, removing a bucket (CHANGED): events pointing at a removed bucket keep their cost and move to a "Miscellaneous" bucket, created with a $0 start when the client has none. Future completions still cost. Replaces "clears cost and bucket_id".
+  - Test change (recorded requirement change): T-11 / AC-11. Before: `cost` and `bucket_id` of an event were null after `remove_bucket`. After: the event is in the Miscellaneous bucket with its cost kept, the bucket is created once and reused. Flagged HUMAN REVIEW: test expectation changed.
+- FD-03, carers create events with a cost: confirmed. Checked against earlier decisions: consistent with PD-058 ("whoever creates the event sets them, carers included") and OQ-09 (a carer writes events only during an active shift), so no conflict. Added AC-16 / T-17 to prove it. One gap to raise: PD-058 says afterwards only Family, admins or the creating carer may change an event's cost, but F0-11's update policy lets any carer on an active shift update any event. Not changed here.
+- FD-03, everything else: confirmed as written.
+- FD-04: left as is (types not regenerated).
+- FD-02: accounting periods last a month (commercial billing). Flagged as changeable. NOT IMPLEMENTED yet: what a month period does to a balance is not stated (see the question raised in-session).

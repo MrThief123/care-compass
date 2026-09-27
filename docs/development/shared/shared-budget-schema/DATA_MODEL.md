@@ -14,7 +14,7 @@ Status: DESIGNED 2026-09-27 against `supabase/migrations/*` (tenancy, audit_log,
 ## Functions (all SECURITY DEFINER, fixed search_path, actor = auth.uid())
 
 - `can_read_budget(client_id)`: family, assigned carer, admin of the client's organisation. `can_edit_budget(client_id)`: family or admin (PD-058).
-- `add_bucket(client_id, name, starting_amount, kind default null, note default null)`, `rename_bucket(bucket_id, name)`, `remove_bucket(bucket_id, note default null)`.
+- `add_bucket(client_id, name, starting_amount, kind default null, note default null)`, `rename_bucket(bucket_id, name)`, `remove_bucket(bucket_id, note default null)` (events pointing at it move, cost kept, to the client's Miscellaneous bucket).
 - `add_funds(bucket_id, amount, note default null)` (then settles pending costs oldest first, whole), `remove_funds(bucket_id, amount, note default null)` (refused above the balance).
 - `budget_bucket_summary(client_id)` (SECURITY INVOKER so RLS applies): bucket_id, name, kind, total, used, remaining, percent_used, threshold_state, pending_total, pending_count.
 - Trigger on `care_event_completions` (AFTER INSERT, action = 'done') charges the event's cost, once per occurrence.

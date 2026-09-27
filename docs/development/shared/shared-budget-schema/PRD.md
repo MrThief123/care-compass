@@ -31,7 +31,7 @@ Families and organisations see exactly how much is left; the basis for threshold
 
 ## Scope
 Rewritten 2026-09-27 for CHG-020 / CHG-021 / CHG-022 (PD-058, PD-059, PD-060); see DECISIONS.md FD-01.
-- `budget_buckets`: a client's open buckets, each with a free name (unique per client ignoring case, max 40) and an optional kind (ndis / fixed / government). A bucket is added with a starting amount ($0 allowed), renamed, and removed only when nothing was ever charged to it.
+- `budget_buckets`: a client's open buckets, each with a free name (unique per client ignoring case, max 40) and an optional kind (ndis / fixed / government). A bucket is added with a starting amount ($0 allowed), renamed, and removed only when nothing was ever charged to it; events that used it move, with their cost, to a Miscellaneous bucket.
 - `budget_fund_entries` (append-only ledger): funds added, funds removed, bucket added, bucket removed; signed `numeric(12,2)`, with the recorder, a name snapshot and the save's optional note.
 - `budget_costs`: one row per completed occurrence of an event that has a cost, `paid` or `pending`, with `incurred_on` and `paid_on`.
 - `care_events.cost` and `care_events.bucket_id` (both or neither): the optional cost of an event and the bucket it is paid from.

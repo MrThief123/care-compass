@@ -5,7 +5,7 @@
 -- never), PD-059 (open buckets), PD-060 (pending costs are paid whole, oldest first), FD-02 (an event's
 -- deletion never deletes a cost; a pending cost carries over until paid).
 begin;
-select plan(132);
+select plan(141);
 
 -- ---------------------------------------------------------------------------
 -- Seed: two organisations, six people, two clients, one costed event
@@ -42,6 +42,9 @@ insert into client_family_members (client_id, profile_id) values
 
 insert into carer_client_assignments (carer_id, client_id, organisation_id, started_at) values
   ('a3333333-3333-3333-3333-333333333333', 'b1111111-1111-1111-1111-111111111111', '11111111-1111-1111-1111-111111111111', now() - interval '3 days');
+
+insert into shifts (client_id, carer_id, starts_at, ends_at) values
+  ('b1111111-1111-1111-1111-111111111111', 'a3333333-3333-3333-3333-333333333333', now() - interval '1 hour', now() + interval '1 hour');
 
 -- e1 Morning medication: a weekly task for Margaret (its cost is set per scenario)
 -- e2 Afternoon walk: a daily task for Margaret (used for the bucket-removal scenario)
@@ -99,6 +102,7 @@ select pg_temp.seed_bucket(12, 'st2', 0, 0);
 select pg_temp.seed_bucket(13, 'old', 0, 0);
 select pg_temp.seed_bucket(14, 'rm2', 50, 0);
 select pg_temp.seed_bucket(15, 'st3', 0, 0);
+select pg_temp.seed_bucket(17, 'rm3', 0, 0);
 select pg_temp.seed_bucket(16, 'Robert bucket', 500, 0, 'b2222222-2222-2222-2222-222222222222');
 
 -- st: pending 40 (oldest), 10, 30. st2: pending 60, then 10. old: pending since 2024. st3: one pending, for the update test.
@@ -291,8 +295,20 @@ select is((select kind || ':' || amount from budget_fund_entries where bucket_id
   '[F0-12][AC-11] the money left is recorded as minus $50');
 select is((select count(*) from budget_bucket_summary('b1111111-1111-1111-1111-111111111111') where name = 'rm2'), 0::bigint, '[F0-12][AC-11] the bucket no longer appears in the summary');
 select is((select count(*) from budget_fund_entries where bucket_id = pg_temp.bid(14)), 2::bigint, '[F0-12][AC-11] its History stays');
-select is((select cost::text || bucket_id::text from care_events where id = 'e2222222-2222-2222-2222-222222222222'), null,
-  '[F0-12][AC-11] events that pointed at it lose their cost and bucket');
+select is((select b.name from care_events e join budget_buckets b on b.id = e.bucket_id where e.id = 'e2222222-2222-2222-2222-222222222222'), 'Miscellaneous',
+  '[F0-12][AC-11] events that pointed at it move to a Miscellaneous bucket');
+select is((select cost from care_events where id = 'e2222222-2222-2222-2222-222222222222'), 10.00::numeric,
+  '[F0-12][AC-11] and keep their cost, so future completions still cost');
+select is((select e.kind || ':' || e.amount from budget_fund_entries e join budget_buckets b on b.id = e.bucket_id where b.name = 'Miscellaneous'), 'bucket_added:0.00',
+  '[F0-12][AC-11] the Miscellaneous bucket is created with a $0 start');
+reset role;
+update care_events set bucket_id = pg_temp.bid(17) where id = 'e2222222-2222-2222-2222-222222222222';
+select pg_temp.login('a1111111-1111-1111-1111-111111111111');
+select lives_ok(format($$ select remove_bucket(%L) $$, pg_temp.bid(17)), '[F0-12][AC-11] a second bucket with an event is removed');
+select is((select count(*) from budget_buckets where client_id = 'b1111111-1111-1111-1111-111111111111' and name = 'Miscellaneous' and removed_at is null), 1::bigint,
+  '[F0-12][AC-11] the existing Miscellaneous bucket is reused, not duplicated');
+select is((select b.name from care_events e join budget_buckets b on b.id = e.bucket_id where e.id = 'e2222222-2222-2222-2222-222222222222'), 'Miscellaneous',
+  '[F0-12][AC-11] and the event moved into it');
 select lives_ok($$ select add_bucket('b1111111-1111-1111-1111-111111111111', 'rm2', 0) $$, '[F0-12][AC-11] the removed name can be used again');
 select throws_ok(format($$ select remove_bucket(%L) $$, pg_temp.bid(14)), '22023', null, '[F0-12][AC-11] a removed bucket cannot be removed again');
 select throws_ok(format($$ select remove_bucket(%L) $$, pg_temp.bid(10)), '22023', null, '[F0-12][AC-11] a bucket with costs cannot be removed');
@@ -322,6 +338,18 @@ select throws_ok(format($$ select remove_funds(%L, 10) $$, pg_temp.bid(9)), '425
 select throws_ok($$ select add_bucket('b1111111-1111-1111-1111-111111111111', 'Carer bucket', 0) $$, '42501', null, '[F0-12][AC-05] a carer cannot add a bucket');
 select throws_ok(format($$ select rename_bucket(%L, 'Renamed') $$, pg_temp.bid(9)), '42501', null, '[F0-12][AC-05] a carer cannot rename a bucket');
 select throws_ok(format($$ select remove_bucket(%L) $$, pg_temp.bid(9)), '42501', null, '[F0-12][AC-05] a carer cannot remove a bucket');
+
+
+-- A carer on an active shift creates an event with a cost (PD-058: whoever creates it sets it, carers included)
+select lives_ok($$ insert into care_events (id, client_id, title, starts_at, completion_mode, cost, bucket_id, created_by)
+  values ('e5555555-5555-5555-5555-555555555555', 'b1111111-1111-1111-1111-111111111111', 'Carer added', '2026-12-01 10:00:00+11', 'manual', 12.50, 'c0000000-0000-0000-0000-000000000009', 'a3333333-3333-3333-3333-333333333333') $$,
+  '[F0-12][AC-05] a carer on shift can create an event with a cost and a bucket');
+select lives_ok($$ select set_occurrence_done('e5555555-5555-5555-5555-555555555555', '2026-12-01 10:00:00+11') $$, '[F0-12][AC-05] and complete it');
+select is((select status || ':' || amount || ':' || recorded_by_name from budget_costs where event_id = 'e5555555-5555-5555-5555-555555555555'), 'paid:12.50:Aisha Rahman',
+  '[F0-12][AC-05] the cost is charged to the bucket the carer chose');
+select throws_ok($$ insert into care_events (client_id, title, starts_at, completion_mode, cost, bucket_id, created_by)
+  values ('b1111111-1111-1111-1111-111111111111', 'Wrong client bucket', '2026-12-02 10:00:00+11', 'manual', 5, 'c0000000-0000-0000-0000-000000000016', 'a3333333-3333-3333-3333-333333333333') $$,
+  '22023', null, '[F0-12][AC-05] a carer cannot charge another client''s bucket');
 
 select pg_temp.login('a4444444-4444-4444-4444-444444444444');
 select is((select count(*) from budget_buckets), 0::bigint, '[F0-12][AC-05] a carer not assigned to Margaret sees no buckets');
