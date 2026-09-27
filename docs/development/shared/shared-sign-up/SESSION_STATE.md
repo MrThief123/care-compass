@@ -6,7 +6,7 @@ Worked on: everything: tests first, migration, `signUp` action, `/sign-up` page 
 What changed: see PROGRESS.md "Files changed"
 Tests run: `supabase test db`; full Vitest; `npm run build` then Playwright `sign-up.spec.ts` and `auth.spec.ts`; eslint, tsc, prettier
 Test results: all F0-17 tests pass (pgTAP 42 assertions, integration 4/4, e2e 7/7 plus F0-07 regression 2/2). One unrelated failure: F0-07 AC-10 TOTP (stale local container, fails identically without F0-17's changes).
-Current blocker: none
+Current blocker: none. (CI `unit` failed once on hosted-vs-local, fixed by gating the integration/e2e account tests on a local URL, FD-07.)
 Important discoveries: admin TOTP MFA is live on `main` (F0-07 CHG-001) although PD-040 says no mandatory MFA. CHG-010 decided MFA stays not mandatory; its removal is a separate shared follow-up fix. Until that lands a new admin hits MFA enrolment after sign-up.
 Also discovered: `.env.local` points at a hosted Supabase project, not the local stack (PROGRESS.md, Problems). Run integration and e2e tests with the three Supabase variables exported from `npx supabase status -o env`.
 Important decisions: PD-057, CHG-010; feature FD-01 to FD-08 (DECISIONS.md). FD-01 and FD-08 need the human.

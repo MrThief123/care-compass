@@ -30,6 +30,8 @@ All tagged `[F0-17][PRD]` or `[F0-17][AC-nn]` and live in the same files as the 
 - `supabase/tests/sign_up.test.sql`: `plan(38)` corrected to `plan(42)`. A miscount of my own assertions; no assertion was changed or removed (FD-07).
 - `tests/integration/shared-sign-up.test.ts` T-04: the "no session" check was `cookieStore.size === 0`. Supabase's PKCE flow writes `...-code-verifier` cookies even for a rejected sign-up, so it now asserts that no cookie other than those exists. The intent (no session created) is unchanged (FD-07).
 
+- Integration tests and the account-creating e2e tests (T-01, the signed-in redirect, T-02, T-03, T-04, T-06) run only when `NEXT_PUBLIC_SUPABASE_URL` is a local address; otherwise they skip (FD-07, as F0-11, FAM-12 and FAM-13 do). CI's `unit` and `e2e` jobs use repository secrets for a hosted project, so they skip there.
+
 ## How the tests were run (2026-09-27)
 - pgTAP: `npx supabase migration up --local`, then `npx supabase test db`: PASS (7 files).
 - Integration and e2e: against the **local** stack, with `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` and `SUPABASE_SERVICE_ROLE_KEY` taken from `npx supabase status -o env` and exported for the command (build and test). `.env.local` currently points at a hosted Supabase project, which does not have the migration (see PROGRESS.md, Problems).

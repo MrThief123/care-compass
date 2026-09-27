@@ -72,14 +72,16 @@ Record feature-level decisions here using the template below. Project-wide decis
 - Consequences: remove the wrapper when the types are regenerated (F0-12's decision, or a shared follow-up).
 - Human confirmation required: no (follows F0-12's open question)
 
-### FD-07 — Test changes found on the first green runs
+### FD-07 — Test changes found on the first runs against the implementation and in CI
 - Date: 2026-09-27
-- Context: two bugs in my own tests, found when they first ran against the implementation. (1) `supabase/tests/sign_up.test.sql` declared `plan(38)` but has 42 assertions; all 42 passed. (2) T-04 in `tests/integration/shared-sign-up.test.ts` asserted the cookie jar was empty after a rejected sign-up, but Supabase's PKCE flow always writes `...-code-verifier` cookies.
-- Decision: (1) `plan(42)`. (2) assert that no cookie other than a `code-verifier` one exists, which is what "no session" means. No assertion was removed and no behaviour was relaxed.
-- Reason: genuine test bugs, not requirement changes.
+- Context: three problems in my own tests, found when they first ran against the implementation and then in CI. (1) `supabase/tests/sign_up.test.sql` declared `plan(38)` but has 42 assertions; all 42 passed. (2) T-04 in `tests/integration/shared-sign-up.test.ts` asserted the cookie jar was empty after a rejected sign-up, but Supabase's PKCE flow always writes `...-code-verifier` cookies.
+- (3) CI's `unit` job runs `npm test` with the Supabase variables from repository **secrets**, which are a hosted project that does not have this migration, so `signUp` created the auth user and `register_account` did not exist: AC-02 and AC-06 failed in CI (AC-03 and AC-04 fail earlier and passed). The same would hit the two account-creating e2e tests in the `e2e` job.
+- Decision: (1) `plan(42)`. (2) assert that no cookie other than a `code-verifier` one exists, which is what "no session" means. (3) gate the integration tests, and the two account-creating e2e tests, on `NEXT_PUBLIC_SUPABASE_URL` being a local address, so they skip against a hosted project; this is the convention F0-11, FAM-12 and FAM-13 already use. No assertion was removed and no behaviour was relaxed; the page-only e2e tests still run everywhere.
+- Reason: (1) and (2) genuine test bugs; (3) an infrastructure defect (the tests assumed a database that has the migration), not a requirement change.
 - Alternatives considered: none.
 - Consequences: none.
-- Test changes caused: T-05 and T-07 (count only); T-04 (cookie assertion, same intent). Not flagged HUMAN REVIEW: no behaviour was relaxed and no assertion removed.
+- Consequences of (3): in CI the sign-up integration and e2e tests skip; what CI proves for F0-17 is `supabase test db` (`sign_up.test.sql`, 42 assertions) plus lint, typecheck, format, build and the page-only e2e tests. The action and the full flow are proved by running the tests against a local stack. Once the migration is applied to the hosted project the gate could be relaxed (the repo-wide question of what CI should run against is not this feature's).
+- Test changes caused: T-05 and T-07 (count only); T-04 (cookie assertion, same intent); T-01 to T-04 and T-06 (skip condition only). Not flagged HUMAN REVIEW: no behaviour was relaxed and no assertion removed.
 - Human confirmation required: no
 
 ### FD-08 — ARCHITECTURE.md would list the new function (needs a controlled change)
