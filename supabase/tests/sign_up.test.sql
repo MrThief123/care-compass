@@ -4,7 +4,7 @@
 -- AC-01, AC-02 and AC-06 rest on (what each role creates, and that nothing can be linked to
 -- an existing organisation or client).
 begin;
-select plan(38);
+select plan(42);
 
 insert into organisations (id, name) values
   ('11111111-1111-1111-1111-111111111111', 'Banksia Home Care');
