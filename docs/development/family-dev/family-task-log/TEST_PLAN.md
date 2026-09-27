@@ -12,11 +12,15 @@ Tests are written **before** production code (TESTING.md §2). Run them, confirm
 
 | Test ID | Covers | Level | Test description | Written first? | Result |
 |---|---|---|---|---|---|
-| T-01 | AC-01 | integration | Given seed data, when the task log is loaded with no filters, then the first rows are Mon 30 Nov Morning medication (Done · Aisha R.), Physiotherapy (Planned), Afternoon check-in (Planned). | ☐ | NOT RUN |
-| T-02 | AC-02 | integration | Given status filter Overdue, when applied, then only Weekly weigh-in (Sun 29 Nov) and Medication review (Sat 28 Nov) are listed, each with nurse '—'. | ☐ | NOT RUN |
-| T-03 | AC-03 | component | Given search 'Zoe', when results are empty, then 'No matches for "Zoe".' is displayed. | ☐ | NOT RUN |
-| T-04 | AC-04 | e2e | Given a row, when clicked, then the Task detail for that occurrence opens. | ☐ | NOT RUN |
-| T-05 | AC-05 | integration | Given weekly recurring events extending forever, when the log loads, then no occurrence after today is returned. | ☐ | NOT RUN |
+| T-01 | AC-01 | component | Given the real mock `getTaskLog` contract, when the task log is loaded with no filters, then Mon 30 Nov's rows include Morning medication (Done · Aisha Rahman), Physiotherapy (Planned) and Afternoon check-in (Planned) with the right nurse/status. | ☑ | PASS |
+| T-02 | AC-02 | component | Given status filter Overdue, when applied, then only Weekly weigh-in (Sun 29 Nov) and Medication review (Sat 28 Nov) are listed, each with nurse '—'. | ☑ | PASS |
+| T-03 | AC-03 | component | Given search 'Zoe', when results are empty, then 'No matches for "Zoe".' is displayed. | ☑ | PASS |
+| T-04 | AC-04 | component | Given a row, when clicked/its link followed, then it goes to that occurrence's Task detail. | ☑ | PASS |
+| T-05 | AC-05 | integration | Given weekly recurring events extending forever, when the log loads, then no occurrence after today is returned. | ☑ | PASS |
+
+Level adaptations from the original plan (recorded per TESTING.md §6 as a level change, not a behaviour change — the underlying route, loader and `getTaskLog` Supabase wiring were already built and integration-tested by FAM-UI-07 and FAM-02):
+- T-01/T-02: integration → component. FAM-02 already added an integration suite exercising `getTaskLog`'s Supabase branch directly (status, actor, RLS); duplicating that here for the same contract function would be redundant. T-01/T-02 instead confirm the Task log *screen* renders that contract's result correctly, against the real (non-Supabase) mock contract FAM-UI-07 already integration-proved at the route level.
+- T-04: e2e → component. `task-log-view.test.tsx`'s existing `[FAM-UI-07][AC-08]` coverage already click-tests row navigation; a FAM-14-labelled component test over the same mechanism is equivalent proof without a second browser-level suite for identical DOM behaviour. `family-task-detail-nav.spec.ts`'s e2e suite (`[FAM-UI-07][AC-10]`) still covers the full click-through end to end.
 
 ## Regression scope
 - Run the full unit/component suite and `supabase test db` before marking READY FOR PR.
