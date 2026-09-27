@@ -775,3 +775,52 @@ describe("[FAM-UI-02] accessibility", () => {
     expect(await axe(container)).toHaveNoViolations();
   });
 });
+
+describe("[FAM-04][AC-01] default week", () => {
+  it("[FAM-04][AC-01] T-01 given no view param, when the calendar renders on Mon 30 Nov 2026, then W is selected and columns MON 30 to SUN 6 are shown with 30 highlighted", async () => {
+    await renderCalendar();
+
+    expect(screen.getByRole("radio", { name: "W" })).toHaveAttribute("aria-checked", "true");
+    expect(screen.getByTestId("week-grid-day-2026-11-30")).toBeInTheDocument();
+    expect(screen.getByTestId("week-grid-day-2026-12-06")).toBeInTheDocument();
+    expect(screen.getByTestId("week-grid-header-2026-11-30")).toHaveAttribute(
+      "aria-current",
+      "date",
+    );
+  });
+});
+
+describe("[FAM-04][AC-03] week grid", () => {
+  it("[FAM-04][AC-03] T-03 given the week of 30 Nov with seed data, '09:30 Weekly weigh-in' appears in the THU 3 column", async () => {
+    await renderCalendar();
+
+    const column = screen.getByTestId("week-grid-day-2026-12-03");
+    const block = within(column).getByText("Weekly weigh-in").closest("button") as HTMLElement;
+    expect(block).toHaveTextContent("09:30");
+  });
+});
+
+describe("[FAM-04][AC-04] month view", () => {
+  it("[FAM-04][AC-04] T-04 given the week view, when M is selected, a December 2026 month grid is shown with out-of-month days styled muted", async () => {
+    // date=2026-12-01 (not a leading/trailing day) so it never coincides with the
+    // out-of-month cell under test and masks its muted styling with "selected".
+    await renderCalendar({ view: "month", date: "2026-12-01", month: "2026-12" });
+
+    expect(screen.getByRole("heading", { level: 1, name: "December 2026" })).toBeVisible();
+    const inMonth = screen.getByTestId("month-grid-day-2026-12-31");
+    expect(inMonth).toHaveAttribute("data-in-month", "true");
+    // Dec 31 2026 is a Thursday, so the grid's last row trails into January.
+    const outOfMonth = screen.getByTestId("month-grid-day-2027-01-03");
+    expect(outOfMonth).toHaveAttribute("data-in-month", "false");
+    expect(outOfMonth.querySelector("[class*='text-text-muted']")).toBeInTheDocument();
+  });
+});
+
+describe("[FAM-04][AC-06] invalid date param", () => {
+  it("[FAM-04][AC-06] T-06 given date=not-a-date, the current week is shown", async () => {
+    await renderCalendar({ date: "not-a-date" });
+
+    expect(screen.getByRole("radio", { name: "W" })).toHaveAttribute("aria-checked", "true");
+    expect(screen.getByRole("heading", { level: 1, name: "30 Nov – 6 Dec 2026" })).toBeVisible();
+  });
+});
