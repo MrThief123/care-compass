@@ -1,12 +1,12 @@
 # Progress — FAM-14 Family — Task log
 
-Status: READY FOR PR
+Status: MERGED TO DEV
 Owner: MrThief123
 Lane: F — Family
 Sprint: SPRINT · planned D11
 Branch: `feature/family-task-log`
 PR target: `family-dev`
-Last updated: 2026-09-27
+Last updated: 2026-09-28
 
 **HUMAN REVIEW requested (FD-02):** `shared-plain-events` DECISIONS.md FD-01 names FAM-14 as an
 adopter of `type: "all"` (showing plain events alongside tasks in the log), but none of FAM-14's
@@ -70,3 +70,6 @@ whether it is a follow-up feature/CHG or should be folded in before merge. See D
 
 ## Ready for PR
 - Yes, pending FD-02 review.
+
+## Merged — 2026-09-28
+- PR #139 (https://github.com/MrThief123/care-compass/pull/139) merged to `main`. Status set to MERGED TO DEV in a docs sync, since the merge left it at READY FOR PR.

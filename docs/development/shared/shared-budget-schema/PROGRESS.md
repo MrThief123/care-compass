@@ -1,12 +1,12 @@
 # Progress — F0-12 Budget buckets, fund top-ups, spending and summary calculation
 
-Status: IN PROGRESS
+Status: MERGED TO DEV
 Owner: Prajeet
 Lane: B — Backend
 Sprint: SPRINT · planned D6
 Branch: `feature/shared-budget-schema`
 PR target: `main (per OQ-01 — shared work)`
-Last updated: 2026-09-27 (tests written first)
+Last updated: 2026-09-28
 
 ## Blockers
 - None. OQ-01, OQ-03, OQ-04, OQ-05 are ANSWERED; F0-06 and F0-08 are merged. FD-02 / FD-03 in DECISIONS.md await human confirmation.
@@ -51,3 +51,6 @@ Last updated: 2026-09-27 (tests written first)
 - Human reviews FD-01 to FD-04; on approval, push and open the PR to `main`.
 ## Ready for PR
 - No
+
+## Merged — 2026-09-28
+- PR #128 (https://github.com/MrThief123/care-compass/pull/128) merged to `main`, including further budget-period and event-cost commits made after this file's last update. Status set to MERGED TO DEV in a docs sync; FD-01 to FD-04 are assumed resolved by the merge — confirm with Prajeet if not.
