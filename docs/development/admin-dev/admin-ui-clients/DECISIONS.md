@@ -63,3 +63,8 @@ _No decisions recorded yet._
 - The initial implementation commit 6ce0735 is preserved intact. No admin-dev push reached origin, verified with ls-remote.
 - Local admin-dev now points back at unchanged origin/admin-dev (697c646); no remote history rewritten.
 - This supersedes FD-05's direct-admin-dev branch instruction.
+
+### FD-07 - PR authorization
+- Human explicitly requested opening the PR into admin-dev and prohibited merging.
+- PR status records updated on the feature branch per workflow section 7.
+- Record verified CI separately from local environment limitations; 4d8461e passed all 7 executed checks.

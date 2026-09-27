@@ -1,5 +1,5 @@
 # Progress - ADM-UI-04 Admin Clients UI
-Status: IN PROGRESS
+Status: PR OPEN
 Owner: Kavis
 Branch: feature/admin-ui-clients
 PR target: admin-dev
@@ -25,4 +25,6 @@ Last updated: 2026-09-27
 - Scoped new-code formatting checked separately.
 - Full suite: 1787 tests passed, 3 timed out in existing server event/profile tests; 8 suites could not load without Supabase environment values (10 failed files total). No Clients tests failed.
 - No schema changes; database suite not run for this local UI preview.
-- Commit/push authorized; remote CI will be checked for the exact pushed commit. No PR requested.
+- Human authorized opening the PR into admin-dev on 2026-09-27; do not merge.
+- GitHub CI at 4d8461e: 7 passed, 0 failed, 3 skipped. Lint, typecheck, format, unit, build, audit and db-test all passed.
+- CI evidence: https://github.com/MrThief123/care-compass/actions/runs/36300256004
