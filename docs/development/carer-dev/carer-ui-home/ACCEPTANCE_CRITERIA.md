@@ -4,6 +4,8 @@ Each criterion is observable and maps to at least one test in TEST_PLAN.md. Crit
 
 AC-01 and AC-02 were rewritten, and AC-04 to AC-10 added, by CHG-025 (2026-09-26), before implementation started. The original AC-01 read "Today's calendar shows 09:00, 11:30 and 15:00 rows for Margaret with Done/Planned/Planned pills".
 
+CHG-031 (2026-09-26) merged the Carer Calendar into this screen: the calendar section is titled 'Shifts' with D/W/M (Day by default, today), and it reads `getCarerShifts` for the visible range. AC-01, AC-05 and AC-07 below keep their meaning with 'Shifts' for "Today's calendar" and 'No shifts' for 'No shifts today'; notifications sit beside it from 1280px and below it under that. The D/W/M behaviour is CAR-UI-03's (see its DECISIONS.md FD-04).
+
 | ID | Story | Type | Criterion (Given / When / Then) | Status |
 |---|---|---|---|---|
 | AC-01 | US-01 | happy | Given fixtures and the carer Aisha, when Carer Home renders, then 'Today's calendar' shows one row, '08:00–12:00' with 'Margaret', and no status pill or event title. | MET |

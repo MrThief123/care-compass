@@ -8,17 +8,27 @@ import { CLIENTS, REFERENCE_DATE, SHIFTS } from "@/mocks/fixtures";
 import { melbourneDateKey } from "@/mocks/melbourne-time";
 import { getToday } from "@/mocks/queries/events";
 import type { CarerPatientRow, CarerShiftRow } from "@/server/shifts/queries";
+import type { OccurrenceRange } from "@/types/domain";
 
-export async function getCarerTodayShifts(carerId: string): Promise<CarerShiftRow[]> {
-  const today = await getToday();
-  return SHIFTS.filter(
-    (shift) => shift.carerId === carerId && melbourneDateKey(shift.start) === today,
-  )
+/** `range` is already validated (`OccurrenceRangeSchema`). */
+export async function getCarerShifts(
+  carerId: string,
+  { from, to }: OccurrenceRange,
+): Promise<CarerShiftRow[]> {
+  return SHIFTS.filter((shift) => {
+    const day = melbourneDateKey(shift.start);
+    return shift.carerId === carerId && day >= from && day <= to;
+  })
     .sort((a, b) => Date.parse(a.start) - Date.parse(b.start))
     .map((shift) => ({
       ...shift,
       clientFirstName: CLIENTS.find((client) => client.id === shift.clientId)?.firstName ?? "",
     }));
+}
+
+export async function getCarerTodayShifts(carerId: string): Promise<CarerShiftRow[]> {
+  const today = await getToday();
+  return getCarerShifts(carerId, { from: today, to: today });
 }
 
 export async function getCarerPatients(carerId: string): Promise<CarerPatientRow[]> {

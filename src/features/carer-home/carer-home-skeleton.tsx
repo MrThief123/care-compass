@@ -6,7 +6,7 @@ export function CarerHomeSkeleton() {
   return (
     <div
       aria-busy="true"
-      className="grid min-w-0 grid-cols-1 items-start gap-4 px-6 py-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]"
+      className="grid min-w-0 grid-cols-1 items-start gap-4 px-6 py-5 xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]"
     >
       {[3, 3].map((rows, card) => (
         <CardShell key={card} className="min-w-0 p-5">
