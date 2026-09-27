@@ -1,20 +1,19 @@
 # Progress — F0-13 Client document storage
 
-Status: NOT STARTED
-Owner: unclaimed
+Status: IN PROGRESS
+Owner: MrThief123
 Lane: B — Backend
 Sprint: SPRINT · planned D6–D7
-Branch: `feature/shared-document-storage` (not yet created)
+Branch: `feature/shared-document-storage`
 PR target: `main (per OQ-01 — shared work)`
-Last updated: 2026-09-17 (planning pack generated)
+Last updated: 2026-09-27 (claimed)
 
 ## Blockers
-- OQ-01 — Branch parent and naming for shared (foundation and cross-cutting) work
-- OQ-26 — File upload constraints
+- None — OQ-01, OQ-26 ANSWERED
 
 ## Dependencies status
-- F0-06 — NOT STARTED
-- F0-11 — NOT STARTED
+- F0-06 — MERGED TO DEV
+- F0-11 — MERGED TO DEV
 
 ## Completed
 - Feature documentation drafted (Claude Chat planning pack)
