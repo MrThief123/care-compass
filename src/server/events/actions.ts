@@ -10,8 +10,9 @@ import { z } from "zod";
 
 import { localToMelbourneIso } from "@/lib/dates/melbourne-time";
 import { getDataSourceMode } from "@/server/data-source";
+import { parseOccurrenceKey } from "@/server/events/occurrence-key";
+import { RECURRENCE_TO_DB } from "@/server/events/recurrence-mapping";
 import { RecurrenceFrequencySchema } from "@/types/domain";
-import type { RecurrenceFrequency } from "@/types/domain";
 
 export type ActionResult<T> =
   | { ok: true; data: T }
@@ -24,18 +25,6 @@ const SetOccurrenceDoneInputSchema = z.object({ key: z.string().min(1) });
 
 /** FAM-05's copy for a failed tick or untick (PRD.md Error/Edge cases, PROPOSED). */
 const TICK_FAILED_MESSAGE = "Couldn't save. Please try again.";
-
-/**
- * `${eventId}:${originalStartISO}` (`home-routes.ts`): the event id is a bare hex id, which
- * never contains ':', unlike the ISO instant that follows it — so splitting on the first ':'
- * always finds the right boundary.
- */
-const KEY_PATTERN = /^([0-9a-f-]{36}):(.+)$/i;
-
-function parseOccurrenceKey(key: string): { eventId: string; originalStart: string } | undefined {
-  const match = KEY_PATTERN.exec(key);
-  return match ? { eventId: match[1]!, originalStart: match[2]! } : undefined;
-}
 
 /** What a tick-off confirms, once the server has recorded it. */
 export interface TickResult {
@@ -221,27 +210,6 @@ const CreateEventInputSchema = z.object({
 });
 export type CreateEventInput = z.infer<typeof CreateEventInputSchema>;
 
-/**
- * PD-046: the domain's full nine-option frequency set as the database's
- * `{frequency, interval}` pair (`daily`/`weekly`/`monthly`/`yearly` only —
- * `build-occurrences.ts` reads the same shape back). `null` is a one-off
- * event (no `recurrence` row).
- */
-const RECURRENCE_TO_DB: Record<
-  RecurrenceFrequency,
-  { frequency: "daily" | "weekly" | "monthly" | "yearly"; interval: number } | null
-> = {
-  none: null,
-  daily: { frequency: "daily", interval: 1 },
-  weekly: { frequency: "weekly", interval: 1 },
-  fortnightly: { frequency: "weekly", interval: 2 },
-  monthly: { frequency: "monthly", interval: 1 },
-  every2months: { frequency: "monthly", interval: 2 },
-  quarterly: { frequency: "monthly", interval: 3 },
-  every6months: { frequency: "monthly", interval: 6 },
-  yearly: { frequency: "yearly", interval: 1 },
-};
-
 export interface CreateEventResult {
   eventId: string;
 }
@@ -330,5 +298,183 @@ export async function createEvent(
   } catch (error) {
     console.error("[events] createEvent failed:", error instanceof Error ? error.name : "unknown");
     return { ok: false, error: { code: "UNEXPECTED", message: CREATE_EVENT_FAILED_MESSAGE } };
+  }
+}
+
+/**
+ * FAM-07's scope choice (PD-045): "occurrence" writes a `care_event_overrides` row for the
+ * viewed occurrence's start (PD-004) — every other field is a series-level column, so it always
+ * updates the whole event either way. "series" writes the anchor `starts_at` directly, and is
+ * refused (VALIDATION) for a recurring event whose date actually changed: doing that would shift
+ * every occurrence's identity (`key`), orphaning history keyed to the old instants. A one-off
+ * event (no recurrence) has only one occurrence, so "series" may always move its date.
+ */
+const UpdateEventScopeSchema = z.enum(["occurrence", "series"]);
+export type UpdateEventScope = z.infer<typeof UpdateEventScopeSchema>;
+
+const UpdateEventInputSchema = z.object({
+  clientId: z.string().min(1),
+  eventId: z.string().min(1),
+  /** The viewed occurrence's original start (its identity, PD-004) — never the edited value. */
+  occurrenceOriginalStart: z.string().min(1),
+  title: z.string().trim().min(1),
+  description: z.string(),
+  date: z.string().regex(LOCAL_DATE_PATTERN),
+  startTime: z.string().regex(LOCAL_TIME_PATTERN),
+  durationMinutes: z.number().int().nonnegative(),
+  recurrence: RecurrenceFrequencySchema,
+  isTask: z.boolean(),
+  scope: UpdateEventScopeSchema,
+});
+export type UpdateEventInput = z.infer<typeof UpdateEventInputSchema>;
+
+export interface UpdateEventResult {
+  eventId: string;
+}
+
+const UPDATE_EVENT_FAILED_MESSAGE = "Couldn't save. Please try again.";
+const UPDATE_EVENT_NOT_ALLOWED = "Not permitted to edit this event.";
+
+function mapUpdateEventError(code: string | null | undefined): ActionResult<never> {
+  switch (code) {
+    // RLS silently drops the row from an UPDATE rather than raising; PGRST116 is `.single()`
+    // seeing 0 rows back, which means either — never which, so as not to leak the difference.
+    case "42501":
+    case "PGRST116":
+      return { ok: false, error: { code: "NOT_ALLOWED", message: UPDATE_EVENT_NOT_ALLOWED } };
+    case "23503":
+    case "P0002":
+      return {
+        ok: false,
+        error: { code: "VALIDATION", message: "That event could not be found." },
+      };
+    default:
+      return { ok: false, error: { code: "UNEXPECTED", message: UPDATE_EVENT_FAILED_MESSAGE } };
+  }
+}
+
+export async function updateEvent(
+  input: UpdateEventInput,
+): Promise<ActionResult<UpdateEventResult>> {
+  const parsed = UpdateEventInputSchema.safeParse(input);
+  if (!parsed.success) {
+    return {
+      ok: false,
+      error: { code: "VALIDATION", message: "Check the event's fields and try again." },
+    };
+  }
+  const {
+    clientId,
+    eventId,
+    occurrenceOriginalStart,
+    title,
+    description,
+    date,
+    startTime,
+    durationMinutes,
+    recurrence,
+    isTask,
+    scope,
+  } = parsed.data;
+  const startsAt = localToMelbourneIso(`${date}T${startTime}`);
+  const completionMode = isTask ? "manual" : "automatic";
+
+  const mode = getDataSourceMode();
+  if (mode === "mock") {
+    try {
+      const mockEvents = await import("@/mocks/queries/events");
+      await mockEvents.updateEvent({
+        clientId,
+        eventId,
+        occurrenceOriginalStart,
+        title,
+        description,
+        startsAt,
+        durationMinutes,
+        recurrenceFrequency: recurrence,
+        completionMode,
+        scope,
+      });
+      return { ok: true, data: { eventId } };
+    } catch (error) {
+      return {
+        ok: false,
+        error: {
+          code: "NOT_FOUND",
+          message: error instanceof Error ? error.message : "Event not found.",
+        },
+      };
+    }
+  }
+
+  try {
+    const { createClient } = await import("@/lib/supabase/server");
+    const supabase = await createClient();
+    const seriesFields = {
+      title,
+      description,
+      recurrence: RECURRENCE_TO_DB[recurrence],
+      duration_minutes: durationMinutes,
+      completion_mode: completionMode,
+    };
+
+    if (scope === "occurrence") {
+      const { error: seriesError } = await supabase
+        .from("care_events")
+        .update(seriesFields)
+        .eq("id", eventId)
+        .eq("client_id", clientId)
+        .select("id")
+        .single();
+      if (seriesError) return mapUpdateEventError(seriesError.code);
+
+      const { error: overrideError } = await supabase.from("care_event_overrides").upsert(
+        {
+          event_id: eventId,
+          client_id: clientId,
+          original_start: occurrenceOriginalStart,
+          kind: "modified",
+          new_starts_at: startsAt,
+        },
+        { onConflict: "event_id,original_start" },
+      );
+      if (overrideError) return mapUpdateEventError(overrideError.code);
+      return { ok: true, data: { eventId } };
+    }
+
+    const { data: existing, error: readError } = await supabase
+      .from("care_events")
+      .select("starts_at, recurrence")
+      .eq("id", eventId)
+      .eq("client_id", clientId)
+      .maybeSingle();
+    if (readError) return mapUpdateEventError(readError.code);
+    // Read access is at least as broad as edit access, so a caller who cannot even read the
+    // event certainly cannot edit it either — the same NOT_ALLOWED the UPDATE branch above maps
+    // PGRST116 to, not NOT_FOUND, so this scope's own failure mode does not leak that distinction.
+    if (!existing) return mapUpdateEventError("PGRST116");
+    if (existing.recurrence !== null && Date.parse(existing.starts_at) !== Date.parse(startsAt)) {
+      return {
+        ok: false,
+        error: {
+          code: "VALIDATION",
+          message: "To move a date on a recurring event, choose 'This occurrence' instead.",
+        },
+      };
+    }
+
+    const { error } = await supabase
+      .from("care_events")
+      .update({ ...seriesFields, starts_at: startsAt })
+      .eq("id", eventId)
+      .eq("client_id", clientId)
+      .select("id")
+      .single();
+    if (error) return mapUpdateEventError(error.code);
+
+    return { ok: true, data: { eventId } };
+  } catch (error) {
+    console.error("[events] updateEvent failed:", error instanceof Error ? error.name : "unknown");
+    return { ok: false, error: { code: "UNEXPECTED", message: UPDATE_EVENT_FAILED_MESSAGE } };
   }
 }

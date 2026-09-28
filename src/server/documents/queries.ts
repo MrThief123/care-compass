@@ -28,7 +28,32 @@ export async function getEventDocuments(
   if (mode === "mock") {
     return mock.getEventDocuments(clientId, eventId);
   }
-  notImplementedForSupabase("documents", "getEventDocuments");
+
+  const { createClient } = await import("@/lib/supabase/server");
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("documents")
+    .select(
+      "id, client_id, event_id, filename, mime_type, size_bytes, uploaded_at, uploader:profiles!documents_uploaded_by_fkey(first_name, last_name)",
+    )
+    .eq("client_id", clientId)
+    .eq("event_id", eventId)
+    .is("detached_at", null)
+    .order("uploaded_at", { ascending: true })
+    .order("id", { ascending: true });
+  if (error || !data) return [];
+
+  return data.map((row) => ({
+    id: row.id,
+    clientId: row.client_id,
+    eventId: row.event_id!,
+    name: row.filename,
+    mimeType: row.mime_type,
+    sizeBytes: row.size_bytes,
+    uploadedAt: row.uploaded_at,
+    // Left out when the uploader's own profile is not one this reader may see (RLS).
+    uploadedBy: row.uploader ? `${row.uploader.first_name} ${row.uploader.last_name}` : undefined,
+  }));
 }
 
 /**
