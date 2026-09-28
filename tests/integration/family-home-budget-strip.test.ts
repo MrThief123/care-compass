@@ -101,11 +101,24 @@ async function seed() {
     .insert({ client_id: clientId, name: "Government", kind: "government" })
     .select("id")
     .single();
-  if (ndis.error || !ndis.data || government.error || !government.data) {
+  const fixed = await admin
+    .from("budget_buckets")
+    .insert({ client_id: clientId, name: "Fixed", kind: "fixed" })
+    .select("id")
+    .single();
+  if (
+    ndis.error ||
+    !ndis.data ||
+    government.error ||
+    !government.data ||
+    fixed.error ||
+    !fixed.data
+  ) {
     throw new Error("buckets");
   }
   const ndisId = ndis.data.id;
   const governmentId = government.data.id;
+  const fixedId = fixed.data.id;
 
   const recordedBy = { recorded_by: helen.userId, recorded_by_name: "Helen Doyle" };
   const today = new Date().toISOString().slice(0, 10);
@@ -118,6 +131,7 @@ async function seed() {
       amount: 3000,
       ...recordedBy,
     },
+    { bucket_id: fixedId, client_id: clientId, kind: "funds_added", amount: 1000, ...recordedBy },
   ]);
   await admin.from("budget_costs").insert([
     {
@@ -142,12 +156,13 @@ async function seed() {
       paid_on: today,
       ...recordedBy,
     },
+    // Pending, uncovered by Fixed's own funds (PD-032): forces 'depleted', whatever the percent.
     {
-      bucket_id: governmentId,
+      bucket_id: fixedId,
       client_id: clientId,
-      original_start: new Date(Date.now() + 1000).toISOString(),
+      original_start: new Date().toISOString(),
       description: "Physiotherapy",
-      amount: 310,
+      amount: 200,
       status: "pending",
       incurred_on: today,
       ...recordedBy,
@@ -166,6 +181,7 @@ async function seed() {
     otherId,
     ndisId,
     governmentId,
+    fixedId,
   };
 }
 
@@ -173,6 +189,12 @@ async function cleanUp(s: Awaited<ReturnType<typeof seed>>) {
   for (const user of [s.helen, s.rosa, s.priya, s.aisha, s.dan]) {
     await s.admin.auth.admin.deleteUser(user.userId);
   }
+  // budget_costs/budget_fund_entries/budget_buckets all reference their parent ON DELETE
+  // RESTRICT, so the ledger has to go before the buckets, and the buckets before the client.
+  const bucketIds = [s.ndisId, s.governmentId, s.fixedId];
+  await s.admin.from("budget_costs").delete().in("bucket_id", bucketIds);
+  await s.admin.from("budget_fund_entries").delete().in("bucket_id", bucketIds);
+  await s.admin.from("budget_buckets").delete().in("id", bucketIds);
   await s.admin.from("clients").delete().in("id", [s.clientId, s.otherId]);
   await s.admin.from("organisations").delete().eq("id", s.orgId);
 }
@@ -258,7 +280,7 @@ describe.skipIf(!hasLocalSupabase)(
       }
     });
 
-    it("[FAM-03][AC-02] T-02 Government: $240 remaining of $3,000, 92% used, alert state, one pending cost", async () => {
+    it("[FAM-03][AC-02] T-02 Government: $240 remaining of $3,000, 92% used, alert state", async () => {
       const s = await seed();
       try {
         const { cookieStore } = await signIn(s.helen.email);
@@ -274,7 +296,30 @@ describe.skipIf(!hasLocalSupabase)(
           remaining: 240,
           percentUsed: 92,
           state: "alert",
-          pendingTotal: 310,
+          pendingTotal: 0,
+          pendingCount: 0,
+        });
+      } finally {
+        await cleanUp(s);
+      }
+    });
+
+    it("[FAM-03][Scope] a pending cost forces the exhausted state, whatever the percent used", async () => {
+      const s = await seed();
+      try {
+        const { cookieStore } = await signIn(s.helen.email);
+
+        const buckets = await budgetAs(cookieStore, s.clientId);
+        const fixed = buckets.find((bucket) => bucket.id === s.fixedId);
+
+        expect(fixed).toMatchObject({
+          label: "Fixed",
+          kind: "fixed",
+          total: 1000,
+          used: 0,
+          remaining: 1000,
+          state: "exhausted",
+          pendingTotal: 200,
           pendingCount: 1,
         });
       } finally {
@@ -302,7 +347,11 @@ describe.skipIf(!hasLocalSupabase)(
 
         const buckets = await budgetAs(cookieStore, s.clientId);
 
-        expect(buckets.map((bucket) => bucket.label).sort()).toEqual(["Government", "NDIS"]);
+        expect(buckets.map((bucket) => bucket.label).sort()).toEqual([
+          "Fixed",
+          "Government",
+          "NDIS",
+        ]);
       } finally {
         await cleanUp(s);
       }
@@ -315,7 +364,11 @@ describe.skipIf(!hasLocalSupabase)(
 
         const buckets = await budgetAs(cookieStore, s.clientId);
 
-        expect(buckets.map((bucket) => bucket.label).sort()).toEqual(["Government", "NDIS"]);
+        expect(buckets.map((bucket) => bucket.label).sort()).toEqual([
+          "Fixed",
+          "Government",
+          "NDIS",
+        ]);
       } finally {
         await cleanUp(s);
       }
