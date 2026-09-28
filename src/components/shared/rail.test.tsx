@@ -22,12 +22,13 @@ describe("Rail", () => {
     expect(labels).toEqual(["Home", "Info", "Calendar", "Budget", "Settings"]);
   });
 
-  it("[F0-15][AC-03] Carer rail items are exactly Home, Patients, Calendar, Settings", () => {
+  // CHG-031: the Carer Calendar merged into Carer Home, so the rail has no Calendar item.
+  it("[F0-15][AC-03] Carer rail items are exactly Home, Patients, Settings", () => {
     render(<Rail role="carer" basePath="/carer" />);
     const labels = within(screen.getByRole("navigation"))
       .getAllByRole("link")
       .map((link) => link.textContent);
-    expect(labels).toEqual(["Home", "Patients", "Calendar", "Settings"]);
+    expect(labels).toEqual(["Home", "Patients", "Settings"]);
   });
 
   it("[F0-15][AC-04] Admin rail items are exactly Home, Manage, Staff, Clients, Settings", () => {

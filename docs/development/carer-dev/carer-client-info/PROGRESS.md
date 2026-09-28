@@ -12,6 +12,7 @@ Last updated: 2026-09-17 (planning pack generated)
 - OQ-09 — Carer access model
 
 ## Dependencies status
+- F0-18 — NOT STARTED (added by CHG-027)
 - F0-06 — NOT STARTED
 - F0-10 — NOT STARTED
 - F0-13 — NOT STARTED

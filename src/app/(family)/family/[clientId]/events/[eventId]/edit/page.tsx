@@ -53,6 +53,7 @@ export default async function EditEventPage({
   return (
     <EventFormScreen
       mode="edit"
+      clientId={clientId}
       initialValues={values}
       initialIsTask={isTaskEvent(event)}
       month={values.date}

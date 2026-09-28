@@ -45,7 +45,7 @@ Carers find the person they're caring for quickly.
 - Match Carer · Patients frame.
 
 ## Dependencies
-- Features: F0-06 (Identity, organisation and client access schema with RLS), F0-10 (Shifts schema, active-shift function and conflict query), CAR-UI-02 (Carer Patients and patient info screens (UI))
+- Features: F0-06 (Identity, organisation and client access schema with RLS), F0-10 (Shifts schema, active-shift function and conflict query), F0-18 (Carer view access derived from shifts, CHG-027), CAR-UI-02 (Carer Patients and patient info screens (UI))
 - Blocking open decisions (must be answered before START FEATURE): OQ-09
 - Non-blocking open decisions (proposed defaults apply, confirm when possible): None
 

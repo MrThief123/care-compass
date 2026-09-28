@@ -241,9 +241,8 @@ export interface SetOccurrenceDoneResult {
  * PD-044 (Manual completion mode): marks an occurrence Done, recording the
  * actor's name (safeguarding requirement, REQ-19). This is a Phase 1 mock
  * mutation over an in-memory copy of the fixture — it does not persist
- * across requests; real persistence lands with the `events` Phase 3
- * wiring feature (F0-11) via the `set_occurrence_done` RPC
- * (ARCHITECTURE.md §4).
+ * across requests; real persistence is the `events` Phase 3 wiring feature
+ * (FAM-05) via the `set_occurrence_done` RPC (ARCHITECTURE.md §4).
  */
 export async function setOccurrenceDone(
   key: string,
@@ -259,4 +258,81 @@ export async function setOccurrenceDone(
     }
   }
   throw new Error(`setOccurrenceDone: no occurrence found for key "${key}".`);
+}
+
+export interface SetOccurrenceUndoneResult {
+  ok: true;
+  occurrence: Occurrence;
+}
+
+/**
+ * OQ-10: undoes a Done occurrence, matching the client's own optimistic
+ * simplification (`apply-ticks.ts`) — it always reads Planned afterwards
+ * here, rather than recomputing Overdue, since the mock has no clock-driven
+ * derivation to recompute it with. Real persistence: FAM-05, the
+ * `set_occurrence_undone` RPC.
+ */
+export async function setOccurrenceUndone(key: string): Promise<SetOccurrenceUndoneResult> {
+  for (const occurrences of Object.values(OCCURRENCES_BY_CLIENT_ID)) {
+    const occurrence = occurrences.find((item) => item.key === key);
+    if (occurrence) {
+      occurrence.status = "planned";
+      occurrence.actor = undefined;
+      occurrence.completedAt = undefined;
+      return { ok: true, occurrence };
+    }
+  }
+  throw new Error(`setOccurrenceUndone: no occurrence found for key "${key}".`);
+}
+
+export interface CreateEventInput {
+  clientId: string;
+  title: string;
+  description: string;
+  /** ISO instant of the first (anchor) occurrence. */
+  startsAt: string;
+  durationMinutes: number;
+  recurrenceFrequency: CareEvent["recurrenceFrequency"];
+  completionMode: CareEvent["completionMode"];
+}
+
+/**
+ * Phase 1 mock mutation (like `setOccurrenceDone`): adds the event to the
+ * in-memory fixture and its first (anchor) occurrence, so it is visible
+ * immediately after creating it (FAM-06). Does not persist across requests,
+ * and does not generate the rest of a recurring series — the fixtures are
+ * static, curated data, not a copy of the recurrence engine; real persistence
+ * and full expansion is the Supabase branch (`loadOccurrences`, F0-11).
+ */
+export async function createEvent(input: CreateEventInput): Promise<string> {
+  const id = `event-mock-${Math.random().toString(36).slice(2, 10)}`;
+  const event: CareEvent = {
+    id,
+    clientId: input.clientId,
+    title: input.title,
+    description: input.description,
+    start: input.startsAt,
+    durationMinutes: input.durationMinutes,
+    recurrenceFrequency: input.recurrenceFrequency,
+    completionMode: input.completionMode,
+  };
+  CARE_EVENTS.push(event);
+
+  const key = `${id}:${input.startsAt}`;
+  const base = {
+    key,
+    eventId: id,
+    clientId: input.clientId,
+    title: input.title,
+    description: input.description,
+    start: input.startsAt,
+    durationMinutes: input.durationMinutes,
+  };
+
+  if (input.completionMode === "manual") {
+    (OCCURRENCES_BY_CLIENT_ID[input.clientId] ??= []).push({ ...base, status: "planned" });
+  } else {
+    (PLAIN_EVENT_OCCURRENCES_BY_CLIENT_ID[input.clientId] ??= []).push({ ...base, kind: "event" });
+  }
+  return id;
 }

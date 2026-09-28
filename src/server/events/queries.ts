@@ -30,6 +30,14 @@ export interface TaskLogQueryInput {
 }
 
 /**
+ * Lower bound `getTaskLog`'s Supabase read expands from (FAM-02): any date before this app can
+ * have created a `care_events` row. Recurrence expansion steps forward from each event's own
+ * anchor regardless of how much earlier `range.from` is (src/lib/recurrence `expand.ts`), so this
+ * never truncates real history and never costs extra work.
+ */
+const TASK_LOG_EARLIEST_DATE = "2000-01-01";
+
+/**
  * Asks a read to include plain events (UI-05, CHG-009): `all` gives tasks and
  * plain events, `tasks` only tasks, `events` only plain events. A read with
  * this option returns `AnyOccurrence`; check `isPlainEvent()` before reading a
@@ -108,7 +116,18 @@ export async function getTaskLog(
   if (mode === "mock") {
     return mock.getTaskLog(clientId, parsed);
   }
-  notImplementedForSupabase("events", "getTaskLog");
+
+  // FAM-02 (OQ-31, proposed default): reads up to the end of today, oldest bound fixed rather
+  // than unbounded, since a range is what `loadOccurrences` needs. `expandOccurrences` always
+  // steps forward from each event's own anchor (src/lib/recurrence `expand.ts`), never from
+  // `range.from`, so an earlier bound here never costs extra work — it only has to predate every
+  // event this app will ever hold. Filtering, ordering, paging and `total` reuse the mock's own pure
+  // `queryTaskLog`, so both data sources answer identically for the same rows.
+  const today = await getToday();
+  const { loadOccurrences, melbourneDaysToInstants } = await import("./occurrences");
+  const range = melbourneDaysToInstants({ from: TASK_LOG_EARLIEST_DATE, to: today });
+  const occurrences = await loadOccurrences(clientId, range, new Date());
+  return mock.queryTaskLog(occurrences, parsed);
 }
 
 /**

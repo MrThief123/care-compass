@@ -137,14 +137,14 @@ Tokens from Figma "01 · Foundations" (CONFIRMED values):
 - `profiles.role ∈ {family, carer, admin}` read live in policies (ADR-03).
 - Family access: `client_family_members` link.
 - Admin access: `clients.organisation_id = profile.organisation_id`.
-- Carer read access: active row in `carer_client_assignments` (definition OQ-09).
+- Carer read access: a non-cancelled shift with the client whose end is after now — `is_assigned_carer(client_id)` (PD-041, F0-18; no separate assignment table).
 - Carer write access: `carer_on_active_shift(client_id)` (CM-0409).
 - Admin cannot edit client info (UI-D28).
 - Helper functions: `current_profile()`, `is_family_of()`, `is_admin_of_client()`, `is_assigned_carer()`, `carer_on_active_shift()` — `SECURITY DEFINER`, `STABLE`, `SET search_path = public`.
 - Route-group layouts also check role server-side for UX redirects; **RLS remains the security boundary**.
 
 ### 5.3 Organisation transfer (CONFIRMED semantics UI-D24, ADR-03)
-One transaction: set new organisation → end active carer assignments → cancel shifts starting after now → audit. Routines, events, budgets, documents and history retained. Outgoing admin/carers lose access immediately because policies read live data.
+One transaction: set new organisation → cancel future shifts, end the in-progress one → audit. Routines, events, budgets, documents and history retained. Outgoing admin/carers lose access immediately because policies read live data — carer read access follows the same shifts this step just cancelled/ended (F0-18), so nothing separate needs ending.
 
 ---
 
@@ -158,7 +158,6 @@ The Confluence ERD (Organisation, Carer, Shift, Shift_has_Carer, Clients, Budget
 | profiles | 1:1 with auth.users; role, organisation, names, contact, job_title, is_active | F0-06 |
 | clients | Person receiving care; current organisation_id; DOB; suburb; avatar | F0-06 |
 | client_family_members | Family authority links | F0-06 |
-| carer_client_assignments | Carer ↔ client access periods | F0-06 |
 | audit_log | Append-only change log | F0-08 |
 | shifts | Carer–client time windows (no recurrence) | F0-10 |
 | care_events | Event series or one-off (title, description, start, duration, recurrence, `completion_mode`: `manual` = task, `automatic` = plain event; PD-044, CHG-009) | F0-11 |

@@ -12,14 +12,30 @@ Tests are written **before** production code (TESTING.md §2). Run them, confirm
 
 | Test ID | Covers | Level | Test description | Written first? | Result |
 |---|---|---|---|---|---|
-| T-01 | AC-01 | e2e | Family sign-up with client 'Harold Smith' lands on `/family/<Harold id>/home`; Harold has null `organisation_id`; a `client_family_members` row links the new profile. | ☐ | — |
-| T-02 | AC-02 | integration | Organisation sign-up creates 'Wattle Care' and an `admin` profile with that `organisation_id`; `redirectTo` equals what `signIn` returns for an existing admin. | ☐ | — |
-| T-03 | AC-03 | integration | Missing field, mismatched passwords and short password each return a field error; no auth user or table rows are created. | ☐ | — |
-| T-04 | AC-04 | integration | Sign-up with an existing email returns the 'already exists' error; row counts in `profiles`, `clients`, `organisations` are unchanged. | ☐ | — |
-| T-05 | AC-05 | db | The registration function called with role `carer` raises; no `profiles` row exists for the caller. | ☐ | — |
-| T-06 | AC-06 | integration | A crafted sign-up carrying Banksia's organisation id and Margaret's client id creates an account linked to neither; the new session reads zero Banksia/Margaret rows. | ☐ | — |
-| T-07 | AC-07 | db | As a signed-up family user and as a signed-up admin, updating own `role`, `organisation_id` or `is_active` is rejected; rows unchanged. Calling the registration function a second time is rejected. | ☐ | — |
-| T-08 | AC-08 | e2e | `/sign-up` renders in the auth layout with the shared components; conditional fields switch with account type; no carer option; carer help text; the links between the sign-in and sign-up pages work. | ☐ | — |
+| T-01 | AC-01 | e2e | Family sign-up with client 'Harold Smith' lands on `/family/<Harold id>/home`; Harold has null `organisation_id`; a `client_family_members` row links the new profile.  | ☑ | PASS |
+| T-02 | AC-02 | integration | Organisation sign-up creates 'Wattle Care' and an `admin` profile with that `organisation_id`; `redirectTo` equals what `signIn` returns for an existing admin.  | ☑ | PASS |
+| T-03 | AC-03 | integration | Missing field, mismatched passwords and short password each return a field error; no auth user or table rows are created.  | ☑ | PASS |
+| T-04 | AC-04 | integration | Sign-up with an existing email returns the 'already exists' error; row counts in `profiles`, `clients`, `organisations` are unchanged.  | ☑ | PASS |
+| T-05 | AC-05 | db | The registration function called with role `carer` raises; no `profiles` row exists for the caller.  | ☑ | PASS |
+| T-06 | AC-06 | integration | A crafted sign-up carrying Banksia's organisation id and Margaret's client id creates an account linked to neither; the new session reads zero Banksia/Margaret rows.  | ☑ | PASS |
+| T-07 | AC-07 | db | As a signed-up family user and as a signed-up admin, updating own `role`, `organisation_id` or `is_active` is rejected; rows unchanged. Calling the registration function a second time is rejected.  | ☑ | PASS |
+| T-08 | AC-08 | e2e | `/sign-up` renders in the auth layout with the shared components; conditional fields switch with account type; no carer option; carer help text; the links between the sign-in and sign-up pages work.  | ☑ | PASS |
+
+## Added tests (not in the original plan)
+All tagged `[F0-17][PRD]` or `[F0-17][AC-nn]` and live in the same files as the planned tests.
+- e2e: a signed-in user who opens `/sign-up` is sent to their own home (PRD Error / Edge Cases); field errors shown on `/sign-up` for a missing field and short, mismatched passwords (AC-03 at the UI).
+- pgTAP: family and admin registration create the right rows and nothing else (AC-01, AC-02, AC-06); blank names and a missing client or organisation name are rejected (AC-03); authenticated users cannot insert into `organisations` or `profiles` directly; `discard_unregistered_account()` removes only a caller's own profile-less auth user.
+
+## Test changes after writing
+- `supabase/tests/sign_up.test.sql`: `plan(38)` corrected to `plan(42)`. A miscount of my own assertions; no assertion was changed or removed (FD-07).
+- `tests/integration/shared-sign-up.test.ts` T-04: the "no session" check was `cookieStore.size === 0`. Supabase's PKCE flow writes `...-code-verifier` cookies even for a rejected sign-up, so it now asserts that no cookie other than those exists. The intent (no session created) is unchanged (FD-07).
+
+- Integration tests and the account-creating e2e tests (T-01, the signed-in redirect, T-02, T-03, T-04, T-06) run only when `NEXT_PUBLIC_SUPABASE_URL` is a local address; otherwise they skip (FD-07, as F0-11, FAM-12 and FAM-13 do). CI's `unit` and `e2e` jobs use repository secrets for a hosted project, so they skip there.
+
+## How the tests were run (2026-09-27)
+- pgTAP: `npx supabase migration up --local`, then `npx supabase test db`: PASS (7 files).
+- Integration and e2e: against the **local** stack, with `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` and `SUPABASE_SERVICE_ROLE_KEY` taken from `npx supabase status -o env` and exported for the command (build and test). `.env.local` currently points at a hosted Supabase project, which does not have the migration (see PROGRESS.md, Problems).
+- e2e: `npm run build`, then `npx playwright test tests/e2e/sign-up.spec.ts tests/e2e/auth.spec.ts`: 9 passed (7 F0-17, 2 F0-07 regression).
 
 ## Regression scope
 - Re-run F0-07's tests (`tests/integration/shared-authentication.test.ts`, `tests/e2e/auth.spec.ts`). `/sign-in` gains a link, and nothing else in it may change.

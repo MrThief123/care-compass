@@ -2,7 +2,8 @@
  * Rail navigation contents per role (F0-15 PRD.md Scope: "Family items:
  * Home · Info · Calendar · Budget · Settings. Carer: Home · Patients ·
  * Calendar · Settings. Admin: Home · Manage · Staff · Clients ·
- * Settings."). The single source both `Rail` (nav list) and `ScreenTitle`
+ * Settings."). Carer has no Calendar item since CHG-031 merged it into
+ * Carer Home. The single source both `Rail` (nav list) and `ScreenTitle`
  * (header screen name derived from the route) read from.
  */
 import type { IconName } from "@/components/ui/icon";
@@ -25,7 +26,6 @@ export const RAIL_NAV_ITEMS: Record<Role, RailNavItemConfig[]> = {
   carer: [
     { segment: "home", label: "Home", icon: "home" },
     { segment: "patients", label: "Patients", icon: "person" },
-    { segment: "calendar", label: "Calendar", icon: "calendar" },
     { segment: "settings", label: "Settings", icon: "sliders" },
   ],
   admin: [

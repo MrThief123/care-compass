@@ -1,20 +1,19 @@
 # Progress — FAM-03 Family Home — Budget strip
 
-Status: NOT STARTED
-Owner: unclaimed
+Status: IN PROGRESS
+Owner: MrThief123
 Lane: F — Family
 Sprint: SPRINT · planned D8
-Branch: `feature/family-home-budget-strip` (not yet created)
+Branch: `feature/family-home-budget-strip`
 PR target: `family-dev`
-Last updated: 2026-09-17 (planning pack generated)
+Last updated: 2026-09-28
 
 ## Blockers
-- OQ-03 — Budget threshold percentages
-- OQ-04 — Funding model: buckets, categories and periods
+- None — OQ-03 and OQ-04 are ANSWERED (root DECISIONS.md)
 
 ## Dependencies status
-- F0-12 — NOT STARTED
-- FAM-UI-01 — NOT STARTED
+- F0-12 — MERGED
+- FAM-UI-01 — MERGED
 
 ## Completed
 - Feature documentation drafted (Claude Chat planning pack)

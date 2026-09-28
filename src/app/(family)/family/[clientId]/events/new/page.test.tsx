@@ -1,7 +1,7 @@
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { axe } from "jest-axe";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const router = vi.hoisted(() => ({ back: vi.fn(), push: vi.fn(), replace: vi.fn() }));
 
@@ -77,6 +77,8 @@ describe("[FAM-UI-03] /family/[clientId]/events/new (real mock contract, DATA_SO
     const [firstDay] = screen.getAllByTestId(/^date-picker-day-/);
     await user.click(firstDay!);
     expect(screen.getByLabelText("Date")).not.toHaveValue("");
+    // FAM-06: Title is required to save.
+    await user.type(screen.getByLabelText("Title"), "Physiotherapy");
     await user.click(screen.getByRole("button", { name: "Save event" }));
 
     expect(router.push).toHaveBeenCalledExactlyOnceWith("/family/client-margaret/home");
@@ -108,6 +110,8 @@ describe("[FAM-UI-03] /family/[clientId]/events/new (real mock contract, DATA_SO
 
     const [firstDay] = screen.getAllByTestId(/^date-picker-day-/);
     await user.click(firstDay!);
+    // FAM-06: Title is required to save.
+    await user.type(screen.getByLabelText("Title"), "Physiotherapy");
     await user.click(screen.getByRole("button", { name: "Save event" }));
 
     expect(router.push).toHaveBeenCalledExactlyOnceWith(
@@ -140,5 +144,50 @@ describe("[FAM-UI-03] /family/[clientId]/events/new (real mock contract, DATA_SO
     await user.click(screen.getByRole("button", { name: "Save event" }));
 
     expect(await axe(container)).toHaveNoViolations();
+  });
+});
+
+/*
+ * [FAM-06][AC-03]: "Pick a date" shows a dot on every day that already has an occurrence, and
+ * fills the selected day. The PRD's example days (24, 26, 27 November) predate the current
+ * fixtures, where daily-repeating medication tasks give every day in November 2026 a dot
+ * (DECISIONS.md FD-01) — December 2026 has partial coverage (1-5 only) and proves the same
+ * mechanism without that blanket coverage masking a mistake.
+ */
+describe("[FAM-06][AC-03] Add event's Pick a date panel", () => {
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date("2026-12-15T09:00:00+11:00"));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("[FAM-06][AC-03] shows a dot on each of 1-5 December, and none on 6 December", async () => {
+    await renderNew();
+
+    for (const day of ["01", "02", "03", "04", "05"]) {
+      expect(screen.getByTestId(`date-picker-day-2026-12-${day}`)).toHaveAttribute(
+        "data-has-items",
+        "true",
+      );
+    }
+    expect(screen.getByTestId("date-picker-day-2026-12-06")).toHaveAttribute(
+      "data-has-items",
+      "false",
+    );
+  });
+
+  it("[FAM-06][AC-03] the selected day is filled once picked", async () => {
+    const user = userEvent.setup();
+    await renderNew();
+
+    const day = screen.getByTestId("date-picker-day-2026-12-01");
+    expect(day).toHaveAttribute("aria-pressed", "false");
+
+    await user.click(day);
+
+    expect(day).toHaveAttribute("aria-pressed", "true");
   });
 });

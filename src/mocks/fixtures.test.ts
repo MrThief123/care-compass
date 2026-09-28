@@ -522,8 +522,8 @@ describe("[UI-04][AC-10] fixture integrity", () => {
       "client-jean",
     ]);
     expect(CLIENTS.find((client) => client.id === "client-robert")).toMatchObject({
-      dob: "1945-03-18",
-      suburb: "Croydon",
+      dob: "1944-03-18",
+      suburb: "Reservoir VIC",
     });
     expect(STAFF_FULL_NAMES).toEqual([
       "Aisha Rahman",
