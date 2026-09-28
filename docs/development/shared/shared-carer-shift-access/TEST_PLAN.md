@@ -33,5 +33,13 @@ None of the four rewrites removed test coverage — each retired assertion has a
 replacement using shifts/`is_assigned_carer` instead of the retired table. Each is recorded
 in DECISIONS.md.
 
+Two more turned up after merge, found by CI rather than by this feature's own search (FD-03):
+- `supabase/tests/budget.test.sql` (F0-12) — its seed's `carer_client_assignments` insert
+  deleted; the seed's own `shifts` row already grants the access under test.
+- `tests/integration/care-events.test.ts` and `tests/integration/family-add-event.test.ts` —
+  both called `.insert()` on the dropped table without checking the result, so it had been
+  failing silently; deleted, since each test needing Aisha assigned already seeds its own
+  `shifts` row.
+
 ## Regression scope
 - Full `supabase test db`, unit suite, typecheck (regenerated types).

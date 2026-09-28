@@ -1,12 +1,12 @@
 # Progress — F0-18 Carer view access derived from shifts
 
-Status: IMPLEMENTED
+Status: MERGED TO DEV
 Owner: MrThief123
 Lane: B — Backend
 Sprint: SPRINT · planned D8
 Branch: `feature/shared-carer-shift-access`
 PR target: `main (per OQ-01 — shared work)`
-Last updated: 2026-09-27 (implemented; ready for review)
+Last updated: 2026-09-28
 
 ## Blockers
 - None
@@ -29,7 +29,16 @@ Last updated: 2026-09-27 (implemented; ready for review)
 - None
 
 ## Remaining
-- Human review; then push (already pushed) and open the PR to `main`
+- None — see FD-03 for a post-merge fix that was needed
+
+## Merged — 2026-09-27
+- PR #132 (https://github.com/MrThief123/care-compass/pull/132) merged to `main`.
+
+## Post-merge fix — 2026-09-28
+- CI on `main` failed `supabase test db` (`budget.test.sql` still seeded the dropped
+  `carer_client_assignments` table). Fixed on `fix/budget-test-carer-client-assignments`
+  along with two more silently-failing Vitest seeds of the same table found by the same
+  grep. See DECISIONS.md FD-03.
 
 ## Acceptance criteria status
 - 9 / 9 MET
