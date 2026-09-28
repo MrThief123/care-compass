@@ -1,6 +1,6 @@
 # Progress — FAM-07 Family — Edit event
 
-Status: IN PROGRESS
+Status: READY FOR PR
 Owner: MrThief123
 Lane: F — Family
 Sprint: SPRINT · planned D10
@@ -15,40 +15,63 @@ Last updated: 2026-09-28
 - FAM-06 — MERGED
 
 ## Completed
-- Feature documentation drafted (Claude Chat planning pack)
+- Traced the gap: FAM-UI-03 already built the Edit event route/screen and wired it to call
+  `getEvent`/`getOccurrence`/`getEventDocuments`/`getBudgetSummary`, but Save was still Phase 1
+  (local state only) and three of those four read functions had no Supabase branch.
+- Wired `getEvent`, `getOccurrence` (delegates to the already-Supabase-wired `getOccurrences`) and
+  `getEventDocuments`'s Supabase branches (FD-03).
+- Implemented `updateEvent` (`src/server/events/actions.ts`): series-wide fields always update the
+  event directly; Date/Start time is scope-sensitive (occurrence override vs. series, refused for
+  a recurring event's series scope to protect occurrence identity) — FD-01.
+- Added Title/Start time/Duration (PD-047) to Edit event too (previously Add event only), and the
+  scope selector (PD-045) — shown only for a recurring event, "This and future" disabled pending
+  human review (FD-02).
+- Regenerated `database.types.ts` (stale again since before F0-12/F0-18).
 
 ## In progress
 - None
 
 ## Remaining
-- Route `/family/[clientId]/events/[eventId]/edit?occurrence=<originalStart>`; header title 'Edit event'.
-- Prefilled EventForm; Status chips Planned / Done / Overdue per OQ-10 resolution.
-- Edit scope (this occurrence / this and future / entire series) per OQ-11 — not built until answered.
-- Save writes event update or occurrence override; history (completions) untouched.
-- Entry points: clicking an event block in FAM-04 and 'Edit' in Task detail (FAM-15).
+- "This and future" (the third PD-045 scope) — FD-02, HUMAN REVIEW requested.
 
 ## Acceptance criteria status
-- 0 / 4 MET
+- 4 / 4 MET
 
 ## Tests
-- Written: 0 / 4
-- Passing: 0
+- Written: 4 component-level (page.test.tsx) + 5 component-level (event-form-edit.test.tsx,
+  AC-03/scope) + 8 integration (tests/integration/family-edit-event.test.ts)
+- Passing: all — full Vitest suite (2048 passed / 47 skipped), `supabase test db` (401/401), full
+  `tests/integration` (61/62 — the 1 failure is the pre-existing `[F0-07][AC-10]` TOTP issue),
+  `npm run typecheck`/`lint`/`prettier --check`/`build`, and this dashboard's Playwright e2e specs
 - Failing: 0
 
 ## Files changed
-- None yet. Likely files: `src/app/(family)/family/[clientId]/events/[eventId]/edit/page.tsx`, `src/server/events/actions.ts`
+- `src/server/events/actions.ts` — `updateEvent`; `parseOccurrenceKey`/`RECURRENCE_TO_DB` moved out
+- `src/server/events/occurrence-key.ts`, `src/server/events/recurrence-mapping.ts` — new, shared
+- `src/server/events/queries.ts` — `getEvent`/`getOccurrence` Supabase branches
+- `src/server/documents/queries.ts` — `getEventDocuments` Supabase branch
+- `src/mocks/queries/events.ts` — mock `updateEvent`
+- `src/features/family-event-form/event-form-screen.tsx` — edit-mode Save wiring
+- `src/features/family-event-form/edit-scope.ts`, `edit-scope-fields.tsx` — new
+- `src/features/family-event-form/event-details.ts` — `editEventDetailsValues`
+- `src/app/(family)/family/[clientId]/events/[eventId]/edit/page.tsx` — new props
+- `src/lib/supabase/database.types.ts` — regenerated
+- Tests: `events/[eventId]/edit/page.test.tsx`, `event-form-edit.test.tsx` (new),
+  `event-form-cost.test.tsx` (updated), `tests/integration/family-edit-event.test.ts` (new);
+  removed 3 pre-existing "not implemented" unit tests this feature made false (FD-03)
 
 ## Decisions
-- See DECISIONS.md
+- See DECISIONS.md (FD-01 scope-sensitivity model, FD-02 HUMAN REVIEW — "this and future",
+  FD-03 read-side wiring, FD-04 a shared-kit `ChipGroup` bug discovered and worked around)
 
 ## Problems encountered
-- None
+- `[F0-07][AC-10]` (TOTP) fails locally — pre-existing, local Supabase has TOTP enroll disabled.
 
 ## Assumptions
 - PROPOSED items in PRD.md are unconfirmed until validated in F0-01 or answered in DECISIONS.md.
 
 ## Next action
-- Wait for answers to OQ-10, OQ-11, OQ-22; then complete dependencies, run START FEATURE FAM-07, and write the tests in TEST_PLAN.md first.
+- Human reviews FD-02 ("this and future"); then push (already done) and open the PR to `main`.
 
 ## Ready for PR
-- No
+- Yes, pending FD-02 review.
