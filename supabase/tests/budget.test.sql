@@ -40,9 +40,8 @@ insert into client_family_members (client_id, profile_id) values
   ('b1111111-1111-1111-1111-111111111111', 'a1111111-1111-1111-1111-111111111111'),
   ('b2222222-2222-2222-2222-222222222222', 'a5555555-5555-5555-5555-555555555555');
 
-insert into carer_client_assignments (carer_id, client_id, organisation_id, started_at) values
-  ('a3333333-3333-3333-3333-333333333333', 'b1111111-1111-1111-1111-111111111111', '11111111-1111-1111-1111-111111111111', now() - interval '3 days');
-
+-- `carer_client_assignments` is retired (F0-18, PD-041): read access derives solely from
+-- an active, uncancelled shift, so this row alone is what grants Aisha access to Margaret.
 insert into shifts (client_id, carer_id, starts_at, ends_at) values
   ('b1111111-1111-1111-1111-111111111111', 'a3333333-3333-3333-3333-333333333333', now() - interval '1 hour', now() + interval '1 hour');
 

@@ -28,6 +28,39 @@
 - Consequences: `database.types.ts` is now a true reflection of the schema; any future feature that hit this same wall no longer will. `src/app/dev-preview-database` keeps working exactly as before (a bare connectivity check).
 - Human confirmation required: no (mechanical; verified with `npm run build`, full `tsc`, and the full test suite)
 
+### FD-03 — Three more `carer_client_assignments` users missed by FD-01's audit, found by CI
+- Date: 2026-09-28
+- Context: FD-01 rewrote every file this feature's own search found. CI on `main` (PR #143's
+  run) then failed `supabase test db` with `relation "carer_client_assignments" does not
+  exist` in `supabase/tests/budget.test.sql` (F0-12, merged the same day as this feature,
+  after this feature's own audit ran) — its seed still inserted into the dropped table.
+  Chasing the same pattern with `grep -rl carer_client_assignments src tests supabase` found
+  two more silent cases: `tests/integration/care-events.test.ts` and (copied from it by the
+  fork that implemented FAM-06) `tests/integration/family-add-event.test.ts` both called
+  `admin.from("carer_client_assignments").insert(...)` without checking `.error`, so the
+  insert had been failing silently in every run since this feature merged — it just happened
+  not to change either file's test outcome, since each test that needed Aisha's access
+  already created its own `shifts` row inline.
+- Decision: fixed on `fix/budget-test-carer-client-assignments` (from `main`): deleted the
+  dead insert in `budget.test.sql` (the seed's own subsequent `shifts` row already grants the
+  access `is_assigned_carer()` checks) and in both Vitest files (each test needing Aisha
+  assigned already seeds its own `shifts` row; `family-add-event.test.ts`'s case actually
+  wanted her *not* assigned, so removing it is the correct fix, not just a no-op cleanup).
+- Reason: same as FD-01 — the table is gone; anything that seeded it would fail or silently
+  no-op regardless of which feature owns the file. `budget.test.sql`'s failure was live and
+  blocking `main`'s CI; the two Vitest cases were latent (passing by accident, not by proof).
+- Alternatives considered: none — leaving `main`'s CI red, or leaving a silently-failing
+  insert that happened to not matter yet, were never options.
+- Consequences: `supabase test db` is green on `main` again (401 assertions, 10 files). The
+  two Vitest seeds no longer perform a doomed insert every run.
+- Human confirmation required: no — mechanical continuation of FD-01, verified with
+  `supabase test db`, `tsc --noEmit`, `npm run lint`, `npx prettier --check`, the full
+  `tests/integration` run (14/15 files; the 1 failure is the pre-existing, unrelated local
+  TOTP/MFA-enroll-disabled issue), the full Vitest suite (1980 passed / 39 skipped), and
+  `npm run build`.
+- Test changes caused: none — no assertion added, changed or removed; only dead/silently-
+  failing seed statements removed.
+
 ### Process note — regeneration verified before committing
 `npm run db:types` was run against the local stack after this migration, producing about
 700 changed lines (in line with F0-08's/F0-12's earlier estimate of ~1,500 for a bigger gap).
