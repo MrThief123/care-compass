@@ -1,20 +1,18 @@
 # Progress — FAM-07 Family — Edit event
 
-Status: NOT STARTED
-Owner: unclaimed
+Status: IN PROGRESS
+Owner: MrThief123
 Lane: F — Family
 Sprint: SPRINT · planned D10
-Branch: `feature/family-edit-event` (not yet created)
-PR target: `family-dev`
-Last updated: 2026-09-17 (planning pack generated)
+Branch: `feature/family-edit-event` (from `main`)
+PR target: `main` (dashboard features now branch from and target `main` directly, not the dev branches)
+Last updated: 2026-09-28
 
 ## Blockers
-- OQ-10 — Status behaviour and undo
-- OQ-11 — Editing recurring events: scope
-- OQ-22 — Event fields
+- None — OQ-10, OQ-11 and OQ-22 are ANSWERED (root DECISIONS.md: PD-044/CHG-009, PD-045, PD-047)
 
 ## Dependencies status
-- FAM-06 — NOT STARTED
+- FAM-06 — MERGED
 
 ## Completed
 - Feature documentation drafted (Claude Chat planning pack)
