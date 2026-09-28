@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { costValuesFromEvent } from "@/features/family-event-form/event-cost";
+import { editEventDetailsValues } from "@/features/family-event-form/event-details";
 import { EventFormScreen } from "@/features/family-event-form/event-form-screen";
 import {
   EMPTY_EVENT_VALUES,
@@ -47,9 +48,12 @@ function renderEdit() {
     <EventFormScreen
       mode="edit"
       clientId={CLIENT_ID}
+      eventId={physio.id}
+      occurrenceOriginalStart={physio.start}
       initialValues={editEventValues(physio)}
       initialIsTask={isTaskEvent(physio)}
       initialCost={costValuesFromEvent(physio)}
+      initialDetails={editEventDetailsValues(physio)}
       buckets={buckets}
       month="2026-11-30"
       documents={[]}

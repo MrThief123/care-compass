@@ -6,10 +6,11 @@ import { useState } from "react";
 import { EventForm, type EventFormValues } from "@/components/shared/forms";
 import { DocumentTile } from "@/features/family-task-detail/document-tile";
 import type { LocalDate } from "@/lib/dates/week-range";
-import { createEvent } from "@/server/events/actions";
+import { createEvent, updateEvent } from "@/server/events/actions";
 import type { BudgetBucketSummary, EventDocument } from "@/types/domain";
 
 import { AddFileTile } from "./add-file-tile";
+import { EditScopeFields } from "./edit-scope-fields";
 import {
   EMPTY_EVENT_COST,
   hasCostText,
@@ -17,14 +18,25 @@ import {
   type EventCostValues,
 } from "./event-cost";
 import { EventCostFields } from "./event-cost-fields";
-import { EMPTY_EVENT_DETAILS, parseEventDetails, validateEventDetails } from "./event-details";
+import {
+  EMPTY_EVENT_DETAILS,
+  parseEventDetails,
+  validateEventDetails,
+  type EventDetailsValues,
+} from "./event-details";
 import { EventDetailsFields } from "./event-details-fields";
 import { TaskSwitch } from "./task-switch";
+
+import type { EditScope } from "./edit-scope";
 
 export interface EventFormScreenProps {
   mode: "add" | "edit";
   /** The client the event belongs to (FAM-06: who `createEvent` saves it for). */
   clientId: string;
+  /** The event being edited; absent on Add event. */
+  eventId?: string;
+  /** The viewed occurrence's original start (its identity, PD-004) — Edit event only. */
+  occurrenceOriginalStart?: string;
   initialValues: EventFormValues;
   /** The task switch's starting value (CHG-009): on for a new event. */
   initialIsTask: boolean;
@@ -37,6 +49,8 @@ export interface EventFormScreenProps {
   buckets: BudgetBucketSummary[];
   /** The event's saved cost and bucket on Edit event; none on Add event. */
   initialCost?: EventCostValues;
+  /** Title, Start time and Duration (PD-047): the event's own, on Edit; empty on Add. */
+  initialDetails?: EventDetailsValues;
   /** Where Save event and Cancel go (CHG-015, `event-form-return.ts`); already validated. */
   returnHref: string;
 }
@@ -44,15 +58,16 @@ export interface EventFormScreenProps {
 const TITLES = { add: "Add event", edit: "Edit event" } as const;
 
 /**
- * Family · Add event and Edit event (FAM-UI-03, FAM-06). Add event persists through
- * `createEvent` (FAM-06); Edit event is still Phase 1 (every change is local state, gone on
- * reload) — persisting an edit is FAM-07. Save event validates (EventForm, then Cost/Paid
- * from and, on Add, Title/Start time/Duration) and only then saves; Cancel goes to
+ * Family · Add event and Edit event (FAM-UI-03, FAM-06, FAM-07). Add event persists through
+ * `createEvent`; Edit event through `updateEvent`. Save event validates (EventForm, then
+ * Cost/Paid from and Title/Start time/Duration) and only then saves; Cancel goes to
  * `returnHref` without changes (FD-04, CHG-015).
  */
 export function EventFormScreen({
   mode,
   clientId,
+  eventId,
+  occurrenceOriginalStart,
   initialValues,
   initialIsTask,
   month,
@@ -60,6 +75,7 @@ export function EventFormScreen({
   documents,
   buckets,
   initialCost = EMPTY_EVENT_COST,
+  initialDetails = EMPTY_EVENT_DETAILS,
   returnHref,
 }: EventFormScreenProps) {
   const router = useRouter();
@@ -67,8 +83,9 @@ export function EventFormScreen({
   const [isTask, setIsTask] = useState(initialIsTask);
   const [cost, setCost] = useState(initialCost);
   const [costErrors, setCostErrors] = useState<Record<string, string>>({});
-  const [details, setDetails] = useState(EMPTY_EVENT_DETAILS);
+  const [details, setDetails] = useState(initialDetails);
   const [detailsErrors, setDetailsErrors] = useState<Record<string, string>>({});
+  const [scope, setScope] = useState<EditScope>("occurrence");
   const [saveError, setSaveError] = useState<string>();
   const [uploadNotice, setUploadNotice] = useState(false);
   const hasSavedCost = hasCostText(initialCost);
@@ -83,25 +100,41 @@ export function EventFormScreen({
     setDetailsErrors({});
   }
 
-  // EventForm has already checked its own fields (Date); Cost (FD-02) and, on Add, Title/Start
-  // time/Duration are checked here, then the event is created (FAM-06) before navigating away.
+  // EventForm has already checked its own fields (Date); Cost (FD-02) and Title/Start
+  // time/Duration are checked here, then the event is created or updated before navigating away.
   async function save() {
     const nextCostErrors = validateEventCost(cost, buckets);
-    const nextDetailsErrors = mode === "add" ? validateEventDetails(details) : {};
+    const nextDetailsErrors = validateEventDetails(details);
     setCostErrors(nextCostErrors);
     setDetailsErrors(nextDetailsErrors);
     if (Object.keys(nextCostErrors).length > 0 || Object.keys(nextDetailsErrors).length > 0) {
       return;
     }
+    const parsedDetails = parseEventDetails(details)!;
+    setSaveError(undefined);
 
     if (mode === "edit") {
-      // Persisting an edit is FAM-07; unchanged from Phase 1 until then.
+      const result = await updateEvent({
+        clientId,
+        eventId: eventId!,
+        occurrenceOriginalStart: occurrenceOriginalStart!,
+        title: parsedDetails.title,
+        description: values.description,
+        date: values.date,
+        startTime: parsedDetails.startTime,
+        durationMinutes: parsedDetails.durationMinutes,
+        recurrence: values.recurrence,
+        isTask,
+        scope,
+      });
+      if (!result.ok) {
+        setSaveError(result.error.message);
+        return;
+      }
       router.push(returnHref);
       return;
     }
 
-    const parsedDetails = parseEventDetails(details)!;
-    setSaveError(undefined);
     const result = await createEvent({
       clientId,
       title: parsedDetails.title,
@@ -134,14 +167,12 @@ export function EventFormScreen({
         className="lg:grid-cols-[minmax(0,1fr)_21rem] lg:gap-10"
         extraFields={
           <>
-            {/* Title, Start time and Duration (OQ-22/PD-047): Add event only — Edit event's
-                persistence is FAM-07, so these would show blank, misleading state there. */}
-            {mode === "add" && (
-              <EventDetailsFields
-                values={details}
-                onChange={changeDetails}
-                errors={detailsErrors}
-              />
+            {/* Title, Start time and Duration (OQ-22/PD-047). */}
+            <EventDetailsFields values={details} onChange={changeDetails} errors={detailsErrors} />
+            {/* PD-045: only meaningful for a recurring event — a one-off's one occurrence is
+                its whole series, so there is nothing to choose between. */}
+            {mode === "edit" && values.recurrence !== "none" && (
+              <EditScopeFields value={scope} onChange={setScope} />
             )}
             <TaskSwitch checked={isTask} onChange={setIsTask} />
             <EventCostFields

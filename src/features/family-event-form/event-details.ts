@@ -1,6 +1,8 @@
 import { z } from "zod";
 
 import { fieldErrors } from "@/components/shared/forms";
+import { instantToMelbourneLocal } from "@/lib/dates/melbourne-time";
+import type { CareEvent, Occurrence } from "@/types/domain";
 
 /**
  * Title, Start time and Duration (OQ-22/PD-047): first-class event fields the
@@ -50,6 +52,25 @@ export function validateEventDetails(values: EventDetailsValues): Record<string,
     });
   const result = fieldErrors(schema, values);
   return result.ok ? {} : result.errors;
+}
+
+/**
+ * Edit event's Title/Start time/Duration (PD-047): the series title, and the
+ * viewed occurrence's own start time and duration (its `start`/`durationMinutes`
+ * already reflect any per-occurrence override, same as `editEventValues`'s
+ * `date`). With no occurrence, the event's own anchor.
+ */
+export function editEventDetailsValues(
+  event: CareEvent,
+  occurrence?: Occurrence,
+): EventDetailsValues {
+  const start = occurrence?.start ?? event.start;
+  const durationMinutes = occurrence?.durationMinutes ?? event.durationMinutes;
+  return {
+    title: event.title,
+    startTime: instantToMelbourneLocal(start).slice(11, 16),
+    duration: String(durationMinutes),
+  };
 }
 
 /** What the form holds once valid: trimmed title, `HH:mm` start time, whole minutes. */
