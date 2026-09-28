@@ -7,10 +7,10 @@ Plan v0.2 · The status section below is **generated** — run `node scripts/pla
 |---|---|
 | Stage | **G1 — Plan validated** (F0-01 merged; `docs/VALIDATION_REPORT.md` approved 2026-09-17 — planning freeze in DECISIONS.md §1) |
 | Sprint | 2 weeks, parallel lanes — see `docs/SPRINT_PLAN.md` |
-| Merged to main | All of lane S, F0-11 to F0-13, F0-17, F0-18, all FAM-UI/FAM features up to FAM-14 are on `main`. F0-12 (budget schema) merged 2026-09-27; only F0-16 (seed data) is left unstarted in lane B. |
-| Merged to a dev branch only | `admin-dev`: ADM-UI-01 to 05 (all five Admin UI screens, PRs #95-97, #130, #134). `carer-dev`: CAR-UI-01 to 04 (all four Carer UI screens, PRs #124-127). Neither lane's UI work is on `main` yet. |
-| Dev branches vs `main` (2026-09-28) | `family-dev`: 0 ahead, 18 behind — safe to fast-forward. `carer-dev`: 0 ahead, 55 behind — safe to fast-forward. `admin-dev`: 25 ahead (its five ADM-UI screens, unmerged to `main`), 119 behind — needs a real merge, not a fast-forward. |
-| Next human actions | Decide whether to merge `admin-dev`'s and `carer-dev`'s UI work into `main` (as was done for family) or keep dashboards on separate dev branches going forward; pick up F0-16 (seed data, now unblocked) and Phase 3 wiring features from the Status section. **`plan-status` on `main` only reflects family/shared work merged to `main`** — read it on `admin-dev`/`carer-dev` for those lanes' true state. |
+| Merged to main | All of lane S, all of lane B except F0-16, all five Admin UI screens (`admin-dev` reconciled into `main`, PR #63), and every Family feature through FAM-07 (Edit event) and FAM-14 (Task log) are on `main`. Only `carer-dev`'s four Carer UI screens are not yet on `main`. |
+| Dev branches vs `main` (2026-09-28) | `family-dev`: 0 ahead, 9 behind — safe to fast-forward, though dashboard features no longer branch from it (see below). `admin-dev`: 0 ahead (fully reconciled), 10 behind. `carer-dev`: 2 ahead (its own docs-sync commits, not feature work), 99 behind — CAR-UI-01 to 04 are still only here (IN REVIEW/PR OPEN to `carer-dev`, PRs #124-127), not on `main`. |
+| Workflow change (2026-09-28) | Dashboard feature branches now branch **from and PR to `main` directly**, not their dashboard's dev branch — `family-dev`/`carer-dev`/`admin-dev` are legacy integration branches from the plan's original per-dashboard model and are no longer the parent for new feature branches. FAM-03, FAM-07, and the `admin-dev` reconciliation itself all landed this way. |
+| Next human actions | Reconcile `carer-dev`'s four merged-but-unlanded Carer UI screens into `main` (the same reconciliation just done for `admin-dev`), or decide to keep sourcing Carer lane features from `carer-dev` a while longer; pick up F0-16 (seed data, now unblocked), FAM-10 (Budget overview, ready to start) and the ADM-0x/ADM-1x wiring features now unblocked by the `admin-dev` merge. |
 | Checkpoints | D7 clickable prototype on fixtures · D10 wired core · D12 release candidate |
 
 ## Progress calculations
@@ -22,9 +22,9 @@ Plan v0.2 · The status section below is **generated** — run `node scripts/pla
 | Risk | Impact | Mitigation |
 |---|---|---|
 | Open decisions still pending (OQ-02, 18, 21, 23, 24, 25, 30, 31, 32, 34, 37, 38, 39) | Features they block stay blocked | Non-blocking ones use their documented default; blocking ones wait for the human |
-| Admin and Carer UI work not on `main` | Their wiring features (ADM-01+, CAR-01+) can't start from `main` until someone decides how those dev branches reconcile | Merge `admin-dev`/`carer-dev` UI work to `main`, or keep sourcing those lanes' next features from their own dev branch |
-| Wiring lags screens | Integration 0/5 | Lane B next: F0-16 (seed data) unblocks FAM-01; F0-12 is merged, unblocking FAM-03/FAM-10/INT-01 |
-| Dev branches behind `main` (family-dev, carer-dev 0 ahead/18-55 behind — safe fast-forward; admin-dev 25 ahead/119 behind — needs a real merge) | A feature branched from a stale dev branch misses recent merges | Fast-forward `family-dev`/`carer-dev` from `main` before branching; reconcile `admin-dev` before its next feature branches |
+| Carer UI work not on `main` | Its wiring features (CAR-01+) can't start from `main` until `carer-dev` reconciles, the same way `admin-dev` just did | Merge `carer-dev`'s CAR-UI-01 to 04 to `main`, or keep sourcing Carer lane features from `carer-dev` a while longer |
+| Wiring lags screens | Integration 0/5 | Lane B next: F0-16 (seed data) unblocks FAM-01; F0-12 is merged — FAM-03 and FAM-07 are done, FAM-10/INT-01 next |
+| Dev branches now unused for new work but still exist (family-dev 0 ahead/9 behind; admin-dev 0 ahead/10 behind; carer-dev 2 ahead/99 behind) | Someone could still branch from a dev branch by habit, missing the workflow change | Branch every new dashboard feature from `main` directly, per the 2026-09-28 workflow change above |
 | Merge conflicts across lanes | Lost time | Folder ownership (CLAUDE.md §4.2); daily syncs; shared changes only via shared PRs |
 | Usage limits per account | Lanes stall mid-feature | One lane per person; END SESSION state before limits; worktrees don't add capacity |
 | GitHub Actions minutes exhausted | CI can't gate PRs | Run the full check suite locally and say so in the PR |
@@ -42,7 +42,7 @@ Generated by `node scripts/plan-status.mjs` on 2026-09-28 — do not edit by han
 | B | 13 | 9 | 2 | 0 | 2 | 0 |
 | A | 11 | 5 | 0 | 5 | 1 | 0 |
 | C | 11 | 0 | 2 | 0 | 7 | 0 |
-| F | 22 | 15 | 1 | 2 | 4 | 0 |
+| F | 22 | 17 | 0 | 1 | 4 | 0 |
 | I | 5 | 0 | 0 | 0 | 5 | 0 |
 
 (Post-sprint features excluded from the summary.)
@@ -54,7 +54,6 @@ Generated by `node scripts/plan-status.mjs` on 2026-09-28 — do not edit by han
 - **ADM-04** Admin — Clients list and add client — lane A, planned D9, branch `feature/admin-clients`
 - **ADM-06** Admin — Manage: staff and client selection — lane A, planned D9, branch `feature/admin-manage-selection`
 - **ADM-10** Admin — Settings — lane A, planned D10, branch `feature/admin-settings`
-- **FAM-07** Family — Edit event — lane F, planned D10, branch `feature/family-edit-event`
 - **FAM-10** Family — Budget overview and history — lane F, planned D10, branch `feature/family-budget-overview`
 
 ### Claimed / in flight
@@ -65,7 +64,6 @@ Generated by `node scripts/plan-status.mjs` on 2026-09-28 — do not edit by han
 - **CAR-UI-04** Carer Settings screen (UI) — PR OPEN — Dhruv Verma
 - **F0-13** Client document storage — IMPLEMENTED — MrThief123
 - **F0-17** Self-serve sign-up for Family and Organisation accounts — IMPLEMENTED — MrThief123
-- **FAM-03** Family Home — Budget strip — IN PROGRESS — MrThief123
 
 ### Not startable yet
 
@@ -140,7 +138,7 @@ Generated by `node scripts/plan-status.mjs` on 2026-09-28 — do not edit by han
 | F0-18 | Carer view access derived from shifts | B | SPRINT | D8 | MERGED TO DEV | MrThief123 |
 | FAM-01 | Family Home — Today day-view timeline | F | SPRINT | D8 | NOT STARTED | unclaimed |
 | FAM-02 | Family Home — Overdue card and Recent activity | F | SPRINT | D8 | MERGED TO DEV | MrThief123 |
-| FAM-03 | Family Home — Budget strip | F | SPRINT | D8 | IN PROGRESS | MrThief123 |
+| FAM-03 | Family Home — Budget strip | F | SPRINT | D8 | MERGED TO DEV | MrThief123 |
 | FAM-04 | Family Calendar — day, week and month views | F | SPRINT | D8–D9 | MERGED TO DEV | MrThief123 |
 | UI-05 | Plain events in the shared kit and contracts (CHG-009) | S | SPRINT | D8 | MERGED TO DEV | Dhruv Verma |
 | ADM-04 | Admin — Clients list and add client | A | SPRINT | D9 | NOT STARTED | unclaimed |
@@ -155,7 +153,7 @@ Generated by `node scripts/plan-status.mjs` on 2026-09-28 — do not edit by han
 | ADM-10 | Admin — Settings | A | SPRINT | D10 | NOT STARTED | unclaimed |
 | CAR-06 | Carer — Mark tasks done | C | SPRINT | D10 | NOT STARTED | unclaimed |
 | CAR-09 | Carer — Settings | C | SPRINT | D10 | NOT STARTED | unclaimed |
-| FAM-07 | Family — Edit event | F | SPRINT | D10 | NOT STARTED | unclaimed |
+| FAM-07 | Family — Edit event | F | SPRINT | D10 | MERGED TO DEV | MrThief123 |
 | FAM-08 | Family — Event documents (file tiles) | F | SPRINT | D10 | NOT STARTED | unclaimed |
 | FAM-10 | Family — Budget overview and history | F | SPRINT | D10 | NOT STARTED | unclaimed |
 | FAM-12 | Family — Settings: family info and password reset | F | SPRINT | D10 | MERGED TO DEV | Dhruv Verma |

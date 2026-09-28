@@ -1,12 +1,18 @@
 # Progress — FAM-03 Family Home — Budget strip
 
-Status: READY FOR PR
+Status: MERGED TO DEV
 Owner: MrThief123
 Lane: F — Family
 Sprint: SPRINT · planned D8
 Branch: `feature/family-home-budget-strip`
 PR target: `family-dev`
 Last updated: 2026-09-28
+
+## Merged — 2026-09-28
+- PR #147 (https://github.com/MrThief123/care-compass/pull/147) merged to `main`. The PR was
+  first opened and merged (PR #145) while only the claim commit had been pushed — the actual
+  implementation/tests/docs commits landed a few minutes later on the same branch, after that PR
+  had already closed. Re-opened as PR #147 from the same branch and merged for real.
 
 ## Blockers
 - None — OQ-03 and OQ-04 are ANSWERED (root DECISIONS.md)
@@ -66,7 +72,7 @@ Last updated: 2026-09-28
 - PROPOSED items in PRD.md are unconfirmed until validated in F0-01 or answered in DECISIONS.md.
 
 ## Next action
-- Human review; then push (already pushed) and open the PR to `family-dev`.
+- None — merged (PR #147, directly to `main`).
 
 ## Ready for PR
-- Yes
+- Merged.

@@ -42,7 +42,7 @@ Important discoveries:
   `fix/budget-test-carer-client-assignments`; cherry-picked that fix rather than duplicate it.
 Important decisions: FD-01 (types regeneration), FD-02 (integration tests added beyond
 TEST_PLAN.md's component-only list) in this feature's DECISIONS.md.
-Exact next action: push (already done) and open the PR to `family-dev` once approved.
+Exact next action: None — merged (PR #147, directly to `main`).
 Files likely to be touched next: none expected before PR.
 Warning for next session: local integration test runs can be flaky under file-parallelism — an
 unrelated `shared-sign-up.test.ts` count assertion raced against other seeded profiles sharing the

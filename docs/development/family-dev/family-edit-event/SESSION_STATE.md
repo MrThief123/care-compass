@@ -50,7 +50,7 @@ Important discoveries:
   DECISIONS.md FD-01 already recorded once this sprint).
 Important decisions: FD-01 (scope-sensitivity model), FD-02 (HUMAN REVIEW — "this and future" not
 built), FD-03 (read-side wiring), FD-04 (shared-kit bug, worked around) — all in DECISIONS.md.
-Exact next action: human reviews FD-02; then open the PR to `main` once approved.
+Exact next action: None — merged (PR #146). FD-02 ("this and future") remains open as a follow-up.
 Files likely to be touched next: none expected before PR, unless FD-02's review asks for "this and
 future" to be built now.
 Warning for next session: Playwright e2e always runs `DATA_SOURCE=mock` and cannot exercise a

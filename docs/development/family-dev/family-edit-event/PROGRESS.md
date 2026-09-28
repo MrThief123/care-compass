@@ -1,12 +1,17 @@
 # Progress — FAM-07 Family — Edit event
 
-Status: READY FOR PR
+Status: MERGED TO DEV
 Owner: MrThief123
 Lane: F — Family
 Sprint: SPRINT · planned D10
 Branch: `feature/family-edit-event` (from `main`)
 PR target: `main` (dashboard features now branch from and target `main` directly, not the dev branches)
 Last updated: 2026-09-28
+
+## Merged — 2026-09-28
+- PR #146 (https://github.com/MrThief123/care-compass/pull/146) merged to `main`. FD-02 ("this
+  and future") remains open — merging did not resolve it; it stays HUMAN REVIEW until a decision
+  is recorded, as a follow-up feature or CHG.
 
 ## Blockers
 - None — OQ-10, OQ-11 and OQ-22 are ANSWERED (root DECISIONS.md: PD-044/CHG-009, PD-045, PD-047)
@@ -71,7 +76,7 @@ Last updated: 2026-09-28
 - PROPOSED items in PRD.md are unconfirmed until validated in F0-01 or answered in DECISIONS.md.
 
 ## Next action
-- Human reviews FD-02 ("this and future"); then push (already done) and open the PR to `main`.
+- Human reviews FD-02 ("this and future") as a follow-up; nothing else pending.
 
 ## Ready for PR
-- Yes, pending FD-02 review.
+- Merged.
