@@ -17,7 +17,6 @@ const hasLocalSupabase =
   Boolean(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY && process.env.SUPABASE_SERVICE_ROLE_KEY);
 
 const PASSWORD = "correct horse battery staple 1!";
-const DAY = 24 * 60 * 60 * 1000;
 
 function unique(label: string) {
   return `fam-06-${label}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -78,12 +77,8 @@ async function seed() {
     { client_id: client.data.id, profile_id: helen.userId },
     { client_id: other.data.id, profile_id: rosa.userId },
   ]);
-  await admin.from("carer_client_assignments").insert({
-    carer_id: aisha.userId,
-    client_id: client.data.id,
-    organisation_id: org.data.id,
-    started_at: new Date(Date.now() - 3 * DAY).toISOString(),
-  });
+  // Aisha is never given an active shift, so `is_assigned_carer` (F0-18) still refuses her —
+  // this is the "a carer" half of AC-04 without needing a shifts fixture.
 
   return {
     admin,
