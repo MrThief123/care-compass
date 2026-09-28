@@ -1,12 +1,12 @@
 # Progress — CAR-UI-03 Carer Calendar screen (UI)
 
-Status: PR OPEN
+Status: MERGED TO DEV
 Owner: Dhruv Verma
 Lane: C — Carer
 Sprint: SPRINT · planned D5–D6
 Branch: `feature/carer-ui-calendar`
 PR target: `carer-dev`
-Last updated: 2026-09-26 (CHG-031: calendar merged into Carer Home; green)
+Last updated: 2026-09-28
 
 ## Blockers
 - None. `/carer/patients/[clientId]` (AC-04's target) ships with CAR-UI-02 (PR #125); the link 404s in the preview until that merges to `carer-dev`.
@@ -73,3 +73,6 @@ Last updated: 2026-09-26 (CHG-031: calendar merged into Carer Home; green)
 
 ## Ready for PR
 - Yes
+
+## Merged — 2026-09-28
+- PR #126 (https://github.com/MrThief123/care-compass/pull/126) merged to `carer-dev`. Status set to MERGED TO DEV in a docs sync, since the merge left it at PR OPEN.
