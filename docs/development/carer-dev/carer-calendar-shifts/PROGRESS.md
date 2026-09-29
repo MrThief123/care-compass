@@ -35,7 +35,7 @@ Last updated: 2026-09-29
 - Failing: none
 
 ## Files changed
-- Migration `supabase/migrations/20260929000000_carer_shifts_rpc.sql` + `supabase/tests/carer_shifts_rpc.test.sql`; `database.types.ts` (one entry, FD-06); `src/server/shifts/queries.ts`, `src/mocks/queries/shifts.ts`, `src/features/carer-home/carer-home-view.tsx`; tests: `tests/integration/carer-calendar-shifts.test.ts`, `src/server/shifts/queries.test.ts`, `src/features/carer-home/carer-home-calendar.test.tsx`, `src/features/carer-home/carer-home.test.tsx`.
+- Migration `supabase/migrations/20260929010000_carer_shifts_rpc.sql` + `supabase/tests/carer_shifts_rpc.test.sql`; `database.types.ts` (one entry, FD-06); `src/server/shifts/queries.ts`, `src/mocks/queries/shifts.ts`, `src/features/carer-home/carer-home-view.tsx`; tests: `tests/integration/carer-calendar-shifts.test.ts`, `src/server/shifts/queries.test.ts`, `src/features/carer-home/carer-home-calendar.test.tsx`, `src/features/carer-home/carer-home.test.tsx`.
 
 ## Decisions
 - FD-01 to FD-04; root CHG-032.
