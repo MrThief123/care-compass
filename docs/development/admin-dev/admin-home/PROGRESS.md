@@ -1,19 +1,19 @@
 # Progress — ADM-01 Admin Home — counts and overdue events
 
-Status: NOT STARTED
-Owner: unclaimed
+Status: IN PROGRESS
+Owner: MrThief123
 Lane: A — Admin
 Sprint: SPRINT · planned D8
-Branch: `feature/admin-home` (not yet created)
+Branch: `feature/admin-home`
 PR target: `admin-dev`
-Last updated: 2026-09-17 (planning pack generated)
+Last updated: 2026-09-29
 
 ## Blockers
-- OQ-29 — Which nurse is shown on an event
+- None. OQ-29 is ANSWERED (PD-055, root DECISIONS.md).
 
 ## Dependencies status
-- F0-11 — NOT STARTED
-- ADM-UI-01 — NOT STARTED
+- F0-11 — MERGED TO DEV
+- ADM-UI-01 — MERGED TO DEV
 
 ## Completed
 - Feature documentation drafted (Claude Chat planning pack)

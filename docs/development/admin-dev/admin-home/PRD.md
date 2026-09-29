@@ -31,10 +31,11 @@ Managers see what needs attention across ~42 clients (accountable).
 
 ## Scope
 - Route `/admin/home`; header 'Home'.
-- Stat cards: 'Clients 42', 'Staff 17' (counts for admin's organisation).
-- Overdue events card (alert tone), caption 'across all clients': rows Client · Event · Nurse · Overdue pill · chevron.
+- Stat cards: 'Clients 42', 'Staff 17' (counts for admin's organisation; Staff is the count of active carers, PD-039).
+- Overdue events card (alert tone), caption 'across all clients': rows Client · Event · Nurse · Overdue pill · chevron. Nurse name is a full name (PD-038), not the abbreviated "Aisha R." form the design and this PRD's original AC-02 text used.
 - Empty state 'All caught up'.
 - Chevron behaviour per OQ-37 (not linked until answered).
+- **Upcoming shifts card (CHG-034, human 2026-09-29):** CHG-006 built this on ADM-UI-01's fixtures only and explicitly excluded live shift queries; CHG-034 brings it into ADM-01's own scope. Client · Carer · Date · Time columns, org-scoped, ordered by start time ascending, empty state 'No upcoming shifts' (already built).
 
 ## Out of Scope
 - Admin task detail/log (PL-20)

@@ -5,8 +5,9 @@ Each criterion is observable and maps to at least one test in TEST_PLAN.md. Crit
 | ID | Story | Type | Criterion (Given / When / Then) | Status |
 |---|---|---|---|---|
 | AC-01 | US-01 | happy | Given seed data, when Admin Home loads for Priya, then Clients shows the organisation's client count and Staff the active carer count. | NOT MET |
-| AC-02 | US-01 | happy | Given overdue items, when rendered, then a row shows 'Margaret', 'Wound dressing check', 'Aisha R.' and an Overdue pill. | NOT MET |
+| AC-02 | US-01 | happy | Given overdue items, when rendered, then a row shows 'Margaret', 'Wound dressing check', a full carer name (PD-038 — "Aisha Rahman", not the design's abbreviated "Aisha R.") and an Overdue pill. | NOT MET |
 | AC-03 | US-01 | permission | Given another organisation's overdue events, when Priya's home loads, then they are not included. | NOT MET |
 | AC-04 | US-01 | empty | Given no overdue events, when rendered, then 'All caught up' is shown. | NOT MET |
+| AC-05 | US-01 | happy | Given upcoming shifts (CHG-034), when Admin Home loads, then the Upcoming shifts table shows the organisation's future shifts (Client, Carer, Date, Time), ordered by start time ascending, and only another organisation's shifts are excluded. | NOT MET |
 
 Status values: NOT MET · MET (test passing) · BLOCKED (cite OQ/PD).
