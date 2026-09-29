@@ -29,3 +29,11 @@ Record feature-level decisions here using the template below. Project-wide decis
 
 ### FD-04 — Migration outside Lane C
 - `supabase/migrations/<timestamp>_carer_shifts_rpc.sql` and regenerated `database.types.ts` are shared-lane files; allowed by CHG-032 and flagged for review in the PR. Chosen over widening the `clients` RLS policy, which would break PD-041's no-lookback rule.
+
+### FD-05 — Test changes during implementation — HUMAN REVIEW: test expectation changed
+- `queries.test.ts` [CAR-UI-03][AC-07] (two tests): remaining bare first names ('Robert', 'Elsie', 'Frank', 'Doris', 'Harold', 'Jean') became full names from the fixtures. Reason: same requirement change as FD-03 (CHG-032); the tests-first pass missed them.
+- `queries.test.ts` [CAR-UI-03][PRD] "supabase mode throws the not-implemented error" for `getCarerShifts`: removed. Reason: the Supabase branch is now implemented; replaced by the [CAR-05] Supabase tests (AC-01, AC-08, AC-09). This is an assertion removed for a recorded requirement change, not to get green. `getCarerTodayShifts`/`getCarerPatients` keep their not-implemented tests.
+- `carer-home-calendar.test.tsx` [CAR-05][AC-07] Day: the mock now returns only 1 Dec's shifts (TUE, CHEN). Reason: genuine test bug (Monday's shift was returned for a 1 Dec Day view, so 'Margaret Doyle' matched twice).
+
+### FD-06 — database.types.ts edited by hand
+- `npm run db:types` with the installed Supabase CLI (2.117.0) reformats the whole file (~2000 lines of unrelated churn), so only the `get_carer_shifts` entry was added, matching the generator's output for it. Regenerate properly when the CLI is pinned.

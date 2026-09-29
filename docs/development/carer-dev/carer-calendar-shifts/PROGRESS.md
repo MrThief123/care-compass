@@ -1,6 +1,6 @@
 # Progress — CAR-05 Carer — Calendar (shifts)
 
-Status: IN PROGRESS
+Status: READY FOR PR (awaiting human approval)
 Owner: Dhruv Verma
 Lane: C — Carer
 Sprint: SPRINT · planned D9–D10
@@ -24,20 +24,18 @@ Last updated: 2026-09-29
 - None. Stopped after the tests, as asked.
 
 ## Remaining
-- Migration `get_carer_shifts`, regenerate DB types.
-- Supabase branch of `getCarerShifts`; rename `clientFirstName` to `clientName`; update `carer-home-view.tsx` and the mock.
-- Run all suites, check Carer Home in a real browser (Supabase mode and mock), update docs, ask before opening the PR.
+- Human approval, then open the PR to `carer-dev`.
 
 ## Acceptance criteria status
-- 0 / 10 MET
+- 10 / 10 MET
 
 ## Tests
 - Written: 10 / 10 (T-01 to T-06 integration, T-07 component, T-08 and T-09 contract, T-10 regression)
-- Passing: 0 (new tests red for the expected reasons; T-01 to T-06 verified red against local Supabase 2026-09-29)
-- Failing: see TEST_PLAN.md
+- Passing: 10 / 10. Run locally 2026-09-29 (CI is down): vitest (unit), integration suite against LOCAL Supabase (18 files, 76 tests), pgTAP `supabase test db`, Playwright e2e `--grep-invert "F0-07"` (43), tsc, eslint (0 errors), prettier
+- Failing: none
 
 ## Files changed
-- Docs only plus tests: `tests/integration/carer-calendar-shifts.test.ts`, `src/server/shifts/queries.test.ts`, `src/features/carer-home/carer-home-calendar.test.tsx`, `src/features/carer-home/carer-home.test.tsx`.
+- Migration `supabase/migrations/20260929000000_carer_shifts_rpc.sql` + `supabase/tests/carer_shifts_rpc.test.sql`; `database.types.ts` (one entry, FD-06); `src/server/shifts/queries.ts`, `src/mocks/queries/shifts.ts`, `src/features/carer-home/carer-home-view.tsx`; tests: `tests/integration/carer-calendar-shifts.test.ts`, `src/server/shifts/queries.test.ts`, `src/features/carer-home/carer-home-calendar.test.tsx`, `src/features/carer-home/carer-home.test.tsx`.
 
 ## Decisions
 - FD-01 to FD-04; root CHG-032.
@@ -46,7 +44,7 @@ Last updated: 2026-09-29
 - Function takes `p_carer_id` and returns nothing unless it equals `auth.uid()` (PRD Scope).
 
 ## Next action
-- Implementation session from the prompt handed to the human.
+- Wait for the human's "yes", then open the PR "CAR-05 Carer — Calendar (shifts)"; flag the migration (FD-04) and changed test expectations (FD-03, FD-05).
 
 ## Ready for PR
-- No
+- Yes, pending human approval

@@ -85,13 +85,13 @@ describe("[CAR-UI-03][AC-07] getCarerShifts", () => {
     expect(rows.map(({ start, end, clientName }) => [start, end, clientName])).toEqual([
       ["2026-11-30T08:00:00+11:00", "2026-11-30T12:00:00+11:00", "Margaret Doyle"],
       ["2026-12-01T09:00:00+11:00", "2026-12-01T11:00:00+11:00", "Margaret Doyle"],
-      ["2026-12-01T13:00:00+11:00", "2026-12-01T15:00:00+11:00", "Robert"],
-      ["2026-12-02T09:00:00+11:00", "2026-12-02T11:00:00+11:00", "Elsie"],
+      ["2026-12-01T13:00:00+11:00", "2026-12-01T15:00:00+11:00", "Robert Hale"],
+      ["2026-12-02T09:00:00+11:00", "2026-12-02T11:00:00+11:00", "Elsie Marsh"],
       ["2026-12-02T13:00:00+11:00", "2026-12-02T17:00:00+11:00", "Margaret Doyle"],
-      ["2026-12-03T09:00:00+11:00", "2026-12-03T11:00:00+11:00", "Frank"],
-      ["2026-12-03T13:00:00+11:00", "2026-12-03T15:00:00+11:00", "Doris"],
-      ["2026-12-04T09:00:00+11:00", "2026-12-04T11:00:00+11:00", "Harold"],
-      ["2026-12-04T13:00:00+11:00", "2026-12-04T15:00:00+11:00", "Jean"],
+      ["2026-12-03T09:00:00+11:00", "2026-12-03T11:00:00+11:00", "Frank Novak"],
+      ["2026-12-03T13:00:00+11:00", "2026-12-03T15:00:00+11:00", "Doris Petrov"],
+      ["2026-12-04T09:00:00+11:00", "2026-12-04T11:00:00+11:00", "Harold Byrne"],
+      ["2026-12-04T13:00:00+11:00", "2026-12-04T15:00:00+11:00", "Jean Ahmed"],
     ]);
     expect(rows[0]).toMatchObject({ clientId: MARGARET_CLIENT_ID });
   });
@@ -110,7 +110,7 @@ describe("[CAR-UI-03][AC-07] getCarerShifts", () => {
 
     expect(rows.map((row) => [row.start, row.clientName])).toEqual([
       ["2026-12-01T09:00:00+11:00", "Margaret Doyle"],
-      ["2026-12-01T13:00:00+11:00", "Robert"],
+      ["2026-12-01T13:00:00+11:00", "Robert Hale"],
     ]);
   });
 
@@ -122,14 +122,6 @@ describe("[CAR-UI-03][AC-07] getCarerShifts", () => {
     await expect(
       getCarerShifts("staff-aisha", { from: "2026-12-06", to: "2026-11-30" }),
     ).rejects.toThrow();
-  });
-
-  it("[CAR-UI-03][PRD] supabase mode throws the not-implemented error naming its domain and function", async () => {
-    vi.stubEnv("DATA_SOURCE", "supabase");
-
-    await expect(getCarerShifts("staff-aisha", AISHA_WEEK)).rejects.toThrow(
-      /shifts\.getCarerShifts: DATA_SOURCE="supabase" is not implemented yet/,
-    );
   });
 });
 

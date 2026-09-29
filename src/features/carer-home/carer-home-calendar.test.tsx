@@ -374,6 +374,7 @@ describe("[CAR-05][AC-07] shifts show the client's full name", () => {
   });
 
   it("[CAR-05][AC-07] Day: the timeline blocks carry the full names", async () => {
+    mocks.getCarerShifts.mockResolvedValue([TUE, CHEN]);
     await renderCalendar({ view: "day", date: "2026-12-01" });
 
     expect(screen.getByText("Margaret Doyle")).toBeInTheDocument();
