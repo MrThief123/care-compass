@@ -336,3 +336,69 @@ export async function createEvent(input: CreateEventInput): Promise<string> {
   }
   return id;
 }
+
+export interface UpdateEventInput {
+  clientId: string;
+  eventId: string;
+  /** The viewed occurrence's original start (its `key`'s second half) — never the edited value. */
+  occurrenceOriginalStart: string;
+  title: string;
+  description: string;
+  startsAt: string;
+  durationMinutes: number;
+  recurrenceFrequency: CareEvent["recurrenceFrequency"];
+  completionMode: CareEvent["completionMode"];
+  scope: "occurrence" | "series";
+}
+
+/**
+ * Phase 1 mock mutation for FAM-07: updates the in-memory event and every
+ * pre-baked occurrence row that names it (title/description/duration), since
+ * the fixtures are static rows, not expanded from the event at read time
+ * (the same limitation `createEvent` documents, FAM-06 DECISIONS.md FD-02).
+ * `completionMode` only updates the event record — moving an existing static
+ * occurrence row between the task and plain-event arrays is not built (no AC
+ * needs it; see FAM-07 DECISIONS.md).
+ *
+ * `scope: "occurrence"` moves only the viewed occurrence's own `start`.
+ * `scope: "series"` moves the event's anchor (and that occurrence's `start`)
+ * only when the event has no recurrence — a recurring event's date never
+ * moves at series scope, matching the restriction the Supabase branch
+ * enforces so neither data source can silently shift occurrence identity.
+ */
+export async function updateEvent(input: UpdateEventInput): Promise<void> {
+  const event = CARE_EVENTS.find(
+    (candidate) => candidate.id === input.eventId && candidate.clientId === input.clientId,
+  );
+  if (!event) throw new Error("That event could not be found.");
+
+  const wasRecurring = event.recurrenceFrequency !== "none";
+  if (input.scope === "series" && wasRecurring && input.startsAt !== event.start) {
+    throw new Error("To move a date on a recurring event, choose 'This occurrence' instead.");
+  }
+
+  event.title = input.title;
+  event.description = input.description;
+  event.recurrenceFrequency = input.recurrenceFrequency;
+  event.completionMode = input.completionMode;
+  event.durationMinutes = input.durationMinutes;
+  if (input.scope === "series" && !wasRecurring) {
+    event.start = input.startsAt;
+  }
+
+  const viewedKey = `${input.eventId}:${input.occurrenceOriginalStart}`;
+  const rows: AnyOccurrence[] = [
+    ...rowsFor(OCCURRENCES_BY_CLIENT_ID, input.clientId),
+    ...rowsFor(UPCOMING_OCCURRENCES_BY_CLIENT_ID, input.clientId),
+    ...rowsFor(PLAIN_EVENT_OCCURRENCES_BY_CLIENT_ID, input.clientId),
+  ];
+  for (const row of rows) {
+    if (row.eventId !== input.eventId) continue;
+    row.title = input.title;
+    row.description = input.description;
+    row.durationMinutes = input.durationMinutes;
+    if (row.key === viewedKey && (input.scope === "occurrence" || !wasRecurring)) {
+      row.start = input.startsAt;
+    }
+  }
+}

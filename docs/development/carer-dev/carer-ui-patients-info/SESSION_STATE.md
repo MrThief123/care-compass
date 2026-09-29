@@ -12,3 +12,5 @@ Exact next action:
 1. PR #125 open to `carer-dev`; wait for review. Address any review comments on this branch.
 Files likely to be touched next: PROGRESS.md only
 Warning for next session: FD-01 request to Lane F (base path + read-only mode for Home/Calendar/Care log) must be raised with the human; CAR-04 depends on it.
+
+Merged 2026-09-28: PR #125 merged to `carer-dev`. Status set to MERGED TO DEV in a docs sync.

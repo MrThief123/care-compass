@@ -6,7 +6,20 @@
  */
 import * as mock from "@/mocks/queries/budget";
 import { getDataSourceMode, notImplementedForSupabase } from "@/server/data-source";
-import type { BudgetBucketSummary, FundEntry } from "@/types/domain";
+import type {
+  BudgetBucketKind,
+  BudgetBucketState,
+  BudgetBucketSummary,
+  FundEntry,
+} from "@/types/domain";
+
+/** `budget_threshold_state()`'s words (PD-032) mapped to the domain's (F0-12 DATA_MODEL.md). */
+const THRESHOLD_STATE: Record<string, BudgetBucketState> = {
+  normal: "ok",
+  warning: "warning",
+  alert: "alert",
+  depleted: "exhausted",
+};
 
 /**
  * The client's buckets, each with a stable `id` (CHG-021) and its pending
@@ -18,7 +31,25 @@ export async function getBudgetSummary(clientId: string): Promise<BudgetBucketSu
   if (mode === "mock") {
     return mock.getBudgetSummary(clientId);
   }
-  notImplementedForSupabase("budget", "getBudgetSummary");
+
+  const { createClient } = await import("@/lib/supabase/server");
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("budget_bucket_summary", { p_client_id: clientId });
+  // The message names no client (ARCHITECTURE.md §12.5).
+  if (error || !data) throw new Error("getBudgetSummary: could not load the budget.");
+
+  return data.map((bucket) => ({
+    id: bucket.bucket_id,
+    kind: (bucket.kind as BudgetBucketKind | null) ?? undefined,
+    label: bucket.name,
+    total: bucket.total,
+    used: bucket.used,
+    remaining: bucket.remaining,
+    percentUsed: bucket.percent_used ?? 0,
+    state: THRESHOLD_STATE[bucket.threshold_state] ?? "ok",
+    pendingTotal: bucket.pending_total,
+    pendingCount: bucket.pending_count,
+  }));
 }
 
 /**
