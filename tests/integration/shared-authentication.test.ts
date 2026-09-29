@@ -300,5 +300,6 @@ describe.skipIf(!hasLocalSupabase)("[F0-07] auth", () => {
     } finally {
       await deleteUser(profile.userId);
     }
-  });
+    // Several sequential round trips to the hosted project; the 5s default is too tight on CI.
+  }, 30_000);
 });
