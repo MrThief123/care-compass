@@ -42,6 +42,7 @@ Record feature-level decisions here using the template below. Project-wide decis
 - Date: 2026-09-29
 - Context: CLAUDE.md and the PRD say branch from and PR to `carer-dev`; root PROGRESS.md records a 2026-09-28 workflow change to `main`. `carer-dev` currently equals `main` plus the CAR-01 retirement docs.
 - Decision: branched from `carer-dev` per CLAUDE.md. Which target the PR uses is the human's call at PR time.
+- Human confirmation: Dhruv Verma, 2026-09-29 (in-session): PR targets `carer-dev`, not `main`.
 
 ### FD-07 — Overlap with CAR-05 (PR open, unmerged)
 - Both edit `src/server/shifts/queries.ts`, `src/mocks/queries/shifts.ts` and `src/server/shifts/queries.test.ts`. Human chose to branch now and resolve conflicts when the second PR lands (2026-09-29).
