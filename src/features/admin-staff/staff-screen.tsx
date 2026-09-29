@@ -10,16 +10,49 @@ import { EmptyState } from "@/components/shared/states";
 import { Button } from "@/components/ui/button";
 import { CardShell } from "@/components/ui/card-shell";
 import { Icon } from "@/components/ui/icon";
-import type { AdminStaffData, StaffMember } from "@/server/admin/staff-queries";
+import { createStaff, updateStaff } from "@/server/admin/staff-actions";
+import type { AdminStaffData } from "@/server/admin/staff-queries";
+import type { StaffMember } from "@/types/domain";
 
-type Draft = Omit<StaffMember, "id">;
+interface Draft {
+  firstName: string;
+  lastName: string;
+  phone: string;
+  email: string;
+  jobTitle: string;
+}
+
+const DraftSchema = z.object({
+  firstName: z.string().trim().min(1, "Enter a first name."),
+  lastName: z.string().trim().min(1, "Enter a last name."),
+  phone: z.string().trim(),
+  email: z.string().trim().email("Enter a valid email address."),
+  jobTitle: z.string(),
+});
+
+function fullName(person: Pick<StaffMember, "firstName" | "lastName">): string {
+  return `${person.firstName} ${person.lastName}`.trim();
+}
 
 export function StaffScreen({ data }: { data: AdminStaffData }) {
   const [staff, setStaff] = useState(() => data.staff.map((person) => ({ ...person })));
   const [selectedId, setSelectedId] = useState<string | null>(data.staff[0]?.id ?? null);
-  const emptyDraft = (): Draft => ({ name: "", phone: "", email: "", role: data.roles[0] ?? "" });
+  const emptyDraft = (): Draft => ({
+    firstName: "",
+    lastName: "",
+    phone: "",
+    email: "",
+    jobTitle: data.roles[0] ?? "",
+  });
+  const draftFrom = (person: StaffMember): Draft => ({
+    firstName: person.firstName,
+    lastName: person.lastName,
+    phone: person.phone ?? "",
+    email: person.email,
+    jobTitle: person.jobTitle,
+  });
   const [draft, setDraft] = useState<Draft>(() =>
-    data.staff[0] ? { ...data.staff[0] } : emptyDraft(),
+    data.staff[0] ? draftFrom(data.staff[0]) : emptyDraft(),
   );
   const [errors, setErrors] = useState<Partial<Record<keyof Draft, string>>>({});
   const [notice, setNotice] = useState("");
@@ -27,21 +60,17 @@ export function StaffScreen({ data }: { data: AdminStaffData }) {
 
   function edit(person?: StaffMember) {
     setSelectedId(person?.id ?? null);
-    setDraft(person ? { ...person } : emptyDraft());
+    setDraft(person ? draftFrom(person) : emptyDraft());
     setErrors({});
     setNotice("");
     panel.current?.querySelector("input")?.focus();
   }
 
-  function save() {
-    const result = z
-      .object({
-        name: z.string().trim().min(1, "Enter a name."),
-        phone: z.string().trim(),
-        email: z.string().trim().email("Enter a valid email address."),
-        role: z.string().refine((role) => data.roles.includes(role), "Choose a role."),
-      })
-      .safeParse(draft);
+  async function save() {
+    const result = DraftSchema.refine((value) => data.roles.includes(value.jobTitle), {
+      message: "Choose a role.",
+      path: ["jobTitle"],
+    }).safeParse(draft);
     if (!result.success) {
       const nextErrors: Partial<Record<keyof Draft, string>> = {};
       for (const issue of result.error.issues)
@@ -50,16 +79,28 @@ export function StaffScreen({ data }: { data: AdminStaffData }) {
       setNotice("");
       return;
     }
-    const saved = { ...result.data, id: selectedId ?? crypto.randomUUID() };
+
+    const outcome = selectedId
+      ? await updateStaff(selectedId, result.data)
+      : await createStaff(result.data);
+    if (!outcome.ok) {
+      if (outcome.error.code === "VALIDATION") {
+        setErrors({ email: outcome.error.message });
+      } else {
+        setNotice(outcome.error.message);
+      }
+      return;
+    }
+    const saved = outcome.data;
     setStaff((current) =>
       selectedId
         ? current.map((person) => (person.id === selectedId ? saved : person))
         : [...current, saved],
     );
     setSelectedId(saved.id);
-    setDraft(result.data);
+    setDraft(draftFrom(saved));
     setErrors({});
-    setNotice(saved.name + " saved");
+    setNotice(fullName(saved) + " saved");
   }
 
   function change(field: keyof Draft, value: string) {
@@ -85,11 +126,13 @@ export function StaffScreen({ data }: { data: AdminStaffData }) {
               rows={staff}
               rowKey={(person) => person.id}
               columns={[
-                { key: "name", header: "Name", render: (person) => person.name },
+                { key: "name", header: "Name", render: (person) => fullName(person) },
                 {
                   key: "role",
                   header: "Role",
-                  render: (person) => <span className="text-text-secondary">{person.role}</span>,
+                  render: (person) => (
+                    <span className="text-text-secondary">{person.jobTitle}</span>
+                  ),
                 },
                 {
                   key: "edit",
@@ -97,7 +140,7 @@ export function StaffScreen({ data }: { data: AdminStaffData }) {
                   render: (person) => (
                     <Button
                       variant="ghost"
-                      aria-label={"Edit " + person.name}
+                      aria-label={"Edit " + fullName(person)}
                       onClick={() => edit(person)}
                     >
                       Edit
@@ -119,10 +162,16 @@ export function StaffScreen({ data }: { data: AdminStaffData }) {
           className="border-transparent"
         >
           <Field
-            label="Name"
-            value={draft.name}
-            onChange={(value) => change("name", value)}
-            error={errors.name}
+            label="First name"
+            value={draft.firstName}
+            onChange={(value) => change("firstName", value)}
+            error={errors.firstName}
+          />
+          <Field
+            label="Last name"
+            value={draft.lastName}
+            onChange={(value) => change("lastName", value)}
+            error={errors.lastName}
           />
           <Field
             label="Phone"
@@ -141,10 +190,10 @@ export function StaffScreen({ data }: { data: AdminStaffData }) {
           <Field
             label="Role"
             type="select"
-            value={draft.role}
+            value={draft.jobTitle}
             options={data.roles.map((role) => ({ value: role, label: role }))}
-            onChange={(value) => change("role", value)}
-            error={errors.role}
+            onChange={(value) => change("jobTitle", value)}
+            error={errors.jobTitle}
           />
           <p role="status" className="text-body-small text-text-secondary">
             {notice}
