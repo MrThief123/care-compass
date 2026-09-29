@@ -31,8 +31,10 @@ Organisations manage their own staff (CM-1908).
 
 ## Scope
 - Route `/admin/staff`; Staff list card with '+ Add staff'; columns NAME, ROLE, EDIT.
-- Add / edit staff panel: Name, Phone, Email, Role (select: Registered Nurse, Enrolled Nurse, Support Worker per design; source per OQ-13); Save.
-- Create account per OQ-08 (e.g. invite email) with role 'carer' in admin's organisation.
+- Add / edit staff panel: First name, Last name (PD-038 — split, not one Name field), Phone, Email,
+  Role (select: Registered Nurse, Enrolled Nurse, Support Worker per design; source per OQ-13); Save.
+- Create account per OQ-08 (invite email, `auth.admin.inviteUserByEmail`) with role 'carer' in admin's
+  organisation.
 - Edit updates profile fields.
 
 ## Out of Scope
