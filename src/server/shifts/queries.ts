@@ -5,12 +5,13 @@
  * Screens must import from here, never from `src/mocks` directly.
  */
 import { ageFromDob } from "@/lib/format/age";
+import { instantToMelbourneLocal, localToMelbourneIso } from "@/lib/dates/melbourne-time";
 import * as mock from "@/mocks/queries/shifts";
 import { getDataSourceMode, notImplementedForSupabase } from "@/server/data-source";
 import { OccurrenceRangeSchema, type OccurrenceRange, type Shift } from "@/types/domain";
 
-/** A shift with the client's first name, which is all Carer Home shows of the client. */
-export type CarerShiftRow = Shift & { clientFirstName: string };
+/** A shift with the client's full name, which is all the carer's calendar shows of the client. */
+export type CarerShiftRow = Shift & { clientName: string };
 
 /**
  * The carer's shifts that start on today's Melbourne calendar day (the day
@@ -40,7 +41,29 @@ export async function getCarerShifts(
   if (mode === "mock") {
     return mock.getCarerShifts(carerId, parsed);
   }
-  notImplementedForSupabase("shifts", "getCarerShifts");
+  // Melbourne midnight of `from` to Melbourne midnight after `to`.
+  const dayAfterTo = new Date(`${parsed.to}T00:00:00Z`);
+  dayAfterTo.setUTCDate(dayAfterTo.getUTCDate() + 1);
+  const { createClient } = await import("@/lib/supabase/server");
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("get_carer_shifts", {
+    p_carer_id: carerId,
+    p_from: new Date(localToMelbourneIso(`${parsed.from}T00:00`)).toISOString(),
+    p_to: new Date(
+      localToMelbourneIso(`${dayAfterTo.toISOString().slice(0, 10)}T00:00`),
+    ).toISOString(),
+  });
+  // Generic message: the database error may carry a client or carer name.
+  if (error) throw new Error("getCarerShifts: could not load shifts.");
+  const toMelbourne = (instant: string) => localToMelbourneIso(instantToMelbourneLocal(instant));
+  return data.map((row) => ({
+    id: row.id,
+    carerId: row.carer_id,
+    clientId: row.client_id,
+    start: toMelbourne(row.starts_at),
+    end: toMelbourne(row.ends_at),
+    clientName: `${row.client_first_name} ${row.client_last_name}`,
+  }));
 }
 
 /** One card on Carer · Patients (CAR-UI-02 FD-02). */

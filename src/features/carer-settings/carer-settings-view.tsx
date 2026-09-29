@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 import {
@@ -10,14 +11,15 @@ import {
 } from "@/components/shared/forms";
 import { Button } from "@/components/ui/button";
 import { CardShell } from "@/components/ui/card-shell";
-import { familyInfoSchema } from "@/server/profiles/contact-schema";
+import { requestOwnPasswordReset, updateCarerContactDetails } from "@/server/profiles/actions";
+import { carerInfoSchema } from "@/server/profiles/contact-schema";
 import type { CarerContactDetails } from "@/server/profiles/queries";
 
 const RESET_SENT = "We've emailed you a link to reset your password.";
+const RESET_FAILED = "Couldn't send the reset link. Try again.";
 const SAVED = "Saved.";
+const SAVE_FAILED = "Couldn't save your details. Try again.";
 
-/** Same rules as Family info, less Address; Role is not editable (PD-054). */
-const myInfoSchema = familyInfoSchema.omit({ address: true });
 type MyInfoValues = { name: string; phone: string; email: string };
 
 /** Display order, which is also the order focus looks for the first bad field. */
@@ -33,8 +35,8 @@ const FIELDS: ReadonlyArray<{
 
 /**
  * Carer · Settings (CAR-UI-04): My info, read-only until 'Edit' like Family
- * Settings, and Reset username / password. Save and Reset only update this
- * screen in Phase 1 (FD-03, FD-06); CAR-09 wires them to the server.
+ * Settings, and Reset username / password. Save and Reset go through the
+ * `profiles` Server Actions (CAR-09).
  */
 export function CarerSettingsView({ contact }: { contact: CarerContactDetails }) {
   // What Cancel goes back to: the fixture, then whatever was last saved.
@@ -47,6 +49,10 @@ export function CarerSettingsView({ contact }: { contact: CarerContactDetails })
   const [errors, setErrors] = useState<FieldErrors>({});
   const [editing, setEditing] = useState(false);
   const [message, setMessage] = useState("");
+  // One request at a time, so a double press saves or emails once.
+  const [saving, setSaving] = useState(false);
+  const [resetting, setResetting] = useState(false);
+  const router = useRouter();
   const formRef = useRef<HTMLDivElement>(null);
 
   function focusField(key: string | undefined) {
@@ -80,16 +86,66 @@ export function CarerSettingsView({ contact }: { contact: CarerContactDetails })
     formRef.current?.querySelector<HTMLElement>("[data-my-info-action]")?.focus();
   }
 
-  function save() {
-    const result = fieldErrors(myInfoSchema, values);
+  async function save() {
+    if (saving) return;
+    const result = fieldErrors(carerInfoSchema, values);
     if (!result.ok) {
       setErrors(result.errors);
+      setMessage("");
       focusField(FIELDS.find(({ key }) => result.errors[key])?.key);
       return;
     }
-    setSaved(result.data);
-    stopEditing(result.data);
+
+    setSaving(true);
+    setMessage("");
+    let outcome: Awaited<ReturnType<typeof updateCarerContactDetails>>;
+    try {
+      outcome = await updateCarerContactDetails(result.data);
+    } catch {
+      // A rejected action is a failed save, not a crash; the edits stay.
+      outcome = { ok: false, error: { code: "UNEXPECTED", message: SAVE_FAILED } };
+    }
+    setSaving(false);
+
+    if (!outcome.ok) {
+      const messages = outcome.error.fieldErrors;
+      if (messages && Object.keys(messages).length > 0) {
+        setErrors(messages);
+        focusField(FIELDS.find(({ key }) => messages[key])?.key);
+      } else {
+        setMessage(outcome.error.message);
+      }
+      return;
+    }
+
+    // What was stored is what Cancel goes back to, and what the inputs show.
+    const stored: MyInfoValues = {
+      name: outcome.data.name,
+      phone: outcome.data.phone ?? "",
+      email: outcome.data.email ?? "",
+    };
+    setSaved(stored);
+    stopEditing(stored);
     setMessage(SAVED);
+    // The shell header shows the name; re-read it so it matches what was saved.
+    router.refresh();
+  }
+
+  async function reset() {
+    if (resetting) return;
+    setResetting(true);
+    setMessage("");
+    let failure = RESET_FAILED;
+    let sent = false;
+    try {
+      const outcome = await requestOwnPasswordReset();
+      sent = outcome.ok;
+      if (!outcome.ok) failure = outcome.error.message;
+    } catch {
+      // Not sent: never say it was.
+    }
+    setResetting(false);
+    setMessage(sent ? RESET_SENT : failure);
   }
 
   return (
@@ -130,7 +186,7 @@ export function CarerSettingsView({ contact }: { contact: CarerContactDetails })
                 Cancel
               </Button>
             )}
-            <Button data-my-info-action onClick={editing ? save : startEditing}>
+            <Button data-my-info-action disabled={saving} onClick={editing ? save : startEditing}>
               {editing ? "Save" : "Edit"}
             </Button>
           </div>
@@ -141,7 +197,7 @@ export function CarerSettingsView({ contact }: { contact: CarerContactDetails })
         title="Reset username / password"
         description="We'll email you a secure link to reset your credentials."
         actionLabel="Reset"
-        onAction={() => setMessage(RESET_SENT)}
+        onAction={reset}
       />
 
       {/* On the page from the start so screen readers pick up what is announced. */}

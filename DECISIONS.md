@@ -888,17 +888,18 @@ Docs updated: DECISIONS.md
 - Human confirmation: Dhruv Verma, 2026-09-26 (in-session).
 - Docs updated: DECISIONS.md (this entry), DEVELOPMENT_PLAN.md (CAR-UI-03, CAR-05 cards), CAR-UI-03 PRD, ACCEPTANCE_CRITERIA, TEST_PLAN, DECISIONS (FD-04), PROGRESS, SESSION_STATE; CAR-UI-01 ACCEPTANCE_CRITERIA; F0-15 ACCEPTANCE_CRITERIA.
 
-### CHG-033 — CAR-01 retired: nothing left to build once CAR-05 and CAR-02 own Carer Home's data
+### CHG-032 — Any name a screen shows is a full name; Carer shifts show past shifts' client names
 - Date / requested by: 2026-09-29 / Dhruv Verma (human, project lead)
-- Type: scope change (retires CAR-01; same approach as CAR-08 under CHG-020)
+- Type: scope change (project-wide display rule; first applied by CAR-05)
 - Description:
-  - CAR-01's original scope was Carer Home's "Today's calendar" (event rows with status pills) and "Tasks" checklist. CHG-025 replaced the rows with shifts and removed the Tasks card; CHG-031 merged the Carer Calendar into Carer Home. CAR-05 (CHG-032) now wires `getCarerShifts` for that calendar, and CAR-02 owns `getCarerNotifications`. Nothing remains for CAR-01.
-  - CAR-01 is **RETIRED**. Do not start it. Its three original ACs are obsolete (event rows, Tasks card, "no Robert occurrences"); the shift-only visibility they were after is covered by CAR-05's AC-01 to AC-10.
-  - `getCarerTodayShifts` (contract, mock and tests) is left in place, unused by any screen. Dropping it is not part of this change; remove it in a later cleanup if wanted.
-- Source / justification: human answer in-session, 2026-09-29: "retire it".
-- Impact: DEVELOPMENT_PLAN.md (row and card), CAR-01 feature docs, root PROGRESS.md (regenerated). No feature depends on CAR-01. Carer Home is complete when CAR-05 and CAR-02 merge.
-- Human confirmation: Dhruv Verma, 2026-09-29 (in-session).
-- Docs updated: DECISIONS.md (this entry), DEVELOPMENT_PLAN.md, `docs/development/carer-dev/carer-home-today/` (PRD, PROGRESS, SESSION_STATE).
+  - **Rule.** Wherever a screen shows a person's name (client, carer, family member, admin), it shows the **full name** (first and last), never the first name alone, because two clients or two carers can share a first name.
+  - **CAR-05 applies it now** to the Carer Home Shifts calendar: a shift block is titled with the client's full name (e.g. 'Margaret Doyle'), and `CarerShiftRow.clientFirstName` becomes `clientName` (full name). CAR-UI-01 and CAR-UI-03 tests that read 'Margaret' as the block title change to 'Margaret Doyle' (CAR-05 DECISIONS FD-03, HUMAN REVIEW: test expectation changed).
+  - **Past shifts keep the name.** PD-041 ends a carer's read access to a client when their last shift with that client ends, so RLS hides the client row for past shifts. CAR-05 adds a security-definer function `get_carer_shifts(p_carer_id, p_from, p_to)` that returns the caller's own non-cancelled shifts with the client's full name and nothing else about the client. Cancelled shifts are hidden from the calendar (the cancellation is told by notification, CHG-025).
+  - **Not done here (each needs scheduling; a human decides how):** every other place that shows a first name alone, for example carer notification messages ("(Margaret)", CAR-02), the Patients cards and headers (CAR-UI-02, CAR-03), the Family screens that name a carer or completer ('Done · Aisha R.', FAM-UI-*, CAR-06), and Admin screens. The sweep is proposed as one controlled follow-up, not folded into CAR-05.
+- Source / justification: human answer in-session, 2026-09-29: "it should return the full name not first name. I think that change should be required everywhere. Any name we display should be a full name since we could have clients or carers with the same first name".
+- Impact: CAR-05 (PRD, ACs, tests, one migration outside Lane C, flagged); CAR-UI-01 and CAR-UI-03 test expectations; the sweep above is unscheduled.
+- Human confirmation: Dhruv Verma, 2026-09-29 (in-session). The sweep's scope and timing are NOT yet confirmed.
+- Docs updated: DECISIONS.md (this entry), DEVELOPMENT_PLAN.md (CAR-05 card), CAR-05 feature docs.
 
 Template for future entries:
 ```

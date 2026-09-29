@@ -58,7 +58,7 @@ const MARGARET_SHIFT = {
   id: "shift-aisha-margaret-1",
   carerId: CARER_ID,
   clientId: "client-margaret",
-  clientFirstName: "Margaret",
+  clientName: "Margaret Doyle",
   start: "2026-11-30T08:00:00+11:00",
   end: "2026-11-30T12:00:00+11:00",
 };
@@ -110,14 +110,14 @@ afterEach(() => {
 });
 
 describe("[CAR-UI-01] Carer Home", () => {
-  it("[CAR-UI-01][AC-01] Shifts (Day view, today) shows one timeline block, 08:00–12:00 Margaret, with no status pill or event title", async () => {
+  it("[CAR-UI-01][AC-01] Shifts (Day view, today) shows one timeline block, 08:00–12:00 Margaret Doyle, with no status pill or event title", async () => {
     await renderHome();
     const calendar = screen.getByRole("region", { name: "Shifts" });
     const blocks = within(calendar).getAllByTestId(/^day-timeline-block-/);
 
     expect(blocks).toHaveLength(1);
     expect(within(blocks[0]!).getByText("08:00–12:00")).toBeInTheDocument();
-    expect(within(blocks[0]!).getByText("Margaret")).toBeInTheDocument();
+    expect(within(blocks[0]!).getByText("Margaret Doyle")).toBeInTheDocument();
     expect(within(calendar).queryByText(/Done|Planned|Overdue/)).not.toBeInTheDocument();
     expect(
       within(calendar).queryByText(/medication|Physiotherapy|check-in/i),

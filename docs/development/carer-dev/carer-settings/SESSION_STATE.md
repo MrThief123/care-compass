@@ -1,14 +1,12 @@
 # Session State — CAR-09 Carer — Settings
 
-Last session date: none (no implementation session yet)
-Current branch: n/a — `feature/carer-settings` not created
-Worked on: n/a
-What changed: n/a
-Tests run: none
-Test results: n/a
-Current blocker: OQ-35
-Important discoveries: none
-Important decisions: none
-Exact next action: Run `START FEATURE CAR-09` once dependencies are MERGED TO DEV (or COMPLETE) and blocking decisions are answered.
-Files likely to be touched next: `src/app/(carer)/carer/settings/page.tsx`
-Warning for next session: Read PRD.md, ACCEPTANCE_CRITERIA.md and TEST_PLAN.md before writing any code. Do not create the branch from the wrong parent (`carer-dev`).
+Last session date: 2026-09-29
+Current branch: `feature/carer-settings` (from `carer-dev`, pushed, claimed)
+Worked on: implementation, verification, docs
+What changed: `carerInfoSchema`, `updateCarerContactDetails` (Lane F folder, FD-03), Save/Reset wired in `CarerSettingsView`; CAR-UI-04 T-09/T-10 mock the actions (FD-05).
+Tests run: four CAR-09 files, full unit suite, typecheck, lint, `supabase test db`, integration against local stack, e2e.
+Test results: all CAR-09 green. Shared F0-04/F0-07 integration cases fail on hosted `.env.local` (unrelated). Some non-carer e2e specs fail (see PROGRESS.md).
+Current blocker: none
+Important decisions: FD-05
+Exact next action: PR is open to `carer-dev`; wait for review. Do not merge.
+Warning for next session: do not open the PR without approval. `src/server/profiles/` is Lane F's folder (flag in PR).

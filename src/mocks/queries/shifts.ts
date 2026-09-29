@@ -10,6 +10,9 @@ import { getToday } from "@/mocks/queries/events";
 import type { CarerPatientRow, CarerShiftRow } from "@/server/shifts/queries";
 import type { OccurrenceRange } from "@/types/domain";
 
+const fullName = (client?: { firstName: string; lastName: string }) =>
+  client ? `${client.firstName} ${client.lastName}` : "";
+
 /** `range` is already validated (`OccurrenceRangeSchema`). */
 export async function getCarerShifts(
   carerId: string,
@@ -22,7 +25,7 @@ export async function getCarerShifts(
     .sort((a, b) => Date.parse(a.start) - Date.parse(b.start))
     .map((shift) => ({
       ...shift,
-      clientFirstName: CLIENTS.find((client) => client.id === shift.clientId)?.firstName ?? "",
+      clientName: fullName(CLIENTS.find((client) => client.id === shift.clientId)),
     }));
 }
 

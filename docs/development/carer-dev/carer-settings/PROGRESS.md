@@ -1,40 +1,54 @@
 # Progress — CAR-09 Carer — Settings
 
-Status: NOT STARTED
-Owner: unclaimed
+Status: PR OPEN
+Owner: Dhruv Verma
 Lane: C — Carer
 Sprint: SPRINT · planned D10
-Branch: `feature/carer-settings` (not yet created)
+Branch: `feature/carer-settings`
 PR target: `carer-dev`
-Last updated: 2026-09-17 (planning pack generated)
+Last updated: 2026-09-29
 
 ## Blockers
-- OQ-35 — Settings forms save behaviour
+- None. OQ-35 answered (PD-054).
 
 ## Dependencies status
-- F0-07 — NOT STARTED
-- CAR-UI-04 — NOT STARTED
+- F0-07 — MERGED
+- CAR-UI-04 — MERGED TO DEV
+- FAM-12 (column grant, `requestOwnPasswordReset`) — on `carer-dev`
 
 ## Completed
-- Feature documentation drafted (Claude Chat planning pack)
+- Claimed. Docs rewritten to match the code that exists (FD-01 to FD-04)
+- Tests T-01 to T-10 written first (see Tests)
+
+- Implemented `carerInfoSchema`, `updateCarerContactDetails`; wired Save and Reset in `CarerSettingsView`
+- Browser sweep 1920 to 768 (mock), failed-save and Reset states checked; save persisted across reload against the local stack
 
 ## In progress
 - None
 
+- After a save the view calls `router.refresh()`, so the shell header shows the new name (found in the browser check)
+
 ## Remaining
-- Route `/carer/settings`; 'My info' card (Name, Phone, Email, Role); Reset card reusing shared component.
-- Role displayed read-only (PROPOSED — job title set by admin in ADM-02).
+- Human approval, then PR to `carer-dev`
 
 ## Acceptance criteria status
-- 0 / 3 MET
+- 5 / 5 MET
 
 ## Tests
-- Written: 0 / 3
-- Passing: 0
-- Failing: 0
+- Written: 10 / 10, all green: four CAR-09 files, full unit suite (only the shared F0-04/F0-07 integration files fail: they read the hosted `.env.local`), typecheck, lint (0 errors), `supabase test db` (410), integration file against the local stack (4)
+- E2E (mock build, clean port, `--grep-invert "F0-07"`): 41 passed, 2 skipped. An earlier run hit a stale server on :3000 and showed false failures. There is no carer e2e spec.
+- Shared F0-04/F0-07 integration failures: 'Invalid API key' from the hosted `.env.local`, not this change
+- Red for the expected reason: 18 unit/component cases (`updateCarerContactDetails is not a function`; view does not call the actions) and 2 integration cases (same reason)
+- Green guards: pgTAP `carer_profile_update.test.sql` (9), 2 integration cases, and the T-03 reset test (existing FAM-12 code)
+
+## HUMAN REVIEW: test expectation changed
+- `carer-settings.test.tsx` (CAR-UI-04 T-09/T-10): `@/server/profiles/actions` is now mocked (succeeds and echoes), because Save and Reset call the server. Assertions are unchanged. See FD-05.
+
+## Cross-lane touch
+- `src/server/profiles/` is Lane F's folder (FAM-12): additive `carerInfoSchema` and `updateCarerContactDetails` (FD-03). Existing family exports unchanged.
 
 ## Files changed
-- None yet. Likely files: `src/app/(carer)/carer/settings/page.tsx`
+- `src/features/carer-settings/carer-settings-view.tsx`, `carer-settings.test.tsx`, `src/server/profiles/{actions,contact-schema}.ts`; `src/features/carer-settings/carer-settings-wiring.test.tsx`, `src/server/profiles/carer-actions.test.ts`, `supabase/tests/carer_profile_update.test.sql`, `tests/integration/carer-settings-profile.test.ts`; feature docs
 
 ## Decisions
 - See DECISIONS.md
@@ -42,11 +56,5 @@ Last updated: 2026-09-17 (planning pack generated)
 ## Problems encountered
 - None
 
-## Assumptions
-- PROPOSED items in PRD.md are unconfirmed until validated in F0-01 or answered in DECISIONS.md.
-
-## Next action
-- Wait for answers to OQ-35; then complete dependencies, run START FEATURE CAR-09, and write the tests in TEST_PLAN.md first.
-
 ## Ready for PR
-- No
+- Yes, waiting for the human's approval
