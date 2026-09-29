@@ -1,54 +1,50 @@
-# Progress — CAR-05 Carer — Calendar (shifts) and selected-shift tasks
+# Progress — CAR-05 Carer — Calendar (shifts)
 
-Status: NOT STARTED
-Owner: unclaimed
+Status: PR OPEN
+Owner: Dhruv Verma
 Lane: C — Carer
 Sprint: SPRINT · planned D9–D10
-Branch: `feature/carer-calendar-shifts` (not yet created)
+Branch: `feature/carer-calendar-shifts`
 PR target: `carer-dev`
-Last updated: 2026-09-17 (planning pack generated)
+Last updated: 2026-09-29
 
 ## Blockers
-- OQ-33 — Carer calendar and task semantics
+- None. OQ-33 answered. Local Supabase (Docker) must be running to execute T-01 to T-06 (it is, as of 2026-09-29).
 
 ## Dependencies status
-- F0-10 — NOT STARTED
-- F0-11 — NOT STARTED
-- CAR-UI-03 — NOT STARTED
+- F0-10, F0-18 — merged. CAR-UI-03, CAR-UI-01 — merged to `carer-dev`.
 
 ## Completed
-- Feature documentation drafted (Claude Chat planning pack)
+- Claimed (Dhruv Verma); branch from `carer-dev`.
+- Questions answered by the human (FD-02); CHG-032 recorded in root DECISIONS.md.
+- PRD, ACCEPTANCE_CRITERIA, TEST_PLAN, USER_STORIES, DECISIONS rewritten (FD-01).
+- Tests written first (see Tests).
 
 ## In progress
-- None
+- None. Stopped after the tests, as asked.
 
 ## Remaining
-- Route `/carer/calendar`; title 'Calendar', section 'Shifts', D/W/M default W; reuse calendar components from FAM-04.
-- Blocks show time and '<Client> — <title>' truncated with ellipsis.
-- Selecting a block shows 'Tasks for the selected shift' with subtitle '09:00 · Margaret — Morning medication' and a checklist (content per OQ-33).
+- Human approval, then open the PR to `carer-dev`.
 
 ## Acceptance criteria status
-- 0 / 3 MET
+- 10 / 10 MET
 
 ## Tests
-- Written: 0 / 3
-- Passing: 0
-- Failing: 0
+- Written: 10 / 10 (T-01 to T-06 integration, T-07 component, T-08 and T-09 contract, T-10 regression)
+- Passing: 10 / 10. Run locally 2026-09-29 (CI is down): vitest (unit), integration suite against LOCAL Supabase (18 files, 76 tests), pgTAP `supabase test db`, Playwright e2e `--grep-invert "F0-07"` (43), tsc, eslint (0 errors), prettier
+- Failing: none
 
 ## Files changed
-- None yet. Likely files: `src/app/(carer)/carer/calendar/page.tsx`, `src/features/carer-calendar/*`
+- Migration `supabase/migrations/20260929000000_carer_shifts_rpc.sql` + `supabase/tests/carer_shifts_rpc.test.sql`; `database.types.ts` (one entry, FD-06); `src/server/shifts/queries.ts`, `src/mocks/queries/shifts.ts`, `src/features/carer-home/carer-home-view.tsx`; tests: `tests/integration/carer-calendar-shifts.test.ts`, `src/server/shifts/queries.test.ts`, `src/features/carer-home/carer-home-calendar.test.tsx`, `src/features/carer-home/carer-home.test.tsx`.
 
 ## Decisions
-- See DECISIONS.md
-
-## Problems encountered
-- None
+- FD-01 to FD-04; root CHG-032.
 
 ## Assumptions
-- PROPOSED items in PRD.md are unconfirmed until validated in F0-01 or answered in DECISIONS.md.
+- Function takes `p_carer_id` and returns nothing unless it equals `auth.uid()` (PRD Scope).
 
 ## Next action
-- Wait for answers to OQ-33; then complete dependencies, run START FEATURE CAR-05, and write the tests in TEST_PLAN.md first.
+- Wait for the human's "yes", then open the PR "CAR-05 Carer — Calendar (shifts)"; flag the migration (FD-04) and changed test expectations (FD-03, FD-05).
 
 ## Ready for PR
-- No
+- Yes (PR opened after human approval)

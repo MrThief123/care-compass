@@ -22,6 +22,11 @@ vi.mock("@/server/auth/queries", () => ({
 vi.mock("@/server/profiles/queries", () => ({
   getCarerContactDetails: mocks.getCarerContactDetails,
 }));
+// CAR-09: Save and Reset call the server actions; these succeed and echo (DECISIONS FD-05).
+vi.mock("@/server/profiles/actions", () => ({
+  updateCarerContactDetails: async (values: object) => ({ ok: true, data: values }),
+  requestOwnPasswordReset: async () => ({ ok: true, data: undefined }),
+}));
 
 /*
  * The screen reads only through the `src/server/**` contract, so these tests

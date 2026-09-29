@@ -1,26 +1,35 @@
-# Test Plan — CAR-05 Carer — Calendar (shifts) and selected-shift tasks
+# Test Plan — CAR-05 Carer — Calendar (shifts)
 
 ## Approach
-Tests are written **before** production code (TESTING.md §2). Run them, confirm they fail for the expected reason, then implement.
+Tests are written **before** production code (TESTING.md §2). Run them, confirm they fail for the expected reason, then implement. Rewritten 2026-09-29 with the ACs (FD-01).
 
 ## Test levels used
-- **component** → `src/**/<component>.test.tsx` (Vitest + Testing Library + axe)
-- **integration** → `tests/integration/<feature>.test.ts` (Vitest against local Supabase)
+- **integration** → `tests/integration/carer-calendar-shifts.test.ts` (Vitest against local Supabase; skips against a hosted project, as the other integration suites do)
+- **contract** → `src/server/shifts/queries.test.ts` (node; mock mode, and Supabase mode with the client mocked)
+- **component** → `src/features/carer-home/*.test.tsx` (Vitest + Testing Library + axe)
 
 ## Test cases
 
 | Test ID | Covers | Level | Test description | Written first? | Result |
 |---|---|---|---|---|---|
-| T-01 | AC-01 | component | Given seed data for Aisha, when week of 30 Nov renders, then MON 30 shows blocks at 09:00, 11:30 and 15:00 labelled with 'Margaret —'. | ☐ | NOT RUN |
-| T-02 | AC-02 | component | Given the 09:00 block is selected, when the task panel renders, then its subtitle reads '09:00 · Margaret — Morning medication'. | ☐ | NOT RUN |
-| T-03 | AC-03 | integration | Given Daniel's shifts exist, when Aisha's calendar loads, then none of Daniel's shifts appear. | ☐ | NOT RUN |
+| T-01 | AC-01 | integration | Aisha signed in, `DATA_SOURCE=supabase`: today's range returns her Margaret Doyle shift, `clientName` 'Margaret Doyle'. | ☑ | FAIL (expected: the Supabase branch is not implemented; `get_carer_shifts` is missing for T-06). Seeding works. |
+| T-02 | AC-02 | integration | Week range: in-range shifts only, earliest first; 23:30 last-day shift in, 00:30 next-day shift out. | ☑ | FAIL (expected: the Supabase branch is not implemented; `get_carer_shifts` is missing for T-06). Seeding works. |
+| T-03 | AC-03 | integration | Daniel's shifts (same org and another org) never returned to Aisha. | ☑ | FAIL (expected: the Supabase branch is not implemented; `get_carer_shifts` is missing for T-06). Seeding works. |
+| T-04 | AC-04 | integration | A cancelled shift is not returned. | ☑ | FAIL (expected: the Supabase branch is not implemented; `get_carer_shifts` is missing for T-06). Seeding works. |
+| T-05 | AC-05 | integration | An ended shift, no other shift with the client, still returns with the full name. | ☑ | FAIL (expected: the Supabase branch is not implemented; `get_carer_shifts` is missing for T-06). Seeding works. |
+| T-06 | AC-06 | integration | `get_carer_shifts` with Priya's id as Aisha, and as Helen (family), returns no rows; Aisha's own row holds only shift keys plus the two names. | ☑ | FAIL (expected: the Supabase branch is not implemented; `get_carer_shifts` is missing for T-06). Seeding works. |
+| T-07 | AC-07 | component | Day, Week and Month render 'Margaret Doyle' and 'Margaret Chen' as separate blocks/chips; bare 'Margaret' is absent. | ☑ | FAIL (expected: the view still titles blocks with `clientFirstName`) |
+| T-08 | AC-08 | contract | Backwards and over-long ranges reject in `mock` and `supabase` mode; the Supabase client is never created. | ☑ | PASS already: the range is parsed before the mode branch, so this is a regression guard |
+| T-09 | AC-09 | contract | With `rpc` returning an error naming 'Margaret Doyle', the thrown message is exactly 'getCarerShifts: could not load shifts.'. | ☑ | FAIL (Supabase branch throws 'not implemented') |
+| T-10 | AC-10 | component + contract | Empty range: mock returns `[]`; Home shows 'No shifts' with D/W/M and arrows (existing CAR-UI-03 T-08, kept as regression). | ☑ | PASS (existing CAR-UI-03 T-08, unchanged) |
+
+Existing tests changed by CHG-032 (FD-03, **HUMAN REVIEW: test expectation changed**): `src/server/shifts/queries.test.ts`, `src/features/carer-home/carer-home-calendar.test.tsx`, `src/features/carer-home/carer-home.test.tsx` now expect `clientName: 'Margaret Doyle'` and the full name in block titles.
 
 ## Regression scope
-- Run the full unit/component suite and `supabase test db` before marking READY FOR PR.
-- Run Playwright e2e tests for this dashboard before opening the PR.
+- Full unit/component suite; `supabase test db` (one new migration, no table); Playwright e2e for the dashboard with `--grep-invert "F0-07"`; CI is down, so run everything locally and say so in the PR.
 
 ## Test data
-- Use `F0-16` seed data (Banksia Home Care, Margaret, Helen, Aisha R., Priya) unless a test creates its own fixtures.
+- Integration tests create their own organisations, users, clients and shifts and delete them after (F0-16 seed does not exist yet). Component and contract tests use `src/mocks/fixtures.ts` plus small local fixtures.
 
 ## Coverage mapping rule
 Every AC must have ≥1 test. Tests may only be modified after implementation begins for reasons in TESTING.md §6, recorded in DECISIONS.md.

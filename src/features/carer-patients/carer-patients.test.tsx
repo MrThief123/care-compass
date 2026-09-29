@@ -66,8 +66,26 @@ const AISHA = {
   lastName: "Rahman",
 };
 
+const SURNAMES: Record<string, string> = {
+  Margaret: "Doyle",
+  Robert: "Hale",
+  Elsie: "Marsh",
+  Frank: "Novak",
+  Doris: "Petrov",
+  Harold: "Byrne",
+  Jean: "Ahmed",
+};
+
+/** `name` is the full name the card shows (CAR-03, CHG-032); `firstName` stays for the header. */
 function patient(firstName: string, age: number, suburb: string, onShift = false): CarerPatientRow {
-  return { clientId: `client-${firstName.toLowerCase()}`, firstName, age, suburb, onShift };
+  return {
+    clientId: `client-${firstName.toLowerCase()}`,
+    firstName,
+    name: `${firstName} ${SURNAMES[firstName]}`,
+    age,
+    suburb,
+    onShift,
+  };
 }
 
 const PATIENTS: CarerPatientRow[] = [
@@ -137,8 +155,9 @@ function captureErrorLog() {
   return vi.spyOn(console, "error").mockImplementation(() => {});
 }
 
-async function renderPatients() {
-  return render(await PatientsPage());
+async function renderPatients(q?: string | string[]) {
+  const searchParams = Promise.resolve(q === undefined ? {} : { q });
+  return render(await PatientsPage({ searchParams }));
 }
 
 function params(clientId: string) {
@@ -169,17 +188,19 @@ describe("[CAR-UI-02] Carer Patients grid", () => {
   it("[CAR-UI-02][AC-01] shows 7 cards in the design's order, with Margaret '78 years · Preston VIC' and Jean '88 years · Fairfield VIC'", async () => {
     await renderPatients();
 
-    expect(mocks.getCarerPatients).toHaveBeenCalledWith(CARER_ID);
+    expect(mocks.getCarerPatients).toHaveBeenCalledWith(CARER_ID, "");
     const links = cardLinks();
     expect(links).toHaveLength(7);
-    expect(links.map((link) => within(link).getByText(/^[A-Z][a-z]+$/).textContent)).toEqual([
-      "Margaret",
-      "Robert",
-      "Elsie",
-      "Frank",
-      "Doris",
-      "Harold",
-      "Jean",
+    expect(
+      links.map((link) => within(link).getByText(/^[A-Z][a-z]+ [A-Z][a-z]+$/).textContent),
+    ).toEqual([
+      "Margaret Doyle",
+      "Robert Hale",
+      "Elsie Marsh",
+      "Frank Novak",
+      "Doris Petrov",
+      "Harold Byrne",
+      "Jean Ahmed",
     ]);
     expect(within(links[0]!).getByText("78 years · Preston VIC")).toBeInTheDocument();
     expect(within(links[6]!).getByText("88 years · Fairfield VIC")).toBeInTheDocument();
@@ -207,41 +228,9 @@ describe("[CAR-UI-02] Carer Patients grid", () => {
     expect(mocks.redirect).toHaveBeenCalledWith(`/carer/patients/${MARGARET}/home`);
   });
 
-  it("[CAR-UI-02][AC-06] typing 'je' in 'Search patients' leaves only Jean", async () => {
-    const user = userEvent.setup();
-    await renderPatients();
-
-    await user.type(screen.getByPlaceholderText("Search patients"), "je");
-
-    const links = cardLinks();
-    expect(links).toHaveLength(1);
-    expect(links[0]).toHaveAttribute("href", "/carer/patients/client-jean");
-  });
-
-  it("[CAR-UI-02][AC-06] a search is not case-sensitive", async () => {
-    const user = userEvent.setup();
-    await renderPatients();
-
-    await user.type(screen.getByPlaceholderText("Search patients"), "MARG");
-
-    expect(cardLinks().map((link) => link.getAttribute("href"))).toEqual([
-      `/carer/patients/${MARGARET}`,
-    ]);
-  });
-
-  it("[CAR-UI-02][AC-06] a search with no match shows no cards and names the query", async () => {
-    const user = userEvent.setup();
-    await renderPatients();
-
-    await user.type(screen.getByPlaceholderText("Search patients"), "zz");
-
-    expect(cardLinks()).toHaveLength(0);
-    expect(screen.getByText('No matches for "zz".')).toBeInTheDocument();
-  });
-
   it("[CAR-UI-02][PRD] a very long name stays on the card without breaking the grid", async () => {
     const long = "Anastasia Wilhelmina Konstantinopoulos-Featherstone";
-    mocks.getCarerPatients.mockResolvedValue([{ ...PATIENTS[0], firstName: long }]);
+    mocks.getCarerPatients.mockResolvedValue([{ ...PATIENTS[0], name: long }]);
     await renderPatients();
 
     const card = cardLinks()[0]!;

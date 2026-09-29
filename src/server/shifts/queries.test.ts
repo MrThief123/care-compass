@@ -19,13 +19,13 @@ afterEach(() => {
 });
 
 describe("[CAR-UI-01][AC-01] getCarerTodayShifts", () => {
-  it("[CAR-UI-01][AC-01] Aisha gets only today's Margaret shift, 08:00–12:00, with the client's first name", async () => {
+  it("[CAR-UI-01][AC-01] Aisha gets only today's Margaret shift, 08:00–12:00, with the client's full name", async () => {
     const rows = await getCarerTodayShifts("staff-aisha");
 
     expect(rows).toHaveLength(1);
     expect(rows[0]).toMatchObject({
       clientId: MARGARET_CLIENT_ID,
-      clientFirstName: "Margaret",
+      clientName: "Margaret Doyle",
       start: "2026-11-30T08:00:00+11:00",
       end: "2026-11-30T12:00:00+11:00",
     });
@@ -44,7 +44,7 @@ describe("[CAR-UI-01][AC-01] getCarerTodayShifts", () => {
     expect(aisha.some((row) => row.start === "2026-11-30T13:00:00+11:00")).toBe(false);
     expect(sarah).toHaveLength(1);
     expect(sarah[0]).toMatchObject({
-      clientFirstName: "Margaret",
+      clientName: "Margaret Doyle",
       start: "2026-11-30T13:00:00+11:00",
       end: "2026-11-30T17:00:00+11:00",
     });
@@ -79,19 +79,19 @@ describe("[CAR-UI-01][PRD] supabase mode", () => {
 const AISHA_WEEK = { from: "2026-11-30", to: "2026-12-06" };
 
 describe("[CAR-UI-03][AC-07] getCarerShifts", () => {
-  it("[CAR-UI-03][AC-07] Aisha's week of 30 Nov gives her nine shifts, earliest first, with the client's first name", async () => {
+  it("[CAR-UI-03][AC-07] Aisha's week of 30 Nov gives her nine shifts, earliest first, with the client's full name", async () => {
     const rows = await getCarerShifts("staff-aisha", AISHA_WEEK);
 
-    expect(rows.map(({ start, end, clientFirstName }) => [start, end, clientFirstName])).toEqual([
-      ["2026-11-30T08:00:00+11:00", "2026-11-30T12:00:00+11:00", "Margaret"],
-      ["2026-12-01T09:00:00+11:00", "2026-12-01T11:00:00+11:00", "Margaret"],
-      ["2026-12-01T13:00:00+11:00", "2026-12-01T15:00:00+11:00", "Robert"],
-      ["2026-12-02T09:00:00+11:00", "2026-12-02T11:00:00+11:00", "Elsie"],
-      ["2026-12-02T13:00:00+11:00", "2026-12-02T17:00:00+11:00", "Margaret"],
-      ["2026-12-03T09:00:00+11:00", "2026-12-03T11:00:00+11:00", "Frank"],
-      ["2026-12-03T13:00:00+11:00", "2026-12-03T15:00:00+11:00", "Doris"],
-      ["2026-12-04T09:00:00+11:00", "2026-12-04T11:00:00+11:00", "Harold"],
-      ["2026-12-04T13:00:00+11:00", "2026-12-04T15:00:00+11:00", "Jean"],
+    expect(rows.map(({ start, end, clientName }) => [start, end, clientName])).toEqual([
+      ["2026-11-30T08:00:00+11:00", "2026-11-30T12:00:00+11:00", "Margaret Doyle"],
+      ["2026-12-01T09:00:00+11:00", "2026-12-01T11:00:00+11:00", "Margaret Doyle"],
+      ["2026-12-01T13:00:00+11:00", "2026-12-01T15:00:00+11:00", "Robert Hale"],
+      ["2026-12-02T09:00:00+11:00", "2026-12-02T11:00:00+11:00", "Elsie Marsh"],
+      ["2026-12-02T13:00:00+11:00", "2026-12-02T17:00:00+11:00", "Margaret Doyle"],
+      ["2026-12-03T09:00:00+11:00", "2026-12-03T11:00:00+11:00", "Frank Novak"],
+      ["2026-12-03T13:00:00+11:00", "2026-12-03T15:00:00+11:00", "Doris Petrov"],
+      ["2026-12-04T09:00:00+11:00", "2026-12-04T11:00:00+11:00", "Harold Byrne"],
+      ["2026-12-04T13:00:00+11:00", "2026-12-04T15:00:00+11:00", "Jean Ahmed"],
     ]);
     expect(rows[0]).toMatchObject({ clientId: MARGARET_CLIENT_ID });
   });
@@ -108,9 +108,9 @@ describe("[CAR-UI-03][AC-07] getCarerShifts", () => {
   it("[CAR-UI-03][AC-07] a one-day range gives only that day's shifts (Tue 1 Dec)", async () => {
     const rows = await getCarerShifts("staff-aisha", { from: "2026-12-01", to: "2026-12-01" });
 
-    expect(rows.map((row) => [row.start, row.clientFirstName])).toEqual([
-      ["2026-12-01T09:00:00+11:00", "Margaret"],
-      ["2026-12-01T13:00:00+11:00", "Robert"],
+    expect(rows.map((row) => [row.start, row.clientName])).toEqual([
+      ["2026-12-01T09:00:00+11:00", "Margaret Doyle"],
+      ["2026-12-01T13:00:00+11:00", "Robert Hale"],
     ]);
   });
 
@@ -122,14 +122,6 @@ describe("[CAR-UI-03][AC-07] getCarerShifts", () => {
     await expect(
       getCarerShifts("staff-aisha", { from: "2026-12-06", to: "2026-11-30" }),
     ).rejects.toThrow();
-  });
-
-  it("[CAR-UI-03][PRD] supabase mode throws the not-implemented error naming its domain and function", async () => {
-    vi.stubEnv("DATA_SOURCE", "supabase");
-
-    await expect(getCarerShifts("staff-aisha", AISHA_WEEK)).rejects.toThrow(
-      /shifts\.getCarerShifts: DATA_SOURCE="supabase" is not implemented yet/,
-    );
   });
 });
 
@@ -170,5 +162,50 @@ describe("[CAR-UI-02][AC-13] getCarerPatients", () => {
 
   it("[CAR-UI-02][AC-13] adding patients leaves Aisha's Carer Home unchanged: one shift today", async () => {
     expect(await getCarerTodayShifts("staff-aisha")).toHaveLength(1);
+  });
+});
+
+/**
+ * [CAR-03] `getCarerPatients(carerId, query?)`: rows carry the full `name` (CHG-032) and the
+ * optional query keeps the patients whose full name contains it, case-insensitively (FD-01).
+ * The Supabase branch is covered by tests/integration/carer-patients.test.ts.
+ */
+describe("[CAR-03][AC-01] getCarerPatients full names", () => {
+  it("[CAR-03][AC-01] every row has the full name from the client's first and last name", async () => {
+    const rows = await getCarerPatients("staff-aisha");
+
+    expect(rows.map((row) => row.name)).toEqual([
+      "Margaret Doyle",
+      "Robert Hale",
+      "Elsie Marsh",
+      "Frank Novak",
+      "Doris Petrov",
+      "Harold Byrne",
+      "Jean Ahmed",
+    ]);
+    expect(rows[0]!.firstName).toBe("Margaret");
+  });
+});
+
+describe("[CAR-03][AC-02] getCarerPatients search", () => {
+  it("[CAR-03][AC-02] 'Els' returns only Elsie Marsh", async () => {
+    const rows = await getCarerPatients("staff-aisha", "Els");
+
+    expect(rows.map((row) => row.name)).toEqual(["Elsie Marsh"]);
+  });
+
+  it("[CAR-03][AC-02] a search matches the last name and ignores case and padding", async () => {
+    const rows = await getCarerPatients("staff-aisha", "  MARSH ");
+
+    expect(rows.map((row) => row.name)).toEqual(["Elsie Marsh"]);
+  });
+
+  it("[CAR-03][AC-02] a blank query returns everyone; a query with no match returns none", async () => {
+    expect(await getCarerPatients("staff-aisha", "   ")).toHaveLength(7);
+    expect(await getCarerPatients("staff-aisha", "zzz")).toEqual([]);
+  });
+
+  it("[CAR-03][AC-02] a search never widens who the carer may see", async () => {
+    expect(await getCarerPatients("staff-daniel", "Margaret")).toEqual([]);
   });
 });

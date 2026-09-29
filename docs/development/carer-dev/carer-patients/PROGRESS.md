@@ -1,44 +1,41 @@
 # Progress — CAR-03 Carer — Patients
 
-Status: NOT STARTED
-Owner: unclaimed
+Status: READY FOR PR
+Owner: Dhruv Verma
 Lane: C — Carer
 Sprint: SPRINT · planned D8
-Branch: `feature/carer-patients` (not yet created)
+Branch: `feature/carer-patients`
 PR target: `carer-dev`
-Last updated: 2026-09-17 (planning pack generated)
+Last updated: 2026-09-29
 
 ## Blockers
-- OQ-09 — Carer access model
+- None. OQ-09 answered (PD-041). Local Supabase (Docker) must be running for T-01, T-02, T-04, T-05 (it is, as of 2026-09-29).
 
 ## Dependencies status
-- F0-18 — NOT STARTED (added by CHG-027)
-- F0-06 — NOT STARTED
-- F0-10 — NOT STARTED
-- CAR-UI-02 — NOT STARTED
+- F0-06, F0-10, F0-18, CAR-UI-02 — MERGED
 
 ## Completed
-- Feature documentation drafted (Claude Chat planning pack)
+- Feature docs rewritten (FD-01, FD-02): PRD, ACs, TEST_PLAN, USER_STORIES
+- Tests written first and confirmed red for the right reason (see TEST_PLAN)
 
 ## In progress
 - None
 
 ## Remaining
-- Route `/carer/patients`; search field 'Search patients' (server-side, D32).
-- Person cards grid (4 columns at 1440): avatar initial, name, '78 years · Preston VIC'.
-- Card click → `/carer/patients/[clientId]` (CAR-04).
-- Empty state 'No patients assigned yet / New patients will appear here once they're assigned to you.'; card-grid skeleton; error state.
+- Human "yes", then open the PR (target per FD-06)
 
 ## Acceptance criteria status
-- 0 / 4 MET
+- 8 / 8 MET
 
 ## Tests
-- Written: 0 / 4
-- Passing: 0
-- Failing: 0
+- 10 / 10 written and passing: vitest for carer-patients and shifts (63), integration against local Supabase (7)
+- Full vitest: 2053 pass; 5 fail in shared-authentication and shared-supabase-environment (F0-07/F0-04, hosted `.env.local`), identical with my changes stashed
+- tsc and eslint clean on touched folders; e2e `--grep-invert "F0-07"`: 41 passed, 2 skipped
+- CI is down (Actions limits): everything run locally
+- Real browser (Playwright), 1920 to 768, no overlap, no horizontal scroll: mock mode (7 cards, 'Els', clear, 'zz', open a card) and `DATA_SOURCE=supabase` against a throwaway local carer (4 cards, same flow)
 
 ## Files changed
-- None yet. Likely files: `src/app/(carer)/carer/patients/page.tsx`, `src/components/shared/person-card.tsx`
+- `src/server/shifts/queries.ts`, `src/mocks/queries/shifts.ts` (Lane S), `src/app/(carer)/carer/patients/page.tsx`, `src/features/carer-patients/carer-patients-view.tsx`
 
 ## Decisions
 - See DECISIONS.md
@@ -50,7 +47,7 @@ Last updated: 2026-09-17 (planning pack generated)
 - PROPOSED items in PRD.md are unconfirmed until validated in F0-01 or answered in DECISIONS.md.
 
 ## Next action
-- Wait for answers to OQ-09; then complete dependencies, run START FEATURE CAR-03, and write the tests in TEST_PLAN.md first.
+- Wait for the human's "yes", then open the PR. Flag HUMAN REVIEW: test changes (FD-03) and the Lane S mock edit.
 
 ## Ready for PR
-- No
+- Yes, awaiting human approval

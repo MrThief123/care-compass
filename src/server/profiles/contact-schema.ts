@@ -28,3 +28,8 @@ export const familyInfoSchema = z.object({
 });
 
 export type FamilyInfoValues = z.infer<typeof familyInfoSchema>;
+
+/** Carer My info card (CAR-09 FD-03): the family rules without address; Role is never editable (PD-054). */
+export const carerInfoSchema = familyInfoSchema.omit({ address: true });
+
+export type CarerInfoValues = z.infer<typeof carerInfoSchema>;

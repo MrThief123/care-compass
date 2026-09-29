@@ -12,6 +12,8 @@
 | Sprint | SPRINT · planned D8 |
 | Status / owner | See PROGRESS.md |
 
+> **RETIRED by CHG-033 (2026-09-29). Do not start.** CHG-025/031 removed the event rows and Tasks card; CAR-05 wires the shifts calendar and CAR-02 the notifications. The text below is the obsolete original scope, kept for history.
+
 > **Plan v0.2 — data wiring feature.** The screen UI is delivered on fixtures by **CAR-UI-01**. Where this PRD's Scope describes layout or visual components, treat them as already built: verify them, then replace fixture data with the Supabase data source, add server actions, permissions and persistence, and make the acceptance criteria pass against real data. Shared components live in the UI kit (UI-01/UI-02/UI-03) — change them only through a shared PR.
 
 ## Purpose
