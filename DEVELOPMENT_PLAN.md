@@ -173,7 +173,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 | 13 | FAM-13 | Family — Change organisation | F | D11 | SPRINT | F0-06, F0-10, FAM-UI-06 | OQ-06, OQ-15 | `feature/family-change-organisation` | NOT STARTED |
 | 14 | FAM-14 | Family — Task log | F | D11 | SPRINT | F0-11, FAM-UI-07 | OQ-29 | `feature/family-task-log` | NOT STARTED |
 | 15 | FAM-15 | Family — Task detail | F | D11 | SPRINT | F0-11, F0-13, FAM-UI-07 | OQ-29, OQ-10 | `feature/family-task-detail` | NOT STARTED |
-| 16 | CAR-01 | Carer Home — Today's calendar and Tasks | C | D8 | SPRINT | F0-10, F0-11, CAR-UI-01 | OQ-33, OQ-09 | `feature/carer-home-today` | NOT STARTED |
+| 16 | CAR-01 | ~~Carer Home — Today's calendar and Tasks~~ (retired, CHG-033) | C | — | SPRINT | F0-10, F0-11, CAR-UI-01 | OQ-33, OQ-09 | `feature/carer-home-today` | RETIRED (CHG-033) |
 | 17 | CAR-02 | Carer — Notifications card and bell | C | D9 | SPRINT | F0-10, F0-13, CAR-UI-01 | OQ-14 | `feature/carer-notifications` | NOT STARTED |
 | 18 | CAR-03 | Carer — Patients | C | D8 | SPRINT | F0-06, F0-10, F0-18, CAR-UI-02 | OQ-09 | `feature/carer-patients` | NOT STARTED |
 | 19 | CAR-04 | Carer — Client info | C | D9 | SPRINT | F0-06, F0-10, F0-13, F0-18, CAR-UI-02 | OQ-09 | `feature/carer-client-info` | NOT STARTED |
@@ -888,7 +888,8 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Requirements:** REQ-05, REQ-17, REQ-25
 - **CHG-009 (tasks and plain events, REQ-35):** Today's calendar shows tasks and plain events; the Tasks checklist lists tasks only.
 - **CHG-025 (carer shifts and notifications):** becomes Today's shifts: wires the shifts query behind Carer Home's calendar card; no event rows and no Tasks checklist. ACs rewritten when it starts.
-- **Docs:** `docs/development/carer-dev/carer-home-today/` · **Status:** NOT STARTED
+- **RETIRED by CHG-033 (2026-09-29):** CAR-05 wires the shifts calendar and CAR-02 the notifications; nothing left. Do not start.
+- **Docs:** `docs/development/carer-dev/carer-home-today/` · **Status:** RETIRED (CHG-033)
 
 ### CAR-02 — Carer — Notifications card and bell
 - **Dashboard / stream:** carer · **Lane:** C · **Days:** D9 · **Sprint:** SPRINT · **PR target:** `carer-dev` · **Branch:** `feature/carer-notifications`
