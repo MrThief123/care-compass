@@ -806,6 +806,68 @@ export type Database = {
           seq: number;
         };
       };
+      admin_check_staff_fields: {
+        Args: {
+          p_first_name: string;
+          p_last_name: string;
+          p_email: string;
+        };
+        Returns: undefined;
+      };
+      admin_create_staff_profile: {
+        Args: {
+          p_user_id: string;
+          p_first_name: string;
+          p_last_name: string;
+          p_phone: string;
+          p_email: string;
+          p_job_title: string;
+        };
+        Returns: {
+          address: string | null;
+          email: string | null;
+          first_name: string | null;
+          id: string;
+          is_active: boolean;
+          job_title: string | null;
+          last_name: string | null;
+          organisation_id: string | null;
+          phone: string | null;
+          role: Database["public"]["Enums"]["app_role"];
+        };
+      };
+      admin_current_org_id: {
+        Args: Record<PropertyKey, never>;
+        Returns: string;
+      };
+      admin_discard_staff_invite: {
+        Args: {
+          p_user_id: string;
+        };
+        Returns: undefined;
+      };
+      admin_update_staff: {
+        Args: {
+          p_profile_id: string;
+          p_first_name: string;
+          p_last_name: string;
+          p_phone: string;
+          p_email: string;
+          p_job_title: string;
+        };
+        Returns: {
+          address: string | null;
+          email: string | null;
+          first_name: string | null;
+          id: string;
+          is_active: boolean;
+          job_title: string | null;
+          last_name: string | null;
+          organisation_id: string | null;
+          phone: string | null;
+          role: Database["public"]["Enums"]["app_role"];
+        };
+      };
       budget_actor_name: {
         Args: Record<PropertyKey, never>;
         Returns: string;
