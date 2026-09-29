@@ -18,10 +18,10 @@ Tests are written **before** production code (TESTING.md §2). Run them, confirm
 | T-04 | AC-04 | integration | A cancelled shift is not returned. | ☑ | NOT RUN (needs local Supabase) |
 | T-05 | AC-05 | integration | An ended shift, no other shift with the client, still returns with the full name. | ☑ | NOT RUN (needs local Supabase) |
 | T-06 | AC-06 | integration | `get_carer_shifts` with Priya's id as Aisha, and as Helen (family), returns no rows; Aisha's own row holds only shift keys plus the two names. | ☑ | NOT RUN (needs local Supabase) |
-| T-07 | AC-07 | component | Day, Week and Month render 'Margaret Doyle' and 'Margaret Chen' as separate blocks/chips; bare 'Margaret' is absent. | ☑ | FAIL (expected: view titles with `clientFirstName`) |
-| T-08 | AC-08 | contract | Backwards and over-long ranges reject in `mock` and `supabase` mode; the Supabase client is never created. | ☑ | FAIL (supabase branch throws 'not implemented', not a range error) |
-| T-09 | AC-09 | contract | With `rpc` returning an error naming 'Margaret Doyle', the thrown message contains no name. | ☑ | FAIL |
-| T-10 | AC-10 | component + contract | Empty range: mock returns `[]`; Home shows 'No shifts' with D/W/M and arrows (existing CAR-UI-03 T-08, kept as regression). | ☑ | see FD-03 |
+| T-07 | AC-07 | component | Day, Week and Month render 'Margaret Doyle' and 'Margaret Chen' as separate blocks/chips; bare 'Margaret' is absent. | ☑ | FAIL (expected: the view still titles blocks with `clientFirstName`) |
+| T-08 | AC-08 | contract | Backwards and over-long ranges reject in `mock` and `supabase` mode; the Supabase client is never created. | ☑ | PASS already: the range is parsed before the mode branch, so this is a regression guard |
+| T-09 | AC-09 | contract | With `rpc` returning an error naming 'Margaret Doyle', the thrown message is exactly 'getCarerShifts: could not load shifts.'. | ☑ | FAIL (Supabase branch throws 'not implemented') |
+| T-10 | AC-10 | component + contract | Empty range: mock returns `[]`; Home shows 'No shifts' with D/W/M and arrows (existing CAR-UI-03 T-08, kept as regression). | ☑ | PASS (existing CAR-UI-03 T-08, unchanged) |
 
 Existing tests changed by CHG-032 (FD-03, **HUMAN REVIEW: test expectation changed**): `src/server/shifts/queries.test.ts`, `src/features/carer-home/carer-home-calendar.test.tsx`, `src/features/carer-home/carer-home.test.tsx` now expect `clientName: 'Margaret Doyle'` and the full name in block titles.
 

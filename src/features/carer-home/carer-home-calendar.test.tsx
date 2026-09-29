@@ -52,7 +52,7 @@ const AISHA = {
 };
 
 function shift(id: string, start: string, end: string) {
-  return { id, carerId: CARER_ID, clientId: CLIENT_ID, clientFirstName: "Margaret", start, end };
+  return { id, carerId: CARER_ID, clientId: CLIENT_ID, clientName: "Margaret Doyle", start, end };
 }
 
 const MON = shift(
@@ -99,7 +99,7 @@ afterEach(() => {
 });
 
 describe("[CAR-UI-03] Carer Home week of shifts", () => {
-  it("[CAR-UI-03][AC-01] MON 30, TUE 1 and WED 2 each show one 'Margaret' shift block with its time range", async () => {
+  it("[CAR-UI-03][AC-01] MON 30, TUE 1 and WED 2 each show one 'Margaret Doyle' shift block with its time range", async () => {
     await renderCalendar();
 
     const expected: [string, string][] = [
@@ -110,7 +110,7 @@ describe("[CAR-UI-03] Carer Home week of shifts", () => {
     for (const [date, range] of expected) {
       const blocks = blocksOn(date);
       expect(blocks).toHaveLength(1);
-      expect(within(blocks[0]!).getByText("Margaret")).toBeInTheDocument();
+      expect(within(blocks[0]!).getByText("Margaret Doyle")).toBeInTheDocument();
       expect(within(blocks[0]!).getByText(range)).toBeInTheDocument();
     }
     expect(screen.getAllByTestId(/^week-grid-block-/)).toHaveLength(3);
@@ -189,11 +189,11 @@ describe("[CAR-UI-03][AC-05] Day and Month views", () => {
     });
     const blocks = screen.getAllByTestId(/^day-timeline-block-/);
     expect(blocks).toHaveLength(1);
-    expect(within(blocks[0]!).getByText("Margaret")).toBeInTheDocument();
+    expect(within(blocks[0]!).getByText("Margaret Doyle")).toBeInTheDocument();
     expect(within(blocks[0]!).getByText("09:00–11:00")).toBeInTheDocument();
   });
 
-  it("[CAR-UI-03][AC-05] view=month&month=2026-12 selects M and shows a Margaret chip on 30 Nov, 1 Dec and 2 Dec", async () => {
+  it("[CAR-UI-03][AC-05] view=month&month=2026-12 selects M and shows a Margaret Doyle chip on 30 Nov, 1 Dec and 2 Dec", async () => {
     await renderCalendar({ view: "month", date: "2026-11-30", month: "2026-12" });
 
     expect(screen.getByRole("radio", { name: "M" })).toHaveAttribute("aria-checked", "true");
@@ -203,7 +203,7 @@ describe("[CAR-UI-03][AC-05] Day and Month views", () => {
     );
     for (const date of ["2026-11-30", "2026-12-01", "2026-12-02"]) {
       expect(
-        within(screen.getByTestId(`month-grid-day-${date}`)).getByText(/Margaret/),
+        within(screen.getByTestId(`month-grid-day-${date}`)).getByText(/Margaret Doyle/),
       ).toBeInTheDocument();
     }
   });
@@ -347,5 +347,45 @@ describe("[CAR-UI-03] Carer Home calendar current-time line", () => {
 
     await screen.findByTestId("week-grid-day-2026-12-07");
     expect(screen.queryByTestId("current-time-line")).not.toBeInTheDocument();
+  });
+});
+
+describe("[CAR-05][AC-07] shifts show the client's full name", () => {
+  const CHEN = {
+    ...TUE,
+    id: "shift-aisha-margaret-chen",
+    clientId: "client-margaret-chen",
+    clientName: "Margaret Chen",
+    start: "2026-12-01T13:00:00+11:00",
+    end: "2026-12-01T15:00:00+11:00",
+  };
+
+  beforeEach(() => {
+    mocks.getCarerShifts.mockResolvedValue([MON, TUE, CHEN]);
+  });
+
+  it("[CAR-05][AC-07] Week: two clients sharing a first name show as two blocks with their full names, and no bare 'Margaret'", async () => {
+    await renderCalendar();
+
+    const tuesday = within(screen.getByTestId("week-grid-day-2026-12-01"));
+    expect(tuesday.getByText("Margaret Doyle")).toBeInTheDocument();
+    expect(tuesday.getByText("Margaret Chen")).toBeInTheDocument();
+    expect(screen.queryByText("Margaret")).not.toBeInTheDocument();
+  });
+
+  it("[CAR-05][AC-07] Day: the timeline blocks carry the full names", async () => {
+    await renderCalendar({ view: "day", date: "2026-12-01" });
+
+    expect(screen.getByText("Margaret Doyle")).toBeInTheDocument();
+    expect(screen.getByText("Margaret Chen")).toBeInTheDocument();
+    expect(screen.queryByText("Margaret")).not.toBeInTheDocument();
+  });
+
+  it("[CAR-05][AC-07] Month: the chips on 1 Dec carry the full names", async () => {
+    await renderCalendar({ view: "month", date: "2026-11-30", month: "2026-12" });
+
+    const day = within(screen.getByTestId("month-grid-day-2026-12-01"));
+    expect(day.getByText(/Margaret Doyle/)).toBeInTheDocument();
+    expect(day.getByText(/Margaret Chen/)).toBeInTheDocument();
   });
 });
