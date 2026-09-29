@@ -4,6 +4,7 @@
  * data-source-adapter shape as the other domains (ARCHITECTURE.md §3.2).
  * Screens must import from here, never from `src/mocks` directly.
  */
+import { ageFromDob } from "@/lib/format/age";
 import * as mock from "@/mocks/queries/shifts";
 import { getDataSourceMode, notImplementedForSupabase } from "@/server/data-source";
 import { OccurrenceRangeSchema, type OccurrenceRange, type Shift } from "@/types/domain";
@@ -46,6 +47,8 @@ export async function getCarerShifts(
 export interface CarerPatientRow {
   clientId: string;
   firstName: string;
+  /** First and last name (CHG-032). */
+  name: string;
   age: number;
   suburb: string;
   /** A shift with this client is in progress now: the carer may edit their Info. */
@@ -54,12 +57,54 @@ export interface CarerPatientRow {
 
 /**
  * The clients the carer has a shift with that hasn't ended (PD-041), soonest
- * shift first (FD-03). An unknown carer returns `[]`.
+ * shift first (FD-03). `query` (trimmed, case-insensitive) keeps those whose
+ * full name contains it (CAR-03). An unknown carer returns `[]`.
  */
-export async function getCarerPatients(carerId: string): Promise<CarerPatientRow[]> {
+export async function getCarerPatients(carerId: string, query = ""): Promise<CarerPatientRow[]> {
   const mode = getDataSourceMode();
   if (mode === "mock") {
-    return mock.getCarerPatients(carerId);
+    return mock.getCarerPatients(carerId, query);
   }
-  notImplementedForSupabase("shifts", "getCarerPatients");
+
+  // Both reads run under the carer's session: RLS limits shifts to their own and clients to
+  // those with a shift that hasn't ended (F0-18), so no filter here widens access.
+  const { createClient } = await import("@/lib/supabase/server");
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("shifts")
+    .select("client_id, starts_at, clients(first_name, last_name, date_of_birth, suburb)")
+    .eq("carer_id", carerId)
+    .is("cancelled_at", null)
+    .gt("ends_at", new Date().toISOString());
+  // The message names no client (ARCHITECTURE.md §12.5).
+  if (error || !data) throw new Error("getCarerPatients: could not load patients.");
+
+  const now = Date.now();
+  const byClient = new Map<string, CarerPatientRow & { start: number }>();
+  for (const { client_id, starts_at, clients } of data) {
+    if (!clients) continue;
+    const start = Date.parse(starts_at);
+    const seen = byClient.get(client_id);
+    byClient.set(client_id, {
+      clientId: client_id,
+      firstName: clients.first_name,
+      name: `${clients.first_name} ${clients.last_name}`,
+      age: clients.date_of_birth ? ageFromDob(clients.date_of_birth) : 0,
+      suburb: clients.suburb ?? "",
+      onShift: (seen?.onShift ?? false) || start <= now,
+      start: Math.min(start, seen?.start ?? Infinity),
+    });
+  }
+  const needle = query.trim().toLowerCase();
+  return [...byClient.values()]
+    .filter((row) => row.name.toLowerCase().includes(needle))
+    .sort((a, b) => a.start - b.start)
+    .map((row) => ({
+      clientId: row.clientId,
+      firstName: row.firstName,
+      name: row.name,
+      age: row.age,
+      suburb: row.suburb,
+      onShift: row.onShift,
+    }));
 }

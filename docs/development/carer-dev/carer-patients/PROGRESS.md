@@ -1,6 +1,6 @@
 # Progress — CAR-03 Carer — Patients
 
-Status: TESTS WRITTEN
+Status: READY FOR PR
 Owner: Dhruv Verma
 Lane: C — Carer
 Sprint: SPRINT · planned D8
@@ -22,20 +22,20 @@ Last updated: 2026-09-29
 - None
 
 ## Remaining
-- Supabase branch of `getCarerPatients(carerId, query?)`; `name` on `CarerPatientRow` and in the mock; the query in the mock
-- Page reads `?q=`; view drives the URL (debounce, Enter, clear), keeps the box on a no-match search
-- Run the full suite, e2e (`--grep-invert "F0-07"`), and a preview with a real browser check
+- Human "yes", then open the PR (target per FD-06)
 
 ## Acceptance criteria status
-- 0 / 8 MET (tests written, red)
+- 8 / 8 MET
 
 ## Tests
-- Written: 10 / 10 (T-03 and T-07 already pass: built by CAR-UI-02, kept as regression)
-- Passing: 2 plus the 'never widens' case in T-10
-- Failing: T-01, T-02, T-04, T-05 (Supabase branch not implemented), T-06, T-08, T-09, T-10 (expected)
+- 10 / 10 written and passing: vitest for carer-patients and shifts (63), integration against local Supabase (7)
+- Full vitest: 2053 pass; 5 fail in shared-authentication and shared-supabase-environment (F0-07/F0-04, hosted `.env.local`), identical with my changes stashed
+- tsc and eslint clean on touched folders; e2e `--grep-invert "F0-07"`: 41 passed, 2 skipped
+- CI is down (Actions limits): everything run locally
+- Real browser (Playwright), 1920 to 768, no overlap, no horizontal scroll: mock mode (7 cards, 'Els', clear, 'zz', open a card) and `DATA_SOURCE=supabase` against a throwaway local carer (4 cards, same flow)
 
 ## Files changed
-- None yet. Likely files: `src/app/(carer)/carer/patients/page.tsx`, `src/components/shared/person-card.tsx`
+- `src/server/shifts/queries.ts`, `src/mocks/queries/shifts.ts` (Lane S), `src/app/(carer)/carer/patients/page.tsx`, `src/features/carer-patients/carer-patients-view.tsx`
 
 ## Decisions
 - See DECISIONS.md
@@ -47,7 +47,7 @@ Last updated: 2026-09-29
 - PROPOSED items in PRD.md are unconfirmed until validated in F0-01 or answered in DECISIONS.md.
 
 ## Next action
-- Implement in a fresh session: RESUME CAR-03; make the red tests green without changing them.
+- Wait for the human's "yes", then open the PR. Flag HUMAN REVIEW: test changes (FD-03) and the Lane S mock edit.
 
 ## Ready for PR
-- No
+- Yes, awaiting human approval

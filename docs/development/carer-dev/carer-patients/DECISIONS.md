@@ -46,6 +46,10 @@ Record feature-level decisions here using the template below. Project-wide decis
 ### FD-07 — Overlap with CAR-05 (PR open, unmerged)
 - Both edit `src/server/shifts/queries.ts`, `src/mocks/queries/shifts.ts` and `src/server/shifts/queries.test.ts`. Human chose to branch now and resolve conflicts when the second PR lands (2026-09-29).
 
+### FD-08 — Page cleans `q` itself
+- Date: 2026-09-29
+- Decision: the page trims and clamps `q` to 200 characters inline rather than importing Family's `normaliseQuery` (another lane's feature folder). Control-character and lone-surrogate stripping are not copied; the query only feeds an in-memory `includes`, never SQL.
+
 <!-- Template
 ### FD-01 — <title>
 - Date:

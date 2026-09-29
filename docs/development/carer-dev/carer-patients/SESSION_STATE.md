@@ -12,3 +12,6 @@ Important decisions: server-side `?q=` search; full names on cards; `firstName` 
 Exact next action: implement per PROGRESS.md Remaining, then preview at `/carer/patients` in a real browser
 Files likely to be touched next: `src/server/shifts/queries.ts`, `src/mocks/queries/shifts.ts`, `src/app/(carer)/carer/patients/page.tsx`, `src/features/carer-patients/carer-patients-view.tsx`
 Warning for next session: do not edit the new tests to get green; run integration with the local Supabase env overrides.
+
+## 2026-09-29 (implementation)
+- Implemented and green; ready for PR, waiting for the human's "yes". Flag HUMAN REVIEW (FD-03) and the Lane S mock edit in the PR.
