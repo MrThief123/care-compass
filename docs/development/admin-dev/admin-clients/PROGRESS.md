@@ -1,32 +1,36 @@
 # Progress — ADM-04 Admin — Clients list and add client
 
-Status: NOT STARTED
-Owner: unclaimed
+Status: IN PROGRESS
+Owner: MrThief123
 Lane: A — Admin
 Sprint: SPRINT · planned D9
-Branch: `feature/admin-clients` (not yet created)
+Branch: `feature/admin-clients`
 PR target: `admin-dev`
-Last updated: 2026-09-17 (planning pack generated)
+Last updated: 2026-09-29
 
 ## Blockers
-- OQ-07 — Client record creation and family linking
-- OQ-08 — Account provisioning, sign-in method and MFA
+- None. OQ-07 is ANSWERED (PD-037); OQ-08 no longer applies (CHG-035 — this feature creates no
+  account any more).
 
 ## Dependencies status
-- F0-06 — NOT STARTED
-- ADM-UI-04 — NOT STARTED
+- F0-06 — MERGED TO DEV
+- ADM-UI-04 — MERGED TO DEV
 
 ## Completed
 - Feature documentation drafted (Claude Chat planning pack)
+- **CHG-035 (this session, applying PD-037/CHG-010): corrected this feature's own stale docs before
+  implementing**, as CHG-010 itself instructed. PRD/ACCEPTANCE_CRITERIA/TEST_PLAN/DECISIONS rewritten:
+  no Add-client panel (rejected flow, not undesigned), ADM-04 is read-only (the list), Remove stays
+  ADM-05's unwired scope.
 
 ## In progress
 - None
 
 ## Remaining
-- Route `/admin/clients`; Client list with '+ Add client'; columns NAME, FAMILY CONTACT, REMOVE (Remove handled by ADM-05; link absent until then).
-- Add client panel: Client name, Family contact name, Family contact email, Notes; 'Add client' button.
-- On add: create client in admin's organisation and family contact link/invite per OQ-07/OQ-08.
-- No edit of client info (D28).
+- Route `/admin/clients`; Client list; columns NAME, FAMILY CONTACT, REMOVE (still a local, unwired
+  preview — ADM-05's real scope).
+- Wire `getAdminClients()` to Supabase (org-scoped, real family-contact names).
+- Remove the Add-client panel from `clients-screen.tsx` (superseded, PD-037/CHG-010).
 
 ## Acceptance criteria status
 - 0 / 4 MET
