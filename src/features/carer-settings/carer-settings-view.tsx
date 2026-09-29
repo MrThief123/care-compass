@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 import {
@@ -51,6 +52,7 @@ export function CarerSettingsView({ contact }: { contact: CarerContactDetails })
   // One request at a time, so a double press saves or emails once.
   const [saving, setSaving] = useState(false);
   const [resetting, setResetting] = useState(false);
+  const router = useRouter();
   const formRef = useRef<HTMLDivElement>(null);
 
   function focusField(key: string | undefined) {
@@ -125,6 +127,8 @@ export function CarerSettingsView({ contact }: { contact: CarerContactDetails })
     setSaved(stored);
     stopEditing(stored);
     setMessage(SAVED);
+    // The shell header shows the name; re-read it so it matches what was saved.
+    router.refresh();
   }
 
   async function reset() {

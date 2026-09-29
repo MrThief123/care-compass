@@ -26,6 +26,8 @@ Last updated: 2026-09-29
 ## In progress
 - None
 
+- After a save the view calls `router.refresh()`, so the shell header shows the new name (found in the browser check)
+
 ## Remaining
 - Human approval, then PR to `carer-dev`
 
@@ -34,7 +36,8 @@ Last updated: 2026-09-29
 
 ## Tests
 - Written: 10 / 10, all green: four CAR-09 files, full unit suite (only the shared F0-04/F0-07 integration files fail: they read the hosted `.env.local`), typecheck, lint (0 errors), `supabase test db` (410), integration file against the local stack (4)
-- Carer e2e: there is no carer spec; the rest of the e2e run with `--grep-invert "F0-07"` had 13 failures in family-calendar/family-event-form/family-task-detail-nav/sign-up, none touching these files (not re-run on a clean branch)
+- E2E (mock build, clean port, `--grep-invert "F0-07"`): 41 passed, 2 skipped. An earlier run hit a stale server on :3000 and showed false failures. There is no carer e2e spec.
+- Shared F0-04/F0-07 integration failures: 'Invalid API key' from the hosted `.env.local`, not this change
 - Red for the expected reason: 18 unit/component cases (`updateCarerContactDetails is not a function`; view does not call the actions) and 2 integration cases (same reason)
 - Green guards: pgTAP `carer_profile_update.test.sql` (9), 2 integration cases, and the T-03 reset test (existing FAM-12 code)
 
