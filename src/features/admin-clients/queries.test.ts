@@ -16,7 +16,6 @@ it("[ADM-UI-04][AC-01] returns synthetic client/contact pairs without shared mut
   firstClient.name = "Changed";
   expect((await getAdminClients()).clients[0]?.name).toBe("Margaret Doyle");
 });
-it("[ADM-UI-04][AC-01] rejects unimplemented live data", async () => {
-  vi.stubEnv("DATA_SOURCE", "supabase");
-  await expect(getAdminClients()).rejects.toThrow("not implemented");
-});
+// [ADM-04]: getAdminClients' Supabase branch replaced the not-implemented stub. Its org-scoping and
+// family-contact mapping are covered by tests/integration/admin-clients.test.ts against a real
+// database — see feature DECISIONS.md FD-02.

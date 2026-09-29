@@ -921,11 +921,11 @@ Template for future entries:
 - Acceptance: AC-04 added to ADM-UI-01; test-first rendering and empty-shift checks. Prior ACs remain unchanged.
 - All changes remain local and uncommitted pending human visual approval.
 
-### CHG-034 — Admin Home: Upcoming shifts wired live, in ADM-01's own scope
-- Date / requested by: 2026-09-29 / human, in-session (ADM-01 kickoff)
-- Type: scope change (amends CHG-006's "No live shift queries" restriction; adds to ADM-01's PRD Scope)
-- Description: CHG-006 scoped 'Upcoming shifts' to ADM-UI-01's fixture-only preview and explicitly excluded live shift queries. ADM-01's own PRD.md Scope never mentions Upcoming shifts, so `getAdminHome()`'s Supabase branch was going to leave it mock-sourced/empty. The human asked, in-session, for it to be wired live as part of ADM-01 instead of deferred.
-- Source / justification: human instruction, in-session, 2026-09-29 (AskUserQuestion: "Wire it too").
-- Impact: ADM-01's PRD.md Scope gains an Upcoming shifts line; ACCEPTANCE_CRITERIA.md gains a new AC (org-scoped, ordered, real shift data) with a matching TEST_PLAN.md case; `getAdminHome()` reads `shifts` (joined to `clients`/`profiles`) instead of leaving `upcomingShifts` mock-sourced. Recorded in `admin-home/DECISIONS.md`.
-- Human confirmation: yes, in-session, 2026-09-29.
-- Docs updated: DECISIONS.md (this entry); `docs/development/admin-dev/admin-home/{PRD,ACCEPTANCE_CRITERIA,TEST_PLAN,PROGRESS,DECISIONS}.md`.
+### CHG-035 — Admin Clients (ADM-04): correcting stale docs to match PD-037/CHG-010 (list + Remove only, no Add panel)
+- Date / requested by: 2026-09-29 / this session, applying an already-confirmed decision
+- Type: doc correction (no new decision — PD-037 and CHG-010 already settled this; their instruction to update ADM-04's own docs "when it starts" was never carried out)
+- Description: `admin-clients/PRD.md`, `ACCEPTANCE_CRITERIA.md`, `TEST_PLAN.md` and `DECISIONS.md` still described and tested an admin "Add client" panel (client name, family contact name/email, notes) and an AC rejecting a client-info update action ADM-04 never had. PD-037 (2026-09-17) rejected admin-created clients in favour of family-created clients; CHG-010 (2026-09-24) confirmed "ADM-04 becomes the clients list (read and Remove per ADM-05) with no add panel" and instructed Lane A to update ADM-04's own docs when it starts the feature. That update never happened until now.
+- Source / justification: PD-037, CHG-010 (both already human-confirmed; this entry only applies them to ADM-04's own docs, per CHG-010's own instruction).
+- Impact: `admin-clients/PRD.md` Scope drops the Add-client panel and the write-action Technical Considerations; `ACCEPTANCE_CRITERIA.md`/`TEST_PLAN.md` rewritten to 4 ACs (list rendering, RLS org-scoping, empty state, "no Add-client UI exists") dropping the old Add-flow and stale D28-action ACs; `admin-clients/DECISIONS.md` records PD-037/CHG-010 against its own stale OQ-07/OQ-08 lines. `src/features/admin-clients/clients-screen.tsx`'s Add-client `SidePanelForm` and its schema/state are removed (not just left unwired) when ADM-04 is implemented; its Remove action stays as ADM-05's still-unwired local preview, unchanged.
+- Human confirmation: n/a — applying PD-037/CHG-010, which are already confirmed (Dhruv Verma 2026-09-17; Prajeet 2026-09-24). Flagged to the human in-session before starting ADM-04's implementation (surfaced as the "headline finding" of this session's ADM-01/02/04 research pass).
+- Docs updated: this entry; `docs/development/admin-dev/admin-clients/{PRD,ACCEPTANCE_CRITERIA,TEST_PLAN,PROGRESS,SESSION_STATE,DECISIONS}.md`.

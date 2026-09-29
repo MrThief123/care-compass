@@ -12,7 +12,7 @@ const data = {
   ],
 };
 describe("Admin Clients", () => {
-  it("[ADM-UI-04][AC-01] shows client/contact pairs and asks before removing", async () => {
+  it("[ADM-04][AC-01] shows client/contact pairs and asks before removing", async () => {
     render(<ClientsScreen data={data} />);
     const row = screen.getByRole("row", { name: /Margaret Doyle/ });
     expect(within(row).getByText("Helen Doyle")).toBeVisible();
@@ -26,55 +26,29 @@ describe("Admin Clients", () => {
     );
     expect(row).toBeVisible();
   });
-  it("[ADM-UI-04][AC-02] reports an empty client name", async () => {
-    render(<ClientsScreen data={data} />);
-    await userEvent.click(screen.getByRole("button", { name: "Add client" }));
-    expect(screen.getByLabelText("Client name")).toHaveAccessibleDescription(
-      "Enter a client name.",
-    );
-  });
-  it("[ADM-UI-04][AC-03] has no client editing controls", () => {
+  it("[ADM-04][AC-04] has no client editing controls", () => {
     render(<ClientsScreen data={data} />);
     expect(screen.queryByRole("button", { name: /edit/i })).not.toBeInTheDocument();
     expect(screen.queryByRole("link", { name: /edit/i })).not.toBeInTheDocument();
   });
-  it("[ADM-UI-04][AC-02] adds locally and resets on remount without mutating fixtures", async () => {
-    const view = render(<ClientsScreen data={data} />);
-    await userEvent.type(screen.getByLabelText("Client name"), "Harold Brown");
-    await userEvent.type(screen.getByLabelText("Family contact name"), "Grace Brown");
-    await userEvent.type(screen.getByLabelText("Family contact email"), "grace@example.com");
-    await userEvent.type(screen.getByLabelText("Notes"), "Prefers morning visits");
-    await userEvent.click(screen.getByRole("button", { name: "Add client" }));
-    expect(screen.getByRole("row", { name: /Harold Brown.*Grace Brown/ })).toBeVisible();
-    expect(screen.getByRole("status")).toHaveTextContent("Harold Brown added");
-    expect(data.clients).toHaveLength(2);
-    view.unmount();
+  it("[ADM-04][AC-04] has no Add-client panel, button or form field (PD-037/CHG-010)", () => {
     render(<ClientsScreen data={data} />);
-    expect(screen.queryByText("Harold Brown")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /add.*client/i })).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(/client name/i)).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(/family contact/i)).not.toBeInTheDocument();
+    expect(screen.queryByRole("dialog", { name: /add/i })).not.toBeInTheDocument();
   });
-  it("[ADM-UI-04][AC-02] rejects invalid contact details", async () => {
-    render(<ClientsScreen data={data} />);
-    await userEvent.type(screen.getByLabelText("Client name"), "Harold");
-    await userEvent.type(screen.getByLabelText("Family contact email"), "invalid");
-    await userEvent.click(screen.getByRole("button", { name: "Add client" }));
-    expect(screen.getByLabelText("Family contact email")).toHaveAttribute("aria-invalid", "true");
-    expect(screen.getByLabelText("Family contact name")).toHaveAttribute("aria-invalid", "true");
-    expect(screen.queryByRole("row", { name: /Harold/ })).not.toBeInTheDocument();
-  });
-  it("[ADM-UI-04][AC-01] handles an empty list and keeps the add form available", async () => {
+  it("[ADM-04][AC-03] handles an empty list", () => {
     render(<ClientsScreen data={{ clients: [] }} />);
     expect(screen.getByText("No clients yet")).toBeVisible();
-    expect(screen.queryByRole("button", { name: "Add a new client" })).not.toBeInTheDocument();
-    expect(screen.getByLabelText("Client name")).toBeVisible();
-    expect(screen.getByRole("button", { name: "Add client" })).toBeEnabled();
   });
-  it("[ADM-UI-04][AC-01] has no detectable accessibility violations", async () => {
+  it("[ADM-04][PRD] has no detectable accessibility violations", async () => {
     const { container } = render(<ClientsScreen data={data} />);
     expect(await axe(container)).toHaveNoViolations();
   });
 });
 
-it("[ADM-UI-04][AC-01] removes only the confirmed client and restores fixtures on remount", async () => {
+it("[ADM-04][PRD] removes only the confirmed client and restores fixtures on remount", async () => {
   const view = render(<ClientsScreen data={data} />);
   await userEvent.click(screen.getByRole("button", { name: "Remove Margaret Doyle" }));
   await userEvent.click(screen.getByRole("button", { name: "Yes, remove" }));
@@ -88,7 +62,7 @@ it("[ADM-UI-04][AC-01] removes only the confirmed client and restores fixtures o
   render(<ClientsScreen data={data} />);
   expect(screen.getByRole("row", { name: /Margaret Doyle/ })).toBeVisible();
 });
-it("[ADM-UI-04][AC-01] Cancel and Escape leave the client unchanged and return focus", async () => {
+it("[ADM-04][PRD] Cancel and Escape leave the client unchanged and return focus", async () => {
   render(<ClientsScreen data={data} />);
   const remove = screen.getByRole("button", { name: "Remove Margaret Doyle" });
   await userEvent.click(remove);
@@ -101,21 +75,19 @@ it("[ADM-UI-04][AC-01] Cancel and Escape leave the client unchanged and return f
   expect(remove).toHaveFocus();
   expect(screen.getByRole("row", { name: /Margaret Doyle/ })).toBeVisible();
 });
-it("[ADM-UI-04][AC-01] removes the final client into the empty state", async () => {
+it("[ADM-04][AC-03] removes the final client into the empty state", async () => {
   render(<ClientsScreen data={data} />);
   for (const name of ["Margaret Doyle", "Doris Petrov"]) {
     await userEvent.click(screen.getByRole("button", { name: "Remove " + name }));
     await userEvent.click(screen.getByRole("button", { name: "Yes, remove" }));
   }
   expect(screen.getByText("No clients yet")).toBeVisible();
-  expect(screen.getByRole("button", { name: "Add client" })).toBeEnabled();
 });
-it("[ADM-UI-04][AC-01] omits the extra add button and visible Remove heading", () => {
+it("[ADM-04][PRD] omits a visible Remove column heading", () => {
   render(<ClientsScreen data={data} />);
-  expect(screen.getAllByRole("button", { name: /add.*client/i })).toHaveLength(1);
   expect(screen.queryByRole("columnheader", { name: "Remove" })).not.toBeInTheDocument();
 });
-it("[ADM-UI-04][AC-01] confirmation dialog has no detectable accessibility violations", async () => {
+it("[ADM-04][PRD] confirmation dialog has no detectable accessibility violations", async () => {
   const { container } = render(<ClientsScreen data={data} />);
   await userEvent.click(screen.getByRole("button", { name: "Remove Doris Petrov" }));
   expect(await axe(container)).toHaveNoViolations();

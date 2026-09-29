@@ -3,26 +3,32 @@
 ## Approach
 Tests are written **before** production code (TESTING.md §2). Run them, confirm they fail for the expected reason, then implement.
 
+**Rewritten by CHG-035 (2026-09-29)** alongside ACCEPTANCE_CRITERIA.md's rewrite — the old T-01/T-02
+tested the rejected Add-client flow.
+
 ## Test levels used
 - **component** → `src/**/<component>.test.tsx` (Vitest + Testing Library + axe)
-- **e2e** → `tests/e2e/<feature>.spec.ts` (Playwright)
 - **integration** → `tests/integration/<feature>.test.ts` (Vitest against local Supabase)
 
 ## Test cases
 
 | Test ID | Covers | Level | Test description | Written first? | Result |
 |---|---|---|---|---|---|
-| T-01 | AC-01 | e2e | Given Priya enters Client name 'Harold', Family contact 'Grace', email 'grace@example.com' and clicks Add client, then Harold appears in the list with family contact 'Grace'. | ☐ | NOT RUN |
-| T-02 | AC-02 | component | Given Client name is empty, when Add client is pressed, then an error is shown. | ☐ | NOT RUN |
-| T-03 | AC-03 | component | Given seed data, when the list renders, then rows include 'Margaret' with family contact 'Helen'. | ☐ | NOT RUN |
-| T-04 | AC-04 | integration | Given Priya, when she calls the client-info update action, then it is rejected (D28). | ☐ | NOT RUN |
+| T-01 | AC-01 | integration | Given seed data, when `getAdminClients()` loads for Priya, then rows include Margaret with family contact Helen, real names from `clients`/`client_family_members`/`profiles`. | ☑ | PASS — `tests/integration/admin-clients.test.ts` |
+| T-01b | AC-01 | component | Given client/contact pairs, when the list renders, then each row shows its name and family contact (already covered by ADM-UI-04's own test, kept unchanged). | ☑ (ADM-UI-04) | PASS — `clients-screen.test.tsx` |
+| T-02 | AC-02 | integration | Given another organisation's clients, when Priya's `getAdminClients()` loads, then none of them are included (RLS). | ☑ | PASS — `admin-clients.test.ts` |
+| T-03 | AC-03 | integration | Given an organisation with no clients, when `getAdminClients()` loads, then it returns `[]`. | ☑ | PASS — `admin-clients.test.ts` |
+| T-03b | AC-03 | component | Given no clients, when the list renders, then 'No clients yet' is shown (already covered by ADM-UI-04's own test). | ☑ (ADM-UI-04) | PASS — `clients-screen.test.tsx` |
+| T-04 | AC-04 | component | Given the Clients screen, when rendered, then no 'Add client' button, panel or form field exists. | ☑ | PASS — `clients-screen.test.tsx` |
+| T-05 | AC-01 | db | The RLS gap this feature's own AC-01 exposed: an admin can read a linked family member's profile, but nobody else's (`profiles_select_linked_family`, feature DECISIONS.md FD-02). | ☑ | PASS — `supabase/tests/admin_clients.test.sql`, 5/5 |
 
 ## Regression scope
 - Run the full unit/component suite and `supabase test db` before marking READY FOR PR.
 - Run Playwright e2e tests for this dashboard before opening the PR.
 
 ## Test data
-- Use `F0-16` seed data (Banksia Home Care, Margaret, Helen, Aisha R., Priya) unless a test creates its own fixtures.
+- F0-16 is not yet merged, so the integration test seeds its own fixtures, following
+  `tests/integration/family-home-budget-strip.test.ts`'s pattern.
 
 ## Coverage mapping rule
 Every AC must have ≥1 test. Tests may only be modified after implementation begins for reasons in TESTING.md §6, recorded in DECISIONS.md.
