@@ -920,3 +920,12 @@ Template for future entries:
 - Implementation: extend the approved Admin mock query/fixture and compose the existing DataTable inside an Admin-local card. No live shift queries, persistence or row navigation.
 - Acceptance: AC-04 added to ADM-UI-01; test-first rendering and empty-shift checks. Prior ACs remain unchanged.
 - All changes remain local and uncommitted pending human visual approval.
+
+### CHG-034 — Admin Home: Upcoming shifts wired live, in ADM-01's own scope
+- Date / requested by: 2026-09-29 / human, in-session (ADM-01 kickoff)
+- Type: scope change (amends CHG-006's "No live shift queries" restriction; adds to ADM-01's PRD Scope)
+- Description: CHG-006 scoped 'Upcoming shifts' to ADM-UI-01's fixture-only preview and explicitly excluded live shift queries. ADM-01's own PRD.md Scope never mentions Upcoming shifts, so `getAdminHome()`'s Supabase branch was going to leave it mock-sourced/empty. The human asked, in-session, for it to be wired live as part of ADM-01 instead of deferred.
+- Source / justification: human instruction, in-session, 2026-09-29 (AskUserQuestion: "Wire it too").
+- Impact: ADM-01's PRD.md Scope gains an Upcoming shifts line; ACCEPTANCE_CRITERIA.md gains a new AC (org-scoped, ordered, real shift data) with a matching TEST_PLAN.md case; `getAdminHome()` reads `shifts` (joined to `clients`/`profiles`) instead of leaving `upcomingShifts` mock-sourced. Recorded in `admin-home/DECISIONS.md`.
+- Human confirmation: yes, in-session, 2026-09-29.
+- Docs updated: DECISIONS.md (this entry); `docs/development/admin-dev/admin-home/{PRD,ACCEPTANCE_CRITERIA,TEST_PLAN,PROGRESS,DECISIONS}.md`.
