@@ -1,11 +1,11 @@
 # Progress — FAM-10 Family — Budget overview and history
 
-Status: READY FOR PR
+Status: MERGED TO DEV
 Owner: MrThief123
 Lane: F — Family
 Sprint: SPRINT · planned D10
-Branch: `feature/family-budget-overview`
-PR target: `family-dev`
+Branch: `feature/family-budget-overview` (from `main`)
+PR target: `main` (dashboard features now branch from and target `main` directly, not the dev branches) — merged as PR #161, 2026-09-29
 Last updated: 2026-09-29
 
 ## Blockers
@@ -79,8 +79,7 @@ Last updated: 2026-09-29
   for the reasoning and the replacement coverage.
 
 ## Next action
-- Human review of the PR, in particular FD-01's removed test and the `paidOn`/sign-based type mapping
-  choices (undesigned corners of the Supabase mapping, not covered by an explicit AC or PD).
+- None. PR #161 merged to `main` 2026-09-29.
 
 ## Ready for PR
-- Yes
+- Merged (PR #161)
