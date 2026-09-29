@@ -1,3 +1,6 @@
-export default function AdminClientsPage() {
-  return <div className="p-6 text-body-default text-text-secondary">Coming soon.</div>;
+import { ClientsScreen } from "@/features/admin-clients/clients-screen";
+import { getAdminClients } from "@/server/admin/clients-queries";
+
+export default async function AdminClientsPage() {
+  return <ClientsScreen data={await getAdminClients()} />;
 }

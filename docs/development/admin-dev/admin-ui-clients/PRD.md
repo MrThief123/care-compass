@@ -29,7 +29,7 @@ A clickable, reviewable screen that matches the design, ready for data wiring in
 
 ## Scope
 - Route `/admin/clients` inside the admin layout.
-- Client list `DataTable` NAME · FAMILY CONTACT · REMOVE with '+ Add client'; Remove links styled alert (no action — OQ-06/07).
+- Client list `DataTable` with NAME and FAMILY CONTACT headings and an unlabelled visible action column. No Add Client toolbar button. Remove opens a confirmation dialog; Yes removes that row locally and Cancel leaves it unchanged (human review revision, FD-08).
 - Add client `SidePanelForm`: Client name, Family contact name, Family contact email, Notes; 'Add client' (local only).
 - Loading skeleton, empty state and error state (States sheet) wired to the query contract's states.
 - Data only via `src/server/**` contract functions (mock data source).

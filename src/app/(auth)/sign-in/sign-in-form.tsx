@@ -73,6 +73,10 @@ export function SignInForm({ notice }: SignInFormProps) {
       <Link href="/forgot-password" className="text-body-default text-text-brand underline">
         Forgot password?
       </Link>
+
+      <Link href="/sign-up" className="text-body-default text-text-brand underline">
+        Create an account
+      </Link>
     </CardShell>
   );
 }

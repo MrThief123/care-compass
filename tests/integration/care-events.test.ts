@@ -89,12 +89,8 @@ async function seed() {
     { client_id: client.data.id, profile_id: helen.userId },
     { client_id: other.data.id, profile_id: rosa.userId },
   ]);
-  await admin.from("carer_client_assignments").insert({
-    carer_id: aisha.userId,
-    client_id: client.data.id,
-    organisation_id: org.data.id,
-    started_at: new Date(Date.now() - 3 * DAY).toISOString(),
-  });
+  // Carer read/edit access derives solely from an active shift (F0-18): each test that
+  // needs Aisha assigned to a client creates its own `shifts` row inline.
 
   return {
     admin,

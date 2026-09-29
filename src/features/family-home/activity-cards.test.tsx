@@ -131,6 +131,29 @@ describe("[FAM-UI-01][AC-02] Overdue card", () => {
   });
 });
 
+describe("[FAM-02][AC-01] Overdue card badge and rows", () => {
+  it("[FAM-02][AC-01] given 3 overdue occurrences, the badge shows '3' and each of the three rows shows an Overdue pill with a warning icon", () => {
+    const card = renderOverdue([WOUND, REVIEW, WEIGH_IN], 3);
+
+    expect(within(card).getByText("3")).toBeInTheDocument();
+    const rows = within(card).getAllByRole("listitem");
+    expect(rows).toHaveLength(3);
+    for (const row of rows) {
+      expect(within(row).getByText("Overdue")).toBeInTheDocument();
+      expect(within(row).getByTestId("icon-alert-triangle")).toBeInTheDocument();
+    }
+  });
+});
+
+describe("[FAM-02][AC-02] Overdue card empty state", () => {
+  it("[FAM-02][AC-02] given no overdue occurrences, shows 'All caught up' and 'There are no overdue tasks right now.'", () => {
+    const card = renderOverdue([], 0);
+
+    expect(within(card).getByText("All caught up")).toBeInTheDocument();
+    expect(within(card).getByText("There are no overdue tasks right now.")).toBeInTheDocument();
+  });
+});
+
 describe("[FAM-UI-01][PRD] Recent activity rows with long and awkward text", () => {
   const LONG_ROW = occurrence({
     title: MOCK_TITLE,
@@ -223,5 +246,23 @@ describe("[FAM-UI-01][PRD] Recent activity rows with long and awkward text", () 
     );
 
     expect(await axe(container)).toHaveNoViolations();
+  });
+});
+
+describe("[FAM-02][AC-04] 'View all' navigates to the Task log", () => {
+  it("[FAM-02][AC-04] clicking 'View all' navigates to /family/<clientId>/tasks", () => {
+    const card = renderRecent([
+      occurrence({
+        title: "Morning medication",
+        start: melbourne("09:00"),
+        status: "done",
+        actor: "Aisha Rahman",
+      }),
+    ]);
+
+    expect(within(card).getByRole("link", { name: "View all" })).toHaveAttribute(
+      "href",
+      `/family/${CLIENT_ID}/tasks`,
+    );
   });
 });

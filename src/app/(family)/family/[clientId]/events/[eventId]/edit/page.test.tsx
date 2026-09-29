@@ -10,6 +10,8 @@ vi.mock("next/navigation", async (importOriginal) => ({
   useRouter: () => router,
 }));
 
+import TaskDetailPage from "../../../tasks/[occurrenceKey]/page";
+
 import EditEventPage from "./page";
 
 const ID = "client-margaret";
@@ -17,6 +19,15 @@ const PHYSIO = "event-margaret-physio";
 const PHYSIO_28_NOV = `${PHYSIO}:2026-11-28T11:30:00+11:00`;
 const PHYSIO_DESCRIPTION =
   "Mobility and strength session with the physiotherapist. Focus on balance exercises per the current care plan.";
+
+async function renderTaskDetail(occurrenceKey: string, clientId = ID) {
+  return render(
+    await TaskDetailPage({
+      params: Promise.resolve({ clientId, occurrenceKey }),
+      searchParams: Promise.resolve({}),
+    }),
+  );
+}
 
 type SearchParams = Record<string, string | string[] | undefined>;
 
@@ -96,7 +107,9 @@ describe("[FAM-UI-03] /family/[clientId]/events/[eventId]/edit (real mock contra
 
     await user.click(screen.getByRole("button", { name: "Add file" }));
 
-    expect(screen.getByRole("status")).toHaveTextContent(/not available yet/i);
+    // FAM-06 added its own Save-error status region, so this one is scoped to Documents.
+    const documents = screen.getByRole("region", { name: "Documents" });
+    expect(within(documents).getByRole("status")).toHaveTextContent(/not available yet/i);
     expect(screen.getAllByRole("listitem")).toHaveLength(3);
   });
 
@@ -194,6 +207,48 @@ describe("[FAM-UI-03] /family/[clientId]/events/[eventId]/edit (real mock contra
 
   it("[FAM-UI-03][PRD] an unknown event, or another client's event, is a 404", async () => {
     await expect(renderEdit("no-such-event")).rejects.toThrow(/NEXT_HTTP_ERROR_FALLBACK;404/);
+    await expect(renderEdit(PHYSIO, {}, "client-robert")).rejects.toThrow(
+      /NEXT_HTTP_ERROR_FALLBACK;404/,
+    );
+  });
+});
+
+describe("[FAM-07] Family — Edit event persists for real (DATA_SOURCE=mock)", () => {
+  afterEach(() => {
+    cleanup();
+  });
+
+  it("[FAM-07][AC-01] changing the description and saving it shows the new text on Task detail", async () => {
+    const user = userEvent.setup();
+    await renderEdit(PHYSIO, { occurrence: PHYSIO_28_NOV });
+
+    await user.clear(screen.getByLabelText("Description"));
+    await user.type(screen.getByLabelText("Description"), "Updated physio plan for this week.");
+    await user.click(screen.getByRole("button", { name: "Save event" }));
+    expect(router.push).toHaveBeenCalled();
+
+    cleanup();
+    await renderTaskDetail(PHYSIO_28_NOV);
+    expect(screen.getByText("Updated physio plan for this week.")).toBeInTheDocument();
+  });
+
+  it("[FAM-07][AC-02] changing the recurrence from weekly to fortnightly leaves the past completion unchanged", async () => {
+    await renderTaskDetail(PHYSIO_28_NOV);
+    const before = screen.getByRole("region", { name: "Status" }).textContent;
+    cleanup();
+
+    const user = userEvent.setup();
+    await renderEdit(PHYSIO, { occurrence: PHYSIO_28_NOV });
+    await user.selectOptions(screen.getByLabelText("Recurring"), "fortnightly");
+    await user.click(screen.getByRole("button", { name: "Save event" }));
+    expect(router.push).toHaveBeenCalled();
+
+    cleanup();
+    await renderTaskDetail(PHYSIO_28_NOV);
+    expect(screen.getByRole("region", { name: "Status" }).textContent).toBe(before);
+  });
+
+  it("[FAM-07][AC-04] an unrelated family member's client id in the URL is refused, same as an unknown event (CHG-008)", async () => {
     await expect(renderEdit(PHYSIO, {}, "client-robert")).rejects.toThrow(
       /NEXT_HTTP_ERROR_FALLBACK;404/,
     );

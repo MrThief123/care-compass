@@ -11,13 +11,22 @@ export interface TasksPanelProps {
   occurrences: Occurrence[];
   isTicked: (occurrence: Occurrence) => boolean;
   onToggle: (key: string, ticked: boolean) => void;
+  /** FAM-05 AC-02: shown when the last tick or untick failed to save. */
+  errorMessage?: string;
 }
 
 /**
- * Tasks: the selected day's care events as a checklist. A tick is local state
- * only (Phase 1, CLAUDE.md §6) and is gone on reload; saving it is FAM-05.
+ * Tasks: the selected day's care events as a checklist. Ticking calls
+ * `setOccurrenceDone`/`setOccurrenceUndone` (FAM-05); the caller applies the
+ * tick optimistically and reverts it here via `isTicked` if the save fails.
  */
-export function TasksPanel({ dateLabel, occurrences, isTicked, onToggle }: TasksPanelProps) {
+export function TasksPanel({
+  dateLabel,
+  occurrences,
+  isTicked,
+  onToggle,
+  errorMessage,
+}: TasksPanelProps) {
   return (
     <section aria-labelledby="family-calendar-tasks" className="min-w-0">
       <CardShell className="flex h-full flex-col gap-3 px-5 py-4">
@@ -44,6 +53,10 @@ export function TasksPanel({ dateLabel, occurrences, isTicked, onToggle }: Tasks
             className="flex flex-col [&_input]:ml-3 [&_input]:accent-primary [&_label]:gap-4 [&_span]:min-w-0 [&_span]:[overflow-wrap:anywhere]"
           />
         )}
+        {/* On the page from the start so screen readers pick up what is announced. */}
+        <p role="status" className="text-body-small text-text-alert-strong empty:hidden">
+          {errorMessage}
+        </p>
       </CardShell>
     </section>
   );

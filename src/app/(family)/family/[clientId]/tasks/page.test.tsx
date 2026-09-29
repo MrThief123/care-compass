@@ -248,3 +248,62 @@ describe("[FAM-UI-07] /family/[clientId]/tasks page: invalid and hostile URLs ne
     );
   });
 });
+
+/**
+ * FAM-14: the same route, loader and contract as FAM-UI-07 above, exercised again under this
+ * feature's own AC IDs per the coverage mapping rule (TESTING.md). No new mechanism — FAM-UI-07
+ * already built the route against the real `getTaskLog` contract; these confirm its ACs hold. The
+ * default sort (newest first, ties by key) is FAM-UI-07/CHG-005's, not re-litigated here — AC-01's
+ * example order in the PRD is illustrative, not a specified tie-break (DECISIONS.md FD-01).
+ */
+describe("[FAM-14] Family — Task log", () => {
+  it("[FAM-14][AC-01] Mon 30 Nov's tasks are listed with the right nurse and status", async () => {
+    await renderPage();
+
+    const monday = dataRows()
+      .map((row) =>
+        within(row)
+          .getAllByRole("cell")
+          .slice(0, 4)
+          .map((cell) => cell.textContent),
+      )
+      .filter((row) => row[0] === "Mon 30 Nov");
+    expect(monday).toEqual(
+      expect.arrayContaining([
+        ["Mon 30 Nov", "Morning medication", "Aisha Rahman", "Done · Aisha Rahman"],
+        ["Mon 30 Nov", "Physiotherapy", "Aisha Rahman", "Planned"],
+        ["Mon 30 Nov", "Afternoon check-in", "Aisha Rahman", "Planned"],
+      ]),
+    );
+  });
+
+  it("[FAM-14][AC-02] the Overdue status filter lists only Weekly weigh-in and Medication review, nurse '—'", async () => {
+    await renderPage(ID, { status: "overdue" });
+
+    const rows = dataRows().map((row) =>
+      within(row)
+        .getAllByRole("cell")
+        .slice(1, 3)
+        .map((cell) => cell.textContent),
+    );
+    expect(rows).toEqual([
+      ["Weekly weigh-in", "—"],
+      ["Medication review", "—"],
+    ]);
+  });
+
+  it('[FAM-14][AC-03] searching "Zoe" shows \'No matches for "Zoe".\'', async () => {
+    await renderPage(ID, { q: "Zoe" });
+
+    expect(screen.getByText('No matches for "Zoe".')).toBeInTheDocument();
+    expect(dataRows()).toHaveLength(0);
+  });
+
+  it("[FAM-14][AC-04] a row's link goes to that occurrence's Task detail", async () => {
+    const expected = await getTaskLog(ID, {});
+
+    await renderPage();
+
+    expect(rowKeys()[0]).toBe(taskDetailHref(ID, expected.items[0]!.key, { q: "", page: 1 }));
+  });
+});

@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { costValuesFromEvent } from "@/features/family-event-form/event-cost";
+import { editEventDetailsValues } from "@/features/family-event-form/event-details";
 import { EventFormScreen } from "@/features/family-event-form/event-form-screen";
 import {
   EMPTY_EVENT_VALUES,
@@ -46,9 +47,13 @@ function renderEdit() {
   return render(
     <EventFormScreen
       mode="edit"
+      clientId={CLIENT_ID}
+      eventId={physio.id}
+      occurrenceOriginalStart={physio.start}
       initialValues={editEventValues(physio)}
       initialIsTask={isTaskEvent(physio)}
       initialCost={costValuesFromEvent(physio)}
+      initialDetails={editEventDetailsValues(physio)}
       buckets={buckets}
       month="2026-11-30"
       documents={[]}
@@ -61,6 +66,7 @@ function renderAdd() {
   return render(
     <EventFormScreen
       mode="add"
+      clientId={CLIENT_ID}
       initialValues={{ ...EMPTY_EVENT_VALUES, date: "2026-11-30" }}
       initialIsTask
       buckets={buckets}
@@ -69,6 +75,11 @@ function renderAdd() {
       returnHref={RETURN_HREF}
     />,
   );
+}
+
+/** FAM-06: Title is required to save; fills it so these FAM-UI-08 cost tests reach Save event. */
+async function fillTitle(user: ReturnType<typeof userEvent.setup>) {
+  await user.type(screen.getByLabelText("Title"), "Physiotherapy");
 }
 
 describe("[FAM-UI-08][AC-06] Edit event opens with the saved cost", () => {
@@ -124,6 +135,7 @@ describe("[FAM-UI-08][AC-02] Save event checks the cost", () => {
   it("[FAM-UI-08][AC-02] a cost with a bucket saves; no cost and no bucket saves", async () => {
     const user = userEvent.setup();
     renderAdd();
+    await fillTitle(user);
 
     await user.click(screen.getByRole("button", { name: "Save event" }));
     expect(mocks.push).toHaveBeenCalledTimes(1);
@@ -137,6 +149,7 @@ describe("[FAM-UI-08][AC-02] Save event checks the cost", () => {
   it("[FAM-UI-08][AC-02] clearing the cost clears its error", async () => {
     const user = userEvent.setup();
     renderAdd();
+    await fillTitle(user);
 
     await user.type(screen.getByLabelText("Cost"), "0");
     await user.click(screen.getByRole("button", { name: "Save event" }));
