@@ -28,6 +28,11 @@ Record feature-level decisions here using the template below. Project-wide decis
      Remove for real ("Remove handled by ADM-05") — only the now-removed Add-client panel was this
      feature's write concern, and that write path is gone entirely (PD-037), not replaced by anything.
      `getAdminClients()` is a read-only contract; there is no `clients-actions.ts` in this feature.
+  3. **Empty-state copy changed**: "Add a client to get started" → "Clients appear here once their
+     family links your organisation" — the old copy referenced the removed Add-client action, so it
+     would have been actively misleading (there is no add button to follow it with). Undesigned
+     (PD-052-style, no copy exists for this state post-PD-037); flagged for review like any undesigned
+     copy.
 - Reason: (1) follows the same pattern `documents/queries.ts`'s `uploader` embed and FAM-10's
   `getFundHistory` already use for a denormalised display name from a join; (2) is what the PRD's own
   Scope already said, restated here because implementing this feature could easily be mistaken for
@@ -39,6 +44,38 @@ Record feature-level decisions here using the template below. Project-wide decis
 - Consequences: none beyond what is stated above.
 - Human confirmation required: no — CHG-035 already carries the human-relevant decision (PD-037/
   CHG-010); these are implementation defaults for undesigned corners, flagged here for review.
+
+### FD-02 — New RLS policy: an admin can read a linked family member's profile
+- Date: 2026-09-29
+- Context: implementing FD-01's family-contact derivation revealed a real RLS gap, not just a query
+  bug: `client_family_members_select` already lets an admin read the *link* row for their own clients,
+  but the linked `profiles` row has its own RLS, and neither existing SELECT policy
+  (`profiles_select_self`, `profiles_select_same_org`) covers it — a self-registered family account
+  usually has no `organisation_id` at all (PD-057), so `profiles_select_same_org` never matches. The
+  family contact's name was invisible to the admin under RLS even though AC-01 requires showing it.
+- Decision: new migration `supabase/migrations/20260929020000_admin_clients_family_contact.sql` adds
+  `profiles_select_linked_family`: a profile becomes readable to a caller when it is linked, via
+  `client_family_members`, to a client that caller administers (`is_admin_of_client`). Narrow and
+  additive — nothing about an existing policy changes, and only a profile actually linked to one of the
+  caller's own clients becomes visible.
+- Reason: PD-002/ADR-03 (authorisation lives in the database) — the fix belongs in RLS, not in
+  application code working around a query that silently returns nothing.
+- Alternatives considered: a SECURITY DEFINER RPC that looks up the name and bypasses `profiles`' own
+  RLS entirely (rejected — a new RLS policy is narrower, and keeps the existing `profiles` SELECT the
+  single, RLS-governed read path CLAUDE.md §7 expects, rather than adding a second one specific to this
+  screen); denormalising the family contact's name onto `client_family_members` at write time (rejected
+  — no write path adds those rows outside `register_account()`/future features, and the extra
+  denormalised column would need its own sync logic for a problem RLS already solves cleanly).
+- Consequences: any other feature reading `profiles` gains this one additional visibility case for
+  free (an admin reading a family member linked to their own client) — checked this is never wider than
+  what `client_family_members_select` already permitted for the link itself, so no new leak.
+- Human confirmation required: no — a narrow, additive RLS fix required for this feature's own AC-01 to
+  work at all, not a design choice. Flagged here and in the PR since it touches the shared `profiles`
+  table's RLS (Lane B territory) from a Lane A feature, following the same "flag rather than hide"
+  approach as FD-01/ADM-02's out-of-lane file.
+- Test changes caused: none. New coverage: `supabase/tests/admin_clients.test.sql` (5 pgTAP cases:
+  admin reads their own linked family member, not another org's; the family member still reads their
+  own profile via the untouched `profiles_select_self`; anon reads nothing).
 - Test changes caused: `src/features/admin-clients/clients-screen.test.tsx`'s Add-flow tests (empty
   client-name validation, "adds locally", "rejects invalid contact details", and the empty-list test's
   reference to the add form) removed, since the Add-client panel itself is removed (CHG-035, not a

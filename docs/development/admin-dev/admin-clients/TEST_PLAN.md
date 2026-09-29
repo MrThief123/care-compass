@@ -14,12 +14,13 @@ tested the rejected Add-client flow.
 
 | Test ID | Covers | Level | Test description | Written first? | Result |
 |---|---|---|---|---|---|
-| T-01 | AC-01 | integration | Given seed data, when `getAdminClients()` loads for Priya, then rows include Margaret with family contact Helen, real names from `clients`/`client_family_members`/`profiles`. | ☐ | NOT RUN |
+| T-01 | AC-01 | integration | Given seed data, when `getAdminClients()` loads for Priya, then rows include Margaret with family contact Helen, real names from `clients`/`client_family_members`/`profiles`. | ☑ | PASS — `tests/integration/admin-clients.test.ts` |
 | T-01b | AC-01 | component | Given client/contact pairs, when the list renders, then each row shows its name and family contact (already covered by ADM-UI-04's own test, kept unchanged). | ☑ (ADM-UI-04) | PASS — `clients-screen.test.tsx` |
-| T-02 | AC-02 | integration | Given another organisation's clients, when Priya's `getAdminClients()` loads, then none of them are included (RLS). | ☐ | NOT RUN |
-| T-03 | AC-03 | integration | Given an organisation with no clients, when `getAdminClients()` loads, then it returns `[]`. | ☐ | NOT RUN |
+| T-02 | AC-02 | integration | Given another organisation's clients, when Priya's `getAdminClients()` loads, then none of them are included (RLS). | ☑ | PASS — `admin-clients.test.ts` |
+| T-03 | AC-03 | integration | Given an organisation with no clients, when `getAdminClients()` loads, then it returns `[]`. | ☑ | PASS — `admin-clients.test.ts` |
 | T-03b | AC-03 | component | Given no clients, when the list renders, then 'No clients yet' is shown (already covered by ADM-UI-04's own test). | ☑ (ADM-UI-04) | PASS — `clients-screen.test.tsx` |
-| T-04 | AC-04 | component | Given the Clients screen, when rendered, then no 'Add client' button, panel or form field exists. | ☐ | NOT RUN |
+| T-04 | AC-04 | component | Given the Clients screen, when rendered, then no 'Add client' button, panel or form field exists. | ☑ | PASS — `clients-screen.test.tsx` |
+| T-05 | AC-01 | db | The RLS gap this feature's own AC-01 exposed: an admin can read a linked family member's profile, but nobody else's (`profiles_select_linked_family`, feature DECISIONS.md FD-02). | ☑ | PASS — `supabase/tests/admin_clients.test.sql`, 5/5 |
 
 ## Regression scope
 - Run the full unit/component suite and `supabase test db` before marking READY FOR PR.
