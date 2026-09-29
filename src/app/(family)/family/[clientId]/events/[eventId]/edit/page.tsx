@@ -1,12 +1,14 @@
 import { notFound } from "next/navigation";
 
 import { costValuesFromEvent } from "@/features/family-event-form/event-cost";
+import { editEventDetailsValues } from "@/features/family-event-form/event-details";
 import { editEventReturnHref } from "@/features/family-event-form/event-form-return";
 import { EventFormScreen } from "@/features/family-event-form/event-form-screen";
 import { editEventValues, isTaskEvent } from "@/features/family-event-form/event-form-values";
 import { resolveTaskDetailOrigin } from "@/features/family-task-detail/task-detail-origin";
 import { getBudgetSummary } from "@/server/budget/queries";
 import { getEventDocuments } from "@/server/documents/queries";
+import { parseOccurrenceKey } from "@/server/events/occurrence-key";
 import { getEvent, getOccurrence, getToday, getTodayOccurrences } from "@/server/events/queries";
 
 /**
@@ -49,12 +51,20 @@ export default async function EditEventPage({
     getBudgetSummary(clientId),
   ]);
   const values = editEventValues(event, occurrence);
+  // The occurrence's identity (PD-004), never its possibly-overridden displayed start.
+  const occurrenceOriginalStart = occurrence
+    ? (parseOccurrenceKey(occurrence.key)?.originalStart ?? event.start)
+    : event.start;
 
   return (
     <EventFormScreen
       mode="edit"
+      clientId={clientId}
+      eventId={event.id}
+      occurrenceOriginalStart={occurrenceOriginalStart}
       initialValues={values}
       initialIsTask={isTaskEvent(event)}
+      initialDetails={editEventDetailsValues(event, occurrence)}
       month={values.date}
       documents={documents}
       buckets={buckets}

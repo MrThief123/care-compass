@@ -49,16 +49,6 @@ describe("[UI-04][AC-06] getEventDocuments", () => {
   });
 });
 
-describe("[UI-04][AC-07] supabase mode", () => {
-  it("[UI-04][AC-07] getEventDocuments throws the not-implemented error naming its domain and function", async () => {
-    vi.stubEnv("DATA_SOURCE", "supabase");
-
-    await expect(getEventDocuments(MARGARET_CLIENT_ID, "any-event")).rejects.toThrow(
-      /documents\.getEventDocuments: DATA_SOURCE="supabase" is not implemented yet/,
-    );
-  });
-});
-
 describe("[FAM-UI-04][AC-03] getClientDocuments", () => {
   it("[FAM-UI-04][AC-03] returns Care plan.pdf then Medication schedule.pdf for Margaret", async () => {
     const documents = await getClientDocuments(MARGARET_CLIENT_ID);

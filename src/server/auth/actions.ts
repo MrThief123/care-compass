@@ -19,7 +19,9 @@ import type { Database } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
 import type { Role } from "@/types/domain";
 
+import { discardUnregisteredAccount, registerAccount } from "./registration";
 import { resolveMfaGatePath, resolveRoleHomePath } from "./routing";
+import { SignUpInputSchema } from "./sign-up-schema";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 
@@ -28,8 +30,17 @@ export type AuthActionResult<T = undefined> =
   | {
       ok: false;
       error: {
-        code: "VALIDATION" | "INVALID_CREDENTIALS" | "INACTIVE" | "MFA_INVALID_CODE" | "UNEXPECTED";
+        code:
+          | "VALIDATION"
+          | "INVALID_CREDENTIALS"
+          | "INACTIVE"
+          | "MFA_INVALID_CODE"
+          | "EMAIL_EXISTS"
+          | "REGISTRATION_FAILED"
+          | "UNEXPECTED";
         message: string;
+        /** Per-field messages, keyed by the form's field names (F0-17, FD-05). */
+        fieldErrors?: Record<string, string>;
       };
     };
 
@@ -95,6 +106,101 @@ async function resolvePostSignInPath(
 ): Promise<string> {
   const mfaPath = await resolveMfaGatePath(supabase, profile.role);
   return mfaPath ?? (await resolveRoleHomePath(supabase, profile.id, profile.role));
+}
+
+// ---------------------------------------------------------------------------
+// Sign up (F0-17)
+// ---------------------------------------------------------------------------
+
+const EMAIL_EXISTS_MESSAGE =
+  "An account with this email already exists. Sign in or reset your password.";
+const REGISTRATION_FAILED_MESSAGE = "We couldn't create your account. Please try again.";
+
+/**
+ * AC-01 to AC-04, AC-06: creates the auth user, then the account's records in one database
+ * transaction (`register_account`), then signs the person in and resolves the same redirect
+ * `signIn` would. `input` is untrusted: it is parsed with the shared schema, which strips
+ * any organisation or client id, and the database function has no such parameters either.
+ * If the records cannot be created the half-made auth user is discarded (FD-01).
+ */
+export async function signUp(input: unknown): Promise<AuthActionResult<{ redirectTo: string }>> {
+  const parsed = SignUpInputSchema.safeParse(input);
+  if (!parsed.success) {
+    const fieldErrors: Record<string, string> = {};
+    for (const issue of parsed.error.issues) {
+      const key = issue.path.map(String).join(".");
+      if (key && fieldErrors[key] === undefined) fieldErrors[key] = issue.message;
+    }
+    return {
+      ok: false,
+      error: {
+        code: "VALIDATION",
+        message: parsed.error.issues[0]?.message ?? "Check the highlighted fields.",
+        fieldErrors,
+      },
+    };
+  }
+  const values = parsed.data;
+
+  const supabase = await createClient();
+  const { data, error } = await supabase.auth.signUp({
+    email: values.email,
+    password: values.password,
+  });
+
+  if (error) {
+    if (error.code === "user_already_exists" || /already (been )?registered/i.test(error.message)) {
+      return { ok: false, error: { code: "EMAIL_EXISTS", message: EMAIL_EXISTS_MESSAGE } };
+    }
+    if (error.code === "weak_password") {
+      return {
+        ok: false,
+        error: {
+          code: "VALIDATION",
+          message: error.message,
+          fieldErrors: { password: error.message },
+        },
+      };
+    }
+    return { ok: false, error: { code: "UNEXPECTED", message: REGISTRATION_FAILED_MESSAGE } };
+  }
+
+  // With email confirmation off (PD-057) a new user comes back signed in. An empty identities
+  // list is Supabase's way of saying the email is already taken when confirmation is on.
+  if (data.user && data.user.identities?.length === 0) {
+    return { ok: false, error: { code: "EMAIL_EXISTS", message: EMAIL_EXISTS_MESSAGE } };
+  }
+  if (!data.user || !data.session) {
+    return {
+      ok: false,
+      error: { code: "REGISTRATION_FAILED", message: REGISTRATION_FAILED_MESSAGE },
+    };
+  }
+
+  const registered = await registerAccount(supabase, values);
+  if (registered.error) {
+    await discardUnregisteredAccount(supabase);
+    await supabase.auth.signOut();
+    return {
+      ok: false,
+      error: { code: "REGISTRATION_FAILED", message: REGISTRATION_FAILED_MESSAGE },
+    };
+  }
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("id, role, organisation_id")
+    .eq("id", data.user.id)
+    .maybeSingle();
+  if (!profile) {
+    return {
+      ok: false,
+      error: { code: "REGISTRATION_FAILED", message: REGISTRATION_FAILED_MESSAGE },
+    };
+  }
+
+  const redirectTo = await resolvePostSignInPath(supabase, profile);
+  return { ok: true, data: { redirectTo } };
 }
 
 /** Placed in the top bar by F0-15 (PageHeader); ends the session and returns to sign-in. */

@@ -44,7 +44,7 @@ async function createUser(label: string, role: "family" | "carer", organisationI
   return { userId: data.user.id, email };
 }
 
-/** Two organisations, a family member with a client at the first, and a carer with 2 future shifts, 1 finished shift and an active assignment. */
+/** Two organisations, a family member with a client at the first, and a carer with 2 future shifts and 1 finished shift (F0-18: her read access comes from these shifts alone). */
 async function seed() {
   const admin = createAdminClient();
   const orgs = await admin
@@ -69,14 +69,6 @@ async function seed() {
     .from("client_family_members")
     .insert({ client_id: clientId, profile_id: helen.userId });
   if (link.error) throw link.error;
-
-  const assignment = await admin.from("carer_client_assignments").insert({
-    carer_id: aisha.userId,
-    client_id: clientId,
-    organisation_id: banksia!.id,
-    started_at: new Date(Date.now() - 2 * HOUR).toISOString(),
-  });
-  if (assignment.error) throw assignment.error;
 
   const at = (offsetHours: number) => new Date(Date.now() + offsetHours * HOUR).toISOString();
   const shifts = await admin.from("shifts").insert([
@@ -186,13 +178,21 @@ describe.skipIf(!hasLocalSupabase)("[FAM-13] change organisation against local S
       expect(past).toHaveLength(1);
       expect(past[0]!.cancelled_at).toBeNull();
 
-      const { data: assignments } = await s.admin
-        .from("carer_client_assignments")
-        .select("ended_at, organisation_id")
-        .eq("client_id", s.clientId);
-      expect(assignments).toHaveLength(1);
-      expect(assignments![0]!.ended_at).not.toBeNull();
-      expect(assignments![0]!.organisation_id).toBe(s.banksia.id);
+      // F0-18: read access follows the same shifts, so cancelling them (above) ends it too.
+      const aishaSession = await signedInAs(s.aisha.email);
+      const { data: stillAssigned } = await cookieClient(aishaSession).rpc("is_assigned_carer", {
+        p_client_id: s.clientId,
+      });
+      expect(stillAssigned).toBe(false);
+
+      const { data: cancelledShift } = await s.admin
+        .from("shifts")
+        .select("organisation_id")
+        .eq("client_id", s.clientId)
+        .not("cancelled_at", "is", null)
+        .limit(1)
+        .single();
+      expect(cancelledShift?.organisation_id).toBe(s.banksia.id);
 
       // Nothing was deleted: the family link is still there (AC-03).
       const { count } = await s.admin

@@ -17,7 +17,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
         <PageHeader
           subject={<ScreenTitle role="admin" basePath="/admin" />}
           date={formatLongDate(new Date())}
-          userFirstName={user.firstName}
+          userFirstName={[user.firstName, user.lastName].filter(Boolean).join(" ")}
           signOutSlot={<SignOutButton />}
         />
         <main className="flex-1">{children}</main>

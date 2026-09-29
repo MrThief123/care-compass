@@ -23,3 +23,8 @@ Tests are written **before** production code (TESTING.md §2). Run them, confirm
 
 ## Coverage mapping rule
 Every AC must have ≥1 test. Tests may only be modified after implementation begins for reasons in TESTING.md §6, recorded in DECISIONS.md.
+
+## Human-requested review revision (FD-08)
+- AC-04: confirm removes only selected client, Cancel/Escape preserve it and restore focus, final removal shows empty state, remount restores fixtures.
+- AC-04: only side-panel Add client submit remains, visible REMOVE heading absent, open dialog passes axe.
+- Existing AC-01 tests revised for active Remove buttons and retained empty-state form; expectations changed by explicit user request.

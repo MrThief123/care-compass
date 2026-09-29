@@ -19,3 +19,9 @@ describe("[UI-01][AC-01] weekRange", () => {
     expect(weekRange("2026-01-01")).toEqual({ start: "2025-12-29", end: "2026-01-04" });
   });
 });
+
+describe("[FAM-04][AC-02] weekRange", () => {
+  it("[FAM-04][AC-02] T-02 given date 2 Dec 2026, returns Mon 30 Nov 2026 to Sun 6 Dec 2026", () => {
+    expect(weekRange("2026-12-02")).toEqual({ start: "2026-11-30", end: "2026-12-06" });
+  });
+});

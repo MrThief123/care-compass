@@ -23,3 +23,9 @@ Tests are written **before** production code (TESTING.md §2). Run them, confirm
 
 ## Coverage mapping rule
 Every AC must have ≥1 test. Tests may only be modified after implementation begins for reasons in TESTING.md §6, recorded in DECISIONS.md.
+
+## CHG-006 — Upcoming shifts
+- T-04 / AC-04: render Client, Carer, Date, Time headers and the assigned shift details from fixtures.
+- T-05 / AC-04: empty shift list shows No upcoming shifts.
+- Written and run before implementation: failed for missing Upcoming shifts/empty state; passing after implementation.
+- T-02 caption assertion updated to Across all Clients per explicit human instruction; recorded in DECISIONS.md.
