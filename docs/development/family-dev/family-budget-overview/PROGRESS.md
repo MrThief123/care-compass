@@ -1,55 +1,86 @@
 # Progress — FAM-10 Family — Budget overview and history
 
-Status: NOT STARTED
-Owner: unclaimed
+Status: READY FOR PR
+Owner: MrThief123
 Lane: F — Family
 Sprint: SPRINT · planned D10
-Branch: `feature/family-budget-overview` (not yet created)
+Branch: `feature/family-budget-overview`
 PR target: `family-dev`
-Last updated: 2026-09-17 (planning pack generated)
+Last updated: 2026-09-29
 
 ## Blockers
-- OQ-04 — Funding model: buckets, categories and periods
-- OQ-05 — Who can add funds and record spending; Budget History contents
+- None. OQ-04 and OQ-05 are ANSWERED (root DECISIONS.md).
 
 ## Dependencies status
-- F0-12 — NOT STARTED
-- FAM-UI-05 — NOT STARTED
+- F0-12 — MERGED TO DEV
+- FAM-UI-05 — MERGED TO DEV (PR #92, commit 2411316)
 
 ## Completed
 - Feature documentation drafted (Claude Chat planning pack)
+- Confirmed the screen (route, 'Funds by source' bucket cards, History table incl. CHG-020's
+  pending-cost rows, empty state) and Home's 'View breakdown' link were already built and merged under
+  FAM-UI-05 (PR #92) against mock data; `getBudgetSummary` was already wired to Supabase under FAM-03
+  (commit f0b0874). None of this needed rebuilding.
+- Wired `getFundHistory` to Supabase in `src/server/budget/queries.ts`: direct `budget_fund_entries` +
+  `budget_costs` selects joined to `budget_buckets(kind)`, no new RPC or migration needed (RLS via the
+  existing `can_read_budget`). Type is derived from sign for fund entries (`funds_added`/`bucket_added`
+  are non-negative → topup; `funds_removed`/`bucket_removed` are negative → expense) and is always
+  `expense` for costs (amount negated). `date` is `entry_date`/`incurred_on`; `paidOn` (CHG-022) is set
+  only when a cost's `paid_on` differs from its `incurred_on` — i.e. it was pending before being paid —
+  so a cost paid the same day it was incurred reads as a plain paid expense, matching the mock contract
+  and `fundStatus()`'s "Paid" vs. "Paid on <date>" distinction in `src/features/family-budget/`.
+- Tests: unit (`src/server/budget/queries.test.ts`, mock-mode, unchanged and still green) and a new
+  Supabase integration test (`tests/integration/family-budget-overview.test.ts`) covering ordering, all
+  four `FundEntry` shapes (topup, plain paid expense, pending-then-paid expense with `paidOn`, still-
+  pending expense), the empty case and RLS (family, assigned carer, admin allowed; unrelated family and
+  a carer off-shift see nothing) — following `tests/integration/family-home-budget-strip.test.ts`'s
+  seed/RLS pattern. A new e2e test (`tests/e2e/family-budget-overview.spec.ts`) confirms 'View
+  breakdown' opens the Budget page (AC-04).
 
 ## In progress
 - None
 
 ## Remaining
-- Route `/family/[clientId]/budget`.
-- Card 'Funds by source' with bucket cards (reuse BudgetBucketCard) — 'Update' button slot reserved for FAM-11.
-- History table: Date · Description · Amount (e.g. '3 Nov 2026 · NDIS quarterly plan top-up · +$6,000'), newest first.
-- Wire Home 'View breakdown' link to this route.
+- None in FAM-10's scope. FAM-11 (Update funds) and OQ-05's Update-flow design remain separately
+  scoped; the Edit budget page FAM-UI-05 already shipped (CHG-021) covers much of that ground already.
 
 ## Acceptance criteria status
-- 0 / 4 MET
+- 4 / 4 MET
 
 ## Tests
-- Written: 0 / 4
-- Passing: 0
+- Written: 2 new files (1 integration, 1 e2e); 1 existing unit test removed (see DECISIONS.md FD-01)
+- Passing: full `npx vitest run` — 2047 passed, 64 skipped (pre-existing, unrelated); integration file
+  9/9; e2e file 1/1 (and the rest of the family-dashboard e2e suite, 33/34, 1 pre-existing unrelated skip)
 - Failing: 0
 
 ## Files changed
-- None yet. Likely files: `src/app/(family)/family/[clientId]/budget/page.tsx`, `src/features/family-budget/history-table.tsx`
+- `src/server/budget/queries.ts` — `getFundHistory`'s Supabase branch
+- `src/server/budget/queries.test.ts` — removed the now-false "not implemented" supabase-mode test
+  (HUMAN REVIEW: see below)
+- `tests/integration/family-budget-overview.test.ts` — new
+- `tests/e2e/family-budget-overview.spec.ts` — new
+- `docs/development/family-dev/family-budget-overview/{PRD,ACCEPTANCE_CRITERIA,TEST_PLAN,PROGRESS,SESSION_STATE,DECISIONS}.md`
 
 ## Decisions
-- See DECISIONS.md
+- See DECISIONS.md (FD-01: removed a test whose assertion this feature makes false by design)
 
 ## Problems encountered
-- None
+- `.env.local` in this checkout points at a hosted Supabase project, so the integration suite skips by
+  default here; ran it locally with `NEXT_PUBLIC_SUPABASE_URL`/`NEXT_PUBLIC_SUPABASE_ANON_KEY`/
+  `SUPABASE_SERVICE_ROLE_KEY` overridden inline to the local stack's values (`supabase status`) rather
+  than editing `.env.local`. CI/other machines should be unaffected as long as their own local-stack
+  env vars are set the normal way.
 
 ## Assumptions
 - PROPOSED items in PRD.md are unconfirmed until validated in F0-01 or answered in DECISIONS.md.
+- **HUMAN REVIEW: test expectation changed.** `src/server/budget/queries.test.ts`'s
+  `[FAM-UI-05][PRD] getFundHistory throws the not-implemented error naming its domain and function` was
+  removed, since FAM-10 wires exactly that function, making the assertion false. See DECISIONS.md FD-01
+  for the reasoning and the replacement coverage.
 
 ## Next action
-- Wait for answers to OQ-04, OQ-05; then complete dependencies, run START FEATURE FAM-10, and write the tests in TEST_PLAN.md first.
+- Human review of the PR, in particular FD-01's removed test and the `paidOn`/sign-based type mapping
+  choices (undesigned corners of the Supabase mapping, not covered by an explicit AC or PD).
 
 ## Ready for PR
-- No
+- Yes
