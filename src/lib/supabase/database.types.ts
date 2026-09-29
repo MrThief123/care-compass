@@ -955,6 +955,18 @@ export type Database = {
         Args: Record<PropertyKey, never>;
         Returns: undefined;
       };
+      get_carer_shifts: {
+        Args: { p_carer_id: string; p_from: string; p_to: string };
+        Returns: {
+          carer_id: string;
+          client_first_name: string;
+          client_id: string;
+          client_last_name: string;
+          ends_at: string;
+          id: string;
+          starts_at: string;
+        }[];
+      };
       is_admin_of_client: {
         Args: {
           p_client_id: string;
