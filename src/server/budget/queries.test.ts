@@ -213,12 +213,6 @@ describe("[FAM-UI-05][AC-02] getFundHistory (CHG-019)", () => {
   });
 });
 
-describe("[FAM-UI-05][PRD] supabase mode", () => {
-  it("[FAM-UI-05][PRD] getFundHistory throws the not-implemented error naming its domain and function", async () => {
-    vi.stubEnv("DATA_SOURCE", "supabase");
-
-    await expect(getFundHistory(MARGARET_CLIENT_ID)).rejects.toThrow(
-      /budget\.getFundHistory: DATA_SOURCE="supabase" is not implemented yet/,
-    );
-  });
-});
+// [FAM-10]: getFundHistory's Supabase branch replaced the not-implemented stub. Its mapping and RLS
+// behaviour are covered by tests/integration/family-budget-overview.test.ts against a real database —
+// see feature DECISIONS.md FD-01.
