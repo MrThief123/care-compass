@@ -30,14 +30,36 @@ export function CarerPatientsView({
   query: string;
 }) {
   const router = useRouter();
+  // What is in the box (it runs ahead of the URL while someone types), the URL's search as of the
+  // last render, and the last search this component sent to the URL.
   const [draft, setDraft] = useState(query);
+  const [seenQ, setSeenQ] = useState(query);
+  const [sentQ, setSentQ] = useState<string | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const latestQ = useRef(query);
+  useEffect(() => {
+    latestQ.current = query;
+  });
+
+  // The URL moved. Follow it (Back, Forward, a shared link), except when it is only our own
+  // search arriving, which must not overwrite words typed since.
+  if (query !== seenQ) {
+    setSeenQ(query);
+    if (query !== sentQ) setDraft(query);
+  }
+
+  // A search still waiting when the URL moved somewhere else is stale: drop it.
+  useEffect(() => {
+    if (query !== sentQ) clearTimeout(timer.current);
+  }, [query, sentQ]);
+
   useEffect(() => () => clearTimeout(timer.current), []);
 
   function go(value: string) {
     clearTimeout(timer.current);
     const q = value.trim();
-    if (q === query) return;
+    if (q === latestQ.current) return;
+    setSentQ(q);
     router.replace(q ? `/carer/patients?q=${encodeURIComponent(q)}` : "/carer/patients", {
       scroll: false,
     });

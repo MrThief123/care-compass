@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import PatientsPage from "@/app/(carer)/carer/patients/page";
+import { CarerPatientsView } from "@/features/carer-patients/carer-patients-view";
 import type { CarerPatientRow } from "@/server/shifts/queries";
 
 const mocks = vi.hoisted(() => ({
@@ -162,5 +163,28 @@ describe("[CAR-03][AC-01] full names on the cards", () => {
     expect(within(card).getByText("Margaret Doyle")).toBeInTheDocument();
     expect(within(card).getByText("78 years · Preston VIC")).toBeInTheDocument();
     expect(within(card).queryByText(/^Margaret$/)).not.toBeInTheDocument();
+  });
+});
+
+describe("[CAR-03][AC-02] the box follows the URL (Back, Forward, a shared link)", () => {
+  it("[CAR-03][AC-02] when the URL's q changes from outside, the box shows the new q", () => {
+    const view = render(<CarerPatientsView patients={[ELSIE]} query="Els" />);
+    expect(screen.getByPlaceholderText("Search patients")).toHaveValue("Els");
+
+    view.rerender(<CarerPatientsView patients={[MARGARET, ELSIE]} query="" />);
+
+    expect(screen.getByPlaceholderText("Search patients")).toHaveValue("");
+  });
+
+  it("[CAR-03][AC-02] our own search arriving in the URL does not overwrite words typed since", async () => {
+    const user = userEvent.setup();
+    const view = render(<CarerPatientsView patients={[MARGARET, ELSIE]} query="" />);
+    const box = screen.getByPlaceholderText("Search patients");
+
+    await user.type(box, "Els{Enter}");
+    await user.type(box, "ie");
+    view.rerender(<CarerPatientsView patients={[ELSIE]} query="Els" />);
+
+    expect(box).toHaveValue("Elsie");
   });
 });
