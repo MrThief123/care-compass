@@ -1,6 +1,6 @@
 # Progress — CAR-09 Carer — Settings
 
-Status: READY FOR PR (awaiting human approval)
+Status: PR OPEN
 Owner: Dhruv Verma
 Lane: C — Carer
 Sprint: SPRINT · planned D10

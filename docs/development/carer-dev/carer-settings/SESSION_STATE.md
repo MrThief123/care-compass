@@ -8,5 +8,5 @@ Tests run: four CAR-09 files, full unit suite, typecheck, lint, `supabase test d
 Test results: all CAR-09 green. Shared F0-04/F0-07 integration cases fail on hosted `.env.local` (unrelated). Some non-carer e2e specs fail (see PROGRESS.md).
 Current blocker: none
 Important decisions: FD-05
-Exact next action: on the human's "yes", open the PR to `carer-dev` (docs ship inside it).
+Exact next action: PR is open to `carer-dev`; wait for review. Do not merge.
 Warning for next session: do not open the PR without approval. `src/server/profiles/` is Lane F's folder (flag in PR).
