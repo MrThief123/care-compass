@@ -9,6 +9,6 @@ Test results: see TEST_PLAN.md
 Current blocker: none
 Important discoveries: PD-041 hides a client from a carer once their last shift ends, so past shifts need a security-definer function to name the client; the plain-RLS route would show blank names.
 Important decisions: FD-01 to FD-04; CHG-032 (full names, human confirmed; everywhere-sweep NOT scheduled)
-Exact next action: browser check done/preview running (see chat); wait for the human's "yes" before opening the PR to carer-dev.
+Exact next action: address PR review; nothing else pending.
 Files likely to be touched next: none unless review asks for changes
 Warning for next session: the personal `.claude/settings.json` change is stashed ("car-05: local settings.json"), not part of this feature; do not commit it.

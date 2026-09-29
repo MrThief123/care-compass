@@ -1,6 +1,6 @@
 # Progress — CAR-05 Carer — Calendar (shifts)
 
-Status: READY FOR PR (awaiting human approval)
+Status: PR OPEN
 Owner: Dhruv Verma
 Lane: C — Carer
 Sprint: SPRINT · planned D9–D10
@@ -47,4 +47,4 @@ Last updated: 2026-09-29
 - Wait for the human's "yes", then open the PR "CAR-05 Carer — Calendar (shifts)"; flag the migration (FD-04) and changed test expectations (FD-03, FD-05).
 
 ## Ready for PR
-- Yes, pending human approval
+- Yes (PR opened after human approval)
