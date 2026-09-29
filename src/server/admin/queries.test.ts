@@ -21,8 +21,8 @@ describe("Admin Home query", () => {
       }),
     );
   });
-  it("[ADM-UI-01][AC-01] does not silently serve mock totals in Supabase mode", async () => {
-    vi.stubEnv("DATA_SOURCE", "supabase");
-    await expect(getAdminHome()).rejects.toThrow("not implemented");
-  });
 });
+
+// [ADM-01]: getAdminHome's Supabase branch replaced the not-implemented stub. Its org-scoping,
+// counts, overdue derivation and upcoming-shifts mapping are covered by
+// tests/integration/admin-home.test.ts against a real database — see feature DECISIONS.md FD-01.
