@@ -47,9 +47,10 @@ Record feature-level decisions here using the template below. Project-wide decis
 - Human confirmation required: CHG-034's upcoming-shifts-in-scope decision, yes (human, 2026-09-29). The
   30-day window, 20-row caps and staff-count scope are PROPOSED-default/unambiguous-AC-reading
   implementation choices, not blocking OQs — flagged here for review rather than asked in advance.
-- Test changes caused: none (no prior test asserted the old "Aisha R." wording or an unwired
-  `upcomingShifts`; AC-02's illustrative text is corrected in ACCEPTANCE_CRITERIA.md itself, not in a
-  test that already existed).
+- Test changes caused: `src/server/admin/queries.test.ts`'s `[ADM-UI-01][AC-01] does not silently
+  serve mock totals in Supabase mode` (asserted `getAdminHome()` throws not-implemented) removed, since
+  ADM-01 wires exactly that function — same reasoning as FAM-10's FD-01. Replacement coverage:
+  `tests/integration/admin-home.test.ts`. Flagged HUMAN REVIEW in PROGRESS.md and the PR.
 
 <!-- Template
 ### FD-01 — <title>

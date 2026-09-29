@@ -11,11 +11,11 @@ Tests are written **before** production code (TESTING.md §2). Run them, confirm
 
 | Test ID | Covers | Level | Test description | Written first? | Result |
 |---|---|---|---|---|---|
-| T-01 | AC-01 | integration | Given seed data, when Admin Home loads for Priya, then Clients shows the organisation's client count and Staff the active carer count (carers only, inactive excluded). | ☐ | NOT RUN |
-| T-02 | AC-02 | integration | Given an overdue task, when `getAdminHome()` loads for Priya, then a row shows the client's full name, the task title, the covering carer's full name (PD-038) and it is marked overdue. | ☐ | NOT RUN |
-| T-03 | AC-03 | integration | Given another organisation's clients/counts/overdue events, when Priya's home loads, then none of them are included. | ☐ | NOT RUN |
-| T-04 | AC-04 | component | Given no overdue events, when rendered, then 'All caught up' is shown. | ☐ | NOT RUN |
-| T-05 | AC-05 | integration | Given upcoming shifts across the organisation (CHG-034), when `getAdminHome()` loads for Priya, then `upcomingShifts` lists them ordered by start time ascending with client/carer full names and formatted date/time, excluding another organisation's shifts, past shifts and cancelled shifts. | ☐ | NOT RUN |
+| T-01 | AC-01 | integration | Given seed data, when Admin Home loads for Priya, then Clients shows the organisation's client count and Staff the active carer count (carers only, inactive excluded). | ☑ | PASS — `tests/integration/admin-home.test.ts` |
+| T-02 | AC-02 | integration | Given an overdue task, when `getAdminHome()` loads for Priya, then a row shows the client's full name, the task title, the covering carer's full name (PD-038) and it is marked overdue. | ☑ | PASS |
+| T-03 | AC-03 | integration | Given another organisation's clients/counts/overdue events, when Priya's home loads, then none of them are included. | ☑ | PASS |
+| T-04 | AC-04 | component | Given no overdue events, when rendered, then 'All caught up' is shown. | ☑ (ADM-UI-01) | PASS — `admin-home-screen.test.tsx`, already existed |
+| T-05 | AC-05 | integration | Given upcoming shifts across the organisation (CHG-034), when `getAdminHome()` loads for Priya, then `upcomingShifts` lists them ordered by start time ascending with client/carer full names and formatted date/time, excluding another organisation's shifts, past shifts and cancelled shifts. | ☑ | PASS — 4/4 in `admin-home.test.ts` |
 
 ## Regression scope
 - Run the full unit/component suite and `supabase test db` before marking READY FOR PR.
