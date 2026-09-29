@@ -37,3 +37,10 @@ OQ-35 is ANSWERED (PD-054): per-card Save, Role read-only for carers, email is c
 ### FD-04 — Non-blocking defaults used
 - Date: 2026-09-29
 - OQ-13: the full name is shown and saved as first + last, split at the first space (FAM-12 FD-03). The job-title list is untouched.
+
+### FD-05 — CAR-UI-04 T-09/T-10 now mock the profiles actions
+- Date: 2026-09-29
+- Test: `[CAR-UI-04][AC-01]` Save says 'Saved.' and `[CAR-UI-04][AC-02]` Reset announces sent, in `carer-settings.test.tsx`.
+- Before: Save and Reset only updated the screen. After: they call server actions, so the file mocks `@/server/profiles/actions` (success, echoing the values). No assertion changed or removed.
+- Reason: recorded requirement change (CAR-UI-04 FD-03/FD-06 handed the wiring to this feature).
+- HUMAN REVIEW: test expectation changed (setup only).
