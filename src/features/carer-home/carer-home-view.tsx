@@ -42,7 +42,7 @@ function toCalendarEvent(shift: CarerShiftRow): PlainEventOccurrence {
     key: shift.id,
     eventId: shift.id,
     clientId: shift.clientId,
-    title: shift.clientFirstName,
+    title: shift.clientName,
     description: "",
     start: shift.start,
     durationMinutes: (Date.parse(shift.end) - Date.parse(shift.start)) / 60_000,

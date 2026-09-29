@@ -1,12 +1,12 @@
 # Progress — CAR-01 Carer Home — Today's calendar and Tasks
 
-Status: NOT STARTED
+Status: RETIRED (CHG-033)
 Owner: unclaimed
 Lane: C — Carer
 Sprint: SPRINT · planned D8
 Branch: `feature/carer-home-today` (not yet created)
 PR target: `carer-dev`
-Last updated: 2026-09-17 (planning pack generated)
+Last updated: 2026-09-29 (retired)
 
 ## Blockers
 - OQ-33 — Carer calendar and task semantics
@@ -50,7 +50,7 @@ Last updated: 2026-09-17 (planning pack generated)
 - PROPOSED items in PRD.md are unconfirmed until validated in F0-01 or answered in DECISIONS.md.
 
 ## Next action
-- Wait for answers to OQ-33, OQ-09; then complete dependencies, run START FEATURE CAR-01, and write the tests in TEST_PLAN.md first.
+- None. Retired by CHG-033: CAR-05 owns the shifts wiring, CAR-02 the notifications. Do not start.
 
 ## Ready for PR
 - No
