@@ -166,90 +166,46 @@ describe("[CAR-UI-02][AC-13] getCarerPatients", () => {
 });
 
 /**
- * CAR-05: the Supabase branch of `getCarerShifts`. The database itself is
- * exercised in `tests/integration/carer-calendar-shifts.test.ts`; these run
- * with the Supabase client mocked.
+ * [CAR-03] `getCarerPatients(carerId, query?)`: rows carry the full `name` (CHG-032) and the
+ * optional query keeps the patients whose full name contains it, case-insensitively (FD-01).
+ * The Supabase branch is covered by tests/integration/carer-patients.test.ts.
  */
-describe("[CAR-05] getCarerShifts against Supabase (client mocked)", () => {
-  const rpc = vi.fn();
-  const createClient = vi.fn(async () => ({ rpc }));
+describe("[CAR-03][AC-01] getCarerPatients full names", () => {
+  it("[CAR-03][AC-01] every row has the full name from the client's first and last name", async () => {
+    const rows = await getCarerPatients("staff-aisha");
 
-  beforeEach(() => {
-    vi.stubEnv("DATA_SOURCE", "supabase");
-    vi.resetModules();
-    rpc.mockReset();
-    createClient.mockClear();
-    vi.doMock("@/lib/supabase/server", () => ({ createClient }));
-  });
-
-  afterEach(() => {
-    vi.doUnmock("@/lib/supabase/server");
-  });
-
-  it.each([
-    ["to before from", { from: "2026-12-06", to: "2026-11-30" }],
-    ["over-long", { from: "2026-01-01", to: "2027-12-31" }],
-  ])("[CAR-05][AC-08] a %s range rejects before the database is called", async (_label, range) => {
-    const { getCarerShifts: get } = await import("@/server/shifts/queries");
-
-    await expect(get("staff-aisha", range)).rejects.toThrow();
-    expect(createClient).not.toHaveBeenCalled();
-    expect(rpc).not.toHaveBeenCalled();
-  });
-
-  it("[CAR-05][AC-08] the same ranges also reject in mock mode", async () => {
-    vi.stubEnv("DATA_SOURCE", "mock");
-    const { getCarerShifts: get } = await import("@/server/shifts/queries");
-
-    await expect(get("staff-aisha", { from: "2026-12-06", to: "2026-11-30" })).rejects.toThrow();
-  });
-
-  it("[CAR-05][AC-09] a database error throws a generic message with no client or carer name", async () => {
-    rpc.mockResolvedValue({ data: null, error: { message: "Margaret Doyle secret" } });
-    const { getCarerShifts: get } = await import("@/server/shifts/queries");
-
-    const error = await get("staff-aisha", { from: "2026-11-30", to: "2026-12-06" }).catch(
-      (thrown: Error) => thrown,
-    );
-
-    expect(error).toBeInstanceOf(Error);
-    expect((error as Error).message).toBe("getCarerShifts: could not load shifts.");
-  });
-
-  it("[CAR-05][AC-01] rows map to CarerShiftRow with clientName and the Melbourne-day window", async () => {
-    rpc.mockResolvedValue({
-      data: [
-        {
-          id: "s1",
-          carer_id: "staff-aisha",
-          client_id: "c1",
-          starts_at: "2026-11-29T21:00:00+00:00",
-          ends_at: "2026-11-30T01:00:00+00:00",
-          client_first_name: "Margaret",
-          client_last_name: "Doyle",
-        },
-      ],
-      error: null,
-    });
-    const { getCarerShifts: get } = await import("@/server/shifts/queries");
-
-    const rows = await get("staff-aisha", { from: "2026-11-30", to: "2026-12-06" });
-
-    expect(rows).toEqual([
-      expect.objectContaining({
-        id: "s1",
-        carerId: "staff-aisha",
-        clientId: "c1",
-        clientName: "Margaret Doyle",
-        start: expect.stringContaining("2026-11-30T08:00"),
-        end: expect.stringContaining("2026-11-30T12:00"),
-      }),
+    expect(rows.map((row) => row.name)).toEqual([
+      "Margaret Doyle",
+      "Robert Hale",
+      "Elsie Marsh",
+      "Frank Novak",
+      "Doris Petrov",
+      "Harold Byrne",
+      "Jean Ahmed",
     ]);
-    // Melbourne midnight of 30 Nov (UTC+11) to Melbourne midnight after 6 Dec.
-    expect(rpc).toHaveBeenCalledWith("get_carer_shifts", {
-      p_carer_id: "staff-aisha",
-      p_from: "2026-11-29T13:00:00.000Z",
-      p_to: "2026-12-06T13:00:00.000Z",
-    });
+    expect(rows[0]!.firstName).toBe("Margaret");
+  });
+});
+
+describe("[CAR-03][AC-02] getCarerPatients search", () => {
+  it("[CAR-03][AC-02] 'Els' returns only Elsie Marsh", async () => {
+    const rows = await getCarerPatients("staff-aisha", "Els");
+
+    expect(rows.map((row) => row.name)).toEqual(["Elsie Marsh"]);
+  });
+
+  it("[CAR-03][AC-02] a search matches the last name and ignores case and padding", async () => {
+    const rows = await getCarerPatients("staff-aisha", "  MARSH ");
+
+    expect(rows.map((row) => row.name)).toEqual(["Elsie Marsh"]);
+  });
+
+  it("[CAR-03][AC-02] a blank query returns everyone; a query with no match returns none", async () => {
+    expect(await getCarerPatients("staff-aisha", "   ")).toHaveLength(7);
+    expect(await getCarerPatients("staff-aisha", "zzz")).toEqual([]);
+  });
+
+  it("[CAR-03][AC-02] a search never widens who the carer may see", async () => {
+    expect(await getCarerPatients("staff-daniel", "Margaret")).toEqual([]);
   });
 });

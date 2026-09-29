@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 
 import { PersonCard } from "@/components/shared/cards/person-card";
 import { SearchField } from "@/components/shared/search-field";
@@ -12,15 +13,59 @@ import type { CarerPatientRow } from "@/server/shifts/queries";
 import { EditStatusBadge } from "./edit-status";
 import { patientMeta } from "./patient-meta";
 
-/**
- * Carer · Patients (CAR-UI-02): a card per patient, soonest shift first
- * (FD-03), filtered by first name as the carer types. Search is local state
- * only and resets on reload.
- */
-export function CarerPatientsView({ patients }: { patients: CarerPatientRow[] }) {
-  const [query, setQuery] = useState("");
+/** How long typing must pause before the search is put in the URL. */
+const SEARCH_DEBOUNCE_MS = 400;
 
-  if (patients.length === 0) {
+/**
+ * Carer · Patients: a card per patient, soonest shift first (FD-03). Search is
+ * the URL's `?q=`, answered by the server (CAR-03 FD-01); this view shows what
+ * it is given and moves the URL, as Family's Task log does.
+ */
+export function CarerPatientsView({
+  patients,
+  query,
+}: {
+  patients: CarerPatientRow[];
+  /** The URL's search, already cleaned by the page. */
+  query: string;
+}) {
+  const router = useRouter();
+  // What is in the box (it runs ahead of the URL while someone types), the URL's search as of the
+  // last render, and the last search this component sent to the URL.
+  const [draft, setDraft] = useState(query);
+  const [seenQ, setSeenQ] = useState(query);
+  const [sentQ, setSentQ] = useState<string | null>(null);
+  const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const latestQ = useRef(query);
+  useEffect(() => {
+    latestQ.current = query;
+  });
+
+  // The URL moved. Follow it (Back, Forward, a shared link), except when it is only our own
+  // search arriving, which must not overwrite words typed since.
+  if (query !== seenQ) {
+    setSeenQ(query);
+    if (query !== sentQ) setDraft(query);
+  }
+
+  // A search still waiting when the URL moved somewhere else is stale: drop it.
+  useEffect(() => {
+    if (query !== sentQ) clearTimeout(timer.current);
+  }, [query, sentQ]);
+
+  useEffect(() => () => clearTimeout(timer.current), []);
+
+  function go(value: string) {
+    clearTimeout(timer.current);
+    const q = value.trim();
+    if (q === latestQ.current) return;
+    setSentQ(q);
+    router.replace(q ? `/carer/patients?q=${encodeURIComponent(q)}` : "/carer/patients", {
+      scroll: false,
+    });
+  }
+
+  if (patients.length === 0 && query === "") {
     return (
       <div className="px-6 py-5">
         <CardShell>
@@ -34,28 +79,41 @@ export function CarerPatientsView({ patients }: { patients: CarerPatientRow[] })
     );
   }
 
-  const needle = query.trim().toLowerCase();
-  const shown = patients.filter((p) => p.firstName.toLowerCase().includes(needle));
-
   return (
     <div className="flex flex-col gap-4 px-6 py-5">
-      <SearchField
-        value={query}
-        onChange={setQuery}
-        onClear={() => setQuery("")}
-        placeholder="Search patients"
-        noResultsFor={shown.length === 0 ? query : undefined}
-      />
-      {shown.length > 0 && (
+      <form
+        role="search"
+        aria-label="Search patients"
+        onSubmit={(event) => {
+          event.preventDefault();
+          go(draft);
+        }}
+      >
+        <SearchField
+          value={draft}
+          onChange={(value) => {
+            setDraft(value);
+            clearTimeout(timer.current);
+            timer.current = setTimeout(() => go(value), SEARCH_DEBOUNCE_MS);
+          }}
+          onClear={() => {
+            setDraft("");
+            go("");
+          }}
+          placeholder="Search patients"
+          noResultsFor={patients.length === 0 ? query : undefined}
+        />
+      </form>
+      {patients.length > 0 && (
         <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {shown.map((patient) => (
+          {patients.map((patient) => (
             <li key={patient.clientId} className="min-w-0">
               <Link
                 href={`/carer/patients/${patient.clientId}`}
                 className="relative block rounded-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring [&>div]:hover:bg-bg-inset"
               >
                 <PersonCard
-                  name={patient.firstName}
+                  name={patient.name}
                   meta={patientMeta(patient)}
                   className="min-h-56 justify-center break-words"
                 />
