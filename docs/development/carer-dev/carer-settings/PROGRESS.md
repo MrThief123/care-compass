@@ -1,52 +1,48 @@
 # Progress — CAR-09 Carer — Settings
 
-Status: NOT STARTED
-Owner: unclaimed
+Status: IN PROGRESS
+Owner: Dhruv Verma
 Lane: C — Carer
 Sprint: SPRINT · planned D10
-Branch: `feature/carer-settings` (not yet created)
+Branch: `feature/carer-settings`
 PR target: `carer-dev`
-Last updated: 2026-09-17 (planning pack generated)
+Last updated: 2026-09-29
 
 ## Blockers
-- OQ-35 — Settings forms save behaviour
+- None. OQ-35 answered (PD-054).
 
 ## Dependencies status
-- F0-07 — NOT STARTED
-- CAR-UI-04 — NOT STARTED
+- F0-07 — MERGED
+- CAR-UI-04 — MERGED TO DEV
+- FAM-12 (column grant, `requestOwnPasswordReset`) — on `carer-dev`
 
 ## Completed
-- Feature documentation drafted (Claude Chat planning pack)
+- Claimed. Docs rewritten to match the code that exists (FD-01 to FD-04)
+- Tests T-01 to T-10 written first (see Tests)
 
 ## In progress
-- None
+- None. Implementation is the next session.
 
 ## Remaining
-- Route `/carer/settings`; 'My info' card (Name, Phone, Email, Role); Reset card reusing shared component.
-- Role displayed read-only (PROPOSED — job title set by admin in ADM-02).
+- Implement `carerInfoSchema`, `updateCarerContactDetails`, and wire the view's Save and Reset
+- Adjust CAR-UI-04's T-09/T-10 to mock the actions (flag HUMAN REVIEW)
+- Browser sweep 1920 to 768, preview link
 
 ## Acceptance criteria status
-- 0 / 3 MET
+- 0 / 5 MET
 
 ## Tests
-- Written: 0 / 3
-- Passing: 0
-- Failing: 0
+- Written: 10 / 10
+- Passing / failing: see SESSION_STATE.md
 
 ## Files changed
-- None yet. Likely files: `src/app/(carer)/carer/settings/page.tsx`
+- Docs only, plus tests (see TEST_PLAN.md)
 
 ## Decisions
 - See DECISIONS.md
 
 ## Problems encountered
 - None
-
-## Assumptions
-- PROPOSED items in PRD.md are unconfirmed until validated in F0-01 or answered in DECISIONS.md.
-
-## Next action
-- Wait for answers to OQ-35; then complete dependencies, run START FEATURE CAR-09, and write the tests in TEST_PLAN.md first.
 
 ## Ready for PR
 - No
