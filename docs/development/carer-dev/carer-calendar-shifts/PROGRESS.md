@@ -9,7 +9,7 @@ PR target: `carer-dev`
 Last updated: 2026-09-29
 
 ## Blockers
-- None. OQ-33 answered. Local Supabase (Docker) must be running to execute T-01 to T-06.
+- None. OQ-33 answered. Local Supabase (Docker) must be running to execute T-01 to T-06 (it is, as of 2026-09-29).
 
 ## Dependencies status
 - F0-10, F0-18 — merged. CAR-UI-03, CAR-UI-01 — merged to `carer-dev`.
@@ -33,7 +33,7 @@ Last updated: 2026-09-29
 
 ## Tests
 - Written: 10 / 10 (T-01 to T-06 integration, T-07 component, T-08 and T-09 contract, T-10 regression)
-- Passing: 0 (new tests red for the expected reasons; T-01 to T-06 skip without local Supabase)
+- Passing: 0 (new tests red for the expected reasons; T-01 to T-06 verified red against local Supabase 2026-09-29)
 - Failing: see TEST_PLAN.md
 
 ## Files changed
