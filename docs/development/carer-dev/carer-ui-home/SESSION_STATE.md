@@ -11,3 +11,5 @@ Important decisions: FD-05 local error state because the kit says 'Retry' and AC
 Exact next action: on human approval, push and open PR `CAR-UI-01 Carer Home screen (UI)` to `carer-dev`, flagging: FD-02 shared-folder edits, FD-05 wording, design gap (built from tokens), side-by-side screenshot.
 Files likely to be touched next: none.
 Warning for next session: `.claude/settings.json` has an uncommitted local change that is not part of this feature; do not commit it.
+
+Merged 2026-09-28: PR #124 merged to `carer-dev`. Status set to MERGED TO DEV in a docs sync.

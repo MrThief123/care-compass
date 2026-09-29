@@ -67,6 +67,190 @@ export type Database = {
         };
         Relationships: [];
       };
+      budget_buckets: {
+        Row: {
+          client_id: string;
+          created_at: string;
+          created_by: string | null;
+          id: string;
+          kind: string | null;
+          name: string;
+          removed_at: string | null;
+          updated_at: string;
+        };
+        Insert: {
+          client_id: string;
+          created_at?: string;
+          created_by?: string | null;
+          id?: string;
+          kind?: string | null;
+          name: string;
+          removed_at?: string | null;
+          updated_at?: string;
+        };
+        Update: {
+          client_id?: string;
+          created_at?: string;
+          created_by?: string | null;
+          id?: string;
+          kind?: string | null;
+          name?: string;
+          removed_at?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "budget_buckets_client_id_fkey";
+            columns: ["client_id"];
+            isOneToOne: false;
+            referencedRelation: "clients";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "budget_buckets_created_by_fkey";
+            columns: ["created_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      budget_costs: {
+        Row: {
+          amount: number;
+          bucket_id: string;
+          client_id: string;
+          created_at: string;
+          description: string;
+          event_id: string | null;
+          id: string;
+          incurred_on: string;
+          note: string | null;
+          original_start: string;
+          paid_on: string | null;
+          recorded_by: string;
+          recorded_by_name: string;
+          seq: number;
+          status: string;
+        };
+        Insert: {
+          amount: number;
+          bucket_id: string;
+          client_id: string;
+          created_at?: string;
+          description: string;
+          event_id?: string | null;
+          id?: string;
+          incurred_on: string;
+          note?: string | null;
+          original_start: string;
+          paid_on?: string | null;
+          recorded_by: string;
+          recorded_by_name: string;
+          seq?: never;
+          status: string;
+        };
+        Update: {
+          amount?: number;
+          bucket_id?: string;
+          client_id?: string;
+          created_at?: string;
+          description?: string;
+          event_id?: string | null;
+          id?: string;
+          incurred_on?: string;
+          note?: string | null;
+          original_start?: string;
+          paid_on?: string | null;
+          recorded_by?: string;
+          recorded_by_name?: string;
+          seq?: never;
+          status?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "budget_costs_bucket_id_fkey";
+            columns: ["bucket_id"];
+            isOneToOne: false;
+            referencedRelation: "budget_buckets";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "budget_costs_client_id_fkey";
+            columns: ["client_id"];
+            isOneToOne: false;
+            referencedRelation: "clients";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "budget_costs_event_id_fkey";
+            columns: ["event_id"];
+            isOneToOne: false;
+            referencedRelation: "care_events";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      budget_fund_entries: {
+        Row: {
+          amount: number;
+          bucket_id: string;
+          client_id: string;
+          created_at: string;
+          description: string;
+          entry_date: string;
+          id: string;
+          kind: string;
+          note: string | null;
+          recorded_by: string;
+          recorded_by_name: string;
+          seq: number;
+        };
+        Insert: {
+          amount: number;
+          bucket_id: string;
+          client_id: string;
+          created_at?: string;
+          description?: string;
+          entry_date?: string;
+          id?: string;
+          kind: string;
+          note?: string | null;
+          recorded_by: string;
+          recorded_by_name: string;
+          seq?: never;
+        };
+        Update: {
+          amount?: number;
+          bucket_id?: string;
+          client_id?: string;
+          created_at?: string;
+          description?: string;
+          entry_date?: string;
+          id?: string;
+          kind?: string;
+          note?: string | null;
+          recorded_by?: string;
+          recorded_by_name?: string;
+          seq?: never;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "budget_fund_entries_bucket_id_fkey";
+            columns: ["bucket_id"];
+            isOneToOne: false;
+            referencedRelation: "budget_buckets";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "budget_fund_entries_client_id_fkey";
+            columns: ["client_id"];
+            isOneToOne: false;
+            referencedRelation: "clients";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       care_event_completions: {
         Row: {
           action: string;
@@ -184,8 +368,10 @@ export type Database = {
       };
       care_events: {
         Row: {
+          bucket_id: string | null;
           client_id: string;
           completion_mode: string;
+          cost: number | null;
           created_at: string;
           created_by: string | null;
           deactivated_at: string | null;
@@ -200,8 +386,10 @@ export type Database = {
           updated_at: string;
         };
         Insert: {
+          bucket_id?: string | null;
           client_id: string;
           completion_mode?: string;
+          cost?: number | null;
           created_at?: string;
           created_by?: string | null;
           deactivated_at?: string | null;
@@ -216,8 +404,10 @@ export type Database = {
           updated_at?: string;
         };
         Update: {
+          bucket_id?: string | null;
           client_id?: string;
           completion_mode?: string;
+          cost?: number | null;
           created_at?: string;
           created_by?: string | null;
           deactivated_at?: string | null;
@@ -232,6 +422,13 @@ export type Database = {
           updated_at?: string;
         };
         Relationships: [
+          {
+            foreignKeyName: "care_events_bucket_id_fkey";
+            columns: ["bucket_id"];
+            isOneToOne: false;
+            referencedRelation: "budget_buckets";
+            referencedColumns: ["id"];
+          },
           {
             foreignKeyName: "care_events_client_id_fkey";
             columns: ["client_id"];
@@ -569,13 +766,141 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      add_bucket: {
+        Args: {
+          p_client_id: string;
+          p_name: string;
+          p_starting_amount: number;
+          p_kind?: string;
+          p_note?: string;
+        };
+        Returns: {
+          client_id: string;
+          created_at: string;
+          created_by: string | null;
+          id: string;
+          kind: string | null;
+          name: string;
+          removed_at: string | null;
+          updated_at: string;
+        };
+      };
+      add_funds: {
+        Args: {
+          p_bucket_id: string;
+          p_amount: number;
+          p_note?: string;
+        };
+        Returns: {
+          amount: number;
+          bucket_id: string;
+          client_id: string;
+          created_at: string;
+          description: string;
+          entry_date: string;
+          id: string;
+          kind: string;
+          note: string | null;
+          recorded_by: string;
+          recorded_by_name: string;
+          seq: number;
+        };
+      };
+      budget_actor_name: {
+        Args: Record<PropertyKey, never>;
+        Returns: string;
+      };
+      budget_bucket_balance: {
+        Args: {
+          p_bucket_id: string;
+        };
+        Returns: number;
+      };
+      budget_bucket_for_write: {
+        Args: {
+          p_bucket_id: string;
+        };
+        Returns: {
+          client_id: string;
+          created_at: string;
+          created_by: string | null;
+          id: string;
+          kind: string | null;
+          name: string;
+          removed_at: string | null;
+          updated_at: string;
+        };
+      };
+      budget_bucket_summary: {
+        Args: {
+          p_client_id: string;
+        };
+        Returns: {
+          bucket_id: string;
+          name: string;
+          kind: string;
+          total: number;
+          used: number;
+          remaining: number;
+          percent_used: number;
+          threshold_state: string;
+          pending_total: number;
+          pending_count: number;
+          period_start: string;
+          period_end: string;
+          period_used: number;
+        }[];
+      };
+      budget_check_amount: {
+        Args: {
+          p_amount: number;
+          p_allow_zero?: boolean;
+        };
+        Returns: undefined;
+      };
+      budget_clean_name: {
+        Args: {
+          p_name: string;
+        };
+        Returns: string;
+      };
+      budget_settle_pending: {
+        Args: {
+          p_bucket_id: string;
+        };
+        Returns: undefined;
+      };
+      budget_threshold_state: {
+        Args: {
+          p_percent: number;
+          p_pending_count: number;
+          p_exhausted?: boolean;
+        };
+        Returns: string;
+      };
+      budget_today: {
+        Args: Record<PropertyKey, never>;
+        Returns: string;
+      };
       can_access_client_documents: {
         Args: {
           p_client_id: string;
         };
         Returns: boolean;
       };
+      can_edit_budget: {
+        Args: {
+          p_client_id: string;
+        };
+        Returns: boolean;
+      };
       can_edit_care_events: {
+        Args: {
+          p_client_id: string;
+        };
+        Returns: boolean;
+      };
+      can_read_budget: {
         Args: {
           p_client_id: string;
         };
@@ -686,6 +1011,84 @@ export type Database = {
           p_organisation_name?: string;
         };
         Returns: Json;
+      };
+      remove_bucket: {
+        Args: {
+          p_bucket_id: string;
+          p_note?: string;
+        };
+        Returns: {
+          client_id: string;
+          created_at: string;
+          created_by: string | null;
+          id: string;
+          kind: string | null;
+          name: string;
+          removed_at: string | null;
+          updated_at: string;
+        };
+      };
+      remove_funds: {
+        Args: {
+          p_bucket_id: string;
+          p_amount: number;
+          p_note?: string;
+        };
+        Returns: {
+          amount: number;
+          bucket_id: string;
+          client_id: string;
+          created_at: string;
+          description: string;
+          entry_date: string;
+          id: string;
+          kind: string;
+          note: string | null;
+          recorded_by: string;
+          recorded_by_name: string;
+          seq: number;
+        };
+      };
+      rename_bucket: {
+        Args: {
+          p_bucket_id: string;
+          p_name: string;
+        };
+        Returns: {
+          client_id: string;
+          created_at: string;
+          created_by: string | null;
+          id: string;
+          kind: string | null;
+          name: string;
+          removed_at: string | null;
+          updated_at: string;
+        };
+      };
+      set_event_cost: {
+        Args: {
+          p_event_id: string;
+          p_cost: number;
+          p_bucket_id: string;
+        };
+        Returns: {
+          bucket_id: string | null;
+          client_id: string;
+          completion_mode: string;
+          cost: number | null;
+          created_at: string;
+          created_by: string | null;
+          deactivated_at: string | null;
+          description: string;
+          duration_minutes: number;
+          id: string;
+          is_active: boolean;
+          recurrence: Json | null;
+          recurrence_until: string | null;
+          starts_at: string;
+          title: string;
+          updated_at: string;
+        };
       };
       set_occurrence_done: {
         Args: {

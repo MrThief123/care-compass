@@ -1,12 +1,12 @@
 # Progress — CAR-UI-02 Carer Patients and patient info screens (UI)
 
-Status: IN REVIEW
+Status: MERGED TO DEV
 Owner: Dhruv Verma
 Lane: C — Carer
 Sprint: SPRINT · planned D4–D5
 Branch: `feature/carer-ui-patients-info`
 PR target: `carer-dev` · PR #125
-Last updated: 2026-09-26 (CHG-029 implemented, green)
+Last updated: 2026-09-28
 
 ## Blockers
 - None. Lane F request (FD-01) blocks only CAR-04's wiring of the Home, Calendar and Care log tabs, not this feature.
@@ -62,3 +62,6 @@ Last updated: 2026-09-26 (CHG-029 implemented, green)
 
 ## Ready for PR
 - Yes (awaiting approval)
+
+## Merged — 2026-09-28
+- PR #125 (https://github.com/MrThief123/care-compass/pull/125) merged to `carer-dev`. Status set to MERGED TO DEV in a docs sync, since the merge left it at IN REVIEW.

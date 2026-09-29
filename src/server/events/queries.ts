@@ -5,8 +5,11 @@
  * Screens must import from here, never from `src/mocks` directly
  * (lint-enforced).
  */
+import { melbourneDateKey } from "@/lib/dates/melbourne-time";
 import * as mock from "@/mocks/queries/events";
 import { getDataSourceMode, notImplementedForSupabase } from "@/server/data-source";
+import { parseOccurrenceKey } from "@/server/events/occurrence-key";
+import { dbToRecurrence, type DbRecurrence } from "@/server/events/recurrence-mapping";
 import {
   isPlainEvent,
   OccurrenceRangeSchema,
@@ -153,7 +156,18 @@ export async function getOccurrence(
   if (mode === "mock") {
     return mock.getOccurrence(clientId, key, { type });
   }
-  notImplementedForSupabase("events", "getOccurrence");
+
+  const parsedKey = parseOccurrenceKey(key);
+  if (!parsedKey) return undefined;
+  const day = melbourneDateKey(parsedKey.originalStart);
+  // Reuses getOccurrences' own recurrence expansion, overrides, completions and RLS — a single
+  // day's occurrences, filtered down to the one this key names.
+  const occurrences = await getOccurrences(
+    clientId,
+    { from: day, to: day },
+    { type: type ?? "tasks" },
+  );
+  return occurrences.find((occurrence) => occurrence.key === key);
 }
 
 /**
@@ -167,7 +181,33 @@ export async function getEvent(clientId: string, eventId: string): Promise<CareE
   if (mode === "mock") {
     return mock.getEvent(clientId, eventId);
   }
-  notImplementedForSupabase("events", "getEvent");
+
+  const { createClient } = await import("@/lib/supabase/server");
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("care_events")
+    .select(
+      "id, client_id, title, description, starts_at, duration_minutes, recurrence, completion_mode, cost, bucket_id",
+    )
+    .eq("id", eventId)
+    .eq("client_id", clientId)
+    .maybeSingle();
+  // RLS returns no row rather than an error for a client the caller cannot read; a genuine
+  // error is treated the same way, matching this contract's "unknown id" undefined (CHG-008).
+  if (error || !data) return undefined;
+
+  return {
+    id: data.id,
+    clientId: data.client_id,
+    title: data.title,
+    description: data.description,
+    start: data.starts_at,
+    durationMinutes: data.duration_minutes,
+    recurrenceFrequency: dbToRecurrence(data.recurrence as DbRecurrence | null),
+    completionMode: data.completion_mode as CareEvent["completionMode"],
+    cost: data.cost ?? undefined,
+    bucketId: data.bucket_id ?? undefined,
+  };
 }
 
 /**

@@ -12,3 +12,5 @@ Important decisions: CHG-031, FD-04, FD-05, FD-06
 Exact next action: PR #126 (https://github.com/MrThief123/care-compass/pull/126) open to `carer-dev`; address review comments, then the human merges.
 Files likely to be touched next: none
 Warning for next session: `/carer/patients/[clientId]` 404s in the preview until CAR-UI-02 (PR #125) merges to `carer-dev`.
+
+Merged 2026-09-28: PR #126 merged to `carer-dev`. Status set to MERGED TO DEV in a docs sync. CAR-UI-02 (PR #125) is also merged, so the 404 note above no longer applies.

@@ -1,12 +1,12 @@
 # Progress — CAR-UI-04 Carer Settings screen (UI)
 
-Status: PR OPEN
+Status: MERGED TO DEV
 Owner: Dhruv Verma
 Lane: C — Carer
 Sprint: SPRINT · planned D6
 Branch: `feature/carer-ui-settings`
 PR target: `carer-dev`
-Last updated: 2026-09-26 (Edit/Save added on the human's request, FD-06)
+Last updated: 2026-09-28
 
 ## Blockers
 - None recorded at planning time
@@ -62,3 +62,6 @@ Last updated: 2026-09-26 (Edit/Save added on the human's request, FD-06)
 
 ## Ready for PR
 - Yes. PR #127 opened to `carer-dev` on 2026-09-26
+
+## Merged — 2026-09-28
+- PR #127 (https://github.com/MrThief123/care-compass/pull/127) merged to `carer-dev`. Status set to MERGED TO DEV in a docs sync, since the merge left it at PR OPEN.
