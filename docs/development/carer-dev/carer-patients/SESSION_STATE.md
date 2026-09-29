@@ -1,14 +1,14 @@
 # Session State — CAR-03 Carer — Patients
 
-Last session date: none (no implementation session yet)
-Current branch: n/a — `feature/carer-patients` not created
-Worked on: n/a
-What changed: n/a
-Tests run: none
-Test results: n/a
-Current blocker: OQ-09
-Important discoveries: none
-Important decisions: none
-Exact next action: Run `START FEATURE CAR-03` once dependencies are MERGED TO DEV (or COMPLETE) and blocking decisions are answered.
-Files likely to be touched next: `src/app/(carer)/carer/patients/page.tsx`, `src/components/shared/person-card.tsx`
-Warning for next session: Read PRD.md, ACCEPTANCE_CRITERIA.md and TEST_PLAN.md before writing any code. Do not create the branch from the wrong parent (`carer-dev`).
+Last session date: 2026-09-29
+Current branch: `feature/carer-patients` (from `carer-dev`, claimed and pushed)
+Worked on: docs rewrite and tests first
+What changed: PRD, ACs, TEST_PLAN, USER_STORIES, DECISIONS (FD-01 to FD-07), PROGRESS; new integration and component tests; CAR-UI-02 tests updated per FD-03
+Tests run: `vitest run src/features/carer-patients src/server/shifts` and the integration file against local Supabase
+Test results: red for the expected reasons (see TEST_PLAN); nothing implemented
+Current blocker: none
+Important discoveries: AC-02's 'Eld' matched no one (now 'Els'); no migration needed because RLS already limits `clients` to shifts that have not ended; `carer-dev` vs `main` PR target is ambiguous (FD-06); CAR-05 overlaps three files (FD-07)
+Important decisions: server-side `?q=` search; full names on cards; `firstName` kept for the header
+Exact next action: implement per PROGRESS.md Remaining, then preview at `/carer/patients` in a real browser
+Files likely to be touched next: `src/server/shifts/queries.ts`, `src/mocks/queries/shifts.ts`, `src/app/(carer)/carer/patients/page.tsx`, `src/features/carer-patients/carer-patients-view.tsx`
+Warning for next session: do not edit the new tests to get green; run integration with the local Supabase env overrides.

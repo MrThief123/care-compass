@@ -1,41 +1,38 @@
 # Progress — CAR-03 Carer — Patients
 
-Status: NOT STARTED
-Owner: unclaimed
+Status: TESTS WRITTEN
+Owner: Dhruv Verma
 Lane: C — Carer
 Sprint: SPRINT · planned D8
-Branch: `feature/carer-patients` (not yet created)
+Branch: `feature/carer-patients`
 PR target: `carer-dev`
-Last updated: 2026-09-17 (planning pack generated)
+Last updated: 2026-09-29
 
 ## Blockers
-- OQ-09 — Carer access model
+- None. OQ-09 answered (PD-041). Local Supabase (Docker) must be running for T-01, T-02, T-04, T-05 (it is, as of 2026-09-29).
 
 ## Dependencies status
-- F0-18 — NOT STARTED (added by CHG-027)
-- F0-06 — NOT STARTED
-- F0-10 — NOT STARTED
-- CAR-UI-02 — NOT STARTED
+- F0-06, F0-10, F0-18, CAR-UI-02 — MERGED
 
 ## Completed
-- Feature documentation drafted (Claude Chat planning pack)
+- Feature docs rewritten (FD-01, FD-02): PRD, ACs, TEST_PLAN, USER_STORIES
+- Tests written first and confirmed red for the right reason (see TEST_PLAN)
 
 ## In progress
 - None
 
 ## Remaining
-- Route `/carer/patients`; search field 'Search patients' (server-side, D32).
-- Person cards grid (4 columns at 1440): avatar initial, name, '78 years · Preston VIC'.
-- Card click → `/carer/patients/[clientId]` (CAR-04).
-- Empty state 'No patients assigned yet / New patients will appear here once they're assigned to you.'; card-grid skeleton; error state.
+- Supabase branch of `getCarerPatients(carerId, query?)`; `name` on `CarerPatientRow` and in the mock; the query in the mock
+- Page reads `?q=`; view drives the URL (debounce, Enter, clear), keeps the box on a no-match search
+- Run the full suite, e2e (`--grep-invert "F0-07"`), and a preview with a real browser check
 
 ## Acceptance criteria status
-- 0 / 4 MET
+- 0 / 8 MET (tests written, red)
 
 ## Tests
-- Written: 0 / 4
-- Passing: 0
-- Failing: 0
+- Written: 10 / 10 (T-03 and T-07 already pass: built by CAR-UI-02, kept as regression)
+- Passing: 2 plus the 'never widens' case in T-10
+- Failing: T-01, T-02, T-04, T-05 (Supabase branch not implemented), T-06, T-08, T-09, T-10 (expected)
 
 ## Files changed
 - None yet. Likely files: `src/app/(carer)/carer/patients/page.tsx`, `src/components/shared/person-card.tsx`
@@ -50,7 +47,7 @@ Last updated: 2026-09-17 (planning pack generated)
 - PROPOSED items in PRD.md are unconfirmed until validated in F0-01 or answered in DECISIONS.md.
 
 ## Next action
-- Wait for answers to OQ-09; then complete dependencies, run START FEATURE CAR-03, and write the tests in TEST_PLAN.md first.
+- Implement in a fresh session: RESUME CAR-03; make the red tests green without changing them.
 
 ## Ready for PR
 - No

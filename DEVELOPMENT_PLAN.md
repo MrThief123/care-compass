@@ -175,7 +175,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 | 15 | FAM-15 | Family — Task detail | F | D11 | SPRINT | F0-11, F0-13, FAM-UI-07 | OQ-29, OQ-10 | `feature/family-task-detail` | NOT STARTED |
 | 16 | CAR-01 | ~~Carer Home — Today's calendar and Tasks~~ (retired, CHG-033) | C | — | SPRINT | F0-10, F0-11, CAR-UI-01 | OQ-33, OQ-09 | `feature/carer-home-today` | RETIRED (CHG-033) |
 | 17 | CAR-02 | Carer — Notifications card and bell | C | D9 | SPRINT | F0-10, F0-13, CAR-UI-01 | OQ-14 | `feature/carer-notifications` | NOT STARTED |
-| 18 | CAR-03 | Carer — Patients | C | D8 | SPRINT | F0-06, F0-10, F0-18, CAR-UI-02 | OQ-09 | `feature/carer-patients` | NOT STARTED |
+| 18 | CAR-03 | Carer — Patients | C | D8 | SPRINT | F0-06, F0-10, F0-18, CAR-UI-02 | OQ-09 | `feature/carer-patients` | IN PROGRESS |
 | 19 | CAR-04 | Carer — Client info | C | D9 | SPRINT | F0-06, F0-10, F0-13, F0-18, CAR-UI-02 | OQ-09 | `feature/carer-client-info` | NOT STARTED |
 | 20 | CAR-05 | Carer — Calendar (shifts) and selected-shift tasks | C | D9–D10 | SPRINT | F0-10, F0-11, CAR-UI-03 | OQ-33 | `feature/carer-calendar-shifts` | NOT STARTED |
 | 21 | CAR-06 | Carer — Mark tasks done | C | D10 | SPRINT | F0-10, F0-11, F0-18, CAR-UI-02, CAR-04 | OQ-09, OQ-10, OQ-33 | `feature/carer-complete-task` | NOT STARTED |
@@ -912,7 +912,8 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Acceptance criteria summary:** 4 criteria — 7 cards are shown including 'Margaret' '78 years · Preston VIC'; only Elsie is shown; 'No patients assigned yet' is shown …
 - **Testing summary:** 3 integration, 1 component
 - **Requirements:** REQ-05
-- **Docs:** `docs/development/carer-dev/carer-patients/` · **Status:** NOT STARTED
+- **CHG-027 / CHG-032 (2026-09-29):** the list is the clients with a shift that has not ended (PD-041); cards show the full name; search is the URL's `?q=` answered by `getCarerPatients(carerId, query?)`; AC-02's 'Eld' corrected to 'Els'. Feature ACs rewritten to 8 (docs updated when it started).
+- **Docs:** `docs/development/carer-dev/carer-patients/` · **Status:** IN PROGRESS
 
 ### CAR-04 — Carer — Client info
 - **Dashboard / stream:** carer · **Lane:** C · **Days:** D9 · **Sprint:** SPRINT · **PR target:** `carer-dev` · **Branch:** `feature/carer-client-info`
