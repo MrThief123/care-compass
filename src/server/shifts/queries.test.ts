@@ -172,3 +172,48 @@ describe("[CAR-UI-02][AC-13] getCarerPatients", () => {
     expect(await getCarerTodayShifts("staff-aisha")).toHaveLength(1);
   });
 });
+
+/**
+ * [CAR-03] `getCarerPatients(carerId, query?)`: rows carry the full `name` (CHG-032) and the
+ * optional query keeps the patients whose full name contains it, case-insensitively (FD-01).
+ * The Supabase branch is covered by tests/integration/carer-patients.test.ts.
+ */
+describe("[CAR-03][AC-01] getCarerPatients full names", () => {
+  it("[CAR-03][AC-01] every row has the full name from the client's first and last name", async () => {
+    const rows = await getCarerPatients("staff-aisha");
+
+    expect(rows.map((row) => row.name)).toEqual([
+      "Margaret Doyle",
+      "Robert Hale",
+      "Elsie Marsh",
+      "Frank Novak",
+      "Doris Petrov",
+      "Harold Byrne",
+      "Jean Ahmed",
+    ]);
+    expect(rows[0]!.firstName).toBe("Margaret");
+  });
+});
+
+describe("[CAR-03][AC-02] getCarerPatients search", () => {
+  it("[CAR-03][AC-02] 'Els' returns only Elsie Marsh", async () => {
+    const rows = await getCarerPatients("staff-aisha", "Els");
+
+    expect(rows.map((row) => row.name)).toEqual(["Elsie Marsh"]);
+  });
+
+  it("[CAR-03][AC-02] a search matches the last name and ignores case and padding", async () => {
+    const rows = await getCarerPatients("staff-aisha", "  MARSH ");
+
+    expect(rows.map((row) => row.name)).toEqual(["Elsie Marsh"]);
+  });
+
+  it("[CAR-03][AC-02] a blank query returns everyone; a query with no match returns none", async () => {
+    expect(await getCarerPatients("staff-aisha", "   ")).toHaveLength(7);
+    expect(await getCarerPatients("staff-aisha", "zzz")).toEqual([]);
+  });
+
+  it("[CAR-03][AC-02] a search never widens who the carer may see", async () => {
+    expect(await getCarerPatients("staff-daniel", "Margaret")).toEqual([]);
+  });
+});
