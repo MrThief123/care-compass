@@ -938,6 +938,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **CHG-031:** there is no Carer Calendar screen; this wires `getCarerShifts` for Carer Home's D/W/M calendar.
 - **CHG-009 (tasks and plain events, REQ-35):** calendar blocks show tasks and plain events; "Tasks for the selected shift" lists tasks only.
 - **CHG-025 (carer shifts and notifications):** blocks are shifts, not events; no selected-shift tasks.
+- **CHG-030 / CHG-031 / CHG-032 (2026-09-29):** no screen of its own: wires `getCarerShifts` to Supabase for Carer Home's Shifts calendar (D/W/M), owns that wiring for CAR-01 too; shifts show the client's **full name**, cancelled shifts are hidden, and past shifts keep the name via a `get_carer_shifts` function. Feature ACs rewritten (docs updated when it started).
 - **Docs:** `docs/development/carer-dev/carer-calendar-shifts/` · **Status:** NOT STARTED
 
 ### CAR-06 — Carer — Mark tasks done
