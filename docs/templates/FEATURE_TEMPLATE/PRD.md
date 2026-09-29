@@ -5,7 +5,7 @@
 | Feature ID | <F0-xx / FAM-xx / CAR-xx / ADM-xx / INT-xx> |
 | Dashboard / stream | <Family / Carer / Admin / Shared> |
 | Phase | <Phase n — name> |
-| Development branch (PR target) | `<family-dev / carer-dev / admin-dev / per OQ-01>` |
+| PR target | `main` (CHG-036) |
 | Feature branch | `feature/<stream>-<feature>` |
 | Documentation | `docs/development/<stream-dir>/<slug>/` |
 | Jira | <key> |

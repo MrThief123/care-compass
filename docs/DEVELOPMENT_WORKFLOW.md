@@ -17,9 +17,7 @@ Jira ticket created (import docs/JIRA_BACKLOG.csv; ticket key recorded in featur
 ↓
 Blocking decisions answered (DECISIONS.md) → status PLANNED
 ↓
-Dashboard development branch identified (PRD header)
-↓
-Feature branch located or created from that dev branch
+Feature branch located or created from `main` (CHG-036)
 ↓
 Feature documentation read (PRD, stories, AC, test plan, progress, session state, decisions)
 ↓
@@ -39,17 +37,15 @@ Progress updated · Session state updated · Decisions recorded
 ↓
 Meaningful commits pushed
 ↓
-PR raised to dashboard dev branch → status PR OPEN
+Latest `main` merged in; relevant suite green locally → PR raised to `main` → status PR OPEN
 ↓
-Human review + CI green → merged → status MERGED TO DEV
+Human review (+ CI green when available) → merged → status MERGED TO DEV (means "merged to `main`")
 ↓
-Development-branch testing (dashboard regression + e2e) → IN DEVELOPMENT TESTING
+Regression + e2e on `main` (§9) → IN DEVELOPMENT TESTING
 ↓
-Checkpoint 2 or 3 checks pass (§9) → READY FOR PRODUCTION
+Checkpoint checks pass (§10) → READY FOR PRODUCTION
 ↓
-Merged to `main` at a checkpoint and Checkpoint 3 checks pass (§9) → COMPLETE
-↓
-Downstream sync (main merged into the other dev branches)
+Release candidate passes Checkpoint 3 → COMPLETE
 ```
 
 ---
@@ -61,11 +57,11 @@ Downstream sync (main merged into the other dev branches)
 | G0 Planning pack imported | Docs copied into repo | F0-01 only (after OQ-01 and OQ-20 answered) |
 | G1 Plan validated | F0-01 merged; `docs/VALIDATION_REPORT.md` approved by human | Phase 0 (lane S) and Phase 2 (lane B) in parallel |
 | Per feature | All dependencies merged; every blocking decision in its PRD ANSWERED by the human | That feature (`node scripts/plan-status.mjs` lists it as ready) |
-| Checkpoint 1 (end D7) | All Phase 1 screens merged to dev branches | Dev branches → `main`: clickable prototype on fixtures |
-| Checkpoint 2 (end D10) | Core wiring merged | Dev branches → `main` |
+| Checkpoint 1 (end D7) | All Phase 1 screens merged | Clickable prototype on fixtures on `main` |
+| Checkpoint 2 (end D10) | Core wiring merged to `main` | Checks in §10 on `main` |
 | Checkpoint 3 (end D12) | Integration journeys green | Release candidate on `main` |
 
-There is no "foundation released" gate any more: screens start as soon as the kit parts they depend on are on `main` and synced.
+There is no "foundation released" gate any more: a feature starts as soon as the parts it depends on are on `main`.
 
 Open decisions stay OPEN until the human closes them. A blocked feature stays blocked; the lane picks other ready work.
 
@@ -76,51 +72,52 @@ Open decisions stay OPEN until the human closes them. A blocked feature stays bl
 ### 3.1 Long-lived branches
 | Branch | Purpose | Direct commits |
 |---|---|---|
-| `main` | Production; always releasable | Never |
-| `family-dev` | Family dashboard integration | Never (PR merges only) |
-| `carer-dev` | Carer dashboard integration | Never |
-| `admin-dev` | Admin dashboard integration | Never |
+| `main` | Production and the only integration branch; always releasable | Never (PR merges only) |
+
+`family-dev`, `carer-dev` and `admin-dev` were retired by CHG-036 (2026-09-30), once all their work was on `main`. Never branch from, commit to or PR to them. They stay on origin until a human deletes them.
 
 ### 3.2 Feature branches
 - Name: `feature/<slug>` (slug = feature doc folder, always prefixed by stream: `family-`, `carer-`, `admin-`, `shared-`). Screen features use `<stream>-ui-<screen>` (e.g. `feature/family-ui-home`).
-- Parent: the stream's dev branch. Shared features (lanes S, B, shared I): per **OQ-01**. Plan v0.2 assumes from `main`, PR to `main`, human review, then daily downstream sync. Don't create `feature/shared-*` branches until OQ-01 is answered.
-- One feature per branch. Delete after merge (human).
+- Parent and PR target: `main`, for every stream (CHG-036; shared features already did this per OQ-01).
+- One feature per branch; keep it short-lived and the PR small. Delete after merge (human).
 
 ### 3.3 Creating or resuming a feature branch
 ```bash
 git status                                   # must be clean or explained
 git fetch origin
-git checkout <dev-branch> && git pull --ff-only
+git checkout main && git pull --ff-only
 if git show-ref --verify --quiet refs/heads/feature/<slug> || git ls-remote --exit-code --heads origin feature/<slug>; then
   git checkout feature/<slug> && git pull --ff-only
-  git log --oneline <dev-branch>..HEAD       # inspect existing progress
+  git log --oneline main..HEAD               # inspect existing progress
 else
-  git checkout -b feature/<slug> <dev-branch>
+  git checkout -b feature/<slug> main
   git push -u origin feature/<slug>
 fi
-git merge-base --is-ancestor <dev-branch> HEAD && echo "parent OK"
+git merge-base --is-ancestor main HEAD && echo "parent OK"
 ```
 
 ### 3.4 Keeping a feature branch current
-Merge (not rebase, since branches are pushed) the dev branch into the feature branch when it moves ahead: `git merge origin/<dev-branch>`. Conflicts in files outside the feature's scope → stop and ask.
+Merge (not rebase, since branches are pushed) `main` into the feature branch at the start of each day and again before opening the PR: `git merge origin/main`. Conflicts in files outside the feature's scope → stop and ask.
 
-### 3.5 Shared code and daily sync (replaces release-then-sync)
+### 3.5 Shared code, migrations and contracts
 - Shared components live only in the kits (F0-14, F0-15, UI-00..03) and are changed only by lane S shared PRs to `main`. A dashboard feature that needs a change records it in its DECISIONS.md and asks; it may build a local wrapper in `src/features/<screen>/` meanwhile.
-- **Daily sync:** each dashboard lane owner opens and merges a PR `main` → `<dashboard>-dev` at the start of the day, and again whenever a shared feature they need lands. Feature branches then merge their dev branch (§3.4).
-- A dashboard feature is implementable when its dependencies are on `main` (shared) or its own dev branch, and synced.
+- **Migrations:** create each with `supabase migration new` so the version is a real, unique timestamp; never hand-pick or reuse one. One feature changes a given table's schema at a time. Keep changes additive: add → backfill → drop in a later PR; never rename or drop a column in the PR that stops using it. A PR that alters a table another feature reads says so in its summary.
+- **Contracts:** two in-flight features that change the same `src/server/**` contract function are sequenced; the second waits for the first to merge.
+- **Pre-PR check:** while CI is unavailable, run the relevant suite locally after merging the latest `main` and list the commands and results in the PR (§8).
+- A feature is implementable when its dependencies are merged to `main`.
 
 ### 3.6 Claiming and working in parallel
 1. Run `node scripts/plan-status.mjs --lane <X>` and pick a feature under **Ready to start** (or one the human assigned).
 2. Create the branch (§3.3). Set `Owner: <name>` and `Status: IN PROGRESS` in its PROGRESS.md; commit `docs(<slug>): claim`; push immediately. The pushed branch is the claim.
 3. If the branch already exists on origin with another owner, don't touch it; pick another feature.
-4. Edit a feature's PROGRESS.md and SESSION_STATE.md only on its own branch. The root PROGRESS.md status section is generated (`--write`) on `main` during the daily sync or at checkpoints.
-5. For several sessions on one machine, use one git worktree per lane: `git worktree add ../care-compass-<lane> <branch>`. Usage limits are per account, so extra sessions don't add capacity.
+4. Edit a feature's PROGRESS.md and SESSION_STATE.md only on its own branch. The root PROGRESS.md status section is generated (`--write`) on `main` in a status-sync PR or at checkpoints.
+5. For several sessions on one machine, use one git worktree per feature: `git worktree add ../care-compass-<lane> feature/<slug>`. Usage limits are per account, so extra sessions don't add capacity.
 
 ---
 
 ## 4. Branch protection (applied by a human in GitHub)
 
-For `main`, `family-dev`, `carer-dev`, `admin-dev`:
+For `main`:
 - Require pull request before merging; ≥1 approving review
 - Require status checks: lint, typecheck, format, unit, build, audit, commitlint (+ db tests and e2e once enabled)
 - Require branches up to date before merging
@@ -165,7 +162,9 @@ Title: `<ID> <Feature name>` (e.g. `FAM-01 Family Home — Today day-view timeli
 ## Feature
 - ID / docs: <ID> — docs/development/<stream>/<slug>/
 - Jira: <key>
-- Target branch: <dev-branch>
+- Target branch: `main`
+- Latest `main` merged at: <sha>
+- Tables / contracts other features read that this PR changes: None / <list>
 
 ## Requirements addressed
 - REQ-xx …
@@ -204,18 +203,18 @@ Title: `<ID> <Feature name>` (e.g. `FAM-01 Family Home — Today day-view timeli
 
 ---
 
-## 9. Development-branch testing
-After each merge into a dev branch:
-1. CI runs lint, typecheck, unit/component and build on the dev branch (integration and db jobs once F0-06 exists).
-2. Update the merged feature to MERGED TO DEV.
-3. Before a checkpoint, run the dashboard's axe checks and any e2e specs that exist; move features to IN DEVELOPMENT TESTING, then READY FOR PRODUCTION when they pass.
-4. Defects: fix on `feature/<stream>-fix-<short>` from the dev branch (minimal docs: PRD summary, AC, TEST_PLAN, PROGRESS), never directly on the dev branch.
+## 9. Testing on `main`
+After each merge to `main`:
+1. CI (when available) runs lint, typecheck, unit/component, build, db and integration jobs on `main`. While CI is down, the PR's local run (§3.5) stands in for it.
+2. Update the merged feature to MERGED TO DEV (meaning merged to `main`).
+3. Before a checkpoint, run the axe checks and the e2e specs that exist on `main`; move features to IN DEVELOPMENT TESTING, then READY FOR PRODUCTION when they pass.
+4. Defects: fix on `fix/<short>` or `feature/<stream>-fix-<short>` from `main` (minimal docs: PRD summary, AC, TEST_PLAN, PROGRESS), never directly on `main`.
 
 ---
 
-## 10. Checkpoints (dev → main)
+## 10. Checkpoints
 
-Plan v0.2 replaces per-dashboard phase releases with three team checkpoints:
+Plan v0.2 replaces per-dashboard phase releases with three team checkpoints. Since CHG-036 everything is already on `main`, so a checkpoint is a check and a tag, not a merge:
 
 | Checkpoint | When | Contents | Exit check |
 |---|---|---|---|
@@ -223,18 +222,16 @@ Plan v0.2 replaces per-dashboard phase releases with three team checkpoints:
 | 2 — Wired core | End of D10 | Phase 3 wiring merged so far | `npm run verify`, `supabase test db`, `npm run test:integration` green on `main` |
 | 3 — Release candidate | End of D12 | Integration journeys (INT-02..04) | Above + Playwright journeys green; demo script rehearsed |
 
-Procedure for each dev branch:
-1. Lane owner confirms included features are MERGED TO DEV with CI green; unfinished features stay on their feature branches (they are not in the dev branch yet).
-2. Claude Code may prepare the PR description: features, AC status, test results, migrations, known gaps, open decisions still blocking.
-3. Open PR `<dev-branch>` → `main`. **Human approval required.** Merge the three dev branches one at a time; after each, re-run CI on `main`.
-4. Sync `main` back into all dev branches the same day.
-5. Run `node scripts/plan-status.mjs --write` on `main`; update root SESSION_STATE.md with a checkpoint entry.
-6. Tag `checkpoint-<n>-<yyyy-mm-dd>` (human or on instruction). Features in the RC that pass Checkpoint 3 become COMPLETE.
-7. Hosted migrations are applied only by the documented runbook (INT-08) after OQ-17 is answered.
+Procedure:
+1. Lane owners confirm which features are MERGED TO DEV (on `main`); unfinished features stay on their feature branches.
+2. Run the exit check on `main` (locally while CI is down). Claude Code may prepare the checkpoint summary: features, AC status, test results, migrations, known gaps, open decisions still blocking.
+3. Run `node scripts/plan-status.mjs --write` on `main`; update root SESSION_STATE.md with a checkpoint entry.
+4. Tag `checkpoint-<n>-<yyyy-mm-dd>` (human or on instruction). Features in the RC that pass Checkpoint 3 become COMPLETE.
+5. Hosted migrations are applied only by the documented runbook (INT-08) after OQ-17 is answered.
 
 ---
 
 ## 11. Session hygiene
 - Start: CLAUDE.md §1 reading order.
 - During: update feature PROGRESS.md at each meaningful step; commit.
-- End (always, including before likely context/usage exhaustion): run `END SESSION` (CLAUDE.md §11) — update the feature's SESSION_STATE.md and PROGRESS.md on its branch; commit and push. Root files are updated only in sync/checkpoint PRs.
+- End (always, including before likely context/usage exhaustion): run `END SESSION` (CLAUDE.md §11) — update the feature's SESSION_STATE.md and PROGRESS.md on its branch; commit and push. Root files are updated only in status-sync or checkpoint PRs to `main`.

@@ -66,9 +66,9 @@ Record assignments here:
 | D7 | Review screens vs designs | F0-13 finish, F0-16 seed data | FAM-UI-07 finish; polish | Polish | Polish | **Checkpoint 1:** dev branches → `main` (clickable prototype on fixtures); demo to client if useful |
 | D8 | → Lane I prep | Support wiring; fix contract/schema gaps | FAM-01, FAM-02, FAM-03, FAM-04 | CAR-01, CAR-03 | ADM-01, ADM-02 | Daily sync |
 | D9 | I: write e2e specs against fixtures | Support wiring | FAM-04 finish, FAM-05, FAM-06, FAM-09 | CAR-02, CAR-04, CAR-05 | ADM-02 finish, ADM-04, ADM-06 | Daily sync |
-| D10 | I | Support | FAM-07, FAM-08, FAM-10, FAM-12 | CAR-05 finish, CAR-06, CAR-09 | ADM-07, ADM-10 | **Checkpoint 2:** dev branches → `main` |
+| D10 | I | Support | FAM-07, FAM-08, FAM-10, FAM-12 | CAR-05 finish, CAR-06, CAR-09 | ADM-07, ADM-10 | **Checkpoint 2:** checks on `main` (CHG-036) |
 | D11 | I | INT-01 budget emails (stretch) | FAM-13, FAM-14, FAM-15 | Fixes | Fixes | Daily sync |
-| D12 | INT-02, INT-03, INT-04 journeys | INT-01 (stretch) | Fixes from e2e | Fixes | Fixes | **Checkpoint 3:** release candidate → `main` |
+| D12 | INT-02, INT-03, INT-04 journeys | INT-01 (stretch) | Fixes from e2e | Fixes | Fixes | **Checkpoint 3:** release candidate checks and tag on `main` |
 | D13 | INT-05 access matrix / INT-08 handover (stretch) | Fixes | Fixes | Fixes | Fixes | Demo prep |
 | D14 | Buffer | Buffer | Buffer | Buffer | Buffer | Submission / demo |
 
@@ -112,7 +112,7 @@ The critical path runs through **OQ-09, OQ-10, OQ-22, OQ-29, OQ-33** (events and
 
 ## 5. Daily rhythm (15 minutes)
 1. Each person runs `node scripts/plan-status.mjs --lane <X>` and picks/continues a ready feature.
-2. Lane owners merge the `main` → `<dashboard>-dev` sync PR.
+2. Everyone merges the latest `origin/main` into their feature branch (CHG-036; there are no dev branches to sync).
 3. Blockers raised: open decisions to the human, shared component requests to lane S, contract/schema gaps to lane B.
 4. End of day: every active feature has updated PROGRESS.md/SESSION_STATE.md pushed; reviewers merge ready PRs; someone runs `node scripts/plan-status.mjs --write` on `main`.
 

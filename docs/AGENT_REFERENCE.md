@@ -21,12 +21,12 @@ A dashboard feature that needs a change to a shared component **must not edit it
 ## State files that don't conflict (CLAUDE.md §4)
 
 - Per-feature `PROGRESS.md` and `SESSION_STATE.md` are the live state; edit them only on that feature's branch.
-- Root `PROGRESS.md` status section is **generated** by `node scripts/plan-status.mjs --write`; run it only on `main` after merges (or in the daily sync PR). Never hand-edit it on a feature branch.
-- Root `SESSION_STATE.md` is a team-level log updated only in sync/checkpoint PRs.
+- Root `PROGRESS.md` status section is **generated** by `node scripts/plan-status.mjs --write`; run it only on `main` after merges (or in a status-sync PR). Never hand-edit it on a feature branch.
+- Root `SESSION_STATE.md` is a team-level log updated only in status-sync or checkpoint PRs to `main`.
 
 ## Parallel sessions on one machine (CLAUDE.md §4)
 
-Use git worktrees, one per lane: `git worktree add ../care-compass-family family-dev`. Only lane B runs `supabase db reset`; other lanes use fixtures (`DATA_SOURCE=mock`) until Phase 3, then point at the shared local stack without resetting it.
+Use git worktrees, one per feature: `git worktree add ../care-compass-<lane> feature/<slug>` (all feature branches come from `main`, CHG-036). Only lane B runs `supabase db reset`; other lanes use fixtures (`DATA_SOURCE=mock`) until Phase 3, then point at the shared local stack without resetting it.
 
 ---
 
@@ -65,4 +65,4 @@ Full day-by-day schedule and staffing: `docs/SPRINT_PLAN.md`. Full stage-gate ta
 
 ## Status values (used in PROGRESS.md)
 
-`NOT STARTED` → `PLANNED` → `IN PROGRESS` → `IMPLEMENTED` → `READY FOR PR` → `PR OPEN` → `MERGED TO DEV` (for shared features: merged to `main`) → `IN DEVELOPMENT TESTING` → `READY FOR PRODUCTION` → `COMPLETE`, plus `BLOCKED (<DECISION OQ-xx | DEPENDENCY <ID> | DESIGN | TECHNICAL>; was <status>)`, and `RETIRED (CHG-xxx)` for a feature a controlled change removed from scope.
+`NOT STARTED` → `PLANNED` → `IN PROGRESS` → `IMPLEMENTED` → `READY FOR PR` → `PR OPEN` → `MERGED TO DEV` (merged to `main`; the name predates CHG-036 retiring the dev branches) → `IN DEVELOPMENT TESTING` → `READY FOR PRODUCTION` → `COMPLETE`, plus `BLOCKED (<DECISION OQ-xx | DEPENDENCY <ID> | DESIGN | TECHNICAL>; was <status>)`, and `RETIRED (CHG-xxx)` for a feature a controlled change removed from scope.

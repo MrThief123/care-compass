@@ -13,7 +13,7 @@ Totals: **83 active features** (84 listed; CAR-08 retired) · **373 acceptance c
 4. **Build the backend in parallel (Days 2–7).** Supabase, schema, row-level security, auth, recurrence, events, shifts, budget, documents and seed data run in their own lane instead of waiting for the UI.
 5. **Wire data, three dashboards in parallel (Days 8–11).** Each wiring feature switches its screen from the mock data source to Supabase through the same contract functions, and adds actions, permissions and persistence.
 6. **Integrate and harden (Days 11–13).** Cross-role journeys, fixes, release candidate; stretch: budget emails, access matrix, handover pack.
-7. **Continuous integration of shared work.** Shared PRs merge to `main` continuously; `main` syncs into dashboard dev branches daily; dashboard dev branches merge to `main` at checkpoints D7, D10 and D12 (see `docs/DEVELOPMENT_WORKFLOW.md` §3 and §9).
+7. **Continuous integration on `main`.** Every feature branches from and PRs to `main`; checkpoints at D7, D10 and D12 are checks and tags on `main` (CHG-036, which retired the dashboard dev branches; see `docs/DEVELOPMENT_WORKFLOW.md` §3 and §10).
 8. **Open decisions stay open until the human closes them.** Features listing a blocking decision stay blocked; the lane moves to other ready work.
 
 Day-by-day lanes, staffing and decision timing: **`docs/SPRINT_PLAN.md`**.
@@ -24,12 +24,12 @@ The v0.1 plan built Family, then Carer, then Admin, and released each phase to `
 ### 1.2 Lanes
 | Lane | Scope | Branch target |
 |---|---|---|
-| S — Shared kit | Phase 0 | `main` (per OQ-01) |
-| B — Backend | Phase 2, INT-01 | `main` (per OQ-01) |
-| F — Family | FAM-UI-*, FAM-* | `family-dev` |
-| C — Carer | CAR-UI-*, CAR-* | `carer-dev` |
-| A — Admin | ADM-UI-*, ADM-* | `admin-dev` |
-| I — Integration | INT-02…08 | dashboard dev branch of the journey owner, or `main` for shared |
+| S — Shared kit | Phase 0 | `main` |
+| B — Backend | Phase 2, INT-01 | `main` |
+| F — Family | FAM-UI-*, FAM-* | `main` (was `family-dev` until CHG-036) |
+| C — Carer | CAR-UI-*, CAR-* | `main` (was `carer-dev` until CHG-036) |
+| A — Admin | ADM-UI-*, ADM-* | `main` (was `admin-dev` until CHG-036) |
+| I — Integration | INT-02…08 | `main` |
 
 ### 1.3 Sprint buckets
 - **SPRINT** — planned inside the two weeks.
@@ -61,7 +61,7 @@ The v0.1 plan built Family, then Carer, then Admin, and released each phase to `
 ### Phase 3 — Data wiring & behaviour (Lanes F, C, A in parallel, D8–D11)
 - **Objective:** Replace fixtures with real data; add actions, permissions and persistence.
 - **Dependencies:** the feature's screen (Phase 1) and backend features (Phase 2).
-- **Definition of done:** in-sprint wiring features merged to dev branches; checkpoint merges on D10 and D12.
+- **Definition of done:** in-sprint wiring features merged to `main`; checkpoint checks on D10 and D12 (CHG-036).
 - **Output:** working application on local Supabase.
 
 ### Phase 4 — Integration, hardening & release (Lane I, D11–D13)
@@ -80,11 +80,11 @@ The v0.1 plan built Family, then Carer, then Admin, and released each phase to `
 | BLOCKED | Cannot proceed; must state reason `DECISION OQ-xx`, `DEPENDENCY <ID>`, `DESIGN`, or `TECHNICAL` and the previous status | Claude Code |
 | IMPLEMENTED | All in-scope ACs have passing tests on the feature branch | Claude Code |
 | READY FOR PR | Feature-level Definition of Done met (CLAUDE.md §8) | Claude Code |
-| PR OPEN | PR to the dev branch open | Claude Code |
-| MERGED TO DEV | Human merged the PR | Human / Claude Code updates docs |
-| IN DEVELOPMENT TESTING | Dashboard regression/e2e running on dev branch | Claude Code |
-| READY FOR PRODUCTION | Dev-branch testing passed; awaiting release | Human |
-| COMPLETE | Released to `main` | Human / Claude Code updates docs |
+| PR OPEN | PR to `main` open | Claude Code |
+| MERGED TO DEV | Human merged the PR to `main` (name predates CHG-036) | Human / Claude Code updates docs |
+| IN DEVELOPMENT TESTING | Regression/e2e running on `main` | Claude Code |
+| READY FOR PRODUCTION | Testing on `main` passed; awaiting release | Human |
+| COMPLETE | In a release candidate that passed Checkpoint 3 | Human / Claude Code updates docs |
 
 ### 3.1 Progress calculations
 - **Phase completion %** = COMPLETE features in phase ÷ total features in phase × 100.
@@ -349,7 +349,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 ## Phase 1 — Screens on fixtures (parallel: Family · Carer · Admin) — feature detail
 
 ### FAM-UI-01 — Family Home screen (UI)
-- **Dashboard / stream:** family · **Lane:** F · **Days:** D4 · **Sprint:** SPRINT · **PR target:** `family-dev` · **Branch:** `feature/family-ui-home`
+- **Dashboard / stream:** family · **Lane:** F · **Days:** D4 · **Sprint:** SPRINT · **PR target:** `main` · **Branch:** `feature/family-ui-home`
 - **Description:** Builds the Family · Home screen(s) exactly as designed, using the shared kit and design fixtures via the data contract. No database, no persistence — interactions change local state only.
 - **User value:** A clickable, reviewable screen that matches the design, ready for data wiring in Phase 3.
 - **Dependencies:** F0-15, UI-01, UI-03 · **Blocking decisions:** None
@@ -361,7 +361,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Docs:** `docs/development/family-dev/family-ui-home/` · **Status:** NOT STARTED
 
 ### FAM-UI-02 — Family Calendar screen (UI)
-- **Dashboard / stream:** family · **Lane:** F · **Days:** D4–D5 · **Sprint:** SPRINT · **PR target:** `family-dev` · **Branch:** `feature/family-ui-calendar`
+- **Dashboard / stream:** family · **Lane:** F · **Days:** D4–D5 · **Sprint:** SPRINT · **PR target:** `main` · **Branch:** `feature/family-ui-calendar`
 - **Description:** Builds the Family · Calendar screen(s) exactly as designed, using the shared kit and design fixtures via the data contract. No database, no persistence — interactions change local state only.
 - **User value:** A clickable, reviewable screen that matches the design, ready for data wiring in Phase 3.
 - **Dependencies:** F0-15, UI-01, UI-03 · **Blocking decisions:** None
@@ -373,7 +373,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Docs:** `docs/development/family-dev/family-ui-calendar/` · **Status:** NOT STARTED
 
 ### FAM-UI-03 — Family Add / Edit event screens (UI)
-- **Dashboard / stream:** family · **Lane:** F · **Days:** D5 · **Sprint:** SPRINT · **PR target:** `family-dev` · **Branch:** `feature/family-ui-event-form`
+- **Dashboard / stream:** family · **Lane:** F · **Days:** D5 · **Sprint:** SPRINT · **PR target:** `main` · **Branch:** `feature/family-ui-event-form`
 - **Description:** Builds the Family · Edit event (and Add event) screen(s) exactly as designed, using the shared kit and design fixtures via the data contract. No database, no persistence — interactions change local state only.
 - **User value:** A clickable, reviewable screen that matches the design, ready for data wiring in Phase 3.
 - **Dependencies:** F0-15, UI-02, UI-01, UI-03 · **Blocking decisions:** None
@@ -385,7 +385,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Docs:** `docs/development/family-dev/family-ui-event-form/` · **Status:** NOT STARTED
 
 ### FAM-UI-04 — Family Info screen (UI)
-- **Dashboard / stream:** family · **Lane:** F · **Days:** D5 · **Sprint:** SPRINT · **PR target:** `family-dev` · **Branch:** `feature/family-ui-info`
+- **Dashboard / stream:** family · **Lane:** F · **Days:** D5 · **Sprint:** SPRINT · **PR target:** `main` · **Branch:** `feature/family-ui-info`
 - **Description:** Builds the Family · Info screen(s) exactly as designed, using the shared kit and design fixtures via the data contract. No database, no persistence — interactions change local state only.
 - **User value:** A clickable, reviewable screen that matches the design, ready for data wiring in Phase 3.
 - **Dependencies:** F0-15, UI-03 · **Blocking decisions:** None
@@ -396,7 +396,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Docs:** `docs/development/family-dev/family-ui-info/` · **Status:** NOT STARTED
 
 ### FAM-UI-05 — Family Budget screen (UI)
-- **Dashboard / stream:** family · **Lane:** F · **Days:** D6 · **Sprint:** SPRINT · **PR target:** `family-dev` · **Branch:** `feature/family-ui-budget`
+- **Dashboard / stream:** family · **Lane:** F · **Days:** D6 · **Sprint:** SPRINT · **PR target:** `main` · **Branch:** `feature/family-ui-budget`
 - **Description:** Builds the Family · Budget screen(s) exactly as designed, using the shared kit and design fixtures via the data contract. No database, no persistence — interactions change local state only.
 - **User value:** A clickable, reviewable screen that matches the design, ready for data wiring in Phase 3.
 - **Dependencies:** F0-15, UI-03 · **Blocking decisions:** None
@@ -410,7 +410,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Docs:** `docs/development/family-dev/family-ui-budget/` · **Status:** NOT STARTED
 
 ### FAM-UI-06 — Family Settings screen (UI)
-- **Dashboard / stream:** family · **Lane:** F · **Days:** D6 · **Sprint:** SPRINT · **PR target:** `family-dev` · **Branch:** `feature/family-ui-settings`
+- **Dashboard / stream:** family · **Lane:** F · **Days:** D6 · **Sprint:** SPRINT · **PR target:** `main` · **Branch:** `feature/family-ui-settings`
 - **Description:** Builds the Family · Settings screen(s) exactly as designed, using the shared kit and design fixtures via the data contract. No database, no persistence — interactions change local state only.
 - **User value:** A clickable, reviewable screen that matches the design, ready for data wiring in Phase 3.
 - **Dependencies:** F0-15, UI-02 · **Blocking decisions:** None
@@ -422,7 +422,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Docs:** `docs/development/family-dev/family-ui-settings/` · **Status:** NOT STARTED
 
 ### FAM-UI-07 — Family Task log and Task detail screens (UI)
-- **Dashboard / stream:** family · **Lane:** F · **Days:** D6–D7 · **Sprint:** SPRINT · **PR target:** `family-dev` · **Branch:** `feature/family-ui-task-log-detail`
+- **Dashboard / stream:** family · **Lane:** F · **Days:** D6–D7 · **Sprint:** SPRINT · **PR target:** `main` · **Branch:** `feature/family-ui-task-log-detail`
 - **Description:** Builds the Family · Task log and Task detail screen(s) exactly as designed, using the shared kit and design fixtures via the data contract. No database, no persistence — interactions change local state only.
 - **User value:** A clickable, reviewable screen that matches the design, ready for data wiring in Phase 3.
 - **Dependencies:** F0-15, UI-03, UI-02 · **Blocking decisions:** None
@@ -434,7 +434,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Docs:** `docs/development/family-dev/family-ui-task-log-detail/` · **Status:** NOT STARTED
 
 ### FAM-UI-08 — Family event cost fields (UI)
-- **Dashboard / stream:** family · **Lane:** F · **Days:** — · **Sprint:** SPRINT · **PR target:** `family-dev` · **Branch:** `feature/family-ui-event-cost`
+- **Dashboard / stream:** family · **Lane:** F · **Days:** — · **Sprint:** SPRINT · **PR target:** `main` · **Branch:** `feature/family-ui-event-cost`
 - **Description:** Adds optional Cost and 'Paid from' bucket fields to the Add / Edit event form on fixtures. A bucket at $0 or with pending costs is struck through and cannot be picked; a cost above a bucket's balance warns that it will be held as pending. Added by CHG-020.
 - **User value:** Care is costed as it is planned, and nobody plans care against money that isn't there.
 - **Dependencies:** FAM-UI-03, FAM-UI-05 · **Blocking decisions:** None
@@ -446,7 +446,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Docs:** `docs/development/family-dev/family-ui-event-cost/` · **Status:** NOT STARTED
 
 ### CAR-UI-01 — Carer Home screen (UI)
-- **Dashboard / stream:** carer · **Lane:** C · **Days:** D4 · **Sprint:** SPRINT · **PR target:** `carer-dev` · **Branch:** `feature/carer-ui-home`
+- **Dashboard / stream:** carer · **Lane:** C · **Days:** D4 · **Sprint:** SPRINT · **PR target:** `main` · **Branch:** `feature/carer-ui-home`
 - **Description:** Builds the Carer · Home screen(s) exactly as designed, using the shared kit and design fixtures via the data contract. No database, no persistence — interactions change local state only.
 - **User value:** A clickable, reviewable screen that matches the design, ready for data wiring in Phase 3.
 - **Dependencies:** F0-15, UI-03 · **Blocking decisions:** None
@@ -459,7 +459,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Docs:** `docs/development/carer-dev/carer-ui-home/` · **Status:** NOT STARTED
 
 ### CAR-UI-02 — Carer Patients and patient info screens (UI)
-- **Dashboard / stream:** carer · **Lane:** C · **Days:** D4–D5 · **Sprint:** SPRINT · **PR target:** `carer-dev` · **Branch:** `feature/carer-ui-patients-info`
+- **Dashboard / stream:** carer · **Lane:** C · **Days:** D4–D5 · **Sprint:** SPRINT · **PR target:** `main` · **Branch:** `feature/carer-ui-patients-info`
 - **Description:** Builds the Carer · Patients (and patient info) screen(s) exactly as designed, using the shared kit and design fixtures via the data contract. No database, no persistence — interactions change local state only.
 - **User value:** A clickable, reviewable screen that matches the design, ready for data wiring in Phase 3.
 - **Dependencies:** F0-15, UI-03 · **Blocking decisions:** None
@@ -472,7 +472,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Docs:** `docs/development/carer-dev/carer-ui-patients-info/` · **Status:** NOT STARTED
 
 ### CAR-UI-03 — Carer Calendar screen (UI)
-- **Dashboard / stream:** carer · **Lane:** C · **Days:** D5–D6 · **Sprint:** SPRINT · **PR target:** `carer-dev` · **Branch:** `feature/carer-ui-calendar`
+- **Dashboard / stream:** carer · **Lane:** C · **Days:** D5–D6 · **Sprint:** SPRINT · **PR target:** `main` · **Branch:** `feature/carer-ui-calendar`
 - **Description:** Builds the Carer · Calendar screen(s) exactly as designed, using the shared kit and design fixtures via the data contract. No database, no persistence — interactions change local state only.
 - **User value:** A clickable, reviewable screen that matches the design, ready for data wiring in Phase 3.
 - **Dependencies:** F0-15, UI-01, UI-03 · **Blocking decisions:** None
@@ -487,7 +487,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Docs:** `docs/development/carer-dev/carer-ui-calendar/` · **Status:** NOT STARTED
 
 ### CAR-UI-04 — Carer Settings screen (UI)
-- **Dashboard / stream:** carer · **Lane:** C · **Days:** D6 · **Sprint:** SPRINT · **PR target:** `carer-dev` · **Branch:** `feature/carer-ui-settings`
+- **Dashboard / stream:** carer · **Lane:** C · **Days:** D6 · **Sprint:** SPRINT · **PR target:** `main` · **Branch:** `feature/carer-ui-settings`
 - **Description:** Builds the Carer · Settings screen(s) exactly as designed, using the shared kit and design fixtures via the data contract. No database, no persistence — interactions change local state only.
 - **User value:** A clickable, reviewable screen that matches the design, ready for data wiring in Phase 3.
 - **Dependencies:** F0-15, UI-02 · **Blocking decisions:** None
@@ -498,7 +498,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Docs:** `docs/development/carer-dev/carer-ui-settings/` · **Status:** NOT STARTED
 
 ### ADM-UI-01 — Admin Home screen (UI)
-- **Dashboard / stream:** admin · **Lane:** A · **Days:** D4 · **Sprint:** SPRINT · **PR target:** `admin-dev` · **Branch:** `feature/admin-ui-home`
+- **Dashboard / stream:** admin · **Lane:** A · **Days:** D4 · **Sprint:** SPRINT · **PR target:** `main` · **Branch:** `feature/admin-ui-home`
 - **Description:** Builds the Admin · Home screen(s) exactly as designed, using the shared kit and design fixtures via the data contract. No database, no persistence — interactions change local state only.
 - **User value:** A clickable, reviewable screen that matches the design, ready for data wiring in Phase 3.
 - **Dependencies:** F0-15, UI-03 · **Blocking decisions:** None
@@ -509,7 +509,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Docs:** `docs/development/admin-dev/admin-ui-home/` · **Status:** NOT STARTED
 
 ### ADM-UI-02 — Admin Manage screen (UI)
-- **Dashboard / stream:** admin · **Lane:** A · **Days:** D4–D5 · **Sprint:** SPRINT · **PR target:** `admin-dev` · **Branch:** `feature/admin-ui-manage`
+- **Dashboard / stream:** admin · **Lane:** A · **Days:** D4–D5 · **Sprint:** SPRINT · **PR target:** `main` · **Branch:** `feature/admin-ui-manage`
 - **Description:** Builds the Admin · Manage screen(s) exactly as designed, using the shared kit and design fixtures via the data contract. No database, no persistence — interactions change local state only.
 - **User value:** A clickable, reviewable screen that matches the design, ready for data wiring in Phase 3.
 - **Dependencies:** F0-15, UI-01, UI-02, UI-03 · **Blocking decisions:** None
@@ -520,7 +520,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Docs:** `docs/development/admin-dev/admin-ui-manage/` · **Status:** NOT STARTED
 
 ### ADM-UI-03 — Admin Staff screen (UI)
-- **Dashboard / stream:** admin · **Lane:** A · **Days:** D5–D6 · **Sprint:** SPRINT · **PR target:** `admin-dev` · **Branch:** `feature/admin-ui-staff`
+- **Dashboard / stream:** admin · **Lane:** A · **Days:** D5–D6 · **Sprint:** SPRINT · **PR target:** `main` · **Branch:** `feature/admin-ui-staff`
 - **Description:** Builds the Admin · Staff screen(s) exactly as designed, using the shared kit and design fixtures via the data contract. No database, no persistence — interactions change local state only.
 - **User value:** A clickable, reviewable screen that matches the design, ready for data wiring in Phase 3.
 - **Dependencies:** F0-15, UI-02, UI-03 · **Blocking decisions:** None
@@ -531,7 +531,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Docs:** `docs/development/admin-dev/admin-ui-staff/` · **Status:** NOT STARTED
 
 ### ADM-UI-04 — Admin Clients screen (UI)
-- **Dashboard / stream:** admin · **Lane:** A · **Days:** D6 · **Sprint:** SPRINT · **PR target:** `admin-dev` · **Branch:** `feature/admin-ui-clients`
+- **Dashboard / stream:** admin · **Lane:** A · **Days:** D6 · **Sprint:** SPRINT · **PR target:** `main` · **Branch:** `feature/admin-ui-clients`
 - **Description:** Builds the Admin · Clients screen(s) exactly as designed, using the shared kit and design fixtures via the data contract. No database, no persistence — interactions change local state only.
 - **User value:** A clickable, reviewable screen that matches the design, ready for data wiring in Phase 3.
 - **Dependencies:** F0-15, UI-02, UI-03 · **Blocking decisions:** None
@@ -542,7 +542,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Docs:** `docs/development/admin-dev/admin-ui-clients/` · **Status:** NOT STARTED
 
 ### ADM-UI-05 — Admin Settings screen (UI)
-- **Dashboard / stream:** admin · **Lane:** A · **Days:** D6 · **Sprint:** SPRINT · **PR target:** `admin-dev` · **Branch:** `feature/admin-ui-settings`
+- **Dashboard / stream:** admin · **Lane:** A · **Days:** D6 · **Sprint:** SPRINT · **PR target:** `main` · **Branch:** `feature/admin-ui-settings`
 - **Description:** Builds the Admin · Settings screen(s) exactly as designed, using the shared kit and design fixtures via the data contract. No database, no persistence — interactions change local state only.
 - **User value:** A clickable, reviewable screen that matches the design, ready for data wiring in Phase 3.
 - **Dependencies:** F0-15, UI-02 · **Blocking decisions:** None
@@ -695,7 +695,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 ## Phase 3 — Data wiring & behaviour (parallel: Family · Carer · Admin) — feature detail
 
 ### FAM-01 — Family Home — Today day-view timeline
-- **Dashboard / stream:** family · **Lane:** F · **Days:** D8 · **Sprint:** SPRINT · **PR target:** `family-dev` · **Branch:** `feature/family-home-today`
+- **Dashboard / stream:** family · **Lane:** F · **Days:** D8 · **Sprint:** SPRINT · **PR target:** `main` · **Branch:** `feature/family-home-today`
 - **Description:** The left 'Today' panel on the Family landing screen: an hour-gutter timeline listing today's occurrences for the client.
 - **User value:** The family sees at a glance what care is happening today and whether it has been done.
 - **Dependencies:** F0-11, F0-16, FAM-UI-01 · **Blocking decisions:** OQ-29
@@ -707,7 +707,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Docs:** `docs/development/family-dev/family-home-today/` · **Status:** NOT STARTED
 
 ### FAM-02 — Family Home — Overdue card and Recent activity
-- **Dashboard / stream:** family · **Lane:** F · **Days:** D8 · **Sprint:** SPRINT · **PR target:** `family-dev` · **Branch:** `feature/family-home-overdue-activity`
+- **Dashboard / stream:** family · **Lane:** F · **Days:** D8 · **Sprint:** SPRINT · **PR target:** `main` · **Branch:** `feature/family-home-overdue-activity`
 - **Description:** Shows overdue occurrences and the most recent five activity items for the client on the Family landing screen.
 - **User value:** Problems surface immediately; recent history is one glance away.
 - **Dependencies:** F0-11, FAM-UI-01 · **Blocking decisions:** None
@@ -719,7 +719,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Docs:** `docs/development/family-dev/family-home-overdue-activity/` · **Status:** NOT STARTED
 
 ### FAM-03 — Family Home — Budget strip
-- **Dashboard / stream:** family · **Lane:** F · **Days:** D8 · **Sprint:** SPRINT · **PR target:** `family-dev` · **Branch:** `feature/family-home-budget-strip`
+- **Dashboard / stream:** family · **Lane:** F · **Days:** D8 · **Sprint:** SPRINT · **PR target:** `main` · **Branch:** `feature/family-home-budget-strip`
 - **Description:** Bottom strip on Family Home showing '$17,870 remaining of $32,000 · 44% used' and one card per funding bucket.
 - **User value:** The bucket in trouble is visible instead of hidden in an average (D17).
 - **Dependencies:** F0-12, FAM-UI-01 · **Blocking decisions:** OQ-03, OQ-04
@@ -730,7 +730,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Docs:** `docs/development/family-dev/family-home-budget-strip/` · **Status:** NOT STARTED
 
 ### FAM-04 — Family Calendar — day, week and month views
-- **Dashboard / stream:** family · **Lane:** F · **Days:** D8–D9 · **Sprint:** SPRINT · **PR target:** `family-dev` · **Branch:** `feature/family-calendar-views`
+- **Dashboard / stream:** family · **Lane:** F · **Days:** D8–D9 · **Sprint:** SPRINT · **PR target:** `main` · **Branch:** `feature/family-calendar-views`
 - **Description:** The Family Calendar grid: week view with hour gutter and event blocks, plus day and month views following normal calendar conventions.
 - **User value:** Families plan around upcoming care across days, weeks and months.
 - **Dependencies:** F0-11, FAM-UI-02 · **Blocking decisions:** None
@@ -742,7 +742,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Docs:** `docs/development/family-dev/family-calendar-views/` · **Status:** NOT STARTED
 
 ### FAM-05 — Family Calendar — Tasks panel and Log panel
-- **Dashboard / stream:** family · **Lane:** F · **Days:** D9 · **Sprint:** SPRINT · **PR target:** `family-dev` · **Branch:** `feature/family-calendar-tasks-log`
+- **Dashboard / stream:** family · **Lane:** F · **Days:** D9 · **Sprint:** SPRINT · **PR target:** `main` · **Branch:** `feature/family-calendar-tasks-log`
 - **Description:** Panels beneath the Family calendar: tick off the selected day's tasks and see a short activity log.
 - **User value:** Family can confirm care has happened (D26) and review recent activity.
 - **Dependencies:** F0-11, FAM-UI-02 · **Blocking decisions:** OQ-10
@@ -754,7 +754,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Docs:** `docs/development/family-dev/family-calendar-tasks-log/` · **Status:** NOT STARTED
 
 ### FAM-06 — Family — Add event (Enter event)
-- **Dashboard / stream:** family · **Lane:** F · **Days:** D9 · **Sprint:** SPRINT · **PR target:** `family-dev` · **Branch:** `feature/family-add-event`
+- **Dashboard / stream:** family · **Lane:** F · **Days:** D9 · **Sprint:** SPRINT · **PR target:** `main` · **Branch:** `feature/family-add-event`
 - **Description:** Creates a one-off or recurring event for the client using the event form shown in the Edit event design.
 - **User value:** Families can put care needs into the perpetual schedule themselves.
 - **Dependencies:** F0-09, F0-11, FAM-UI-03 · **Blocking decisions:** OQ-22, OQ-12, OQ-10
@@ -767,7 +767,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Docs:** `docs/development/family-dev/family-add-event/` · **Status:** NOT STARTED
 
 ### FAM-07 — Family — Edit event
-- **Dashboard / stream:** family · **Lane:** F · **Days:** D10 · **Sprint:** SPRINT · **PR target:** `family-dev` · **Branch:** `feature/family-edit-event`
+- **Dashboard / stream:** family · **Lane:** F · **Days:** D10 · **Sprint:** SPRINT · **PR target:** `main` · **Branch:** `feature/family-edit-event`
 - **Description:** The 'Edit event' screen, prefilled, reached from Task detail 'Edit' or a calendar event block.
 - **User value:** Care needs change over time (CIS5); families can adjust without re-entering.
 - **Dependencies:** FAM-06 · **Blocking decisions:** OQ-10, OQ-11, OQ-22
@@ -780,7 +780,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Docs:** `docs/development/family-dev/family-edit-event/` · **Status:** NOT STARTED
 
 ### FAM-08 — Family — Event documents (file tiles)
-- **Dashboard / stream:** family · **Lane:** F · **Days:** D10 · **Sprint:** SPRINT · **PR target:** `family-dev` · **Branch:** `feature/family-event-documents`
+- **Dashboard / stream:** family · **Lane:** F · **Days:** D10 · **Sprint:** SPRINT · **PR target:** `main` · **Branch:** `feature/family-event-documents`
 - **Description:** Adds working document tiles to the event form and Task detail, backed by document storage.
 - **User value:** Referrals, plans and evidence live with the care they relate to.
 - **Dependencies:** F0-13, FAM-UI-03 · **Blocking decisions:** OQ-26
@@ -791,7 +791,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Docs:** `docs/development/family-dev/family-event-documents/` · **Status:** NOT STARTED
 
 ### FAM-09 — Family — Client info
-- **Dashboard / stream:** family · **Lane:** F · **Days:** D9 · **Sprint:** SPRINT · **PR target:** `family-dev` · **Branch:** `feature/family-client-info`
+- **Dashboard / stream:** family · **Lane:** F · **Days:** D9 · **Sprint:** SPRINT · **PR target:** `main` · **Branch:** `feature/family-client-info`
 - **Description:** The Family 'Info' screen showing and editing the client's key information and client-level documents.
 - **User value:** Everyone caring for the client reads the same up-to-date information (D9).
 - **Dependencies:** F0-06, F0-13, FAM-UI-04 · **Blocking decisions:** OQ-26
@@ -802,7 +802,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Docs:** `docs/development/family-dev/family-client-info/` · **Status:** NOT STARTED
 
 ### FAM-10 — Family — Budget overview and history
-- **Dashboard / stream:** family · **Lane:** F · **Days:** D10 · **Sprint:** SPRINT · **PR target:** `family-dev` · **Branch:** `feature/family-budget-overview`
+- **Dashboard / stream:** family · **Lane:** F · **Days:** D10 · **Sprint:** SPRINT · **PR target:** `main` · **Branch:** `feature/family-budget-overview`
 - **Description:** The Family Budget screen: per-bucket remaining/total/percent and a dated history of top-ups.
 - **User value:** Families understand where money came from and how much is left (D7).
 - **Dependencies:** F0-12, FAM-UI-05 · **Blocking decisions:** OQ-04, OQ-05
@@ -816,7 +816,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Docs:** `docs/development/family-dev/family-budget-overview/` · **Status:** NOT STARTED
 
 ### FAM-11 — Family — Update funds
-- **Dashboard / stream:** family · **Lane:** F · **Days:** — · **Sprint:** POST-SPRINT · **PR target:** `family-dev` · **Branch:** `feature/family-budget-update-funds`
+- **Dashboard / stream:** family · **Lane:** F · **Days:** — · **Sprint:** POST-SPRINT · **PR target:** `main` · **Branch:** `feature/family-budget-update-funds`
 - **Description:** Lets the authorised person record a fund top-up against a bucket, producing a History entry and updated totals.
 - **User value:** Budgets stay accurate as new funding arrives.
 - **Dependencies:** FAM-10 · **Blocking decisions:** OQ-05, OQ-04, OQ-19
@@ -830,7 +830,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Docs:** `docs/development/family-dev/family-budget-update-funds/` · **Status:** NOT STARTED
 
 ### FAM-12 — Family — Settings: family info and password reset
-- **Dashboard / stream:** family · **Lane:** F · **Days:** D10 · **Sprint:** SPRINT · **PR target:** `family-dev` · **Branch:** `feature/family-settings-profile`
+- **Dashboard / stream:** family · **Lane:** F · **Days:** D10 · **Sprint:** SPRINT · **PR target:** `main` · **Branch:** `feature/family-settings-profile`
 - **Description:** The Family Settings screen apart from Change organisation: personal contact details and requesting a reset link.
 - **User value:** Contact details stay current for staff and notifications; users can recover access themselves.
 - **Dependencies:** F0-07, FAM-UI-06 · **Blocking decisions:** OQ-35
@@ -841,7 +841,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Docs:** `docs/development/family-dev/family-settings-profile/` · **Status:** NOT STARTED
 
 ### FAM-13 — Family — Change organisation
-- **Dashboard / stream:** family · **Lane:** F · **Days:** D11 · **Sprint:** SPRINT · **PR target:** `family-dev` · **Branch:** `feature/family-change-organisation`
+- **Dashboard / stream:** family · **Lane:** F · **Days:** D11 · **Sprint:** SPRINT · **PR target:** `main` · **Branch:** `feature/family-change-organisation`
 - **Description:** Lets the family move the client to another organisation: history retained, nurse assignments and future shifts cleared, old organisation loses access immediately.
 - **User value:** Families can leave a provider without losing any records (CIS3, CIS5).
 - **Dependencies:** F0-06, F0-10, FAM-UI-06 · **Blocking decisions:** OQ-06, OQ-15
@@ -853,7 +853,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Docs:** `docs/development/family-dev/family-change-organisation/` · **Status:** NOT STARTED
 
 ### FAM-14 — Family — Task log
-- **Dashboard / stream:** family · **Lane:** F · **Days:** D11 · **Sprint:** SPRINT · **PR target:** `family-dev` · **Branch:** `feature/family-task-log`
+- **Dashboard / stream:** family · **Lane:** F · **Days:** D11 · **Sprint:** SPRINT · **PR target:** `main` · **Branch:** `feature/family-task-log`
 - **Description:** Drill-down page (no rail item) listing every task occurrence up to today with search and filtering.
 - **User value:** Families can audit care history over time (D27).
 - **Dependencies:** F0-11, FAM-UI-07 · **Blocking decisions:** OQ-29
@@ -865,7 +865,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Docs:** `docs/development/family-dev/family-task-log/` · **Status:** NOT STARTED
 
 ### FAM-15 — Family — Task detail
-- **Dashboard / stream:** family · **Lane:** F · **Days:** D11 · **Sprint:** SPRINT · **PR target:** `family-dev` · **Branch:** `feature/family-task-detail`
+- **Dashboard / stream:** family · **Lane:** F · **Days:** D11 · **Sprint:** SPRINT · **PR target:** `main` · **Branch:** `feature/family-task-detail`
 - **Description:** Drill-down detail for one occurrence reached from the Task log, Overdue card, Recent activity and Log panel.
 - **User value:** Families can see exactly what happened, when and by whom.
 - **Dependencies:** F0-11, F0-13, FAM-UI-07 · **Blocking decisions:** OQ-29, OQ-10
@@ -878,7 +878,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Docs:** `docs/development/family-dev/family-task-detail/` · **Status:** NOT STARTED
 
 ### CAR-01 — Carer Home — Today's calendar and Tasks
-- **Dashboard / stream:** carer · **Lane:** C · **Days:** D8 · **Sprint:** SPRINT · **PR target:** `carer-dev` · **Branch:** `feature/carer-home-today`
+- **Dashboard / stream:** carer · **Lane:** C · **Days:** D8 · **Sprint:** SPRINT · **PR target:** `main` · **Branch:** `feature/carer-home-today`
 - **Description:** The Carer Home screen's top cards listing today's occurrences across the carer's assigned clients.
 - **User value:** A carer on a shared laptop mid-shift sees one clear list of what to do next.
 - **Dependencies:** F0-10, F0-11, CAR-UI-01 · **Blocking decisions:** OQ-33, OQ-09
@@ -892,7 +892,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Docs:** `docs/development/carer-dev/carer-home-today/` · **Status:** RETIRED (CHG-033)
 
 ### CAR-02 — Carer — Notifications card and bell
-- **Dashboard / stream:** carer · **Lane:** C · **Days:** D9 · **Sprint:** SPRINT · **PR target:** `carer-dev` · **Branch:** `feature/carer-notifications`
+- **Dashboard / stream:** carer · **Lane:** C · **Days:** D9 · **Sprint:** SPRINT · **PR target:** `main` · **Branch:** `feature/carer-notifications`
 - **Description:** Records and displays notifications for carers such as new shift assignments and family document updates.
 - **User value:** Carers learn about changes affecting their clients without being told in person (D34).
 - **Dependencies:** F0-10, F0-13, CAR-UI-01 · **Blocking decisions:** OQ-14
@@ -904,7 +904,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Docs:** `docs/development/carer-dev/carer-notifications/` · **Status:** NOT STARTED
 
 ### CAR-03 — Carer — Patients
-- **Dashboard / stream:** carer · **Lane:** C · **Days:** D8 · **Sprint:** SPRINT · **PR target:** `carer-dev` · **Branch:** `feature/carer-patients`
+- **Dashboard / stream:** carer · **Lane:** C · **Days:** D8 · **Sprint:** SPRINT · **PR target:** `main` · **Branch:** `feature/carer-patients`
 - **Description:** The Carer Patients screen listing clients the carer is currently assigned to.
 - **User value:** Carers find the person they're caring for quickly.
 - **Dependencies:** F0-06, F0-10, F0-18, CAR-UI-02 · **Blocking decisions:** OQ-09
@@ -916,7 +916,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Docs:** `docs/development/carer-dev/carer-patients/` · **Status:** IN PROGRESS
 
 ### CAR-04 — Carer — Client info
-- **Dashboard / stream:** carer · **Lane:** C · **Days:** D9 · **Sprint:** SPRINT · **PR target:** `carer-dev` · **Branch:** `feature/carer-client-info`
+- **Dashboard / stream:** carer · **Lane:** C · **Days:** D9 · **Sprint:** SPRINT · **PR target:** `main` · **Branch:** `feature/carer-client-info`
 - **Description:** Reuses the Family Info view for a patient opened from Patients, with edit controls present only when the carer is on an active shift for that client.
 - **User value:** Carers read the same care information as the family and can update it while working.
 - **Dependencies:** F0-06, F0-10, F0-13, F0-18, CAR-UI-02 · **Blocking decisions:** OQ-09
@@ -928,7 +928,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Docs:** `docs/development/carer-dev/carer-client-info/` · **Status:** NOT STARTED
 
 ### CAR-05 — Carer — Calendar (shifts) and selected-shift tasks
-- **Dashboard / stream:** carer · **Lane:** C · **Days:** D9–D10 · **Sprint:** SPRINT · **PR target:** `carer-dev` · **Branch:** `feature/carer-calendar-shifts`
+- **Dashboard / stream:** carer · **Lane:** C · **Days:** D9–D10 · **Sprint:** SPRINT · **PR target:** `main` · **Branch:** `feature/carer-calendar-shifts`
 - **Description:** The Carer Calendar screen: calendar blocks labelled '09:00 Margaret — Morning m…' and a task panel for the selected block.
 - **User value:** Carers see their roster and what each shift involves (D8).
 - **Dependencies:** F0-10, F0-11, CAR-UI-03 · **Blocking decisions:** OQ-33
@@ -943,7 +943,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Docs:** `docs/development/carer-dev/carer-calendar-shifts/` · **Status:** NOT STARTED
 
 ### CAR-06 — Carer — Mark tasks done
-- **Dashboard / stream:** carer · **Lane:** C · **Days:** D10 · **Sprint:** SPRINT · **PR target:** `carer-dev` · **Branch:** `feature/carer-complete-task`
+- **Dashboard / stream:** carer · **Lane:** C · **Days:** D10 · **Sprint:** SPRINT · **PR target:** `main` · **Branch:** `feature/carer-complete-task`
 - **Description:** Lets carers complete occurrences with their identity recorded, respecting shift-based edit rights.
 - **User value:** Accurate, safeguarded record of who provided care and when (brief II, item 7).
 - **Dependencies:** F0-10, F0-11, F0-18, CAR-UI-02, CAR-04 · **Blocking decisions:** OQ-09, OQ-10, OQ-33
@@ -957,7 +957,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Docs:** `docs/development/carer-dev/carer-complete-task/` · **Status:** NOT STARTED
 
 ### CAR-07 — Carer — Add and edit events for a patient
-- **Dashboard / stream:** carer · **Lane:** C · **Days:** — · **Sprint:** POST-SPRINT · **PR target:** `carer-dev` · **Branch:** `feature/carer-manage-events`
+- **Dashboard / stream:** carer · **Lane:** C · **Days:** — · **Sprint:** POST-SPRINT · **PR target:** `main` · **Branch:** `feature/carer-manage-events`
 - **Description:** Implements sequence Use Case 2: carer opens a rostered patient's calendar and adds a task with date, description and documentation.
 - **User value:** Carers can record needs they observe while caring.
 - **Dependencies:** CAR-04, F0-11, UI-02 · **Blocking decisions:** OQ-09, OQ-22, OQ-19
@@ -970,7 +970,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Docs:** `docs/development/carer-dev/carer-manage-events/` · **Status:** NOT STARTED
 
 ### CAR-08 — Carer — Record an expense
-- **Dashboard / stream:** carer · **Lane:** C · **Days:** — · **Sprint:** POST-SPRINT · **PR target:** `carer-dev` · **Branch:** `feature/carer-record-expense`
+- **Dashboard / stream:** carer · **Lane:** C · **Days:** — · **Sprint:** POST-SPRINT · **PR target:** `main` · **Branch:** `feature/carer-record-expense`
 - **Description:** Lets carers record care-related spending, optionally linked to an event, with receipt upload.
 - **User value:** Spending is captured when it happens and budgets stay correct (CM-0409).
 - **Dependencies:** F0-12, F0-13 · **Blocking decisions:** OQ-19, OQ-04, OQ-05
@@ -982,7 +982,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Docs:** `docs/development/carer-dev/carer-record-expense/` · **Status:** RETIRED (CHG-020)
 
 ### CAR-09 — Carer — Settings
-- **Dashboard / stream:** carer · **Lane:** C · **Days:** D10 · **Sprint:** SPRINT · **PR target:** `carer-dev` · **Branch:** `feature/carer-settings`
+- **Dashboard / stream:** carer · **Lane:** C · **Days:** D10 · **Sprint:** SPRINT · **PR target:** `main` · **Branch:** `feature/carer-settings`
 - **Description:** Carer Settings screen for own details and password reset.
 - **User value:** Carers keep their contact details current and recover access without help.
 - **Dependencies:** F0-07, CAR-UI-04 · **Blocking decisions:** OQ-35
@@ -993,7 +993,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Docs:** `docs/development/carer-dev/carer-settings/` · **Status:** NOT STARTED
 
 ### ADM-01 — Admin Home — counts and overdue events
-- **Dashboard / stream:** admin · **Lane:** A · **Days:** D8 · **Sprint:** SPRINT · **PR target:** `admin-dev` · **Branch:** `feature/admin-home`
+- **Dashboard / stream:** admin · **Lane:** A · **Days:** D8 · **Sprint:** SPRINT · **PR target:** `main` · **Branch:** `feature/admin-home`
 - **Description:** Admin landing screen showing organisation totals and every overdue event across the organisation's clients.
 - **User value:** Managers see what needs attention across ~42 clients (accountable).
 - **Dependencies:** F0-11, ADM-UI-01 · **Blocking decisions:** OQ-29
@@ -1004,7 +1004,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Docs:** `docs/development/admin-dev/admin-home/` · **Status:** NOT STARTED
 
 ### ADM-02 — Admin — Staff list and add/edit staff
-- **Dashboard / stream:** admin · **Lane:** A · **Days:** D8–D9 · **Sprint:** SPRINT · **PR target:** `admin-dev` · **Branch:** `feature/admin-staff`
+- **Dashboard / stream:** admin · **Lane:** A · **Days:** D8–D9 · **Sprint:** SPRINT · **PR target:** `main` · **Branch:** `feature/admin-staff`
 - **Description:** Admin manages the organisation's carer accounts and job titles.
 - **User value:** Organisations manage their own staff (CM-1908).
 - **Dependencies:** F0-06, F0-07, ADM-UI-03 · **Blocking decisions:** OQ-08, OQ-13
@@ -1015,7 +1015,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Docs:** `docs/development/admin-dev/admin-staff/` · **Status:** NOT STARTED
 
 ### ADM-03 — Admin — Deactivate staff
-- **Dashboard / stream:** admin · **Lane:** A · **Days:** — · **Sprint:** POST-SPRINT · **PR target:** `admin-dev` · **Branch:** `feature/admin-staff-deactivate`
+- **Dashboard / stream:** admin · **Lane:** A · **Days:** — · **Sprint:** POST-SPRINT · **PR target:** `main` · **Branch:** `feature/admin-staff-deactivate`
 - **Description:** Deactivates a carer account so they can no longer access organisation information while their completions remain attributed.
 - **User value:** Access is withdrawn when staff leave (CIS5).
 - **Dependencies:** ADM-02 · **Blocking decisions:** OQ-36, OQ-19
@@ -1026,7 +1026,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Docs:** `docs/development/admin-dev/admin-staff-deactivate/` · **Status:** NOT STARTED
 
 ### ADM-04 — Admin — Clients list and add client
-- **Dashboard / stream:** admin · **Lane:** A · **Days:** D9 · **Sprint:** SPRINT · **PR target:** `admin-dev` · **Branch:** `feature/admin-clients`
+- **Dashboard / stream:** admin · **Lane:** A · **Days:** D9 · **Sprint:** SPRINT · **PR target:** `main` · **Branch:** `feature/admin-clients`
 - **Description:** Admin views the organisation's clients and adds a client with a family contact; admin cannot edit client information (D28).
 - **User value:** Organisations onboard the people they care for.
 - **Dependencies:** F0-06, ADM-UI-04 · **Blocking decisions:** OQ-07, OQ-08
@@ -1039,7 +1039,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Docs:** `docs/development/admin-dev/admin-clients/` · **Status:** NOT STARTED
 
 ### ADM-05 — Admin — Remove client
-- **Dashboard / stream:** admin · **Lane:** A · **Days:** — · **Sprint:** POST-SPRINT · **PR target:** `admin-dev` · **Branch:** `feature/admin-client-remove`
+- **Dashboard / stream:** admin · **Lane:** A · **Days:** — · **Sprint:** POST-SPRINT · **PR target:** `main` · **Branch:** `feature/admin-client-remove`
 - **Description:** Implements the Remove link on the Admin client list.
 - **User value:** Organisations can stop serving a client cleanly.
 - **Dependencies:** ADM-04 · **Blocking decisions:** OQ-06, OQ-07, OQ-19
@@ -1050,7 +1050,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Docs:** `docs/development/admin-dev/admin-client-remove/` · **Status:** NOT STARTED
 
 ### ADM-06 — Admin — Manage: staff and client selection
-- **Dashboard / stream:** admin · **Lane:** A · **Days:** D9 · **Sprint:** SPRINT · **PR target:** `admin-dev` · **Branch:** `feature/admin-manage-selection`
+- **Dashboard / stream:** admin · **Lane:** A · **Days:** D9 · **Sprint:** SPRINT · **PR target:** `main` · **Branch:** `feature/admin-manage-selection`
 - **Description:** The left two columns and selection summary of the Admin Manage screen.
 - **User value:** Admins pick who to roster to whom quickly (dense but clear).
 - **Dependencies:** F0-06, ADM-UI-02 · **Blocking decisions:** None
@@ -1061,7 +1061,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Docs:** `docs/development/admin-dev/admin-manage-selection/` · **Status:** NOT STARTED
 
 ### ADM-07 — Admin — Assign shift
-- **Dashboard / stream:** admin · **Lane:** A · **Days:** D10 · **Sprint:** SPRINT · **PR target:** `admin-dev` · **Branch:** `feature/admin-assign-shift`
+- **Dashboard / stream:** admin · **Lane:** A · **Days:** D10 · **Sprint:** SPRINT · **PR target:** `main` · **Branch:** `feature/admin-assign-shift`
 - **Description:** Assign panel body on Manage: creates a shift for the selected carer and client.
 - **User value:** Rostering in a few clicks with overlap awareness but no hard block (D30).
 - **Dependencies:** F0-10, ADM-06 · **Blocking decisions:** OQ-09
@@ -1072,7 +1072,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Docs:** `docs/development/admin-dev/admin-assign-shift/` · **Status:** NOT STARTED
 
 ### ADM-08 — Admin — Manage carer-client assignments
-- **Dashboard / stream:** admin · **Lane:** A · **Days:** — · **Sprint:** POST-SPRINT · **PR target:** `admin-dev` · **Branch:** `feature/admin-carer-assignments`
+- **Dashboard / stream:** admin · **Lane:** A · **Days:** — · **Sprint:** POST-SPRINT · **PR target:** `main` · **Branch:** `feature/admin-carer-assignments`
 - **Description:** Lets admins end a carer's access to a client independently of shifts.
 - **User value:** Clients have the right carers; removed carers lose access (A-3).
 - **Dependencies:** ADM-07 · **Blocking decisions:** OQ-09, OQ-19
@@ -1083,7 +1083,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Docs:** `docs/development/admin-dev/admin-carer-assignments/` · **Status:** NOT STARTED
 
 ### ADM-09 — Admin — Edit, extend or cancel a shift
-- **Dashboard / stream:** admin · **Lane:** A · **Days:** — · **Sprint:** POST-SPRINT · **PR target:** `admin-dev` · **Branch:** `feature/admin-edit-shift`
+- **Dashboard / stream:** admin · **Lane:** A · **Days:** — · **Sprint:** POST-SPRINT · **PR target:** `main` · **Branch:** `feature/admin-edit-shift`
 - **Description:** Supports the client's need to extend a shift when a manager asks a carer to stay longer.
 - **User value:** Rosters reflect reality; edit rights follow actual working time.
 - **Dependencies:** ADM-07 · **Blocking decisions:** OQ-27, OQ-19
@@ -1094,7 +1094,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Docs:** `docs/development/admin-dev/admin-edit-shift/` · **Status:** NOT STARTED
 
 ### ADM-10 — Admin — Settings
-- **Dashboard / stream:** admin · **Lane:** A · **Days:** D10 · **Sprint:** SPRINT · **PR target:** `admin-dev` · **Branch:** `feature/admin-settings`
+- **Dashboard / stream:** admin · **Lane:** A · **Days:** D10 · **Sprint:** SPRINT · **PR target:** `main` · **Branch:** `feature/admin-settings`
 - **Description:** Admin Settings screen for organisation details and password reset.
 - **User value:** Organisation details used across the app stay correct (e.g. header subline, POA/business details per CIS5).
 - **Dependencies:** F0-07, ADM-UI-05 · **Blocking decisions:** OQ-35
@@ -1105,7 +1105,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Docs:** `docs/development/admin-dev/admin-settings/` · **Status:** NOT STARTED
 
 ### ADM-11 — Admin — Client view: a client's Family screens with full access
-- **Dashboard / stream:** admin · **Lane:** A · **Days:** — · **Sprint:** POST-SPRINT · **PR target:** `admin-dev` · **Branch:** `feature/admin-client-view`
+- **Dashboard / stream:** admin · **Lane:** A · **Days:** — · **Sprint:** POST-SPRINT · **PR target:** `main` · **Branch:** `feature/admin-client-view`
 - **Description:** A client's name in Admin · Clients opens `/admin/clients/<id>/home`, which renders that client's Family screens inside the admin layout with every Family action available; each change names the admin. Added by CHG-020.
 - **User value:** Care and money keep being managed when a family is no longer there.
 - **Dependencies:** ADM-04, FAM-01, FAM-04, FAM-06, FAM-07, FAM-09, FAM-10, FAM-11, FAM-14, FAM-15 · **Blocking decisions:** None
@@ -1130,7 +1130,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Docs:** `docs/development/shared/shared-budget-threshold-emails/` · **Status:** NOT STARTED
 
 ### INT-02 — End-to-end: organisation transfer journey
-- **Dashboard / stream:** family · **Lane:** I · **Days:** D12 · **Sprint:** SPRINT · **PR target:** `family-dev` · **Branch:** `feature/family-organisation-transfer-e2e`
+- **Dashboard / stream:** family · **Lane:** I · **Days:** D12 · **Sprint:** SPRINT · **PR target:** `main` · **Branch:** `feature/family-organisation-transfer-e2e`
 - **Description:** Verifies the full transfer: family changes organisation, old admin and carers lose access, new admin sees the client, history retained.
 - **User value:** Proves the highest-risk privacy workflow works across dashboards.
 - **Dependencies:** FAM-13, ADM-04, CAR-03 · **Blocking decisions:** OQ-06, OQ-15
@@ -1141,7 +1141,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Docs:** `docs/development/family-dev/family-organisation-transfer-e2e/` · **Status:** NOT STARTED
 
 ### INT-03 — End-to-end: carer care delivery journey
-- **Dashboard / stream:** carer · **Lane:** I · **Days:** D12 · **Sprint:** SPRINT · **PR target:** `carer-dev` · **Branch:** `feature/carer-care-delivery-e2e`
+- **Dashboard / stream:** carer · **Lane:** I · **Days:** D12 · **Sprint:** SPRINT · **PR target:** `main` · **Branch:** `feature/carer-care-delivery-e2e`
 - **Description:** Carer signs in, opens a rostered patient, completes and (when CAR-07/08 exist) adds a task with cost and documentation; family sees results.
 - **User value:** Proves carer actions flow through to the family view.
 - **Dependencies:** CAR-06, FAM-01 · **Blocking decisions:** OQ-33
@@ -1153,7 +1153,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Docs:** `docs/development/carer-dev/carer-care-delivery-e2e/` · **Status:** NOT STARTED
 
 ### INT-04 — End-to-end: admin rostering journey
-- **Dashboard / stream:** admin · **Lane:** I · **Days:** D12 · **Sprint:** SPRINT · **PR target:** `admin-dev` · **Branch:** `feature/admin-assign-shift-e2e`
+- **Dashboard / stream:** admin · **Lane:** I · **Days:** D12 · **Sprint:** SPRINT · **PR target:** `main` · **Branch:** `feature/admin-assign-shift-e2e`
 - **Description:** Verifies rostering across Admin, Carer and Family dashboards.
 - **User value:** Proves shifts drive carer access, notifications and family visibility.
 - **Dependencies:** ADM-07, CAR-02, CAR-05, FAM-01 · **Blocking decisions:** OQ-09, OQ-33
