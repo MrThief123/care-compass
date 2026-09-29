@@ -154,6 +154,11 @@ When asking: the question, options, your recommendation, affected features, and 
 
 ---
 
+## 11a. Responses to the human
+Focus on clear explanation. Grammar and punctuation can be dropped when it makes a reply shorter.
+
+---
+
 ## 12. Safety and privacy
 Client data is health and financial information about vulnerable people. Only synthetic fixtures/seed data. Never copy credentials found in source documents. No analytics or external services without a recorded decision.
 
