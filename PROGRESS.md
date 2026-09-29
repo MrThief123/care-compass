@@ -8,8 +8,8 @@ Plan v0.2 · The status section below is **generated** — run `node scripts/pla
 | Stage | **G1 — Plan validated** (F0-01 merged; `docs/VALIDATION_REPORT.md` approved 2026-09-17 — planning freeze in DECISIONS.md §1) |
 | Sprint | 2 weeks, parallel lanes — see `docs/SPRINT_PLAN.md` |
 | Merged to main | All of lane S, all of lane B except F0-16, all five Admin UI screens (`admin-dev` reconciled into `main`, PR #63), all four Carer UI screens (`carer-dev` reconciled into `main`, PR #64), and every Family feature through FAM-07 (Edit event) and FAM-14 (Task log) are on `main`. |
-| Dev branches vs `main` (2026-09-28) | `family-dev`: 0 ahead, 9 behind — safe to fast-forward, though dashboard features no longer branch from it (see below). `admin-dev`: 0 ahead (fully reconciled), 10 behind. `carer-dev`: its CAR-UI-01 to 04 work reconciled into `main` via PR #64; the branch's own docs-status commits (PR #142) lagged main and are folded in by this sync. |
-| Workflow change (2026-09-28) | Dashboard feature branches now branch **from and PR to `main` directly**, not their dashboard's dev branch — `family-dev`/`carer-dev`/`admin-dev` are legacy integration branches from the plan's original per-dashboard model and are no longer the parent for new feature branches. FAM-03, FAM-07, and the `admin-dev`/`carer-dev` reconciliations all landed this way. |
+| Dev branches (2026-09-30) | Retired by CHG-036. Audit: `family-dev` and `admin-dev` have 0 commits not in `main`; `carer-dev`'s only extra commit is the #153 merge, with an empty diff against `main`. They stay on origin until a human deletes them; no new work goes to them. |
+| Workflow (CHG-036, 2026-09-30) | Every feature branches **from and PRs to `main`**. Merge `origin/main` daily and before each PR; migration, contract and local pre-PR check rules in CLAUDE.md §3. Formalises the practice in use since 2026-09-28. |
 | Next human actions | Pick up F0-16 (seed data, now unblocked), FAM-10 (Budget overview, ready to start), CAR-01/CAR-03/CAR-05/CAR-09 (Carer wiring, now unblocked by the CAR-UI-0x merge) and the ADM-0x/ADM-1x wiring features now unblocked by the `admin-dev` merge. |
 | Checkpoints | D7 clickable prototype on fixtures · D10 wired core · D12 release candidate |
 
@@ -23,8 +23,9 @@ Plan v0.2 · The status section below is **generated** — run `node scripts/pla
 |---|---|---|
 | Open decisions still pending (OQ-02, 18, 21, 23, 24, 25, 30, 31, 32, 34, 37, 38, 39) | Features they block stay blocked | Non-blocking ones use their documented default; blocking ones wait for the human |
 | Wiring lags screens | Integration 0/5 | Lane B next: F0-16 (seed data) unblocks FAM-01; F0-12 is merged — FAM-03 and FAM-07 are done, FAM-10/INT-01 next |
-| Dev branches now unused for new work but still exist (family-dev 0 ahead/9 behind; admin-dev 0 ahead/10 behind; carer-dev's CAR-UI work already reconciled) | Someone could still branch from a dev branch by habit, missing the workflow change | Branch every new dashboard feature from `main` directly, per the 2026-09-28 workflow change above |
-| Merge conflicts across lanes | Lost time | Folder ownership (CLAUDE.md §4.2); daily syncs; shared changes only via shared PRs |
+| Backends colliding on `main` (shared tables, migrations, contracts) | A merge breaks another feature's schema or queries | CHG-036 rules: real `supabase migration new` versions, one schema owner per table, additive changes, sequenced contract changes, local suite after merging latest `main` |
+| Retired dev branches still exist on origin | Someone could branch from one by habit | CLAUDE.md §3 forbids it; human may delete the branches |
+| Merge conflicts across lanes | Lost time | Folder ownership (CLAUDE.md §4.2); merge `main` daily; small PRs; shared changes only via shared PRs |
 | Usage limits per account | Lanes stall mid-feature | One lane per person; END SESSION state before limits; worktrees don't add capacity |
 | GitHub Actions minutes exhausted | CI can't gate PRs | Run the full check suite locally and say so in the PR |
 | RLS mistakes | Health/financial data leak | pgTAP allow/deny per role in every schema feature |

@@ -35,7 +35,7 @@ Never rely on memory from earlier sessions. The repository is the only source of
 
 ## 2. Gates (hard rule)
 
-A feature may start only when `node scripts/plan-status.mjs` lists it as **Ready to start** — all its dependencies are merged (to `main` for shared features, to its dev branch or `main` for dashboard features) and every blocking decision in its PRD is ANSWERED in DECISIONS.md.
+A feature may start only when `node scripts/plan-status.mjs` lists it as **Ready to start** — all its dependencies are merged to `main` and every blocking decision in its PRD is ANSWERED in DECISIONS.md.
 
 **Open decisions stay open until the human closes them.** Never mark an OQ answered, never act on a "proposed default" for a blocking OQ, and never infer an answer from other documents. Features blocked by an open decision stay blocked. Non-blocking OQs: use the documented proposed default and note it in the feature `DECISIONS.md`.
 
@@ -45,14 +45,19 @@ Before **G1 — Plan validated** (F0-01 merged, `docs/VALIDATION_REPORT.md` appr
 
 ## 3. Git rules
 
-Branches: `main` (production) ← `family-dev` / `carer-dev` / `admin-dev` (per-dashboard integration) ← `feature/<slug>` (one feature per branch). Dashboard features (`family-*`, `carer-*`, `admin-*`) branch from and PR to their dev branch. **Shared features (`shared-*`): do not create `feature/shared-*` branches until OQ-01 is ANSWERED — stop and ask.**
+Branches: `main` (production and the only integration branch) ← `feature/<slug>` (one feature per branch). **Every feature, shared or dashboard, branches from `main` and PRs to `main`** (CHG-036). `family-dev`, `carer-dev` and `admin-dev` are retired: never branch from, commit to or PR to them.
 
 ### Always
 1. `git status` and `git branch --show-current` first; unexplained dirty tree → stop and ask.
-2. `git fetch origin`; update the parent branch with `git pull --ff-only`.
-3. If `feature/<slug>` exists locally or on origin → check it out and continue from its PROGRESS/SESSION_STATE. Otherwise create it from the updated parent and push immediately (this is how you **claim** it, §4).
-4. Verify parentage: `git merge-base --is-ancestor <parent> HEAD`.
-5. Before starting work each day on a dashboard feature branch: merge the latest dev branch (`git merge origin/<dev-branch>`).
+2. `git fetch origin`; update `main` with `git pull --ff-only`.
+3. If `feature/<slug>` exists locally or on origin → check it out and continue from its PROGRESS/SESSION_STATE. Otherwise create it from the updated `main` and push immediately (this is how you **claim** it, §4).
+4. Verify parentage: `git merge-base --is-ancestor origin/main HEAD` (an old branch cut from a retired dev branch → stop and ask).
+5. Merge the latest `main` into the feature branch (`git merge origin/main`) at the start of each day and again before opening a PR. Conflicts outside the feature's scope → stop and ask.
+
+### Backend and wiring work (CHG-036)
+- **Migrations:** create each one with `supabase migration new` so its version is a real, unique timestamp; never hand-pick or reuse a version. One feature changes a given table's schema at a time. Keep changes additive: add → backfill → drop in a later PR, never rename or drop a column in the same PR that stops using it. A PR that alters a table another feature reads says so in its summary.
+- **Contracts:** two in-flight features that change the same `src/server/**` contract function are sequenced; the second waits for the first to merge.
+- **Pre-PR check:** while CI is unavailable, run the relevant suite (§5) locally after the step-5 merge, and list the commands and results in the PR.
 
 ### Never
 - Commit or implement on `main`, `master`, `family-dev`, `carer-dev`, `admin-dev`.
@@ -60,7 +65,7 @@ Branches: `main` (production) ← `family-dev` / `carer-dev` / `admin-dev` (per-
 - Merge PRs yourself, force-push shared branches, rewrite pushed history, delete branches.
 - Commit secrets, `.env*.local`, or credentials from source documents.
 
-Full branching, daily sync and checkpoint procedure: `docs/DEVELOPMENT_WORKFLOW.md` §3–§10.
+Full branching and release procedure: `docs/DEVELOPMENT_WORKFLOW.md` §3–§10.
 
 ---
 
