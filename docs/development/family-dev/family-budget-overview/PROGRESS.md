@@ -1,32 +1,34 @@
 # Progress — FAM-10 Family — Budget overview and history
 
-Status: NOT STARTED
-Owner: unclaimed
+Status: IN PROGRESS
+Owner: MrThief123
 Lane: F — Family
 Sprint: SPRINT · planned D10
-Branch: `feature/family-budget-overview` (not yet created)
+Branch: `feature/family-budget-overview`
 PR target: `family-dev`
-Last updated: 2026-09-17 (planning pack generated)
+Last updated: 2026-09-29
 
 ## Blockers
-- OQ-04 — Funding model: buckets, categories and periods
-- OQ-05 — Who can add funds and record spending; Budget History contents
+- None. OQ-04 and OQ-05 are ANSWERED (root DECISIONS.md).
 
 ## Dependencies status
-- F0-12 — NOT STARTED
-- FAM-UI-05 — NOT STARTED
+- F0-12 — MERGED TO DEV
+- FAM-UI-05 — MERGED TO DEV (PR #92, commit 2411316)
 
 ## Completed
 - Feature documentation drafted (Claude Chat planning pack)
 
 ## In progress
-- None
+- Route `/family/[clientId]/budget`, the 'Funds by source' bucket cards and the History table were
+  already built on fixtures under FAM-UI-05 (PR #92), including CHG-020's pending-cost rows in History.
+  Home's 'View breakdown' link (`homeRoutes.budget`) already points at this route, and `getBudgetSummary`
+  was wired to Supabase under FAM-03 (commit f0b0874). The one remaining gap: `getFundHistory` in
+  `src/server/budget/queries.ts` still throws `notImplementedForSupabase` in Supabase mode. Wiring that
+  is this session's scope.
 
 ## Remaining
-- Route `/family/[clientId]/budget`.
-- Card 'Funds by source' with bucket cards (reuse BudgetBucketCard) — 'Update' button slot reserved for FAM-11.
-- History table: Date · Description · Amount (e.g. '3 Nov 2026 · NDIS quarterly plan top-up · +$6,000'), newest first.
-- Wire Home 'View breakdown' link to this route.
+- Wire `getFundHistory` to Supabase (direct `budget_fund_entries` + `budget_costs` selects, RLS via
+  `can_read_budget`) and add tests.
 
 ## Acceptance criteria status
 - 0 / 4 MET
