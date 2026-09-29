@@ -9,13 +9,18 @@
  * touching a database, so the screen behaves as it did on fixtures.
  */
 import { fieldErrors } from "@/components/shared/forms/validation";
-import type { FamilyContactDetails } from "@/mocks/queries/profiles";
+import type { CarerContactDetails, FamilyContactDetails } from "@/mocks/queries/profiles";
 import { getDataSourceMode } from "@/server/data-source";
 
 import { requestPasswordReset } from "../auth/actions";
 
-import { contactFromRow, contactRowValues, CONTACT_COLUMNS } from "./contact-details";
-import { familyInfoSchema, type FamilyInfoValues } from "./contact-schema";
+import { contactFromRow, contactRowValues, CONTACT_COLUMNS, splitName } from "./contact-details";
+import {
+  carerInfoSchema,
+  familyInfoSchema,
+  type CarerInfoValues,
+  type FamilyInfoValues,
+} from "./contact-schema";
 
 export type ProfileActionResult<T = undefined> =
   | { ok: true; data: T }
@@ -81,6 +86,76 @@ export async function updateFamilyContactDetails(
     return { ok: true, data: contactFromRow(data) };
   } catch (error) {
     logFailure("updateFamilyContactDetails", error);
+    return { ok: false, error: { code: "UNEXPECTED", message: SAVE_FAILED } };
+  }
+}
+
+/**
+ * CAR-09 AC-04: saves the signed-in carer's name, phone and contact email.
+ * Address, job title, role, organisation and any id are never read from the
+ * caller or written (FD-03); `job_title` is also outside the column grant.
+ */
+export async function updateCarerContactDetails(
+  input: CarerInfoValues,
+): Promise<ProfileActionResult<CarerContactDetails>> {
+  const parsed = fieldErrors(carerInfoSchema, input);
+  if (!parsed.ok) {
+    return {
+      ok: false,
+      error: {
+        code: "VALIDATION",
+        message: "Check the highlighted fields.",
+        fieldErrors: parsed.errors,
+      },
+    };
+  }
+  const { name, phone, email } = parsed.data;
+
+  if (getDataSourceMode() === "mock") {
+    const { getCurrentUser } = await import("@/mocks/current-user");
+    const { getCarerContactDetails } = await import("@/mocks/queries/profiles");
+    const { profileId } = await getCurrentUser("carer");
+    const { role } = await getCarerContactDetails(profileId);
+    return {
+      ok: true,
+      data: {
+        profileId,
+        name,
+        ...(phone && { phone }),
+        ...(email && { email }),
+        ...(role && { role }),
+      },
+    };
+  }
+
+  try {
+    const { createClient } = await import("@/lib/supabase/server");
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return { ok: false, error: { code: "UNEXPECTED", message: SIGNED_OUT } };
+
+    const { data, error } = await supabase
+      .from("profiles")
+      .update({ ...splitName(name), phone: phone || null, email: email || null })
+      .eq("id", user.id)
+      .select("id, first_name, last_name, phone, email, job_title")
+      .maybeSingle();
+
+    if (error || !data) return { ok: false, error: { code: "UNEXPECTED", message: SAVE_FAILED } };
+    return {
+      ok: true,
+      data: {
+        profileId: data.id,
+        name: [data.first_name, data.last_name].filter(Boolean).join(" "),
+        ...(data.phone && { phone: data.phone }),
+        ...(data.email && { email: data.email }),
+        ...(data.job_title && { role: data.job_title }),
+      },
+    };
+  } catch (error) {
+    logFailure("updateCarerContactDetails", error);
     return { ok: false, error: { code: "UNEXPECTED", message: SAVE_FAILED } };
   }
 }
