@@ -33,10 +33,11 @@ Last updated: 2026-09-29
 
 ## Tests
 - Written: 10 / 10
-- Passing / failing: see SESSION_STATE.md
+- Red for the expected reason: 18 unit/component cases (`updateCarerContactDetails is not a function`; view does not call the actions) and 2 integration cases (same reason)
+- Green guards: pgTAP `carer_profile_update.test.sql` (9), 2 integration cases, and the T-03 reset test (existing FAM-12 code)
 
 ## Files changed
-- Docs only, plus tests (see TEST_PLAN.md)
+- `src/features/carer-settings/carer-settings-wiring.test.tsx`, `src/server/profiles/carer-actions.test.ts`, `supabase/tests/carer_profile_update.test.sql`, `tests/integration/carer-settings-profile.test.ts`; feature docs
 
 ## Decisions
 - See DECISIONS.md
