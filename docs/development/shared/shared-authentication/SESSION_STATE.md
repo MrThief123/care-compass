@@ -16,3 +16,4 @@ Important decisions: CHG-001 (see feature DECISIONS.md) — implement admin TOTP
 Exact next action: none — merged. F0-08, F0-10, ADM-02, FAM-12, CAR-09, ADM-10 are unblocked on this dependency (each still has other dependencies to check).
 Files likely to be touched next: none for this feature — scope is complete and merged.
 Warning for next session: local Supabase (`supabase start`) needed `auth.mfa.totp` enabled in `supabase/config.toml` (now committed) and a restart before MFA enrollment worked; `.env.local` must be sourced into the shell (`set -a; source .env.local; set +a`) before `npm run test`/`test:e2e` pick up `NEXT_PUBLIC_SUPABASE_*`/`SUPABASE_SERVICE_ROLE_KEY` — same convention F0-06 used.
+- Update (F0-22, 2026-10-01): the transitional state above is closed for `clients.getClientHeaderSummary` under `DATA_SOURCE=supabase`.

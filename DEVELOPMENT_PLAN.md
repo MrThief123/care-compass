@@ -1,7 +1,7 @@
 # DEVELOPMENT PLAN — Care Compass
 
 Version 0.2 · 17 September 2026 · Status: DRAFT (controlled after planning freeze) · Supersedes v0.1 dashboard-by-dashboard phases
-Totals: **84 active features** (85 listed; CAR-08 retired) · **379 acceptance criteria** across 5 phases (UI-04 and its 10 criteria added by CHG-004, 2026-09-19; UI-05 and its 13 criteria added under CHG-009, 2026-09-24; F0-17 and its 8 criteria added by CHG-010, 2026-09-24; CHG-020, 2026-09-25: FAM-UI-08 (6 criteria) and ADM-11 (5) added, FAM-UI-05 +5 criteria, CAR-08 and its 2 criteria retired; CHG-021, 2026-09-25: FAM-UI-05 +4 criteria; CHG-022, 2026-09-25: FAM-UI-05 +5 criteria; CHG-027, 2026-09-26: F0-18 and its 9 criteria added; CHG-037, 2026-09-30: F0-19 and its 6 criteria added; the Jira import `docs/JIRA_BACKLOG.csv` predates all five). Jira import: `docs/JIRA_BACKLOG.csv`.
+Totals: **87 active features** (88 listed; CAR-08 retired) · **403 acceptance criteria** across 5 phases (UI-04 and its 10 criteria added by CHG-004, 2026-09-19; UI-05 and its 13 criteria added under CHG-009, 2026-09-24; F0-17 and its 8 criteria added by CHG-010, 2026-09-24; CHG-020, 2026-09-25: FAM-UI-08 (6 criteria) and ADM-11 (5) added, FAM-UI-05 +5 criteria, CAR-08 and its 2 criteria retired; CHG-021, 2026-09-25: FAM-UI-05 +4 criteria; CHG-022, 2026-09-25: FAM-UI-05 +5 criteria; CHG-027, 2026-09-26: F0-18 and its 9 criteria added; CHG-037, 2026-09-30: F0-19 and its 6 criteria added; CHG-040, 2026-09-30: F0-20 and its 10 criteria added; CHG-041, 2026-10-01: F0-21 and its 6 criteria added; CHG-042, 2026-10-01: F0-22 and its 8 criteria added; the Jira import `docs/JIRA_BACKLOG.csv` predates all six). Jira import: `docs/JIRA_BACKLOG.csv`.
 
 ---
 
@@ -154,12 +154,15 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 | 11 | F0-17 | Self-serve sign-up for Family and Organisation accounts | B | D8 | SPRINT | F0-06, F0-07 | OQ-01, OQ-07, OQ-08 | `feature/shared-sign-up` | NOT STARTED |
 | 12 | F0-18 | Carer view access derived from shifts | B | D8 | SPRINT | F0-06, F0-10, F0-08 | — | `feature/shared-carer-shift-access` | NOT STARTED |
 | 13 | F0-19 | Root route and production guard for dev previews | S | D11 | SPRINT | F0-07 | — | `feature/shared-root-route` | NOT STARTED |
+| 14 | F0-20 | Admin TOTP MFA hardening | S | D11 | SPRINT | F0-07, F0-17 | — | `feature/shared-admin-mfa-hardening` | IN PROGRESS |
+| 15 | F0-21 | Auth security audit | S | D12 | SPRINT | F0-07, F0-20 | — | `feature/shared-auth-security-audit` | NOT STARTED |
+| 16 | F0-22 | Client header wiring and family route guard | S | D12 | SPRINT | F0-06, F0-07, F0-15 | — | `feature/shared-client-header-wiring` | NOT STARTED |
 
 ### Phase 3 — Data wiring & behaviour (parallel: Family · Carer · Admin)
 
 | Order | ID | Feature | Lane | Days | Sprint | Depends on | Blocking decisions | Branch | Status |
 |---|---|---|---|---|---|---|---|---|---|
-| 1 | FAM-01 | Family Home — Today day-view timeline | F | D8 | SPRINT | F0-11, F0-16, FAM-UI-01 | OQ-29 | `feature/family-home-today` | NOT STARTED |
+| 1 | FAM-01 | Family Home — Today day-view timeline | F | D8 | SPRINT | F0-11, F0-16, FAM-UI-01, F0-22 | OQ-29 | `feature/family-home-today` | NOT STARTED |
 | 2 | FAM-02 | Family Home — Overdue card and Recent activity | F | D8 | SPRINT | F0-11, FAM-UI-01 | — | `feature/family-home-overdue-activity` | NOT STARTED |
 | 3 | FAM-03 | Family Home — Budget strip | F | D8 | SPRINT | F0-12, FAM-UI-01 | OQ-03, OQ-04 | `feature/family-home-budget-strip` | NOT STARTED |
 | 4 | FAM-04 | Family Calendar — day, week and month views | F | D8–D9 | SPRINT | F0-11, FAM-UI-02 | — | `feature/family-calendar-views` | NOT STARTED |
@@ -704,13 +707,46 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Requirements:** REQ-02
 - **Docs:** `docs/development/shared/shared-root-route/` · **Status:** NOT STARTED
 
+### F0-20 — Admin TOTP MFA hardening
+- **Dashboard / stream:** shared · **Lane:** S · **Days:** D11 · **Sprint:** SPRINT · **PR target:** `main` · **Branch:** `feature/shared-admin-mfa-hardening`
+- **Description:** Keeps admin TOTP MFA mandatory (CHG-040) and makes it reliable: the QR renders, enrolment cannot collide or be raced by page renders, the code field clears after a bad code, no credentials are logged by our code, and the whole path is tested from unit to a real-browser e2e. Added by CHG-040.
+- **User value:** An admin can set up and use two-factor sign-in first time, every time.
+- **Dependencies:** F0-07, F0-17 · **Blocking decisions:** None
+- **Jira summary:** Harden admin TOTP MFA enrolment and challenge; full test coverage
+- **Acceptance criteria summary:** 10 criteria — QR renders, concurrent enrol, stale cleanup, enrol once from the client, field clears, verify outcomes, full sign-in path, AAL1 refused and non-admins never gated, no credentials logged
+- **Testing summary:** unit, component, server-action, integration, e2e; each run 10 times
+- **Requirements:** REQ-01
+- **Docs:** `docs/development/shared/shared-admin-mfa-hardening/` · **Status:** IN PROGRESS
+
+### F0-21 — Auth security audit
+- **Dashboard / stream:** shared · **Lane:** S · **Days:** D12 · **Sprint:** SPRINT · **PR target:** `main` · **Branch:** `feature/shared-auth-security-audit`
+- **Description:** Audits sign-in and authorisation for the common weaknesses of generated code and fixes what it finds: admin MFA enforced only by the app (RLS has no `aal` check), session cookie flags, ID swapping (IDOR) across every client-scoped table, rate limiting on sign-in, password reset and TOTP verify, and the sign-in form putting credentials in the URL when submitted before hydration. Added by CHG-041.
+- **User value:** Client health and financial data stays protected even if someone bypasses the screens and calls the data API directly.
+- **Dependencies:** F0-07, F0-20 · **Blocking decisions:** None. Any RLS change is an additive migration and is shown to the human before it is applied.
+- **Jira summary:** Audit and harden authentication and authorisation: RLS aal2 for admins, cookies, IDOR, rate limits
+- **Acceptance criteria summary:** 6 criteria — admin data needs AAL2 in RLS, cookie flags, IDOR sweep on every client-scoped table, rate limits on sign-in/reset/TOTP verify, no credentials in the URL, written audit report
+- **Testing summary:** integration against local Supabase (direct data API calls with AAL1 and cross-tenant sessions), unit, e2e
+- **Requirements:** REQ-01
+- **Docs:** `docs/development/shared/shared-auth-security-audit/` · **Status:** NOT STARTED
+
+### F0-22 — Client header wiring and family route guard
+- **Dashboard / stream:** shared · **Lane:** S · **Days:** D12 · **Sprint:** SPRINT · **PR target:** `main` · **Branch:** `feature/shared-client-header-wiring`
+- **Description:** Wires `getClientHeaderSummary` to Supabase, adds `assertClientAccess` (redirect when the user is not linked to the client) and orders the family layout so the role check runs before any data call. Added by CHG-042.
+- **User value:** Every Family page shows the real client header, and a family member cannot open a client they are not linked to.
+- **Dependencies:** F0-06, F0-07, F0-15 · **Blocking decisions:** None
+- **Jira summary:** Client header from Supabase; linked-client redirect; layout guard order
+- **Acceptance criteria summary:** 8 criteria — real header fields, missing fields, unreadable client error, organisation lookup failure, unlinked client redirect, carer/admin redirect before data, no-client-linked, mock mode unchanged
+- **Testing summary:** 2 unit, 2 component, 1 integration
+- **Requirements:** REQ-02, REQ-05
+- **Docs:** `docs/development/shared/shared-client-header-wiring/` · **Status:** NOT STARTED
+
 ## Phase 3 — Data wiring & behaviour (parallel: Family · Carer · Admin) — feature detail
 
 ### FAM-01 — Family Home — Today day-view timeline
 - **Dashboard / stream:** family · **Lane:** F · **Days:** D8 · **Sprint:** SPRINT · **PR target:** `main` · **Branch:** `feature/family-home-today`
 - **Description:** The left 'Today' panel on the Family landing screen: an hour-gutter timeline listing today's occurrences for the client.
 - **User value:** The family sees at a glance what care is happening today and whether it has been done.
-- **Dependencies:** F0-11, F0-16, FAM-UI-01 · **Blocking decisions:** OQ-29
+- **Dependencies:** F0-11, F0-16, FAM-UI-01, F0-22 · **Blocking decisions:** OQ-29
 - **Jira summary:** Day-view timeline 07:00–18:00 showing today's events with carer, duration and status pill
 - **Acceptance criteria summary:** 6 criteria — a block at 09:00 shows 'Morning medication', 'Aisha R.', '1 hr' and pill 'Done · Aisha R.'; its block spans 11:30–13:00, shows '1 hr 30 min' and pill 'Planned'; tops are 88px and 198px and heights 44px and 66px …
 - **Testing summary:** 4 component, 1 unit, 1 integration

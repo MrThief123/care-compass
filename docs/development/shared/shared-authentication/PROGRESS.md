@@ -74,3 +74,4 @@ Last updated: 2026-09-23
 
 ## Ready for PR
 - Merged (PR #67)
+- **Resolved by F0-22 (2026-10-01):** `getClientHeaderSummary` now has a Supabase branch and the family layout checks the role, then client access, then reads the header. A real signed-in family user under `DATA_SOURCE=supabase` gets the real header; the transitional state above applies only to `DATA_SOURCE=mock` with a real UUID.
