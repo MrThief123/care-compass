@@ -2,7 +2,7 @@
 -- Covers AC-03 (T-03): admin_update_organisation changes only the calling admin's own organisation,
 -- refuses carers, family and signed-out callers, and there is no direct table update.
 begin;
-select plan(13);
+select plan(19);
 
 insert into organisations (id, name, abn, phone, address) values
   ('11111111-1111-1111-1111-111111111111', 'Banksia Home Care', '54 123 456 789', '03 9555 0102', '220 High St, Preston VIC 3072'),
@@ -79,6 +79,32 @@ select throws_ok(
 select throws_ok(
   $$ select admin_update_organisation('Banksia', '54123456789', '', '1 High St') $$,
   '22023', null, 'AC-02: a blank phone is refused'
+);
+
+-- AC-08: Australian phone numbers only.
+select throws_ok(
+  $$ select admin_update_organisation('Banksia', '54123456789', '03 9555 O102', '1 High St') $$,
+  '22023', null, 'AC-08: a phone with a letter is refused'
+);
+select throws_ok(
+  $$ select admin_update_organisation('Banksia', '54123456789', '03 9555 010', '1 High St') $$,
+  '22023', null, 'AC-08: a phone one digit short is refused'
+);
+select throws_ok(
+  $$ select admin_update_organisation('Banksia', '54123456789', '+61 03 9555 0102', '1 High St') $$,
+  '22023', null, 'AC-08: +61 with the leading 0 kept is refused'
+);
+select throws_ok(
+  $$ select admin_update_organisation('Banksia', '54123456789', '+44 20 7946 0958', '1 High St') $$,
+  '22023', null, 'AC-08: a non-Australian number is refused'
+);
+select lives_ok(
+  $$ select admin_update_organisation('Banksia', '54123456789', '+61 3 9555 0102', '1 High St') $$,
+  'AC-08: +61 3 9555 0102 is accepted'
+);
+select lives_ok(
+  $$ select admin_update_organisation('Banksia', '54123456789', '1300 123 456', '1 High St') $$,
+  'AC-08: a 1300 number is accepted'
 );
 
 -- Carer and family are refused.

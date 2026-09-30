@@ -169,3 +169,31 @@ describe("[ADM-10][AC-07] read-only until Edit, with Cancel", () => {
     expect(screen.getByRole("button", { name: "Save" })).toBeInTheDocument();
   });
 });
+
+describe("[ADM-10][AC-08] a bad phone number is stopped on the screen", () => {
+  it.each([
+    ["0395", "Enter an Australian phone number, like 03 9555 0102 or +61 3 9555 0102."],
+    ["03 9555 O102", "A phone number can only have digits, spaces, + ( ) and -."],
+  ])(
+    "[ADM-10][AC-08] phone '%s' shows its error and the action is not called",
+    async (phone, message) => {
+      render(<SettingsScreen data={data} />);
+      await edit();
+      await userEvent.clear(screen.getByLabelText("Phone"));
+      await userEvent.type(screen.getByLabelText("Phone"), phone);
+      await userEvent.click(screen.getByRole("button", { name: "Save" }));
+
+      expect(screen.getByLabelText("Phone")).toHaveAccessibleDescription(message);
+      expect(mocks.update).not.toHaveBeenCalled();
+    },
+  );
+
+  it("[ADM-10][AC-08] +61 3 9555 0102 is accepted", async () => {
+    render(<SettingsScreen data={data} />);
+    await edit();
+    await userEvent.clear(screen.getByLabelText("Phone"));
+    await userEvent.type(screen.getByLabelText("Phone"), "+61 3 9555 0102");
+    await userEvent.click(screen.getByRole("button", { name: "Save" }));
+    expect(await screen.findByText("Saved.")).toBeInTheDocument();
+  });
+});

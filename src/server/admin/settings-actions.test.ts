@@ -67,6 +67,17 @@ describe("[ADM-10][AC-02] updateOrganisationSettings validates on the server", (
     expect(mocks.rpc).not.toHaveBeenCalled();
   });
 
+  it("[ADM-10][AC-08] a phone with letters or the wrong length is refused on the server and calls nothing", async () => {
+    const { updateOrganisationSettings } = await import("@/server/admin/settings-actions");
+
+    for (const phone of ["03 9555 O102", "0395"]) {
+      const result = await updateOrganisationSettings({ ...VALID, phone });
+      expect(result.ok).toBe(false);
+      if (!result.ok) expect(result.error.fieldErrors?.phone).toBeTruthy();
+    }
+    expect(mocks.rpc).not.toHaveBeenCalled();
+  });
+
   it("[ADM-10][AC-02] a non-object input is refused rather than thrown", async () => {
     const { updateOrganisationSettings } = await import("@/server/admin/settings-actions");
     expect((await updateOrganisationSettings(null as never)).ok).toBe(false);
