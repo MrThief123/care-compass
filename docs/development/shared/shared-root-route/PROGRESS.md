@@ -15,7 +15,7 @@ Last updated: 2026-09-30
 - F0-07 — MERGED
 
 ## Acceptance criteria status
-- 6 / 6 MET
+- 7 / 7 MET (AC-07 added by FD-06)
 
 ## Next action
 - Human go-ahead, then open the PR to `main` (docs update ships inside it).
@@ -26,6 +26,6 @@ Last updated: 2026-09-30
 ## Checks run locally (CI down)
 - `npx vitest run`: all pass except F0-07 integration tests (hosted project returns "Invalid API key" 401, environment, not this change)
 - `npm run typecheck` clean; `npm run lint` 0 errors (3 pre-existing warnings); prettier clean
-- `npm run build` then `npx playwright test root-route smoke`: 6 passed
+- `env -u DATA_SOURCE npm run build` OK; `npx playwright test --grep-invert F0-07`: 47 passed, 2 skipped; production start with DATA_SOURCE unset returns 500 on a dashboard (AC-07)
 - Test change: T-03 expected rewrite target regex corrected from a guess to `/not-found` (test bug, own test)
 - Noted, out of scope: `/api/test` (F0-04 connectivity check) is still reachable in production

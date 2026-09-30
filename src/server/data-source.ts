@@ -13,10 +13,24 @@ export type DataSourceMode = "mock" | "supabase";
 
 const VALID_MODES: readonly DataSourceMode[] = ["mock", "supabase"];
 
-/** Default `mock` until Phase 3 (PRD.md UI-00 Scope). */
+/**
+ * Default `mock` until Phase 3 (PRD.md UI-00 Scope), except in production,
+ * where an unset value throws so a deploy can't fall back to unguarded mock
+ * screens (F0-19 FD-06). `next build` prerendering is exempt.
+ */
 export function getDataSourceMode(): DataSourceMode {
   const raw = process.env.DATA_SOURCE;
-  if (!raw) return "mock";
+  if (!raw) {
+    if (
+      process.env.NODE_ENV === "production" &&
+      process.env.NEXT_PHASE !== "phase-production-build"
+    ) {
+      throw new Error(
+        'DATA_SOURCE is not set. Production must set it explicitly ("supabase"); it does not default to mock.',
+      );
+    }
+    return "mock";
+  }
   if ((VALID_MODES as readonly string[]).includes(raw)) {
     return raw as DataSourceMode;
   }

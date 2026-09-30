@@ -16,7 +16,7 @@ Tests first (TESTING.md §2); confirm they fail for the expected reason.
 | T-03 | AC-03 | unit | With `NODE_ENV=production`, `/dev-preview` and each `/dev-preview-*` route return 404. | ☑ | PASS |
 | T-04 | AC-04 | unit (render, FD-02) | In dev/mock, `/dev-preview` renders the showcase and its tabs navigate. | ☑ | PASS |
 | T-05 | AC-06 | e2e | A production build serves `/` as a redirect and `/dev-preview` as 404. Existing specs updated. | ☑ | PASS |
-| T-06 | AC-07 | unit | `getDataSourceMode` throws in production when `DATA_SOURCE` is unset; explicit values and `next build` are unaffected; dev/test default to mock. | ☑ | FAIL (written first) |
+| T-06 | AC-07 | unit | `getDataSourceMode` throws in production when `DATA_SOURCE` is unset; explicit values and `next build` are unaffected; dev/test default to mock. | ☑ | PASS |
 
 ## Regression scope
 Full unit suite, typecheck, lint, e2e with `--grep-invert "F0-07"`.

@@ -8,6 +8,6 @@
 | AC-04 | US-01 | happy | Given development, when a developer opens `/dev-preview`, then the UI-kit showcase renders and its tabs work. | MET |
 | AC-05 | US-01 | edge | Given an admin without AAL2, when they open `/`, then the existing MFA gate applies, not their home. | MET |
 | AC-06 | US-01 | regression | Given the change, when the e2e and unit suites run, then no test or doc still treats `/` as the showcase. | MET |
-| AC-07 | US-01 | permission | Given production, when `DATA_SOURCE` is unset, then the app fails loudly instead of falling back to mock data (an explicit value is accepted; `next build` is unaffected). Added by FD-06. | NOT MET |
+| AC-07 | US-01 | permission | Given production, when `DATA_SOURCE` is unset, then the app fails loudly instead of falling back to mock data (an explicit value is accepted; `next build` is unaffected). Added by FD-06. | MET |
 
 Status values: NOT MET · MET (test passing) · BLOCKED (cite OQ/PD).
