@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import Loading from "@/app/(family)/family/[clientId]/info/loading";
 import FamilyInfoPage from "@/app/(family)/family/[clientId]/info/page";
+import { FamilyInfoView } from "@/features/family-info/family-info-view";
 import type { ClientInfoSection, DocumentRef } from "@/types/domain";
 
 const mocks = vi.hoisted(() => ({
@@ -12,6 +13,9 @@ const mocks = vi.hoisted(() => ({
   getClientHeaderSummary: vi.fn(),
   getClientInfoSections: vi.fn(),
   getClientDocuments: vi.fn(),
+  saveClientInfoSection: vi.fn(),
+  uploadDocument: vi.fn(),
+  getDocumentUrl: vi.fn(),
 }));
 
 vi.mock("next/navigation", () => ({
@@ -23,6 +27,15 @@ vi.mock("@/server/clients/queries", () => ({
 }));
 vi.mock("@/server/documents/queries", () => ({
   getClientDocuments: mocks.getClientDocuments,
+}));
+// FAM-09: the cards save and upload through the contract; these tests stub it (the wired
+// behaviour is in family-info-wired.test.tsx).
+vi.mock("@/server/clients/actions", () => ({
+  saveClientInfoSection: mocks.saveClientInfoSection,
+}));
+vi.mock("@/server/documents/actions", () => ({
+  uploadDocument: mocks.uploadDocument,
+  getDocumentUrl: mocks.getDocumentUrl,
 }));
 
 /*
@@ -88,6 +101,7 @@ beforeEach(() => {
   });
   mocks.getClientInfoSections.mockResolvedValue(SECTIONS);
   mocks.getClientDocuments.mockResolvedValue(DOCUMENTS);
+  mocks.saveClientInfoSection.mockResolvedValue({ ok: true, data: undefined });
 });
 
 afterEach(() => {
@@ -203,8 +217,8 @@ describe("[FAM-UI-04] inline edit (PROPOSED interaction, PRD Scope)", () => {
     await user.type(textarea, "Likes a nap after lunch.");
     await user.click(within(habits).getByRole("button", { name: "Save" }));
 
+    expect(await within(habits).findByText("Likes a nap after lunch.")).toBeInTheDocument();
     expect(within(habits).queryByRole("textbox")).not.toBeInTheDocument();
-    expect(within(habits).getByText("Likes a nap after lunch.")).toBeInTheDocument();
     expect(within(habits).queryByRole("button", { name: "Save" })).not.toBeInTheDocument();
     expect(within(habits).getByRole("button", { name: "Edit Habits" })).toHaveFocus();
   });
@@ -265,7 +279,7 @@ describe("[FAM-UI-04] inline edit (PROPOSED interaction, PRD Scope)", () => {
     await user.type(within(habits).getByRole("textbox"), "   ");
     await user.click(within(habits).getByRole("button", { name: "Save" }));
 
-    expect(within(habits).getByText("Nothing added yet.")).toBeInTheDocument();
+    expect(await within(habits).findByText("Nothing added yet.")).toBeInTheDocument();
     // The heading and Edit stay, so the text can be added back.
     expect(within(habits).getByRole("button", { name: "Edit Habits" })).toBeInTheDocument();
   });
@@ -279,12 +293,12 @@ describe("[FAM-UI-04] inline edit (PROPOSED interaction, PRD Scope)", () => {
     await user.clear(within(habits).getByRole("textbox"));
     await user.type(within(habits).getByRole("textbox"), "  Tea at four.  ");
     await user.click(within(habits).getByRole("button", { name: "Save" }));
-    await user.click(within(habits).getByRole("button", { name: "Edit Habits" }));
+    await user.click(await within(habits).findByRole("button", { name: "Edit Habits" }));
 
     expect(within(habits).getByRole("textbox")).toHaveValue("Tea at four.");
   });
 
-  it("[FAM-UI-04][PRD] an edit lives in local state only: rendering the screen again shows the fixture text", async () => {
+  it("[FAM-UI-04][PRD] what the screen shows after a render is what the contract returns, not an earlier edit", async () => {
     const user = userEvent.setup();
     const first = await renderInfo();
     const habits = card("Habits");
@@ -293,6 +307,7 @@ describe("[FAM-UI-04] inline edit (PROPOSED interaction, PRD Scope)", () => {
     await user.clear(within(habits).getByRole("textbox"));
     await user.type(within(habits).getByRole("textbox"), "Changed.");
     await user.click(within(habits).getByRole("button", { name: "Save" }));
+    await within(habits).findByText("Changed.");
     first.unmount();
 
     await renderInfo();
@@ -314,18 +329,19 @@ describe("[FAM-UI-04] inline edit (PROPOSED interaction, PRD Scope)", () => {
   });
 });
 
-describe("[FAM-UI-04] Add file (Phase 1: uploads are FAM-08)", () => {
-  it("[FAM-UI-04][PRD] pressing 'Add file' says adding files is not available yet, and adds nothing", async () => {
+describe("[FAM-UI-04] Add file (wired by FAM-09)", () => {
+  it("[FAM-UI-04][PRD] pressing 'Add file' opens the file chooser, says nothing is unavailable, and adds nothing yet", async () => {
     const user = userEvent.setup();
     await renderInfo();
     const documentation = card("Documentation");
+    const click = vi.spyOn(HTMLInputElement.prototype, "click");
 
     await user.click(within(documentation).getByRole("button", { name: "Add file" }));
 
-    expect(within(documentation).getByRole("status")).toHaveTextContent(
-      "Adding files is not available yet.",
-    );
+    expect(click).toHaveBeenCalled();
+    expect(within(documentation).getByRole("status")).toBeEmptyDOMElement();
     expect(within(documentation).getAllByRole("listitem")).toHaveLength(3);
+    expect(mocks.uploadDocument).not.toHaveBeenCalled();
   });
 });
 
@@ -334,7 +350,8 @@ describe("[FAM-UI-04] states (States sheet)", () => {
     mocks.getClientInfoSections.mockResolvedValue([]);
     await renderInfo();
 
-    expect(screen.queryByRole("region", { name: "Description" })).not.toBeInTheDocument();
+    // The three text cards stay so a first entry can be added (FAM-09 FD-04).
+    expect(within(card("Description")).getByText("Nothing added yet.")).toBeInTheDocument();
     expect(within(card("Documentation")).getByText("Care plan.pdf")).toBeInTheDocument();
   });
 
@@ -347,10 +364,14 @@ describe("[FAM-UI-04] states (States sheet)", () => {
     expect(within(documentation).getByRole("button", { name: "Add file" })).toBeInTheDocument();
   });
 
-  it("[FAM-UI-04][PRD] empty state: no sections and no documents shows one message, with no Edit and no Add file", async () => {
-    mocks.getClientInfoSections.mockResolvedValue([]);
-    mocks.getClientDocuments.mockResolvedValue([]);
-    await renderInfo();
+  it("[FAM-UI-04][PRD] empty state: when the viewer cannot edit, no sections and no documents shows one message, with no Edit and no Add file", async () => {
+    render(
+      <FamilyInfoView
+        clientId={CLIENT_ID}
+        data={{ sections: [], documents: [] }}
+        canEdit={false}
+      />,
+    );
 
     expect(screen.getByText("No information yet")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /Edit|Add file/ })).not.toBeInTheDocument();
