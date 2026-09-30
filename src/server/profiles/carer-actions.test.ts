@@ -70,11 +70,23 @@ describe("[CAR-09][AC-05] updateCarerContactDetails validates on the server", ()
       expect(result.error.code).toBe("VALIDATION");
       expect(result.error.fieldErrors).toMatchObject({
         name: "Enter your name.",
-        phone: "Enter a phone number like 0412 345 678.",
+        phone: "Enter an Australian phone number, like 03 9555 0102 or +61 3 9555 0102.",
         email: "Enter an email address like name@example.com.",
       });
     }
     expect(mocks.from).not.toHaveBeenCalled();
+  });
+
+  it("[CHG-038] the carer's phone must be an Australian number when filled in, and may be blank", async () => {
+    vi.stubEnv("DATA_SOURCE", "mock");
+    const { updateCarerContactDetails } = await import("@/server/profiles/actions");
+    const values = { name: "Aisha Rahman", email: "aisha@example.com" };
+
+    const bad = await updateCarerContactDetails({ ...values, phone: "0395550" });
+    expect(bad.ok).toBe(false);
+    if (!bad.ok) expect(bad.error.fieldErrors?.phone).toBeTruthy();
+    expect((await updateCarerContactDetails({ ...values, phone: "0412 345 678" })).ok).toBe(true);
+    expect((await updateCarerContactDetails({ ...values, phone: "" })).ok).toBe(true);
   });
 
   it("[CAR-09][AC-05] a non-object input is refused rather than thrown", async () => {

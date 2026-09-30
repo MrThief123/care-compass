@@ -118,6 +118,26 @@ describe("Admin Staff", () => {
     );
     expect(mocks.createStaff).not.toHaveBeenCalled();
   });
+  it("[CHG-038] Add Staff refuses a phone that is not an Australian number, and letters", async () => {
+    render(<StaffScreen data={data} />);
+    await userEvent.click(screen.getByRole("button", { name: "Add Staff" }));
+    await userEvent.type(screen.getByLabelText("First name"), "Helen");
+    await userEvent.type(screen.getByLabelText("Last name"), "Brown");
+    await userEvent.type(screen.getByLabelText("Email"), "helen.brown@example.com");
+    await userEvent.type(screen.getByLabelText("Phone"), "0395");
+    await userEvent.click(screen.getByRole("button", { name: "Save" }));
+    expect(screen.getByLabelText("Phone")).toHaveAccessibleDescription(
+      "Enter an Australian phone number, like 03 9555 0102 or +61 3 9555 0102.",
+    );
+
+    await userEvent.clear(screen.getByLabelText("Phone"));
+    await userEvent.type(screen.getByLabelText("Phone"), "03 9555 O102");
+    await userEvent.click(screen.getByRole("button", { name: "Save" }));
+    expect(screen.getByLabelText("Phone")).toHaveAccessibleDescription(
+      "A phone number can only have digits, spaces, + ( ) and -.",
+    );
+    expect(mocks.createStaff).not.toHaveBeenCalled();
+  });
   it("[ADM-02][AC-01] Add Staff validates a missing first name on Save", async () => {
     render(<StaffScreen data={data} />);
     await userEvent.click(screen.getByRole("button", { name: "Add Staff" }));

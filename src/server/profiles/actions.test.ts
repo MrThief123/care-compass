@@ -84,10 +84,23 @@ describe("[FAM-12][AC-02] updateFamilyContactDetails validates on the server", (
     if (!result.ok) {
       expect(result.error.fieldErrors).toMatchObject({
         name: "Enter your name.",
-        phone: "Enter a phone number like 0412 345 678.",
+        phone: "Enter an Australian phone number, like 03 9555 0102 or +61 3 9555 0102.",
       });
     }
     expect(mocks.from).not.toHaveBeenCalled();
+  });
+
+  it("[CHG-038] the phone must be an Australian number when filled in, and may be blank", async () => {
+    vi.stubEnv("DATA_SOURCE", "mock");
+    const { updateFamilyContactDetails } = await import("@/server/profiles/actions");
+
+    const bad = await updateFamilyContactDetails({ ...VALID, phone: "0000 000 000" });
+    expect(bad.ok).toBe(false);
+    if (!bad.ok) expect(bad.error.fieldErrors?.phone).toBeTruthy();
+    expect((await updateFamilyContactDetails({ ...VALID, phone: "+61 412 345 678" })).ok).toBe(
+      true,
+    );
+    expect((await updateFamilyContactDetails({ ...VALID, phone: "" })).ok).toBe(true);
   });
 
   it("[FAM-12][AC-02] a non-object input is refused rather than thrown", async () => {
