@@ -5,7 +5,6 @@ import { useState } from "react";
 import { z } from "zod";
 
 import { DatePickerGrid } from "@/components/shared/calendar/date-picker-grid";
-import { ChipGroup } from "@/components/shared/forms/chip-group";
 import { Field } from "@/components/shared/forms/field";
 import { InlineAlert } from "@/components/shared/forms/inline-alert";
 import { SelectableListRow } from "@/components/shared/lists/selectable-list-row";
@@ -13,14 +12,26 @@ import { EmptyState } from "@/components/shared/states";
 import { Button } from "@/components/ui/button";
 import { CardShell } from "@/components/ui/card-shell";
 import { Icon } from "@/components/ui/icon";
+import { cn } from "@/lib/utils";
 import type { AdminManageData, ManagePerson } from "@/server/admin/manage-queries";
 
-const slots = [
-  { value: "07:00/11:00", label: "07:00 - 11:00" },
-  { value: "11:00/15:00", label: "11:00 - 15:00" },
-  { value: "15:00/19:00", label: "15:00 - 19:00" },
-  { value: "custom", label: "Custom" },
+/** Common shift times, one tap fills the start and end dropdowns. */
+const commonShifts = [
+  { start: "07:00", end: "11:00" },
+  { start: "11:00", end: "15:00" },
+  { start: "15:00", end: "19:00" },
+  { start: "08:00", end: "16:00" },
+  { start: "09:00", end: "17:00" },
 ];
+const pad = (n: number) => String(n).padStart(2, "0");
+const hourOptions = Array.from({ length: 24 }, (_, hour) => ({
+  value: pad(hour),
+  label: pad(hour),
+}));
+const minuteOptions = Array.from({ length: 12 }, (_, step) => ({
+  value: pad(step * 5),
+  label: pad(step * 5),
+}));
 const time = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, "Enter a time as HH:MM.");
 const timeRange = z.object({ start: time, end: time }).refine(({ start, end }) => end > start, {
   message: "End time must be after start time.",
@@ -134,16 +145,15 @@ export function ManageScreen({
   const { staffId, clientId } = selection;
   const [date, setDate] = useState(data.referenceDate);
   const [month, setMonth] = useState(data.referenceDate);
-  const [slot, setSlot] = useState("07:00/11:00");
-  const [custom, setCustom] = useState({ start: "", end: "" });
+  const [start, setStart] = useState("07:00");
+  const [end, setEnd] = useState("11:00");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [notice, setNotice] = useState("");
   const [shifts, setShifts] = useState(data.shifts);
   const [justAssignedId, setJustAssignedId] = useState("");
   const staff = data.staff.find((person) => person.id === staffId);
   const client = data.clients.find((person) => person.id === clientId);
-  const [presetStart = "", presetEnd = ""] = slot.split("/");
-  const range = slot === "custom" ? custom : { start: presetStart, end: presetEnd };
+  const range = { start, end };
   const validRange = timeRange.safeParse(range);
   const overlaps = validRange.success
     ? shifts.filter(
@@ -175,8 +185,8 @@ export function ManageScreen({
     clear();
     setDate(data.referenceDate);
     setMonth(data.referenceDate);
-    setSlot("07:00/11:00");
-    setCustom({ start: "", end: "" });
+    setStart("07:00");
+    setEnd("11:00");
   }
   function changeMonth(offset: number) {
     const [year = 2026, monthNumber = 11] = month.split("-").map(Number);
@@ -261,43 +271,17 @@ export function ManageScreen({
             />
           </section>
           <div className="flex min-w-0 flex-col gap-5">
-            <ChipGroup
-              legend="Time slot"
-              options={slots}
-              value={slot}
-              onChange={(value) => {
-                setSlot(value);
+            <TimeRangePicker
+              start={start}
+              end={end}
+              error={errors.end ?? errors.start}
+              onChange={(next) => {
+                setStart(next.start);
+                setEnd(next.end);
                 setErrors({});
                 setNotice("");
               }}
             />
-            {slot === "custom" && (
-              <div className="grid gap-3 sm:grid-cols-2">
-                <Field
-                  label="Start time"
-                  value={custom.start}
-                  placeholder="HH:MM"
-                  hint="24-hour Melbourne time"
-                  error={errors.start}
-                  onChange={(start) => {
-                    setCustom({ ...custom, start });
-                    setErrors({});
-                    setNotice("");
-                  }}
-                />
-                <Field
-                  label="End time"
-                  value={custom.end}
-                  placeholder="HH:MM"
-                  error={errors.end}
-                  onChange={(end) => {
-                    setCustom({ ...custom, end });
-                    setErrors({});
-                    setNotice("");
-                  }}
-                />
-              </div>
-            )}
             {staff && overlaps.length > 0 && (
               <InlineAlert>
                 {overlaps
@@ -331,5 +315,81 @@ export function ManageScreen({
         </div>
       </CardShell>
     </div>
+  );
+}
+
+function TimePicker({
+  label,
+  value,
+  onChange,
+}: {
+  label: "Start" | "End";
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  const [hour = "00", minute = "00"] = value.split(":");
+  return (
+    <div className="grid grid-cols-2 gap-3">
+      <Field
+        label={`${label} hour`}
+        type="select"
+        value={hour}
+        options={hourOptions}
+        onChange={(next) => onChange(`${next}:${minute}`)}
+      />
+      <Field
+        label={`${label} minute`}
+        type="select"
+        value={minute}
+        options={minuteOptions}
+        onChange={(next) => onChange(`${hour}:${next}`)}
+      />
+    </div>
+  );
+}
+
+function TimeRangePicker({
+  start,
+  end,
+  error,
+  onChange,
+}: {
+  start: string;
+  end: string;
+  error?: string;
+  onChange: (range: { start: string; end: string }) => void;
+}) {
+  return (
+    <section aria-label="Shift time" className="flex min-w-0 flex-col gap-4">
+      <h3 className="text-body-emphasis text-text-primary">Time</h3>
+      <TimePicker label="Start" value={start} onChange={(next) => onChange({ start: next, end })} />
+      <TimePicker label="End" value={end} onChange={(next) => onChange({ start, end: next })} />
+      {error && <p className="text-body-small text-text-alert-strong">{error}</p>}
+      <div className="flex flex-col gap-2">
+        <span className="text-body-default text-text-secondary">Common shifts</span>
+        <div className="flex flex-wrap gap-2">
+          {commonShifts.map((shift) => {
+            const pressed = shift.start === start && shift.end === end;
+            return (
+              <button
+                key={`${shift.start}-${shift.end}`}
+                type="button"
+                aria-pressed={pressed}
+                onClick={() => onChange(shift)}
+                className={cn(
+                  "h-11 rounded-control border px-4 text-body-default transition-colors",
+                  "outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
+                  pressed
+                    ? "border-border-brand bg-primary text-primary-foreground"
+                    : "border-border-brand bg-bg-surface text-text-primary hover:bg-bg-inset",
+                )}
+              >
+                {shift.start} - {shift.end}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </section>
   );
 }

@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -61,7 +61,9 @@ describe("[ADM-06] Admin Manage selection", () => {
 
   it("[ADM-06][AC-05] T-05 the URL selection is the only selection", () => {
     render(<ManageScreen data={data} selection={{ staffId: "daniel", clientId: "" }} />);
-    const selected = screen.getAllByRole("option", { selected: true });
+    const selected = within(screen.getByRole("listbox", { name: "Staff" })).getAllByRole("option", {
+      selected: true,
+    });
     // The row text also holds the avatar initials, so match on the accessible name.
     expect(selected).toEqual([screen.getByRole("option", { name: "Daniel Kelly" })]);
   });

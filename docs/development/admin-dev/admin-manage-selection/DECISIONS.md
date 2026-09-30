@@ -51,6 +51,16 @@ Changes made (2026-09-30), all flagged HUMAN REVIEW in PROGRESS.md:
 - Human confirmation required: no, requested in chat.
 - Test changes caused: see above, flagged yes.
 
+### FD-08 — Time picker: hour and minute dropdowns plus common shifts
+- Date: 2026-09-30
+- Context: human asked to replace the time-slot chips and the Custom option with dropdowns.
+- Decision: Start and End each have an hour dropdown (00-23) and a minute dropdown (5-minute steps), reusing the shared `Field` select. Under them, "Common shifts" buttons (07:00-11:00, 11:00-15:00, 15:00-19:00, 08:00-16:00, 09:00-17:00) fill the dropdowns and show pressed while they match. Default 07:00-11:00. End must be after start (existing rule). Local wrapper only; `src/components/shared/**` untouched.
+- Reason: human request. The 5-minute step and the two added common shifts (08-16, 09-17) are my defaults; change on request.
+- Alternatives considered: 15-minute steps; overnight shifts (still rejected, end must be after start).
+- Consequences: no Custom mode. ADM-07 will save the same start and end values.
+- Human confirmation required: no, requested in chat (step size and preset list open to change).
+- Test changes caused: "warns on a true overlap" and "a first assignment..." now press buttons named by time instead of radios (control changed, same behaviour); "validates custom times..." rewritten for the dropdowns; 2 tests added. `manage-screen.test.tsx` "Clear removes both selections" and `manage-selection.test.tsx` T-05 counted every selected `option`, which now also matches the dropdown options; scoped to the Staff/Client lists (test bug). Flagged yes.
+
 <!-- Template
 ### FD-01 — <title>
 - Date:

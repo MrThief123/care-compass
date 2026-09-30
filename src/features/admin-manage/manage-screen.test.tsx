@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { axe } from "jest-axe";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -55,13 +55,18 @@ describe("Admin Manage", () => {
     await userEvent.click(screen.getByRole("button", { name: "Clear" }));
     expect(replace).toHaveBeenCalledWith("/admin/manage", { scroll: false });
     view.rerender(<ManageScreen data={data} />);
-    expect(screen.queryAllByRole("option", { selected: true })).toHaveLength(0);
+    const listed = screen
+      .getAllByRole("listbox")
+      .flatMap((list) => within(list).queryAllByRole("option"));
+    expect(listed.filter((option) => option.getAttribute("aria-selected") === "true")).toHaveLength(
+      0,
+    );
     expect(screen.getByRole("button", { name: "Assign shift" })).toBeDisabled();
   });
   it("[ADM-UI-02][AC-03] warns on a true overlap but permits assignment", async () => {
     const view = render(<ManageScreen data={data} selection={selection} />);
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
-    await userEvent.click(screen.getByRole("radio", { name: "11:00 - 15:00" }));
+    await userEvent.click(screen.getByRole("button", { name: "11:00 - 15:00" }));
     expect(screen.getByRole("alert")).toHaveTextContent("11:30 - 13:00");
     expect(screen.getByRole("button", { name: "Assign shift" })).toBeEnabled();
     view.rerender(
@@ -81,28 +86,50 @@ describe("Admin Manage", () => {
     view.rerender(<ManageScreen data={{ ...data, clients: [] }} clientSearch="missing" />);
     expect(screen.getByText("No clients found")).toBeVisible();
   });
-  it("[ADM-UI-02][AC-03] validates custom times and treats touching intervals as non-overlapping", async () => {
+  it("[ADM-UI-02][AC-03] validates the chosen times and treats touching intervals as non-overlapping", async () => {
     render(<ManageScreen data={data} selection={selection} />);
-    await userEvent.click(screen.getByRole("radio", { name: "Custom" }));
-    await userEvent.type(screen.getByLabelText("Start time"), "13:00");
-    await userEvent.type(screen.getByLabelText("End time"), "11:00");
+    await userEvent.selectOptions(screen.getByLabelText("Start hour"), "13");
+    await userEvent.selectOptions(screen.getByLabelText("Start minute"), "00");
+    await userEvent.selectOptions(screen.getByLabelText("End hour"), "11");
     await userEvent.click(screen.getByRole("button", { name: "Assign shift" }));
     expect(screen.getByText("End time must be after start time.")).toBeVisible();
-    await userEvent.clear(screen.getByLabelText("End time"));
-    await userEvent.type(screen.getByLabelText("End time"), "15:00");
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    await userEvent.selectOptions(screen.getByLabelText("End hour"), "15");
     await userEvent.click(screen.getByRole("button", { name: "Assign shift" }));
     expect(screen.getByRole("status")).toHaveTextContent("Shift assigned");
     // A shift just assigned never warns about itself, and touching intervals do not overlap.
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  });
+  it("[ADM-UI-02][AC-03] starts at 07:00 to 11:00 with hour and minute dropdowns for start and end", () => {
+    render(<ManageScreen data={data} selection={selection} />);
+    expect(screen.getByLabelText("Start hour")).toHaveValue("07");
+    expect(screen.getByLabelText("Start minute")).toHaveValue("00");
+    expect(screen.getByLabelText("End hour")).toHaveValue("11");
+    expect(screen.getByLabelText("End minute")).toHaveValue("00");
+    expect(within(screen.getByLabelText("Start hour")).getAllByRole("option")).toHaveLength(24);
+    expect(within(screen.getByLabelText("Start minute")).getAllByRole("option")).toHaveLength(12);
+  });
+  it("[ADM-UI-02][AC-03] a common shift fills the dropdowns and is marked pressed until they change", async () => {
+    render(<ManageScreen data={{ ...data, shifts: [] }} selection={selection} />);
+    const nineToFive = screen.getByRole("button", { name: "09:00 - 17:00" });
+    expect(nineToFive).toHaveAttribute("aria-pressed", "false");
+    await userEvent.click(nineToFive);
+    expect(screen.getByLabelText("Start hour")).toHaveValue("09");
+    expect(screen.getByLabelText("End hour")).toHaveValue("17");
+    expect(nineToFive).toHaveAttribute("aria-pressed", "true");
+    await userEvent.selectOptions(screen.getByLabelText("End minute"), "30");
+    expect(nineToFive).toHaveAttribute("aria-pressed", "false");
+    await userEvent.click(screen.getByRole("button", { name: "Assign shift" }));
+    expect(screen.getByRole("status")).toHaveTextContent("09:00 - 17:30");
   });
   it("[ADM-UI-02][AC-03] a first assignment shows only the success message, and a repeat warns", async () => {
     render(<ManageScreen data={{ ...data, shifts: [] }} selection={selection} />);
     await userEvent.click(screen.getByRole("button", { name: "Assign shift" }));
     expect(screen.getByRole("status")).toHaveTextContent("Shift assigned");
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
-    await userEvent.click(screen.getByRole("radio", { name: "11:00 - 15:00" }));
+    await userEvent.click(screen.getByRole("button", { name: "11:00 - 15:00" }));
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
-    await userEvent.click(screen.getByRole("radio", { name: "07:00 - 11:00" }));
+    await userEvent.click(screen.getByRole("button", { name: "07:00 - 11:00" }));
     expect(screen.getByRole("alert")).toHaveTextContent("07:00 - 11:00");
   });
   it("[ADM-UI-02][AC-03] resets local assignments on remount", async () => {
