@@ -61,6 +61,16 @@ Changes made (2026-09-30), all flagged HUMAN REVIEW in PROGRESS.md:
 - Human confirmation required: no, requested in chat (step size and preset list open to change).
 - Test changes caused: "warns on a true overlap" and "a first assignment..." now press buttons named by time instead of radios (control changed, same behaviour); "validates custom times..." rewritten for the dropdowns; 2 tests added. `manage-screen.test.tsx` "Clear removes both selections" and `manage-selection.test.tsx` T-05 counted every selected `option`, which now also matches the dropdown options; scoped to the Staff/Client lists (test bug). Flagged yes.
 
+### FD-09 — "Already booked" panel for the selected carer and client
+- Date: 2026-09-30
+- Context: human asked to see, for the chosen date, what the selected carer and client already have.
+- Decision: a panel in the right column under the time controls lists the carer's shifts (with client names) and the client's shifts (with carer names) for the date, sorted by start, or "No other shifts that day". Hidden until a carer or client is selected. It reads the shifts the screen already holds, so it includes shifts assigned in the session. Human chose option 1 (UI only).
+- Reason: helps avoid double-ups and spot gaps.
+- Alternatives considered: loading real shifts now via `getAdminManage` (declined: overlaps ADM-07, which also changes that contract).
+- Consequences: in Supabase mode the panel is empty until ADM-07 loads real shifts (`shifts: []` today). The screen keeps shifts in local state initialised from `data.shifts`; ADM-07 must revisit that when data reloads.
+- Human confirmation required: no, chosen in chat.
+- Test changes caused: none to existing tests; 3 tests added.
+
 <!-- Template
 ### FD-01 — <title>
 - Date:

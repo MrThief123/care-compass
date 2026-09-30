@@ -122,6 +122,73 @@ describe("Admin Manage", () => {
     await userEvent.click(screen.getByRole("button", { name: "Assign shift" }));
     expect(screen.getByRole("status")).toHaveTextContent("09:00 - 17:30");
   });
+  it("[ADM-UI-02][AC-03] lists what the carer and the client already have on the chosen date", async () => {
+    const busy = {
+      ...data,
+      shifts: [
+        ...data.shifts,
+        {
+          id: "s2",
+          staffId: "aisha",
+          clientId: "robert",
+          date: "2026-11-30",
+          start: "08:00",
+          end: "09:00",
+        },
+        {
+          id: "s3",
+          staffId: "daniel",
+          clientId: "margaret",
+          date: "2026-11-30",
+          start: "14:00",
+          end: "16:00",
+        },
+        {
+          id: "s4",
+          staffId: "aisha",
+          clientId: "robert",
+          date: "2026-12-01",
+          start: "08:00",
+          end: "09:00",
+        },
+      ],
+    };
+    const view = render(<ManageScreen data={busy} selection={selection} />);
+    const panel = screen.getByRole("region", { name: "Already booked on 30 November 2026" });
+    const carer = within(within(panel).getByRole("list", { name: "Aisha Rahman's shifts" }));
+    expect(carer.getAllByRole("listitem").map((item) => item.textContent)).toEqual([
+      "Robert Hale08:00 - 09:00",
+      "Margaret Doyle11:30 - 13:00",
+    ]);
+    const client = within(within(panel).getByRole("list", { name: "Margaret Doyle's shifts" }));
+    expect(client.getAllByRole("listitem").map((item) => item.textContent)).toEqual([
+      "Aisha Rahman11:30 - 13:00",
+      "Daniel Kelly14:00 - 16:00",
+    ]);
+    view.rerender(
+      <ManageScreen data={busy} selection={{ staffId: "daniel", clientId: "robert" }} />,
+    );
+    expect(screen.getByRole("list", { name: "Robert Hale's shifts" })).toHaveTextContent(
+      "Aisha Rahman08:00 - 09:00",
+    );
+    view.unmount();
+    render(<ManageScreen data={{ ...data, shifts: [] }} selection={selection} />);
+    expect(screen.getAllByText("No other shifts that day")).toHaveLength(2);
+  });
+  it("[ADM-UI-02][AC-03] a shift assigned in this session appears in both lists", async () => {
+    render(<ManageScreen data={{ ...data, shifts: [] }} selection={selection} />);
+    await userEvent.click(screen.getByRole("button", { name: "Assign shift" }));
+    expect(screen.getByRole("list", { name: "Aisha Rahman's shifts" })).toHaveTextContent(
+      "Margaret Doyle07:00 - 11:00",
+    );
+    expect(screen.getByRole("list", { name: "Margaret Doyle's shifts" })).toHaveTextContent(
+      "Aisha Rahman07:00 - 11:00",
+    );
+  });
+  it("[ADM-UI-02][AC-03] shows no bookings panel until someone is selected", () => {
+    render(<ManageScreen data={data} />);
+    expect(screen.queryByRole("region", { name: /Already booked/ })).not.toBeInTheDocument();
+  });
   it("[ADM-UI-02][AC-03] a first assignment shows only the success message, and a repeat warns", async () => {
     render(<ManageScreen data={{ ...data, shifts: [] }} selection={selection} />);
     await userEvent.click(screen.getByRole("button", { name: "Assign shift" }));

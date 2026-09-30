@@ -282,6 +282,16 @@ export function ManageScreen({
                 setNotice("");
               }}
             />
+            {(staff || client) && (
+              <BookedPanel
+                date={date}
+                staff={staff}
+                client={client}
+                shifts={shifts}
+                staffList={data.staff}
+                clientList={data.clients}
+              />
+            )}
             {staff && overlaps.length > 0 && (
               <InlineAlert>
                 {overlaps
@@ -389,6 +399,85 @@ function TimeRangePicker({
             );
           })}
         </div>
+      </div>
+    </section>
+  );
+}
+
+const dayFormat = new Intl.DateTimeFormat("en-AU", {
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+  timeZone: "UTC",
+});
+
+/** What the selected carer and client already have on the chosen date, so gaps and double-ups show. */
+function BookedPanel({
+  date,
+  staff,
+  client,
+  shifts,
+  staffList,
+  clientList,
+}: {
+  date: string;
+  staff?: ManagePerson;
+  client?: ManagePerson;
+  shifts: AdminManageData["shifts"];
+  staffList: ManagePerson[];
+  clientList: ManagePerson[];
+}) {
+  const onDay = shifts
+    .filter((shift) => shift.date === date)
+    .sort((a, b) => a.start.localeCompare(b.start));
+  const nameOf = (list: ManagePerson[], id: string, fallback: string) =>
+    list.find((person) => person.id === id)?.name ?? fallback;
+  const groups = [
+    staff && {
+      person: staff,
+      rows: onDay
+        .filter((shift) => shift.staffId === staff.id)
+        .map((shift) => ({ ...shift, who: nameOf(clientList, shift.clientId, "Another client") })),
+    },
+    client && {
+      person: client,
+      rows: onDay
+        .filter((shift) => shift.clientId === client.id)
+        .map((shift) => ({ ...shift, who: nameOf(staffList, shift.staffId, "Another carer") })),
+    },
+  ].filter((group) => Boolean(group));
+  const heading = `Already booked on ${dayFormat.format(new Date(`${date}T00:00:00Z`))}`;
+  return (
+    <section aria-label={heading} className="flex flex-col gap-3 rounded-inset bg-bg-inset p-4">
+      <h3 className="text-body-emphasis text-text-primary">{heading}</h3>
+      <div className="grid gap-4 sm:grid-cols-2">
+        {groups.map(
+          (group) =>
+            group && (
+              <div key={group.person.id} className="min-w-0 space-y-1">
+                <p className="break-words text-body-default text-text-secondary">
+                  {group.person.name}
+                </p>
+                {group.rows.length ? (
+                  <ul aria-label={`${group.person.name}'s shifts`} className="space-y-1">
+                    {group.rows.map((row) => (
+                      <li
+                        key={row.id}
+                        className="flex flex-wrap justify-between gap-x-3 text-body-default text-text-primary"
+                      >
+                        <span className="min-w-0 break-words">{row.who}</span>
+                        <span>
+                          {row.start} - {row.end}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-body-default text-text-secondary">No other shifts that day</p>
+                )}
+              </div>
+            ),
+        )}
       </div>
     </section>
   );
