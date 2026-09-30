@@ -7,7 +7,14 @@
  */
 import * as mock from "@/mocks/queries/clients";
 import { getDataSourceMode, notImplementedForSupabase } from "@/server/data-source";
-import type { ClientInfoSection } from "@/types/domain";
+import type { ClientInfoSection, ClientInfoSectionKind } from "@/types/domain";
+
+/** The order the sections are drawn in, with the database key and title of each. */
+const SECTIONS: ReadonlyArray<{ kind: ClientInfoSectionKind; key: string; title: string }> = [
+  { kind: "description", key: "description", title: "Description" },
+  { kind: "habits", key: "habits", title: "Habits" },
+  { kind: "medicalHistory", key: "medical_history", title: "Medical history" },
+];
 
 export type { ClientHeaderSummary, OrganisationChoice } from "@/mocks/queries/clients";
 
@@ -23,14 +30,39 @@ export async function getClientHeaderSummary(clientId: string): Promise<mock.Cli
  * A client's Description, Habits and Medical history, in that order, as
  * Family · Info draws them (FAM-UI-04, CHG-018). A section that has never been
  * written is left out, so a client with none, or an unknown client, returns
- * `[]`. Read only: saving an edit is a later feature.
+ * `[]`. Read only; `saveClientInfoSection` (actions.ts) saves an edit. With
+ * `DATA_SOURCE=supabase` RLS decides who sees anything (family, an admin of the
+ * client's organisation, a carer whose shift has not ended).
  */
 export async function getClientInfoSections(clientId: string): Promise<ClientInfoSection[]> {
   const mode = getDataSourceMode();
   if (mode === "mock") {
     return mock.getClientInfoSections(clientId);
   }
-  notImplementedForSupabase("clients", "getClientInfoSections");
+
+  const { createClient } = await import("@/lib/supabase/server");
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("client_info_sections")
+    .select("client_id, key, body, updated_at")
+    .eq("client_id", clientId);
+  // The message names no client or carer (ARCHITECTURE.md §12.5).
+  if (error || !data) throw new Error("getClientInfoSections: could not load the sections.");
+
+  return SECTIONS.flatMap(({ kind, key, title }) => {
+    const row = data.find((r) => r.key === key);
+    if (!row || row.body === null) return [];
+    return [
+      {
+        id: `${row.client_id}:${key}`,
+        clientId: row.client_id,
+        kind,
+        title,
+        content: row.body,
+        updatedAt: row.updated_at,
+      },
+    ];
+  });
 }
 
 /**

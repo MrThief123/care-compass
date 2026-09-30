@@ -79,12 +79,4 @@ describe("[FAM-UI-04][AC-01] getClientInfoSections", () => {
   });
 });
 
-describe("[FAM-UI-04][PRD] supabase mode", () => {
-  it("[FAM-UI-04][PRD] getClientInfoSections throws the not-implemented error naming its domain and function", async () => {
-    vi.stubEnv("DATA_SOURCE", "supabase");
-
-    await expect(getClientInfoSections(MARGARET_CLIENT_ID)).rejects.toThrow(
-      /clients\.getClientInfoSections: DATA_SOURCE="supabase" is not implemented yet/,
-    );
-  });
-});
+// The Supabase branch is covered by [CAR-04][AC-08] in info-sections.test.ts (FD-01).

@@ -48,6 +48,13 @@ Record feature-level decisions here using the template below. Project-wide decis
 - Test changes caused: `carer_client_info.test.sql` [CAR-04][AC-03] 'admin cannot insert' and 'admin update changed nothing' now expect success; added admin read, other-organisation admin read and insert (plan 21 to 24). HUMAN REVIEW: test expectation changed.
 - Human confirmation: Dhruv Verma, 2026-09-30 (in-session).
 
+### FD-08 — Test changes made at implementation (steps 2)
+- Date: 2026-09-30
+- `src/server/clients/queries.test.ts` [FAM-UI-04][PRD] 'getClientInfoSections throws the not-implemented error': before, asserted the Supabase mode throws "not implemented"; after, removed (replaced by [CAR-04][AC-08] in `info-sections.test.ts`). Reason: CAR-04 implements the read (FD-01). HUMAN REVIEW: assertion removed.
+- `src/server/documents/queries.test.ts` [FAM-UI-04][PRD] 'getClientDocuments … not-implemented': same change, same reason.
+- `src/server/clients/info-sections.test.ts` fake `createClient`: before, the returned client carried the builder's `then`, so `await createClient()` resolved to the query result and every Supabase-mode test failed with `supabase.from is not a function`; after, `then` is removed from the client and stays on the chained builder. Reason: genuine test bug; no assertion changed.
+- `getClientDocuments` returns `url: ""` for Supabase documents: the bucket is private and files open through `getDocumentUrl` (F0-13); `DocumentRef.url` is a required string.
+
 <!-- Template
 ### FD-01 — <title>
 - Date:

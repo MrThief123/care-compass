@@ -38,7 +38,13 @@ const mocks = vi.hoisted(() => {
 });
 
 vi.mock("@/lib/supabase/server", () => ({
-  createClient: async () => ({ ...mocks.builder, auth: { getUser: mocks.getUser } }),
+  // `then` is left off the client itself: a thenable here would make `await createClient()`
+  // resolve to the query result. Only the chained builder is awaited for a result.
+  createClient: async () => {
+    const client = { ...mocks.builder };
+    delete client.then;
+    return { ...client, auth: { getUser: mocks.getUser } };
+  },
 }));
 
 const CLIENT_ID = "b1111111-1111-1111-1111-111111111111";

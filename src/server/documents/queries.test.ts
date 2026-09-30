@@ -97,12 +97,4 @@ describe("[FAM-UI-04][AC-03] getClientDocuments", () => {
   });
 });
 
-describe("[FAM-UI-04][PRD] getClientDocuments supabase mode", () => {
-  it("[FAM-UI-04][PRD] throws the not-implemented error naming its domain and function", async () => {
-    vi.stubEnv("DATA_SOURCE", "supabase");
-
-    await expect(getClientDocuments(MARGARET_CLIENT_ID)).rejects.toThrow(
-      /documents\.getClientDocuments: DATA_SOURCE="supabase" is not implemented yet/,
-    );
-  });
-});
+// The Supabase branch is covered by [CAR-04][AC-08] in clients/info-sections.test.ts (FD-01).
