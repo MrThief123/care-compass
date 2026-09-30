@@ -1,57 +1,58 @@
 # Progress — CAR-04 Carer — Client info
 
-Status: NOT STARTED
-Owner: unclaimed
+Status: IN PROGRESS (tests written, implementation not started)
+Owner: Dhruv Verma
 Lane: C — Carer
 Sprint: SPRINT · planned D9
-Branch: `feature/carer-client-info` (not yet created)
-PR target: `carer-dev`
-Last updated: 2026-09-17 (planning pack generated)
+Branch: `feature/carer-client-info` (from `main`)
+PR target: `main` (CHG-036)
+Last updated: 2026-09-30
 
 ## Blockers
-- OQ-09 — Carer access model
+- None. OQ-09 answered (PD-041, CHG-027). FAM-09 overlap settled (FD-01).
 
 ## Dependencies status
-- F0-18 — NOT STARTED (added by CHG-027)
-- F0-06 — NOT STARTED
-- F0-10 — NOT STARTED
-- F0-13 — NOT STARTED
-- CAR-UI-02 — NOT STARTED
+- F0-06, F0-10, F0-13, F0-18, CAR-UI-02, CAR-03 — MERGED
 
 ## Completed
-- Feature documentation drafted (Claude Chat planning pack)
+- Docs rewritten (PRD Scope, 9 ACs, TEST_PLAN, USER_STORIES, DECISIONS FD-01 to FD-06)
+- Tests written first and run red for the right reasons
 
 ## In progress
 - None
 
 ## Remaining
-- Route `/carer/patients/[clientId]` using `ClientInfoView` in carer mode.
-- Header: 'Patients' screen name (PROPOSED) with in-page client summary.
-- Edit links and Add file tile rendered only when `carer_on_active_shift(clientId)` is true.
-- No organisation or payment controls (D10).
+- Migration (`supabase migration new`): carer write on `client_info_sections`, `documents`, `client-documents` only while `carer_on_active_shift`
+- `getClientInfoSections`, `getClientDocuments` Supabase reads; `saveClientInfoSection` action
+- `findCarerPatient` redirects to `/carer/patients`
+- Carer Info wrappers (edit-in-place save, Add file upload) in `src/features/carer-patients/`
+- Replace the two "not implemented" assertions; update `docs/DEVELOPMENT_PLAN.md` card; regenerate DB types if needed
 
 ## Acceptance criteria status
-- 0 / 4 MET
+- 0 / 9 MET
 
 ## Tests
-- Written: 0 / 4
-- Passing: 0
-- Failing: 0
+- Written: 9 / 9 (component 12, unit 14, db 21 assertions, integration 5, e2e 3)
+- Passing: 0 new (the CAR-UI-02 AC-09 tests are changed to expect a redirect and fail until implemented)
+- Failing (red, expected): all of the above
 
 ## Files changed
-- None yet. Likely files: `src/app/(carer)/carer/patients/[clientId]/page.tsx`, `src/components/shared/client-info-view.tsx`
+- `src/features/carer-patients/carer-client-info.test.tsx`, `carer-patients.test.tsx` (AC-09 ×2, HUMAN REVIEW)
+- `src/server/clients/info-sections.test.ts`
+- `supabase/tests/carer_client_info.test.sql`
+- `tests/integration/carer-client-info.test.ts`, `tests/e2e/carer-client-info.spec.ts`
 
 ## Decisions
-- See DECISIONS.md
+- See DECISIONS.md (FD-01 to FD-06)
 
 ## Problems encountered
-- None
+- `.env.local` is the hosted project: integration/e2e must be run with the local stack's variables (`supabase status -o env`).
 
 ## Assumptions
-- PROPOSED items in PRD.md are unconfirmed until validated in F0-01 or answered in DECISIONS.md.
+- Copy and the 5,000-character cap are the PRD's PROPOSED values.
 
 ## Next action
-- Wait for answers to OQ-09; then complete dependencies, run START FEATURE CAR-04, and write the tests in TEST_PLAN.md first.
+- Human review of tests, then implement in a fresh session.
 
 ## Ready for PR
 - No
