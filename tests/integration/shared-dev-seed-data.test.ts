@@ -19,6 +19,9 @@ const hasLocalSupabase =
   Boolean(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY && process.env.SUPABASE_SERVICE_ROLE_KEY);
 
 const SEED_PASSWORD = "care-compass-local-1!";
+// Not helen@example.com: eight pgTAP files insert that throwaway address, which would clash
+// with a seeded user after `supabase db reset` (FD-01).
+const HELEN_EMAIL = "helen.doyle@example.com";
 const MARGARET_ID = "c0000000-0000-4000-8000-000000000001";
 const BANKSIA_ID = "a0000000-0000-4000-8000-000000000001";
 
@@ -50,7 +53,7 @@ async function signIn(email: string) {
 
 describe.skipIf(!hasLocalSupabase)("[F0-16] development seed data", () => {
   it("[F0-16][AC-01] Margaret's budget summary is NDIS 14880, Fixed 2750, Government 240 remaining", async () => {
-    const { supabase } = await signIn("helen@example.com");
+    const { supabase } = await signIn(HELEN_EMAIL);
 
     const { data, error } = await supabase.rpc("budget_bucket_summary", {
       p_client_id: MARGARET_ID,
@@ -64,7 +67,7 @@ describe.skipIf(!hasLocalSupabase)("[F0-16] development seed data", () => {
   });
 
   it("[F0-16][AC-01] fund history matches the design and its opening balances make the totals agree", async () => {
-    const { supabase } = await signIn("helen@example.com");
+    const { supabase } = await signIn(HELEN_EMAIL);
 
     const { data, error } = await supabase
       .from("budget_fund_entries")
@@ -178,7 +181,7 @@ describe.skipIf(!hasLocalSupabase)("[F0-16] development seed data", () => {
   });
 
   it("[F0-16][AC-02] Helen, Aisha and Priya sign in with the seed credentials and land on their role", async () => {
-    const helen = await signIn("helen@example.com");
+    const helen = await signIn(HELEN_EMAIL);
     const helenProfile = await helen.supabase
       .from("profiles")
       .select("role")
