@@ -16,6 +16,8 @@ beforeEach(() => {
   mocks.reset.mockReset().mockResolvedValue({ ok: true, data: undefined });
 });
 
+const edit = () => userEvent.click(screen.getByRole("button", { name: "Edit" }));
+
 const data = {
   organisation: {
     name: "Banksia Home Care",
@@ -34,6 +36,7 @@ describe("Admin Settings", () => {
   });
   it("[ADM-UI-05][AC-01] saves changes without mutating the props it was given", async () => {
     render(<SettingsScreen data={data} />);
+    await edit();
     await userEvent.clear(screen.getByLabelText("Organisation Name"));
     await userEvent.type(screen.getByLabelText("Organisation Name"), "Banksia Care");
     await userEvent.click(screen.getByRole("button", { name: "Save" }));
@@ -43,6 +46,7 @@ describe("Admin Settings", () => {
   });
   it("[ADM-UI-05][AC-01] validates missing organisation name and ABN format", async () => {
     render(<SettingsScreen data={data} />);
+    await edit();
     await userEvent.clear(screen.getByLabelText("Organisation Name"));
     await userEvent.clear(screen.getByLabelText("ABN"));
     await userEvent.type(screen.getByLabelText("ABN"), "123");
@@ -57,6 +61,7 @@ describe("Admin Settings", () => {
   });
   it("[ADM-UI-05][AC-01] clears saved feedback when a field changes", async () => {
     render(<SettingsScreen data={data} />);
+    await edit();
     await userEvent.click(screen.getByRole("button", { name: "Save" }));
     expect(await screen.findByText("Saved.")).toBeInTheDocument();
     await userEvent.type(screen.getByLabelText("Address"), " Suite 2");

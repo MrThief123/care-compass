@@ -39,6 +39,13 @@ Record feature-level decisions here using the template below. Project-wide decis
 ### FD-08 — Generated types
 - `database.types.ts` got only the `admin_update_organisation` entry by hand: the generator in this CLI version reorders unrelated entries (about 450 lines of noise). The action types `.single<Row>()` because the hand entry has no `SetofOptions`.
 
+### FD-09 — Edit and Cancel flow (AC-07)
+- Date: 2026-09-30
+- Context: reviewing the preview, the human asked for Organisation info to work like Family info (CHG-024): read-only until Edit, then Save and Cancel. ADM-UI-05 built it always-editable with Save only.
+- Decision: added AC-07. Same behaviour as Family info; built locally in `src/features/admin-settings/` because the kit's `DetailsFormCard` has no Cancel slot (no shared edit, CLAUDE.md §4.2).
+- Test changes caused: ADM-UI-05 and ADM-10 component tests now click Edit before typing or saving (`settings-screen.test.tsx`, `settings-wiring.test.tsx`), no assertion removed. **HUMAN REVIEW: test expectation changed** (requirement change confirmed by the human in session).
+- Human confirmation required: given, this session.
+
 <!-- Template
 ### FD-01 — <title>
 - Date:

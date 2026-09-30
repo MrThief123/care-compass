@@ -12,3 +12,4 @@ Each criterion is observable and maps to at least one test in TEST_PLAN.md. Crit
 | AC-06 | US-01 | happy | Given the Reset card, when Reset is pressed, then a reset link is requested for the admin's sign-in email and a sent message shows; on failure an error shows instead. | NOT MET |
 
 Status values: NOT MET · MET (test passing) · BLOCKED (cite OQ/PD).
+| AC-07 | US-01 | happy | Given Settings, when it opens, then Organisation info is read-only with an Edit button; Edit unlocks the fields and shows Save and Cancel; Cancel restores the saved values, clears errors and locks again; a successful save locks again; a failed save stays open. | NOT MET |
