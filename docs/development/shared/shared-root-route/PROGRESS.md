@@ -1,10 +1,10 @@
 # Progress — F0-19 Root route and production guard for dev previews
 
-Status: NOT STARTED
-Owner: unclaimed
+Status: IN PROGRESS
+Owner: Dhruv Verma
 Lane: S — Shared
 Sprint: SPRINT · planned D11
-Branch: `feature/shared-root-route` (not yet created)
+Branch: `feature/shared-root-route`
 PR target: `main`
 Last updated: 2026-09-30
 
