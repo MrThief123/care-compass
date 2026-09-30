@@ -160,7 +160,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 
 | Order | ID | Feature | Lane | Days | Sprint | Depends on | Blocking decisions | Branch | Status |
 |---|---|---|---|---|---|---|---|---|---|
-| 1 | FAM-01 | Family Home — Today day-view timeline | F | D8 | SPRINT | F0-11, F0-16, FAM-UI-01 | OQ-29 | `feature/family-home-today` | NOT STARTED |
+| 1 | FAM-01 | Family Home — Today day-view timeline | F | D8 | SPRINT | F0-11, F0-16, FAM-UI-01, F0-20 | OQ-29 | `feature/family-home-today` | NOT STARTED |
 | 2 | FAM-02 | Family Home — Overdue card and Recent activity | F | D8 | SPRINT | F0-11, FAM-UI-01 | — | `feature/family-home-overdue-activity` | NOT STARTED |
 | 3 | FAM-03 | Family Home — Budget strip | F | D8 | SPRINT | F0-12, FAM-UI-01 | OQ-03, OQ-04 | `feature/family-home-budget-strip` | NOT STARTED |
 | 4 | FAM-04 | Family Calendar — day, week and month views | F | D8–D9 | SPRINT | F0-11, FAM-UI-02 | — | `feature/family-calendar-views` | NOT STARTED |
@@ -722,7 +722,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Dashboard / stream:** family · **Lane:** F · **Days:** D8 · **Sprint:** SPRINT · **PR target:** `main` · **Branch:** `feature/family-home-today`
 - **Description:** The left 'Today' panel on the Family landing screen: an hour-gutter timeline listing today's occurrences for the client.
 - **User value:** The family sees at a glance what care is happening today and whether it has been done.
-- **Dependencies:** F0-11, F0-16, FAM-UI-01 · **Blocking decisions:** OQ-29
+- **Dependencies:** F0-11, F0-16, FAM-UI-01, F0-20 · **Blocking decisions:** OQ-29
 - **Jira summary:** Day-view timeline 07:00–18:00 showing today's events with carer, duration and status pill
 - **Acceptance criteria summary:** 6 criteria — a block at 09:00 shows 'Morning medication', 'Aisha R.', '1 hr' and pill 'Done · Aisha R.'; its block spans 11:30–13:00, shows '1 hr 30 min' and pill 'Planned'; tops are 88px and 198px and heights 44px and 66px …
 - **Testing summary:** 4 component, 1 unit, 1 integration

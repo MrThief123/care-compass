@@ -1,6 +1,6 @@
 # Progress — F0-20 Client header wiring and family route guard
 
-Status: NOT STARTED
+Status: IN PROGRESS
 Owner: Dhruv Verma
 Lane: S — Shared
 Sprint: SPRINT
@@ -18,7 +18,7 @@ Last updated: 2026-10-01
 - 0 / 8 MET
 
 ## Next action
-- Claim (commit `docs(shared-client-header-wiring): claim`, push), write the tests, stop.
+- Write the tests from TEST_PLAN.md, confirm they fail, then implement (fresh session).
 
 ## Ready for PR
 - No
