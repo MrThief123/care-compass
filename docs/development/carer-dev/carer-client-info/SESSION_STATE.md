@@ -9,5 +9,5 @@ Test results: green (2213 unit tests, 2 unrelated load flakes pass alone; 470 pg
 Current blocker: none
 Important discoveries: local storage needs the collate "C" index after db reset (FD-09); an early test run touched the hosted project (see PROGRESS)
 Important decisions: FD-01 to FD-11
-Exact next action: wait for the human "yes", then open the PR to `main` listing the local commands and results
+Exact next action: none; merged to `main` in #173 (2026-09-30).
 Warning for next session: do not edit `src/features/family-info/**`; never run integration or e2e with the hosted `.env.local`

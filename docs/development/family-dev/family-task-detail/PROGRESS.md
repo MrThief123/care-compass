@@ -1,12 +1,12 @@
 # Progress — FAM-15 Family — Task detail
 
-Status: IN PROGRESS
+Status: MERGED TO DEV
 Owner: Dhruv Verma
 Lane: F — Family
 Sprint: SPRINT · planned D11
 Branch: `feature/family-task-detail`
-PR target: `main`
-Last updated: 2026-09-30 (implemented; all checks run; awaiting PR approval)
+PR target: `main` (merged in #175, 2026-09-30)
+Last updated: 2026-09-30
 
 ## Blockers
 - None. OQ-29 (PD-055) and OQ-10 (PD-044) answered; F0-11, F0-13, FAM-UI-07 merged.
@@ -44,8 +44,8 @@ Last updated: 2026-09-30 (implemented; all checks run; awaiting PR approval)
 - None beyond DECISIONS.md.
 
 ## Next action
-- Human review, then PR.
+- None; merged to `main`.
 
 ## Ready for PR
-- Yes, waiting for the human's approval.
+- Merged (see PR target above)
 - HUMAN REVIEW: test expectation changed (FD-06, page.edge.test.tsx, `getOccurrence` now has the `{ type: "all" }` argument).

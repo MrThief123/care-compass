@@ -1,11 +1,11 @@
 # Progress — CAR-02 Carer — Notifications card and bell
 
-Status: READY FOR PR
+Status: MERGED TO DEV
 Owner: Dhruv Verma
 Lane: C — Carer
 Sprint: SPRINT · planned D9
 Branch: `feature/carer-notifications` (from `main`)
-PR target: `main`
+PR target: `main` (merged in #174, 2026-09-30)
 Last updated: 2026-09-30
 
 ## Blockers
@@ -64,7 +64,7 @@ Last updated: 2026-09-30
 - `transfer_client_organisation` cancelling future shifts will notify carers through the trigger (FD-02); intended.
 
 ## Next action
-- Human says "yes", then open the PR to `main` with the docs update inside it.
+- None; merged to `main`.
 
 ## Ready for PR
-- Yes (waiting for the human's approval to open it)
+- Merged (see PR target above)
