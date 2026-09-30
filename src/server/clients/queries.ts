@@ -5,9 +5,17 @@
  * Screens must import from here, never from `src/mocks` directly
  * (lint-enforced).
  */
+import { redirect } from "next/navigation";
+import { z } from "zod";
+
+import { ageFromDob } from "@/lib/format/age";
 import * as mock from "@/mocks/queries/clients";
-import { getDataSourceMode, notImplementedForSupabase } from "@/server/data-source";
+import { getLandingPath } from "@/server/auth/queries";
+import { getDataSourceMode } from "@/server/data-source";
 import type { ClientInfoSection, ClientInfoSectionKind } from "@/types/domain";
+
+// `guid`, not `uuid`: Postgres accepts any 8-4-4-4-12 hex id, and seed ids need not carry RFC version bits.
+const ClientIdSchema = z.guid();
 
 /** The order the sections are drawn in, with the database key and title of each. */
 const SECTIONS: ReadonlyArray<{ kind: ClientInfoSectionKind; key: string; title: string }> = [
@@ -18,12 +26,77 @@ const SECTIONS: ReadonlyArray<{ kind: ClientInfoSectionKind; key: string; title:
 
 export type { ClientHeaderSummary, OrganisationChoice } from "@/mocks/queries/clients";
 
+/**
+ * The header every Family page opens with (F0-20): first and last name, age in
+ * whole years (Australia/Melbourne), suburb and the organisation's name. A missing
+ * date of birth, suburb or organisation leaves that field out. With
+ * `DATA_SOURCE=supabase` RLS decides whether the client is readable; one that is
+ * not, a malformed id or a database error throws a message naming no client.
+ * The organisation name comes from `list_organisations_for_transfer` (family
+ * members cannot read `organisations`, F0-20 FD-01); if that fails the header
+ * is returned without it.
+ */
 export async function getClientHeaderSummary(clientId: string): Promise<mock.ClientHeaderSummary> {
   const mode = getDataSourceMode();
   if (mode === "mock") {
     return mock.getClientHeaderSummary(clientId);
   }
-  notImplementedForSupabase("clients", "getClientHeaderSummary");
+
+  // The message names no client, id or date of birth (ARCHITECTURE.md §12.5).
+  const failed = () => new Error("getClientHeaderSummary: could not load the client.");
+  if (!ClientIdSchema.safeParse(clientId).success) throw failed();
+
+  const { createClient } = await import("@/lib/supabase/server");
+  const supabase = await createClient();
+  const { data: row, error } = await supabase
+    .from("clients")
+    .select("id, first_name, last_name, date_of_birth, suburb, organisation_id")
+    .eq("id", clientId)
+    .maybeSingle();
+  if (error || !row) throw failed();
+
+  let organisationName: string | undefined;
+  if (row.organisation_id) {
+    const { data: organisations, error: organisationsError } = await supabase.rpc(
+      "list_organisations_for_transfer",
+      { p_client_id: clientId },
+    );
+    if (!organisationsError) {
+      organisationName = organisations?.find((organisation) => organisation.is_current)?.name;
+    }
+  }
+
+  return {
+    id: row.id,
+    firstName: row.first_name,
+    lastName: row.last_name,
+    ...(row.date_of_birth ? { age: ageFromDob(row.date_of_birth) } : {}),
+    ...(row.suburb ? { suburb: row.suburb } : {}),
+    ...(organisationName ? { organisationName } : {}),
+  };
+}
+
+/**
+ * Sends the signed-in user to their own landing page unless they can read this
+ * client (F0-20). RLS is the boundary; this is the redirect. A malformed id, no
+ * readable row and a database error all redirect, never grant. No-op under
+ * `DATA_SOURCE=mock`. A layout does not stop its page rendering, so a page that
+ * must not fetch for an unlinked client calls this itself.
+ */
+export async function assertClientAccess(clientId: string): Promise<void> {
+  if (getDataSourceMode() === "mock") return;
+
+  if (ClientIdSchema.safeParse(clientId).success) {
+    const { createClient } = await import("@/lib/supabase/server");
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("clients")
+      .select("id")
+      .eq("id", clientId)
+      .maybeSingle();
+    if (!error && data) return;
+  }
+  redirect(await getLandingPath());
 }
 
 /**

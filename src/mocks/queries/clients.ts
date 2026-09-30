@@ -17,8 +17,8 @@ export interface ClientHeaderSummary {
   id: string;
   firstName: string;
   lastName: string;
-  /** Whole years, computed from dob as of "now" (Australia/Melbourne). */
-  age: number;
+  /** Whole years, computed from dob as of "now" (Australia/Melbourne). Omitted when no date of birth is stored. */
+  age?: number;
   suburb?: string;
   /** Omitted for a client with no current organisation (PRD Error/Edge Cases). */
   organisationName?: string;

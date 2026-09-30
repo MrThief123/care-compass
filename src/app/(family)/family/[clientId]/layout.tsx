@@ -4,7 +4,7 @@ import { SignOutButton } from "@/components/shared/sign-out-button";
 import { Avatar } from "@/components/ui/avatar";
 import { formatLongDate } from "@/lib/format/date";
 import { getCurrentUser } from "@/server/auth/queries";
-import { getClientHeaderSummary } from "@/server/clients/queries";
+import { assertClientAccess, getClientHeaderSummary } from "@/server/clients/queries";
 
 import type { ReactNode } from "react";
 
@@ -16,12 +16,17 @@ export default async function FamilyLayout({
   params: Promise<{ clientId: string }>;
 }) {
   const { clientId } = await params;
-  const [user, client] = await Promise.all([
-    getCurrentUser("family"),
-    getClientHeaderSummary(clientId),
-  ]);
+  // One after the other (F0-20 FD-05): the role redirect must not be hidden by a
+  // data call, and no client is read for someone who may not open it.
+  const user = await getCurrentUser("family");
+  await assertClientAccess(clientId);
+  const client = await getClientHeaderSummary(clientId);
 
-  const meta = [`${client.age} years`, client.suburb, client.organisationName]
+  const meta = [
+    client.age === undefined ? undefined : `${client.age} years`,
+    client.suburb,
+    client.organisationName,
+  ]
     .filter((part): part is string => Boolean(part))
     .join(" · ");
 

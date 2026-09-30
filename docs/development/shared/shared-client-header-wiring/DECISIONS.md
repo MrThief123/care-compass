@@ -10,5 +10,8 @@ None.
 - FD-04 (2026-10-01): `getCarerTodayShifts` (`src/server/shifts/queries.ts`) has no owner and no caller (added by CAR-UI-01, CHG-025; left for CAR-01, retired by CHG-033). Not touched here. Recommend a separate cleanup removing it, its mock and its T-07 contract test; needs a recorded decision because a test is removed.
 - FD-05 (2026-10-01): closes F0-19 FD-05 by ordering, not by catching: session/role → client access → header data.
 
+- FD-06 (2026-10-01): Next's layout docs say layouts do not re-render on navigation between pages under them, so the layout check runs on entry to `/family/<id>/...`, not on every page. Pages keep relying on RLS and call `assertClientAccess` when they must not fetch (as FD-03 says).
+- FD-07 (2026-10-01): the client id is checked with `z.guid()` (as `changeClientOrganisation` does), not `z.uuid()`, because Postgres accepts any 8-4-4-4-12 hex id and seed ids carry no RFC version bits.
+
 ## Test changes
-None yet.
+None. No test was changed, removed or skipped.

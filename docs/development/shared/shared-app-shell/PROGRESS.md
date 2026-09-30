@@ -62,3 +62,4 @@ Last updated: 2026-09-19
 
 ## Ready for PR
 - Merged
+- Update (F0-20, 2026-10-01): the family layout no longer fetches the user and header together; it runs `getCurrentUser("family")`, `assertClientAccess`, then `getClientHeaderSummary`, in that order, and `getClientHeaderSummary` has a Supabase branch.

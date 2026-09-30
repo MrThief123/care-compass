@@ -61,3 +61,4 @@ Last updated: 2026-09-25
 
 ## Ready for PR
 - No
+- Update (F0-20, 2026-10-01): `getClientHeaderSummary` now has a Supabase branch; the Settings page renders against the database and the e2e for AC-01 can be added.
