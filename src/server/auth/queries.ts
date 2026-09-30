@@ -43,14 +43,9 @@ export async function getPrimaryTotpFactorId(): Promise<string | null> {
 }
 
 /**
- * Where `/` sends the visitor (F0-19). Under `DATA_SOURCE=mock` there is no
- * sign-in, so it resolves the mock family user's first client home.
+ * Where `/` sends the visitor (F0-19). Sign-in is always real Supabase auth,
+ * even under `DATA_SOURCE=mock`, so this does not branch on the data source.
  */
 export async function getLandingPath(): Promise<string> {
-  if (getDataSourceMode() === "mock") {
-    const { MARGARET_CLIENT_ID } = await import("@/mocks/fixtures");
-    return `/family/${MARGARET_CLIENT_ID}/home`;
-  }
-
   return evaluateLanding(await createClient());
 }
