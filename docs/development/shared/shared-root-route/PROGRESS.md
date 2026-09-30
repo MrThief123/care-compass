@@ -15,7 +15,7 @@ Last updated: 2026-09-30
 - F0-07 — MERGED
 
 ## Acceptance criteria status
-- 0 / 6 MET
+- 0 / 6 MET (tests written first, confirmed failing: evaluateLanding missing, proxy has no guard, /dev-preview page missing)
 
 ## Next action
 - `START FEATURE F0-19`: read the Next.js `proxy.ts` and redirect docs, write the tests in TEST_PLAN.md first.
