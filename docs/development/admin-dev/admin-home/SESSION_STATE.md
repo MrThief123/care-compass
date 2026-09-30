@@ -36,3 +36,6 @@ Warning for next session: Do not touch `src/app/(admin)/admin/home/**` or `src/f
   UI — that's ADM-UI-01's already-merged work, not ADM-01's scope. If an organisation's client count
   grows large, the per-client fan-out in `getAdminHome()`'s overdue derivation is the first thing to
   revisit (see PROGRESS.md's HUMAN REVIEW: performance note).
+
+## 2026-09-30 (status sync, by Dhruv Verma)
+- Merged to `main` in #163 on 2026-09-29. Status set to MERGED TO DEV (merged to `main`, CHG-036). Owner unchanged. No code changes.

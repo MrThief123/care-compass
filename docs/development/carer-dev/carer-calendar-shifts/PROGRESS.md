@@ -1,12 +1,12 @@
 # Progress — CAR-05 Carer — Calendar (shifts)
 
-Status: PR OPEN
+Status: MERGED TO DEV
 Owner: Dhruv Verma
 Lane: C — Carer
 Sprint: SPRINT · planned D9–D10
 Branch: `feature/carer-calendar-shifts`
-PR target: `carer-dev`
-Last updated: 2026-09-29
+PR target: `main` (merged in #158, 2026-09-29; CHG-036)
+Last updated: 2026-09-30
 
 ## Blockers
 - None. OQ-33 answered. Local Supabase (Docker) must be running to execute T-01 to T-06 (it is, as of 2026-09-29).

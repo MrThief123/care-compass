@@ -35,3 +35,6 @@ Files likely to be touched next: none expected for ADM-04. ADM-05 (Remove client
 Warning for next session: `src/mocks/admin-clients.ts` (`ADMIN_CLIENTS`) is still used for mock mode —
   unlike ADM-02, no type/shape change was needed here, so this mock fixture is still live, not dead.
   Do not re-add an Add-client panel to this screen without a new confirmed decision superseding PD-037.
+
+## 2026-09-30 (status sync, by Dhruv Verma)
+- Merged to `main` in #164 on 2026-09-29. Status set to MERGED TO DEV (merged to `main`, CHG-036). Owner unchanged. No code changes.

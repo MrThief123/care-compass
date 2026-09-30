@@ -1,11 +1,11 @@
 # Progress — F0-17 Self-serve sign-up for Family and Organisation accounts
 
-Status: IMPLEMENTED
+Status: MERGED TO DEV
 Owner: MrThief123
 Lane: B — Backend
 Branch: `feature/shared-sign-up`
-PR target: `main (per OQ-01 — shared work)`
-Last updated: 2026-09-27 (implemented; awaiting human review)
+PR target: `main` (merged in #129, 2026-09-27; CHG-036)
+Last updated: 2026-09-30
 
 ## Blockers
 - None — OQ-01, OQ-07, OQ-08 ANSWERED

@@ -30,3 +30,6 @@ Warning for next session: do not touch `src/server/documents/queries.ts` or its 
   After pulling any new migration run `npx supabase migration up --local`, then
   `supabase test db`. Integration tests need `supabase start` (the full stack, for Storage),
   not only `supabase db start`.
+
+## 2026-09-30 (status sync, by Dhruv Verma)
+- Merged to `main` in #131 on 2026-09-27. Status set to MERGED TO DEV (merged to `main`, CHG-036). Owner unchanged. No code changes.

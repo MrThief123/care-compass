@@ -1,12 +1,12 @@
 # Progress — ADM-01 Admin Home — counts and overdue events
 
-Status: READY FOR PR
+Status: MERGED TO DEV
 Owner: MrThief123
 Lane: A — Admin
 Sprint: SPRINT · planned D8
 Branch: `feature/admin-home`
-PR target: `admin-dev`
-Last updated: 2026-09-29
+PR target: `main` (merged in #163, 2026-09-29; CHG-036)
+Last updated: 2026-09-30
 
 ## Blockers
 - None. OQ-29 is ANSWERED (PD-055, root DECISIONS.md).

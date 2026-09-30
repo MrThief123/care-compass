@@ -15,3 +15,6 @@ Warning for next session: do not edit the new tests to get green; run integratio
 
 ## 2026-09-29 (implementation)
 - Implemented and green; ready for PR, waiting for the human's "yes". Flag HUMAN REVIEW (FD-03) and the Lane S mock edit in the PR.
+
+## 2026-09-30 (status sync)
+- Merged to `main` in #160 on 2026-09-29. Status set to MERGED TO DEV, which means merged to `main` under CHG-036. No code changes.

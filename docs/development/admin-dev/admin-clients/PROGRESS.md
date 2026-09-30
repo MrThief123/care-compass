@@ -1,12 +1,12 @@
 # Progress — ADM-04 Admin — Clients list and add client
 
-Status: READY FOR PR
+Status: MERGED TO DEV
 Owner: MrThief123
 Lane: A — Admin
 Sprint: SPRINT · planned D9
 Branch: `feature/admin-clients`
-PR target: `admin-dev`
-Last updated: 2026-09-29
+PR target: `main` (merged in #164, 2026-09-29; CHG-036)
+Last updated: 2026-09-30
 
 ## Blockers
 - None. OQ-07 is ANSWERED (PD-037); OQ-08 no longer applies (CHG-035).
