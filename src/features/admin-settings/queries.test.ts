@@ -10,7 +10,34 @@ it("[ADM-UI-05][AC-01] returns independent synthetic settings", async () => {
   first.organisation.name = "Changed";
   expect((await getAdminSettings()).organisation?.name).toBe("Banksia Home Care");
 });
-it("[ADM-UI-05][AC-01] rejects unwired live mode", async () => {
+it("[ADM-10][AC-01] live mode reads the signed-in admin's organisation, blanks for null columns", async () => {
   vi.stubEnv("DATA_SOURCE", "supabase");
-  await expect(getAdminSettings()).rejects.toThrow("not implemented");
+  vi.resetModules();
+  vi.doMock("@/lib/supabase/server", () => ({
+    createClient: async () => ({
+      from: () => ({
+        select: () => ({
+          limit: () => ({
+            maybeSingle: async () => ({
+              data: {
+                name: "Banksia Home Care",
+                abn: "54 123 456 789",
+                phone: null,
+                address: null,
+              },
+              error: null,
+            }),
+          }),
+        }),
+      }),
+    }),
+  }));
+  const { getAdminSettings: live } = await import("@/server/admin/settings-queries");
+  expect((await live()).organisation).toEqual({
+    name: "Banksia Home Care",
+    abn: "54 123 456 789",
+    phone: "",
+    address: "",
+  });
+  vi.doUnmock("@/lib/supabase/server");
 });

@@ -1,35 +1,35 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
-import { z } from "zod";
 
 import { DetailsFormCard } from "@/components/shared/forms/details-form-card";
 import { Field } from "@/components/shared/forms/field";
 import { SettingsActionCard } from "@/components/shared/forms/settings-action-card";
+import { fieldErrors } from "@/components/shared/forms/validation";
 import { EmptyState } from "@/components/shared/states";
 import { CardShell } from "@/components/ui/card-shell";
+import { updateOrganisationSettings } from "@/server/admin/settings-actions";
 import type { AdminSettingsData, OrganisationSettings } from "@/server/admin/settings-queries";
+import { organisationSettingsSchema } from "@/server/admin/settings-schema";
+import { requestOwnPasswordReset } from "@/server/profiles/actions";
 
-const organisationSchema = z.object({
-  name: z.string().trim().min(1, "Enter an organisation name."),
-  abn: z
-    .string()
-    .trim()
-    .refine(
-      (value) => /^[0-9 ]+$/.test(value) && value.replace(/ /g, "").length === 11,
-      "Enter an ABN with 11 digits.",
-    ),
-  phone: z.string().trim().min(1, "Enter a phone number."),
-  address: z.string().trim().min(1, "Enter an address."),
-});
 const emptyValues: OrganisationSettings = { name: "", abn: "", phone: "", address: "" };
+const FIELD_ORDER: (keyof OrganisationSettings)[] = ["name", "abn", "phone", "address"];
+const SAVED = "Saved.";
+const SAVE_FAILED = "Couldn't save the organisation details. Try again.";
+const RESET_SENT = "We've emailed you a link to reset your password.";
+const RESET_FAILED = "Couldn't send the reset link. Try again.";
 
 export function SettingsScreen({ data }: { data: AdminSettingsData }) {
+  const router = useRouter();
   const [values, setValues] = useState<OrganisationSettings>(() => ({
     ...(data.organisation ?? emptyValues),
   }));
   const [errors, setErrors] = useState<Partial<Record<keyof OrganisationSettings, string>>>({});
   const [notice, setNotice] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [resetting, setResetting] = useState(false);
   const form = useRef<HTMLDivElement>(null);
 
   function change(key: keyof OrganisationSettings, value: string) {
@@ -37,22 +37,59 @@ export function SettingsScreen({ data }: { data: AdminSettingsData }) {
     setErrors((current) => ({ ...current, [key]: undefined }));
     setNotice("");
   }
-  function save() {
-    const result = organisationSchema.safeParse(values);
-    if (!result.success) {
-      const next: Partial<Record<keyof OrganisationSettings, string>> = {};
-      for (const issue of result.error.issues)
-        next[issue.path[0] as keyof OrganisationSettings] = issue.message;
-      setErrors(next);
+  function focusFirst(messages: Record<string, string>) {
+    const first = FIELD_ORDER.find((key) => messages[key]);
+    if (first) form.current?.querySelector<HTMLInputElement>('[name="' + first + '"]')?.focus();
+  }
+  async function save() {
+    if (saving) return;
+    const result = fieldErrors(organisationSettingsSchema, values);
+    if (!result.ok) {
+      setErrors(result.errors);
       setNotice("");
-      const firstField = result.error.issues[0]?.path[0];
-      if (typeof firstField === "string")
-        form.current?.querySelector<HTMLInputElement>('[name="' + firstField + '"]')?.focus();
+      focusFirst(result.errors);
       return;
     }
-    setValues(result.data);
+    setSaving(true);
+    setNotice("");
+    let outcome: Awaited<ReturnType<typeof updateOrganisationSettings>>;
+    try {
+      outcome = await updateOrganisationSettings(result.data);
+    } catch {
+      // A rejected action is a failed save, not a crash; the edits stay.
+      outcome = { ok: false, error: { code: "UNEXPECTED", message: SAVE_FAILED } };
+    }
+    setSaving(false);
+    if (!outcome.ok) {
+      const messages = outcome.error.fieldErrors;
+      if (messages && Object.keys(messages).length > 0) {
+        setErrors(messages);
+        focusFirst(messages);
+      } else {
+        setNotice(outcome.error.message);
+      }
+      return;
+    }
+    setValues(outcome.data);
     setErrors({});
-    setNotice("Organisation details saved. Changes reset when you reload.");
+    setNotice(SAVED);
+    router.refresh();
+  }
+  async function reset() {
+    if (resetting) return;
+    setResetting(true);
+    setNotice("");
+    let sent = false;
+    let failure = RESET_FAILED;
+    try {
+      const outcome = await requestOwnPasswordReset();
+      sent = outcome.ok;
+      if (!outcome.ok) failure = outcome.error.message;
+    } catch {
+      // Not sent: never say it was.
+    }
+    setResetting(false);
+    setNotice(sent ? RESET_SENT : failure);
   }
 
   return (
@@ -104,12 +141,9 @@ export function SettingsScreen({ data }: { data: AdminSettingsData }) {
           title="Reset Username / Password"
           description="Send a password reset link to your sign-in email."
           actionLabel="Reset"
-          onAction={() => setNotice("Password reset requested in this preview. No email was sent.")}
+          onAction={reset}
           className="flex-wrap border-transparent"
         />
-        <p className="text-body-small text-text-secondary">
-          Changes on this preview reset when you reload.
-        </p>
         <p role="status" className="text-body-default text-text-secondary">
           {notice}
         </p>
