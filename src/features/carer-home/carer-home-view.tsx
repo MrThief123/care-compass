@@ -6,7 +6,6 @@ import { useCurrentTime } from "@/components/shared/calendar/current-time-line";
 import { DayTimeline } from "@/components/shared/calendar/day-timeline";
 import { MonthGrid } from "@/components/shared/calendar/month-grid";
 import { WeekGrid } from "@/components/shared/calendar/week-grid";
-import { NotificationRow } from "@/components/shared/lists/notification-row";
 import { EmptyState } from "@/components/shared/states";
 import { CardShell } from "@/components/ui/card-shell";
 import { rangeLabel } from "@/features/family-calendar/calendar-format";
@@ -26,6 +25,7 @@ import type { CarerShiftRow } from "@/server/shifts/queries";
 import type { CarerNotification, PlainEventOccurrence } from "@/types/domain";
 
 import { CarerShiftsToolbar } from "./carer-shifts-toolbar";
+import { UnreadNotificationRow } from "./unread-notification-row";
 
 export interface CarerHomeViewProps {
   today: LocalDate;
@@ -151,7 +151,11 @@ export function CarerHomeView({ today, params, shifts, notifications }: CarerHom
       </section>
       <section aria-labelledby="carer-home-notifications" className="min-w-0">
         <CardShell className="flex h-full min-w-0 flex-col p-5">
-          <h2 id="carer-home-notifications" className="text-title-card text-text-primary">
+          <h2
+            id="carer-home-notifications"
+            tabIndex={-1}
+            className="text-title-card text-text-primary outline-none"
+          >
             Notifications
           </h2>
           {notifications.length === 0 ? (
@@ -169,7 +173,7 @@ export function CarerHomeView({ today, params, shifts, notifications }: CarerHom
             >
               {notifications.map((notification) => (
                 <li key={notification.id} className="min-w-0 break-words">
-                  <NotificationRow source={notification.source} message={notification.message} />
+                  <UnreadNotificationRow notification={notification} />
                 </li>
               ))}
             </ul>
