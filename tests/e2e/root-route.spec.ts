@@ -4,7 +4,7 @@ import { expect, test } from "@playwright/test";
 test.describe("[F0-19] root route and dev-preview guard", () => {
   test("[F0-19][AC-01] T-05 / redirects away from the showcase", async ({ page }) => {
     await page.goto("/");
-    await expect(page).not.toHaveURL(/\/$/);
+    await expect(page).toHaveURL(/\/sign-in$/);
     await expect(page.getByRole("link", { name: "UI-01" })).toHaveCount(0);
   });
 

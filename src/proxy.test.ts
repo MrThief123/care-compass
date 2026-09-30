@@ -38,6 +38,18 @@ describe("[F0-19][AC-03] dev-preview production guard", () => {
     expect(response.headers.get("x-middleware-rewrite")).toBeTruthy();
   });
 
+  it("[F0-19][AC-03] T-03 guards a trailing slash in production", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    const response = await proxy(request("/dev-preview/"));
+    expect(response.headers.get("x-middleware-rewrite")).toMatch(/\/not-found$/);
+  });
+
+  it("[F0-19][AC-03] T-03 does not rewrite a non-route like /dev-preview.png", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    const response = await proxy(request("/dev-preview.png"));
+    expect(response.headers.get("x-session")).toBe("1");
+  });
+
   it.each(["development", "test"])(
     "[F0-19][AC-04] T-03 leaves previews alone in %s",
     async (env) => {
