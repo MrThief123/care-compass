@@ -141,6 +141,56 @@ test.describe(() => {
     }
   });
 
+  test("[CAR-04][AC-07][AC-10] given an on-shift carer, when she uploads a 3 MB file it is saved and opens; a file just over 20 MB is refused with the validator's message", async ({
+    page,
+  }) => {
+    const s = await seed();
+    try {
+      await signIn(page, s.email);
+      await page.goto(`/carer/patients/${s.id("Margaret")}/info`);
+      await page.waitForLoadState("networkidle"); // hydrated, so the file input has its handler
+      const chooser = page.locator('input[type="file"]');
+      const pdf = (bytes: number) =>
+        Buffer.concat([Buffer.from("%PDF-1.4\n"), Buffer.alloc(bytes - 9, 32)]);
+
+      // Above the 1 MB Server Action default (TASK 2), below the 20 MB limit.
+      await chooser.setInputFiles({
+        name: "Big plan.pdf",
+        mimeType: "application/pdf",
+        buffer: pdf(3 * 1024 * 1024),
+      });
+      await expect(page.getByText("Big plan.pdf")).toBeVisible({ timeout: 20_000 });
+      await page.reload();
+      const tile = page.getByRole("button", { name: "Big plan.pdf" });
+      await expect(tile).toBeVisible();
+
+      const popup = page.waitForEvent("popup");
+      const signed = page
+        .context()
+        .waitForEvent("response", (r) => /\/storage\/v1\/object\/sign\//.test(r.url()));
+      await tile.click();
+      const opened = await popup;
+      const response = await signed;
+      expect(response.status()).toBe(200);
+      // The tab downloads the file, so its body isn't readable there: fetch the same URL.
+      const file = await page.request.get(response.url());
+      expect(file.status()).toBe(200);
+      expect((await file.body()).length).toBe(3 * 1024 * 1024);
+      await opened.close();
+
+      // Over 20 MB but inside the 21 MB body limit: the validator answers, not a 413.
+      await chooser.setInputFiles({
+        name: "Too big.pdf",
+        mimeType: "application/pdf",
+        buffer: pdf(20 * 1024 * 1024 + 512 * 1024),
+      });
+      await expect(page.getByText("Files must be 20MB or smaller.")).toBeVisible();
+      await expect(page.getByText("Too big.pdf")).toHaveCount(0);
+    } finally {
+      await cleanUp(s);
+    }
+  });
+
   test("[CAR-04][AC-01] given the same carer off shift (Robert), Info is read-only with a view-only notice", async ({
     page,
   }) => {

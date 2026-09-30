@@ -67,6 +67,14 @@ Record feature-level decisions here using the template below. Project-wide decis
 - Human confirmation: Dhruv Verma, 2026-09-30 (in-session; scope addition).
 - Test changes caused: none to existing tests; `getDocumentUrl` added to the `documents/actions` mock in `carer-client-info.test.tsx`.
 
+### FD-11 — Raise the upload body limits in `next.config.ts` (shared file, human-approved)
+- Date: 2026-09-30
+- Context: uploads over 1 MB failed ("Body exceeded 1 MB limit", 413) although `MAX_DOCUMENT_SIZE_BYTES` is 20 MB. Reading `node_modules/next/dist/docs/` (CLAUDE.md §14) showed a second limit: with `proxy.ts` Next buffers request bodies, by default only to 10 MB (`proxyClientMaxBodySize`); a 10–20 MB upload arrived truncated ("Unexpected end of form").
+- Decision: `experimental.serverActions.bodySizeLimit: "21mb"` and `experimental.proxyClientMaxBodySize: "21mb"` (20 MB plus multipart overhead). Both are experimental keys in this Next version.
+- Consequences: `next.config.ts` is shared; the change also fixes Family uploads. List it in the PR summary. A file over about 21 MB still meets the body limit before the validator; files between 20 MB and 21 MB get the validator's "Files must be 20MB or smaller.".
+- Human confirmation: Dhruv Verma, 2026-09-30 (in-session; the `proxyClientMaxBodySize` half found during verification and covered by the same approval's intent, flagged for review).
+- Verified: e2e (local stack, production build) uploads 3 MB and opens it via its signed URL; 20.5 MB is refused with the validator's message.
+
 <!-- Template
 ### FD-01 — <title>
 - Date:
