@@ -1,60 +1,54 @@
 # Progress — F0-16 Development seed data from the design content
 
-Status: NOT STARTED
-Owner: unclaimed
+Status: IN PROGRESS
+Owner: Prajeet
 Lane: B — Backend
 Sprint: SPRINT · planned D7
-Branch: `feature/shared-dev-seed-data` (not yet created)
+Branch: `feature/shared-dev-seed-data` (created from main 2026-09-30)
 PR target: `main (per OQ-01 — shared work)`
-Last updated: 2026-09-17 (planning pack generated)
+Last updated: 2026-09-30
 
 ## Blockers
-- OQ-01 — Branch parent and naming for shared (foundation and cross-cutting) work
+- None. OQ-01 answered (2026-09-17); F0-10, F0-11, F0-12, F0-13 merged. FD-01 to FD-05 in DECISIONS.md; FD-02 and FD-05 await human confirmation.
 
 ## Dependencies status
-- F0-11 — NOT STARTED
-- F0-12 — NOT STARTED
-- F0-13 — NOT STARTED
-- F0-10 — NOT STARTED
+- F0-10, F0-11, F0-12, F0-13 — MERGED
 
 ## Completed
 - Feature documentation drafted (Claude Chat planning pack)
+- Claimed 2026-09-30; tests written first and run: all 6 failed for the expected reason (no seed data, no script)
+- `supabase/seed.sql`, `scripts/seed.mjs`, `npm run db:seed`, `docs/SEED_DATA.md`
+- Two consecutive `supabase db reset` runs give identical data
 
 ## In progress
-- None
+- Awaiting human review of FD-02 / FD-05 and the PR
 
 ## Remaining
-- Organisation Banksia Home Care (ABN 54 123 456 789, 03 9555 0102, 220 High St, Preston VIC 3072) and a second organisation for negative tests.
-- Admin Priya; carers Aisha Rahman (Registered Nurse, 0423 987 654), Daniel K. (Registered Nurse), Sarah Nguyen (Enrolled Nurse), Marcus Chen (Support Worker), Fatima Ali (Support Worker).
-- Clients Margaret (78, Preston VIC; family Helen, 0412 345 678, helen@example.com, 12 Wattle St, Preston VIC 3072), Robert (82, Reservoir; Michael), Elsie (90, Thornbury; Susan), Frank (76, Northcote; Karen), Doris (85, Preston; Tom), Harold (79, Coburg), Jean (88, Fairfield).
-- Margaret's info sections (Description, Habits, Medical history) with the design text; documents Care plan.pdf, Medication schedule.pdf, Physio referral.pdf, Exercise plan.pdf, Medication chart.pdf (placeholder PDFs).
-- Events around reference date Mon 30 Nov 2026: Morning medication 09:00 1 hr (daily per calendar), Physiotherapy 11:30 1 hr 30 min (Mon, Fri), Afternoon check-in 15:00 1 hr, Wound dressing check 10:00, Weekly weigh-in 09:30, Medication review 14:00, Evening medication; completions/overdue states matching Family Home, Task log and Admin Home.
-- Budgets: NDIS $24,000 / $9,120 used; Fixed $5,000 / $2,250; Government $3,000 / $2,760; fund history 3 Nov 2026 +$6,000 'NDIS quarterly plan top-up', 15 Oct 2026 +$1,000 'Fixed funding top-up', 1 Oct 2026 +$750 'Government subsidy payment'.
-- Shifts for Aisha (including 11:30–13:00 with Margaret used by the conflict warning) and Daniel K.
-- Test users with known local-only passwords; seed guarded so it never runs outside local/test.
+- Playwright e2e for this feature not run (no UI change; seed only)
+- Human approval before the PR is opened
 
 ## Acceptance criteria status
-- 0 / 3 MET
+- 3 / 3 MET
 
 ## Tests
-- Written: 0 / 3
-- Passing: 0
+- Written: 3 / 3 (6 integration tests: T-01 x2, T-02, T-03 x2 plus the seed content test)
+- Passing: 6 / 6. `supabase test db`: 14 files, 446 tests pass. `npm run verify`: lint 0 errors (3 existing warnings), typecheck, format, 2186 Vitest tests pass.
 - Failing: 0
 
 ## Files changed
-- None yet. Likely files: `supabase/seed.sql`, `scripts/seed.ts`, `docs/SEED_DATA.md`, `tests/integration/seed.test.ts`
+- `supabase/seed.sql`, `scripts/seed.mjs`, `package.json` (`db:seed`), `tests/integration/shared-dev-seed-data.test.ts`, `docs/SEED_DATA.md`, this folder's docs, F0-16 cards in `docs/JIRA_TICKETS.md` and `docs/JIRA_BACKLOG.csv` (Helen's email)
 
 ## Decisions
-- See DECISIONS.md
+- See DECISIONS.md (FD-01 to FD-05)
 
 ## Problems encountered
-- None
+- Helen's PRD email clashed with 8 pgTAP files; resolved by FD-01 (human answered). Second organisation renamed Kookaburra Care to avoid sign_up test 21.
 
 ## Assumptions
 - PROPOSED items in PRD.md are unconfirmed until validated in F0-01 or answered in DECISIONS.md.
 
 ## Next action
-- Wait for answers to OQ-01; then complete dependencies, run START FEATURE F0-16, and write the tests in TEST_PLAN.md first.
+- Human reviews FD-02 / FD-05; on approval, merge latest `main`, re-run the suites, push and open the PR to `main`.
 
 ## Ready for PR
-- No
+- Yes, pending human approval

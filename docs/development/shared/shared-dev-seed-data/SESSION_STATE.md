@@ -1,14 +1,14 @@
 # Session State — F0-16 Development seed data from the design content
 
-Last session date: none (no implementation session yet)
-Current branch: n/a — `feature/shared-dev-seed-data` not created
-Worked on: n/a
-What changed: n/a
-Tests run: none
-Test results: n/a
-Current blocker: OQ-01
-Important discoveries: none
-Important decisions: none
-Exact next action: Run `START FEATURE F0-16` once dependencies are MERGED TO DEV (or COMPLETE) and blocking decisions are answered.
-Files likely to be touched next: `supabase/seed.sql`, `scripts/seed.ts`, `docs/SEED_DATA.md`, `tests/integration/seed.test.ts`
-Warning for next session: Read PRD.md, ACCEPTANCE_CRITERIA.md and TEST_PLAN.md before writing any code. Do not create the branch from the wrong parent (`main (per OQ-01 — shared work)`).
+Last session date: 2026-09-30
+Current branch: `feature/shared-dev-seed-data` (from `main`)
+Worked on: seed.sql, seed script, integration tests, SEED_DATA.md
+What changed: `supabase/seed.sql`, `scripts/seed.mjs`, `package.json` (`db:seed`), `tests/integration/shared-dev-seed-data.test.ts`, `docs/SEED_DATA.md`, feature docs, F0-16 cards (Helen's email)
+Tests run: `supabase db reset` (x3, identical data), `npm run db:seed`, `supabase test db`, `npm run verify`
+Test results: all green (pgTAP 14 files / 446; Vitest 2186; seed tests 6/6)
+Current blocker: none
+Important discoveries: `carer_client_assignments` was retired by F0-18 (access is from shifts). Eight pgTAP files insert helen@example.com, so Helen is seeded as helen.doyle@example.com (FD-01). sign_up pgTAP test 21 counts organisations named "Wattle Care", so the second organisation is Kookaburra Care.
+Important decisions: FD-01 (human), FD-02 to FD-05 (see DECISIONS.md)
+Exact next action: human reviews FD-02 / FD-05; then `git merge origin/main`, re-run `supabase db reset`, `npm run db:seed`, `supabase test db`, `npm run verify`; push and open the PR to `main` with approval.
+Files likely to be touched next: none unless review asks for changes
+Warning for next session: run `npm run db:seed` after every `supabase db reset`. Any new migration that adds a NOT NULL column or a table the seed should fill must also update `supabase/seed.sql` and `docs/SEED_DATA.md`.
