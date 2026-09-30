@@ -943,3 +943,12 @@ Template for future entries:
 - Impact: CLAUDE.md §1, §2, §3, §8; `docs/DEVELOPMENT_WORKFLOW.md` §1–§4, §8–§10; `docs/AGENT_REFERENCE.md`; `DEVELOPMENT_PLAN.md` (principle 7, lanes table, status table, card PR targets); `docs/templates/FEATURE_TEMPLATE/PRD.md`; `docs/SPRINT_PLAN.md` (daily rhythm, D10/D12 checkpoints); root `PROGRESS.md`. No code, tests or migrations change. The dev branches stay on origin until a human deletes them; no new work goes to them.
 - Human confirmation: Dhruv Verma, 2026-09-30 (in-session).
 - Docs updated: the files listed under Impact.
+
+### CHG-037 — Root route and production guard for dev previews (new feature F0-19)
+- Date / requested by: 2026-09-30 / Dhruv Verma (human, project lead)
+- Type: scope addition (new feature)
+- Description: `/` currently renders the UI-kit showcase (`src/app/page.tsx`), and the `dev-preview-*` routes are reachable in any environment. A deployed app must open on sign-in or the user's dashboard. New feature **F0-19** redirects `/` by session and role, moves the showcase to `/dev-preview`, and makes every dev-preview route return 404 in production.
+- Source / justification: human, in-session 2026-09-30: "when we deploy this app, we don't want that component showcase to come up, we want the actual screens." Chosen over a parking-lot item (CLAUDE.md §6, §9).
+- Impact: new feature F0-19 (Lane S, `docs/development/shared/shared-root-route/`), depends on F0-07 only; touches `src/app`, `src/proxy.ts`, `DevPreviewNav`, e2e specs. No migration. Should merge before INT-08 (release readiness).
+- Human confirmation: Dhruv Verma, 2026-09-30 (in-session).
+- Docs updated: DECISIONS.md (this entry), DEVELOPMENT_PLAN.md (F0-19 row, card, totals), F0-19 feature docs.
