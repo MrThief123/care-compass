@@ -1,6 +1,6 @@
 # Progress — ADM-10 Admin — Settings
 
-Status: IN PROGRESS (implementation done; e2e not confirmed, see Problems)
+Status: IN PROGRESS (implementation done; awaiting human go-ahead for PR)
 Owner: Dhruv Verma
 Lane: A — Admin
 Sprint: SPRINT · planned D10
@@ -36,7 +36,7 @@ Last updated: 2026-09-30
 - `supabase test db`: 15 files, 459 tests PASS (admin_settings 13/13)
 - Integration against local Supabase: `admin-settings` 4/4 pass; 3 `documents` (F0-13) tests fail with a storage upload error after `supabase db reset` (not this feature)
 - typecheck, eslint (0 errors), prettier clean
-- e2e `--grep-invert "F0-07"`: 29 passed, 13 failed (family calendar/event form/task detail nav, sign-up); none touch admin settings. Run reused a `next dev` server already on :3000, so not a clean result
+- e2e `--grep-invert "F0-07"` on a clean production build: 41 passed, 2 skipped, 1 failed (`family-task-log-filters` FAM-UI-07 spacing, layout flake under parallel load; passes 3/3 on its own, not this feature)
 
 ## Files changed
 - `supabase/migrations/20260930032751_admin_update_organisation.sql`, `src/lib/supabase/database.types.ts`
@@ -47,13 +47,13 @@ Last updated: 2026-09-30
 - See DECISIONS.md
 
 ## Problems encountered
-- e2e could not be run cleanly: a `next dev` server owned by someone else was on :3000 and Playwright reuses it. `npm run pretest:e2e` (next build) also rewrote `.next` under it, so restart that server.
+- None. (Earlier e2e run hit a stray `next dev` on :3000; rerun clean after it was stopped.)
 
 ## Assumptions
 - PROPOSED items in PRD.md are unconfirmed until validated in F0-01 or answered in DECISIONS.md.
 
 ## Next action
-- Re-run e2e with `--grep-invert "F0-07"` against a clean production server; then ask the human before opening the PR to main.
+- Ask the human before opening the PR to main.
 
 ## Ready for PR
 - No
