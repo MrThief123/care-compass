@@ -13,3 +13,6 @@ Important decisions: PD-057, CHG-010; feature FD-01 to FD-08 (DECISIONS.md). FD-
 Exact next action: human reviews FD-01 and FD-08; on approval, push the branch (already pushed up to the docs commit) and open the PR to `main`. After merge, apply `20260927010000_sign_up.sql` to any shared Supabase project.
 Files likely to be touched next: none, unless review asks for changes.
 Warning for next session: never let public sign-up create a `carer` or attach to an existing organisation/client; keep `/sign-in` behaviour unchanged apart from the new link. Do not edit ARCHITECTURE.md (controlled; FD-08). Do not regenerate `database.types.ts` (FD-06). After pulling any new migration run `npx supabase migration up --local`, then `supabase test db`.
+
+## 2026-09-30 (status sync, by Dhruv Verma)
+- Merged to `main` in #129 on 2026-09-27. Status set to MERGED TO DEV (merged to `main`, CHG-036). Owner unchanged. No code changes.

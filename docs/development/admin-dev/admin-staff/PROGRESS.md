@@ -1,12 +1,12 @@
 # Progress — ADM-02 Admin — Staff list and add/edit staff
 
-Status: READY FOR PR
+Status: MERGED TO DEV
 Owner: MrThief123
 Lane: A — Admin
 Sprint: SPRINT · planned D8–D9
 Branch: `feature/admin-staff`
-PR target: `admin-dev`
-Last updated: 2026-09-29
+PR target: `main` (merged in #165, 2026-09-29; CHG-036)
+Last updated: 2026-09-30
 
 ## Blockers
 - None. OQ-08 and OQ-13 are ANSWERED (root DECISIONS.md); OQ-36 (non-blocking) is ADM-03's scope.

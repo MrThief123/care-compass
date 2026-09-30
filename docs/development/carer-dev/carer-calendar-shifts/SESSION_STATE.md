@@ -12,3 +12,6 @@ Important decisions: FD-01 to FD-04; CHG-032 (full names, human confirmed; every
 Exact next action: address PR review; nothing else pending.
 Files likely to be touched next: none unless review asks for changes
 Warning for next session: the personal `.claude/settings.json` change is stashed ("car-05: local settings.json"), not part of this feature; do not commit it.
+
+## 2026-09-30 (status sync)
+- Merged to `main` in #158 on 2026-09-29. Status set to MERGED TO DEV, which means merged to `main` under CHG-036. No code changes.

@@ -10,3 +10,6 @@ Current blocker: none
 Important decisions: FD-05
 Exact next action: PR is open to `carer-dev`; wait for review. Do not merge.
 Warning for next session: do not open the PR without approval. `src/server/profiles/` is Lane F's folder (flag in PR).
+
+## 2026-09-30 (status sync)
+- Merged to `main` in #159 on 2026-09-29. Status set to MERGED TO DEV, which means merged to `main` under CHG-036. No code changes.

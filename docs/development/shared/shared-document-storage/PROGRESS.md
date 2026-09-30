@@ -1,12 +1,12 @@
 # Progress — F0-13 Client document storage
 
-Status: IMPLEMENTED
+Status: MERGED TO DEV
 Owner: MrThief123
 Lane: B — Backend
 Sprint: SPRINT · planned D6–D7
 Branch: `feature/shared-document-storage`
-PR target: `main (per OQ-01 — shared work)`
-Last updated: 2026-09-27 (implemented; awaiting human review of FD-01)
+PR target: `main` (merged in #131, 2026-09-27; CHG-036)
+Last updated: 2026-09-30
 
 ## Blockers
 - None — OQ-01, OQ-26 ANSWERED

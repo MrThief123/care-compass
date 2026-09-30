@@ -1,12 +1,12 @@
 # Progress — CAR-03 Carer — Patients
 
-Status: READY FOR PR
+Status: MERGED TO DEV
 Owner: Dhruv Verma
 Lane: C — Carer
 Sprint: SPRINT · planned D8
 Branch: `feature/carer-patients`
-PR target: `carer-dev`
-Last updated: 2026-09-29
+PR target: `main` (merged in #160, 2026-09-29; CHG-036)
+Last updated: 2026-09-30
 
 ## Blockers
 - None. OQ-09 answered (PD-041). Local Supabase (Docker) must be running for T-01, T-02, T-04, T-05 (it is, as of 2026-09-29).

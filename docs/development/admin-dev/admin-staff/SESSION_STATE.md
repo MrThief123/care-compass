@@ -43,3 +43,6 @@ Files likely to be touched next: none expected for ADM-02. A future ADM-10 (Admi
 Warning for next session: Do not touch `src/app/(admin)/admin/staff/**`'s `loading.tsx`/`error.tsx` or
   `staff-states.test.tsx` — those are ADM-UI-03's already-merged work and untouched here. Do not delete
   `src/mocks/admin-staff.ts` from this lane — it's Lane S's file; flagged for their own cleanup PR.
+
+## 2026-09-30 (status sync, by Dhruv Verma)
+- Merged to `main` in #165 on 2026-09-29. Status set to MERGED TO DEV (merged to `main`, CHG-036). Owner unchanged. No code changes.

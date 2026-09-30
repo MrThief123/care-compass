@@ -1,12 +1,12 @@
 # Progress — CAR-09 Carer — Settings
 
-Status: PR OPEN
+Status: MERGED TO DEV
 Owner: Dhruv Verma
 Lane: C — Carer
 Sprint: SPRINT · planned D10
 Branch: `feature/carer-settings`
-PR target: `carer-dev`
-Last updated: 2026-09-29
+PR target: `main` (merged in #159, 2026-09-29; CHG-036)
+Last updated: 2026-09-30
 
 ## Blockers
 - None. OQ-35 answered (PD-054).
