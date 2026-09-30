@@ -55,6 +55,11 @@ Record feature-level decisions here using the template below. Project-wide decis
 - `src/server/clients/info-sections.test.ts` fake `createClient`: before, the returned client carried the builder's `then`, so `await createClient()` resolved to the query result and every Supabase-mode test failed with `supabase.from is not a function`; after, `then` is removed from the client and stays on the chained builder. Reason: genuine test bug; no assertion changed.
 - `getClientDocuments` returns `url: ""` for Supabase documents: the bucket is private and files open through `getDocumentUrl` (F0-13); `DocumentRef.url` is a required string.
 
+### FD-09 — On-shift carers see all three section cards; local storage index quirk
+- Date: 2026-09-30
+- Decision: on shift, Description, Habits and Medical history each show a card even when never written ("Nothing added yet." plus Edit), so a carer can add a first entry. Off shift, an unwritten section is left out. The "No information yet" empty state shows only when off shift with nothing at all.
+- Local stack note (not in a migration): storage-api v1.77.0 needs a unique index on `storage.objects (bucket_id, name collate "C") where archived_at is null`; the local DB lacks it after `supabase db reset`, so every upload fails 42P10 (F0-13 too). Create it as `supabase_storage_admin` before upload integration or e2e runs.
+
 <!-- Template
 ### FD-01 — <title>
 - Date:

@@ -1,6 +1,6 @@
 # Progress — CAR-04 Carer — Client info
 
-Status: IN PROGRESS (migration done; reads, action, redirect, components remaining)
+Status: READY FOR PR (awaiting human approval to open it)
 Owner: Dhruv Verma
 Lane: C — Carer
 Sprint: SPRINT · planned D9
@@ -15,26 +15,28 @@ Last updated: 2026-09-30
 - F0-06, F0-10, F0-13, F0-18, CAR-UI-02, CAR-03 — MERGED
 
 ## Completed
-- Docs rewritten (PRD Scope, 9 ACs, TEST_PLAN, USER_STORIES, DECISIONS FD-01 to FD-06)
-- Tests written first and run red for the right reasons
+- Docs rewritten, tests written first and run red for the right reasons
+- Migration, Supabase reads, `saveClientInfoSection`, redirect, carer Info components (FD-01 to FD-09)
 
 ## In progress
 - None
 
 ## Remaining
-- Migration (`supabase migration new`): carer write on `client_info_sections`, `documents`, `client-documents` only while `carer_on_active_shift`
-- `getClientInfoSections`, `getClientDocuments` Supabase reads; `saveClientInfoSection` action
-- `findCarerPatient` redirects to `/carer/patients`
-- Carer Info wrappers (edit-in-place save, Add file upload) in `src/features/carer-patients/`
-- Replace the two "not implemented" assertions; update `docs/DEVELOPMENT_PLAN.md` card; regenerate DB types if needed
+- Mock-mode browser check and width sweep; human "yes" to open the PR
+- `docs/DEVELOPMENT_PLAN.md` card status left for the PR owner (controlled file)
+- DB types unchanged (no table or column changes)
 
 ## Acceptance criteria status
-- 0 / 9 MET
+- 9 / 9 MET
 
 ## Tests
-- Written: 9 / 9 (component 12, unit 14, db 21 assertions, integration 5, e2e 3)
-- Passing: 0 new (the CAR-UI-02 AC-09 tests are changed to expect a redirect and fail until implemented)
-- Failing (red, expected): all of the above
+- Written: 9 / 9; all passing
+- Local stack (supabase status -o env, never the hosted .env.local):
+  - `npm test`: 181 files, 2208 tests pass
+  - `supabase test db`: 15 files, 470 tests pass
+  - `tests/integration/carer-client-info.test.ts`: 5/5 (on-shift save and upload succeed; off-shift refused NOT_ALLOWED)
+  - `tests/e2e/carer-client-info.spec.ts`: 3/3 (production build, DATA_SOURCE=supabase)
+  - typecheck: only the stale `.next/types/validator.ts` error; lint: 0 errors, 3 warnings in untouched files; prettier: only `care-compass-status.html` (not mine)
 
 ## Files changed
 - `src/features/carer-patients/carer-client-info.test.tsx`, `carer-patients.test.tsx` (AC-09 ×2, HUMAN REVIEW)
@@ -51,13 +53,14 @@ Last updated: 2026-09-30
 - `src/server/clients/queries.test.ts` and `src/server/documents/queries.test.ts`: the "not implemented" Supabase assertions removed, replaced by [CAR-04][AC-08] (FD-08).
 
 ## Problems encountered
+- An early `npm test` ran without the local env, so the F0-07 and F0-04 integration suites hit the hosted project and may have left `f0-07-*@example.test` users there; not cleaned, reported to the human.
 - `.env.local` is the hosted project: integration/e2e must be run with the local stack's variables (`supabase status -o env`).
 
 ## Assumptions
 - Copy and the 5,000-character cap are the PRD's PROPOSED values.
 
 ## Next action
-- Human review of tests, then implement in a fresh session.
+- Browser check, then wait for the human "yes" before opening the PR to `main`.
 
 ## Ready for PR
-- No
+- Yes, pending the browser check and human approval

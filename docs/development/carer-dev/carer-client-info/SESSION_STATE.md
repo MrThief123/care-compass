@@ -1,14 +1,13 @@
 # Session State — CAR-04 Carer — Client info
 
 Last session date: 2026-09-30
-Current branch: `feature/carer-client-info` (from `main`; claim commit pending push)
-Worked on: docs rewrite and tests first
-What changed: docs, 5 new test files, 2 changed tests (CAR-UI-02 AC-09)
-Tests run: carer-patients + info-sections (vitest), carer_client_info.test.sql (pgTAP), carer-client-info integration (local Supabase)
-Test results: all new tests red for the expected reason (missing action, "not implemented" reads, notFound instead of redirect, RLS lets off-shift carers add documents, blocks on-shift section writes)
+Current branch: `feature/carer-client-info` (from `main`, pushed)
+Worked on: implementation and local verification
+What changed: migration (carer/admin writes, upload narrowed to shift), Supabase reads, `saveClientInfoSection`, redirect, carer Info components, test updates per FD-07/FD-08
+Tests run: npm test, supabase test db, carer-client-info integration and e2e (all on the local stack)
+Test results: all green (181 files / 2208 tests; 470 pgTAP; 5/5 integration; 3/3 e2e)
 Current blocker: none
-Important discoveries: today any carer with read access can INSERT documents and storage objects (`can_access_client_documents`); `client_info_sections` writes are family-only; both Supabase reads throw "not implemented"; `.env.local` is the hosted project
-Important decisions: FD-01 to FD-06
-Exact next action: implement in this order: migration → reads + action → redirect → carer Info components; then run `npm test`, `supabase test db`, integration (local env), e2e (local env)
-Files likely to be touched next: `supabase/migrations/<new>_carer_client_info.sql`, `src/server/clients/{actions,queries}.ts`, `src/server/documents/queries.ts`, `src/features/carer-patients/find-patient.ts`, `src/app/(carer)/carer/patients/[clientId]/info/page.tsx`, new carer Info components
-Warning for next session: do not edit `src/features/family-info/**` (Lane F); do not change the tests except as DECISIONS says.
+Important discoveries: local storage needs the collate "C" index after db reset (FD-09); an early test run touched the hosted project (see PROGRESS)
+Important decisions: FD-01 to FD-09
+Exact next action: mock-mode browser check and width sweep; announce readiness; wait for the human "yes", then open the PR to `main` listing the local commands and results
+Warning for next session: do not edit `src/features/family-info/**`; never run integration or e2e with the hosted `.env.local`
