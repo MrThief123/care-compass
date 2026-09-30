@@ -1,29 +1,37 @@
 # Test Plan — CAR-04 Carer — Client info
 
 ## Approach
-Tests are written **before** production code (TESTING.md §2). Run them, confirm they fail for the expected reason, then implement.
+Tests are written **before** production code (TESTING.md §2). Run them, confirm they fail for the expected reason, then implement. Rewritten 2026-09-30.
 
 ## Test levels used
-- **component** → `src/**/<component>.test.tsx` (Vitest + Testing Library + axe)
-- **db** → `supabase/tests/<feature>.test.sql` (pgTAP via `supabase test db`)
-- **e2e** → `tests/e2e/<feature>.spec.ts` (Playwright)
-- **integration** → `tests/integration/<feature>.test.ts` (Vitest against local Supabase)
+- **component** → `src/features/carer-patients/carer-client-info.test.tsx` (Vitest + Testing Library; the page is rendered with the contract mocked)
+- **unit** → `src/server/clients/info-sections.test.ts` (action and queries, Supabase client faked)
+- **db** → `supabase/tests/carer_client_info.test.sql` (pgTAP)
+- **integration** → `tests/integration/carer-client-info.test.ts` (Vitest against local Supabase)
+- **e2e** → `tests/e2e/carer-client-info.spec.ts` (Playwright, local Supabase)
 
 ## Test cases
 
 | Test ID | Covers | Level | Test description | Written first? | Result |
 |---|---|---|---|---|---|
-| T-01 | AC-01 | component | Given Aisha is assigned but not on shift, when Margaret's info renders, then no Edit links or Add file tile exist. | ☐ | NOT RUN |
-| T-02 | AC-02 | e2e | Given Aisha is on an active shift for Margaret, when she edits Habits and saves, then the change is shown. | ☐ | NOT RUN |
-| T-03 | AC-03 | db | Given Aisha is not on shift, when she updates client_info_sections for Margaret directly, then RLS rejects it. | ☐ | NOT RUN |
-| T-04 | AC-04 | integration | Given Aisha is not assigned to a client, when she opens that client's info URL, then she is redirected to Patients. | ☐ | NOT RUN |
+| T-01 | AC-01 | component | Off shift: four cards, no Edit link, no Add file tile, 'View only' notice. | ☑ | FAILS (expected) |
+| T-02 | AC-02 | e2e | Signed in as an on-shift carer, edit Habits, save, reload: new text shown. | ☑ | FAILS (expected) |
+| T-03 | AC-03 | db | Off shift: section insert/update, document insert and storage upload rejected; on shift accepted; admin rejected; read allowed. | ☑ | FAILS (expected) |
+| T-04 | AC-04 | component + integration | Unassigned client: layout and Info redirect to `/carer/patients`; real RLS gives the unassigned carer no sections. | ☑ | FAILS (expected) |
+| T-05 | AC-05 | component + unit | Save rejected with the shift-ended message: shown, draft kept, saved text unchanged; RLS error maps to that message. | ☑ | FAILS (expected) |
+| T-06 | AC-06 | unit + component | Over 5,000 characters refused before the database; error shown. | ☑ | FAILS (expected) |
+| T-07 | AC-07 | component + integration | On shift: Add file calls `uploadDocument` with the client and file, tile appears; error shown on failure; no remove control. Real: on-shift carer uploads, off-shift refused. | ☑ | FAILS (expected) |
+| T-08 | AC-08 | unit + integration | Supabase reads: section order, missing sections left out, client documents oldest first, no event or detached documents. | ☑ | FAILS (expected) |
+| T-09 | AC-09 | component | Contract rejects: error state, logs name no client or carer. | ☑ | FAILS (expected) |
 
 ## Regression scope
-- Run the full unit/component suite and `supabase test db` before marking READY FOR PR.
-- Run Playwright e2e tests for this dashboard before opening the PR.
+- `npm test`, `npm run typecheck`, `npm run lint`, `supabase test db`, `npm run test:integration`, and the CAR-related Playwright specs before READY FOR PR.
 
 ## Test data
-- Use `F0-16` seed data (Banksia Home Care, Margaret, Helen, Aisha R., Priya) unless a test creates its own fixtures.
+- Component/unit tests use their own fixtures. db, integration and e2e create their own users, organisation, client and shifts (F0-16 seed is not merged).
+- e2e writes rows to whichever Supabase `.env.local` points at; run it against the local stack only.
 
-## Coverage mapping rule
-Every AC must have ≥1 test. Tests may only be modified after implementation begins for reasons in TESTING.md §6, recorded in DECISIONS.md.
+## Changed existing tests (HUMAN REVIEW: test expectation changed)
+- `carer-patients.test.tsx` [CAR-UI-02][AC-09] ×2 (`notFound`) become `redirect('/carer/patients')`. Reason: FD-03.
+- `carer-patients.test.tsx` [CAR-UI-02] Info tests that clicked Edit and expected the "not saved" Phase 1 behaviour, if any, are kept until implementation shows a conflict.
+- `src/server/clients/queries.test.ts` [FAM-UI-04][PRD] and `src/server/documents/queries.test.ts` assert that the Supabase mode of `getClientInfoSections` / `getClientDocuments` throws "not implemented". CAR-04 implements both, so at implementation these two assertions are replaced by the [CAR-04][AC-08] tests (recorded requirement change; HUMAN REVIEW: assertion removed).
