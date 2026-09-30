@@ -1,11 +1,11 @@
 # Progress — F0-16 Development seed data from the design content
 
-Status: IN PROGRESS
+Status: MERGED TO DEV
 Owner: Prajeet
 Lane: B — Backend
 Sprint: SPRINT · planned D7
 Branch: `feature/shared-dev-seed-data` (created from main 2026-09-30)
-PR target: `main (per OQ-01 — shared work)`
+PR target: `main` (merged in #172, 2026-09-30)
 Last updated: 2026-09-30
 
 ## Blockers
@@ -48,7 +48,7 @@ Last updated: 2026-09-30
 - PROPOSED items in PRD.md are unconfirmed until validated in F0-01 or answered in DECISIONS.md.
 
 ## Next action
-- Human reviews FD-02 / FD-05; on approval, merge latest `main`, re-run the suites, push and open the PR to `main`.
+- None; merged to `main`.
 
 ## Ready for PR
-- Yes, pending human approval
+- Merged (see PR target above)

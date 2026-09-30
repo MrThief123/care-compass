@@ -9,6 +9,6 @@ Test results: all green (pgTAP 14 files / 446; Vitest 2186; seed tests 6/6)
 Current blocker: none
 Important discoveries: `carer_client_assignments` was retired by F0-18 (access is from shifts). Eight pgTAP files insert helen@example.com, so Helen is seeded as helen.doyle@example.com (FD-01). sign_up pgTAP test 21 counts organisations named "Wattle Care", so the second organisation is Kookaburra Care.
 Important decisions: FD-01 (human), FD-02 to FD-05 (see DECISIONS.md)
-Exact next action: human reviews FD-02 / FD-05; then `git merge origin/main`, re-run `supabase db reset`, `npm run db:seed`, `supabase test db`, `npm run verify`; push and open the PR to `main` with approval.
+Exact next action: none; merged to `main` in #172 (2026-09-30).
 Files likely to be touched next: none unless review asks for changes
 Warning for next session: run `npm run db:seed` after every `supabase db reset`. Any new migration that adds a NOT NULL column or a table the seed should fill must also update `supabase/seed.sql` and `docs/SEED_DATA.md`.

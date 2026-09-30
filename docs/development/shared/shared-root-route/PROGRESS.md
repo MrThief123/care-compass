@@ -1,11 +1,11 @@
 # Progress — F0-19 Root route and production guard for dev previews
 
-Status: READY FOR PR
+Status: MERGED TO DEV
 Owner: Dhruv Verma
 Lane: S — Shared
 Sprint: SPRINT · planned D11
 Branch: `feature/shared-root-route`
-PR target: `main`
+PR target: `main` (merged in #171, 2026-09-30)
 Last updated: 2026-09-30
 
 ## Blockers
@@ -18,10 +18,10 @@ Last updated: 2026-09-30
 - 7 / 7 MET (AC-07 added by FD-06)
 
 ## Next action
-- Human go-ahead, then open the PR to `main` (docs update ships inside it).
+- None; merged to `main`.
 
 ## Ready for PR
-- Yes, awaiting human approval
+- Merged (see PR target above)
 
 ## Checks run locally (CI down)
 - `npx vitest run`: all pass except F0-07 integration tests (hosted project returns "Invalid API key" 401, environment, not this change)

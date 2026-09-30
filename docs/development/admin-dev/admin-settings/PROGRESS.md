@@ -1,11 +1,11 @@
 # Progress — ADM-10 Admin — Settings
 
-Status: IN PROGRESS (implementation done; awaiting human go-ahead for PR)
+Status: MERGED TO DEV
 Owner: Dhruv Verma
 Lane: A — Admin
 Sprint: SPRINT · planned D10
 Branch: `feature/admin-settings`
-PR target: `main`
+PR target: `main` (merged in #170, 2026-09-30)
 Last updated: 2026-09-30
 
 ## Blockers
@@ -56,7 +56,7 @@ Last updated: 2026-09-30
 - PROPOSED items in PRD.md are unconfirmed until validated in F0-01 or answered in DECISIONS.md.
 
 ## Next action
-- Ask the human before opening the PR to main.
+- None; merged to `main`.
 
 ## Ready for PR
-- No
+- Merged (see PR target above)

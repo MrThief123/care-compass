@@ -1,11 +1,11 @@
 # Progress — CAR-04 Carer — Client info
 
-Status: READY FOR PR (awaiting human approval to open it)
+Status: MERGED TO DEV
 Owner: Dhruv Verma
 Lane: C — Carer
 Sprint: SPRINT · planned D9
 Branch: `feature/carer-client-info` (from `main`)
-PR target: `main` (CHG-036)
+PR target: `main` (merged in #173, 2026-09-30)
 Last updated: 2026-09-30
 
 ## Blockers
@@ -65,7 +65,7 @@ Last updated: 2026-09-30
 - Copy and the 5,000-character cap are the PRD's PROPOSED values.
 
 ## Next action
-- Wait for the human "yes" before opening the PR to `main`. PR notes: shared `next.config.ts`; Carer Home error against a real database (CAR-02 not started); hosted `f0-07-*` users uncleaned.
+- None; merged to `main`.
 
 ## Ready for PR
-- Yes, pending human approval
+- Merged (see PR target above)
