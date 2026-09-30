@@ -9,6 +9,6 @@ Test results: 3 new files green; full suite green except 4 tests from local DB s
 Current blocker: none
 Important discoveries: none
 Important decisions: none
-Exact next action: human review, then open the PR to main on their yes.
+Exact next action: PR open on feature/family-home-today; address review comments.
 Files likely to be touched next: none (PR review fixes only)
 Warning for next session: Read PRD.md, ACCEPTANCE_CRITERIA.md and TEST_PLAN.md before writing any code. The screen already exists (FAM-UI-01); the gaps are the Supabase `getTodayOccurrences` and the page-level `assertClientAccess` (DECISIONS FD-01, FD-05).

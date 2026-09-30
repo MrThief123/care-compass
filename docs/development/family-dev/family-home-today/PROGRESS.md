@@ -1,6 +1,6 @@
 # Progress — FAM-01 Family Home — Today day-view timeline
 
-Status: IN PROGRESS
+Status: PR OPEN
 Owner: Dhruv Verma
 Lane: F — Family
 Sprint: SPRINT · planned D8
@@ -70,7 +70,7 @@ Last updated: 2026-10-01 (implemented, READY FOR PR pending human yes)
 - PROPOSED items in PRD.md are unconfirmed until validated in F0-01 or answered in DECISIONS.md.
 
 ## Next action
-- Human reviews, then says yes to open the PR.
+- PR review.
 
 ## Ready for PR
-- Yes, awaiting the human's yes before opening it
+- Yes. PR opened after the human approved (2026-10-01).
