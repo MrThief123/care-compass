@@ -24,6 +24,21 @@ Record feature-level decisions here using the template below. Project-wide decis
 ### FD-04 — Reset card
 - Reuses `requestOwnPasswordReset` (FAM-12), so it goes to the sign-in email, not the contact email (PD-054). Screen swaps the preview notice for real sent/failed messages.
 
+### FD-05 — Table UPDATE revoked on organisations
+- Decision: the migration also runs `revoke update on organisations from anon, authenticated`.
+- Reason: with RLS and no update policy a direct update silently matches zero rows; T-03 requires a refusal (42501). Same pattern as `profiles` and `documents`.
+- Consequences: additive; nothing else updates `organisations` as `authenticated` (service role unaffected).
+
+### FD-06 — Changed existing tests (ADM-UI-05) — HUMAN REVIEW: test expectation changed
+- `settings-screen.test.tsx`: the screen now calls server actions, so the file mocks `next/navigation`, `updateOrganisationSettings` and `requestOwnPasswordReset`. Before: 'saves local changes ... resets on remount' expected 'Organisation details saved' and a reset on remount; after: expects 'Saved.' and unmutated props. Before: 'clears saved feedback' expected no 'saved' text straight after clicking Save; after: waits for 'Saved.' then expects it cleared on typing. Before: reset expected 'No email was sent'; after: expects the sent message and unchanged details. Reason: the local-preview behaviour and notices were removed (this feature's scope). No assertion dropped.
+- `queries.test.ts`: 'rejects unwired live mode' replaced by a live-mode read test (`[ADM-10][AC-01]`); live mode no longer throws.
+
+### FD-07 — ABN storage
+- FD-03 confirmed as built: the Zod schema lives in `src/server/admin/settings-schema.ts` (shared by screen and action); the RPC re-checks. Still non-blocking; human to confirm no checksum.
+
+### FD-08 — Generated types
+- `database.types.ts` got only the `admin_update_organisation` entry by hand: the generator in this CLI version reorders unrelated entries (about 450 lines of noise). The action types `.single<Row>()` because the hand entry has no `SetofOptions`.
+
 <!-- Template
 ### FD-01 — <title>
 - Date:

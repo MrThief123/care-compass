@@ -2,13 +2,13 @@
 
 Last session date: 2026-09-30
 Current branch: `feature/admin-settings`
-Worked on: claim, docs, tests first
-What changed: docs, tests T-01..T-09
-Tests run: none
-Test results: n/a
-Current blocker: none
-Important discoveries: none
-Important decisions: none
-Exact next action: implement per FD-02; make red tests green; update ADM-UI-05 tests per TEST_PLAN.
-Files likely to be touched next: `src/app/(admin)/admin/settings/page.tsx`, `src/features/admin-settings/*`
-Warning for next session: branch from main; create migration with `supabase migration new`.
+Worked on: implementation (migration, schema, action, query, screen wiring, ADM-UI-05 test updates)
+What changed: see PROGRESS.md Files changed
+Tests run: vitest, supabase test db, local integration, tsc, eslint, e2e (see PROGRESS.md)
+Test results: unit/pgTAP/ADM-10 integration green; e2e not clean (dev server on :3000 reused)
+Current blocker: e2e needs :3000 free (or the owner stopping their `next dev`)
+Important discoveries: direct UPDATE needed a table revoke to raise 42501 (FD-05); type generator is noisy (FD-08)
+Important decisions: FD-05 to FD-08
+Exact next action: re-run e2e cleanly, then ask the human before opening the PR to main.
+Files likely to be touched next: none
+Warning for next session: restart any `next dev` after `npm run pretest:e2e`.
