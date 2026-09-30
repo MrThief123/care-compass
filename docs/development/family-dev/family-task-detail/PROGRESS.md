@@ -1,12 +1,12 @@
 # Progress — FAM-15 Family — Task detail
 
-Status: NOT STARTED
-Owner: unclaimed
+Status: IN PROGRESS
+Owner: Dhruv Verma
 Lane: F — Family
 Sprint: SPRINT · planned D11
-Branch: `feature/family-task-detail` (not yet created)
-PR target: `family-dev`
-Last updated: 2026-09-17 (planning pack generated)
+Branch: `feature/family-task-detail`
+PR target: `main`
+Last updated: 2026-09-30 (claimed)
 
 ## Blockers
 - OQ-29 — Which nurse is shown on an event
