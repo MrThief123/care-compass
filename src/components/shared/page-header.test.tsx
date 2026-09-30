@@ -46,4 +46,32 @@ describe("PageHeader", () => {
     render(<PageHeader subject="Home" date="Monday 30 November 2026" userFirstName="Aisha" bell />);
     expect(screen.getByRole("button", { name: /notification/i })).toBeInTheDocument();
   });
+
+  it("[CAR-02][T-14] renders bellSlot in place of the plain bell button", () => {
+    render(
+      <PageHeader
+        subject="Home"
+        date="Monday 30 November 2026"
+        userFirstName="Aisha"
+        bell
+        bellSlot={<button type="button">Custom bell</button>}
+      />,
+    );
+
+    expect(screen.getByRole("button", { name: "Custom bell" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Notifications" })).not.toBeInTheDocument();
+  });
+
+  it("[CAR-02][T-14] bellSlot alone (without bell) still renders, and the header has one bell only", () => {
+    render(
+      <PageHeader
+        subject="Home"
+        date="Monday 30 November 2026"
+        userFirstName="Aisha"
+        bellSlot={<button type="button">Custom bell</button>}
+      />,
+    );
+
+    expect(screen.getAllByRole("button")).toHaveLength(1);
+  });
 });

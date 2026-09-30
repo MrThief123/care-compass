@@ -40,11 +40,18 @@ Record feature-level decisions here using the template below. Project-wide decis
 
 ### FD-04 — Read state and the bell
 - Date: 2026-09-30
-- Decision (human, 2026-09-30): `read_at` null = unread. The bell shows the unread count (badge, hidden at 0, `9+` above 9; accessible name `Notifications, N unread`, or `Notifications` at 0). Clicking it:
-  - on `/carer/home`: scrolls to the Notifications card, moves focus to it, and marks **all** the carer's notifications read;
-  - anywhere else in the carer app: navigates to `/carer/home#carer-home-notifications`, then does the same on arrival.
+- Decision (human, 2026-09-30): `read_at` null = unread. The bell shows the unread count (badge, hidden at 0, `9+` above 9; accessible name `Notifications, N unread`, or `Notifications` at 0). Clicking it calls `markCarerNotificationsRead()` (all the carer's unread), then `router.refresh()` (the layout persists across navigations, so the count needs it), then:
+  - on `/carer/home`: scrolls to the Notifications heading (`id="carer-home-notifications"`, `tabIndex=-1`) and focuses it;
+  - anywhere else in the carer app: `router.push('/carer/home#carer-home-notifications')`.
+  If the action fails (rejects or `{ok:false}`), the scroll or navigation still happens, the count stays, and nothing is shown that could carry a name (AC-11).
   Unread rows show a small dot with the accessible text 'Unread' (status never by colour alone). There is no per-row control. Read rows stay listed (no deletion or expiry in this feature; the card shows the newest 50).
 - Mock mode: `markCarerNotificationsRead` flips `read` on an in-memory copy so the dev preview behaves; the fixture module is not rewritten.
+
+### FD-04a — Test changes caused by this feature
+- Date: 2026-09-30
+- `[CAR-UI-01][AC-02]`, `[CAR-UI-01][AC-06]` (`src/server/notifications/queries.test.ts`, `src/features/carer-home/carer-home.test.tsx`): message text `(Margaret)` → `(Margaret Doyle)`. Reason: FD-03 (CHG-032). **HUMAN REVIEW: test expectation changed.**
+- `[CAR-UI-01][PRD] getCarerNotifications throws the not-implemented error` (`queries.test.ts`) removed. Reason: this feature implements the Supabase branch, so the assertion is invalid; the Supabase behaviour is covered by `tests/integration/carer-notifications.test.ts`. **HUMAN REVIEW: assertion removed.**
+- `carer-home.test.tsx` mock setup gains `getCarerUnreadCount`, `@/server/notifications/actions` (the layout now renders the bell). Infrastructure only; no assertion changed.
 
 ### FD-05 — Shared edit: PageHeader gets an optional `bellSlot`
 - Date: 2026-09-30

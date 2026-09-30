@@ -14,6 +14,7 @@ const mocks = vi.hoisted(() => ({
   getToday: vi.fn(),
   getCarerShifts: vi.fn(),
   getCarerNotifications: vi.fn(),
+  getCarerUnreadCount: vi.fn(),
 }));
 
 vi.mock("next/navigation", () => ({
@@ -22,6 +23,9 @@ vi.mock("next/navigation", () => ({
 }));
 vi.mock("@/server/auth/queries", () => ({
   getCurrentUser: mocks.getCurrentUser,
+}));
+vi.mock("@/server/notifications/actions", () => ({
+  markCarerNotificationsRead: vi.fn(),
 }));
 vi.mock("@/server/auth/actions", () => ({
   signOut: vi.fn(),
@@ -34,6 +38,7 @@ vi.mock("@/server/shifts/queries", () => ({
 }));
 vi.mock("@/server/notifications/queries", () => ({
   getCarerNotifications: mocks.getCarerNotifications,
+  getCarerUnreadCount: mocks.getCarerUnreadCount,
 }));
 
 /*
@@ -72,17 +77,17 @@ function notification(
 const NOTIFICATIONS: CarerNotification[] = [
   notification({
     id: "notif-1",
-    message: "New shift assigned: Tuesday 1 Dec, 09:00–11:00 (Margaret).",
+    message: "New shift assigned: Tuesday 1 Dec, 09:00–11:00 (Margaret Doyle).",
     createdAt: "2026-11-30T08:30:00+11:00",
   }),
   notification({
     id: "notif-2",
-    message: "Shift changed: Wednesday 2 Dec now 13:00–17:00 (Margaret).",
+    message: "Shift changed: Wednesday 2 Dec now 13:00–17:00 (Margaret Doyle).",
     createdAt: "2026-11-29T17:00:00+11:00",
   }),
   notification({
     id: "notif-3",
-    message: "Shift cancelled: Friday 4 Dec, 08:00–12:00 (Margaret).",
+    message: "Shift cancelled: Friday 4 Dec, 08:00–12:00 (Margaret Doyle).",
     createdAt: "2026-11-28T10:00:00+11:00",
     read: true,
   }),
@@ -102,6 +107,7 @@ beforeEach(() => {
   mocks.getToday.mockResolvedValue("2026-11-30");
   mocks.getCarerShifts.mockResolvedValue([MARGARET_SHIFT]);
   mocks.getCarerNotifications.mockResolvedValue(NOTIFICATIONS);
+  mocks.getCarerUnreadCount.mockResolvedValue(0);
 });
 
 afterEach(() => {
@@ -129,11 +135,11 @@ describe("[CAR-UI-01] Carer Home", () => {
     });
   });
 
-  it("[CAR-UI-01][AC-02] Notifications include 'New shift assigned: Tuesday 1 Dec, 09:00–11:00 (Margaret).' with an 'Admin' chip", async () => {
+  it("[CAR-UI-01][AC-02] Notifications include 'New shift assigned: Tuesday 1 Dec, 09:00–11:00 (Margaret Doyle).' with an 'Admin' chip", async () => {
     await renderHome();
     const notifications = screen.getByRole("region", { name: "Notifications" });
     const message = within(notifications).getByText(
-      "New shift assigned: Tuesday 1 Dec, 09:00–11:00 (Margaret).",
+      "New shift assigned: Tuesday 1 Dec, 09:00–11:00 (Margaret Doyle).",
     );
     const row = message.closest("li") ?? message.parentElement!;
 
@@ -260,6 +266,45 @@ describe("[CAR-UI-01] Carer Home accessibility (REQ-N2)", () => {
 
   it("[CAR-UI-01][AC-10] loading skeleton has no axe violations", async () => {
     const { container } = render(<Loading />);
+
+    expect(await axe(container)).toHaveNoViolations();
+  });
+});
+
+describe("[CAR-02] Carer Home notifications card and header bell on real read state", () => {
+  it("[CAR-02][AC-06] rows are newest first; the two unread rows have an 'Unread' marker and the read one has none", async () => {
+    await renderHome();
+    const notifications = screen.getByRole("region", { name: "Notifications" });
+    const rows = within(notifications).getAllByRole("listitem");
+
+    expect(rows.map((row) => within(row).queryByText("Unread") !== null)).toEqual([
+      true,
+      true,
+      false,
+    ]);
+    expect(rows[0]).toHaveTextContent("New shift assigned");
+    expect(rows[0]).toHaveTextContent("Admin");
+  });
+
+  it("[CAR-02][AC-08] the Notifications heading can take focus, so the bell can move it there", async () => {
+    await renderHome();
+
+    const heading = screen.getByRole("heading", { name: "Notifications" });
+    expect(heading).toHaveAttribute("id", "carer-home-notifications");
+    expect(heading).toHaveAttribute("tabindex", "-1");
+  });
+
+  it("[CAR-02][AC-07] the layout's bell shows the carer's unread count", async () => {
+    mocks.getCarerUnreadCount.mockResolvedValue(2);
+    const layout = await CarerLayout({ children: <div /> });
+    render(layout);
+
+    expect(screen.getByRole("button", { name: "Notifications, 2 unread" })).toBeInTheDocument();
+    expect(mocks.getCarerUnreadCount).toHaveBeenCalledWith(AISHA.profileId);
+  });
+
+  it("[CAR-02][AC-12] the card with unread markers has no axe violations", async () => {
+    const { container } = await renderHome();
 
     expect(await axe(container)).toHaveNoViolations();
   });

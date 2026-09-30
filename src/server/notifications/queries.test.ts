@@ -1,14 +1,15 @@
 // @vitest-environment node
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { getCarerNotifications } from "@/server/notifications/queries";
+import { getCarerNotifications, getCarerUnreadCount } from "@/server/notifications/queries";
 
 /**
  * Contract tests for the carer's notifications (CHG-025, amending PD-048):
  * shift assigned, changed and cancelled only, each naming the client.
  */
 
-const SHIFT_MESSAGE = /^(New shift assigned|Shift changed|Shift cancelled): .+\(Margaret\)\.$/;
+const SHIFT_MESSAGE =
+  /^(New shift assigned|Shift changed|Shift cancelled): .+\(Margaret Doyle\)\.$/;
 
 beforeEach(() => {
   vi.stubEnv("DATA_SOURCE", "mock");
@@ -19,12 +20,12 @@ afterEach(() => {
 });
 
 describe("[CAR-UI-01][AC-02][AC-06] getCarerNotifications", () => {
-  it("[CAR-UI-01][AC-02] Aisha's newest notification is 'New shift assigned: Tuesday 1 Dec, 09:00–11:00 (Margaret).' from Admin", async () => {
+  it("[CAR-UI-01][AC-02] Aisha's newest notification is 'New shift assigned: Tuesday 1 Dec, 09:00–11:00 (Margaret Doyle).' from Admin", async () => {
     const rows = await getCarerNotifications("staff-aisha");
 
     expect(rows[0]).toMatchObject({
       source: "admin",
-      message: "New shift assigned: Tuesday 1 Dec, 09:00–11:00 (Margaret).",
+      message: "New shift assigned: Tuesday 1 Dec, 09:00–11:00 (Margaret Doyle).",
     });
   });
 
@@ -59,12 +60,12 @@ describe("[CAR-UI-01][AC-02][AC-06] getCarerNotifications", () => {
   });
 });
 
-describe("[CAR-UI-01][PRD] supabase mode", () => {
-  it("[CAR-UI-01][PRD] getCarerNotifications throws the not-implemented error naming its domain and function", async () => {
-    vi.stubEnv("DATA_SOURCE", "supabase");
+describe("[CAR-02][AC-10] getCarerUnreadCount", () => {
+  it("[CAR-02][AC-10] counts Aisha's unread notifications (two of her three)", async () => {
+    await expect(getCarerUnreadCount("staff-aisha")).resolves.toBe(2);
+  });
 
-    await expect(getCarerNotifications("staff-aisha")).rejects.toThrow(
-      /notifications\.getCarerNotifications: DATA_SOURCE="supabase" is not implemented yet/,
-    );
+  it("[CAR-02][AC-10] an unknown carer has none", async () => {
+    await expect(getCarerUnreadCount("staff-nobody")).resolves.toBe(0);
   });
 });
