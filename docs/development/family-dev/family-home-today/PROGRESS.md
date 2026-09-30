@@ -35,12 +35,16 @@ Last updated: 2026-10-01 (claimed)
 - 0 / 6 MET
 
 ## Tests
-- Written: 0 / 6
-- Passing: 0
-- Failing: 0
+- Written: 6 / 6 ACs, plus T-07 and T-08 (17 tests in 3 files)
+- Passing on first run: 6 (regression guards for work FAM-UI-01 and F0-22 already did: T-01, T-02, T-03, T-04, T-06, and the integration redirect check)
+- Failing for the right reason: 11 (5 unit and 3 integration: `getTodayOccurrences` is "not implemented" under Supabase; 3 page tests: the page does not call `assertClientAccess`)
+
+## Tests written first
+- Commands: `npx vitest run src/server/events/get-today-occurrences.test.ts "src/app/(family)/family/[clientId]/home"` (13 tests: 8 fail, 5 pass); integration with the local Supabase env (`supabase status -o env`): `npx vitest run tests/integration/family-home-today.test.ts` (4 tests: 3 fail, 1 passes). `npm run typecheck` clean; `npm run lint` 0 errors (2 existing warnings in `dev-preview/page.tsx`).
+- To implement: Supabase branch of `getTodayOccurrences` in `src/server/events/queries.ts` (today via `getToday()`, `loadOccurrences` over `melbourneDaysToInstants`, same `type` handling as `getOccurrences`); `home/page.tsx` calls `assertClientAccess(clientId)` first, outside the try/catch (FD-05).
 
 ## Files changed
-- None yet. Likely files: `src/app/(family)/family/[clientId]/home/page.tsx`, `src/features/family-home/today-panel.tsx`, `src/features/family-home/position-blocks.ts`, `src/features/family-home/*.test.tsx`
+- Tests: `src/server/events/get-today-occurrences.test.ts`, `src/app/(family)/family/[clientId]/home/page.test.tsx`, `tests/integration/family-home-today.test.ts`. Likely production files: `src/app/(family)/family/[clientId]/home/page.tsx`, `src/features/family-home/today-panel.tsx`, `src/features/family-home/position-blocks.ts`, `src/features/family-home/*.test.tsx`
 
 ## Decisions
 - See DECISIONS.md
@@ -52,7 +56,7 @@ Last updated: 2026-10-01 (claimed)
 - PROPOSED items in PRD.md are unconfirmed until validated in F0-01 or answered in DECISIONS.md.
 
 ## Next action
-- Write the tests first (TEST_PLAN.md), confirm they fail for the right reason, commit `test(family): …`, then stop for the implementation session.
+- Implementation session (fresh context): make the failing tests pass, then run the suite and the visual check.
 
 ## Ready for PR
 - No
