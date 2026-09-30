@@ -980,3 +980,13 @@ Template for future entries:
 - Impact: new feature F0-20 (Lane B, `docs/development/shared/shared-admin-mfa-hardening/`), depends on F0-07 and F0-17. Touches `src/app/(auth)/mfa/**`, `src/server/auth/actions.ts`, and tests. No migration. F0-07 AC-09/AC-10 and T-09/T-10 stay valid, so no F0-07 expectation changes because of this entry. Prajeet decided CHG-010's note; this entry reverses it on the human's instruction and he should be told. Open feature branches should merge `main` afterwards.
 - Human confirmation: Dhruv Verma, 2026-09-30 (in-session).
 - Docs updated: this entry, PD-040 and CHG-010 amendment notes, DEVELOPMENT_PLAN.md (F0-20 row and card), F0-20 feature docs.
+
+### CHG-041 — Auth security audit (new feature F0-21)
+- Date / requested by: 2026-10-01 / Dhruv Verma (human, project lead)
+- Type: scope addition (new feature)
+- Description: new feature **F0-21** audits sign-in and authorisation against five common weaknesses and fixes what it finds: (1) admin MFA is enforced only by the app route guard, because no RLS policy checks `aal`, so a password-only (AAL1) session can call the data API directly; (2) session cookie flags (`HttpOnly`, `Secure`, `SameSite`) not yet verified; (3) IDOR: every client-scoped table needs a cross-tenant test; (4) rate limits on sign-in, password reset and TOTP verify not yet confirmed; (5) the sign-in form submits as a GET with the email and password in the URL if clicked before hydration (seen in dev during F0-20).
+- Supersedes: nothing. Kept out of F0-20 by CLAUDE.md §6; F0-20's PR lists findings (1) and (5) as known.
+- Source / justification: human, in-session 2026-10-01, after the F0-20 review of generated-code sign-in weaknesses. F0-20 found finding (1) and (5).
+- Impact: new feature F0-21 (Lane S, `docs/development/shared/shared-auth-security-audit/`), depends on F0-07 and F0-20. Likely touches `supabase/migrations` (additive RLS only; CLAUDE.md §3 rules apply), `src/lib/supabase/**`, `proxy.ts`, the sign-in form, and tests. A PR that alters a table another feature reads says so. Nothing starts until F0-20 is merged.
+- Human confirmation: Dhruv Verma, 2026-10-01 (in-session).
+- Docs updated: this entry, DEVELOPMENT_PLAN.md (F0-21 row, card, totals 86 features / 395 ACs), F0-21 feature docs.

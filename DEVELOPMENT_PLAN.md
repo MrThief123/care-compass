@@ -1,7 +1,7 @@
 # DEVELOPMENT PLAN — Care Compass
 
 Version 0.2 · 17 September 2026 · Status: DRAFT (controlled after planning freeze) · Supersedes v0.1 dashboard-by-dashboard phases
-Totals: **85 active features** (86 listed; CAR-08 retired) · **389 acceptance criteria** across 5 phases (UI-04 and its 10 criteria added by CHG-004, 2026-09-19; UI-05 and its 13 criteria added under CHG-009, 2026-09-24; F0-17 and its 8 criteria added by CHG-010, 2026-09-24; CHG-020, 2026-09-25: FAM-UI-08 (6 criteria) and ADM-11 (5) added, FAM-UI-05 +5 criteria, CAR-08 and its 2 criteria retired; CHG-021, 2026-09-25: FAM-UI-05 +4 criteria; CHG-022, 2026-09-25: FAM-UI-05 +5 criteria; CHG-027, 2026-09-26: F0-18 and its 9 criteria added; CHG-037, 2026-09-30: F0-19 and its 6 criteria added; CHG-040, 2026-09-30: F0-20 and its 10 criteria added; the Jira import `docs/JIRA_BACKLOG.csv` predates all five). Jira import: `docs/JIRA_BACKLOG.csv`.
+Totals: **86 active features** (87 listed; CAR-08 retired) · **395 acceptance criteria** across 5 phases (UI-04 and its 10 criteria added by CHG-004, 2026-09-19; UI-05 and its 13 criteria added under CHG-009, 2026-09-24; F0-17 and its 8 criteria added by CHG-010, 2026-09-24; CHG-020, 2026-09-25: FAM-UI-08 (6 criteria) and ADM-11 (5) added, FAM-UI-05 +5 criteria, CAR-08 and its 2 criteria retired; CHG-021, 2026-09-25: FAM-UI-05 +4 criteria; CHG-022, 2026-09-25: FAM-UI-05 +5 criteria; CHG-027, 2026-09-26: F0-18 and its 9 criteria added; CHG-037, 2026-09-30: F0-19 and its 6 criteria added; CHG-040, 2026-09-30: F0-20 and its 10 criteria added; CHG-041, 2026-10-01: F0-21 and its 6 criteria added; the Jira import `docs/JIRA_BACKLOG.csv` predates all five). Jira import: `docs/JIRA_BACKLOG.csv`.
 
 ---
 
@@ -155,6 +155,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 | 12 | F0-18 | Carer view access derived from shifts | B | D8 | SPRINT | F0-06, F0-10, F0-08 | — | `feature/shared-carer-shift-access` | NOT STARTED |
 | 13 | F0-19 | Root route and production guard for dev previews | S | D11 | SPRINT | F0-07 | — | `feature/shared-root-route` | NOT STARTED |
 | 14 | F0-20 | Admin TOTP MFA hardening | S | D11 | SPRINT | F0-07, F0-17 | — | `feature/shared-admin-mfa-hardening` | IN PROGRESS |
+| 15 | F0-21 | Auth security audit | S | D12 | SPRINT | F0-07, F0-20 | — | `feature/shared-auth-security-audit` | NOT STARTED |
 
 ### Phase 3 — Data wiring & behaviour (parallel: Family · Carer · Admin)
 
@@ -715,6 +716,17 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Testing summary:** unit, component, server-action, integration, e2e; each run 10 times
 - **Requirements:** REQ-01
 - **Docs:** `docs/development/shared/shared-admin-mfa-hardening/` · **Status:** IN PROGRESS
+
+### F0-21 — Auth security audit
+- **Dashboard / stream:** shared · **Lane:** S · **Days:** D12 · **Sprint:** SPRINT · **PR target:** `main` · **Branch:** `feature/shared-auth-security-audit`
+- **Description:** Audits sign-in and authorisation for the common weaknesses of generated code and fixes what it finds: admin MFA enforced only by the app (RLS has no `aal` check), session cookie flags, ID swapping (IDOR) across every client-scoped table, rate limiting on sign-in, password reset and TOTP verify, and the sign-in form putting credentials in the URL when submitted before hydration. Added by CHG-041.
+- **User value:** Client health and financial data stays protected even if someone bypasses the screens and calls the data API directly.
+- **Dependencies:** F0-07, F0-20 · **Blocking decisions:** None. Any RLS change is an additive migration and is shown to the human before it is applied.
+- **Jira summary:** Audit and harden authentication and authorisation: RLS aal2 for admins, cookies, IDOR, rate limits
+- **Acceptance criteria summary:** 6 criteria — admin data needs AAL2 in RLS, cookie flags, IDOR sweep on every client-scoped table, rate limits on sign-in/reset/TOTP verify, no credentials in the URL, written audit report
+- **Testing summary:** integration against local Supabase (direct data API calls with AAL1 and cross-tenant sessions), unit, e2e
+- **Requirements:** REQ-01
+- **Docs:** `docs/development/shared/shared-auth-security-audit/` · **Status:** NOT STARTED
 
 ## Phase 3 — Data wiring & behaviour (parallel: Family · Carer · Admin) — feature detail
 
