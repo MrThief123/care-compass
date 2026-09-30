@@ -846,6 +846,22 @@ export type Database = {
         };
         Returns: undefined;
       };
+      admin_update_organisation: {
+        Args: {
+          p_name: string;
+          p_abn: string;
+          p_phone: string;
+          p_address: string;
+        };
+        Returns: {
+          abn: string | null;
+          address: string | null;
+          created_at: string;
+          id: string;
+          name: string;
+          phone: string | null;
+        };
+      };
       admin_update_staff: {
         Args: {
           p_profile_id: string;
