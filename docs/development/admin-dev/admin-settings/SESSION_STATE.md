@@ -1,14 +1,14 @@
 # Session State — ADM-10 Admin — Settings
 
-Last session date: none (no implementation session yet)
-Current branch: n/a — `feature/admin-settings` not created
-Worked on: n/a
-What changed: n/a
+Last session date: 2026-09-30
+Current branch: `feature/admin-settings`
+Worked on: claim, docs, tests first
+What changed: docs, tests T-01..T-09
 Tests run: none
 Test results: n/a
-Current blocker: OQ-35
+Current blocker: none
 Important discoveries: none
 Important decisions: none
-Exact next action: Run `START FEATURE ADM-10` once dependencies are MERGED TO DEV (or COMPLETE) and blocking decisions are answered.
+Exact next action: implement per FD-02; make red tests green; update ADM-UI-05 tests per TEST_PLAN.
 Files likely to be touched next: `src/app/(admin)/admin/settings/page.tsx`, `src/features/admin-settings/*`
-Warning for next session: Read PRD.md, ACCEPTANCE_CRITERIA.md and TEST_PLAN.md before writing any code. Do not create the branch from the wrong parent (`admin-dev`).
+Warning for next session: branch from main; create migration with `supabase migration new`.
