@@ -5,7 +5,7 @@
 | Feature ID | ADM-06 |
 | Dashboard / stream | Admin |
 | Phase | Phase 3 — Data wiring & behaviour (parallel: Family · Carer · Admin) |
-| Development branch (PR target) | `admin-dev` |
+| PR target | `main` (CHG-036) |
 | Feature branch | `feature/admin-manage-selection` |
 | Documentation | `docs/development/admin-dev/admin-manage-selection/` |
 | Lane | A — Admin |
@@ -34,6 +34,7 @@ Admins pick who to roster to whom quickly (dense but clear).
 - Selectable list rows: avatar + name; selected = solid #07727D with white text and check; hover = tint.
 - Assign shift panel header with summary 'Aisha Rahman → Margaret' and 'Clear' (panel body is ADM-07).
 - Selection state in URL (`staff`, `client`).
+- Search state in URL (`staffQ`, `clientQ`), submitted with Enter; the server filters (see FD-02).
 
 ## Out of Scope
 - Date/time assignment (ADM-07)
