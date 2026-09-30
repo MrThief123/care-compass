@@ -1,7 +1,7 @@
 # DEVELOPMENT PLAN — Care Compass
 
 Version 0.2 · 17 September 2026 · Status: DRAFT (controlled after planning freeze) · Supersedes v0.1 dashboard-by-dashboard phases
-Totals: **83 active features** (84 listed; CAR-08 retired) · **373 acceptance criteria** across 5 phases (UI-04 and its 10 criteria added by CHG-004, 2026-09-19; UI-05 and its 13 criteria added under CHG-009, 2026-09-24; F0-17 and its 8 criteria added by CHG-010, 2026-09-24; CHG-020, 2026-09-25: FAM-UI-08 (6 criteria) and ADM-11 (5) added, FAM-UI-05 +5 criteria, CAR-08 and its 2 criteria retired; CHG-021, 2026-09-25: FAM-UI-05 +4 criteria; CHG-022, 2026-09-25: FAM-UI-05 +5 criteria; CHG-027, 2026-09-26: F0-18 and its 9 criteria added; the Jira import `docs/JIRA_BACKLOG.csv` predates all five). Jira import: `docs/JIRA_BACKLOG.csv`.
+Totals: **84 active features** (85 listed; CAR-08 retired) · **379 acceptance criteria** across 5 phases (UI-04 and its 10 criteria added by CHG-004, 2026-09-19; UI-05 and its 13 criteria added under CHG-009, 2026-09-24; F0-17 and its 8 criteria added by CHG-010, 2026-09-24; CHG-020, 2026-09-25: FAM-UI-08 (6 criteria) and ADM-11 (5) added, FAM-UI-05 +5 criteria, CAR-08 and its 2 criteria retired; CHG-021, 2026-09-25: FAM-UI-05 +4 criteria; CHG-022, 2026-09-25: FAM-UI-05 +5 criteria; CHG-027, 2026-09-26: F0-18 and its 9 criteria added; CHG-037, 2026-09-30: F0-19 and its 6 criteria added; the Jira import `docs/JIRA_BACKLOG.csv` predates all five). Jira import: `docs/JIRA_BACKLOG.csv`.
 
 ---
 
@@ -153,6 +153,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 | 10 | F0-16 | Development seed data from the design content | B | D7 | SPRINT | F0-11, F0-12, F0-13, F0-10 | OQ-01 | `feature/shared-dev-seed-data` | NOT STARTED |
 | 11 | F0-17 | Self-serve sign-up for Family and Organisation accounts | B | D8 | SPRINT | F0-06, F0-07 | OQ-01, OQ-07, OQ-08 | `feature/shared-sign-up` | NOT STARTED |
 | 12 | F0-18 | Carer view access derived from shifts | B | D8 | SPRINT | F0-06, F0-10, F0-08 | — | `feature/shared-carer-shift-access` | NOT STARTED |
+| 13 | F0-19 | Root route and production guard for dev previews | S | D11 | SPRINT | F0-07 | — | `feature/shared-root-route` | NOT STARTED |
 
 ### Phase 3 — Data wiring & behaviour (parallel: Family · Carer · Admin)
 
@@ -691,6 +692,17 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Testing summary:** 9 db
 - **Requirements:** REQ-05
 - **Docs:** `docs/development/shared/shared-carer-shift-access/` · **Status:** NOT STARTED
+
+### F0-19 — Root route and production guard for dev previews
+- **Dashboard / stream:** shared · **Lane:** S · **Days:** D11 · **Sprint:** SPRINT · **PR target:** `main` · **Branch:** `feature/shared-root-route`
+- **Description:** `/` redirects to sign-in or the user's role home; the UI-kit showcase moves to `/dev-preview`; all dev-preview routes return 404 in production. Added by CHG-037.
+- **User value:** A deployed app opens on the real sign-in or dashboard, never on developer pages.
+- **Dependencies:** F0-07 · **Blocking decisions:** None
+- **Jira summary:** Root route redirect; dev-preview routes 404 in production
+- **Acceptance criteria summary:** 6 criteria — signed-out redirect, role home redirect, production 404, dev showcase still works, MFA gate, no stale tests/docs
+- **Testing summary:** 3 unit, 2 e2e
+- **Requirements:** REQ-02
+- **Docs:** `docs/development/shared/shared-root-route/` · **Status:** NOT STARTED
 
 ## Phase 3 — Data wiring & behaviour (parallel: Family · Carer · Admin) — feature detail
 
