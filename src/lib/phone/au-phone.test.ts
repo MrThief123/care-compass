@@ -4,6 +4,8 @@ import {
   AU_PHONE_FORMAT_MESSAGE,
   AU_PHONE_LETTERS_MESSAGE,
   australianPhoneError,
+  REQUIRED_PHONE_MESSAGE,
+  requiredPhoneError,
   isAustralianPhone,
 } from "@/lib/phone/au-phone";
 
@@ -57,6 +59,14 @@ describe("[CHG-038] australianPhoneError", () => {
   it("[CHG-038] a blank phone has no format error (whether it is required is the form's rule)", () => {
     expect(australianPhoneError("   ")).toBeNull();
     expect(australianPhoneError("")).toBeNull();
+  });
+
+  it("[CHG-039] requiredPhoneError refuses a blank phone, else defers to the format check", () => {
+    expect(requiredPhoneError("")).toBe(REQUIRED_PHONE_MESSAGE);
+    expect(requiredPhoneError("   ")).toBe(REQUIRED_PHONE_MESSAGE);
+    expect(requiredPhoneError("0395")).toBe(AU_PHONE_FORMAT_MESSAGE);
+    expect(requiredPhoneError("03 9555 O102")).toBe(AU_PHONE_LETTERS_MESSAGE);
+    expect(requiredPhoneError("03 9555 0102")).toBeNull();
   });
 
   it("[CHG-038] isAustralianPhone is the yes/no form", () => {

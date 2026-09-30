@@ -77,7 +77,7 @@ describe("[CAR-09][AC-05] updateCarerContactDetails validates on the server", ()
     expect(mocks.from).not.toHaveBeenCalled();
   });
 
-  it("[CHG-038] the carer's phone must be an Australian number when filled in, and may be blank", async () => {
+  it("[CHG-038] the carer's phone must be an Australian number, and cannot be blank (CHG-039)", async () => {
     vi.stubEnv("DATA_SOURCE", "mock");
     const { updateCarerContactDetails } = await import("@/server/profiles/actions");
     const values = { name: "Aisha Rahman", email: "aisha@example.com" };
@@ -86,7 +86,9 @@ describe("[CAR-09][AC-05] updateCarerContactDetails validates on the server", ()
     expect(bad.ok).toBe(false);
     if (!bad.ok) expect(bad.error.fieldErrors?.phone).toBeTruthy();
     expect((await updateCarerContactDetails({ ...values, phone: "0412 345 678" })).ok).toBe(true);
-    expect((await updateCarerContactDetails({ ...values, phone: "" })).ok).toBe(true);
+    const blank = await updateCarerContactDetails({ ...values, phone: "" });
+    expect(blank.ok).toBe(false);
+    if (!blank.ok) expect(blank.error.fieldErrors?.phone).toBe("Enter a phone number.");
   });
 
   it("[CAR-09][AC-05] a non-object input is refused rather than thrown", async () => {
@@ -174,14 +176,14 @@ describe("[CAR-09][AC-04] updateCarerContactDetails saves the signed-in carer", 
     );
   });
 
-  it("[CAR-09][AC-04] stores a blank phone or email as null and returns the saved details with the role", async () => {
+  it("[CAR-09][AC-04] stores a blank email as null (phone is required) and returns the saved details with the role", async () => {
     vi.stubEnv("DATA_SOURCE", "supabase");
     mocks.maybeSingle.mockResolvedValue({
       data: {
         id: AISHA_ID,
         first_name: "Aisha",
         last_name: "Rahman",
-        phone: null,
+        phone: "0412 345 678",
         email: null,
         job_title: "Registered Nurse",
       },
@@ -189,10 +191,14 @@ describe("[CAR-09][AC-04] updateCarerContactDetails saves the signed-in carer", 
     });
     const { updateCarerContactDetails } = await import("@/server/profiles/actions");
 
-    const result = await updateCarerContactDetails({ name: "Aisha Rahman", phone: "", email: "" });
+    const result = await updateCarerContactDetails({
+      name: "Aisha Rahman",
+      phone: "0412 345 678",
+      email: "",
+    });
 
     expect(mocks.update).toHaveBeenCalledWith(
-      expect.objectContaining({ phone: null, email: null }),
+      expect.objectContaining({ phone: "0412 345 678", email: null }),
     );
     expect(result).toEqual({
       ok: true,

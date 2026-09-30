@@ -101,7 +101,7 @@ describe("[ADM-02][AC-03] updateStaff (mock mode)", () => {
     const result = await updateStaff("does-not-exist", {
       firstName: "X",
       lastName: "Y",
-      phone: "",
+      phone: "0400 111 222",
       email: "x@example.test",
       jobTitle: "Support Worker",
     });
@@ -110,7 +110,7 @@ describe("[ADM-02][AC-03] updateStaff (mock mode)", () => {
   });
 });
 
-describe("[CHG-038] staff phone must be an Australian number when filled in", () => {
+describe("[CHG-038] staff phone must be an Australian number and is required", () => {
   const staff = {
     firstName: "Nina",
     lastName: "Ray",
@@ -132,7 +132,10 @@ describe("[CHG-038] staff phone must be an Australian number when filled in", ()
     expect(await getAdminStaff()).toEqual(before);
   });
 
-  it("[CHG-038] a blank phone is still allowed", async () => {
-    expect((await createStaff({ ...staff, phone: "" })).ok).toBe(true);
+  it("[CHG-039] a blank phone is refused too", async () => {
+    const before = await getAdminStaff();
+    const result = await createStaff({ ...staff, phone: "" });
+    expect(result).toMatchObject({ ok: false, error: { code: "VALIDATION" } });
+    expect(await getAdminStaff()).toEqual(before);
   });
 });

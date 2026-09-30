@@ -16,10 +16,12 @@ describe("[FAM-UI-06][AC-07] familyInfoSchema (FD-03)", () => {
     expect(fieldErrors(familyInfoSchema, VALID)).toEqual({ ok: true, data: VALID });
   });
 
-  it("[FAM-UI-06][AC-07] allows a blank phone, email and address", () => {
-    const result = fieldErrors(familyInfoSchema, { ...VALID, phone: "", email: "", address: "" });
-
-    expect(result.ok).toBe(true);
+  it("[FAM-UI-06][AC-07] allows a blank email and address, but the phone is required (CHG-039)", () => {
+    expect(fieldErrors(familyInfoSchema, { ...VALID, email: "", address: "" }).ok).toBe(true);
+    expect(fieldErrors(familyInfoSchema, { ...VALID, phone: "  " })).toEqual({
+      ok: false,
+      errors: { phone: "Enter a phone number." },
+    });
   });
 
   it.each(["0412 345 678", "+61 412 345 678", "(03) 9123 4567"])(

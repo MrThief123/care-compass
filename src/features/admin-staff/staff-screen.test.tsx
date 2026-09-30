@@ -138,6 +138,16 @@ describe("Admin Staff", () => {
     );
     expect(mocks.createStaff).not.toHaveBeenCalled();
   });
+  it("[CHG-039] Add Staff requires a phone number", async () => {
+    render(<StaffScreen data={data} />);
+    await userEvent.click(screen.getByRole("button", { name: "Add Staff" }));
+    await userEvent.type(screen.getByLabelText("First name"), "Helen");
+    await userEvent.type(screen.getByLabelText("Last name"), "Brown");
+    await userEvent.type(screen.getByLabelText("Email"), "helen.brown@example.com");
+    await userEvent.click(screen.getByRole("button", { name: "Save" }));
+    expect(screen.getByLabelText("Phone")).toHaveAccessibleDescription("Enter a phone number.");
+    expect(mocks.createStaff).not.toHaveBeenCalled();
+  });
   it("[ADM-02][AC-01] Add Staff validates a missing first name on Save", async () => {
     render(<StaffScreen data={data} />);
     await userEvent.click(screen.getByRole("button", { name: "Add Staff" }));
@@ -172,6 +182,7 @@ describe("Admin Staff", () => {
     await userEvent.type(screen.getByLabelText("First name"), "Helen");
     await userEvent.type(screen.getByLabelText("Last name"), "Brown");
     await userEvent.type(screen.getByLabelText("Email"), "helen.brown@example.com");
+    await userEvent.type(screen.getByLabelText("Phone"), "0412 345 678");
     await userEvent.selectOptions(screen.getByLabelText("Role"), "Support Worker");
     await userEvent.click(screen.getByRole("button", { name: "Save" }));
     expect(mocks.createStaff).toHaveBeenCalledWith(
@@ -194,6 +205,7 @@ describe("Admin Staff", () => {
     await userEvent.type(screen.getByLabelText("First name"), "Helen");
     await userEvent.type(screen.getByLabelText("Last name"), "Brown");
     await userEvent.type(screen.getByLabelText("Email"), "helen.brown@example.com");
+    await userEvent.type(screen.getByLabelText("Phone"), "0412 345 678");
     await userEvent.click(screen.getByRole("button", { name: "Save" }));
     expect(await screen.findByRole("status")).toHaveTextContent("Couldn't save. Please try again.");
     expect(screen.queryByRole("row", { name: /Helen Brown/ })).not.toBeInTheDocument();
