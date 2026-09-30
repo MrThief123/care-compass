@@ -913,6 +913,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Testing summary:** 3 db, 1 component
 - **Requirements:** REQ-32
 - **CHG-025 (carer shifts and notifications):** triggers are shift assigned, changed and cancelled only, naming the client and time; no Family notifications.
+- **CAR-02 start (2026-09-30, FD-01 to FD-06):** messages name the client's full name (CHG-032); reassigning a carer notifies both; the bell marks all read and shows an unread count; additive `bellSlot` on the shared PageHeader; feature ACs rewritten to 12 (docs updated when it started).
 - **Docs:** `docs/development/carer-dev/carer-notifications/` · **Status:** NOT STARTED
 
 ### CAR-03 — Carer — Patients
