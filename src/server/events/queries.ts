@@ -160,12 +160,22 @@ export async function getOccurrence(
   const parsedKey = parseOccurrenceKey(key);
   if (!parsedKey) return undefined;
   const day = melbourneDateKey(parsedKey.originalStart);
-  // Reuses getOccurrences' own recurrence expansion, overrides, completions and RLS — a single
-  // day's occurrences, filtered down to the one this key names.
-  const occurrences = await getOccurrences(
+  // Reuses the range read's recurrence expansion, overrides, completions and RLS — a single
+  // day's occurrences, filtered down to the one this key names. Unlike a range read, an
+  // occurrence completed and then cancelled is kept, so it still opens as Done (FAM-15, FD-03).
+  const { loadOccurrences, melbourneDaysToInstants } = await import("./occurrences");
+  const found = await loadOccurrences(
     clientId,
-    { from: day, to: day },
-    { type: type ?? "tasks" },
+    melbourneDaysToInstants({ from: day, to: day }),
+    new Date(),
+    { keepCancelledWithCompletion: true },
+  );
+  const occurrences = found.filter((occurrence) =>
+    (type ?? "tasks") === "all"
+      ? true
+      : (type ?? "tasks") === "events"
+        ? isPlainEvent(occurrence)
+        : !isPlainEvent(occurrence),
   );
   return occurrences.find((occurrence) => occurrence.key === key);
 }

@@ -7,7 +7,7 @@ import { getEventDocuments } from "@/server/documents/queries";
 import { getOccurrence, getToday } from "@/server/events/queries";
 
 /**
- * Family · Task detail (FAM-UI-07). Any task opens, past or future, by its key alone
+ * Family · Task detail (FAM-UI-07). Any task or plain event opens, past or future, by its key alone
  * (`getOccurrence`, not a scan of the log). An unknown key, or one that belongs to another
  * client, is a 404. The Documents card lists the event's documents (`getEventDocuments`). The
  * URL may carry where the task was opened from (CHG-014): `?from=calendar&view=&date=&month=`,
@@ -24,7 +24,9 @@ export default async function TaskDetailPage({
 }) {
   const { clientId, occurrenceKey } = await params;
   const origin = await resolveTaskDetailOrigin(await searchParams, () => getToday());
-  const occurrence = await getOccurrence(clientId, decodeOccurrenceKey(occurrenceKey));
+  const occurrence = await getOccurrence(clientId, decodeOccurrenceKey(occurrenceKey), {
+    type: "all",
+  });
 
   if (!occurrence) notFound();
 

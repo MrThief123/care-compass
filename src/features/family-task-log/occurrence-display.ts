@@ -10,7 +10,7 @@ export const NO_NURSE = "—";
  * shift covers it; `—` if there is none.
  */
 export function occurrenceNurse(
-  occurrence: Pick<Occurrence, "status" | "actor" | "assignee">,
+  occurrence: Partial<Pick<Occurrence, "status" | "actor" | "assignee">>,
 ): string {
   const name =
     occurrence.status === "done" ? (occurrence.actor ?? occurrence.assignee) : occurrence.assignee;
