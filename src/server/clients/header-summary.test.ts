@@ -2,7 +2,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 /*
- * F0-20: the Supabase branches of `getClientHeaderSummary` and `assertClientAccess` with the
+ * F0-22: the Supabase branches of `getClientHeaderSummary` and `assertClientAccess` with the
  * Supabase client faked. The real database is covered by
  * tests/integration/shared-client-header-wiring.test.ts.
  */
@@ -86,8 +86,8 @@ afterEach(() => {
   vi.unstubAllEnvs();
 });
 
-describe("[F0-20][AC-01] getClientHeaderSummary (DATA_SOURCE=supabase)", () => {
-  it("[F0-20][AC-01] returns the names, Melbourne age, suburb and current organisation name", async () => {
+describe("[F0-22][AC-01] getClientHeaderSummary (DATA_SOURCE=supabase)", () => {
+  it("[F0-22][AC-01] returns the names, Melbourne age, suburb and current organisation name", async () => {
     await expect(getClientHeaderSummary(CLIENT_ID)).resolves.toEqual({
       id: CLIENT_ID,
       firstName: "Margaret",
@@ -103,14 +103,14 @@ describe("[F0-20][AC-01] getClientHeaderSummary (DATA_SOURCE=supabase)", () => {
     ]);
   });
 
-  it("[F0-20][AC-01] counts the birthday only once it has been reached in Melbourne", async () => {
+  it("[F0-22][AC-01] counts the birthday only once it has been reached in Melbourne", async () => {
     mocks.state.row = { data: { ...ROW, date_of_birth: "1943-10-02" }, error: null };
     await expect(getClientHeaderSummary(CLIENT_ID)).resolves.toMatchObject({ age: 82 });
   });
 });
 
-describe("[F0-20][AC-02] a client with missing details", () => {
-  it("[F0-20][AC-02] omits suburb, age and organisation when none is stored, without throwing", async () => {
+describe("[F0-22][AC-02] a client with missing details", () => {
+  it("[F0-22][AC-02] omits suburb, age and organisation when none is stored, without throwing", async () => {
     mocks.state.row = {
       data: { ...ROW, date_of_birth: null, suburb: null, organisation_id: null },
       error: null,
@@ -128,27 +128,27 @@ describe("[F0-20][AC-02] a client with missing details", () => {
     expect(summary).not.toHaveProperty("organisationName");
   });
 
-  it("[F0-20][AC-02] skips the organisation lookup when the client has no organisation", async () => {
+  it("[F0-22][AC-02] skips the organisation lookup when the client has no organisation", async () => {
     mocks.state.row = { data: { ...ROW, organisation_id: null }, error: null };
     await getClientHeaderSummary(CLIENT_ID);
     expect(mocks.rpc).not.toHaveBeenCalled();
   });
 });
 
-describe("[F0-20][AC-03] an unreadable client", () => {
+describe("[F0-22][AC-03] an unreadable client", () => {
   const GENERIC = "getClientHeaderSummary: could not load the client.";
 
-  it("[F0-20][AC-03] throws a generic error when no row is readable (RLS hides it)", async () => {
+  it("[F0-22][AC-03] throws a generic error when no row is readable (RLS hides it)", async () => {
     mocks.state.row = { data: null, error: null };
     await expect(getClientHeaderSummary(CLIENT_ID)).rejects.toThrow(GENERIC);
   });
 
-  it("[F0-20][AC-03] throws the same error, without reading, for a malformed id", async () => {
+  it("[F0-22][AC-03] throws the same error, without reading, for a malformed id", async () => {
     await expect(getClientHeaderSummary("not-a-uuid")).rejects.toThrow(GENERIC);
     expect(called("from")).toEqual([]);
   });
 
-  it("[F0-20][AC-03] throws the same error on a database error, naming no client or date of birth", async () => {
+  it("[F0-22][AC-03] throws the same error on a database error, naming no client or date of birth", async () => {
     mocks.state.row = {
       data: null,
       error: { message: `failed for ${CLIENT_ID} Margaret 1943-10-01` },
@@ -159,8 +159,8 @@ describe("[F0-20][AC-03] an unreadable client", () => {
   });
 });
 
-describe("[F0-20][AC-04] the organisation lookup fails", () => {
-  it("[F0-20][AC-04] returns the rest of the header without an organisation name", async () => {
+describe("[F0-22][AC-04] the organisation lookup fails", () => {
+  it("[F0-22][AC-04] returns the rest of the header without an organisation name", async () => {
     mocks.state.rpc = { data: null, error: { message: "permission denied" } };
 
     const summary = await getClientHeaderSummary(CLIENT_ID);
@@ -170,8 +170,8 @@ describe("[F0-20][AC-04] the organisation lookup fails", () => {
   });
 });
 
-describe("[F0-20][AC-05][AC-07] assertClientAccess", () => {
-  it("[F0-20][AC-05] returns without redirecting when the client is readable", async () => {
+describe("[F0-22][AC-05][AC-07] assertClientAccess", () => {
+  it("[F0-22][AC-05] returns without redirecting when the client is readable", async () => {
     mocks.state.row = { data: { id: CLIENT_ID }, error: null };
     await expect(assertClientAccess(CLIENT_ID)).resolves.toBeUndefined();
     expect(mocks.getLandingPath).not.toHaveBeenCalled();
@@ -179,21 +179,21 @@ describe("[F0-20][AC-05][AC-07] assertClientAccess", () => {
     expect(called("eq")).toEqual([["id", CLIENT_ID]]);
   });
 
-  it("[F0-20][AC-05] redirects to the landing path when no row is readable (not linked)", async () => {
+  it("[F0-22][AC-05] redirects to the landing path when no row is readable (not linked)", async () => {
     mocks.state.row = { data: null, error: null };
     await expect(redirectTarget(() => assertClientAccess(CLIENT_ID))).resolves.toBe(
       "/family/landing-client/home",
     );
   });
 
-  it("[F0-20][AC-05] redirects for a malformed id without reading", async () => {
+  it("[F0-22][AC-05] redirects for a malformed id without reading", async () => {
     await expect(redirectTarget(() => assertClientAccess("not-a-uuid"))).resolves.toBe(
       "/family/landing-client/home",
     );
     expect(called("from")).toEqual([]);
   });
 
-  it("[F0-20][AC-07] follows the landing path to /no-client-linked for a family member with no client", async () => {
+  it("[F0-22][AC-07] follows the landing path to /no-client-linked for a family member with no client", async () => {
     mocks.getLandingPath.mockResolvedValueOnce("/no-client-linked");
     mocks.state.row = { data: null, error: null };
     await expect(redirectTarget(() => assertClientAccess(CLIENT_ID))).resolves.toBe(
@@ -201,7 +201,7 @@ describe("[F0-20][AC-05][AC-07] assertClientAccess", () => {
     );
   });
 
-  it("[F0-20][AC-05] does not turn a database error into access: it redirects too", async () => {
+  it("[F0-22][AC-05] does not turn a database error into access: it redirects too", async () => {
     mocks.state.row = { data: null, error: { message: "boom" } };
     await expect(redirectTarget(() => assertClientAccess(CLIENT_ID))).resolves.toBe(
       "/family/landing-client/home",
@@ -209,8 +209,8 @@ describe("[F0-20][AC-05][AC-07] assertClientAccess", () => {
   });
 });
 
-describe("[F0-20][AC-08] DATA_SOURCE=mock", () => {
-  it("[F0-20][AC-08] assertClientAccess does nothing and reads nothing", async () => {
+describe("[F0-22][AC-08] DATA_SOURCE=mock", () => {
+  it("[F0-22][AC-08] assertClientAccess does nothing and reads nothing", async () => {
     vi.stubEnv("DATA_SOURCE", "mock");
     await expect(assertClientAccess(CLIENT_ID)).resolves.toBeUndefined();
     expect(mocks.calls).toEqual([]);

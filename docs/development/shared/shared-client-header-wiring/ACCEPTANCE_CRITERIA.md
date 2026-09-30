@@ -1,4 +1,4 @@
-# Acceptance Criteria — F0-20 Client header wiring and family route guard
+# Acceptance Criteria — F0-22 Client header wiring and family route guard
 
 | ID | Story | Type | Criterion (Given / When / Then) | Status |
 |---|---|---|---|---|

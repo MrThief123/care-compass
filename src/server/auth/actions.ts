@@ -35,6 +35,7 @@ export type AuthActionResult<T = undefined> =
           | "INVALID_CREDENTIALS"
           | "INACTIVE"
           | "MFA_INVALID_CODE"
+          | "MFA_FACTOR_MISSING"
           | "EMAIL_EXISTS"
           | "REGISTRATION_FAILED"
           | "UNEXPECTED";
@@ -283,26 +284,44 @@ export async function resetPassword(input: { password: string }): Promise<AuthAc
 // ---------------------------------------------------------------------------
 
 /**
- * AC-09: starts TOTP enrollment for the signed-in (admin) user. Clears any
- * stale unverified factor first — `enroll()` only returns the QR/secret
- * once, so a page reload otherwise piles up unusable factors instead of
- * reusing one.
+ * An unverified factor younger than this may belong to a page the admin still has open, so
+ * clean-up leaves it alone (F0-20 AC-03).
+ */
+const STALE_FACTOR_AGE_MS = 5 * 60_000;
+
+/**
+ * F0-20 AC-02/AC-03: starts TOTP enrolment. Called once from the browser (AC-04), never from a
+ * server render. Every factor gets a unique friendly name, so two enrolments at the same time
+ * cannot collide (422 `mfa_factor_name_conflict`), and only unverified factors older than
+ * STALE_FACTOR_AGE_MS are cleaned up, so one enrolment can never delete the factor another
+ * page is showing. Clean-up is best effort: its failure never fails the enrolment.
  */
 export async function enrollMfaFactor(): Promise<
   AuthActionResult<{ factorId: string; qrCode: string; secret: string }>
 > {
   const supabase = await createClient();
 
-  const { data: existingFactors } = await supabase.auth.mfa.listFactors();
-  const staleFactors =
-    existingFactors?.all.filter(
-      (factor) => factor.factor_type === "totp" && factor.status === "unverified",
-    ) ?? [];
-  for (const factor of staleFactors) {
-    await supabase.auth.mfa.unenroll({ factorId: factor.id });
+  try {
+    const { data: existingFactors } = await supabase.auth.mfa.listFactors();
+    const cutoff = Date.now() - STALE_FACTOR_AGE_MS;
+    const staleFactors =
+      existingFactors?.all.filter(
+        (factor) =>
+          factor.factor_type === "totp" &&
+          factor.status === "unverified" &&
+          new Date(factor.created_at).getTime() < cutoff,
+      ) ?? [];
+    for (const factor of staleFactors) {
+      await supabase.auth.mfa.unenroll({ factorId: factor.id });
+    }
+  } catch {
+    // Best effort: a leftover unverified factor is harmless; the next enrolment retries.
   }
 
-  const { data, error } = await supabase.auth.mfa.enroll({ factorType: "totp" });
+  const { data, error } = await supabase.auth.mfa.enroll({
+    factorType: "totp",
+    friendlyName: `admin-totp-${crypto.randomUUID()}`,
+  });
 
   if (error || !data) {
     return {
@@ -345,6 +364,16 @@ export async function verifyMfaCode(input: {
   const { data: challenge, error: challengeError } = await supabase.auth.mfa.challenge({
     factorId: parsed.data.factorId,
   });
+
+  if (challengeError?.code === "mfa_factor_not_found") {
+    return {
+      ok: false,
+      error: {
+        code: "MFA_FACTOR_MISSING",
+        message: "This setup has expired. Reload the page to start again.",
+      },
+    };
+  }
 
   if (challengeError || !challenge) {
     return {

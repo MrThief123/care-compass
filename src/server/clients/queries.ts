@@ -27,13 +27,13 @@ const SECTIONS: ReadonlyArray<{ kind: ClientInfoSectionKind; key: string; title:
 export type { ClientHeaderSummary, OrganisationChoice } from "@/mocks/queries/clients";
 
 /**
- * The header every Family page opens with (F0-20): first and last name, age in
+ * The header every Family page opens with (F0-22): first and last name, age in
  * whole years (Australia/Melbourne), suburb and the organisation's name. A missing
  * date of birth, suburb or organisation leaves that field out. With
  * `DATA_SOURCE=supabase` RLS decides whether the client is readable; one that is
  * not, a malformed id or a database error throws a message naming no client.
  * The organisation name comes from `list_organisations_for_transfer` (family
- * members cannot read `organisations`, F0-20 FD-01); if that fails the header
+ * members cannot read `organisations`, F0-22 FD-01); if that fails the header
  * is returned without it.
  */
 export async function getClientHeaderSummary(clientId: string): Promise<mock.ClientHeaderSummary> {
@@ -78,7 +78,7 @@ export async function getClientHeaderSummary(clientId: string): Promise<mock.Cli
 
 /**
  * Sends the signed-in user to their own landing page unless they can read this
- * client (F0-20). RLS is the boundary; this is the redirect. A malformed id, no
+ * client (F0-22). RLS is the boundary; this is the redirect. A malformed id, no
  * readable row and a database error all redirect, never grant. No-op under
  * `DATA_SOURCE=mock`. A layout does not stop its page rendering, so a page that
  * must not fetch for an unlinked client calls this itself.

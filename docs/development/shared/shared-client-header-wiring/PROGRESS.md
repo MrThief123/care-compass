@@ -1,4 +1,4 @@
-# Progress — F0-20 Client header wiring and family route guard
+# Progress — F0-22 Client header wiring and family route guard
 
 Status: READY FOR PR (awaiting human approval)
 Owner: Dhruv Verma
@@ -18,7 +18,7 @@ Last updated: 2026-10-01
 - 8 / 8 MET
 
 ## Next action
-- Human approves, then open the PR to `main` (title `F0-20 Client header wiring and family route guard`).
+- Human approves, then open the PR to `main` (title `F0-22 Client header wiring and family route guard`).
 
 ## Ready for PR
 - Yes, awaiting the human's approval to open it.

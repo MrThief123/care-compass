@@ -151,14 +151,14 @@ async function redirectTarget(run: () => Promise<unknown>): Promise<string> {
 }
 
 describe.skipIf(!hasLocalSupabase)(
-  "[F0-20] Client header and family route guard against local Supabase",
+  "[F0-22] Client header and family route guard against local Supabase",
   () => {
     afterEach(() => {
       vi.doUnmock("next/headers");
       vi.unstubAllEnvs();
     });
 
-    it("[F0-20][AC-01] Helen reads Margaret's header: names, age, suburb and organisation name", async () => {
+    it("[F0-22][AC-01] Helen reads Margaret's header: names, age, suburb and organisation name", async () => {
       const s = await seed();
       try {
         const { cookieStore } = await signIn(s.helen.email);
@@ -182,7 +182,7 @@ describe.skipIf(!hasLocalSupabase)(
       }
     });
 
-    it("[F0-20][AC-02] a client with no suburb, date of birth or organisation still loads", async () => {
+    it("[F0-22][AC-02] a client with no suburb, date of birth or organisation still loads", async () => {
       const s = await seed();
       try {
         const bare = await s.admin
@@ -210,7 +210,7 @@ describe.skipIf(!hasLocalSupabase)(
       }
     });
 
-    it("[F0-20][AC-03] another family's client is unreadable and the error names nobody", async () => {
+    it("[F0-22][AC-03] another family's client is unreadable and the error names nobody", async () => {
       const s = await seed();
       try {
         const { cookieStore } = await signIn(s.helen.email);
@@ -228,7 +228,7 @@ describe.skipIf(!hasLocalSupabase)(
       }
     });
 
-    it("[F0-20][AC-05] Helen opening Robert is redirected to her own client's home", async () => {
+    it("[F0-22][AC-05] Helen opening Robert is redirected to her own client's home", async () => {
       const s = await seed();
       try {
         const { cookieStore } = await signIn(s.helen.email);
@@ -244,7 +244,7 @@ describe.skipIf(!hasLocalSupabase)(
       }
     });
 
-    it("[F0-20][AC-05] Helen opening Margaret is let through", async () => {
+    it("[F0-22][AC-05] Helen opening Margaret is let through", async () => {
       const s = await seed();
       try {
         const { cookieStore } = await signIn(s.helen.email);
@@ -258,7 +258,7 @@ describe.skipIf(!hasLocalSupabase)(
       }
     });
 
-    it("[F0-20][AC-07] a family member with no linked client goes to /no-client-linked", async () => {
+    it("[F0-22][AC-07] a family member with no linked client goes to /no-client-linked", async () => {
       const s = await seed();
       try {
         const { cookieStore } = await signIn(s.nina.email);

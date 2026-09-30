@@ -1,4 +1,4 @@
-# Test Plan — F0-20 Client header wiring and family route guard
+# Test Plan — F0-22 Client header wiring and family route guard
 
 ## Approach
 Tests first (TESTING.md §2); confirm they fail for the expected reason.

@@ -1,8 +1,8 @@
-# F0-20 — Client header wiring and family route guard
+# F0-22 — Client header wiring and family route guard
 
 | Field | Value |
 |---|---|
-| Feature ID | F0-20 |
+| Feature ID | F0-22 |
 | Dashboard / stream | Shared |
 | Phase | Phase 2 — Backend & data layer |
 | Development branch (PR target) | `main` (CHG-036) |
@@ -12,7 +12,7 @@
 | Sprint | SPRINT |
 | Status / owner | See PROGRESS.md |
 
-> **Added by CHG-040, 2026-10-01.** Closes the "transitional state" recorded in F0-07, F0-15 and F0-19 FD-05.
+> **Added by CHG-042, 2026-10-01.** Closes the "transitional state" recorded in F0-07, F0-15 and F0-19 FD-05.
 
 ## Purpose
 Every Family page opens with the real client's header and only for a client the signed-in family member is linked to, under `DATA_SOURCE=supabase`.
@@ -37,7 +37,7 @@ A family member sees their own client's real header and cannot land on someone e
 - `assertClientAccess` contract function.
 - Family layout ordering and the linked-client redirect.
 - Settings page keeps working (it calls `getClientHeaderSummary`).
-- Tests, CHG-040, DECISIONS, doc updates.
+- Tests, CHG-042, DECISIONS, doc updates.
 
 ## Out of Scope
 - Page-level data fetching or per-page access checks. A page that must not fetch for an unlinked client calls `assertClientAccess` itself (FAM-01 AC-05 does).
@@ -79,7 +79,7 @@ A family member sees their own client's real header and cannot land on someone e
 
 ## Traceability
 - Product requirements: REQ-02, REQ-05
-- Sources: CHG-040; F0-19 FD-05; FAM-01 AC-05.
+- Sources: CHG-042; F0-19 FD-05; FAM-01 AC-05.
 
 ## Labels
 None PROPOSED.

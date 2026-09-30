@@ -16,7 +16,7 @@ export default async function FamilyLayout({
   params: Promise<{ clientId: string }>;
 }) {
   const { clientId } = await params;
-  // One after the other (F0-20 FD-05): the role redirect must not be hidden by a
+  // One after the other (F0-22 FD-05): the role redirect must not be hidden by a
   // data call, and no client is read for someone who may not open it.
   const user = await getCurrentUser("family");
   await assertClientAccess(clientId);

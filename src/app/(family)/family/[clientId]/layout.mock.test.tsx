@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 /*
- * F0-20 AC-08: with the real mock contract (DATA_SOURCE=mock) the family layout behaves as it
+ * F0-22 AC-08: with the real mock contract (DATA_SOURCE=mock) the family layout behaves as it
  * did before the guard was added: no redirect, the mock client's header.
  */
 // The Supabase client is built from env vars a mock-mode test does not set; it is never called here.
@@ -24,8 +24,8 @@ afterEach(() => {
   vi.unstubAllEnvs();
 });
 
-describe("[F0-20][AC-08] the family layout under DATA_SOURCE=mock", () => {
-  it("[F0-20][AC-08] renders Margaret's header and the page without redirecting", async () => {
+describe("[F0-22][AC-08] the family layout under DATA_SOURCE=mock", () => {
+  it("[F0-22][AC-08] renders Margaret's header and the page without redirecting", async () => {
     render(
       await FamilyLayout({
         children: <p>Page body</p>,
