@@ -49,6 +49,12 @@ Record feature-level decisions here using the template below. Project-wide decis
 - Reason: behaviour change recorded in FD-02 and FD-04; no assertion on look, focus or wrapping was dropped.
 - Human confirmation required: yes (review the flagged tests in the PR).
 
+### FD-07 — Temporary header wiring for verification only
+- Date: 2026-10-01
+- Context: `getClientHeaderSummary` is unimplemented under `DATA_SOURCE=supabase`, so no Family page renders against real data. No plan feature owns it.
+- Decision: a local, uncommitted patch of `src/server/clients/queries.ts` is used to run the FAM-09 browser check and e2e, then reverted. The patch and a draft feature card are in `TEMP_HEADER_WIRING.md`. The gap is to be picked up as its own shared feature; the PR for FAM-09 must say verification used the temporary patch.
+- Human confirmation: Dhruv Verma, 2026-10-01 (in-session).
+
 <!-- Template
 ### FD-01 — <title>
 - Date:
