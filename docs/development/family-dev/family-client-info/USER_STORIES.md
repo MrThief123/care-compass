@@ -5,5 +5,5 @@ Format: As a [user], I want [capability], so that [outcome].
 ## US-01
 As a family member, I want to keep my family member's description, habits and medical history current, so that carers know how to care for them.
 
-- Acceptance criteria: AC-01, AC-02, AC-03, AC-04, AC-05
+- Acceptance criteria: AC-01, AC-02, AC-03, AC-04, AC-05, AC-06, AC-07, AC-08, AC-09
 - Requirements: REQ-10, REQ-22
