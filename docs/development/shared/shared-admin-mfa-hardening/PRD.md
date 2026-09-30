@@ -4,7 +4,9 @@
 |---|---|
 | Feature ID | F0-20 |
 | Dashboard / stream | Shared |
-| Phase | Phase 2 — shared foundations (added after F0-07 and F0-17) |
+| Phase | Phase 2 — Backend & data layer (added after F0-07 and F0-17) |
+| Lane | S — Shared |
+| Sprint | SPRINT · planned D11 |
 | PR target | `main` (CHG-036) |
 | Feature branch | `feature/shared-admin-mfa-hardening` |
 | Documentation | `docs/development/shared/shared-admin-mfa-hardening/` |

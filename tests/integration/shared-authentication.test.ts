@@ -1,12 +1,12 @@
 // @vitest-environment node
-import { createHmac } from "node:crypto";
-
 import { createServerClient } from "@supabase/ssr";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import type { Database } from "@/lib/supabase/database.types";
 import { createAdminClient } from "@/server/jobs/supabase-admin";
 import type { Role } from "@/types/domain";
+
+import { totpCode } from "../helpers/totp";
 
 // Requires a running local Supabase stack (`supabase start`) and `.env.local`
 // populated from `supabase status` — see README / F0-04's shared-supabase-environment
@@ -106,38 +106,6 @@ async function withCookieClient<T>(
   } finally {
     vi.doUnmock("next/headers");
   }
-}
-
-function base32Decode(base32: string): Buffer {
-  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
-  const clean = base32.replace(/=+$/, "").toUpperCase();
-  let bits = "";
-  for (const char of clean) {
-    const value = alphabet.indexOf(char);
-    if (value === -1) continue;
-    bits += value.toString(2).padStart(5, "0");
-  }
-  const bytes: number[] = [];
-  for (let i = 0; i + 8 <= bits.length; i += 8) {
-    bytes.push(parseInt(bits.slice(i, i + 8), 2));
-  }
-  return Buffer.from(bytes);
-}
-
-/** RFC 6238 TOTP, 30s step / 6 digits — matches Supabase Auth's TOTP defaults. */
-function totpCode(secret: string, time = Date.now()): string {
-  const key = base32Decode(secret);
-  const counter = Math.floor(time / 1000 / 30);
-  const counterBuffer = Buffer.alloc(8);
-  counterBuffer.writeBigUInt64BE(BigInt(counter));
-  const hmac = createHmac("sha1", key).update(counterBuffer).digest();
-  const offset = hmac.readUInt8(hmac.length - 1) & 0xf;
-  const binCode =
-    ((hmac.readUInt8(offset) & 0x7f) << 24) |
-    ((hmac.readUInt8(offset + 1) & 0xff) << 16) |
-    ((hmac.readUInt8(offset + 2) & 0xff) << 8) |
-    (hmac.readUInt8(offset + 3) & 0xff);
-  return (binCode % 1_000_000).toString().padStart(6, "0");
 }
 
 describe.skipIf(!hasLocalSupabase)("[F0-07] auth", () => {
