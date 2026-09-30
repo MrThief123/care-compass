@@ -28,7 +28,7 @@ describe("[F0-19][AC-03] dev-preview production guard", () => {
     async (path) => {
       vi.stubEnv("NODE_ENV", "production");
       const response = await proxy(request(path));
-      expect(response.headers.get("x-middleware-rewrite")).toMatch(/\/_not-found|\/404/);
+      expect(response.headers.get("x-middleware-rewrite")).toMatch(/\/not-found$/);
     },
   );
 

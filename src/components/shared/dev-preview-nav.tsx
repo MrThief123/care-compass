@@ -8,7 +8,7 @@ import { Button } from "../ui/button";
 const navigation = [
   {
     label: "Home",
-    href: "/",
+    href: "/dev-preview",
   },
   {
     label: "UI-01",

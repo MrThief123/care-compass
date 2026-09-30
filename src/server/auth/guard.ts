@@ -27,29 +27,11 @@ export async function evaluateRoleGuard(
   supabase: SupabaseClient<Database>,
   requiredRole: Role,
 ): Promise<GuardOutcome> {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return { action: "redirect", to: "/sign-in" };
+  const resolved = await resolveActiveProfile(supabase);
+  if ("redirect" in resolved) {
+    return { action: "redirect", to: resolved.redirect };
   }
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("id, role, organisation_id, first_name, last_name, is_active")
-    .eq("id", user.id)
-    .maybeSingle();
-
-  if (!profile || !profile.is_active) {
-    await supabase.auth.signOut();
-    return { action: "redirect", to: "/sign-in?reason=inactive" };
-  }
-
-  const mfaPath = await resolveMfaGatePath(supabase, profile.role);
-  if (mfaPath) {
-    return { action: "redirect", to: mfaPath };
-  }
+  const { profile } = resolved;
 
   if (profile.role !== requiredRole) {
     return {
@@ -68,4 +50,59 @@ export async function evaluateRoleGuard(
       lastName: profile.last_name ?? "",
     },
   };
+}
+
+/**
+ * Where `/` sends a visitor (F0-19): sign-in when signed out, otherwise the
+ * same MFA gate and role home the route-group guard uses.
+ */
+export async function evaluateLanding(supabase: SupabaseClient<Database>): Promise<string> {
+  const resolved = await resolveActiveProfile(supabase);
+  if ("redirect" in resolved) return resolved.redirect;
+
+  const { profile } = resolved;
+  return resolveRoleHomePath(supabase, profile.id, profile.role);
+}
+
+/**
+ * Shared first steps of both guards: a session (AC-05), an active profile
+ * (AC-06), and — for an admin — a met MFA challenge (AC-09/AC-10, OQ-08).
+ */
+type ActiveProfileOutcome =
+  | { redirect: string }
+  | {
+      profile: Pick<
+        Database["public"]["Tables"]["profiles"]["Row"],
+        "id" | "role" | "organisation_id" | "first_name" | "last_name" | "is_active"
+      >;
+    };
+
+async function resolveActiveProfile(
+  supabase: SupabaseClient<Database>,
+): Promise<ActiveProfileOutcome> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { redirect: "/sign-in" };
+  }
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("id, role, organisation_id, first_name, last_name, is_active")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  if (!profile || !profile.is_active) {
+    await supabase.auth.signOut();
+    return { redirect: "/sign-in?reason=inactive" };
+  }
+
+  const mfaPath = await resolveMfaGatePath(supabase, profile.role);
+  if (mfaPath) {
+    return { redirect: mfaPath };
+  }
+
+  return { profile };
 }

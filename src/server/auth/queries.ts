@@ -14,7 +14,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getDataSourceMode } from "@/server/data-source";
 import type { Role } from "@/types/domain";
 
-import { evaluateRoleGuard } from "./guard";
+import { evaluateLanding, evaluateRoleGuard } from "./guard";
 
 export type { CurrentUser } from "@/mocks/current-user";
 
@@ -40,4 +40,17 @@ export async function getPrimaryTotpFactorId(): Promise<string | null> {
   const supabase = await createClient();
   const { data } = await supabase.auth.mfa.listFactors();
   return data?.totp[0]?.id ?? null;
+}
+
+/**
+ * Where `/` sends the visitor (F0-19). Under `DATA_SOURCE=mock` there is no
+ * sign-in, so it resolves the mock family user's first client home.
+ */
+export async function getLandingPath(): Promise<string> {
+  if (getDataSourceMode() === "mock") {
+    const { MARGARET_CLIENT_ID } = await import("@/mocks/fixtures");
+    return `/family/${MARGARET_CLIENT_ID}/home`;
+  }
+
+  return evaluateLanding(await createClient());
 }
