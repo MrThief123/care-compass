@@ -55,6 +55,12 @@ Record feature-level decisions here using the template below. Project-wide decis
 - Decision: a local, uncommitted patch of `src/server/clients/queries.ts` is used to run the FAM-09 browser check and e2e, then reverted. The patch and a draft feature card are in `TEMP_HEADER_WIRING.md`. The gap is to be picked up as its own shared feature; the PR for FAM-09 must say verification used the temporary patch.
 - Human confirmation: Dhruv Verma, 2026-10-01 (in-session).
 
+### FD-08 — e2e T-01 waits for the save to finish before reloading
+- Date: 2026-10-01
+- Context: `tests/e2e/family-client-info.spec.ts` T-01 checked `getByText("Tea at 6am, then a walk.")` straight after Save. That text also matches the still-open textarea, so the reload could fire before the save finished and show the old text. A manual browser run (Save, wait for Edit, reload) kept the new text.
+- Decision: HUMAN REVIEW: test expectation changed (genuine test bug). Before: expect the text, then reload. After: expect the Edit button to be back, then the text, then reload. No assertion removed.
+- Human confirmation required: yes (PR review).
+
 <!-- Template
 ### FD-01 — <title>
 - Date:

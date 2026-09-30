@@ -9,7 +9,7 @@ PR target: `main` (CHG-036), opened only after CAR-04 is merged
 Last updated: 2026-10-01
 
 ## Blockers
-- Browser check and e2e: under `DATA_SOURCE=supabase` every `/family/[clientId]/*` page errors, because the family layout calls `getClientHeaderSummary`, which is still `notImplementedForSupabase` on `main` (known, shared-root-route FD-05). The Info cards themselves are wired and unit-tested. Awaiting the human: see Problems encountered.
+- None. Verification needed a temporary, uncommitted `getClientHeaderSummary` supabase patch (FD-07, `TEMP_HEADER_WIRING.md`); the gap is to become its own shared feature.
 
 ## Dependencies status
 - F0-06, F0-13, FAM-UI-04, CAR-04 — merged to `main`
@@ -20,7 +20,7 @@ Last updated: 2026-10-01
 - 2026-10-01: tests written first (component, pgTAP, e2e); see Tests
 
 ## In progress
-- 2026-10-01: implemented (info-section-card, documentation-card, family-info-view, Info page); FAM-UI-04 tests updated (FD-06). HUMAN REVIEW: test expectation changed (see DECISIONS FD-06). Full checks and browser/e2e run pending.
+- 2026-10-01: implemented (info-section-card, documentation-card, family-info-view, Info page); FAM-UI-04 tests updated (FD-06). HUMAN REVIEW: test expectations changed (DECISIONS FD-06 FAM-UI-04 tests; FD-08 e2e T-01 waits for Edit before reload). Checks run (2026-10-01): family-info vitest 45/45, tsc clean, prettier clean, `supabase test db` pass, e2e `family-client-info.spec.ts` 3/3 (run twice, local Supabase, production webpack build, temp header patch), real-browser check of 5,001 characters and width sweep 1920 to 768 (no overflow).
 
 ## Remaining
 - Route `/family/[clientId]/info`; in-page summary (avatar, name, '78 years · Preston VIC · Banksia Home Care').
@@ -34,8 +34,8 @@ Last updated: 2026-10-01
 
 ## Tests
 - Written: component 11, pgTAP 12, e2e 3 (covering AC-01 to AC-09)
-- Passing: component family-info 45/45 (wired 11 + FAM-UI-04 updated), pgTAP 12
-- Failing: none; e2e not run yet
+- Passing: component family-info 45/45, pgTAP 12, e2e 3/3
+- Failing: none in this feature (3 unrelated integration failures, see Problems)
 
 ## Files changed
 - None yet. Tests: `src/features/family-info/family-info-wired.test.tsx`, `supabase/tests/family_client_info.test.sql`, `tests/e2e/family-client-info.spec.ts`. Likely implementation files: `src/features/family-info/{info-section-card,documentation-card,family-info-view}.tsx`, the Info `page.tsx`; no migration or new contract function (FD-02)
@@ -55,4 +55,4 @@ Last updated: 2026-10-01
 - Implementation: wire `InfoSectionCard` and `DocumentationCard` to the contract, pass `clientId`/`kind` from the page, update the listed FAM-UI-04 tests (DECISIONS, HUMAN REVIEW).
 
 ## Ready for PR
-- No
+- Not yet: waiting for the human to review the dev server and say go. Before the PR revert `src/server/clients/queries.ts` (`git checkout src/server/clients/queries.ts`).

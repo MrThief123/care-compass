@@ -106,6 +106,8 @@ test.describe(() => {
       await page.getByRole("textbox", { name: "Habits" }).fill("Tea at 6am, then a walk.");
       await page.getByRole("button", { name: "Save" }).click();
 
+      // Edit returns only once the save has finished; the text alone would also match the open textarea.
+      await expect(page.getByRole("button", { name: "Edit Habits" })).toBeVisible();
       await expect(page.getByText("Tea at 6am, then a walk.")).toBeVisible();
       await page.reload();
       await expect(page.getByText("Tea at 6am, then a walk.")).toBeVisible();

@@ -9,6 +9,6 @@ Test results: component 10 red / 1 green (expected); pgTAP 12/12 green; e2e not 
 Current blocker: none
 Important discoveries: CAR-04 is merged; family RLS, audit and uploads already exist; plan-status output was stale
 Important decisions: FD-01 to FD-05 (AC-04 follows CAR-04 FD-07)
-Exact next action: run full local suite, supabase test db, then real-browser check and e2e (local Supabase only); then ask for PR approval
+Exact next action: human reviews the running dev server; on approval, revert the temporary `src/server/clients/queries.ts` patch, confirm the tree is clean, open the PR (human "yes" first). Stated in the PR: verification used the temp header patch (FD-07); list local check commands.
 Files likely to be touched next: `src/features/family-info/*`, the Info `page.tsx`, `family-info.test.tsx`
 Warning for next session: use the worktree; e2e needs local Supabase, never the hosted project; open no PR without human approval.
