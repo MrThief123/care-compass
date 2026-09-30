@@ -111,7 +111,7 @@ describe("[F0-20][AC-05] code field after a failed attempt", () => {
 
     expect(await screen.findByRole("alert")).toHaveTextContent("That code isn't right");
     await waitFor(() => expect(field).toHaveValue(""));
-    expect(field).toHaveFocus();
+    await waitFor(() => expect(field).toHaveFocus());
 
     await userEvent.type(field, "123456");
     await userEvent.click(screen.getByRole("button", { name: /verify and continue/i }));

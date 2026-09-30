@@ -151,7 +151,7 @@ test.describe("[F0-20] admin TOTP MFA in a real browser", () => {
 
       await field.fill(wrong);
       await page.getByRole("button", { name: /verify and continue/i }).click();
-      await expect(page.getByRole("alert")).toContainText("isn't right");
+      await expect(page.getByRole("alert").filter({ hasText: "isn't right" })).toBeVisible();
       await expect(field).toHaveValue("");
       await expect(field).toBeFocused();
 
