@@ -41,6 +41,13 @@ Record feature-level decisions here using the template below. Project-wide decis
 - Date: 2026-09-30
 - Decision: PRD Scope, ACs (AC-01 to AC-09), TEST_PLAN and USER_STORIES rewritten before code (CHG-026/027/028/032, PD-041). Branch from and PR to `main` (CHG-036), not `carer-dev`. Copy 'Your shift has ended, so changes can't be saved.' and the 5,000-character cap are the PRD's PROPOSED values, used as the defaults.
 
+### FD-07 — Admin of the client's organisation reads and writes Info sections and uploads documents
+- Date: 2026-09-30
+- Context: the brief and D28 said admin never writes `client_info_sections`; the human then ruled that admin can do everything except move organisations.
+- Decision: the migration adds admin insert and update policies (`is_admin_of_client`, `updated_by = auth.uid()`) and adds admin to the select policy. Admin uploads to `documents` and `client-documents` are kept (`can_upload_client_documents` = family, admin of the client, or carer on shift). Another organisation's admin is refused. No UI for admin here.
+- Test changes caused: `carer_client_info.test.sql` [CAR-04][AC-03] 'admin cannot insert' and 'admin update changed nothing' now expect success; added admin read, other-organisation admin read and insert (plan 21 to 24). HUMAN REVIEW: test expectation changed.
+- Human confirmation: Dhruv Verma, 2026-09-30 (in-session).
+
 <!-- Template
 ### FD-01 — <title>
 - Date:

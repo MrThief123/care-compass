@@ -1,6 +1,6 @@
 # Progress — CAR-04 Carer — Client info
 
-Status: IN PROGRESS (tests written, implementation not started)
+Status: IN PROGRESS (migration done; reads, action, redirect, components remaining)
 Owner: Dhruv Verma
 Lane: C — Carer
 Sprint: SPRINT · planned D9
@@ -43,7 +43,10 @@ Last updated: 2026-09-30
 - `tests/integration/carer-client-info.test.ts`, `tests/e2e/carer-client-info.spec.ts`
 
 ## Decisions
-- See DECISIONS.md (FD-01 to FD-06)
+- See DECISIONS.md (FD-01 to FD-07)
+
+## HUMAN REVIEW: test expectation changed
+- `carer_client_info.test.sql`: admin section write/read now accepted (FD-07)
 
 ## Problems encountered
 - `.env.local` is the hosted project: integration/e2e must be run with the local stack's variables (`supabase status -o env`).

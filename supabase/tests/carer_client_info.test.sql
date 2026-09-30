@@ -5,10 +5,11 @@
 -- keeps its rights. Audit: AC-02's "recorded as saved by Aisha" rests on updated_by, checked in
 -- tests/integration/carer-client-info.test.ts.
 begin;
-select plan(21);
+select plan(24);
 
 insert into organisations (id, name) values
-  ('11111111-1111-1111-1111-111111111111', 'Banksia Home Care');
+  ('11111111-1111-1111-1111-111111111111', 'Banksia Home Care'),
+  ('22222222-2222-2222-2222-222222222222', 'Wattle Care');
 
 insert into clients (id, organisation_id, first_name, last_name) values
   ('b1111111-1111-1111-1111-111111111111', '11111111-1111-1111-1111-111111111111', 'Margaret', 'Doyle');
@@ -18,7 +19,8 @@ insert into auth.users (id, email) values
   ('a2222222-2222-2222-2222-222222222222', 'priya@example.com'),
   ('a3333333-3333-3333-3333-333333333333', 'aisha@example.com'),
   ('a7777777-7777-7777-7777-777777777777', 'daniel@example.com'),
-  ('a8888888-8888-8888-8888-888888888888', 'erin@example.com');
+  ('a8888888-8888-8888-8888-888888888888', 'erin@example.com'),
+  ('a4444444-4444-4444-4444-444444444444', 'wendy@example.com');
 
 -- Helen (family), Priya (admin), Aisha (carer: only a LATER shift with Margaret = off shift),
 -- Daniel (carer: shift with Margaret in progress = on shift), Erin (carer: no shift at all).
@@ -27,7 +29,8 @@ insert into profiles (id, role, organisation_id, first_name, last_name, is_activ
   ('a2222222-2222-2222-2222-222222222222', 'admin', '11111111-1111-1111-1111-111111111111', 'Priya', 'Nair', true),
   ('a3333333-3333-3333-3333-333333333333', 'carer', '11111111-1111-1111-1111-111111111111', 'Aisha', 'Rahman', true),
   ('a7777777-7777-7777-7777-777777777777', 'carer', '11111111-1111-1111-1111-111111111111', 'Daniel', 'Kim', true),
-  ('a8888888-8888-8888-8888-888888888888', 'carer', '11111111-1111-1111-1111-111111111111', 'Erin', 'Walsh', true);
+  ('a8888888-8888-8888-8888-888888888888', 'carer', '11111111-1111-1111-1111-111111111111', 'Erin', 'Walsh', true),
+  ('a4444444-4444-4444-4444-444444444444', 'admin', '22222222-2222-2222-2222-222222222222', 'Wendy', 'Cho', true);
 
 insert into client_family_members (client_id, profile_id, relationship_label) values
   ('b1111111-1111-1111-1111-111111111111', 'a1111111-1111-1111-1111-111111111111', 'Daughter');
@@ -166,22 +169,44 @@ select is(
 reset role;
 
 -- ---------------------------------------------------------------------------
--- Admin never writes client info (D28); family keeps its rights.
+-- An admin of the client's organisation reads and writes sections; another organisation's
+-- admin does neither. Family keeps its rights.
 -- ---------------------------------------------------------------------------
 select pg_temp.login('a2222222-2222-2222-2222-222222222222');
-select throws_ok(
+select is(
+  (select count(*)::int from client_info_sections where client_id = 'b1111111-1111-1111-1111-111111111111'),
+  2,
+  '[CAR-04][AC-03] Priya (admin, same organisation) can read the sections'
+);
+savepoint admin_insert;
+select lives_ok(
   $$insert into client_info_sections (client_id, key, body, updated_by)
     values ('b1111111-1111-1111-1111-111111111111', 'medical_history', 'Admin edit', 'a2222222-2222-2222-2222-222222222222')$$,
-  '42501', null,
-  '[CAR-04][AC-03] Priya (admin) cannot insert a section'
+  '[CAR-04][AC-03] Priya (admin) can insert a section'
 );
-update client_info_sections set body = 'Admin edit' where client_id = 'b1111111-1111-1111-1111-111111111111' and key = 'habits';
+rollback to savepoint admin_insert;
+update client_info_sections set body = 'Admin edit', updated_by = 'a2222222-2222-2222-2222-222222222222'
+  where client_id = 'b1111111-1111-1111-1111-111111111111' and key = 'habits';
 reset role;
 select is(
   (select body from client_info_sections where client_id = 'b1111111-1111-1111-1111-111111111111' and key = 'habits'),
-  'Tea at 6am.',
-  '[CAR-04][AC-03] Priya''s update changed nothing'
+  'Admin edit',
+  '[CAR-04][AC-03] Priya (admin) can update a section'
 );
+
+select pg_temp.login('a4444444-4444-4444-4444-444444444444');
+select is(
+  (select count(*)::int from client_info_sections where client_id = 'b1111111-1111-1111-1111-111111111111'),
+  0,
+  '[CAR-04][AC-03] Wendy (admin, other organisation) reads no sections'
+);
+select throws_ok(
+  $$insert into client_info_sections (client_id, key, body, updated_by)
+    values ('b1111111-1111-1111-1111-111111111111', 'medical_history', 'Other org', 'a4444444-4444-4444-4444-444444444444')$$,
+  '42501', null,
+  '[CAR-04][AC-03] Wendy (admin, other organisation) cannot insert a section'
+);
+reset role;
 
 select pg_temp.login('a1111111-1111-1111-1111-111111111111');
 select lives_ok(
