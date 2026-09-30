@@ -59,6 +59,11 @@ Record feature-level decisions here using the template below. Project-wide decis
 - Decision: the FD-10 rule moved to `src/lib/phone/au-phone.ts` and is also applied to Family info, Carer My info and Staff add/edit (blank still allowed there). See root DECISIONS.md CHG-038 for scope, changed tests and what is not enforced in the database. The human chose to build it on this branch.
 - Test changes caused: `settings-schema.test.ts` (ADM-10) now holds only form-level cases; the format table moved to `src/lib/phone/au-phone.test.ts`. Other lanes' tests are listed in CHG-038. **HUMAN REVIEW: test expectation changed**.
 
+### FD-12 — Phone required on every form (CHG-039)
+- Date: 2026-09-30
+- Decision: Family info, Carer My info and Staff add/edit now require a phone as well, using `requiredPhoneError`. Reverses the "blank still allowed" choice in FD-11. See root DECISIONS.md CHG-039 for the changed tests and the app-level-only enforcement outside the organisation RPC.
+- Test changes caused: blank-phone cases in `settings-schema.test.ts` (Family), `actions.test.ts`, `carer-actions.test.ts`, `staff-actions.test.ts` and two integration files now expect a refusal or use a filled-in phone. **HUMAN REVIEW: test expectation changed**.
+
 <!-- Template
 ### FD-01 — <title>
 - Date:

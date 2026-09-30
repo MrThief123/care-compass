@@ -202,7 +202,12 @@ describe("[CAR-09][AC-04] updateCarerContactDetails saves the signed-in carer", 
     );
     expect(result).toEqual({
       ok: true,
-      data: { profileId: AISHA_ID, name: "Aisha Rahman", role: "Registered Nurse" },
+      data: {
+        profileId: AISHA_ID,
+        name: "Aisha Rahman",
+        phone: "0412 345 678",
+        role: "Registered Nurse",
+      },
     });
   });
 

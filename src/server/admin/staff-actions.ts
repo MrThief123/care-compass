@@ -7,7 +7,7 @@
  */
 import { z } from "zod";
 
-import { australianPhoneError } from "@/lib/phone/au-phone";
+import { requiredPhoneError } from "@/lib/phone/au-phone";
 import { addMockStaff, updateMockStaff } from "@/server/admin/staff-mock-store";
 import { getDataSourceMode } from "@/server/data-source";
 import type { StaffMember } from "@/types/domain";
@@ -26,7 +26,7 @@ const StaffFieldsSchema = z.object({
     .string()
     .trim()
     .superRefine((value, ctx) => {
-      const message = australianPhoneError(value);
+      const message = requiredPhoneError(value);
       if (message) ctx.addIssue({ code: "custom", message });
     }),
   email: z.string().trim().email("Enter a valid email address."),

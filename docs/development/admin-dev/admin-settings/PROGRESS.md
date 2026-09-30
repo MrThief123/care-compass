@@ -20,6 +20,7 @@ Last updated: 2026-09-30
 - Tests T-01 to T-09 written first
 - Migration `20260930032751_admin_update_organisation.sql`; `settings-schema.ts`, `settings-actions.ts`; supabase branch of `getAdminSettings`; screen wired (Save, Reset), preview notices removed
 - Australian phone format check added (AC-08, FD-10), then shared with Family, Carer and Staff forms (CHG-038, FD-11). **HUMAN REVIEW: other lanes' tests changed**
+- Phone made required on Family, Carer and Staff forms too (CHG-039, FD-12). **HUMAN REVIEW: other lanes' tests changed**
 - Edit and Cancel flow added on the human's request (AC-07, FD-09)
 - ADM-UI-05 tests updated (FD-06, FD-09). **HUMAN REVIEW: test expectation changed**
 

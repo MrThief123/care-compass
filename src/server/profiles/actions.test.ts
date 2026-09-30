@@ -200,7 +200,7 @@ describe("[FAM-12][AC-01] updateFamilyContactDetails saves the signed-in profile
     );
     expect(result).toEqual({
       ok: true,
-      data: { profileId: HELEN_ID, name: "Helen Doyle" },
+      data: { profileId: HELEN_ID, name: "Helen Doyle", phone: "0412 345 678" },
     });
   });
 
