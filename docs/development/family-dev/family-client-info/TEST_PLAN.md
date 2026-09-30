@@ -12,15 +12,15 @@ Tests are written **before** production code (TESTING.md §2). Run them, confirm
 
 | Test ID | Covers | Level | Test description | Written first? | Result |
 |---|---|---|---|---|---|
-| T-01 | AC-01, AC-09 | e2e | Helen edits Habits, saves, sees the text, still sees it after a reload; audit row names Helen. Also in the spec: never-written section + 5,001 characters refused with draft kept (AC-03, AC-08) | ☑ | NOT RUN (needs local Supabase + DATA_SOURCE=supabase build) |
-| T-01b | AC-01 | component | Save calls `saveClientInfoSection(clientId, kind, text)`, shows the new text, refreshes the route, focus returns to Edit | ☑ | RED (expected) |
-| T-02 | AC-02 | component | Description, Habits, Medical history, Documentation cards appear in that order | ☑ | RED (expected) |
-| T-03 | AC-03, AC-07 | component | A 'too long' refusal shows under the box, the draft stays and the old text is not replaced; a failed save does the same | ☑ | RED (expected) |
+| T-01 | AC-01, AC-09 | e2e | Helen edits Habits, saves, sees the text, still sees it after a reload; audit row names Helen. Also in the spec: never-written section + 5,001 characters refused with draft kept (AC-03, AC-08) | ☑ | GREEN (e2e 6/6 locally, prod build, local Supabase) |
+| T-01b | AC-01 | component | Save calls `saveClientInfoSection(clientId, kind, text)`, shows the new text, refreshes the route, focus returns to Edit | ☑ | GREEN |
+| T-02 | AC-02 | component | Description, Habits, Medical history, Documentation cards appear in that order | ☑ | GREEN |
+| T-03 | AC-03, AC-07 | component | A 'too long' refusal shows under the box, the draft stays and the old text is not replaced; a failed save does the same | ☑ | GREEN |
 | T-04 | AC-04 | db | Another organisation's admin and an unlinked family member cannot insert or update Margaret's sections; Helen can; an unlinked family member cannot read; Priya (own admin) can (FD-05) | ☑ | GREEN on first run: CAR-04's migration already holds these rules |
-| T-05 | AC-05, AC-06 | e2e | Helen adds 'Care plan.pdf'; the tile appears and is listed after a reload; a file over 20 MB is refused; the row has event_id null | ☑ | NOT RUN (as T-01) |
-| T-05b | AC-05 | component | Add file posts a FormData with clientId and no eventId; a tile appears; a saved tile opens its signed URL | ☑ | RED (expected) |
-| T-06 | AC-06 | component | A refused upload shows the server's message and adds no tile | ☑ | RED (expected) |
-| T-07 | AC-08 | component | An unwritten section shows 'Nothing added yet.' with Edit, and family still sees all three text cards | ☑ | RED (expected) |
+| T-05 | AC-05, AC-06 | e2e | Helen adds 'Care plan.pdf'; the tile appears and is listed after a reload; a file over 20 MB is refused; the row has event_id null | ☑ | GREEN (e2e 6/6 locally, prod build, local Supabase) |
+| T-05b | AC-05 | component | Add file posts a FormData with clientId and no eventId; a tile appears; a saved tile opens its signed URL | ☑ | GREEN |
+| T-06 | AC-06 | component | A refused upload shows the server's message and adds no tile | ☑ | GREEN |
+| T-07 | AC-08 | component | An unwritten section shows 'Nothing added yet.' with Edit, and family still sees all three text cards | ☑ | GREEN |
 | T-08 | AC-09 | db | Helen's section saves write audit_log rows: actor Helen, role family, client Margaret | ☑ | GREEN on first run (audit trigger exists) |
 | T-09 | AC-05 | db | Helen can add a client-level document row (event_id null); an unlinked family member cannot | ☑ | GREEN on first run |
 

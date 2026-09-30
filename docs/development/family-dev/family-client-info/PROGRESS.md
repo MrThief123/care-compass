@@ -55,7 +55,7 @@ Last updated: 2026-10-01
 - Implementation: wire `InfoSectionCard` and `DocumentationCard` to the contract, pass `clientId`/`kind` from the page, update the listed FAM-UI-04 tests (DECISIONS, HUMAN REVIEW).
 
 ## Ready for PR
-- Not yet: waiting for the human to review the dev server and say go. Before the PR revert `src/server/clients/queries.ts` (`git checkout src/server/clients/queries.ts`).
+- READY FOR PR. Human approved 2026-10-01; temporary header patch reverted. HUMAN REVIEW: test expectation changed (DECISIONS FD-06, FD-08).
 
 ## Known gap for FAM-01
 Family Home errors under DATA_SOURCE=supabase: events/budget contracts unimplemented (see DECISIONS.md FD-09).
