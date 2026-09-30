@@ -69,6 +69,13 @@ Record feature-level decisions here using the template below. Project-wide decis
   - Client data: `client_id` is stored for future use; a carer whose read access to the client ended (PD-041) still sees the message text, which is all the carer needs and names only what the assigned shift already named.
 - Retention: none in this feature.
 
+### FD-07 — Test file fix and implementation notes
+- Date: 2026-09-30
+- `[T-05]` in `supabase/tests/carer_notifications.test.sql`: two assertions used `(with u as (update ... returning 1) select count(*) from u)` inside a subquery, which Postgres rejects ('WITH clause containing a data-modifying statement must be at the top level'). Genuine test bug. They now call `public.t_mark_read(...)`, an invoker-rights helper created inside the test transaction (rolled back), so they still run as Daniel and still assert 0 rows and 1 row. Same 23-test plan. **HUMAN REVIEW: test file changed.**
+- Message for a cancellation uses the shift's times as they were (`old` row); a carer change at the same time as a cancellation notifies the old carer only.
+- The carer layout catches a failed `getCarerUnreadCount` and renders the bell with no badge, so a notifications outage does not take the carer app down. The card itself still shows its error state if its own query fails.
+- `markCarerNotificationsRead` refreshes the router only when the action succeeds; on failure the scroll or navigation still happens (AC-11).
+
 <!-- Template
 ### FD-01 — <title>
 - Date:

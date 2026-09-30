@@ -13,20 +13,20 @@ Tests are written **before** production code (TESTING.md §2). Run them, confirm
 
 | Test ID | Covers | Level | Test description | Written first? | Result |
 |---|---|---|---|---|---|
-| T-01 | AC-01 | db | Insert shift for Aisha/Margaret Doyle (Melbourne 09:00–11:00, stored as UTC) → one unread admin `shift_assigned` row with the exact message. | ☑ | FAILING (expected) |
-| T-02 | AC-02 | db | Change times → 'Shift changed: …' message; update of an unrelated column → no new row. | ☑ | FAILING (expected) |
-| T-03 | AC-03 | db | Set `cancelled_at` → 'Shift cancelled: …' once; a second update of the cancelled shift adds nothing. | ☑ | FAILING (expected) |
-| T-04 | AC-04 | db | Change `carer_id` Aisha→Daniel → Aisha `shift_cancelled`, Daniel `shift_assigned`. | ☑ | FAILING (expected) |
-| T-05 | AC-05 | db | As Daniel: Aisha's rows invisible; insert refused; update of `message` refused; update of Aisha's `read_at` affects 0 rows; own `read_at` update works. RLS enabled. | ☑ | FAILING (expected) |
-| T-06 | AC-06 | component | `CarerHomeView` with 3 notifications (1 read): chips and messages newest first; 'Unread' marker on exactly the 2 unread rows. | ☑ | FAILING (expected) |
-| T-07 | AC-07 | component | `NotificationBell`: names and badge for 0, 2, 12 unread. | ☑ | FAILING (expected) |
-| T-08 | AC-08 | component | `NotificationBell` on `/carer/home`: click calls `markCarerNotificationsRead`, scrolls and focuses the card, refreshes the router. | ☑ | FAILING (expected) |
-| T-09 | AC-09 | component | `NotificationBell` on `/carer/patients`: click pushes `/carer/home#carer-home-notifications`. | ☑ | FAILING (expected) |
-| T-10 | AC-10 | integration | As Aisha through the contract: rows newest first, `read` flag, unread count; mark-read touches only hers; Daniel's rows untouched. | ☑ | FAILING (expected) |
-| T-11 | AC-11 | component | Mark-read rejects/returns `{ok:false}`: card still scrolled, count unchanged, no names in the page text. | ☑ | FAILING (expected) |
-| T-12 | AC-12 | component | axe on the header with the bell and on the card; bell activates with Enter and Space. | ☑ | FAILING (expected) |
-| T-13 | AC-06, AC-10 | contract (mock) | Existing `getCarerNotifications` tests updated for the full-name text; `getCarerUnreadCount('staff-aisha')` = 2; unknown carer = 0. | ☑ | FAILING (expected) |
-| T-14 | FD-05 | component | `PageHeader` renders `bellSlot` in place of the plain bell; without it, unchanged. | ☑ | FAILING (expected) |
+| T-01 | AC-01 | db | Insert shift for Aisha/Margaret Doyle (Melbourne 09:00–11:00, stored as UTC) → one unread admin `shift_assigned` row with the exact message. | ☑ | PASSING |
+| T-02 | AC-02 | db | Change times → 'Shift changed: …' message; update of an unrelated column → no new row. | ☑ | PASSING |
+| T-03 | AC-03 | db | Set `cancelled_at` → 'Shift cancelled: …' once; a second update of the cancelled shift adds nothing. | ☑ | PASSING |
+| T-04 | AC-04 | db | Change `carer_id` Aisha→Daniel → Aisha `shift_cancelled`, Daniel `shift_assigned`. | ☑ | PASSING |
+| T-05 | AC-05 | db | As Daniel: Aisha's rows invisible; insert refused; update of `message` refused; update of Aisha's `read_at` affects 0 rows; own `read_at` update works. RLS enabled. | ☑ | PASSING |
+| T-06 | AC-06 | component | `CarerHomeView` with 3 notifications (1 read): chips and messages newest first; 'Unread' marker on exactly the 2 unread rows. | ☑ | PASSING |
+| T-07 | AC-07 | component | `NotificationBell`: names and badge for 0, 2, 12 unread. | ☑ | PASSING |
+| T-08 | AC-08 | component | `NotificationBell` on `/carer/home`: click calls `markCarerNotificationsRead`, scrolls and focuses the card, refreshes the router. | ☑ | PASSING |
+| T-09 | AC-09 | component | `NotificationBell` on `/carer/patients`: click pushes `/carer/home#carer-home-notifications`. | ☑ | PASSING |
+| T-10 | AC-10 | integration | As Aisha through the contract: rows newest first, `read` flag, unread count; mark-read touches only hers; Daniel's rows untouched. | ☑ | PASSING |
+| T-11 | AC-11 | component | Mark-read rejects/returns `{ok:false}`: card still scrolled, count unchanged, no names in the page text. | ☑ | PASSING |
+| T-12 | AC-12 | component | axe on the header with the bell and on the card; bell activates with Enter and Space. | ☑ | PASSING |
+| T-13 | AC-06, AC-10 | contract (mock) | Existing `getCarerNotifications` tests updated for the full-name text; `getCarerUnreadCount('staff-aisha')` = 2; unknown carer = 0. | ☑ | PASSING |
+| T-14 | FD-05 | component | `PageHeader` renders `bellSlot` in place of the plain bell; without it, unchanged. | ☑ | PASSING |
 
 ## Regression scope
 - Run the full unit/component suite and `supabase test db` before marking READY FOR PR.

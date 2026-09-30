@@ -2,13 +2,13 @@
 
 Last session date: 2026-09-30
 Current branch: `feature/carer-notifications`
-Worked on: docs rewrite and tests-first
-What changed: docs (PRD, ACs, TEST_PLAN, DECISIONS, PROGRESS); failing tests only
-Tests run: see PROGRESS.md
-Test results: failing for the expected reasons
+Worked on: implementation to green, visual and real-data checks
+What changed: migration, server contract and action, bell, unread marker, `PageHeader.bellSlot`, layout, fixture text, docs
+Tests run: see PROGRESS.md (all green; one unrelated FAM-UI-01 axe timeout passed on rerun)
+Test results: 12 / 12 ACs MET
 Current blocker: none
-Important discoveries: shifts already have `cancelled_at`; `transfer_client_organisation` cancels future shifts, so the trigger will notify those carers
-Important decisions: FD-01 to FD-06 (full name in messages, bell marks all read, bellSlot on PageHeader)
-Exact next action: implement to green, then start a preview for the human
-Files likely to be touched next: `supabase/migrations/*_carer_notifications.sql`, `src/server/notifications/*`, `src/features/carer-home/notification-bell.tsx`, `src/features/carer-home/carer-home-view.tsx`, `src/components/shared/page-header.tsx`, `src/app/(carer)/carer/layout.tsx`, `src/mocks/fixtures.ts`, `src/mocks/queries/notifications.ts`
-Warning for next session: branch is cut from `main`, not from `feature/carer-client-info` (unmerged CAR-04 migration `20260930054637` is not here). Do not open the PR without the human's yes.
+Important discoveries: local DB carries the unmerged CAR-04 migration, so `migration up` and full `db:types` are noisy on this machine; pgTAP file had one invalid-SQL construct (FD-07)
+Important decisions: FD-01 to FD-07
+Exact next action: human says "yes" -> open the PR to `main` (docs ship inside it). Flag in the PR: `page-header.tsx` is outside Lane C; two CAR-UI-01 expectations changed; one assertion removed; pgTAP helper fix.
+Preview (leave running): mock `http://localhost:3000/carer/home` and `http://localhost:3000/carer/patients`; real data `http://localhost:3001/sign-in` with `aisha.preview@example.test` / `Carer02-preview!` (local Supabase, `DATA_SOURCE=supabase`, served from a copy in /tmp/cc-sb).
+Warning for next session: do not open the PR without the human's yes. Do not run integration tests against `.env.local` (hosted).
