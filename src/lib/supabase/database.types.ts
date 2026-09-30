@@ -445,6 +445,64 @@ export type Database = {
           },
         ];
       };
+      carer_notifications: {
+        Row: {
+          client_id: string | null;
+          created_at: string;
+          id: string;
+          kind: string;
+          message: string;
+          read_at: string | null;
+          recipient_id: string;
+          shift_id: string | null;
+          source: string;
+        };
+        Insert: {
+          client_id?: string | null;
+          created_at?: string;
+          id?: string;
+          kind: string;
+          message: string;
+          read_at?: string | null;
+          recipient_id: string;
+          shift_id?: string | null;
+          source: string;
+        };
+        Update: {
+          client_id?: string | null;
+          created_at?: string;
+          id?: string;
+          kind?: string;
+          message?: string;
+          read_at?: string | null;
+          recipient_id?: string;
+          shift_id?: string | null;
+          source?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "carer_notifications_client_id_fkey";
+            columns: ["client_id"];
+            isOneToOne: false;
+            referencedRelation: "clients";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "carer_notifications_recipient_id_fkey";
+            columns: ["recipient_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "carer_notifications_shift_id_fkey";
+            columns: ["shift_id"];
+            isOneToOne: false;
+            referencedRelation: "shifts";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       client_family_members: {
         Row: {
           client_id: string;

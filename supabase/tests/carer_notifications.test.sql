@@ -114,6 +114,18 @@ select is(
     where shift_id = 'c3333333-3333-3333-3333-333333333333'),
   3, '[T-04] assigned to Aisha, cancelled for Aisha, assigned to Daniel: three rows');
 
+-- Invoker-rights helper (rolled back with the transaction): counts rows an update touched.
+create function public.t_mark_read(p_recipient uuid default null) returns int
+language plpgsql as $$
+declare n int;
+begin
+  update carer_notifications set read_at = now()
+    where (p_recipient is null and read_at is null) or recipient_id = p_recipient;
+  get diagnostics n = row_count;
+  return n;
+end;
+$$;
+
 -- [T-05][AC-05] permissions
 select pg_temp.login('a2222222-2222-2222-2222-222222222222');
 
@@ -133,13 +145,10 @@ select throws_ok(
   $$delete from carer_notifications$$,
   '42501', null, '[T-05] a carer cannot delete a notification');
 select is(
-  (with u as (update carer_notifications set read_at = now()
-                where recipient_id = 'a1111111-1111-1111-1111-111111111111' returning 1)
-   select count(*)::int from u),
+  public.t_mark_read('a1111111-1111-1111-1111-111111111111'),
   0, '[T-05] Daniel cannot mark Aisha''s notifications read');
 select is(
-  (with u as (update carer_notifications set read_at = now() where read_at is null returning 1)
-   select count(*)::int from u),
+  public.t_mark_read(),
   1, '[T-05] Daniel can mark his own read');
 
 reset role;
