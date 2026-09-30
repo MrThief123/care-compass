@@ -1,12 +1,12 @@
 # Progress — ADM-06 Admin — Manage: staff and client selection
 
-Status: NOT STARTED
-Owner: unclaimed
+Status: IN PROGRESS
+Owner: Dhruv Verma
 Lane: A — Admin
 Sprint: SPRINT · planned D9
-Branch: `feature/admin-manage-selection` (not yet created)
-PR target: `admin-dev`
-Last updated: 2026-09-17 (planning pack generated)
+Branch: `feature/admin-manage-selection`
+PR target: `main`
+Last updated: 2026-09-30 (claimed)
 
 ## Blockers
 - None recorded at planning time
