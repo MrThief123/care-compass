@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 
 import { Field } from "@/components/shared/forms/field";
 import { InlineAlert } from "@/components/shared/forms/inline-alert";
@@ -19,6 +19,14 @@ export function MfaVerifyForm({ factorId }: MfaVerifyFormProps) {
   const [code, setCode] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  const fieldRef = useRef<HTMLDivElement>(null);
+
+  // AC-05: after a failed attempt the field is empty and focused, so the next 6 digits are typed
+  // fresh. The shared Field has no ref, so the input is found through its wrapper. The field is
+  // disabled while pending, so focus waits until it is enabled again.
+  useEffect(() => {
+    if (error && !isPending) fieldRef.current?.querySelector("input")?.focus();
+  }, [error, isPending]);
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
@@ -26,6 +34,7 @@ export function MfaVerifyForm({ factorId }: MfaVerifyFormProps) {
     startTransition(async () => {
       const result = await verifyMfaCode({ factorId, code });
       if (!result.ok) {
+        setCode("");
         setError(result.error.message);
         return;
       }
@@ -45,14 +54,16 @@ export function MfaVerifyForm({ factorId }: MfaVerifyFormProps) {
       {error && <InlineAlert>{error}</InlineAlert>}
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <Field
-          label="6-digit code"
-          name="code"
-          value={code}
-          onChange={setCode}
-          required
-          disabled={isPending}
-        />
+        <div ref={fieldRef}>
+          <Field
+            label="6-digit code"
+            name="code"
+            value={code}
+            onChange={setCode}
+            required
+            disabled={isPending}
+          />
+        </div>
         <Button type="submit" disabled={isPending} className="w-full">
           {isPending ? "Verifying…" : "Verify"}
         </Button>
