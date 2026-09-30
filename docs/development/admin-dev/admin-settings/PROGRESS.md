@@ -19,7 +19,7 @@ Last updated: 2026-09-30
 - Claimed. Docs updated (FD-01 to FD-04), AC-04 to AC-06 added
 - Tests T-01 to T-09 written first
 - Migration `20260930032751_admin_update_organisation.sql`; `settings-schema.ts`, `settings-actions.ts`; supabase branch of `getAdminSettings`; screen wired (Save, Reset), preview notices removed
-- Australian phone format check added (AC-08, FD-10)
+- Australian phone format check added (AC-08, FD-10), then shared with Family, Carer and Staff forms (CHG-038, FD-11). **HUMAN REVIEW: other lanes' tests changed**
 - Edit and Cancel flow added on the human's request (AC-07, FD-09)
 - ADM-UI-05 tests updated (FD-06, FD-09). **HUMAN REVIEW: test expectation changed**
 
@@ -34,7 +34,7 @@ Last updated: 2026-09-30
 
 ## Tests
 - Written: 9 / 9
-- Unit/component: `npx vitest run` 2132 passed; 5 failed, all `F0-07`/`F0-04` auth integration tests run against the hosted project from `.env.local` (not this feature)
+- Unit/component: `npx vitest run` 2141 passed; 5 failed, all `F0-07`/`F0-04` auth integration tests run against the hosted project from `.env.local` (not this feature)
 - `supabase test db`: 15 files, 459 tests PASS (admin_settings 13/13)
 - Integration against local Supabase: `admin-settings` 4/4 pass; 3 `documents` (F0-13) tests fail with a storage upload error after `supabase db reset` (not this feature)
 - typecheck, eslint (0 errors), prettier clean

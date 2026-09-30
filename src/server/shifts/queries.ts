@@ -4,8 +4,8 @@
  * data-source-adapter shape as the other domains (ARCHITECTURE.md §3.2).
  * Screens must import from here, never from `src/mocks` directly.
  */
-import { ageFromDob } from "@/lib/format/age";
 import { instantToMelbourneLocal, localToMelbourneIso } from "@/lib/dates/melbourne-time";
+import { ageFromDob } from "@/lib/format/age";
 import * as mock from "@/mocks/queries/shifts";
 import { getDataSourceMode, notImplementedForSupabase } from "@/server/data-source";
 import { OccurrenceRangeSchema, type OccurrenceRange, type Shift } from "@/types/domain";

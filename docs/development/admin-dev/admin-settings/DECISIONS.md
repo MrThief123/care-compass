@@ -54,6 +54,11 @@ Record feature-level decisions here using the template below. Project-wide decis
 - Consequences: the migration `20260930032751_admin_update_organisation.sql` was edited in place: it is unmerged and was only ever applied to local databases. Phones already stored elsewhere are not re-checked until they are edited. 1900 and 000 are refused. The human should confirm the list of accepted forms.
 - Human confirmation required: yes, the accepted forms (non-blocking).
 
+### FD-11 — Phone rule made shared (CHG-038)
+- Date: 2026-09-30
+- Decision: the FD-10 rule moved to `src/lib/phone/au-phone.ts` and is also applied to Family info, Carer My info and Staff add/edit (blank still allowed there). See root DECISIONS.md CHG-038 for scope, changed tests and what is not enforced in the database. The human chose to build it on this branch.
+- Test changes caused: `settings-schema.test.ts` (ADM-10) now holds only form-level cases; the format table moved to `src/lib/phone/au-phone.test.ts`. Other lanes' tests are listed in CHG-038. **HUMAN REVIEW: test expectation changed**.
+
 <!-- Template
 ### FD-01 — <title>
 - Date:

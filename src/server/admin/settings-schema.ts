@@ -4,19 +4,7 @@
  */
 import { z } from "zod";
 
-const PHONE_FORMAT = "Enter an Australian phone number, like 03 9555 0102 or +61 3 9555 0102.";
-const PHONE_LETTERS = "A phone number can only have digits, spaces, + ( ) and -.";
-
-/**
- * Australian numbers only (AC-08, FD-10): 0X XXXX XXXX (02, 03, 04, 07, 08) or the same with +61 and
- * no leading 0, 1300/1800 XXX XXX, and 13 XX XX. Spaces, hyphens and brackets are ignored. The
- * database repeats this check in `admin_update_organisation`.
- */
-const AU_PHONE = /^(?:(?:0|\+61)[23478]\d{8}|(?:0|\+61)?1[38]00\d{6}|13\d{4})$/;
-
-export function isAustralianPhone(phone: string): boolean {
-  return AU_PHONE.test(phone.replace(/[ ()-]/g, ""));
-}
+import { australianPhoneError } from "@/lib/phone/au-phone";
 
 export const organisationSettingsSchema = z.object({
   name: z.string().trim().min(1, "Enter an organisation name."),
@@ -31,8 +19,10 @@ export const organisationSettingsSchema = z.object({
     .string()
     .trim()
     .min(1, "Enter a phone number.")
-    .refine((value) => /^[0-9+() -]+$/.test(value), PHONE_LETTERS)
-    .refine(isAustralianPhone, PHONE_FORMAT),
+    .superRefine((value, ctx) => {
+      const message = australianPhoneError(value);
+      if (message) ctx.addIssue({ code: "custom", message });
+    }),
   address: z.string().trim().min(1, "Enter an address."),
 });
 export type OrganisationSettingsValues = z.infer<typeof organisationSettingsSchema>;

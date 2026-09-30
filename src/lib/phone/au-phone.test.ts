@@ -54,7 +54,13 @@ describe("[CHG-038] australianPhoneError", () => {
     },
   );
 
-  it("[CHG-038] a blank phone keeps its own message", () => {
-    expect(phoneError("   ")).toBe("Enter a phone number.");
+  it("[CHG-038] a blank phone has no format error (whether it is required is the form's rule)", () => {
+    expect(australianPhoneError("   ")).toBeNull();
+    expect(australianPhoneError("")).toBeNull();
+  });
+
+  it("[CHG-038] isAustralianPhone is the yes/no form", () => {
+    expect(isAustralianPhone("03 9555 0102")).toBe(true);
+    expect(isAustralianPhone("0395")).toBe(false);
   });
 });

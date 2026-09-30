@@ -122,7 +122,10 @@ describe("[CHG-038] staff phone must be an Australian number when filled in", ()
     const before = await getAdminStaff();
 
     const created = await createStaff({ ...staff, phone: "0395" });
-    const updated = await updateStaff(before.staff[0].id, { ...staff, phone: "03 9555 O102" });
+    const updated = await updateStaff(before.staff[0]?.id ?? "", {
+      ...staff,
+      phone: "03 9555 O102",
+    });
 
     expect(created).toMatchObject({ ok: false, error: { code: "VALIDATION" } });
     expect(updated).toMatchObject({ ok: false, error: { code: "VALIDATION" } });
