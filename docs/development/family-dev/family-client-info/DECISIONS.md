@@ -61,6 +61,12 @@ Record feature-level decisions here using the template below. Project-wide decis
 - Decision: HUMAN REVIEW: test expectation changed (genuine test bug). Before: expect the text, then reload. After: expect the Edit button to be back, then the text, then reload. No assertion removed.
 - Human confirmation required: yes (PR review).
 
+### FD-09 — Family Home errors under DATA_SOURCE=supabase (known gap, not FAM-09)
+- Date: 2026-10-01
+- Context: `/family/[clientId]/home` logs `[family-home] could not load home data: "Error"` and shows its error state when run with `DATA_SOURCE=supabase`. `loadFamilyHomeData` calls `getTodayOccurrences` and `getTaskLog` (`src/server/events/queries.ts`, `getTodayOccurrences` is `notImplementedForSupabase`) and `getBudgetSummary`. Not checked which one throws first.
+- Decision: not fixed here; Home wiring is FAM-01 (not started). FAM-09 does not touch `home-data.ts` or the events/budget contracts. Whoever starts FAM-01 should expect this error in supabase mode and wire those contracts (or confirm they are covered by another feature) before the Home page can load real data.
+- Human confirmation required: no (record only).
+
 <!-- Template
 ### FD-01 — <title>
 - Date:

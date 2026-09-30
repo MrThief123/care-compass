@@ -56,3 +56,6 @@ Last updated: 2026-10-01
 
 ## Ready for PR
 - Not yet: waiting for the human to review the dev server and say go. Before the PR revert `src/server/clients/queries.ts` (`git checkout src/server/clients/queries.ts`).
+
+## Known gap for FAM-01
+Family Home errors under DATA_SOURCE=supabase: events/budget contracts unimplemented (see DECISIONS.md FD-09).
