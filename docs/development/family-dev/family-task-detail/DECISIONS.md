@@ -58,6 +58,14 @@ None open. OQ-29 (PD-055) and OQ-10 (PD-044) are ANSWERED in root DECISIONS.md.
 - Implementation note (FD-03): `buildOccurrences` takes `keepCancelledWithCompletion`; only `getOccurrence`'s Supabase branch sets it, so range reads still hide cancelled occurrences.
 - Human confirmation required: review in the PR.
 
+### FD-07 — Follow-up (not built here): late-completion wording
+- Date: 2026-09-30
+- Context: the human asked that a task completed after it was overdue show how late it was and its original due date (for example "Done · Aisha Rahman · 2 days late"). No existing feature covers it. Completion itself is FAM-05 (Calendar Tasks panel) and the Carer screens; Task detail stays read-only (FD-01).
+- Decision: not built in FAM-15. To be a separate Family feature, proposed as "Late completion wording". It would add one shared helper that turns the due time and `completedAt` into the wording (Melbourne time), and use it on Task detail, the Task log and the Calendar Tasks panel. No data or database change.
+- Depends on: FAM-15, FAM-14, FAM-05 merged.
+- Next step: promotion needs a CHG entry, human confirmation, and feature docs from `docs/templates/FEATURE_TEMPLATE/` (DEVELOPMENT_PLAN.md §7).
+- Human confirmation required: yes, to promote. Recorded as a follow-up 2026-09-30 (Dhruv Verma).
+
 <!-- Template
 ### FD-01 — <title>
 - Date:
