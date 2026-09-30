@@ -60,6 +60,13 @@ Record feature-level decisions here using the template below. Project-wide decis
 - Decision: on shift, Description, Habits and Medical history each show a card even when never written ("Nothing added yet." plus Edit), so a carer can add a first entry. Off shift, an unwritten section is left out. The "No information yet" empty state shows only when off shift with nothing at all.
 - Local stack note (not in a migration): storage-api v1.77.0 needs a unique index on `storage.objects (bucket_id, name collate "C") where archived_at is null`; the local DB lacks it after `supabase db reset`, so every upload fails 42P10 (F0-13 too). Create it as `supabase_storage_admin` before upload integration or e2e runs.
 
+### FD-10 — Open and download documents on the Info tab (CHG-CAR04-01)
+- Date: 2026-09-30
+- Context: `getDocumentUrl` (F0-13) returns a signed URL but no screen calls it; Supabase `DocumentRef.url` is "" (FD-08).
+- Decision: a carer wrapper around `DocumentTile` (family-task-detail, not edited) makes a client-document tile a button that opens the signed URL in a new tab; on failure an inline status message shows. Mock mode shows the NOT_AVAILABLE message. Read access follows assignment, so it works on and off shift. Tiles added in this session stay non-clickable (brief; the id is known, so this can be relaxed later). Adds AC-10 / T-10.
+- Human confirmation: Dhruv Verma, 2026-09-30 (in-session; scope addition).
+- Test changes caused: none to existing tests; `getDocumentUrl` added to the `documents/actions` mock in `carer-client-info.test.tsx`.
+
 <!-- Template
 ### FD-01 — <title>
 - Date:

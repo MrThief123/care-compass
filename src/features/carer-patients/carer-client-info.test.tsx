@@ -29,6 +29,7 @@ const mocks = vi.hoisted(() => ({
   getClientDocuments: vi.fn(),
   saveClientInfoSection: vi.fn(),
   uploadDocument: vi.fn(),
+  getDocumentUrl: vi.fn(),
 }));
 
 vi.mock("next/navigation", () => ({
@@ -46,7 +47,10 @@ vi.mock("@/server/clients/actions", () => ({
   saveClientInfoSection: mocks.saveClientInfoSection,
 }));
 vi.mock("@/server/documents/queries", () => ({ getClientDocuments: mocks.getClientDocuments }));
-vi.mock("@/server/documents/actions", () => ({ uploadDocument: mocks.uploadDocument }));
+vi.mock("@/server/documents/actions", () => ({
+  uploadDocument: mocks.uploadDocument,
+  getDocumentUrl: mocks.getDocumentUrl,
+}));
 
 const CARER_ID = "staff-aisha";
 const MARGARET = "client-margaret"; // Aisha's shift is in progress
@@ -307,6 +311,89 @@ describe("[CAR-04][AC-07] on shift the carer adds a file", () => {
     await renderInfo(MARGARET);
 
     expect(screen.queryByRole("button", { name: /remove|delete|detach/i })).not.toBeInTheDocument();
+  });
+});
+
+describe("[CAR-04][AC-10] opening a document", () => {
+  const SIGNED = "https://storage.example.test/signed/care-plan?token=abc";
+
+  function fakeWindow() {
+    const opened = { location: { href: "" }, opener: {} as unknown, close: vi.fn() };
+    vi.spyOn(window, "open").mockReturnValue(opened as unknown as Window);
+    return opened;
+  }
+
+  beforeEach(() => {
+    mocks.getDocumentUrl.mockResolvedValue({
+      ok: true,
+      data: { url: SIGNED, expiresInSeconds: 300 },
+    });
+  });
+
+  it("[CAR-04][AC-10] opens the signed URL in a new tab, with no opener, when a tile is clicked", async () => {
+    const opened = fakeWindow();
+    const user = userEvent.setup();
+    await renderInfo(MARGARET);
+
+    await user.click(screen.getByRole("button", { name: "Care plan.pdf" }));
+
+    await waitFor(() => expect(opened.location.href).toBe(SIGNED));
+    expect(mocks.getDocumentUrl).toHaveBeenCalledWith("doc-care-plan");
+    expect(window.open).toHaveBeenCalledWith("", "_blank");
+    expect(opened.opener).toBeNull();
+  });
+
+  it("[CAR-04][AC-10] works off shift too", async () => {
+    const opened = fakeWindow();
+    const user = userEvent.setup();
+    mocks.getClientDocuments.mockResolvedValue([{ ...CARE_PLAN, clientId: ROBERT }]);
+    await renderInfo(ROBERT);
+
+    await user.click(screen.getByRole("button", { name: "Care plan.pdf" }));
+
+    await waitFor(() => expect(opened.location.href).toBe(SIGNED));
+  });
+
+  it("[CAR-04][AC-10] shows the failure message inline and closes the blank tab", async () => {
+    const opened = fakeWindow();
+    mocks.getDocumentUrl.mockResolvedValue({
+      ok: false,
+      error: { code: "NOT_FOUND", message: "That document isn't available." },
+    });
+    const user = userEvent.setup();
+    await renderInfo(MARGARET);
+
+    await user.click(screen.getByRole("button", { name: "Care plan.pdf" }));
+
+    const card = screen.getByRole("region", { name: "Documentation" });
+    expect(await within(card).findByText("That document isn't available.")).toBeInTheDocument();
+    expect(opened.close).toHaveBeenCalled();
+    expect(opened.location.href).toBe("");
+  });
+
+  it("[CAR-04][AC-10] shows a message and does not crash when the action throws", async () => {
+    fakeWindow();
+    mocks.getDocumentUrl.mockRejectedValue(new Error("boom"));
+    const user = userEvent.setup();
+    await renderInfo(MARGARET);
+
+    await user.click(screen.getByRole("button", { name: "Care plan.pdf" }));
+
+    expect(await screen.findByText("Couldn't open that document.")).toBeInTheDocument();
+  });
+
+  it("[CAR-04][AC-10] leaves a tile just added in this session non-clickable", async () => {
+    const user = userEvent.setup();
+    await renderInfo(MARGARET);
+    await user.upload(
+      document.querySelector<HTMLInputElement>('input[type="file"]')!,
+      new File(["%PDF-1.4"], "Diet sheet.pdf", { type: "application/pdf" }),
+    );
+
+    const card = screen.getByRole("region", { name: "Documentation" });
+    expect(await within(card).findByText("Diet sheet.pdf")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Diet sheet.pdf" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Care plan.pdf" })).toBeInTheDocument();
   });
 });
 

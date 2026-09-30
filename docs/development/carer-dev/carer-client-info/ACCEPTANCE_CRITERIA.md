@@ -13,5 +13,6 @@ Each criterion is observable and maps to at least one test in TEST_PLAN.md. Crit
 | AC-07 | US-01 | happy | Given Aisha is on shift, when she adds 'Care plan.pdf' on the Documentation card, then a tile with that name appears; a file type or size that is not allowed shows the upload's error; she has no way to remove a file. | NOT MET |
 | AC-08 | US-01 | happy | Given Supabase data, when Info loads, then the sections come in the order Description, Habits, Medical history (a section never written is left out), and Documentation lists the client's own documents oldest first, without event documents or detached ones. | NOT MET |
 | AC-09 | US-01 | error | Given a contract function rejects, when Info loads, then the error state is shown and nothing logged or thrown names a client or carer. | NOT MET |
+| AC-10 | US-01 | happy | Given a document tile on the Documentation card (on or off shift), when Aisha clicks it, then its signed URL opens in a new tab; if it cannot be opened an inline message shows and no tab stays open; a tile added in this session has no open action. Added by CHG-CAR04-01 (FD-10). | NOT MET |
 
 Status values: NOT MET · MET (test passing) · BLOCKED (cite OQ/PD).

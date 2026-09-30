@@ -23,6 +23,7 @@ Tests are written **before** production code (TESTING.md §2). Run them, confirm
 | T-07 | AC-07 | component + integration | On shift: Add file calls `uploadDocument` with the client and file, tile appears; error shown on failure; no remove control. Real: on-shift carer uploads, off-shift refused. | ☑ | FAILS (expected) |
 | T-08 | AC-08 | unit + integration | Supabase reads: section order, missing sections left out, client documents oldest first, no event or detached documents. | ☑ | FAILS (expected) |
 | T-09 | AC-09 | component | Contract rejects: error state, logs name no client or carer. | ☑ | FAILS (expected) |
+| T-10 | AC-10 | component + e2e | Tile click calls `getDocumentUrl(id)` and opens the URL in a new tab (no opener), on and off shift; failure shows an inline message; just-added tile not clickable. Real: signed URL fetches the file. | ☑ | FAILS (expected) |
 
 ## Regression scope
 - `npm test`, `npm run typecheck`, `npm run lint`, `supabase test db`, `npm run test:integration`, and the CAR-related Playwright specs before READY FOR PR.
