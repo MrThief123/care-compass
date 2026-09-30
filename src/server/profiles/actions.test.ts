@@ -84,10 +84,25 @@ describe("[FAM-12][AC-02] updateFamilyContactDetails validates on the server", (
     if (!result.ok) {
       expect(result.error.fieldErrors).toMatchObject({
         name: "Enter your name.",
-        phone: "Enter a phone number like 0412 345 678.",
+        phone: "Enter an Australian phone number, like 03 9555 0102 or +61 3 9555 0102.",
       });
     }
     expect(mocks.from).not.toHaveBeenCalled();
+  });
+
+  it("[CHG-038] the phone must be an Australian number when filled in, and may be blank", async () => {
+    vi.stubEnv("DATA_SOURCE", "mock");
+    const { updateFamilyContactDetails } = await import("@/server/profiles/actions");
+
+    const bad = await updateFamilyContactDetails({ ...VALID, phone: "0000 000 000" });
+    expect(bad.ok).toBe(false);
+    if (!bad.ok) expect(bad.error.fieldErrors?.phone).toBeTruthy();
+    expect((await updateFamilyContactDetails({ ...VALID, phone: "+61 412 345 678" })).ok).toBe(
+      true,
+    );
+    const blank = await updateFamilyContactDetails({ ...VALID, phone: "" });
+    expect(blank.ok).toBe(false);
+    if (!blank.ok) expect(blank.error.fieldErrors?.phone).toBe("Enter a phone number.");
   });
 
   it("[FAM-12][AC-02] a non-object input is refused rather than thrown", async () => {
@@ -158,14 +173,14 @@ describe("[FAM-12][AC-01] updateFamilyContactDetails saves the signed-in profile
     );
   });
 
-  it("[FAM-12][AC-01] stores a blank phone, email or address as null and returns the saved details", async () => {
+  it("[FAM-12][AC-01] stores a blank email or address as null (phone is required) and returns the saved details", async () => {
     vi.stubEnv("DATA_SOURCE", "supabase");
     mocks.maybeSingle.mockResolvedValue({
       data: {
         id: HELEN_ID,
         first_name: "Helen",
         last_name: "Doyle",
-        phone: null,
+        phone: "0412 345 678",
         email: null,
         address: null,
       },
@@ -175,17 +190,17 @@ describe("[FAM-12][AC-01] updateFamilyContactDetails saves the signed-in profile
 
     const result = await updateFamilyContactDetails({
       name: "Helen Doyle",
-      phone: "",
+      phone: "0412 345 678",
       email: "",
       address: "",
     });
 
     expect(mocks.update).toHaveBeenCalledWith(
-      expect.objectContaining({ phone: null, email: null, address: null }),
+      expect.objectContaining({ phone: "0412 345 678", email: null, address: null }),
     );
     expect(result).toEqual({
       ok: true,
-      data: { profileId: HELEN_ID, name: "Helen Doyle" },
+      data: { profileId: HELEN_ID, name: "Helen Doyle", phone: "0412 345 678" },
     });
   });
 

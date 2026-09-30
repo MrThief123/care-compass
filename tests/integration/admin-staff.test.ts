@@ -204,7 +204,7 @@ describe.skipIf(!hasLocalSupabase)("[ADM-02] Admin Staff against local Supabase"
         return updateStaff(s.bob.userId, {
           firstName: "Bob",
           lastName: "Diaz",
-          phone: "",
+          phone: "0400 555 666",
           email: s.bob.email,
           jobTitle: "Support Worker",
         });

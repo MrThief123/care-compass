@@ -101,11 +101,41 @@ describe("[ADM-02][AC-03] updateStaff (mock mode)", () => {
     const result = await updateStaff("does-not-exist", {
       firstName: "X",
       lastName: "Y",
-      phone: "",
+      phone: "0400 111 222",
       email: "x@example.test",
       jobTitle: "Support Worker",
     });
 
     expect(result).toMatchObject({ ok: false, error: { code: "NOT_FOUND" } });
+  });
+});
+
+describe("[CHG-038] staff phone must be an Australian number and is required", () => {
+  const staff = {
+    firstName: "Nina",
+    lastName: "Ray",
+    email: "nina.ray@example.test",
+    jobTitle: "Support Worker",
+  };
+
+  it("[CHG-038] createStaff and updateStaff refuse a bad phone before touching the store", async () => {
+    const before = await getAdminStaff();
+
+    const created = await createStaff({ ...staff, phone: "0395" });
+    const updated = await updateStaff(before.staff[0]?.id ?? "", {
+      ...staff,
+      phone: "03 9555 O102",
+    });
+
+    expect(created).toMatchObject({ ok: false, error: { code: "VALIDATION" } });
+    expect(updated).toMatchObject({ ok: false, error: { code: "VALIDATION" } });
+    expect(await getAdminStaff()).toEqual(before);
+  });
+
+  it("[CHG-039] a blank phone is refused too", async () => {
+    const before = await getAdminStaff();
+    const result = await createStaff({ ...staff, phone: "" });
+    expect(result).toMatchObject({ ok: false, error: { code: "VALIDATION" } });
+    expect(await getAdminStaff()).toEqual(before);
   });
 });

@@ -1,14 +1,14 @@
 # Session State — ADM-10 Admin — Settings
 
-Last session date: none (no implementation session yet)
-Current branch: n/a — `feature/admin-settings` not created
-Worked on: n/a
-What changed: n/a
-Tests run: none
-Test results: n/a
-Current blocker: OQ-35
-Important discoveries: none
-Important decisions: none
-Exact next action: Run `START FEATURE ADM-10` once dependencies are MERGED TO DEV (or COMPLETE) and blocking decisions are answered.
-Files likely to be touched next: `src/app/(admin)/admin/settings/page.tsx`, `src/features/admin-settings/*`
-Warning for next session: Read PRD.md, ACCEPTANCE_CRITERIA.md and TEST_PLAN.md before writing any code. Do not create the branch from the wrong parent (`admin-dev`).
+Last session date: 2026-09-30
+Current branch: `feature/admin-settings`
+Worked on: implementation (migration, schema, action, query, screen wiring, ADM-UI-05 test updates)
+What changed: see PROGRESS.md Files changed
+Tests run: vitest, supabase test db, local integration, tsc, eslint, e2e (see PROGRESS.md)
+Test results: unit/pgTAP/ADM-10 integration green; e2e clean apart from one unrelated layout flake
+Current blocker: none
+Important discoveries: direct UPDATE needed a table revoke to raise 42501 (FD-05); type generator is noisy (FD-08)
+Important decisions: FD-05 to FD-08
+Exact next action: ask the human before opening the PR to main.
+Files likely to be touched next: none
+Warning for next session: restart any `next dev` after `npm run pretest:e2e`.

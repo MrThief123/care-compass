@@ -5,7 +5,7 @@
 | Feature ID | ADM-10 |
 | Dashboard / stream | Admin |
 | Phase | Phase 3 — Data wiring & behaviour (parallel: Family · Carer · Admin) |
-| Development branch (PR target) | `admin-dev` |
+| Development branch (PR target) | `main` (CHG-036) |
 | Feature branch | `feature/admin-settings` |
 | Documentation | `docs/development/admin-dev/admin-settings/` |
 | Lane | A — Admin |
@@ -36,7 +36,10 @@ Organisation details used across the app stay correct (e.g. header subline, POA/
 - Organisation registration/deletion (PL-18)
 
 ## Functional Requirements
-- ABN format 11 digits (PROPOSED validation).
+- ABN: 11 digits, spaces allowed, saved as `XX XXX XXX XXX`; no checksum (FD-03). Organisation name, phone and address must not be blank.
+- Organisation info has its own Save button (PD-054). Save writes name, ABN, phone and address of the signed-in admin's own organisation only, through `admin_update_organisation` (FD-02).
+- Reset card sends a password-reset link to the admin's sign-in email through `requestOwnPasswordReset` (FAM-12); it never takes an address from the caller.
+- Reads: `getAdminSettings` reads the admin's own organisation from Supabase (RLS `organisations_select_member`).
 
 ## UI / UX Requirements
 - Match design.
@@ -53,13 +56,14 @@ Organisation details used across the app stay correct (e.g. header subline, POA/
 - Updated organisation
 
 ## Error / Edge Cases
-- —
+- Save failure keeps what was typed, shows an error, no 'Saved.'. Reset failure shows an error.
+- Missing organisation: empty state; Reset stays available.
 
 ## Security / Permissions
-- Admin of that organisation only.
+- Active admin of that organisation only. Carers, family and other organisations' admins are refused (42501). The organisation id is never taken from the caller.
 
 ## Technical Considerations
-- Server Action + Zod.
+- Server Action + Zod, schema shared by screen and action (`src/server/admin/settings-schema.ts`). One additive migration: `admin_update_organisation` SECURITY DEFINER RPC, same shape as ADM-02's `admin_update_staff`. No direct `update` grant on `organisations`.
 
 ## Traceability
 - Product requirements: REQ-06 (Admins (managers/head nurses share one dashboard) manage their organisation's staff accoun…)

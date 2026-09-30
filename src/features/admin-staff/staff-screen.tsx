@@ -10,6 +10,7 @@ import { EmptyState } from "@/components/shared/states";
 import { Button } from "@/components/ui/button";
 import { CardShell } from "@/components/ui/card-shell";
 import { Icon } from "@/components/ui/icon";
+import { requiredPhoneError } from "@/lib/phone/au-phone";
 import { createStaff, updateStaff } from "@/server/admin/staff-actions";
 import type { AdminStaffData } from "@/server/admin/staff-queries";
 import type { StaffMember } from "@/types/domain";
@@ -25,7 +26,13 @@ interface Draft {
 const DraftSchema = z.object({
   firstName: z.string().trim().min(1, "Enter a first name."),
   lastName: z.string().trim().min(1, "Enter a last name."),
-  phone: z.string().trim(),
+  phone: z
+    .string()
+    .trim()
+    .superRefine((value, ctx) => {
+      const message = requiredPhoneError(value);
+      if (message) ctx.addIssue({ code: "custom", message });
+    }),
   email: z.string().trim().email("Enter a valid email address."),
   jobTitle: z.string(),
 });

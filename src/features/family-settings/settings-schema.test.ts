@@ -16,10 +16,12 @@ describe("[FAM-UI-06][AC-07] familyInfoSchema (FD-03)", () => {
     expect(fieldErrors(familyInfoSchema, VALID)).toEqual({ ok: true, data: VALID });
   });
 
-  it("[FAM-UI-06][AC-07] allows a blank phone, email and address", () => {
-    const result = fieldErrors(familyInfoSchema, { ...VALID, phone: "", email: "", address: "" });
-
-    expect(result.ok).toBe(true);
+  it("[FAM-UI-06][AC-07] allows a blank email and address, but the phone is required (CHG-039)", () => {
+    expect(fieldErrors(familyInfoSchema, { ...VALID, email: "", address: "" }).ok).toBe(true);
+    expect(fieldErrors(familyInfoSchema, { ...VALID, phone: "  " })).toEqual({
+      ok: false,
+      errors: { phone: "Enter a phone number." },
+    });
   });
 
   it.each(["0412 345 678", "+61 412 345 678", "(03) 9123 4567"])(
@@ -29,15 +31,17 @@ describe("[FAM-UI-06][AC-07] familyInfoSchema (FD-03)", () => {
     },
   );
 
-  it.each(["abc", "123", "0412-345-678x", "1234567890123"])(
-    "[FAM-UI-06][AC-07] rejects the phone number %s",
-    (phone) => {
-      expect(fieldErrors(familyInfoSchema, { ...VALID, phone })).toEqual({
-        ok: false,
-        errors: { phone: "Enter a phone number like 0412 345 678." },
-      });
-    },
-  );
+  it.each([
+    ["abc", "A phone number can only have digits, spaces, + ( ) and -."],
+    ["0412-345-678x", "A phone number can only have digits, spaces, + ( ) and -."],
+    ["123", "Enter an Australian phone number, like 03 9555 0102 or +61 3 9555 0102."],
+    ["1234567890123", "Enter an Australian phone number, like 03 9555 0102 or +61 3 9555 0102."],
+  ])("[FAM-UI-06][AC-07] rejects the phone number %s (CHG-038)", (phone, message) => {
+    expect(fieldErrors(familyInfoSchema, { ...VALID, phone })).toEqual({
+      ok: false,
+      errors: { phone: message },
+    });
+  });
 
   it("[FAM-UI-06][AC-07] requires a name, and a blank-looking name counts as blank", () => {
     for (const name of ["", "   "]) {
@@ -68,7 +72,7 @@ describe("[FAM-UI-06][AC-07] familyInfoSchema (FD-03)", () => {
       errors: {
         name: "Enter your name.",
         email: "Enter an email address like name@example.com.",
-        phone: "Enter a phone number like 0412 345 678.",
+        phone: "A phone number can only have digits, spaces, + ( ) and -.",
       },
     });
   });

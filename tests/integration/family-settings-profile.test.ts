@@ -149,7 +149,7 @@ describe.skipIf(!hasLocalSupabase)("[FAM-12] family settings against local Supab
         const { updateFamilyContactDetails } = await import("@/server/profiles/actions");
         return updateFamilyContactDetails({
           name: "Helen Doyle",
-          phone: "",
+          phone: "0412 345 678",
           email: "helen.contact@example.com",
           address: "",
         });
@@ -160,7 +160,11 @@ describe.skipIf(!hasLocalSupabase)("[FAM-12] family settings against local Supab
         .select("email, phone, address")
         .eq("id", helen.userId)
         .single();
-      expect(profile).toEqual({ email: "helen.contact@example.com", phone: null, address: null });
+      expect(profile).toEqual({
+        email: "helen.contact@example.com",
+        phone: "0412 345 678",
+        address: null,
+      });
       const { data: authUser } = await createAdminClient().auth.admin.getUserById(helen.userId);
       expect(authUser.user?.email).toBe(helen.email);
     } finally {

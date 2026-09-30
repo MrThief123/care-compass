@@ -7,6 +7,7 @@
  */
 import { z } from "zod";
 
+import { requiredPhoneError } from "@/lib/phone/au-phone";
 import { addMockStaff, updateMockStaff } from "@/server/admin/staff-mock-store";
 import { getDataSourceMode } from "@/server/data-source";
 import type { StaffMember } from "@/types/domain";
@@ -21,7 +22,13 @@ export type ActionResult<T> =
 const StaffFieldsSchema = z.object({
   firstName: z.string().trim().min(1, "Enter a first name."),
   lastName: z.string().trim().min(1, "Enter a last name."),
-  phone: z.string().trim(),
+  phone: z
+    .string()
+    .trim()
+    .superRefine((value, ctx) => {
+      const message = requiredPhoneError(value);
+      if (message) ctx.addIssue({ code: "custom", message });
+    }),
   email: z.string().trim().email("Enter a valid email address."),
   jobTitle: z.string().trim().min(1, "Choose a role."),
 });

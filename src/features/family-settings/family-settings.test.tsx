@@ -238,7 +238,7 @@ describe("[FAM-UI-06] Family Settings", () => {
     const expected: Array<[string, string]> = [
       ["Name", "Enter your name."],
       ["Email", "Enter an email address like name@example.com."],
-      ["Phone", "Enter a phone number like 0412 345 678."],
+      ["Phone", "A phone number can only have digits, spaces, + ( ) and -."],
     ];
     for (const [label, message] of expected) {
       const field = input(label);
@@ -252,6 +252,7 @@ describe("[FAM-UI-06] Family Settings", () => {
     await user.clear(input("Email"));
     await user.type(input("Email"), "helen@example.com");
     await user.clear(input("Phone"));
+    await user.type(input("Phone"), "0412 345 678");
     await user.click(screen.getByRole("button", { name: "Save" }));
 
     for (const [label, message] of expected) {
