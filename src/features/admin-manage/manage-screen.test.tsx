@@ -1,9 +1,19 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { axe } from "jest-axe";
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ManageScreen } from "./manage-screen";
+
+const replace = vi.fn();
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ replace, push: replace }),
+  usePathname: () => "/admin/manage",
+  useSearchParams: () => new URLSearchParams("staff=aisha&client=margaret"),
+}));
+// ADM-06 FD-02: the URL, not local state, holds the selection, so tests pass it in.
+const selection = { staffId: "aisha", clientId: "margaret" };
+beforeEach(() => replace.mockReset());
 
 const data = {
   referenceDate: "2026-11-30",
@@ -29,7 +39,7 @@ const data = {
 
 describe("Admin Manage", () => {
   it("[ADM-UI-02][AC-01] selects the initial staff and client and shows the assignment summary", () => {
-    render(<ManageScreen data={data} />);
+    render(<ManageScreen data={data} selection={selection} />);
     expect(screen.getByRole("option", { name: "Aisha Rahman" })).toHaveAttribute(
       "aria-selected",
       "true",
@@ -41,34 +51,38 @@ describe("Admin Manage", () => {
     expect(screen.getByText("Aisha Rahman → Margaret Doyle")).toBeVisible();
   });
   it("[ADM-UI-02][AC-02] Clear removes both selections", async () => {
-    render(<ManageScreen data={data} />);
+    const view = render(<ManageScreen data={data} selection={selection} />);
     await userEvent.click(screen.getByRole("button", { name: "Clear" }));
+    expect(replace).toHaveBeenCalledWith("/admin/manage", { scroll: false });
+    view.rerender(<ManageScreen data={data} />);
     expect(screen.queryAllByRole("option", { selected: true })).toHaveLength(0);
     expect(screen.getByRole("button", { name: "Assign shift" })).toBeDisabled();
   });
   it("[ADM-UI-02][AC-03] warns on a true overlap but permits assignment", async () => {
-    render(<ManageScreen data={data} />);
+    const view = render(<ManageScreen data={data} selection={selection} />);
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
     await userEvent.click(screen.getByRole("radio", { name: "11:00 - 15:00" }));
     expect(screen.getByRole("alert")).toHaveTextContent("11:30 - 13:00");
     expect(screen.getByRole("button", { name: "Assign shift" })).toBeEnabled();
-    await userEvent.click(screen.getByRole("option", { name: "Daniel Kelly" }));
+    view.rerender(
+      <ManageScreen data={data} selection={{ staffId: "daniel", clientId: "margaret" }} />,
+    );
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
   it("[ADM-UI-02][AC-04] has no Repeat control", () => {
-    render(<ManageScreen data={data} />);
+    render(<ManageScreen data={data} selection={selection} />);
     expect(screen.queryByText(/repeat/i)).not.toBeInTheDocument();
   });
-  it("[ADM-UI-02][AC-01] filters each list and handles no results", async () => {
-    render(<ManageScreen data={data} />);
+  it("[ADM-UI-02][AC-01] typing does not filter locally and a search with no rows shows no results", async () => {
+    // ADM-06 FD-02: filtering is server-side and submitted with Enter (covered by ADM-06 T-06).
+    const view = render(<ManageScreen data={data} selection={selection} />);
     await userEvent.type(screen.getByRole("searchbox", { name: "Search staff" }), "Daniel");
-    expect(screen.queryByRole("option", { name: "Aisha Rahman" })).not.toBeInTheDocument();
-    expect(screen.getByRole("option", { name: "Daniel Kelly" })).toBeVisible();
-    await userEvent.type(screen.getByRole("searchbox", { name: "Search clients" }), "missing");
+    expect(screen.getByRole("option", { name: "Aisha Rahman" })).toBeVisible();
+    view.rerender(<ManageScreen data={{ ...data, clients: [] }} clientSearch="missing" />);
     expect(screen.getByText("No clients found")).toBeVisible();
   });
   it("[ADM-UI-02][AC-03] validates custom times and treats touching intervals as non-overlapping", async () => {
-    render(<ManageScreen data={data} />);
+    render(<ManageScreen data={data} selection={selection} />);
     await userEvent.click(screen.getByRole("radio", { name: "Custom" }));
     await userEvent.type(screen.getByLabelText("Start time"), "13:00");
     await userEvent.type(screen.getByLabelText("End time"), "11:00");
@@ -82,11 +96,11 @@ describe("Admin Manage", () => {
     expect(screen.getByRole("alert")).not.toHaveTextContent("11:30 - 13:00");
   });
   it("[ADM-UI-02][AC-03] resets local assignments on remount", async () => {
-    const first = render(<ManageScreen data={data} />);
+    const first = render(<ManageScreen data={data} selection={selection} />);
     await userEvent.click(screen.getByRole("button", { name: "Assign shift" }));
     expect(screen.getByRole("alert")).toHaveTextContent("07:00 - 11:00");
     first.unmount();
-    render(<ManageScreen data={data} />);
+    render(<ManageScreen data={data} selection={selection} />);
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
   it("[ADM-UI-02][AC-01] supports empty staff and client lists", () => {
@@ -95,7 +109,7 @@ describe("Admin Manage", () => {
     expect(screen.getByText("No clients available")).toBeVisible();
   });
   it("[ADM-UI-02][AC-01] has no detectable accessibility violations", async () => {
-    const { container } = render(<ManageScreen data={data} />);
+    const { container } = render(<ManageScreen data={data} selection={selection} />);
     expect(await axe(container)).toHaveNoViolations();
   });
 });

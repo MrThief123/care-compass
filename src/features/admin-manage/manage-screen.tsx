@@ -1,5 +1,6 @@
 "use client";
 
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { z } from "zod";
 
@@ -30,35 +31,44 @@ function PersonList({
   title,
   people,
   selected,
+  search,
   onSelect,
+  onSearch,
 }: {
   title: "Staff" | "Clients";
   people: ManagePerson[];
   selected: string;
+  search: string;
   onSelect: (id: string) => void;
+  onSearch: (query: string) => void;
 }) {
-  const [query, setQuery] = useState("");
-  const matches = people.filter((person) =>
-    person.name.toLowerCase().includes(query.trim().toLowerCase()),
-  );
+  const [query, setQuery] = useState(search);
   const label = title.toLowerCase();
   return (
     <CardShell className="min-w-0 space-y-3 border-transparent p-4">
       <h2 id={`manage-${label}`} className="text-title-section text-text-primary">
         {title}
       </h2>
-      <label className="flex h-11 items-center gap-2 rounded-control border border-border-brand px-3 focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-ring">
-        <Icon name="search" size={20} aria-hidden className="shrink-0 text-text-secondary" />
-        <span className="sr-only">Search {label}</span>
-        <input
-          type="search"
-          value={query}
-          onChange={(event) => setQuery(event.target.value)}
-          placeholder={`Search ${label}`}
-          className="min-w-0 w-full bg-transparent text-body-default text-text-primary outline-none placeholder:text-text-secondary"
-        />
-      </label>
-      {matches.length ? (
+      <form
+        role="search"
+        onSubmit={(event) => {
+          event.preventDefault();
+          onSearch(query.trim());
+        }}
+      >
+        <label className="flex h-11 items-center gap-2 rounded-control border border-border-brand px-3 focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-ring">
+          <Icon name="search" size={20} aria-hidden className="shrink-0 text-text-secondary" />
+          <span className="sr-only">Search {label}</span>
+          <input
+            type="search"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder={`Search ${label}`}
+            className="min-w-0 w-full bg-transparent text-body-default text-text-primary outline-none placeholder:text-text-secondary"
+          />
+        </label>
+      </form>
+      {people.length ? (
         <div
           role="listbox"
           aria-labelledby={`manage-${label}`}
@@ -81,7 +91,7 @@ function PersonList({
             options[next]?.click();
           }}
         >
-          {matches.map((person) => (
+          {people.map((person) => (
             <SelectableListRow
               key={person.id}
               name={person.name}
@@ -94,17 +104,34 @@ function PersonList({
       ) : (
         <EmptyState
           icon="search"
-          title={people.length ? `No ${label} found` : `No ${label} available`}
-          body={people.length ? "Try a different name." : `There are no ${label} in this preview.`}
+          title={search ? `No ${label} found` : `No ${label} available`}
+          body={search ? "Try a different name." : `There are no ${label} to show.`}
         />
       )}
     </CardShell>
   );
 }
 
-export function ManageScreen({ data }: { data: AdminManageData }) {
-  const [staffId, setStaffId] = useState(data.staff[0]?.id ?? "");
-  const [clientId, setClientId] = useState(data.clients[0]?.id ?? "");
+export interface ManageSelection {
+  staffId: string;
+  clientId: string;
+}
+
+export function ManageScreen({
+  data,
+  selection = { staffId: "", clientId: "" },
+  staffSearch = "",
+  clientSearch = "",
+}: {
+  data: AdminManageData;
+  selection?: ManageSelection;
+  staffSearch?: string;
+  clientSearch?: string;
+}) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const { staffId, clientId } = selection;
   const [date, setDate] = useState(data.referenceDate);
   const [month, setMonth] = useState(data.referenceDate);
   const [slot, setSlot] = useState("07:00/11:00");
@@ -127,9 +154,18 @@ export function ManageScreen({ data }: { data: AdminManageData }) {
       )
     : [];
 
+  /** The URL is the single source of truth for selection and search (FD-02). */
+  function updateUrl(changes: Record<string, string>) {
+    const next = new URLSearchParams(searchParams.toString());
+    for (const [key, value] of Object.entries(changes)) {
+      if (value) next.set(key, value);
+      else next.delete(key);
+    }
+    const query = next.toString();
+    router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+  }
   function clear() {
-    setStaffId("");
-    setClientId("");
+    updateUrl({ staff: "", client: "" });
     setNotice("");
     setErrors({});
   }
@@ -170,8 +206,11 @@ export function ManageScreen({ data }: { data: AdminManageData }) {
         title="Staff"
         people={data.staff}
         selected={staffId}
+        search={staffSearch}
+        key={`staff-${staffSearch}`}
+        onSearch={(query) => updateUrl({ staffQ: query })}
         onSelect={(id) => {
-          setStaffId(id);
+          updateUrl({ staff: id });
           setNotice("");
         }}
       />
@@ -179,8 +218,11 @@ export function ManageScreen({ data }: { data: AdminManageData }) {
         title="Clients"
         people={data.clients}
         selected={clientId}
+        search={clientSearch}
+        key={`client-${clientSearch}`}
+        onSearch={(query) => updateUrl({ clientQ: query })}
         onSelect={(id) => {
-          setClientId(id);
+          updateUrl({ client: id });
           setNotice("");
         }}
       />

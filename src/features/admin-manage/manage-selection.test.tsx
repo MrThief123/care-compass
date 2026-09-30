@@ -62,7 +62,8 @@ describe("[ADM-06] Admin Manage selection", () => {
   it("[ADM-06][AC-05] T-05 the URL selection is the only selection", () => {
     render(<ManageScreen data={data} selection={{ staffId: "daniel", clientId: "" }} />);
     const selected = screen.getAllByRole("option", { selected: true });
-    expect(selected.map((row) => row.textContent)).toEqual(["Daniel Kelly"]);
+    // The row text also holds the avatar initials, so match on the accessible name.
+    expect(selected).toEqual([screen.getByRole("option", { name: "Daniel Kelly" })]);
   });
 
   it("[ADM-06][AC-05] T-05 clicking another staff row changes only the staff param", async () => {
