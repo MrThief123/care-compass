@@ -1,20 +1,21 @@
 # Progress — FAM-01 Family Home — Today day-view timeline
 
-Status: NOT STARTED
-Owner: unclaimed
+Status: IN PROGRESS
+Owner: Dhruv Verma
 Lane: F — Family
 Sprint: SPRINT · planned D8
-Branch: `feature/family-home-today` (not yet created)
-PR target: `family-dev`
-Last updated: 2026-09-17 (planning pack generated)
+Branch: `feature/family-home-today`
+PR target: `main`
+Last updated: 2026-10-01 (claimed)
 
 ## Blockers
-- OQ-29 — Which nurse is shown on an event
+- None. OQ-29 is answered (PD-055, 2026-09-17).
 
 ## Dependencies status
-- F0-11 — NOT STARTED
-- F0-16 — NOT STARTED
-- FAM-UI-01 — NOT STARTED
+- F0-11 — MERGED
+- F0-16 — MERGED
+- FAM-UI-01 — MERGED
+- F0-22 (client header wiring and family route guard, added by CHG-042) — MERGED, PR #181
 
 ## Completed
 - Feature documentation drafted (Claude Chat planning pack)
@@ -51,7 +52,7 @@ Last updated: 2026-09-17 (planning pack generated)
 - PROPOSED items in PRD.md are unconfirmed until validated in F0-01 or answered in DECISIONS.md.
 
 ## Next action
-- Wait for answers to OQ-29; then complete dependencies, run START FEATURE FAM-01, and write the tests in TEST_PLAN.md first.
+- Write the tests first (TEST_PLAN.md), confirm they fail for the right reason, commit `test(family): …`, then stop for the implementation session.
 
 ## Ready for PR
 - No
