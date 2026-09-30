@@ -38,6 +38,18 @@ Changes made (2026-09-30), all flagged HUMAN REVIEW in PROGRESS.md:
 - "filters each list and handles no results": before, typing filtered locally; after, typing does not filter and a server search with no rows shows "No clients found". Reason: search is server-side on Enter (D32). Assertion of local filtering removed, covered by T-06/T-07.
 - `manage-queries.test.ts` "refuses to disguise Supabase mode": before `rejects.toThrow("not implemented")`; after `rejects.toThrow()` (the branch is implemented, outside a request it fails reading cookies). Still proves mock data is not returned.
 - `manage-selection.test.tsx` T-05 (own test, test bug): compared `textContent`, which includes avatar initials ("DKDaniel Kelly"); now compares by accessible name.
+- `manage-screen.test.tsx` "validates custom times and treats touching intervals as non-overlapping" (test bug, FD-07): before, after assigning 13:00-15:00 it expected an alert naming 13:00 - 15:00; after, it expects no alert. Reason: the overlap check ran against the shift just created, so every first assignment warned about itself. Added "a first assignment shows only the success message, and a repeat warns".
+- `manage-screen.test.tsx` "resets local assignments on remount" (test bug, FD-07): before it asserted the self-overlap alert after one click; after it asserts the "Shift assigned" status.
+
+### FD-07 — Self-overlap warning fix and assign-shift layout on this branch
+- Date: 2026-09-30
+- Context: hand-testing showed a red overlap warning and the green success message together after the first click. The live overlap check included the shift just added to local state. Separately, the calendar left a wide empty area beside it.
+- Decision: the just-assigned shift is excluded from the warning until the form changes (then it counts as an ordinary shift). Time slot, custom times and the overlap warning moved into a column beside the calendar at 1280px and wider; below that it stacks.
+- Reason: human asked to fix it here rather than wait for ADM-07. Assignment is still Phase 1 local state only; nothing is saved (ADM-07).
+- Alternatives considered: leave both for ADM-07 (recommended, declined by the human).
+- Consequences: two ADM-UI-02 test expectations changed (above). Flagged HUMAN REVIEW in PROGRESS.md. ADM-07 will rewrite this form.
+- Human confirmation required: no, requested in chat.
+- Test changes caused: see above, flagged yes.
 
 <!-- Template
 ### FD-01 — <title>

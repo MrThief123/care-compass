@@ -92,13 +92,23 @@ describe("Admin Manage", () => {
     await userEvent.type(screen.getByLabelText("End time"), "15:00");
     await userEvent.click(screen.getByRole("button", { name: "Assign shift" }));
     expect(screen.getByRole("status")).toHaveTextContent("Shift assigned");
-    expect(screen.getByRole("alert")).toHaveTextContent("13:00 - 15:00");
-    expect(screen.getByRole("alert")).not.toHaveTextContent("11:30 - 13:00");
+    // A shift just assigned never warns about itself, and touching intervals do not overlap.
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  });
+  it("[ADM-UI-02][AC-03] a first assignment shows only the success message, and a repeat warns", async () => {
+    render(<ManageScreen data={{ ...data, shifts: [] }} selection={selection} />);
+    await userEvent.click(screen.getByRole("button", { name: "Assign shift" }));
+    expect(screen.getByRole("status")).toHaveTextContent("Shift assigned");
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole("radio", { name: "11:00 - 15:00" }));
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole("radio", { name: "07:00 - 11:00" }));
+    expect(screen.getByRole("alert")).toHaveTextContent("07:00 - 11:00");
   });
   it("[ADM-UI-02][AC-03] resets local assignments on remount", async () => {
     const first = render(<ManageScreen data={data} selection={selection} />);
     await userEvent.click(screen.getByRole("button", { name: "Assign shift" }));
-    expect(screen.getByRole("alert")).toHaveTextContent("07:00 - 11:00");
+    expect(screen.getByRole("status")).toHaveTextContent("Shift assigned");
     first.unmount();
     render(<ManageScreen data={data} selection={selection} />);
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();

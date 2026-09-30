@@ -139,6 +139,7 @@ export function ManageScreen({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [notice, setNotice] = useState("");
   const [shifts, setShifts] = useState(data.shifts);
+  const [justAssignedId, setJustAssignedId] = useState("");
   const staff = data.staff.find((person) => person.id === staffId);
   const client = data.clients.find((person) => person.id === clientId);
   const [presetStart = "", presetEnd = ""] = slot.split("/");
@@ -147,6 +148,7 @@ export function ManageScreen({
   const overlaps = validRange.success
     ? shifts.filter(
         (shift) =>
+          !(notice && shift.id === justAssignedId) &&
           shift.staffId === staffId &&
           shift.date === date &&
           range.start < shift.end &&
@@ -192,10 +194,11 @@ export function ManageScreen({
       return;
     }
     setErrors({});
-    setShifts((previous) => [
-      ...previous,
-      { id: `local-${previous.length}`, staffId, clientId, date, ...validRange.data },
-    ]);
+    // The shift just made must not warn about itself; any change to the form clears `notice`,
+    // and the shift then counts as an ordinary existing one.
+    const id = `local-${shifts.length}`;
+    setShifts([...shifts, { id, staffId, clientId, date, ...validRange.data }]);
+    setJustAssignedId(id);
     setNotice(
       `Shift assigned: ${staff.name} → ${client.name}, ${date}, ${range.start} - ${range.end}.`,
     );
@@ -238,72 +241,76 @@ export function ManageScreen({
             Clear
           </Button>
         </div>
-        <section aria-label="Shift date" className="space-y-3 overflow-x-auto">
-          <h3 className="text-body-emphasis text-text-primary">Date</h3>
-          <DatePickerGrid
-            month={month}
-            selected={date}
-            datesWithItems={shifts
-              .filter((shift) => shift.staffId === staffId)
-              .map((shift) => shift.date)}
-            onSelect={(value) => {
-              setDate(value);
-              setMonth(value);
-              setNotice("");
-            }}
-            onPrevMonth={() => changeMonth(-1)}
-            onNextMonth={() => changeMonth(1)}
-            className="min-w-[332px] max-w-[336px] [&_button]:min-h-11 [&_button]:min-w-11 [&_button]:justify-center"
-          />
-        </section>
-        <ChipGroup
-          legend="Time slot"
-          options={slots}
-          value={slot}
-          onChange={(value) => {
-            setSlot(value);
-            setErrors({});
-            setNotice("");
-          }}
-        />
-        {slot === "custom" && (
-          <div className="grid gap-3 sm:grid-cols-2">
-            <Field
-              label="Start time"
-              value={custom.start}
-              placeholder="HH:MM"
-              hint="24-hour Melbourne time"
-              error={errors.start}
-              onChange={(start) => {
-                setCustom({ ...custom, start });
+        <div className="grid min-w-0 gap-6 xl:grid-cols-[minmax(0,336px)_minmax(0,1fr)]">
+          <section aria-label="Shift date" className="space-y-3 overflow-x-auto">
+            <h3 className="text-body-emphasis text-text-primary">Date</h3>
+            <DatePickerGrid
+              month={month}
+              selected={date}
+              datesWithItems={shifts
+                .filter((shift) => shift.staffId === staffId)
+                .map((shift) => shift.date)}
+              onSelect={(value) => {
+                setDate(value);
+                setMonth(value);
+                setNotice("");
+              }}
+              onPrevMonth={() => changeMonth(-1)}
+              onNextMonth={() => changeMonth(1)}
+              className="min-w-[332px] max-w-[336px] [&_button]:min-h-11 [&_button]:min-w-11 [&_button]:justify-center"
+            />
+          </section>
+          <div className="flex min-w-0 flex-col gap-5">
+            <ChipGroup
+              legend="Time slot"
+              options={slots}
+              value={slot}
+              onChange={(value) => {
+                setSlot(value);
                 setErrors({});
                 setNotice("");
               }}
             />
-            <Field
-              label="End time"
-              value={custom.end}
-              placeholder="HH:MM"
-              error={errors.end}
-              onChange={(end) => {
-                setCustom({ ...custom, end });
-                setErrors({});
-                setNotice("");
-              }}
-            />
+            {slot === "custom" && (
+              <div className="grid gap-3 sm:grid-cols-2">
+                <Field
+                  label="Start time"
+                  value={custom.start}
+                  placeholder="HH:MM"
+                  hint="24-hour Melbourne time"
+                  error={errors.start}
+                  onChange={(start) => {
+                    setCustom({ ...custom, start });
+                    setErrors({});
+                    setNotice("");
+                  }}
+                />
+                <Field
+                  label="End time"
+                  value={custom.end}
+                  placeholder="HH:MM"
+                  error={errors.end}
+                  onChange={(end) => {
+                    setCustom({ ...custom, end });
+                    setErrors({});
+                    setNotice("");
+                  }}
+                />
+              </div>
+            )}
+            {staff && overlaps.length > 0 && (
+              <InlineAlert>
+                {overlaps
+                  .map(
+                    (shift) =>
+                      `${staff.name} already has a shift with ${data.clients.find((person) => person.id === shift.clientId)?.name ?? "another client"} from ${shift.start} - ${shift.end} that overlaps this time.`,
+                  )
+                  .join(" ")}{" "}
+                You can still assign it.
+              </InlineAlert>
+            )}
           </div>
-        )}
-        {staff && overlaps.length > 0 && (
-          <InlineAlert>
-            {overlaps
-              .map(
-                (shift) =>
-                  `${staff.name} already has a shift with ${data.clients.find((person) => person.id === shift.clientId)?.name ?? "another client"} from ${shift.start} - ${shift.end} that overlaps this time.`,
-              )
-              .join(" ")}{" "}
-            You can still assign it.
-          </InlineAlert>
-        )}
+        </div>
         {notice && (
           <p
             role="status"

@@ -39,6 +39,7 @@ Last updated: 2026-09-30 (verified, ready for PR approval)
 
 ## HUMAN REVIEW: test expectation changed
 - ADM-UI-02 `manage-screen.test.tsx`: added a `next/navigation` mock and passes `selection` in (URL is the source of truth); Clear test asserts the URL update then rerenders empty; overlap test switches staff by rerender; the client-side filter test now asserts typing does not filter locally and a search with no rows shows "No clients found" (server filtering is covered by T-06/T-07). Details in DECISIONS FD-06.
+- HUMAN REVIEW: test expectation changed (2026-09-30): two ADM-UI-02 tests asserted that a just-assigned shift warns about itself (a bug). Now they assert no warning; one test added. See DECISIONS FD-07. Layout of the assign-shift card also changed (time slots beside the calendar).
 - ADM-UI-02 `manage-queries.test.ts`: "refuses Supabase mode" now expects a rejection instead of "not implemented".
 - ADM-06 own test T-05 (test bug): the row's text includes avatar initials, so it now matches by accessible name.
 
