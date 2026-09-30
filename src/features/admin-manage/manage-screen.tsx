@@ -251,7 +251,12 @@ export function ManageScreen({
             Clear
           </Button>
         </div>
-        <div className="grid min-w-0 gap-6 xl:grid-cols-[minmax(0,336px)_minmax(0,1fr)]">
+        <div
+          className={cn(
+            "grid min-w-0 gap-6",
+            (staff || client) && "2xl:grid-cols-[minmax(0,336px)_minmax(0,1fr)]",
+          )}
+        >
           <section aria-label="Shift date" className="space-y-3 overflow-x-auto">
             <h3 className="text-body-emphasis text-text-primary">Date</h3>
             <DatePickerGrid
@@ -270,40 +275,40 @@ export function ManageScreen({
               className="min-w-[332px] max-w-[336px] [&_button]:min-h-11 [&_button]:min-w-11 [&_button]:justify-center"
             />
           </section>
-          <div className="flex min-w-0 flex-col gap-5">
-            <TimeRangePicker
-              start={start}
-              end={end}
-              error={errors.end ?? errors.start}
-              onChange={(next) => {
-                setStart(next.start);
-                setEnd(next.end);
-                setErrors({});
-                setNotice("");
-              }}
+          {(staff || client) && (
+            <BookedPanel
+              date={date}
+              staff={staff}
+              client={client}
+              shifts={shifts}
+              staffList={data.staff}
+              clientList={data.clients}
             />
-            {(staff || client) && (
-              <BookedPanel
-                date={date}
-                staff={staff}
-                client={client}
-                shifts={shifts}
-                staffList={data.staff}
-                clientList={data.clients}
-              />
-            )}
-            {staff && overlaps.length > 0 && (
-              <InlineAlert>
-                {overlaps
-                  .map(
-                    (shift) =>
-                      `${staff.name} already has a shift with ${data.clients.find((person) => person.id === shift.clientId)?.name ?? "another client"} from ${shift.start} - ${shift.end} that overlaps this time.`,
-                  )
-                  .join(" ")}{" "}
-                You can still assign it.
-              </InlineAlert>
-            )}
-          </div>
+          )}
+        </div>
+        <div className="flex min-w-0 flex-col gap-5">
+          <TimeRangePicker
+            start={start}
+            end={end}
+            error={errors.end ?? errors.start}
+            onChange={(next) => {
+              setStart(next.start);
+              setEnd(next.end);
+              setErrors({});
+              setNotice("");
+            }}
+          />
+          {staff && overlaps.length > 0 && (
+            <InlineAlert>
+              {overlaps
+                .map(
+                  (shift) =>
+                    `${staff.name} already has a shift with ${data.clients.find((person) => person.id === shift.clientId)?.name ?? "another client"} from ${shift.start} - ${shift.end} that overlaps this time.`,
+                )
+                .join(" ")}{" "}
+              You can still assign it.
+            </InlineAlert>
+          )}
         </div>
         {notice && (
           <p
@@ -372,8 +377,14 @@ function TimeRangePicker({
   return (
     <section aria-label="Shift time" className="flex min-w-0 flex-col gap-4">
       <h3 className="text-body-emphasis text-text-primary">Time</h3>
-      <TimePicker label="Start" value={start} onChange={(next) => onChange({ start: next, end })} />
-      <TimePicker label="End" value={end} onChange={(next) => onChange({ start, end: next })} />
+      <div className="grid gap-4 md:grid-cols-2 md:gap-8">
+        <TimePicker
+          label="Start"
+          value={start}
+          onChange={(next) => onChange({ start: next, end })}
+        />
+        <TimePicker label="End" value={end} onChange={(next) => onChange({ start, end: next })} />
+      </div>
       {error && <p className="text-body-small text-text-alert-strong">{error}</p>}
       <div className="flex flex-col gap-2">
         <span className="text-body-default text-text-secondary">Common shifts</span>
@@ -452,7 +463,10 @@ function BookedPanel({
   ].filter((group) => Boolean(group));
   const heading = "Current shifts on selected day";
   return (
-    <section aria-label={heading} className="flex flex-col gap-3 rounded-inset bg-bg-inset p-4">
+    <section
+      aria-label={heading}
+      className="flex flex-col gap-3 self-start rounded-inset bg-bg-inset p-4"
+    >
       <div>
         <h3 className="text-body-emphasis text-text-primary">{heading}</h3>
         <p className="text-body-default text-text-secondary">

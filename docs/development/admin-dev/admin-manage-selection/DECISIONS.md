@@ -66,6 +66,7 @@ Changes made (2026-09-30), all flagged HUMAN REVIEW in PROGRESS.md:
 - Context: human asked to see, for the chosen date, what the selected carer and client already have.
 - Decision: a panel in the right column under the time controls lists the carer's shifts (with client names) and the client's shifts (with carer names) for the date, sorted by start, or "No other shifts that day". Hidden until a carer or client is selected. It reads the shifts the screen already holds, so it includes shifts assigned in the session. Human chose option 1 (UI only).
 - Revised after hand-testing: title "Current shifts on selected day" with the date beneath; two columns headed Carer and Client, each with the full name. Empty text is "No shift" for the carer and "No carer assigned" for the client.
+- Layout revised again: the time controls sit under the calendar across the full width (start and end side by side, common shifts below). At 1536px and wider the panel sits to the right of the calendar; below that it stacks under the calendar, because beside it at 1280px it was too narrow and names broke mid-word.
 - Reason: helps avoid double-ups and spot gaps.
 - Alternatives considered: loading real shifts now via `getAdminManage` (declined: overlaps ADM-07, which also changes that contract).
 - Consequences: in Supabase mode the panel is empty until ADM-07 loads real shifts (`shifts: []` today). The screen keeps shifts in local state initialised from `data.shifts`; ADM-07 must revisit that when data reloads.
