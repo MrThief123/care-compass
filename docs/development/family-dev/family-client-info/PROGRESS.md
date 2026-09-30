@@ -1,12 +1,12 @@
 # Progress — FAM-09 Family — Client info
 
-Status: NOT STARTED
-Owner: unclaimed
+Status: IN PROGRESS
+Owner: Dhruv Verma
 Lane: F — Family
 Sprint: SPRINT · planned D9
-Branch: `feature/family-client-info` (not yet created)
-PR target: `family-dev`
-Last updated: 2026-09-17 (planning pack generated)
+Branch: `feature/family-client-info` (cut from `feature/carer-client-info`, FD-01)
+PR target: `main` (CHG-036), opened only after CAR-04 is merged
+Last updated: 2026-10-01
 
 ## Blockers
 - OQ-26 — File upload constraints
