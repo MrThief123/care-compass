@@ -47,6 +47,8 @@ Last updated: 2026-09-30
 
 ## HUMAN REVIEW: test expectation changed
 - `carer_client_info.test.sql`: admin section write/read now accepted (FD-07)
+- `carer-patients.test.tsx` [CAR-UI-02][AC-09] ×2: `notFound()` became `redirect("/carer/patients")` (FD-03). A patient URL that isn't the carer's now returns them to the Patients list.
+- `src/server/clients/queries.test.ts` and `src/server/documents/queries.test.ts`: the "not implemented" Supabase assertions removed, replaced by [CAR-04][AC-08] (FD-08).
 
 ## Problems encountered
 - `.env.local` is the hosted project: integration/e2e must be run with the local stack's variables (`supabase status -o env`).
