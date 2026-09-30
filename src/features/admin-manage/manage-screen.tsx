@@ -434,28 +434,40 @@ function BookedPanel({
     list.find((person) => person.id === id)?.name ?? fallback;
   const groups = [
     staff && {
+      role: "Carer",
+      empty: "No shift",
       person: staff,
       rows: onDay
         .filter((shift) => shift.staffId === staff.id)
         .map((shift) => ({ ...shift, who: nameOf(clientList, shift.clientId, "Another client") })),
     },
     client && {
+      role: "Client",
+      empty: "No carer assigned",
       person: client,
       rows: onDay
         .filter((shift) => shift.clientId === client.id)
         .map((shift) => ({ ...shift, who: nameOf(staffList, shift.staffId, "Another carer") })),
     },
   ].filter((group) => Boolean(group));
-  const heading = `Already booked on ${dayFormat.format(new Date(`${date}T00:00:00Z`))}`;
+  const heading = "Current shifts on selected day";
   return (
     <section aria-label={heading} className="flex flex-col gap-3 rounded-inset bg-bg-inset p-4">
-      <h3 className="text-body-emphasis text-text-primary">{heading}</h3>
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div>
+        <h3 className="text-body-emphasis text-text-primary">{heading}</h3>
+        <p className="text-body-default text-text-secondary">
+          {dayFormat.format(new Date(`${date}T00:00:00Z`))}
+        </p>
+      </div>
+      <div className="grid gap-6 sm:grid-cols-2 sm:gap-10">
         {groups.map(
           (group) =>
             group && (
-              <div key={group.person.id} className="min-w-0 space-y-1">
-                <p className="break-words text-body-default text-text-secondary">
+              <div key={group.person.id} className="min-w-0 space-y-2">
+                <h4 className="text-body-small uppercase tracking-wide text-text-secondary">
+                  {group.role}
+                </h4>
+                <p className="break-words text-body-emphasis text-text-primary">
                   {group.person.name}
                 </p>
                 {group.rows.length ? (
@@ -473,7 +485,7 @@ function BookedPanel({
                     ))}
                   </ul>
                 ) : (
-                  <p className="text-body-default text-text-secondary">No other shifts that day</p>
+                  <p className="text-body-default text-text-secondary">{group.empty}</p>
                 )}
               </div>
             ),

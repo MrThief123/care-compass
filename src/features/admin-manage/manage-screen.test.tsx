@@ -154,7 +154,7 @@ describe("Admin Manage", () => {
       ],
     };
     const view = render(<ManageScreen data={busy} selection={selection} />);
-    const panel = screen.getByRole("region", { name: "Already booked on 30 November 2026" });
+    const panel = screen.getByRole("region", { name: "Current shifts on selected day" });
     const carer = within(within(panel).getByRole("list", { name: "Aisha Rahman's shifts" }));
     expect(carer.getAllByRole("listitem").map((item) => item.textContent)).toEqual([
       "Robert Hale08:00 - 09:00",
@@ -173,7 +173,13 @@ describe("Admin Manage", () => {
     );
     view.unmount();
     render(<ManageScreen data={{ ...data, shifts: [] }} selection={selection} />);
-    expect(screen.getAllByText("No other shifts that day")).toHaveLength(2);
+    expect(screen.getByText("No shift")).toBeVisible();
+    expect(screen.getByText("No carer assigned")).toBeVisible();
+    expect(screen.getByText("30 November 2026")).toBeVisible();
+    const columns = screen
+      .getAllByRole("heading", { level: 4 })
+      .map((heading) => heading.textContent);
+    expect(columns).toEqual(["Carer", "Client"]);
   });
   it("[ADM-UI-02][AC-03] a shift assigned in this session appears in both lists", async () => {
     render(<ManageScreen data={{ ...data, shifts: [] }} selection={selection} />);
@@ -187,7 +193,7 @@ describe("Admin Manage", () => {
   });
   it("[ADM-UI-02][AC-03] shows no bookings panel until someone is selected", () => {
     render(<ManageScreen data={data} />);
-    expect(screen.queryByRole("region", { name: /Already booked/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole("region", { name: /Current shifts/ })).not.toBeInTheDocument();
   });
   it("[ADM-UI-02][AC-03] a first assignment shows only the success message, and a repeat warns", async () => {
     render(<ManageScreen data={{ ...data, shifts: [] }} selection={selection} />);
