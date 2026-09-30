@@ -9,7 +9,7 @@ PR target: `main` (CHG-036), opened only after CAR-04 is merged
 Last updated: 2026-10-01
 
 ## Blockers
-- None (OQ-26 answered, PD-051)
+- Browser check and e2e: under `DATA_SOURCE=supabase` every `/family/[clientId]/*` page errors, because the family layout calls `getClientHeaderSummary`, which is still `notImplementedForSupabase` on `main` (known, shared-root-route FD-05). The Info cards themselves are wired and unit-tested. Awaiting the human: see Problems encountered.
 
 ## Dependencies status
 - F0-06, F0-13, FAM-UI-04, CAR-04 — merged to `main`
@@ -44,7 +44,9 @@ Last updated: 2026-10-01
 - See DECISIONS.md
 
 ## Problems encountered
-- None
+- 2026-10-01: `npx playwright test tests/e2e/family-client-info.spec.ts` (local Supabase, webpack production build, `DATA_SOURCE=supabase`): 3 of 3 fail. Sign-in works; the family layout then throws "clients.getClientHeaderSummary: DATA_SOURCE=supabase is not implemented yet". Not caused by FAM-09.
+- Turbopack rejects the worktree's symlinked `node_modules`; dev/build use `next dev --webpack` / `next build --webpack`. Dev mode also blocks the e2e's 127.0.0.1 origin (hydration), so the e2e needs a production build.
+- Full `npx vitest run` with local Supabase env: 3 failures outside this feature: `tests/integration/family-home-budget-strip.test.ts` (2) and `tests/integration/shared-sign-up.test.ts` (1). Not checked against `main`.
 
 ## Assumptions
 - PROPOSED items in PRD.md are unconfirmed until validated in F0-01 or answered in DECISIONS.md.
