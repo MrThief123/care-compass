@@ -14,7 +14,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getDataSourceMode } from "@/server/data-source";
 import type { Role } from "@/types/domain";
 
-import { evaluateRoleGuard } from "./guard";
+import { evaluateLanding, evaluateRoleGuard } from "./guard";
 
 export type { CurrentUser } from "@/mocks/current-user";
 
@@ -40,4 +40,12 @@ export async function getPrimaryTotpFactorId(): Promise<string | null> {
   const supabase = await createClient();
   const { data } = await supabase.auth.mfa.listFactors();
   return data?.totp[0]?.id ?? null;
+}
+
+/**
+ * Where `/` sends the visitor (F0-19). Sign-in is always real Supabase auth,
+ * even under `DATA_SOURCE=mock`, so this does not branch on the data source.
+ */
+export async function getLandingPath(): Promise<string> {
+  return evaluateLanding(await createClient());
 }

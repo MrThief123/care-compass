@@ -8,7 +8,7 @@ import type { Occurrence } from "@/types/domain";
 import { EventPopover } from "./event-popover";
 
 /**
- * A page that renders the card from the start (the showcase at `/`) must
+ * A page that renders the card from the start (e.g. the showcase at `/dev-preview`) must
  * hydrate cleanly: the server has no `document.body` to portal into, so the
  * first client render must match the server's empty output, and the card
  * appears once hydration is done.
