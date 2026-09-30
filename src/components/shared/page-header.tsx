@@ -11,6 +11,8 @@ export interface PageHeaderProps {
   userFirstName: string;
   /** Carer only (PRD.md F0-15 Scope: "Bell renders only in the Carer header"). */
   bell?: boolean;
+  /** CAR-02 (FD-05): replaces the plain bell, so the Carer layout can pass its own interactive bell with an unread count. */
+  bellSlot?: ReactNode;
   /** F0-07: the sign-out control, rendered by the caller (`<SignOutButton />`) so this stays a plain component. */
   signOutSlot?: ReactNode;
 }
@@ -27,6 +29,7 @@ export function PageHeader({
   date,
   userFirstName,
   bell = false,
+  bellSlot,
   signOutSlot,
 }: PageHeaderProps) {
   return (
@@ -35,11 +38,12 @@ export function PageHeader({
       <div className="ml-auto flex max-w-full flex-wrap items-center justify-end gap-x-4 gap-y-1">
         <p className="text-body-default tabular-nums text-text-secondary">{date}</p>
         <div aria-hidden="true" className="h-6 w-px bg-border-default max-md:hidden" />
-        {bell && (
-          <button type="button" aria-label="Notifications" className="text-text-secondary">
-            <Icon name="bell" size={20} />
-          </button>
-        )}
+        {bellSlot ??
+          (bell && (
+            <button type="button" aria-label="Notifications" className="text-text-secondary">
+              <Icon name="bell" size={20} />
+            </button>
+          ))}
         <div className="flex items-center gap-2">
           <Avatar name={userFirstName} size="md" />
           <p className="text-body-default text-text-primary">{userFirstName}</p>
