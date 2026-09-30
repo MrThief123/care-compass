@@ -13,3 +13,4 @@ Each criterion is observable and maps to at least one test in TEST_PLAN.md. Crit
 
 Status values: MET · MET (test passing) · BLOCKED (cite OQ/PD).
 | AC-07 | US-01 | happy | Given Settings, when it opens, then Organisation info is read-only with an Edit button; Edit unlocks the fields and shows Save and Cancel; Cancel restores the saved values, clears errors and locks again; a successful save locks again; a failed save stays open. | MET |
+| AC-08 | US-01 | validation | Given a phone that is not an Australian number (0 or +61 start, correct length), or has letters, when saved, then a phone error is shown, the action is not called, and the database refuses it too. | MET |

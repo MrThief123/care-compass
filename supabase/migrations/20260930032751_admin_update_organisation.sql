@@ -31,6 +31,12 @@ begin
   if nullif(btrim(coalesce(p_phone, '')), '') is null then
     raise exception 'a phone number is required' using errcode = '22023';
   end if;
+  -- Australian numbers only (AC-08): 0X XXXX XXXX (02/03/04/07/08) or +61 without the 0,
+  -- 1300/1800 XXX XXX, 13 XX XX. Spaces, hyphens and brackets are ignored.
+  if regexp_replace(p_phone, '[ ()-]', '', 'g') !~
+     '^((0|\+61)[23478][0-9]{8}|(0|\+61)?1[38]00[0-9]{6}|13[0-9]{4})$' then
+    raise exception 'an Australian phone number is required' using errcode = '22023';
+  end if;
   if nullif(btrim(coalesce(p_address, '')), '') is null then
     raise exception 'an address is required' using errcode = '22023';
   end if;

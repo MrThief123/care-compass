@@ -46,6 +46,14 @@ Record feature-level decisions here using the template below. Project-wide decis
 - Test changes caused: ADM-UI-05 and ADM-10 component tests now click Edit before typing or saving (`settings-screen.test.tsx`, `settings-wiring.test.tsx`), no assertion removed, except: "clears saved feedback when a field changes" became "... when Edit is pressed again" (fields are locked after a save, so Edit is what clears 'Saved.', as on Family info). **HUMAN REVIEW: test expectation changed** (requirement change confirmed by the human in session).
 - Human confirmation required: given, this session.
 
+### FD-10 — Australian phone number rule (AC-08)
+- Date: 2026-09-30
+- Context: the human asked for phone format checking: starts 0 or +61, correct length, no letters.
+- Decision: after removing spaces, hyphens and brackets, accept `0` or `+61` then `[23478]` and 8 digits (landline and mobile), 1300/1800 with 6 digits (with or without the 0/+61 prefix), and `13` plus 4 digits. Reject everything else. Letters get their own message. Checked in the shared Zod schema and again in the RPC (22023). The value is stored as typed (trimmed), not reformatted.
+- Reason: national and +61 forms of the standard Australian plans; 13/1300/1800 are common for organisations. No checks on whether the number is assigned.
+- Consequences: the migration `20260930032751_admin_update_organisation.sql` was edited in place: it is unmerged and was only ever applied to local databases. Phones already stored elsewhere are not re-checked until they are edited. 1900 and 000 are refused. The human should confirm the list of accepted forms.
+- Human confirmation required: yes, the accepted forms (non-blocking).
+
 <!-- Template
 ### FD-01 — <title>
 - Date:

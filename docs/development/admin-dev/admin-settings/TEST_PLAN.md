@@ -23,6 +23,7 @@ Tests are written **before** production code (TESTING.md §2). Run them, confirm
 | T-08 | AC-06 | component | Reset calls `requestOwnPasswordReset` and shows the sent message; on failure shows the error, not the sent message. | ☑ | GREEN |
 | T-09 | AC-01, AC-04 | integration | `getAdminSettings` returns the admin's own organisation; after `updateOrganisationSettings` the change reads back; a signed-out save refuses. | ☑ | GREEN |
 | T-10 | AC-07 | component | Starts read-only with Edit only; Edit shows Save and Cancel; Cancel restores values, clears errors, does not call the action; a saved form locks again and Cancel then goes back to the saved values; a failed save stays open. | ☑ | GREEN |
+| T-11 | AC-08 | unit, component, db | Valid forms (0X, +61, 1300/1800, 13 XX XX, spaces/hyphens/brackets) accepted; wrong length, bad prefix, +61 with 0 kept, non-Australian refused with the format message; letters refused with the letters message; refused on the screen, in the action and in the RPC (22023). | ☑ | GREEN |
 
 ## Existing tests affected
 - `src/features/admin-settings/settings-screen.test.tsx` (ADM-UI-05 local Save/Reset behaviour) and `queries.test.ts` ('rejects unwired live mode'). Changed in the implementation session (and again for AC-07: Save now needs Edit first): the screen now mocks the actions, the preview notices go, live mode no longer throws. Record in DECISIONS.md and flag **HUMAN REVIEW: test expectation changed**. Not touched in the tests-first session.
