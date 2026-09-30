@@ -9,6 +9,6 @@ Test results: component 10 red / 1 green (expected); pgTAP 12/12 green; e2e not 
 Current blocker: none
 Important discoveries: CAR-04 is merged; family RLS, audit and uploads already exist; plan-status output was stale
 Important decisions: FD-01 to FD-05 (AC-04 follows CAR-04 FD-07)
-Exact next action: implement per PROGRESS Next action, then update the FAM-UI-04 tests and record them in DECISIONS.md
+Exact next action: run full local suite, supabase test db, then real-browser check and e2e (local Supabase only); then ask for PR approval
 Files likely to be touched next: `src/features/family-info/*`, the Info `page.tsx`, `family-info.test.tsx`
 Warning for next session: use the worktree; e2e needs local Supabase, never the hosted project; open no PR without human approval.

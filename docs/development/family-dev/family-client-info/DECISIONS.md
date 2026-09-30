@@ -35,6 +35,20 @@ Record feature-level decisions here using the template below. Project-wide decis
 - Decision: AC-04 and T-04 now reject another organisation's admin and an unlinked family member. HUMAN REVIEW: test expectation changed before implementation (test never ran).
 - Human confirmation: Dhruv Verma, 2026-10-01 (in-session, following FD-07).
 
+### FD-06 — FAM-UI-04 tests changed for the wired behaviour
+- Date: 2026-10-01
+- Context: `src/features/family-info/family-info.test.tsx` assumed nothing is saved. FAM-09 wires Save, Add file and the always-three-cards rule (TEST_PLAN "Existing tests expected to change"). The file now also mocks `@/server/clients/actions` and `@/server/documents/actions`.
+- Decision: HUMAN REVIEW: test expectations changed. Changes (test, before, after, reason):
+  - "Save shows the edited text…": before, text shown at once; after, awaited (`findByText`) because Save now awaits the contract. Behaviour same.
+  - "saving a blank textarea shows 'Nothing added yet.'": before, sync; after, awaited. Same reason.
+  - "Save keeps the words but trims stray space": before, sync; after, waits for Edit to reappear. Same reason.
+  - "an edit lives in local state only…": before, asserted local-only state; after, asserts a fresh render shows what the contract returns (an edit is saved through the contract, not kept in the page). Assertion reworded, not removed.
+  - "pressing 'Add file' says adding files is not available yet": before, asserted that message; after, asserts the file chooser opens, the status stays empty and no upload is sent. The "not available yet" message is removed because uploads are wired.
+  - "a client with documents but no text sections still shows the Documentation card": before, asserted no Description card; after, asserts Description shows 'Nothing added yet.' (FD-04).
+  - "empty state: no sections and no documents…": before, rendered through the page (canEdit true); after, renders `FamilyInfoView` with `canEdit={false}`, because the empty state now shows only when the viewer cannot edit (FD-04). The page always passes `canEdit`, so the page shows the three cards instead.
+- Reason: behaviour change recorded in FD-02 and FD-04; no assertion on look, focus or wrapping was dropped.
+- Human confirmation required: yes (review the flagged tests in the PR).
+
 <!-- Template
 ### FD-01 — <title>
 - Date:

@@ -20,7 +20,7 @@ Last updated: 2026-10-01
 - 2026-10-01: tests written first (component, pgTAP, e2e); see Tests
 
 ## In progress
-- None
+- 2026-10-01: implemented (info-section-card, documentation-card, family-info-view, Info page); FAM-UI-04 tests updated (FD-06). HUMAN REVIEW: test expectation changed (see DECISIONS FD-06). Full checks and browser/e2e run pending.
 
 ## Remaining
 - Route `/family/[clientId]/info`; in-page summary (avatar, name, '78 years · Preston VIC · Banksia Home Care').
@@ -34,8 +34,8 @@ Last updated: 2026-10-01
 
 ## Tests
 - Written: component 11, pgTAP 12, e2e 3 (covering AC-01 to AC-09)
-- Passing: component 1 (order), pgTAP 12
-- Failing (expected, nothing implemented): component 10; e2e not run
+- Passing: component family-info 45/45 (wired 11 + FAM-UI-04 updated), pgTAP 12
+- Failing: none; e2e not run yet
 
 ## Files changed
 - None yet. Tests: `src/features/family-info/family-info-wired.test.tsx`, `supabase/tests/family_client_info.test.sql`, `tests/e2e/family-client-info.spec.ts`. Likely implementation files: `src/features/family-info/{info-section-card,documentation-card,family-info-view}.tsx`, the Info `page.tsx`; no migration or new contract function (FD-02)
