@@ -59,12 +59,12 @@ describe("Admin Settings", () => {
     );
     expect(screen.getByRole("status")).not.toHaveTextContent("saved");
   });
-  it("[ADM-UI-05][AC-01] clears saved feedback when a field changes", async () => {
+  it("[ADM-UI-05][AC-01] clears saved feedback when Edit is pressed again", async () => {
     render(<SettingsScreen data={data} />);
     await edit();
     await userEvent.click(screen.getByRole("button", { name: "Save" }));
     expect(await screen.findByText("Saved.")).toBeInTheDocument();
-    await userEvent.type(screen.getByLabelText("Address"), " Suite 2");
+    await edit();
     expect(screen.queryByText("Saved.")).not.toBeInTheDocument();
   });
   it("[ADM-UI-05][AC-01] reset does not change the organisation details", async () => {

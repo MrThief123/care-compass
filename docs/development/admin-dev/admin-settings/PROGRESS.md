@@ -19,7 +19,8 @@ Last updated: 2026-09-30
 - Claimed. Docs updated (FD-01 to FD-04), AC-04 to AC-06 added
 - Tests T-01 to T-09 written first
 - Migration `20260930032751_admin_update_organisation.sql`; `settings-schema.ts`, `settings-actions.ts`; supabase branch of `getAdminSettings`; screen wired (Save, Reset), preview notices removed
-- ADM-UI-05 tests updated (FD-06). **HUMAN REVIEW: test expectation changed**
+- Edit and Cancel flow added on the human's request (AC-07, FD-09)
+- ADM-UI-05 tests updated (FD-06, FD-09). **HUMAN REVIEW: test expectation changed**
 
 ## In progress
 - None
@@ -28,15 +29,15 @@ Last updated: 2026-09-30
 - Route `/admin/settings`; Organisation info card: Organisation name, ABN, Phone, Address; Reset card reused.
 
 ## Acceptance criteria status
-- 6 / 6 MET by unit, pgTAP and local integration tests
+- 7 / 7 MET by unit, pgTAP and local integration tests
 
 ## Tests
 - Written: 9 / 9
-- Unit/component: `npx vitest run` 2093 passed; 5 failed, all `F0-07`/`F0-04` auth integration tests run against the hosted project from `.env.local` (not this feature)
+- Unit/component: `npx vitest run` 2098 passed; 5 failed, all `F0-07`/`F0-04` auth integration tests run against the hosted project from `.env.local` (not this feature)
 - `supabase test db`: 15 files, 459 tests PASS (admin_settings 13/13)
 - Integration against local Supabase: `admin-settings` 4/4 pass; 3 `documents` (F0-13) tests fail with a storage upload error after `supabase db reset` (not this feature)
 - typecheck, eslint (0 errors), prettier clean
-- e2e `--grep-invert "F0-07"` on a clean production build: 41 passed, 2 skipped, 1 failed (`family-task-log-filters` FAM-UI-07 spacing, layout flake under parallel load; passes 3/3 on its own, not this feature)
+- e2e `--grep-invert "F0-07"` on a clean production build: 41 passed, 2 skipped, 1 failed (`family-calendar` keyboard test, flake under parallel load; 10/10 on its own; earlier run flaked a different family spec). Real-browser check of Edit, Cancel, Save and 768px width done
 
 ## Files changed
 - `supabase/migrations/20260930032751_admin_update_organisation.sql`, `src/lib/supabase/database.types.ts`

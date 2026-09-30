@@ -1,13 +1,13 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
-import { DetailsFormCard } from "@/components/shared/forms/details-form-card";
 import { Field } from "@/components/shared/forms/field";
 import { SettingsActionCard } from "@/components/shared/forms/settings-action-card";
 import { fieldErrors } from "@/components/shared/forms/validation";
 import { EmptyState } from "@/components/shared/states";
+import { Button } from "@/components/ui/button";
 import { CardShell } from "@/components/ui/card-shell";
 import { updateOrganisationSettings } from "@/server/admin/settings-actions";
 import type { AdminSettingsData, OrganisationSettings } from "@/server/admin/settings-queries";
@@ -26,6 +26,12 @@ export function SettingsScreen({ data }: { data: AdminSettingsData }) {
   const [values, setValues] = useState<OrganisationSettings>(() => ({
     ...(data.organisation ?? emptyValues),
   }));
+  // What Cancel goes back to: the loaded values, then whatever was last saved.
+  const [saved, setSaved] = useState<OrganisationSettings>(() => ({
+    ...(data.organisation ?? emptyValues),
+  }));
+  // Read-only until 'Edit', so details can't be changed by accident (as Family info, CHG-024).
+  const [editing, setEditing] = useState(false);
   const [errors, setErrors] = useState<Partial<Record<keyof OrganisationSettings, string>>>({});
   const [notice, setNotice] = useState("");
   const [saving, setSaving] = useState(false);
@@ -37,6 +43,22 @@ export function SettingsScreen({ data }: { data: AdminSettingsData }) {
     setErrors((current) => ({ ...current, [key]: undefined }));
     setNotice("");
   }
+  function startEditing() {
+    setEditing(true);
+    setNotice("");
+  }
+  function cancel() {
+    setValues(saved);
+    setErrors({});
+    setNotice("");
+    setEditing(false);
+    // Cancel is about to go; the Edit/Save button stays mounted.
+    form.current?.querySelector<HTMLElement>("[data-org-action]")?.focus();
+  }
+  // Focus the first field once the inputs have lost readOnly.
+  useEffect(() => {
+    if (editing) form.current?.querySelector<HTMLInputElement>('[name="name"]')?.focus();
+  }, [editing]);
   function focusFirst(messages: Record<string, string>) {
     const first = FIELD_ORDER.find((key) => messages[key]);
     if (first) form.current?.querySelector<HTMLInputElement>('[name="' + first + '"]')?.focus();
@@ -71,6 +93,8 @@ export function SettingsScreen({ data }: { data: AdminSettingsData }) {
       return;
     }
     setValues(outcome.data);
+    setSaved(outcome.data);
+    setEditing(false);
     setErrors({});
     setNotice(SAVED);
     router.refresh();
@@ -97,37 +121,54 @@ export function SettingsScreen({ data }: { data: AdminSettingsData }) {
       <div className="flex max-w-[1040px] flex-col gap-5">
         {data.organisation ? (
           <div ref={form}>
-            <DetailsFormCard title="Organisation Info" onSave={save} className="border-transparent">
-              <Field
-                label="Organisation Name"
-                name="name"
-                value={values.name}
-                onChange={(value) => change("name", value)}
-                error={errors.name}
-              />
-              <Field
-                label="ABN"
-                name="abn"
-                value={values.abn}
-                onChange={(value) => change("abn", value)}
-                error={errors.abn}
-              />
-              <Field
-                label="Phone"
-                name="phone"
-                type="tel"
-                value={values.phone}
-                onChange={(value) => change("phone", value)}
-                error={errors.phone}
-              />
-              <Field
-                label="Address"
-                name="address"
-                value={values.address}
-                onChange={(value) => change("address", value)}
-                error={errors.address}
-              />
-            </DetailsFormCard>
+            <CardShell className="flex flex-col gap-4 border-transparent p-5">
+              <h3 className="text-title-card text-text-primary">Organisation Info</h3>
+              <div data-testid="details-form-grid" className="grid gap-4 sm:grid-cols-2">
+                <Field
+                  label="Organisation Name"
+                  name="name"
+                  value={values.name}
+                  onChange={(value) => change("name", value)}
+                  error={errors.name}
+                  readOnly={!editing}
+                />
+                <Field
+                  label="ABN"
+                  name="abn"
+                  value={values.abn}
+                  onChange={(value) => change("abn", value)}
+                  error={errors.abn}
+                  readOnly={!editing}
+                />
+                <Field
+                  label="Phone"
+                  name="phone"
+                  type="tel"
+                  value={values.phone}
+                  onChange={(value) => change("phone", value)}
+                  error={errors.phone}
+                  readOnly={!editing}
+                />
+                <Field
+                  label="Address"
+                  name="address"
+                  value={values.address}
+                  onChange={(value) => change("address", value)}
+                  error={errors.address}
+                  readOnly={!editing}
+                />
+              </div>
+              <div className="flex justify-end gap-3">
+                {editing && (
+                  <Button variant="secondary" onClick={cancel}>
+                    Cancel
+                  </Button>
+                )}
+                <Button data-org-action disabled={saving} onClick={editing ? save : startEditing}>
+                  {editing ? "Save" : "Edit"}
+                </Button>
+              </div>
+            </CardShell>
           </div>
         ) : (
           <CardShell className="border-transparent p-5">
