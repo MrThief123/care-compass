@@ -1,12 +1,12 @@
 # Progress — F0-16 Development seed data from the design content
 
-Status: NOT STARTED
-Owner: unclaimed
+Status: IN PROGRESS
+Owner: Prajeet
 Lane: B — Backend
 Sprint: SPRINT · planned D7
-Branch: `feature/shared-dev-seed-data` (not yet created)
+Branch: `feature/shared-dev-seed-data` (created from main 2026-09-30)
 PR target: `main (per OQ-01 — shared work)`
-Last updated: 2026-09-17 (planning pack generated)
+Last updated: 2026-09-30
 
 ## Blockers
 - OQ-01 — Branch parent and naming for shared (foundation and cross-cutting) work
