@@ -66,6 +66,11 @@ export interface BuildOccurrencesInput {
   /** ISO instants; `from` is inclusive, `to` exclusive. */
   range: { from: string; to: string };
   now: Date;
+  /**
+   * Keep an occurrence that has a completion but was cancelled by an override, so a single-key
+   * read can still open it (FAM-15, FD-03). Range reads leave this off and hide it.
+   */
+  keepCancelledWithCompletion?: boolean;
 }
 
 const RecurrenceJsonSchema = z.object({
@@ -109,7 +114,19 @@ const byStartThenKey = (a: AnyOccurrence, b: AnyOccurrence) =>
   Date.parse(a.start) - Date.parse(b.start) || (a.key < b.key ? -1 : a.key > b.key ? 1 : 0);
 
 export function buildOccurrences(input: BuildOccurrencesInput): AnyOccurrence[] {
-  const { events, overrides, completions, shifts, range, now } = input;
+  const { events, shifts, range, now, keepCancelledWithCompletion = false } = input;
+  const { completions } = input;
+  const overrides = keepCancelledWithCompletion
+    ? input.overrides.filter(
+        (row) =>
+          row.kind !== "cancelled" ||
+          !completions.some(
+            (completion) =>
+              completion.event_id === row.event_id &&
+              Date.parse(completion.original_start) === Date.parse(row.original_start),
+          ),
+      )
+    : input.overrides;
 
   const rangeStart = instantToMelbourneLocal(range.from);
   const rangeEnd = instantToMelbourneLocal(range.to);

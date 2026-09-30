@@ -887,6 +887,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Requirements:** REQ-19, REQ-21, REQ-22
 - **CHG-009 (tasks and plain events, REQ-35):** a plain event's detail shows "Event · No tick-off needed" in the Status card, no pill or completion time; back link reads "Back to Care log".
 - **CHG-020 (PD-058):** marking a task done charges its cost or makes it pending through F0-12.
+- **FAM-15 start (2026-09-30, FD-01 to FD-05):** most of the screen exists (FAM-UI-07); remaining scope is plain events opening (CHG-009, no 'Care log' rename), a cancelled-after-completion occurrence still opening as Done, and real-data verification. Stays read-only (no Mark done / Undo). ACs rewritten to 8 (docs updated when it started).
 - **Docs:** `docs/development/family-dev/family-task-detail/` · **Status:** NOT STARTED
 
 ### CAR-01 — Carer Home — Today's calendar and Tasks

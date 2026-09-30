@@ -7,7 +7,7 @@ import { formatTimeOfDay } from "@/features/family-task-log/melbourne-time";
 import { occurrenceNurse } from "@/features/family-task-log/occurrence-display";
 import { statusPillClassName } from "@/features/family-task-log/status-pill-class";
 import { formatLongDate } from "@/lib/format/date";
-import type { EventDocument, Occurrence } from "@/types/domain";
+import { isPlainEvent, type AnyOccurrence, type EventDocument } from "@/types/domain";
 
 import { BackLink } from "./back-link";
 import { DocumentTile } from "./document-tile";
@@ -16,7 +16,7 @@ import type { TaskDetailOrigin } from "./task-detail-origin";
 
 export interface TaskDetailViewProps {
   clientId: string;
-  occurrence: Occurrence;
+  occurrence: AnyOccurrence;
   /** Documents attached to the task's event; read-only here. */
   documents: EventDocument[];
   /**
@@ -43,9 +43,10 @@ const EDIT_EVENT_BUTTON =
  * Edit event page (CHG-014). No hooks, so it renders on the server.
  */
 export function TaskDetailView({ clientId, occurrence, documents, origin }: TaskDetailViewProps) {
-  const nurse = occurrenceNurse(occurrence);
-  const completedAt = occurrence.status === "done" ? occurrence.completedAt : undefined;
-  const pillText = occurrence.status === "done" ? `Done · ${nurse}` : undefined;
+  const plain = isPlainEvent(occurrence);
+  const nurse = occurrenceNurse(plain ? { assignee: occurrence.assignee } : occurrence);
+  const completedAt = !plain && occurrence.status === "done" ? occurrence.completedAt : undefined;
+  const pillText = !plain && occurrence.status === "done" ? `Done · ${nurse}` : undefined;
 
   return (
     <div className="flex flex-col gap-4 px-6 pb-6 pt-2">
@@ -81,13 +82,17 @@ export function TaskDetailView({ clientId, occurrence, documents, origin }: Task
         <div className="flex flex-wrap items-center gap-3">
           {/* The pill may shrink below its text; its label then ends in an ellipsis and the
               whole text stays in the DOM and in the title (FD-21). */}
-          <span title={pillText} className="flex min-w-0 max-w-full">
-            <StatusPill
-              status={occurrence.status}
-              actorName={nurse}
-              className={statusPillClassName(occurrence.status)}
-            />
-          </span>
+          {plain ? (
+            <p className="text-body-default text-text-primary">Event · No tick-off needed</p>
+          ) : (
+            <span title={pillText} className="flex min-w-0 max-w-full">
+              <StatusPill
+                status={occurrence.status}
+                actorName={nurse}
+                className={statusPillClassName(occurrence.status)}
+              />
+            </span>
+          )}
           {completedAt && (
             <p className="text-body-small text-text-secondary">
               {`Completed at ${formatTimeOfDay(completedAt)}`}

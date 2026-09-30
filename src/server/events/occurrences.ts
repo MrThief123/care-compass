@@ -51,6 +51,7 @@ export async function loadOccurrences(
   clientId: string,
   range: InstantRange,
   now: Date,
+  options: { keepCancelledWithCompletion?: boolean } = {},
 ): Promise<AnyOccurrence[]> {
   // An id that is not an id is an unknown client, which the contract says is an empty list.
   if (!ID_PATTERN.test(clientId)) return [];
@@ -100,5 +101,6 @@ export async function loadOccurrences(
     shifts: shiftsResult.data as ShiftCarerRow[],
     range,
     now,
+    ...options,
   });
 }

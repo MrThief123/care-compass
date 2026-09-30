@@ -58,7 +58,7 @@ describe("[FAM-UI-07] Task detail page edge cases (contract stubbed)", () => {
   it("[FAM-UI-07][AC-04] opens a future task through getOccurrence, without looking the task up in the log", async () => {
     render(await TaskDetailPage(props(encodeURIComponent(FUTURE.key))));
 
-    expect(getOccurrence).toHaveBeenCalledExactlyOnceWith(ID, FUTURE.key);
+    expect(getOccurrence).toHaveBeenCalledExactlyOnceWith(ID, FUTURE.key, { type: "all" });
     expect(screen.getByRole("heading", { level: 1, name: "Physiotherapy" })).toBeInTheDocument();
     expect(screen.getByText("Monday 15 March 2027 · Assigned to Aisha Rahman")).toBeInTheDocument();
     expect(screen.getByText("Planned")).toBeInTheDocument();
