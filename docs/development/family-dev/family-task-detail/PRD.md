@@ -5,7 +5,7 @@
 | Feature ID | FAM-15 |
 | Dashboard / stream | Family |
 | Phase | Phase 3 — Data wiring & behaviour (parallel: Family · Carer · Admin) |
-| Development branch (PR target) | `family-dev` |
+| PR target | `main` (CHG-036) |
 | Feature branch | `feature/family-task-detail` |
 | Documentation | `docs/development/family-dev/family-task-detail/` |
 | Lane | F — Family |
@@ -18,7 +18,7 @@
 Show occurrence detail.
 
 ## Problem
-Undo of Done (Q16) is undecided.
+The Task detail screen (FAM-UI-07) already renders, and reads through the `src/server/events` and `src/server/documents` contracts, which already have a Supabase branch. What is left is to verify it against real data and to close the gaps found at start (FD-02, FD-03): plain events return 404 and a cancelled-after-completion occurrence disappears.
 
 ## Description
 Drill-down detail for one occurrence reached from the Task log, Overdue card, Recent activity and Log panel.
@@ -31,25 +31,27 @@ Families can see exactly what happened, when and by whom.
 
 ## Scope
 - Route `/family/[clientId]/tasks/[occurrenceKey]`.
-- '< Back to Task log' link; title (Title/Page); subline 'Monday 30 November 2026 · Assigned to Aisha R.'.
-- Status card: pill ('Done · Aisha R.') and 'Completed at 09:14' when done; planned/overdue shows pill only.
-- Description card with 'Edit' link → FAM-07 edit route.
-- Documents card with file tiles (read-only here).
-- Wire chevrons from Overdue card, Recent activity, Log panel and task log rows.
+- Verify against real data (`DATA_SOURCE=supabase`): '< Back to …' link (follows the origin, CHG-014); title; subline 'Monday 30 November 2026 · Assigned to Aisha Rahman' (full names, CHG-032; assignee from the covering shift, the actor once Done, '—' if none, PD-055).
+- Status card: pill ('Done · Aisha Rahman') and 'Completed at 09:14' when done; planned/overdue shows pill only.
+- **Plain events open** (CHG-009, FD-02): Status card reads 'Event · No tick-off needed', no pill, no completion time. Back label follows the origin as today (no 'Care log' rename, FD-02).
+- **Cancelled after completion** still opens, as Done (FD-03).
+- Description card and 'Edit event' button (CHG-014, already built); Documents card with file tiles (read-only, already built).
+- Verify the chevrons from the Overdue card, Recent activity, Log panel and Task log rows open the right detail (already built by FAM-UI-01/02/07).
 
 ## Out of Scope
-- Undo Done (OQ-10)
+- A Mark done / Undo control on this screen (FD-01): Task detail stays read-only (CHG-014). Undo itself is answered (OQ-10, PD-044) but lives on the Calendar Tasks panel and Carer screens.
+- The Family 'Care log' rename (FD-02).
 - Comments/notes (OQ-34)
 
 ## Functional Requirements
-- Invalid occurrence key → not found page.
+- Invalid, unknown or other-client occurrence key → not found page.
 
 ## UI / UX Requirements
 - Match design.
 
 ## Dependencies
 - Features: F0-11 (Care events, occurrence overrides and append-only completions), F0-13 (Client document storage), FAM-UI-07 (Family Task log and Task detail screens (UI))
-- Blocking open decisions (must be answered before START FEATURE): OQ-29, OQ-10
+- Blocking decisions: OQ-29 (PD-055) and OQ-10 (PD-044) are ANSWERED. All three dependencies are merged to `main`.
 - Non-blocking open decisions (proposed defaults apply, confirm when possible): None
 
 ## Inputs
@@ -59,7 +61,8 @@ Families can see exactly what happened, when and by whom.
 - Detail page
 
 ## Error / Edge Cases
-- Occurrence cancelled after completion → still viewable with status Done.
+- Occurrence cancelled after completion → still viewable with status Done (FD-03).
+- Plain event → viewable, no status (FD-02).
 
 ## Security / Permissions
 - Linked family only; occurrence must belong to clientId.
