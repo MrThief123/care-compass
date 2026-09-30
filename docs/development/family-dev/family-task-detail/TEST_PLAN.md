@@ -18,11 +18,19 @@ Tests are written **before** production code (TESTING.md §2). Run them, confirm
 | T-04 | AC-02 | integration | Assignee comes from the covering shift; the actor replaces it once Done by someone else; '—' (no assignee) with no shift. | ☑ | PASS (already built) |
 | T-05 | AC-03 | e2e | Overdue card chevron on 'Weekly weigh-in' opens its detail: Overdue pill, 'Assigned to —'. | ☑ | PASS (already built) |
 | T-06 | AC-04 | integration | Robert's key under Margaret's client, and an unknown key, return nothing (not found). | ☑ | PASS (already built) |
-| T-07 | AC-05 | component | A plain event shows 'Event · No tick-off needed', no pill, no 'Completed at', Edit event still present. | ☑ | FAIL: view shows no 'Event · No tick-off needed' |
-| T-08 | AC-05 | page | The route resolves a plain event key (reads with `type: "all"`), shows it, and a Robert plain event under Margaret is not found. | ☑ | FAIL: page 404s a plain event |
+| T-07 | AC-05 | component | A plain event shows 'Event · No tick-off needed', no pill, no 'Completed at', Edit event still present. | ☑ | PASS (after implementation) |
+| T-08 | AC-05 | page | The route resolves a plain event key (reads with `type: "all"`), shows it, and a Robert plain event under Margaret is not found. | ☑ | PASS (after implementation) |
 | T-09 | AC-06 | integration | A plain event (automatic mode) opens for its own client with kind 'event'; another client's family gets nothing. | ☑ | PASS (contract already reads plain events) |
-| T-10 | AC-07 | integration | An occurrence completed then cancelled (override) still returns, status done, actor kept. | ☑ | FAIL: cancelled occurrence returns nothing (404) |
+| T-10 | AC-07 | integration | An occurrence completed then cancelled (override) still returns, status done, actor kept. | ☑ | PASS (after implementation) |
 | T-11 | AC-08 | e2e | Recent activity row, Log panel row and Task log row each open a Task detail and Back returns to the origin. | ☑ | PASS (already built) |
+
+## Results after implementation (2026-09-30)
+- `.fam15` Vitest files, `src/server/events`, `family-task-detail`, `family-task-log`: 20 files, 453 tests pass.
+- Full Vitest run: 2088 pass; failures only in `shared-authentication`, `shared-supabase-environment`, `mocks-import-boundary` (need the F0-07 stack or the lint subprocess; they fail identically on `main` state before this change; two runs under load also showed timeouts in unrelated files that pass when run alone).
+- Integration against local Supabase: `family-*` (12 files, 59 tests) and `care-events` pass, including T-02, T-04, T-06, T-09, T-10.
+- `supabase test db` PASS · `tsc` clean · `prettier` clean · `eslint` 0 errors (3 pre-existing warnings in other files) · `npm run build` OK.
+- Playwright `--grep-invert "F0-07"`: 46 passed, 2 skipped (T-05, T-11 pass).
+- Real-browser width sweep (Playwright Chromium) at 1920, 1440, 1024, 768: no overlap, no horizontal scroll for a plain event, a Done task and an Overdue task.
 
 ## Regression scope
 - Full Vitest suite, `supabase test db`, and the Family e2e specs (`--grep-invert "F0-07"`, CI is down: run locally and say so in the PR).

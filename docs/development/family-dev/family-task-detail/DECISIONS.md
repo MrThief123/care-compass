@@ -49,6 +49,15 @@ None open. OQ-29 (PD-055) and OQ-10 (PD-044) are ANSWERED in root DECISIONS.md.
 - Decision: FAM-15 verifies these against real data (integration tests) and adds only FD-02 and FD-03. Tests for already-built behaviour may pass on first run.
 - Human confirmation required: no.
 
+### FD-06 — One existing test assertion updated (HUMAN REVIEW: test expectation changed)
+- Date: 2026-09-30
+- Test: `[FAM-UI-07][AC-04]` in `src/app/(family)/family/[clientId]/tasks/[occurrenceKey]/page.edge.test.tsx`.
+- Before: `expect(getOccurrence).toHaveBeenCalledExactlyOnceWith(ID, FUTURE.key)`.
+- After: `toHaveBeenCalledExactlyOnceWith(ID, FUTURE.key, { type: "all" })`.
+- Reason: recorded requirement change (FD-02): the page now reads with `type: "all"` so plain events open. The test's intent (opens a future task through `getOccurrence`, no log scan) is unchanged.
+- Implementation note (FD-03): `buildOccurrences` takes `keepCancelledWithCompletion`; only `getOccurrence`'s Supabase branch sets it, so range reads still hide cancelled occurrences.
+- Human confirmation required: review in the PR.
+
 <!-- Template
 ### FD-01 — <title>
 - Date:
