@@ -3,7 +3,7 @@
 -- Reading stays as F0-18 left it: family, or a carer with any non-cancelled shift that has
 -- not ended (`is_assigned_carer`). Writing is narrower: a carer may edit a client's info
 -- sections and add documents only while a shift with that client is in progress
--- (`carer_on_active_shift`, F0-10). Admins never write client info. Carers cannot delete
+-- (`carer_on_active_shift`, F0-10). Carers cannot delete
 -- (there is no DELETE policy on any of these tables or on the bucket).
 --
 -- Additive: the family policies on `client_info_sections` are untouched; only the
@@ -25,10 +25,9 @@ create policy client_info_sections_update_carer on client_info_sections
   with check (carer_on_active_shift(client_id) and updated_by = auth.uid());
 
 -- ---------------------------------------------------------------------------
--- documents and storage: uploads by family, or by a carer on shift.
+-- documents and storage: uploads by family, an admin of the client's organisation, or a carer on shift.
 -- Before this, `can_access_client_documents` let any carer with read access (a shift
--- scheduled for next week, or one that just ended) and any admin of the organisation add
--- files. Reads and detach are unchanged.
+-- scheduled for next week, or one that just ended) add files. Reads and detach are unchanged.
 -- ---------------------------------------------------------------------------
 create or replace function can_upload_client_documents(p_client_id uuid)
 returns boolean
@@ -38,6 +37,7 @@ security definer
 set search_path = public
 as $$
   select is_family_of(p_client_id)
+      or is_admin_of_client(p_client_id)
       or carer_on_active_shift(p_client_id);
 $$;
 
