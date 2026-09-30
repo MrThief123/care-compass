@@ -1,7 +1,7 @@
 # DEVELOPMENT PLAN — Care Compass
 
 Version 0.2 · 17 September 2026 · Status: DRAFT (controlled after planning freeze) · Supersedes v0.1 dashboard-by-dashboard phases
-Totals: **84 active features** (85 listed; CAR-08 retired) · **379 acceptance criteria** across 5 phases (UI-04 and its 10 criteria added by CHG-004, 2026-09-19; UI-05 and its 13 criteria added under CHG-009, 2026-09-24; F0-17 and its 8 criteria added by CHG-010, 2026-09-24; CHG-020, 2026-09-25: FAM-UI-08 (6 criteria) and ADM-11 (5) added, FAM-UI-05 +5 criteria, CAR-08 and its 2 criteria retired; CHG-021, 2026-09-25: FAM-UI-05 +4 criteria; CHG-022, 2026-09-25: FAM-UI-05 +5 criteria; CHG-027, 2026-09-26: F0-18 and its 9 criteria added; CHG-037, 2026-09-30: F0-19 and its 6 criteria added; the Jira import `docs/JIRA_BACKLOG.csv` predates all five). Jira import: `docs/JIRA_BACKLOG.csv`.
+Totals: **85 active features** (86 listed; CAR-08 retired) · **389 acceptance criteria** across 5 phases (UI-04 and its 10 criteria added by CHG-004, 2026-09-19; UI-05 and its 13 criteria added under CHG-009, 2026-09-24; F0-17 and its 8 criteria added by CHG-010, 2026-09-24; CHG-020, 2026-09-25: FAM-UI-08 (6 criteria) and ADM-11 (5) added, FAM-UI-05 +5 criteria, CAR-08 and its 2 criteria retired; CHG-021, 2026-09-25: FAM-UI-05 +4 criteria; CHG-022, 2026-09-25: FAM-UI-05 +5 criteria; CHG-027, 2026-09-26: F0-18 and its 9 criteria added; CHG-037, 2026-09-30: F0-19 and its 6 criteria added; CHG-040, 2026-09-30: F0-20 and its 10 criteria added; the Jira import `docs/JIRA_BACKLOG.csv` predates all five). Jira import: `docs/JIRA_BACKLOG.csv`.
 
 ---
 
@@ -154,6 +154,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 | 11 | F0-17 | Self-serve sign-up for Family and Organisation accounts | B | D8 | SPRINT | F0-06, F0-07 | OQ-01, OQ-07, OQ-08 | `feature/shared-sign-up` | NOT STARTED |
 | 12 | F0-18 | Carer view access derived from shifts | B | D8 | SPRINT | F0-06, F0-10, F0-08 | — | `feature/shared-carer-shift-access` | NOT STARTED |
 | 13 | F0-19 | Root route and production guard for dev previews | S | D11 | SPRINT | F0-07 | — | `feature/shared-root-route` | NOT STARTED |
+| 14 | F0-20 | Admin TOTP MFA hardening | S | D11 | SPRINT | F0-07, F0-17 | — | `feature/shared-admin-mfa-hardening` | IN PROGRESS |
 
 ### Phase 3 — Data wiring & behaviour (parallel: Family · Carer · Admin)
 
@@ -703,6 +704,17 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Testing summary:** 3 unit, 2 e2e
 - **Requirements:** REQ-02
 - **Docs:** `docs/development/shared/shared-root-route/` · **Status:** NOT STARTED
+
+### F0-20 — Admin TOTP MFA hardening
+- **Dashboard / stream:** shared · **Lane:** S · **Days:** D11 · **Sprint:** SPRINT · **PR target:** `main` · **Branch:** `feature/shared-admin-mfa-hardening`
+- **Description:** Keeps admin TOTP MFA mandatory (CHG-040) and makes it reliable: the QR renders, enrolment cannot collide or be raced by page renders, the code field clears after a bad code, no credentials are logged by our code, and the whole path is tested from unit to a real-browser e2e. Added by CHG-040.
+- **User value:** An admin can set up and use two-factor sign-in first time, every time.
+- **Dependencies:** F0-07, F0-17 · **Blocking decisions:** None
+- **Jira summary:** Harden admin TOTP MFA enrolment and challenge; full test coverage
+- **Acceptance criteria summary:** 10 criteria — QR renders, concurrent enrol, stale cleanup, enrol once from the client, field clears, verify outcomes, full sign-in path, AAL1 refused and non-admins never gated, no credentials logged
+- **Testing summary:** unit, component, server-action, integration, e2e; each run 10 times
+- **Requirements:** REQ-01
+- **Docs:** `docs/development/shared/shared-admin-mfa-hardening/` · **Status:** IN PROGRESS
 
 ## Phase 3 — Data wiring & behaviour (parallel: Family · Carer · Admin) — feature detail
 
