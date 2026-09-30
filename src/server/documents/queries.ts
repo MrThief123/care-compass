@@ -10,7 +10,7 @@
  * URL (F0-13) and is not part of this contract.
  */
 import * as mock from "@/mocks/queries/documents";
-import { getDataSourceMode, notImplementedForSupabase } from "@/server/data-source";
+import { getDataSourceMode } from "@/server/data-source";
 import type { DocumentRef, EventDocument } from "@/types/domain";
 
 /**
@@ -68,5 +68,30 @@ export async function getClientDocuments(clientId: string): Promise<DocumentRef[
   if (mode === "mock") {
     return mock.getClientDocuments(clientId);
   }
-  notImplementedForSupabase("documents", "getClientDocuments");
+
+  const { createClient } = await import("@/lib/supabase/server");
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("documents")
+    .select(
+      "id, client_id, filename, uploaded_at, uploader:profiles!documents_uploaded_by_fkey(first_name, last_name)",
+    )
+    .eq("client_id", clientId)
+    .is("event_id", null)
+    .is("detached_at", null)
+    .order("uploaded_at", { ascending: true })
+    .order("id", { ascending: true });
+  // The message names no client or carer (ARCHITECTURE.md §12.5).
+  if (error || !data) throw new Error("getClientDocuments: could not load the documents.");
+
+  return data.map((row) => ({
+    id: row.id,
+    clientId: row.client_id,
+    name: row.filename,
+    // The bucket is private: a file is opened through a short-lived signed URL
+    // (`getDocumentUrl`, F0-13), never a stored link.
+    url: "",
+    uploadedAt: row.uploaded_at,
+    uploadedBy: row.uploader ? `${row.uploader.first_name} ${row.uploader.last_name}` : undefined,
+  }));
 }

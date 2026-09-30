@@ -937,7 +937,8 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Testing summary:** 1 component, 1 e2e, 1 db, 1 integration
 - **Requirements:** REQ-05, REQ-10
 - **CHG-026 (carer ticks from the patient's screens):** covers the patient's Home, Calendar, Info and Care log, not Info alone; edit and tick-off only during an active shift (PD-041).
-- **Docs:** `docs/development/carer-dev/carer-client-info/` · **Status:** NOT STARTED
+- **CAR-04 start (2026-09-30, FD-01 to FD-06):** Info tab only (Home, Calendar and Care log stay 'Coming soon'); CAR-04 builds the Supabase Info reads, the section-save action and the carer RLS migration because FAM-09 is unmerged; a client with no shift redirects to Patients; feature ACs rewritten to 9 (docs updated when it started).
+- **Docs:** `docs/development/carer-dev/carer-client-info/` · **Status:** IN PROGRESS
 
 ### CAR-05 — Carer — Calendar (shifts) and selected-shift tasks
 - **Dashboard / stream:** carer · **Lane:** C · **Days:** D9–D10 · **Sprint:** SPRINT · **PR target:** `main` · **Branch:** `feature/carer-calendar-shifts`

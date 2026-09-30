@@ -5,7 +5,7 @@
 | Feature ID | CAR-04 |
 | Dashboard / stream | Carer |
 | Phase | Phase 3 — Data wiring & behaviour (parallel: Family · Carer · Admin) |
-| Development branch (PR target) | `carer-dev` |
+| Development branch (PR target) | `main` (CHG-036) |
 | Feature branch | `feature/carer-client-info` |
 | Documentation | `docs/development/carer-dev/carer-client-info/` |
 | Lane | C — Carer |
@@ -30,24 +30,33 @@ Carers read the same care information as the family and can update it while work
 - Carer
 
 ## Scope
-- Route `/carer/patients/[clientId]` using `ClientInfoView` in carer mode.
-- Header: 'Patients' screen name (PROPOSED) with in-page client summary.
-- Edit links and Add file tile rendered only when `carer_on_active_shift(clientId)` is true.
+Rewritten 2026-09-30 before implementation (FD-01 to FD-06).
+- **Info tab only.** Route `/carer/patients/[clientId]/info` reads Supabase and lets an on-shift carer edit. Home, Calendar and Care log stay 'Coming soon' (CHG-026/028 wiring is a follow-up; it needs a Lane F base-path/read-only change).
+- Read: the client's Description, Habits and Medical history (in that order) and the client's own documents (not event documents, not detached), through `src/server/**` contract functions with `DATA_SOURCE=supabase`.
+- Edit and Add file controls exist only when the carer is on an active shift for that client (`carer_on_active_shift`, PD-041); off shift they are absent and the 'View only' notice shows.
+- Saving a section is a Server Action (`saveClientInfoSection`, Zod, max 5,000 characters). Adding a file uses the existing `uploadDocument`. Carers cannot remove files.
+- RLS mirrors the UI: a migration lets `client_info_sections` be written, and `documents` and the `client-documents` bucket be added to, by a carer only during an active shift (family unchanged; admin still cannot write).
+- A carer with no shift that has not ended for the client who opens any `/carer/patients/[clientId]/…` URL is redirected to `/carer/patients` (FD-03).
 - No organisation or payment controls (D10).
 
 ## Out of Scope
 - Carer editing outside shift
 - Budget views for carers
+- Home, Calendar and Care log tabs (follow-up)
+- Removing documents; family editing rules (FAM-09 adds only what family needs beyond this)
 
 ## Functional Requirements
-- RLS mirrors UI: updates rejected outside active shift.
+- RLS mirrors UI: writes rejected outside an active shift, including documents and storage uploads.
+- Section edits are audited (the existing audit trigger on `client_info_sections`).
+- Saved-by is the signed-in carer (`updated_by`).
 
 ## UI / UX Requirements
 - Controls absent, not disabled (DD NFR-3).
+- Reuse the Family Info cards' look; carer wrappers live in `src/features/carer-patients/` because `src/features/family-info/` is Lane F's (FD-02).
 
 ## Dependencies
 - Features: F0-06 (Identity, organisation and client access schema with RLS), F0-10 (Shifts schema, active-shift function and conflict query), F0-13 (Client document storage), F0-18 (Carer view access derived from shifts, CHG-027), CAR-UI-02 (Carer Patients and patient info screens (UI))
-- Blocking open decisions (must be answered before START FEATURE): OQ-09
+- Blocking open decisions: OQ-09 — ANSWERED (PD-041, CHG-027)
 - Non-blocking open decisions (proposed defaults apply, confirm when possible): OQ-19
 
 ## Inputs
@@ -57,13 +66,15 @@ Carers read the same care information as the family and can update it while work
 - Info page
 
 ## Error / Edge Cases
-- Shift ends while editing → save rejected with message 'Your shift has ended, so changes can't be saved.' (PROPOSED copy).
+- Shift ends while editing → save rejected with message 'Your shift has ended, so changes can't be saved.'; the draft stays in the box and nothing shows as saved.
+- Text over 5,000 characters → error, not saved.
+- Empty section → 'Not added yet' (as Family).
 
 ## Security / Permissions
 - Assigned carers only.
 
 ## Technical Considerations
-- Reuse FAM-09 component merged via main sync.
+- FAM-09 is not merged, so CAR-04 builds the shared pieces (FD-01): the Supabase reads for sections and client documents, the save action and the carer RLS migration. FAM-09 reuses them.
 
 ## Traceability
 - Product requirements: REQ-05 (Carers see only clients they are assigned to; read access while assigned; edit access only…), REQ-10 (Client information page with key descriptive, habit and medical information and documentat…)

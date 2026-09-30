@@ -1,7 +1,7 @@
 import { CarerHomeErrorState } from "@/features/carer-home/carer-home-error-state";
+import { CarerInfoView } from "@/features/carer-patients/carer-info-view";
 import { ViewOnlyNotice } from "@/features/carer-patients/edit-status";
 import { findCarerPatient } from "@/features/carer-patients/find-patient";
-import { FamilyInfoView } from "@/features/family-info/family-info-view";
 import { loadFamilyInfoData, type FamilyInfoData } from "@/features/family-info/info-data";
 
 export default async function PatientInfoPage({
@@ -10,7 +10,7 @@ export default async function PatientInfoPage({
   params: Promise<{ clientId: string }>;
 }) {
   const { clientId } = await params;
-  // Outside the try: notFound() throws and must reach Next.js.
+  // Outside the try: redirect() throws and must reach Next.js.
   const patient = await findCarerPatient(clientId);
 
   let data: FamilyInfoData;
@@ -24,11 +24,12 @@ export default async function PatientInfoPage({
     return <CarerHomeErrorState />;
   }
 
-  // OQ-09 default: carers edit client info only during a shift; otherwise the controls are absent.
+  // PD-041: a carer edits client info and adds documents only while a shift is in progress;
+  // otherwise the controls are absent (RLS refuses the writes either way).
   return (
     <>
       {!patient.onShift && <ViewOnlyNotice firstName={patient.firstName} />}
-      <FamilyInfoView data={data} canEdit={patient.onShift} />
+      <CarerInfoView clientId={clientId} data={data} canEdit={patient.onShift} />
     </>
   );
 }

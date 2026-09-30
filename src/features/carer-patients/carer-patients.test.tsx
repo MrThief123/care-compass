@@ -302,11 +302,12 @@ describe("[CAR-UI-02] Patient header and tabs", () => {
     expect(within(nav).queryByRole("link", { name: /Budget|Settings/ })).not.toBeInTheDocument();
   });
 
-  it("[CAR-UI-02][AC-09] a patient not in the carer's list is not found", async () => {
+  // CAR-04 FD-03 (HUMAN REVIEW: test expectation changed): was not-found, now a redirect to Patients.
+  it("[CAR-UI-02][AC-09] a patient not in the carer's list redirects to Patients", async () => {
     await expect(
       PatientLayout({ children: <p>tab content</p>, ...params("client-stranger") }),
-    ).rejects.toThrow("NEXT_NOT_FOUND");
-    expect(mocks.notFound).toHaveBeenCalled();
+    ).rejects.toThrow("NEXT_REDIRECT /carer/patients");
+    expect(mocks.redirect).toHaveBeenCalledWith("/carer/patients");
   });
 });
 
@@ -360,8 +361,10 @@ describe("[CAR-UI-02] Patient Info tab", () => {
     expect(mocks.getCarerPatients).toHaveBeenCalledWith(CARER_ID);
   });
 
-  it("[CAR-UI-02][AC-09] Info for a patient not in the carer's list is not found", async () => {
-    await expect(InfoPage(params("client-stranger"))).rejects.toThrow("NEXT_NOT_FOUND");
+  it("[CAR-UI-02][AC-09] Info for a patient not in the carer's list redirects to Patients", async () => {
+    await expect(InfoPage(params("client-stranger"))).rejects.toThrow(
+      "NEXT_REDIRECT /carer/patients",
+    );
   });
 });
 

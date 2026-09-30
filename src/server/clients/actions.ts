@@ -101,3 +101,91 @@ export async function changeClientOrganisation(
     return { ok: false, error: { code: "UNEXPECTED", message: FAILED } };
   }
 }
+
+const INFO_SECTION_KEYS = {
+  description: "description",
+  habits: "habits",
+  medicalHistory: "medical_history",
+} as const;
+
+const INFO_SECTION_MAX = 5000;
+
+const SaveInfoSectionInputSchema = z.object({
+  clientId: z.guid(),
+  kind: z.enum(["description", "habits", "medicalHistory"]),
+  content: z.string().trim().max(INFO_SECTION_MAX),
+});
+
+const SAVE_FAILED = "Couldn't save your changes. Try again.";
+const SHIFT_ENDED = "Your shift has ended, so changes can't be saved.";
+
+/**
+ * CAR-04: saves one of a client's Description, Habits or Medical history, recording the
+ * signed-in user as the saver. Family may save at any time, an admin of the client's
+ * organisation likewise, and a carer only while a shift with the client is in progress:
+ * that is enforced by RLS, not here, so an RLS refusal (42501) is the shift-ended case.
+ * With `DATA_SOURCE=mock` nothing can change, and it says so.
+ */
+export async function saveClientInfoSection(
+  clientId: string,
+  kind: keyof typeof INFO_SECTION_KEYS,
+  content: string,
+): Promise<ClientActionResult> {
+  if (getDataSourceMode() === "mock") {
+    return {
+      ok: false,
+      error: { code: "NOT_AVAILABLE", message: "Saving changes is not available yet." },
+    };
+  }
+
+  const parsed = SaveInfoSectionInputSchema.safeParse({ clientId, kind, content });
+  if (!parsed.success) {
+    const tooLong = parsed.error.issues.some((issue) => issue.path[0] === "content");
+    return {
+      ok: false,
+      error: {
+        code: "VALIDATION",
+        message: tooLong
+          ? "Keep it to 5,000 characters or fewer."
+          : "That section can't be saved. Reload and try again.",
+      },
+    };
+  }
+
+  try {
+    const { createClient } = await import("@/lib/supabase/server");
+    const supabase = await createClient();
+    const { data: auth } = await supabase.auth.getUser();
+    if (!auth.user) {
+      return {
+        ok: false,
+        error: { code: "NOT_ALLOWED", message: "Sign in to save your changes." },
+      };
+    }
+
+    const { error } = await supabase.from("client_info_sections").upsert(
+      {
+        client_id: parsed.data.clientId,
+        key: INFO_SECTION_KEYS[parsed.data.kind],
+        body: parsed.data.content,
+        updated_by: auth.user.id,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "client_id,key" },
+    );
+
+    if (!error) return { ok: true, data: undefined };
+    // Fixed messages by error code: the database's text may name a client.
+    if (error.code === "42501") {
+      return { ok: false, error: { code: "NOT_ALLOWED", message: SHIFT_ENDED } };
+    }
+    return { ok: false, error: { code: "UNEXPECTED", message: SAVE_FAILED } };
+  } catch (error) {
+    // A feature tag and the error's class only (ARCHITECTURE.md §12.5).
+    console.error(
+      "[clients] saveClientInfoSection failed:",
+      error instanceof Error ? error.name : "unknown",
+    );
+    return { ok: false, error: { code: "UNEXPECTED", message: SAVE_FAILED } };
+  }
+}
