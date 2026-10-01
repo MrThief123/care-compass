@@ -1,21 +1,20 @@
 # Progress — INT-02 End-to-end: organisation transfer journey
 
-Status: NOT STARTED
-Owner: unclaimed
+Status: IN PROGRESS
+Owner: MrThief123
 Lane: I — Integration
 Sprint: SPRINT · planned D12
-Branch: `feature/family-organisation-transfer-e2e` (not yet created)
-PR target: `family-dev`
-Last updated: 2026-09-17 (planning pack generated)
+Branch: `feature/family-organisation-transfer-e2e`
+PR target: `main` (CHG-036; `family-dev` is retired)
+Last updated: 2026-10-01
 
 ## Blockers
-- OQ-06 — Organisation change model
-- OQ-15 — Incoming organisation's visibility of history
+- None — OQ-06, OQ-15 ANSWERED
 
 ## Dependencies status
-- FAM-13 — NOT STARTED
-- ADM-04 — NOT STARTED
-- CAR-03 — NOT STARTED
+- FAM-13 — MERGED TO DEV
+- ADM-04 — MERGED TO DEV
+- CAR-03 — MERGED TO DEV
 
 ## Completed
 - Feature documentation drafted (Claude Chat planning pack)
