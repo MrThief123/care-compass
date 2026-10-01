@@ -28,7 +28,7 @@ Last updated: 2026-10-01 (claimed)
 
 ## Tests
 - Written: 8 / 8 (T-05 integration and T-01 e2e need local Supabase)
-- Passing: T-08 only (regression guard). Failing: the rest, as expected.
+- Passing: T-08 (Family regression guard, 2 tests) and T-05 (integration guard, DB side already exists). Failing as expected: 13 component tests (Calendar, Home and Care log are 'Coming soon'). T-01 e2e written, not run.
 
 ## Files changed
 - Docs only so far, plus the three test files. Likely implementation files: `src/features/family-{home,calendar,task-log,task-detail,event-form}/*`, `src/features/carer-patients/*`, `src/app/(carer)/carer/patients/[clientId]/{home,calendar,tasks}/**`.
