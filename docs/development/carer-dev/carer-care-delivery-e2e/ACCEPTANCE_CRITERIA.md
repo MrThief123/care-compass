@@ -4,7 +4,7 @@ Each criterion is observable and maps to at least one test in TEST_PLAN.md. Crit
 
 | ID | Story | Type | Criterion (Given / When / Then) | Status |
 |---|---|---|---|---|
-| AC-01 | US-01 | happy | Given Aisha on shift completes Afternoon check-in, when Helen loads Home, then the block shows 'Done · Aisha R.'. | NOT MET |
-| AC-02 | US-01 | permission | Given Aisha's shift has ended, when she tries to tick a task, then it cannot be completed. | NOT MET |
+| AC-01 | US-01 | happy | Given Aisha on shift completes Afternoon check-in, when Helen loads Home, then the block shows 'Done · Aisha R.'. | MET (T-01; asserts 'Done · Aisha Rahman' per PD-038, see DECISIONS.md FD-01) |
+| AC-02 | US-01 | permission | Given Aisha's shift has ended, when she tries to tick a task, then it cannot be completed. | MET (T-02, T-02b) |
 
 Status values: NOT MET · MET (test passing) · BLOCKED (cite OQ/PD).

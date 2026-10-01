@@ -11,10 +11,12 @@ Tests are written **before** production code (TESTING.md §2). Run them, confirm
 
 | Test ID | Covers | Level | Test description | Written first? | Result |
 |---|---|---|---|---|---|
-| T-01 | AC-01 | e2e | Given Aisha and Margaret selected, date 1 Dec 2026 and slot 07:00–11:00, when Assign shift is clicked, then a shift 07:00–11:00 on 1 Dec exists and a dot appears on 1 Dec. | ☐ | NOT RUN |
-| T-02 | AC-02 | component | Given an overlapping existing shift 11:30–13:00 and selected slot 11:00–15:00, when the slot is chosen, then the warning names 11:30–13:00 and Assign shift remains available. | ☐ | NOT RUN |
-| T-03 | AC-03 | component | Given Custom with end 10:00 before start 12:00, when Assign is pressed, then a time error is shown. | ☐ | NOT RUN |
-| T-04 | AC-04 | component | Given the panel, when rendered, then no Repeat control exists. | ☐ | NOT RUN |
+| T-01 | AC-01 | e2e | Given Aisha and Margaret selected, date 1 Dec 2026 and slot 07:00–11:00, when Assign shift is clicked, then a shift 07:00–11:00 on 1 Dec exists and a dot appears on 1 Dec. | ☑ | PASS |
+| T-02 | AC-02 | component | Given an overlapping existing shift 11:30–13:00 and selected slot 11:00–15:00, when the slot is chosen, then the warning names 11:30–13:00 and Assign shift remains available. | ☑ | PASS |
+| T-03 | AC-03 | component | Given Custom with end 10:00 before start 12:00, when Assign is pressed, then a time error is shown. | ☑ | PASS |
+| T-04 | AC-04 | component | Given the panel, when rendered, then no Repeat control exists. | ☑ | PASS |
+
+Where they live (2026-10-01): T-01 `tests/e2e/admin-assign-shift.spec.ts` (local Supabase, `E2E_DATA_SOURCE=supabase`); T-01..T-04 component `src/features/admin-manage/assign-shift.test.tsx`; action unit tests `src/server/admin/manage-actions.test.ts`; integration incl. RLS negative cases `tests/integration/admin-assign-shift.test.ts`.
 
 ## Regression scope
 - Run the full unit/component suite and `supabase test db` before marking READY FOR PR.
