@@ -9,7 +9,7 @@ Supabase stack (`E2E_DATA_SOURCE=supabase E2E_PORT=3101`), 3 consecutive runs, a
 flakes. Also `npm run lint`, `npx tsc --noEmit`, `npx prettier --check` — clean.
 Test results: 3/3 ACs pass in one test. See PROGRESS.md "Problems encountered" for the debugging
 path (port conflict, admin MFA, a stale local Supabase container).
-Current blocker: none — READY FOR PR.
+Current blocker: none — merged to `main` in #187.
 Important discoveries:
 - `playwright.config.ts`'s `reuseExistingServer` will silently attach to *any* process already on
   port 3000, including someone else's unrelated `npm run dev` — always use `E2E_PORT` for a
@@ -25,7 +25,7 @@ Important discoveries:
   sharing the same prefix, making a prefix-regex selector ambiguous. Used the exact generated name
   (returned from `seed()`) instead.
 Important decisions: DECISIONS.md FD-01, FD-02 (both informational, no human input needed).
-Exact next action: open the PR to `main`.
+Exact next action: none — merged.
 Files likely to be touched next: none expected.
 Warning for next session: this spec needs `E2E_PORT` set to something other than the default when
 run locally if anything might already be on port 3000 — don't "fix" a hang by increasing timeouts

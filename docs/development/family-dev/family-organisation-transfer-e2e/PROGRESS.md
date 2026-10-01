@@ -1,6 +1,6 @@
 # Progress — INT-02 End-to-end: organisation transfer journey
 
-Status: READY FOR PR
+Status: MERGED TO DEV (merged to `main` in #187, 2026-10-01)
 Owner: MrThief123
 Lane: I — Integration
 Sprint: SPRINT · planned D12
@@ -72,7 +72,7 @@ Last updated: 2026-10-01
 - PROPOSED items in PRD.md are unconfirmed until validated in F0-01 or answered in DECISIONS.md.
 
 ## Next action
-- None — human review of FD-01/FD-02 (informational, nothing to decide), then open the PR.
+- None — merged to `main` in #187.
 
 ## Ready for PR
 - Yes
