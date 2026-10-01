@@ -1,19 +1,19 @@
 # Progress — INT-03 End-to-end: carer care delivery journey
 
-Status: NOT STARTED
-Owner: unclaimed
+Status: IN PROGRESS
+Owner: MrThief123
 Lane: I — Integration
 Sprint: SPRINT · planned D12
-Branch: `feature/carer-care-delivery-e2e` (not yet created)
-PR target: `carer-dev`
-Last updated: 2026-09-17 (planning pack generated)
+Branch: `feature/carer-care-delivery-e2e`
+PR target: `main` (CHG-036; `carer-dev` retired)
+Last updated: 2026-10-01 (claimed)
 
 ## Blockers
-- OQ-33 — Carer calendar and task semantics
+- None (OQ-33 ANSWERED — PD-043, amended by CHG-025)
 
 ## Dependencies status
-- CAR-06 — NOT STARTED
-- FAM-01 — NOT STARTED
+- CAR-06 — MERGED to main
+- FAM-01 — MERGED to main
 
 ## Completed
 - Feature documentation drafted (Claude Chat planning pack)
