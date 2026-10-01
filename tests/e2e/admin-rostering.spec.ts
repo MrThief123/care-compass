@@ -257,7 +257,7 @@ test.describe("[INT-04] Admin rostering journey across Admin, Carer and Family",
     }
   });
 
-  test("[INT-04][PRD] REQ-26 given that shift, when Helen opens Margaret's 09:30 task on Tue 1 Dec, then it is assigned to Aisha Rahman", async () => {
+  test("[INT-04][PRD] T-03 REQ-26 given that shift, when Helen opens Margaret's 09:30 task on Tue 1 Dec, then it is assigned to Aisha Rahman", async () => {
     await family.goto(`/family/${s.clientId}/calendar?view=week&date=2026-12-01`);
     await family.waitForLoadState("networkidle"); // hydrated, so a block click navigates
     const block = family
@@ -269,7 +269,7 @@ test.describe("[INT-04] Admin rostering journey across Admin, Carer and Family",
     await expect(family.getByText(/Assigned to Aisha Rahman/)).toBeVisible();
   });
 
-  test("[INT-04][PRD] overlap: given Aisha's 09:00–11:00 shift, when Priya chooses 10:00–12:00 the same day, the warning names 09:00 - 11:00 and the assignment still goes through", async () => {
+  test("[INT-04][PRD] T-04 overlap: given Aisha's 09:00–11:00 shift, when Priya chooses 10:00–12:00 the same day, the warning names 09:00 - 11:00 and the assignment still goes through", async () => {
     await openManageOnFirstDec(admin, s);
     await chooseTime(admin, "10:00", "12:00");
     await expect(admin.getByText(/already has a shift/)).toContainText(
