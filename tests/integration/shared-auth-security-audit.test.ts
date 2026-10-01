@@ -135,15 +135,13 @@ async function seed() {
     .insert({ client_id: clientA, title: "A event", starts_at: eventStart, created_by: familyA.id })
     .select("id")
     .single();
-  await admin
-    .from("care_event_overrides")
-    .insert({
-      event_id: event!.id,
-      client_id: clientA,
-      original_start: eventStart,
-      kind: "modified",
-      new_duration_minutes: 20,
-    });
+  await admin.from("care_event_overrides").insert({
+    event_id: event!.id,
+    client_id: clientA,
+    original_start: eventStart,
+    kind: "modified",
+    new_duration_minutes: 20,
+  });
   await admin.from("care_event_completions").insert({
     event_id: event!.id,
     client_id: clientA,
@@ -204,7 +202,15 @@ async function seed() {
 type Seed = Awaited<ReturnType<typeof seed>>;
 
 /** Every client-scoped table, how to find client A's rows in it, and a harmless change to try. */
-function matrix(s: Seed, attackerId: string) {
+interface MatrixRow {
+  table: string;
+  col: string;
+  val: string;
+  update: Record<string, unknown>;
+  insert: Record<string, unknown>;
+}
+
+function matrix(s: Seed, attackerId: string): MatrixRow[] {
   const soon = new Date(Date.now() + 86_400_000).toISOString();
   const later = new Date(Date.now() + 90_000_000).toISOString();
   const second = new Date(Math.floor(Date.now() / 1000) * 1000).toISOString();
@@ -368,7 +374,7 @@ function matrix(s: Seed, attackerId: string) {
         client_id: s.clientA,
       },
     },
-  ] as const;
+  ];
 }
 
 /** Client A's rows on every table, read with the service role: the before/after picture. */
