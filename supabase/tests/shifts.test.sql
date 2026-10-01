@@ -76,6 +76,8 @@ select is(
 set local role postgres;
 insert into shifts (id, organisation_id, client_id, carer_id, starts_at, ends_at, created_by) values
   ('c4444444-4444-4444-4444-444444444444', '11111111-1111-1111-1111-111111111111', 'b1111111-1111-1111-1111-111111111111', 'a3333333-3333-3333-3333-333333333333', now() + interval '11 hours 30 minutes', now() + interval '13 hours', 'a2222222-2222-2222-2222-222222222222');
+-- F0-21: overlapping_shifts answers only the carer's own admin (it is the admin's warning, D30).
+select pg_temp.login('a2222222-2222-2222-2222-222222222222');
 select results_eq(
   $$ select id from overlapping_shifts('a3333333-3333-3333-3333-333333333333'::uuid, now() + interval '12 hours', now() + interval '15 hours') order by id $$,
   $$ values ('c4444444-4444-4444-4444-444444444444'::uuid) $$,
