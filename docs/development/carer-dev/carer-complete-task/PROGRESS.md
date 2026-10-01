@@ -69,3 +69,12 @@ Last updated: 2026-10-01 (implementation green)
 - Robert Calendar: tasks visible, no checkboxes, view-only notice.
 - Helen: /family/<margaretId>/calendar shows 'Done · Aisha Rahman'; no /carer/ links; Family links unchanged.
 - Width sweep 1920/1440/1280/1024/768 on Calendar and Home: no horizontal scroll, nothing overlapping (the only rect overlaps are hour labels clipped inside the calendar's scroll area).
+
+## Pre-PR checks (2026-10-01, after merging origin/main with FAM-01; all against LOCAL Supabase)
+- `npx tsc --noEmit`: clean. `npm run lint`: 0 errors, 2 import-order warnings.
+- `npx vitest run` (clean F0-16 seed): 2428 of 2429 pass; the one failure (a lint-boundary test) timed out under load and passes alone (3/3).
+- `supabase test db`: 512 tests pass.
+- `npm run build`, then e2e with `E2E_DATA_SOURCE=supabase` for `carer-complete-task` and `carer-client-info`: 6 passed (T-01 now passes; FAM-01 gives Family Home real data).
+- e2e in mock mode with `--grep-invert "F0-07|CAR-0[46]"`: 53 passed, 3 skipped (admin MFA).
+- Note: e2e serves `npm run start`, so rebuild after merging or the old build is tested.
+- Carer Home on real data now loads (FD-07 resolved by FAM-01).
