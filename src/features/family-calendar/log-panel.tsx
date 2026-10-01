@@ -16,6 +16,7 @@ export interface LogPanelProps {
   occurrences: Occurrence[];
   /** The calendar's current view and day; a row's task detail returns to it (CHG-014). */
   calendar: CalendarParams;
+  basePath?: string;
 }
 
 /**
@@ -24,7 +25,7 @@ export interface LogPanelProps {
  * a title that wraps, a pill that is never squeezed), not the kit's
  * `ActivityRow` button (DECISIONS.md FD-05).
  */
-export function LogPanel({ clientId, occurrences, calendar }: LogPanelProps) {
+export function LogPanel({ clientId, occurrences, calendar, basePath }: LogPanelProps) {
   return (
     <section aria-labelledby="family-calendar-log" className="min-w-0">
       <CardShell className="flex h-full flex-col gap-2 px-5 py-4">
@@ -33,7 +34,7 @@ export function LogPanel({ clientId, occurrences, calendar }: LogPanelProps) {
             Log
           </h2>
           <Link
-            href={taskLogHref(clientId)}
+            href={taskLogHref(clientId, undefined, basePath)}
             className="inline-flex min-h-11 items-center px-3 text-body-emphasis text-text-brand outline-none hover:underline focus-visible:ring-[3px] focus-visible:ring-ring/50"
           >
             View all
@@ -50,10 +51,12 @@ export function LogPanel({ clientId, occurrences, calendar }: LogPanelProps) {
             {occurrences.map((occurrence) => (
               <li key={occurrence.key}>
                 <ActivityLinkRow
-                  href={taskDetailHrefFrom(clientId, occurrence.key, {
-                    from: "calendar",
-                    view: calendar,
-                  })}
+                  href={taskDetailHrefFrom(
+                    clientId,
+                    occurrence.key,
+                    { from: "calendar", view: calendar },
+                    basePath,
+                  )}
                   title={occurrence.title}
                   date={shortDate(occurrence.start)}
                   status={occurrence.status}

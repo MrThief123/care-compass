@@ -54,6 +54,8 @@ export interface TaskLogViewProps {
   pageSize: number;
   /** The validated URL state. */
   params: TaskLogParams;
+  /** Where the links go; defaults to `/family/<id>` (a carer sets it, CHG-043). */
+  basePath?: string;
 }
 
 type StatusChoice = "all" | OccurrenceStatus;
@@ -76,7 +78,14 @@ function toStatusChoice(value: string): StatusChoice | undefined {
  * and the server answers them (CHG-005), so this component only shows what it
  * is given and moves the URL.
  */
-export function TaskLogView({ clientId, items, total, pageSize, params }: TaskLogViewProps) {
+export function TaskLogView({
+  clientId,
+  items,
+  total,
+  pageSize,
+  params,
+  basePath,
+}: TaskLogViewProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [status, setOptimisticStatus] = useOptimistic<StatusChoice>(params.status ?? "all");
@@ -115,7 +124,7 @@ export function TaskLogView({ clientId, items, total, pageSize, params }: TaskLo
     setSentQ(next.q);
     startTransition(() => {
       setOptimisticStatus(next.status ?? "all");
-      router.replace(taskLogHref(clientId, { ...next, page: 1 }), { scroll: false });
+      router.replace(taskLogHref(clientId, { ...next, page: 1 }, basePath), { scroll: false });
     });
   }
 
@@ -192,12 +201,21 @@ export function TaskLogView({ clientId, items, total, pageSize, params }: TaskLo
             clientId={clientId}
             items={items}
             params={params}
-            onOpen={(occurrence) => router.push(taskDetailHref(clientId, occurrence.key, params))}
+            basePath={basePath}
+            onOpen={(occurrence) =>
+              router.push(taskDetailHref(clientId, occurrence.key, params, basePath))
+            }
           />
         )}
       </CardShell>
 
-      <TaskLogPager clientId={clientId} params={params} total={total} pageSize={pageSize} />
+      <TaskLogPager
+        clientId={clientId}
+        params={params}
+        total={total}
+        pageSize={pageSize}
+        basePath={basePath}
+      />
 
       {/* Announces what changed (WCAG 4.1.3); the visible message lives in the search field. */}
       <p role="status" className="sr-only">

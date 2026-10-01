@@ -30,6 +30,7 @@ export type LoadedTaskLog =
 export async function loadTaskLog(
   clientId: string,
   rawParams: RawSearchParams | undefined,
+  basePath?: string,
 ): Promise<LoadedTaskLog> {
   const params = parseTaskLogParams(rawParams);
 
@@ -41,7 +42,10 @@ export async function loadTaskLog(
   const lastPage = lastPageFor(total, pageSize);
 
   if (params.page > lastPage) {
-    return { kind: "redirect", href: taskLogHref(clientId, { ...params, page: lastPage }) };
+    return {
+      kind: "redirect",
+      href: taskLogHref(clientId, { ...params, page: lastPage }, basePath),
+    };
   }
 
   return { kind: "ok", items, total, pageSize, lastPage, params };

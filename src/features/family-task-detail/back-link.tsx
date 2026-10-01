@@ -9,8 +9,16 @@ import { backLinkFor, type TaskDetailOrigin } from "./task-detail-origin";
  * opened from, already validated (`parseTaskDetailOrigin`), so Back returns to that exact
  * Calendar, Home or Task log view (CHG-014). Without one it is 'Back to Task log'.
  */
-export function BackLink({ clientId, origin }: { clientId: string; origin?: TaskDetailOrigin }) {
-  const { label, href } = backLinkFor(clientId, origin);
+export function BackLink({
+  clientId,
+  origin,
+  basePath,
+}: {
+  clientId: string;
+  origin?: TaskDetailOrigin;
+  basePath?: string;
+}) {
+  const { label, href } = backLinkFor(clientId, origin, basePath);
   return (
     <Link
       href={href}

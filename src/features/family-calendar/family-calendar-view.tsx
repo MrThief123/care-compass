@@ -41,6 +41,12 @@ export interface FamilyCalendarViewProps {
   log: Occurrence[];
   /** The signed-in person, shown on a task they tick (CHG-016). */
   actorName: string;
+  /** Where the links go; defaults to `/family/<id>`. A carer's Calendar sets it (CHG-043). */
+  basePath?: string;
+  /** False: the Tasks panel lists each task's status with no tick boxes (carer off shift). */
+  canTick?: boolean;
+  /** False: no Enter event link (carers, CHG-043). */
+  canAddEvent?: boolean;
 }
 
 /**
@@ -59,10 +65,13 @@ export function FamilyCalendarView({
   occurrences: loaded,
   log,
   actorName,
+  basePath,
+  canTick = true,
+  canAddEvent = true,
 }: FamilyCalendarViewProps) {
   const router = useRouter();
   const range = visibleRange(params);
-  const paramsHref = calendarHref(clientId, params);
+  const paramsHref = calendarHref(clientId, params, basePath);
 
   // The selected day follows the URL the server rendered, and a click moves it
   // locally. Reset when a navigation brings new params (React "adjust state on
@@ -98,17 +107,23 @@ export function FamilyCalendarView({
     }
   }
 
-  const navigate = (next: CalendarParams) => router.push(calendarHref(clientId, next));
+  const navigate = (next: CalendarParams) => router.push(calendarHref(clientId, next, basePath));
 
   function select(date: LocalDate) {
     setSelection({ source: paramsHref, date });
-    window.history.replaceState(null, "", calendarHref(clientId, selectDate(params, date)));
+    window.history.replaceState(
+      null,
+      "",
+      calendarHref(clientId, selectDate(params, date), basePath),
+    );
   }
 
   const current: CalendarParams = { ...params, date: selected };
   // A task opened here remembers this view and day, so Task detail's Back returns to them (CHG-014).
   const openOccurrence = (occurrence: Occurrence) =>
-    router.push(taskDetailHrefFrom(clientId, occurrence.key, { from: "calendar", view: current }));
+    router.push(
+      taskDetailHrefFrom(clientId, occurrence.key, { from: "calendar", view: current }, basePath),
+    );
   const dayOccurrences = occurrences.filter(
     (occurrence) => melbourneDay(occurrence.start) === selected,
   );
@@ -134,7 +149,11 @@ export function FamilyCalendarView({
         onViewChange={changeView}
         onStep={step}
         onToday={goToday}
-        enterEventHref={addEventHrefFrom(clientId, { from: "calendar", view: current })}
+        enterEventHref={
+          canAddEvent
+            ? addEventHrefFrom(clientId, { from: "calendar", view: current }, basePath)
+            : undefined
+        }
       />
 
       <CardShell className="flex min-w-0 flex-col overflow-hidden p-0">
@@ -175,8 +194,9 @@ export function FamilyCalendarView({
           isTicked={(occurrence) => ticks[occurrence.key] ?? occurrence.status === "done"}
           onToggle={toggleTick}
           errorMessage={tickError}
+          readOnly={!canTick}
         />
-        <LogPanel clientId={clientId} occurrences={log} calendar={current} />
+        <LogPanel clientId={clientId} occurrences={log} calendar={current} basePath={basePath} />
       </div>
     </div>
   );

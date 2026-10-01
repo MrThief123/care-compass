@@ -24,6 +24,10 @@ export interface TaskDetailViewProps {
    * view), so Back returns to it (CHG-014). Absent: 'Back to Task log'.
    */
   origin?: TaskDetailOrigin;
+  /** Where the links go; defaults to `/family/<id>` (a carer sets it, CHG-043). */
+  basePath?: string;
+  /** Carers: no Edit event link (CHG-043, CAR-07 is post-sprint). */
+  canEdit?: boolean;
 }
 
 const CARD = "flex flex-col gap-3";
@@ -42,7 +46,14 @@ const EDIT_EVENT_BUTTON =
  * assignee, then the Status, Description and Documents cards. Read-only: editing happens on the
  * Edit event page (CHG-014). No hooks, so it renders on the server.
  */
-export function TaskDetailView({ clientId, occurrence, documents, origin }: TaskDetailViewProps) {
+export function TaskDetailView({
+  clientId,
+  occurrence,
+  documents,
+  origin,
+  basePath,
+  canEdit = true,
+}: TaskDetailViewProps) {
   const plain = isPlainEvent(occurrence);
   const nurse = occurrenceNurse(plain ? { assignee: occurrence.assignee } : occurrence);
   const completedAt = !plain && occurrence.status === "done" ? occurrence.completedAt : undefined;
@@ -51,7 +62,7 @@ export function TaskDetailView({ clientId, occurrence, documents, origin }: Task
   return (
     <div className="flex flex-col gap-4 px-6 pb-6 pt-2">
       <div className="flex flex-col">
-        <BackLink clientId={clientId} origin={origin} />
+        <BackLink clientId={clientId} origin={origin} basePath={basePath} />
         {/* The button sits right of the title and wraps below it when the row is too narrow;
             the title and date line take the rest of the row and wrap anywhere, so they never overlap. */}
         <div
@@ -66,12 +77,14 @@ export function TaskDetailView({ clientId, occurrence, documents, origin }: Task
               {`${formatLongDate(occurrence.start)} · Assigned to ${nurse}`}
             </p>
           </div>
-          <Link
-            href={editEventHrefFrom(clientId, occurrence, origin)}
-            className={EDIT_EVENT_BUTTON}
-          >
-            Edit event
-          </Link>
+          {canEdit && (
+            <Link
+              href={editEventHrefFrom(clientId, occurrence, origin, basePath)}
+              className={EDIT_EVENT_BUTTON}
+            >
+              Edit event
+            </Link>
+          )}
         </div>
       </div>
 

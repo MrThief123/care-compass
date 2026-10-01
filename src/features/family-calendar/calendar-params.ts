@@ -1,3 +1,4 @@
+import { resolveBasePath } from "@/features/family-task-log/base-path";
 import { monthGrid } from "@/lib/dates/month-grid";
 import { weekRange, type LocalDate } from "@/lib/dates/week-range";
 
@@ -146,6 +147,6 @@ export function calendarQuery({ view, date, month }: CalendarParams): string {
   return search.toString();
 }
 
-export function calendarHref(clientId: string, params: CalendarParams): string {
-  return `/family/${encodeURIComponent(clientId)}/calendar?${calendarQuery(params)}`;
+export function calendarHref(clientId: string, params: CalendarParams, basePath?: string): string {
+  return `${resolveBasePath(clientId, basePath)}/calendar?${calendarQuery(params)}`;
 }

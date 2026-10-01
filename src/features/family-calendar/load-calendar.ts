@@ -13,7 +13,7 @@ export interface FamilyCalendarData {
   params: CalendarParams;
   occurrences: Occurrence[];
   log: Occurrence[];
-  /** The signed-in person, "First Last", shown on a task they tick (CHG-016). */
+  /** The signed-in person (their full name, CHG-032), "First Last", shown on a task they tick (CHG-016). */
   actorName: string;
 }
 
@@ -33,13 +33,14 @@ export function selectLog(items: Occurrence[]): Occurrence[] {
 export async function loadFamilyCalendar(
   clientId: string,
   search: Record<string, string | string[] | undefined>,
+  role: "family" | "carer" = "family",
 ): Promise<FamilyCalendarData> {
   const today = await getToday();
   const params = parseCalendarParams(search, today);
   const [occurrences, taskLog, user] = await Promise.all([
     getOccurrences(clientId, visibleRange(params)),
     getTaskLog(clientId),
-    getCurrentUser("family"),
+    getCurrentUser(role),
   ]);
   return {
     today,

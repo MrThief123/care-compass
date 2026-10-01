@@ -12,10 +12,11 @@ export interface RecentActivityCardProps {
   clientId: string;
   /** Latest first. */
   occurrences: Occurrence[];
+  basePath?: string;
 }
 
 /** Recent activity: the latest done and overdue occurrences, each opening its task detail. */
-export function RecentActivityCard({ clientId, occurrences }: RecentActivityCardProps) {
+export function RecentActivityCard({ clientId, occurrences, basePath }: RecentActivityCardProps) {
   return (
     <section aria-labelledby="family-home-recent-activity">
       <CardShell className="flex flex-col gap-2">
@@ -24,7 +25,7 @@ export function RecentActivityCard({ clientId, occurrences }: RecentActivityCard
             Recent activity
           </h2>
           <Link
-            href={homeRoutes.tasks(clientId)}
+            href={homeRoutes.tasks(clientId, basePath)}
             className="inline-flex min-h-11 items-center px-5 text-body-emphasis text-text-brand hover:underline"
           >
             View all
@@ -41,7 +42,7 @@ export function RecentActivityCard({ clientId, occurrences }: RecentActivityCard
             {occurrences.map((occurrence) => (
               <li key={occurrence.key}>
                 <ActivityLinkRow
-                  href={homeRoutes.taskDetail(clientId, occurrence.key)}
+                  href={homeRoutes.taskDetail(clientId, occurrence.key, basePath)}
                   title={occurrence.title}
                   date={shortDate(occurrence.start)}
                   status={occurrence.status}
