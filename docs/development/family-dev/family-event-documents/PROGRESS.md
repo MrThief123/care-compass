@@ -1,6 +1,6 @@
 # Progress — FAM-08 Family — Event documents (file tiles)
 
-Status: IMPLEMENTED — HUMAN REVIEW needed (see Problems encountered, DECISIONS.md FD-01)
+Status: MERGED TO DEV (merged to `main` in #184, 2026-10-01; FD-01's Lane B follow-up — Add event's uploads can't link to the event on save — is still open and not tracked as a new DEVELOPMENT_PLAN row)
 Owner: MrThief123
 Lane: F — Family
 Sprint: SPRINT · planned D10
