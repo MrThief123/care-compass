@@ -4,12 +4,10 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { EventForm, type EventFormValues } from "@/components/shared/forms";
-import { DocumentTile } from "@/features/family-task-detail/document-tile";
 import type { LocalDate } from "@/lib/dates/week-range";
 import { createEvent, updateEvent } from "@/server/events/actions";
 import type { BudgetBucketSummary, EventDocument } from "@/types/domain";
 
-import { AddFileTile } from "./add-file-tile";
 import { EditScopeFields } from "./edit-scope-fields";
 import {
   EMPTY_EVENT_COST,
@@ -25,6 +23,7 @@ import {
   type EventDetailsValues,
 } from "./event-details";
 import { EventDetailsFields } from "./event-details-fields";
+import { EventDocuments } from "./event-documents";
 import { TaskSwitch } from "./task-switch";
 
 import type { EditScope } from "./edit-scope";
@@ -87,7 +86,6 @@ export function EventFormScreen({
   const [detailsErrors, setDetailsErrors] = useState<Record<string, string>>({});
   const [scope, setScope] = useState<EditScope>("occurrence");
   const [saveError, setSaveError] = useState<string>();
-  const [uploadNotice, setUploadNotice] = useState(false);
   const hasSavedCost = hasCostText(initialCost);
 
   function changeCost(next: EventCostValues) {
@@ -185,23 +183,7 @@ export function EventFormScreen({
             />
           </>
         }
-        documents={
-          <div role="region" aria-label="Documents" className="flex flex-col gap-2">
-            <ul className="grid grid-cols-[repeat(auto-fill,6.5rem)] gap-3">
-              {documents.map((document) => (
-                <li key={document.id} className="min-w-0">
-                  <DocumentTile document={document} showDetails={false} />
-                </li>
-              ))}
-              <li className="min-w-0">
-                <AddFileTile onAdd={() => setUploadNotice(true)} />
-              </li>
-            </ul>
-            <p role="status" className="text-body-small text-text-secondary">
-              {uploadNotice ? "Adding files is not available yet." : ""}
-            </p>
-          </div>
-        }
+        documents={<EventDocuments clientId={clientId} eventId={eventId} documents={documents} />}
       />
       <p
         role="status"
