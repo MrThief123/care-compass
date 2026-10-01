@@ -9,6 +9,7 @@
  * `getCurrentUser(role)` gets the guard for free.
  */
 import { redirect } from "next/navigation";
+import { connection } from "next/server";
 
 import { createClient } from "@/lib/supabase/server";
 import { getDataSourceMode } from "@/server/data-source";
@@ -19,6 +20,11 @@ import { evaluateLanding, evaluateRoleGuard } from "./guard";
 export type { CurrentUser } from "@/mocks/current-user";
 
 export async function getCurrentUser(role: Role) {
+  // F0-21: never prerender a guarded page. Without this, a build run with no DATA_SOURCE (the
+  // build phase falls back to mock) froze pages whose mock branch used no request API into static
+  // HTML, served to anyone with no guard at all. Waiting for a request makes every page that
+  // calls the guard render per request, where the runtime DATA_SOURCE decides.
+  await atRequestTime();
   const mode = getDataSourceMode();
   if (mode === "mock") {
     const mock = await import("@/mocks/current-user");
@@ -33,6 +39,22 @@ export async function getCurrentUser(role: Role) {
   }
 
   return outcome.user;
+}
+
+/**
+ * `connection()`, except when called outside Next altogether (a unit test rendering a layout
+ * directly), where Next reports a missing request scope and there is nothing to prerender. Every
+ * other error — including the ones Next uses to interrupt a prerender — is rethrown.
+ */
+async function atRequestTime(): Promise<void> {
+  try {
+    await connection();
+  } catch (error) {
+    if (error instanceof Error && error.message.includes("was called outside a request scope")) {
+      return;
+    }
+    throw error;
+  }
 }
 
 /** Used by `/mfa/enroll` and `/mfa/verify` — the signed-in user's TOTP factor, if any. */
