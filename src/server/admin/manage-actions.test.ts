@@ -134,7 +134,10 @@ describe("[ADM-07] assignShift permissions", () => {
   it("[ADM-07] a row-level security refusal is reported as not allowed, naming no one", async () => {
     mocks.single.mockResolvedValue({
       data: null,
-      error: { code: "42501", message: 'new row violates row-level security policy for table "shifts"' },
+      error: {
+        code: "42501",
+        message: 'new row violates row-level security policy for table "shifts"',
+      },
     });
     const { assignShift } = await import("@/server/admin/manage-actions");
 

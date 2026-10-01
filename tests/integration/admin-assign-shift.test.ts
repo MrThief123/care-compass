@@ -251,7 +251,9 @@ describe.skipIf(!hasLocalSupabase)("[ADM-07] Assign shift against local Supabase
         p_ends_at: "2026-12-01T04:00:00Z",
       });
       expect(error).toBeNull();
-      expect(overlaps?.map((row) => row.id)).toEqual([s.existingShiftId]);
+      expect((overlaps as { id: string }[] | null)?.map((row) => row.id)).toEqual([
+        s.existingShiftId,
+      ]);
 
       const result = await assignAs(session, {
         carerId: s.aisha.userId,
