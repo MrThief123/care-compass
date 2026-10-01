@@ -65,3 +65,29 @@ describe("[F0-19][AC-03] dev-preview production guard", () => {
     expect(response.headers.get("x-session")).toBe("1");
   });
 });
+
+describe("[F0-21][FD-10] dev connectivity route is not served in production", () => {
+  it.each(["/api/test", "/api/test/", "/api/test/anything"])(
+    "[F0-21][FD-10] returns 404 for %s in production",
+    async (path) => {
+      vi.stubEnv("NODE_ENV", "production");
+      const response = await proxy(request(path));
+      expect(response.headers.get("x-middleware-rewrite")).toMatch(/\/not-found$/);
+    },
+  );
+
+  it("[F0-21][FD-10] leaves /api/test alone in development", async () => {
+    vi.stubEnv("NODE_ENV", "development");
+    const response = await proxy(request("/api/test"));
+    expect(response.headers.get("x-session")).toBe("1");
+  });
+
+  it.each(["/api/testing", "/api/jobs/budget-thresholds"])(
+    "[F0-21][FD-10] does not block other API routes like %s in production",
+    async (path) => {
+      vi.stubEnv("NODE_ENV", "production");
+      const response = await proxy(request(path));
+      expect(response.headers.get("x-session")).toBe("1");
+    },
+  );
+});
