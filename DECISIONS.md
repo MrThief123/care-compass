@@ -999,3 +999,12 @@ Template for future entries:
 - Impact: new feature F0-22 (Lane S, `docs/development/shared/shared-client-header-wiring/`), depends on F0-06, F0-07, F0-15; edits `src/server/clients/queries.ts`, `src/app/(family)/family/[clientId]/layout.tsx` and the Settings page (family lane files, on the human's instruction), and `ClientHeaderSummary.age` becomes optional. No migration. FAM-01 gains F0-22 as a dependency. The only other unwired stubs are `getTodayOccurrences` (FAM-01), `getAdminManage` (ADM-06) and the ownerless `getCarerTodayShifts` (F0-22 FD-04).
 - Human confirmation: Dhruv Verma, 2026-10-01 (in-session).
 - Docs updated: DECISIONS.md (this entry), DEVELOPMENT_PLAN.md (F0-22 row, card, totals), F0-22 feature docs.
+
+### CHG-043 — CAR-06 also wires the carer's Home, Calendar and Care log tabs
+- Date / requested by: 2026-10-01 / Dhruv Verma (human, project lead)
+- Type: scope change (extends CAR-06; completes CHG-028's deferred wiring)
+- Description: CAR-04 wired only the Info tab; Home, Calendar and Care log are still 'Coming soon' (CAR-04 FD-01). CAR-06 needs the Calendar tab to tick on, so it now wires all three, reusing the Family screens through the carer's account (CHG-026). The Family modules hardcode `/family/<id>/…` links and have no read-only mode, so CAR-06 adds an optional `basePath` (default unchanged) and flags that hide Add event, Edit event and the budget link, to `src/features/family-home`, `family-calendar`, `family-task-log`, `family-task-detail` and `family-event-form` (route helpers and views). Ticks show only while a shift is in progress. Task detail opens read-only under `/carer/patients/<id>/tasks/<key>` (assumption, FD-02 in the feature DECISIONS). `loadFamilyCalendar` and its siblings take the role instead of assuming `family`.
+- Source / justification: human, in-session 2026-10-01: chose "CAR-06 wires Calendar, Home and Care log" and "Additive base-path edit" over a wrapper or copy.
+- Impact: edits Lane F files on the human's instruction (CLAUDE.md §4.2 exception, additive only; Family defaults and tests unchanged, guarded by AC-08). FAM-01 (Family Home today) and FAM-09 touch the same family-home files: whoever merges second merges `main` first. No migration.
+- Human confirmation: Dhruv Verma, 2026-10-01 (in-session).
+- Docs updated: DECISIONS.md (this entry), CAR-06 PRD, ACCEPTANCE_CRITERIA, USER_STORIES, TEST_PLAN, DECISIONS, PROGRESS, SESSION_STATE; DEVELOPMENT_PLAN.md (CAR-06 card).

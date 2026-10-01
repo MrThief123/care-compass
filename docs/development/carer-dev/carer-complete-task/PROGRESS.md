@@ -9,38 +9,29 @@ PR target: `main`
 Last updated: 2026-10-01 (claimed)
 
 ## Blockers
-- OQ-09 — Carer access model
-- OQ-10 — Status behaviour and undo
-- OQ-33 — Carer calendar and task semantics
+- None. OQ-09, OQ-10, OQ-33 ANSWERED. Awaiting human confirmation of FD-02 (read-only Task detail for carers).
 
 ## Dependencies status
-- F0-18 — NOT STARTED (added by CHG-027)
-- F0-10 — NOT STARTED
-- F0-11 — NOT STARTED
-- CAR-UI-02 — NOT STARTED
-- CAR-04 — NOT STARTED
+- F0-10, F0-11, F0-18, CAR-UI-02, CAR-04 — all MERGED to main
 
 ## Completed
-- Feature documentation drafted (Claude Chat planning pack)
+- Claimed; docs rewritten for CHG-043; tests written first (red)
 
 ## In progress
 - None
 
 ## Remaining
-- Checkboxes on Home Tasks card and Calendar task panel call `set_occurrence_done`.
-- Checkboxes rendered interactive only during an active shift for that client; otherwise read-only state display.
-- Optimistic update with revert on failure.
+- Implementation: base path and read-only flags in the family modules, carer Calendar/Home/Care log/Task detail routes, role-aware loaders, read-only Tasks panel, full-name actor.
 
 ## Acceptance criteria status
-- 0 / 3 MET
+- 0 / 8 MET
 
 ## Tests
-- Written: 0 / 3
-- Passing: 0
-- Failing: 0
+- Written: 8 / 8 (T-05 integration and T-01 e2e need local Supabase)
+- Passing: T-08 only (regression guard). Failing: the rest, as expected.
 
 ## Files changed
-- None yet. Likely files: `src/features/carer-home/tasks-card.tsx`, `src/features/carer-calendar/shift-tasks-panel.tsx`, `src/server/events/actions.ts`
+- Docs only so far, plus the three test files. Likely implementation files: `src/features/family-{home,calendar,task-log,task-detail,event-form}/*`, `src/features/carer-patients/*`, `src/app/(carer)/carer/patients/[clientId]/{home,calendar,tasks}/**`.
 
 ## Decisions
 - See DECISIONS.md
@@ -52,7 +43,7 @@ Last updated: 2026-10-01 (claimed)
 - PROPOSED items in PRD.md are unconfirmed until validated in F0-01 or answered in DECISIONS.md.
 
 ## Next action
-- Wait for answers to OQ-09, OQ-10, OQ-33; then complete dependencies, run START FEATURE CAR-06, and write the tests in TEST_PLAN.md first.
+- Implement against the red tests, in a fresh session (see SESSION_STATE.md).
 
 ## Ready for PR
 - No
