@@ -19,7 +19,11 @@ Last updated: 2026-10-01 (claimed)
 - Feature documentation drafted (Claude Chat planning pack)
 
 ## In progress
-- None
+- Tests written first (2026-10-01) and run red:
+  - `src/server/admin/manage-actions.test.ts` — 8/8 fail: `@/server/admin/manage-actions` does not exist yet.
+  - `src/features/admin-manage/assign-shift.test.tsx` — 5/8 fail: Assign never calls a server action (local state only), no server error shown, overlap warning says "another client" when the client isn't in the listed (searched) clients. 3 pass already because ADM-UI-02 built them on fixtures (client-side time validation T-03, no Repeat T-04, axe) — expected for a wiring feature.
+  - `tests/integration/admin-assign-shift.test.ts` (local Supabase) — 5/6 fail: action module missing; `getAdminManage` returns no shifts in Supabase mode. 1 passes already (another org's admin sees no Banksia shifts — trivially, since none are loaded yet).
+  - `tests/e2e/admin-assign-shift.spec.ts` (T-01, AC-01) — written; gated on local Supabase + `E2E_DATA_SOURCE=supabase`.
 
 ## Remaining
 - Date: month grid (MON–SUN), prev/next, dots where the selected carer already has shifts, selected date filled.
