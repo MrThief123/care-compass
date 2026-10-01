@@ -130,7 +130,7 @@ Nothing was returned or changed; a service-role before/after snapshot was identi
   RLS refuses it (server log "could not load settings data"); nothing leaks.
 - `/api/test` is live in production and returns the caller's own organisation (RLS-bounded).
 
-## 4. Rate limits (AC-04): NOT MET, needs a human decision
+## 4. Rate limits (AC-04): NOT MET, decided (a) + (b) as a follow-up (FD-07)
 
 **Measured on GoTrue v2.197.0 (hosted version), local config.** The probe method is described in
 this folder's SESSION_STATE.md (the scripts were not committed because they embed local keys).
@@ -165,7 +165,7 @@ token verification, MFA challenge/verify and email sending.
 - (c) Add a database-backed per-account throttle for the UI path only, as defence in depth.
 - (d) Forward the client IP to GoTrue if the hosted platform honours it.
 
-**Recommendation:** (a) + (b).
+**Recommendation:** (a) + (b). **Decided** by the human 2026-10-02 (DECISIONS.md FD-07).
 
 ## 5. Credentials never in a URL (AC-05)
 
@@ -199,8 +199,10 @@ the query string.
 
 ## Remaining
 
-- **Human:** review and approve both migrations before they go to any shared or hosted database.
-- **Human:** decide AC-04 (options above) and record the hosted rate-limit values.
+- ~~**Human:** review and approve both migrations~~ — approved 2026-10-02; both were already applied
+  to hosted (DECISIONS.md FD-08).
+- **Human (FD-07 follow-up):** record the hosted rate-limit values and enable the MFA/password
+  verification Auth Hooks; then re-probe and set AC-04 MET.
 - **Once a seeded stack is available:** run `tests/integration/shared-dev-seed-data.test.ts`
   (F0-16) on a stack seeded with the migrations applied. The seeded admin Priya will now need TOTP
   for admin data.

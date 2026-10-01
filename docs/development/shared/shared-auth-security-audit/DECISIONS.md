@@ -68,8 +68,8 @@ is changed, renamed or dropped.
 - Scope note: `src/server/admin/**` is ADM-02's contract file. This is a guard in front of a
   privileged call, found by this audit. **HUMAN REVIEW: confirm it belongs here and not in a
   separate fix PR.**
-- Human confirmation: MrThief123, 2026-10-01 (in-session) — keep in this PR. Splitting it out would
-  mean shipping `main` with a known privilege-escalation hole in between.
+- Human confirmation: Dhruv561, 2026-10-02 — belongs in F0-21 (merged in #195). Splitting it out
+  would have shipped `main` with a known privilege-escalation hole in between.
 
 ### FD-06 — Guarded pages never prerendered (AC-03 gap)
 - Finding: building without `DATA_SOURCE` (the project `dockerfile` does) prerendered `/admin/home`,
@@ -83,7 +83,7 @@ is changed, renamed or dropped.
 - Alternative: `export const dynamic = "force-dynamic"` in each dashboard layout. Rejected because it
   edits Lane A/C/F folders and is easy to forget on a new layout.
 - Related recommendation (not done): set `DATA_SOURCE=supabase` as a build ARG in the dockerfile too.
-- Human confirmation: MrThief123, 2026-10-01 (in-session) — keep in this PR, same reasoning as FD-05.
+- Human confirmation: Dhruv561, 2026-10-02 — belongs in F0-21 (merged in #195), same reasoning as FD-05.
 
 ### FD-07 — AC-04 rate limits: no app throttle added
 - Finding: local GoTrue throttles nothing (300 wrong passwords, 60 wrong TOTP codes). Hosted values
@@ -93,9 +93,21 @@ is changed, renamed or dropped.
   - Hosted per-IP limits see our server's single IP for all users.
 - Decision: no app-level throttle without the human; the options are in AUDIT_REPORT.md §4.
 - **Blocks AC-04.**
-- Human confirmation: MrThief123, 2026-10-01 (in-session) — ship without AC-04 MET; track confirming
-  the hosted dashboard's Auth > Rate Limits values and enabling the MFA/password verification hooks
-  (options a + b, AUDIT_REPORT.md §4 recommendation) as a follow-up, not a PR blocker.
+- Human decision: Dhruv561, 2026-10-02 — options (a) + (b) (AUDIT_REPORT.md §4 recommendation), as a
+  follow-up: record the hosted dashboard's Auth > Rate Limits values, and enable the MFA Verification
+  Attempt and Password Verification Attempt Auth Hooks to lock out per account. No app-level
+  throttle. AC-04 stays NOT MET until both are done; F0-21 shipped without it (#195).
+
+### FD-08 — Migrations approved; already applied to hosted
+- Both migrations were found already applied to the hosted project on 2026-10-02, before the PRD's
+  "shown to the human before they are applied" step was signed off. Who applied them is not
+  recorded. Read-only checks:
+  - `20261001121303_admin_aal2_rls.sql`: the hosted PostgREST OpenAPI schema (service key) lists
+    `/rpc/session_is_aal2`, a function only this migration creates.
+  - `20261001123254_overlapping_shifts_caller_check.sql`: `rpc/overlapping_shifts` called with the
+    anon key and a random carer id returns `42501 permission denied for function
+    overlapping_shifts` (this migration's `revoke … from anon`); before it, anon got `200 []`.
+- Human approval: Dhruv561, 2026-10-02 — both migrations approved.
 
 ## Test changes (CLAUDE.md §5) — HUMAN REVIEW: test expectation changed
 No assertion was removed or loosened. The simulated session changed because the requirement changed
