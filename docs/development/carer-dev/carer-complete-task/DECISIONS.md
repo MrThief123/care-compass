@@ -26,7 +26,7 @@ Blocking OQ-09, OQ-10 and OQ-33 are ANSWERED in root DECISIONS.md (PD-041, PD-04
 - Date: 2026-10-01
 - Context: Care log and Calendar rows open Task detail; no carer route exists, and a `/family/` link would bounce the carer.
 - Decision: add `/carer/patients/[clientId]/tasks/[occurrenceKey]` reusing the Family Task detail with Edit event hidden. No ticking there.
-- Human confirmation required: yes. Flag in the PR; reverse by hiding the row links if the human disagrees.
+- Human confirmation: ACCEPTED by the human, 2026-10-01 (read-only is fine).
 
 ### FD-03 — Test mapping changed from the planning pack
 - Date: 2026-10-01
@@ -39,7 +39,7 @@ Blocking OQ-09, OQ-10 and OQ-33 are ANSWERED in root DECISIONS.md (PD-041, PD-04
 - Decision: the three-case `describe` ("Home, Calendar and Care log holding tabs") and its three page imports are removed. Before: each tab rendered 'Coming soon', no buttons, no checkboxes, no axe violations. After: no such test; the tabs are covered by `carer-complete-task.test.tsx` (T-02, T-04, T-06, T-07). `ComingSoon` is deleted, nothing else used it.
 - Reason: recorded requirement change (CHG-043).
 - Test changes caused: CAR-UI-02 AC-08 test, removed; flagged for review: yes. The axe check on those three screens is not carried over; worth adding in a follow-up.
-- Human confirmation required: yes (review in the PR).
+- Human confirmation: ACCEPTED by the human, 2026-10-01. Still flagged HUMAN REVIEW in the PR.
 
 ### FD-05 — Home loader keeps only overdue rows in the Overdue list
 - Date: 2026-10-01
@@ -51,13 +51,13 @@ Blocking OQ-09, OQ-10 and OQ-33 are ANSWERED in root DECISIONS.md (PD-041, PD-04
 - Date: 2026-10-01
 - Context: the session brief said the Add event link exists on shift for the Calendar; PRD Scope, AC-07, T-07 and CHG-043 say there is no Add event link on any carer screen (CAR-07 is post-sprint).
 - Decision: followed the PRD, AC-07 and the test (never shown). `FamilyCalendarView` takes `canAddEvent`, which the carer route sets to false.
-- Human confirmation required: yes (the brief and the PRD disagree; flag in the PR).
+- Human confirmation: RESOLVED 2026-10-01. The human wants carer-created events, synced to the client and family, but as CAR-07 (Carer — Add and edit events), not CAR-06. No Add event link in this PR.
 
 ### FD-07 — Home cannot load real data until FAM-01; e2e T-01's last step depends on it
 - Date: 2026-10-01
 - Context: `getTodayOccurrences` is `notImplementedForSupabase` on `main` (FAM-01, unclaimed). Family Home and the carer Home therefore show their error state against Supabase, with this feature or without it. T-01 ends by opening `/family/<id>/home`, so it fails there.
 - Decision: no change to the test or to `src/server/events/queries.ts` (FAM-01's contract function). With that last step pointed at `/family/<id>/calendar` in a throwaway copy, T-01 and the AC-02 e2e both pass. Proposed fix, for the human: change `/home` to `/calendar` on T-01's last navigation, or wait for FAM-01.
-- Human confirmation required: yes.
+- Resolved: FAM-01 was merged on 2026-10-01; Home loads and T-01 passes unchanged.
 
 <!-- Template
 ### FD-01 — <title>
