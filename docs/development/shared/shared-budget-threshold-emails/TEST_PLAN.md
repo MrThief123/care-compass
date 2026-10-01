@@ -11,6 +11,7 @@ Tests are written **before** production code (TESTING.md §2). Run them, confirm
 | Test ID | Covers | Level | Test description | Written first? | Result |
 |---|---|---|---|---|---|
 | T-01 | AC-01 | integration | Given Government bucket crosses the top warning threshold, when the job runs, then one email per eligible recipient is sent with the client's name and percentage. | ☐* | PASS |
+| T-01b | AC-01 | integration | Given a bucket at 40% this period with a cost held as pending (F0-12 reads it as 'depleted'), when the job runs, then no threshold email is sent and nothing is recorded (FD-04). | ☑ (failed first: 6 emails claiming "reached 40%") | PASS |
 | T-02 | AC-02 | integration | Given the email for that threshold was already sent this period, when the job runs again, then no email is sent. | ☐* | PASS |
 | T-03 | AC-03 | integration | Given a previous organisation's admin, when the job runs after transfer, then they receive no email. | ☐* | PASS |
 | T-04 | AC-04 | integration | Given a request to the job endpoint without the secret, when received, then it returns 401 and does nothing. | ☐* | PASS |

@@ -1,6 +1,6 @@
 # Progress — INT-01 Automatic budget threshold emails
 
-Status: IMPLEMENTED — HUMAN REVIEW needed (DECISIONS.md FD-01, FD-02)
+Status: IMPLEMENTED — HUMAN REVIEW needed (DECISIONS.md FD-01, FD-02, FD-04)
 Owner: MrThief123
 Lane: B — Backend
 Sprint: STRETCH · planned D11–D12
@@ -31,10 +31,23 @@ Last updated: 2026-10-01
   tests covering AC-01–AC-05 (`tests/integration/budget-thresholds.test.ts`), 5 unit tests for the
   Resend provider (`src/server/email/provider.test.ts`).
 
+- Second session (2026-10-01): merged `origin/main` (clean); fixed an environment-dependent pgTAP
+  assertion (FD-03); fixed the job emailing every threshold for a bucket that only has a pending
+  cost (FD-04, new test T-01b written first and seen failing).
+
 ## In progress
 - None
 
 ## Remaining
+- **Needs a human decision — CHG-020 / REQ-37 pending-cost email.** DEVELOPMENT_PLAN.md's INT-01
+  card and CHG-020 add "email Family and admins when an event cost goes pending" to INT-01, but this
+  feature's PRD/ACs were never updated and the trigger, idempotency and wording are unspecified.
+  Not built. Options: (a) add it to INT-01 via a CHG with a new AC and agreed wording; (b) split it
+  into its own feature. Recommendation: (b), so INT-01 can go to PR as is.
+- **Needs a human decision — CHG-021 "INT-01 names the bucket by its name".** The email body is
+  still exactly the CIS5 wording (client name + percent, no bucket name), so a client with several
+  buckets cannot tell which one crossed. Needs agreed wording (e.g. "…has reached 85% of its
+  Government allocation…"); `budget_thresholds_snapshot()` would also need to return the bucket name.
 - `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, `JOBS_SECRET` are not set anywhere — needed before this
   can send a real email or be triggered for real (DECISIONS.md FD-02).
 - The scheduler itself (Vercel Cron or pg_cron, OQ-17) is not configured — out of this PR's code,
@@ -46,7 +59,14 @@ Last updated: 2026-10-01
 - 5 / 5 MET
 
 ## Tests
-- Written: 5 / 5 integration (T-01–T-05), plus 16 pgTAP and 5 unit tests beyond TEST_PLAN.md's
+- Second session re-run (local stack, `.env` overridden from `npx supabase status -o env`):
+  `npx supabase test db` 19 files / 540 tests PASS (after FD-03; 539/540 before it);
+  `vitest run tests/integration/budget-thresholds.test.ts src/server/email/provider.test.ts` 11/11;
+  `npx tsc --noEmit` clean; `npm run lint` 0 errors (2 pre-existing warnings); `npm run format:check`
+  clean; full `vitest run` 2469 passed / 10 failed — none in INT-01 files: 4 F0-16 seed tests (seed
+  not loaded locally, FD-02), 5 other features' integration tests that pass when run alone (shared-DB
+  contention in the parallel run), 1 FAM-UI-03 page test (`edit/page.test.tsx`, 'Add file' copy).
+- Written: 6 integration (T-01–T-05, T-01b), plus 16 pgTAP and 5 unit tests beyond TEST_PLAN.md's
   minimum (see TEST_PLAN.md's note on write order — not strictly red-first this session).
 - Passing: all of them, run against a local Supabase stack this session —
   `npx supabase test db`: 19 files, 540 tests, PASS (includes this feature's 16);
@@ -72,7 +92,9 @@ Last updated: 2026-10-01
 
 ## Decisions
 - See DECISIONS.md FD-01 (partial-recipient-failure handling; "each threshold" proposed default),
-  FD-02 (Resend via `fetch`; self-seeded test fixtures; the `seed.sql` environment issue)
+  FD-02 (Resend via `fetch`; self-seeded test fixtures; the `seed.sql` environment issue),
+  FD-03 (pgTAP test 9 fixed — test bug, no behaviour change), FD-04 (thresholds from
+  `percent_used`, not `threshold_state` — HUMAN REVIEW)
 
 ## Problems encountered
 - `supabase db reset`'s auto-seed from `supabase/seed.sql` failed twice in this environment
@@ -93,7 +115,8 @@ Last updated: 2026-10-01
   special-case logic — a transferred client's previous admin is simply never matched by the query.
 
 ## Next action
-- Human: review FD-01 and FD-02; set `RESEND_API_KEY`/`RESEND_FROM_EMAIL`/`JOBS_SECRET` and wire
+- Human: decide the two items under Remaining (CHG-020 pending email, CHG-021 bucket name); review
+  FD-01, FD-02 and FD-04; set `RESEND_API_KEY`/`RESEND_FROM_EMAIL`/`JOBS_SECRET` and wire
   up the scheduler (OQ-17) before relying on this in any real environment; then this is READY FOR PR.
 
 ## Ready for PR

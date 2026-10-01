@@ -33,6 +33,24 @@ Record feature-level decisions here using the template below. Project-wide decis
 - Human confirmation required: yes — HUMAN REVIEW (set `RESEND_API_KEY`/`RESEND_FROM_EMAIL`/`JOBS_SECRET` before relying on this in any real environment; separately investigate the seed.sql failure if it recurs for other features)
 - Test changes caused: none
 
+### FD-03 — pgTAP snapshot row count compared against `budget_buckets`, not the literal 1
+- Date: 2026-10-01 (second session)
+- Context: `supabase/tests/budget_threshold_notifications.test.sql` test 9 asserted `count(*) from budget_thresholds_snapshot()` = 1. pgTAP runs inside a transaction on the existing local database, so any seed or leftover integration-test bucket makes it fail (`have: 71, want: 1` on this stack). `supabase test db` therefore failed (539/540), though the first session recorded 540/540 on a then-empty database.
+- Decision: genuine test bug (environment-dependent assumption). Before: `= 1`, "one row for the one bucket that exists". After: `= (select count(*) from budget_buckets where removed_at is null)`, "one row for every bucket that exists (system-wide, not one client's)". The per-bucket assertions on the test's own bucket (tests 10–14) are unchanged.
+- Reason: identical on an empty database, and still checks the function is system-wide; no assertion removed, no behaviour changed.
+- Human confirmation required: no (test bug fix, no behaviour change)
+- Test changes caused: pgTAP test 9 in `budget_threshold_notifications.test.sql`, as above.
+
+### FD-04 — Due thresholds come from `percent_used`, not F0-12's `threshold_state`
+- Date: 2026-10-01 (second session)
+- Context: the job picked thresholds from `threshold_state`. F0-12's `budget_threshold_state()` returns 'depleted' whenever any cost is pending (PD-058), whatever the percentage. A bucket at 40% with one pending cost therefore sent the 75, 85 and 100 emails, each saying "has reached 40% of its allocation" — misleading, and it pre-empts CHG-020's separate (unspecified) pending-cost email.
+- Decision: a threshold is due when `percent_used >= threshold` (PD-032's 75/85/100 constant); a null `percent_used` (no funds left this period to measure against) sends nothing. New test T-01b written first and seen failing (6 emails) before the fix.
+- Reason: the email states a percentage (AC-01, CIS5 wording); it should only go when that percentage has actually reached the threshold.
+- Alternatives considered: keep `threshold_state` (rejected: misleading copy); treat pending as 100% (rejected: that is CHG-020's pending-cost email, whose trigger and wording are undecided).
+- Consequences: a bucket that is pending-only or exhausted from earlier periods (`percent_used` null) gets no threshold email from INT-01. That case is what CHG-020's pending-cost email would cover — see PROGRESS.md Remaining.
+- Human confirmation required: yes — HUMAN REVIEW (behaviour change in the job; no existing test expectation changed)
+- Test changes caused: none changed; T-01b added.
+
 <!-- Template
 ### FD-01 — <title>
 - Date:

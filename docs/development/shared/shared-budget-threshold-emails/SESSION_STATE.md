@@ -1,6 +1,14 @@
 # Session State — INT-01 Automatic budget threshold emails
 
-Last session date: 2026-10-01
+Last session date: 2026-10-01 (second session the same day)
+Second session: merged origin/main (clean); verified the first session's results independently;
+FD-03 (pgTAP test 9 assumed an empty database — fixed); FD-04 (pending-only bucket sent all three
+threshold emails with the wrong percentage — T-01b written first, then fixed in
+`src/server/jobs/budget-thresholds.ts`). Tests: supabase test db 540/540, INT-01 vitest 11/11,
+tsc/lint/prettier clean. Open for the human: CHG-020 pending-cost email and CHG-021 bucket name in
+the email are recorded INT-01 scope that the feature PRD/ACs never picked up — not built, see
+PROGRESS.md Remaining. No PR opened.
+First session:
 Current branch: `feature/shared-budget-threshold-emails` (from `main`; claimed and pushed)
 Worked on: migration + pgTAP, `EmailProvider`/`ResendEmailProvider`, the job, the route handler,
 integration tests (T-01–T-05), provider unit tests.
@@ -28,7 +36,7 @@ Important discoveries:
 - RLS with zero policies and zero grants refuses a query outright (42501), not a silent empty
   result — different from RLS-with-policies-that-match-nothing. Mattered for the pgTAP tests.
 Important decisions: DECISIONS.md FD-01, FD-02 (both HUMAN REVIEW).
-Exact next action: human reviews FD-01/FD-02, decides on Resend vs Supabase SMTP for real (both
+Exact next action: human decides CHG-020/CHG-021 items (PROGRESS.md Remaining), reviews FD-01/FD-02/FD-04, decides on Resend vs Supabase SMTP for real (both
 already fit `EmailProvider` unchanged), sets the three env vars and the scheduler; on approval,
 push (already pushed) and open the PR to `main`.
 Files likely to be touched next: none expected from this feature; `RESEND_API_KEY` etc. are
