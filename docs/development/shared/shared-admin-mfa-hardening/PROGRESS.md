@@ -1,7 +1,7 @@
 # Progress — F0-20 Admin TOTP MFA hardening
 
 Owner: Dhruv Verma
-Status: READY FOR PR
+Status: MERGED TO DEV (commits present on `main` via #181, folded into shared-client-header-wiring's branch — confirmed by `git merge-base --is-ancestor` and src/app/(auth)/mfa/** existing on `main`, 2026-10-01)
 Jira: —
 Branch: `feature/shared-admin-mfa-hardening`
 PR target: `main`
@@ -69,7 +69,7 @@ Last updated: 2026-10-01
 - No HUMAN REVIEW flag needed: no existing test expectation changed.
 
 ## Next action
-- Human says "yes", then open the PR to `main`.
+- None — merged.
 
 ## Ready for PR
-- Yes, awaiting human approval
+- Merged (via #181).

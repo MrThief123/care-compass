@@ -1,6 +1,6 @@
 # Progress — FAM-09 Family — Client info
 
-Status: IN PROGRESS
+Status: MERGED TO DEV (merged to `main` in #179, 2026-10-01)
 Owner: Dhruv Verma
 Lane: F — Family
 Sprint: SPRINT · planned D9
@@ -52,10 +52,10 @@ Last updated: 2026-10-01
 - PROPOSED items in PRD.md are unconfirmed until validated in F0-01 or answered in DECISIONS.md.
 
 ## Next action
-- Implementation: wire `InfoSectionCard` and `DocumentationCard` to the contract, pass `clientId`/`kind` from the page, update the listed FAM-UI-04 tests (DECISIONS, HUMAN REVIEW).
+- None — merged.
 
 ## Ready for PR
-- READY FOR PR. Human approved 2026-10-01; temporary header patch reverted. HUMAN REVIEW: test expectation changed (DECISIONS FD-06, FD-08).
+- Merged in #179.
 
 ## Known gap for FAM-01
 Family Home errors under DATA_SOURCE=supabase: events/budget contracts unimplemented (see DECISIONS.md FD-09).

@@ -1,6 +1,6 @@
 # Progress — ADM-06 Admin — Manage: staff and client selection
 
-Status: IN PROGRESS
+Status: MERGED TO DEV (merged to `main` in #176, 2026-10-01)
 Owner: Dhruv Verma
 Lane: A — Admin
 Sprint: SPRINT · planned D9
@@ -59,7 +59,7 @@ Last updated: 2026-09-30 (verified, ready for PR approval)
 - Supabase-mode `referenceDate` is today in Australia/Melbourne until ADM-07 wires shifts.
 
 ## Next action
-- Wait for the human's "yes", then open the PR (title `ADM-06 Admin — Manage: staff and client selection`).
+- None — merged.
 
 ## Ready for PR
-- No
+- Merged in #176.
