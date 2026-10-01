@@ -43,15 +43,13 @@ async function createUser(role: "family" | "carer", organisationId: string | nul
     email_confirm: true,
   });
   if (error || !data.user) throw error ?? new Error("createUser failed");
-  const { error: profileError } = await db()
-    .from("profiles")
-    .insert({
-      id: data.user.id,
-      role,
-      organisation_id: organisationId,
-      first_name: "E2e",
-      last_name: role,
-    });
+  const { error: profileError } = await db().from("profiles").insert({
+    id: data.user.id,
+    role,
+    organisation_id: organisationId,
+    first_name: "E2e",
+    last_name: role,
+  });
   if (profileError) throw profileError;
   return { id: data.user.id, email };
 }
