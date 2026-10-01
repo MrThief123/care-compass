@@ -1,19 +1,19 @@
 # Progress — ADM-07 Admin — Assign shift
 
-Status: NOT STARTED
-Owner: unclaimed
+Status: IN PROGRESS
+Owner: MrThief123
 Lane: A — Admin
 Sprint: SPRINT · planned D10
-Branch: `feature/admin-assign-shift` (not yet created)
-PR target: `admin-dev`
-Last updated: 2026-09-17 (planning pack generated)
+Branch: `feature/admin-assign-shift`
+PR target: `main` (CHG-036)
+Last updated: 2026-10-01 (claimed)
 
 ## Blockers
-- OQ-09 — Carer access model
+- None (OQ-09 ANSWERED)
 
 ## Dependencies status
-- F0-10 — NOT STARTED
-- ADM-06 — NOT STARTED
+- F0-10 — MERGED
+- ADM-06 — MERGED (#176)
 
 ## Completed
 - Feature documentation drafted (Claude Chat planning pack)
