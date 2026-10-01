@@ -1008,3 +1008,12 @@ Template for future entries:
 - Impact: edits Lane F files on the human's instruction (CLAUDE.md §4.2 exception, additive only; Family defaults and tests unchanged, guarded by AC-08). FAM-01 (Family Home today) and FAM-09 touch the same family-home files: whoever merges second merges `main` first. No migration.
 - Human confirmation: Dhruv Verma, 2026-10-01 (in-session).
 - Docs updated: DECISIONS.md (this entry), CAR-06 PRD, ACCEPTANCE_CRITERIA, USER_STORIES, TEST_PLAN, DECISIONS, PROGRESS, SESSION_STATE; DEVELOPMENT_PLAN.md (CAR-06 card).
+
+### CHG-044 — Split INT-01's pending-cost email out of this PR; park the threshold email's bucket-name gap
+- Date / requested by: 2026-10-01 / MrThief123 (human)
+- Type: scope reduction (descopes an unscheduled line from INT-01's card) + two Parking lot additions
+- Description: INT-01's DEVELOPMENT_PLAN.md card carried a line, "CHG-020 (PD-058): also email Family and admins when an event cost goes pending," but INT-01's own `PRD.md`/`ACCEPTANCE_CRITERIA.md` never incorporated it (no AC, no scope line, no trigger/idempotency/wording specified), so it was never built. A second-session review of INT-01 (code and tests otherwise complete, 5/5 ACs MET) also found the threshold email's wording (unchanged CIS5 copy) names only the client, not which bucket crossed the threshold — a gap for any client with more than one bucket. Rather than block INT-01's PR on either, both are moved out: the pending-cost email becomes **PL-25** (Parking lot), and the bucket name becomes **PL-26** (Parking lot), both ordinary backlog items awaiting their own scheduling, lane and feature ID when picked up.
+- Source / justification: human, in-session 2026-10-01: for the pending-cost email, chose "split into its own feature" over folding it into INT-01 and holding the PR; for the bucket name, chose "follow-up after this PR" over fixing it now.
+- Impact: INT-01's DEVELOPMENT_PLAN.md card line updated to point at PL-25 instead of asserting it's in scope; PRD.md §17 Parking lot gains PL-25 and PL-26. No change to INT-01's own PRD.md/ACCEPTANCE_CRITERIA.md (neither item was ever listed there). No migration, no code impact beyond INT-01 shipping without either.
+- Human confirmation: MrThief123 (human), 2026-10-01 (in-session).
+- Docs updated: DECISIONS.md (this entry), DEVELOPMENT_PLAN.md (INT-01 card line), PRD.md (§17 Parking lot: PL-25, PL-26); INT-01's own DECISIONS.md/PROGRESS.md record the same split (FD-05).

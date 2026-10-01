@@ -1178,8 +1178,8 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Acceptance criteria summary:** 5 criteria — one email per eligible recipient is sent with the client's name and percentage; no email is sent; they receive no email …
 - **Testing summary:** 5 integration
 - **Requirements:** REQ-31
-- **CHG-020 (PD-058):** also email Family and admins when an event cost goes pending.
-- **Docs:** `docs/development/shared/shared-budget-threshold-emails/` · **Status:** NOT STARTED
+- **Split out by CHG-044:** the pending-cost email mentioned here under the original CHG-020 note was never incorporated into this feature's own PRD/ACs and is not built; tracked as PL-25 instead. INT-01 itself ships threshold emails only (5/5 ACs).
+- **Docs:** `docs/development/shared/shared-budget-threshold-emails/` · **Status:** See PROGRESS.md
 
 ### INT-02 — End-to-end: organisation transfer journey
 - **Dashboard / stream:** family · **Lane:** I · **Days:** D12 · **Sprint:** SPRINT · **PR target:** `main` · **Branch:** `feature/family-organisation-transfer-e2e`

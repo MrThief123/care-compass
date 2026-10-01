@@ -32,6 +32,7 @@ Record feature-level decisions here using the template below. Project-wide decis
 - Consequences: nothing in this feature was tested against a real Resend account — `RESEND_API_KEY`/`RESEND_FROM_EMAIL` are unset in `.env.local`; the route handler will throw a clear error if triggered for real before those are set. The `supabase/seed.sql` batching failure is unresolved and will affect any other feature relying on `supabase db reset`'s auto-seed in this kind of environment; `npm run db:seed` alone cannot recover from it either (it expects the base seed to already exist).
 - Human confirmation required: yes — HUMAN REVIEW (set `RESEND_API_KEY`/`RESEND_FROM_EMAIL`/`JOBS_SECRET` before relying on this in any real environment; separately investigate the seed.sql failure if it recurs for other features)
 - Test changes caused: none
+- Human confirmation: MrThief123, 2026-10-01 (in-session) — accepted as-is; per-recipient tracking is a bigger schema change, deferred unless it proves disruptive in practice.
 
 ### FD-03 — pgTAP snapshot row count compared against `budget_buckets`, not the literal 1
 - Date: 2026-10-01 (second session)
@@ -50,6 +51,18 @@ Record feature-level decisions here using the template below. Project-wide decis
 - Consequences: a bucket that is pending-only or exhausted from earlier periods (`percent_used` null) gets no threshold email from INT-01. That case is what CHG-020's pending-cost email would cover — see PROGRESS.md Remaining.
 - Human confirmation required: yes — HUMAN REVIEW (behaviour change in the job; no existing test expectation changed)
 - Test changes caused: none changed; T-01b added.
+- Human confirmation: MrThief123, 2026-10-01 (in-session) — accepted.
+
+### FD-05 — CHG-020 pending-cost email and the threshold email's missing bucket name are out of this PR (CHG-044)
+- Date: 2026-10-01 (second session)
+- Context: DEVELOPMENT_PLAN.md's INT-01 card carries a note from the original project-wide CHG-020 ("also email Family and admins when an event cost goes pending"), but this feature's own PRD.md/ACCEPTANCE_CRITERIA.md never incorporated it — no AC, no scope line, trigger/idempotency/wording unspecified — so it was never built. Separately, the threshold email's CIS5 wording names only the client, not which bucket crossed (a gap for multi-bucket clients).
+- Decision: both are out of INT-01's scope. The pending-cost email is tracked as root PRD.md Parking lot item PL-25; the bucket name as PL-26. Root DECISIONS.md CHG-044 records the split. INT-01 ships with its original 5 ACs (threshold emails only), unaffected.
+- Reason: human chose to split the pending-cost email into its own feature rather than hold this PR, and to treat the bucket name as a fast-follow rather than fix it now — in both cases to let INT-01 (code and tests complete) go to PR.
+- Alternatives considered: fold the pending-cost email into INT-01 under a new AC (rejected: trigger/idempotency/wording still unspecified — would need its own PRD work first, not a PR-blocking fix); fix the bucket name now (rejected: `budget_thresholds_snapshot()` would need a bucket-name column and agreed copy — small but not zero scope, and not required by any current AC).
+- Consequences: INT-01's emails keep the exact CIS5 wording and do not cover pending costs; both are real, tracked gaps (PL-25, PL-26), not forgotten.
+- Human confirmation required: yes — HUMAN REVIEW
+- Human confirmation: MrThief123, 2026-10-01 (in-session) — split into PL-25 and PL-26 per root DECISIONS.md CHG-044.
+- Test changes caused: none.
 
 <!-- Template
 ### FD-01 — <title>
