@@ -1,14 +1,14 @@
 # Progress — F0-21 Auth security audit
 
-Owner: unassigned
-Status: NOT STARTED
+Owner: MrThief123
+Status: IN PROGRESS
 Jira: —
-Branch: `feature/shared-auth-security-audit` (not created yet)
+Branch: `feature/shared-auth-security-audit`
 PR target: `main`
 Last updated: 2026-10-01
 
 ## Blockers
-- F0-20 must be merged to `main` first.
+- None. F0-20 merged to `main` (PR #177); F0-07 merged.
 
 ## Acceptance criteria status
 - 0 / 6 MET
@@ -19,7 +19,7 @@ Last updated: 2026-10-01
 - Failing: 0
 
 ## Next action
-- After F0-20 merges: create the branch from `main`, set Owner, claim, then write the failing tests.
+- Inspect RLS, auth flow and F0-20 tests; write the failing tests.
 
 ## Ready for PR
 - No
