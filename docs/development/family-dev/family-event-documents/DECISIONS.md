@@ -20,6 +20,29 @@ Record feature-level decisions here using the template below. Project-wide decis
 - Human confirmation required: yes — HUMAN REVIEW (flagged in PROGRESS.md)
 - Test changes caused: none (no existing test asserted Add-mode upload behaviour)
 
+### FD-02 — Fix stale FAM-UI-03 page test broken by this feature's real upload behaviour
+- Date: 2026-10-01
+- Context: `src/app/(family)/family/[clientId]/events/[eventId]/edit/page.test.tsx`'s pre-existing
+  `[FAM-UI-03][PRD] 'Add file' uploads nothing and says so` test predates this feature: it asserted
+  the old Phase-1 stub, where clicking the 'Add file' tile itself showed a blocking message. FAM-08
+  changed Edit event's 'Add file' tile to open a real hidden file input (`EventDocuments`), so a bare
+  click is now a no-op and the test's `within(documents).getByRole("status")` assertion saw empty
+  text instead of the expected message — not caught when FAM-08 merged (#184) because this file
+  wasn't touched by that PR, and only surfaced later running the suite with `DATA_SOURCE=mock`.
+- Decision: Updated the test to actually choose a file via the hidden input
+  (`user.upload(screen.getByLabelText("Choose a file to add"), file)`) instead of only clicking the
+  tile. That reaches `uploadDocument`, which already returns `"Documents are not available yet."` in
+  `DATA_SOURCE=mock` (`src/server/documents/actions.ts`) — so the original assertion and intent are
+  preserved, just reached the correct way.
+- Reason: Invalid assumption in the old test (clicking alone triggers the message) made stale by a
+  genuine, intentional behaviour change in this feature (real file picker instead of a stub). Not a
+  requirements change — no AC or PRD text changed.
+- Alternatives considered: none — the fix restores the original assertion via the correct interaction.
+- Consequences: none; no behaviour changed, only the test's simulated interaction.
+- Human confirmation required: no (CLAUDE.md §5 genuine test bug / invalid assumption case)
+- Test changes caused: `[FAM-UI-03][PRD] 'Add file' uploads nothing and says so` — before: clicked
+  the tile only; after: clicks the tile then chooses a file via the hidden input. Flagged below.
+
 <!-- Template
 ### FD-01 — <title>
 - Date:

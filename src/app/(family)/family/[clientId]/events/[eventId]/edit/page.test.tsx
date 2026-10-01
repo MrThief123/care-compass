@@ -105,11 +105,17 @@ describe("[FAM-UI-03] /family/[clientId]/events/[eventId]/edit (real mock contra
     const user = userEvent.setup();
     await renderEdit();
 
-    await user.click(screen.getByRole("button", { name: "Add file" }));
+    // FAM-08 made "Add file" open a real file picker (clicking the tile alone is a no-op);
+    // choosing a file is what reaches `uploadDocument`, which refuses with this message in
+    // DATA_SOURCE=mock (src/server/documents/actions.ts).
+    const file = new File(["%PDF-1.4"], "scan.pdf", { type: "application/pdf" });
+    await user.upload(screen.getByLabelText("Choose a file to add"), file);
 
     // FAM-06 added its own Save-error status region, so this one is scoped to Documents.
     const documents = screen.getByRole("region", { name: "Documents" });
-    expect(within(documents).getByRole("status")).toHaveTextContent(/not available yet/i);
+    expect(
+      await within(documents).findByRole("status"),
+    ).toHaveTextContent(/not available yet/i);
     expect(screen.getAllByRole("listitem")).toHaveLength(3);
   });
 
