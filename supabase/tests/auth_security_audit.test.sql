@@ -9,7 +9,7 @@
 -- organisation could be put on a shift by update, which the insert trigger alone did not check).
 -- The AAL claim read is `auth.jwt() ->> 'aal'` (non-blocking default, feature DECISIONS.md FD-01).
 begin;
-select plan(111);
+select plan(118);
 
 -- ---------------------------------------------------------------------------
 -- Fixtures (as the table owner)
@@ -338,6 +338,38 @@ select throws_ok($$select set_occurrence_done('f2100000-0000-4000-8000-0000000e0
 select throws_ok($$select add_funds('f2100000-0000-4000-8000-00000000bba1', 10)$$, '42501', null, 'AC-03: another carer cannot add funds to client A');
 select throws_ok($$select client_shift_carers('f2100000-0000-4000-8000-00000000c0a1', now() - interval '1 day', now() + interval '1 day')$$, '42501', null, 'AC-03: another carer cannot list client A''s carers');
 select is(pg_temp.deletable_for_client_a(), '{}'::text[], 'AC-03: another carer deletes nothing of client A');
+
+-- ===========================================================================
+-- AC-03: overlapping_shifts(carer, from, to) (F0-10) is SECURITY DEFINER, so RLS does not apply
+-- inside it: it must itself refuse anyone but an admin (at AAL2) of that carer's organisation.
+-- Found by ADM-07; any signed-in user could name any carer and read their shifts and clients.
+-- ===========================================================================
+select pg_temp.login('f2100000-0000-4000-8000-000000000b02', 'aal1');
+select throws_ok($$select * from overlapping_shifts('f2100000-0000-4000-8000-000000000a02', now() - interval '1 day', now() + interval '1 day')$$,
+  '42501', null, 'AC-03: a carer of another organisation cannot read Org A''s carer''s shifts through overlapping_shifts');
+select pg_temp.login('f2100000-0000-4000-8000-000000000a02', 'aal1');
+select throws_ok($$select * from overlapping_shifts('f2100000-0000-4000-8000-000000000a02', now() - interval '1 day', now() + interval '1 day')$$,
+  '42501', null, 'AC-03: overlapping_shifts is an admin warning only: even the carer themselves is refused (they read their own shifts through RLS)');
+select pg_temp.login('f2100000-0000-4000-8000-000000000b03', 'aal1');
+select throws_ok($$select * from overlapping_shifts('f2100000-0000-4000-8000-000000000a02', now() - interval '1 day', now() + interval '1 day')$$,
+  '42501', null, 'AC-03: a family member cannot read a carer''s shifts through overlapping_shifts');
+select pg_temp.login('f2100000-0000-4000-8000-000000000b01', 'aal2');
+select throws_ok($$select * from overlapping_shifts('f2100000-0000-4000-8000-000000000a02', now() - interval '1 day', now() + interval '1 day')$$,
+  '42501', null, 'AC-03: another organisation''s admin cannot read Org A''s carer''s shifts through overlapping_shifts');
+select pg_temp.login('f2100000-0000-4000-8000-000000000a01', 'aal1');
+select throws_ok($$select * from overlapping_shifts('f2100000-0000-4000-8000-000000000a02', now() - interval '1 day', now() + interval '1 day')$$,
+  '42501', null, 'AC-01: the carer''s own admin below AAL2 cannot call overlapping_shifts');
+select pg_temp.login('f2100000-0000-4000-8000-000000000a01', 'aal2');
+select is((select count(*)::int from overlapping_shifts('f2100000-0000-4000-8000-000000000a02', now() - interval '1 day', now() + interval '1 day')),
+  1, 'AC-03: the carer''s own admin at AAL2 still gets the overlap warning');
+reset role;
+select is(
+  (select array_agg(grantee::text order by grantee::text) from information_schema.role_routine_grants
+   where routine_schema = 'public' and routine_name = 'overlapping_shifts' and privilege_type = 'EXECUTE'
+     and grantee in ('PUBLIC', 'anon')),
+  null,
+  'AC-03: overlapping_shifts is not executable by PUBLIC or anon'
+);
 
 -- ===========================================================================
 -- AC-03: swapped ids on a shift update. Ada (Org A, AAL2) tries to put Org B's carer on her
