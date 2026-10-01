@@ -13,6 +13,11 @@ export default defineConfig({
     setupFiles: ["./vitest.setup.ts"],
     include: ["src/**/*.test.{ts,tsx}", "tests/integration/**/*.test.{ts,tsx}"],
     globals: false,
+    // Integration tests re-import the server actions after vi.resetModules() and talk to a
+    // real Supabase stack; on a loaded CI runner that can pass the 5s default (seen in
+    // F0-07's shared-authentication tests on main).
+    testTimeout: 30_000,
+    hookTimeout: 30_000,
   },
   resolve: {
     alias: {
