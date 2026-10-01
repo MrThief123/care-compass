@@ -382,8 +382,12 @@ async function snapshot(s: Seed): Promise<string> {
   const admin = createAdminClient() as unknown as Untyped;
   const parts: unknown[] = [];
   for (const { table, col, val } of matrix(s, s.familyB.id)) {
-    const { data } = await admin.from(table).select("*").eq(col, val).order(col);
-    parts.push([table, JSON.stringify(data ?? [], Object.keys((data ?? [])[0] ?? {}).sort())]);
+    const { data } = await admin.from(table).select("*").eq(col, val);
+    // Several rows share client A's id, and Postgres returns ties in any order: compare as a set.
+    const rows = (data ?? []).map((row: Record<string, unknown>) =>
+      JSON.stringify(row, Object.keys(row).sort()),
+    );
+    parts.push([table, rows.sort()]);
   }
   const { data: objects } = await admin.storage
     .from("client-documents")
