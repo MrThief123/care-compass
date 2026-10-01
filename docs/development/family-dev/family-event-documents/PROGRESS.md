@@ -1,19 +1,19 @@
 # Progress — FAM-08 Family — Event documents (file tiles)
 
-Status: NOT STARTED
-Owner: unclaimed
+Status: IN PROGRESS
+Owner: MrThief123
 Lane: F — Family
 Sprint: SPRINT · planned D10
-Branch: `feature/family-event-documents` (not yet created)
-PR target: `family-dev`
-Last updated: 2026-09-17 (planning pack generated)
+Branch: `feature/family-event-documents`
+PR target: `main` (CHG-036; `family-dev` is retired)
+Last updated: 2026-10-01
 
 ## Blockers
-- OQ-26 — File upload constraints
+- None — OQ-26 ANSWERED
 
 ## Dependencies status
-- F0-13 — NOT STARTED
-- FAM-UI-03 — NOT STARTED
+- F0-13 — MERGED TO DEV
+- FAM-UI-03 — MERGED TO DEV
 
 ## Completed
 - Feature documentation drafted (Claude Chat planning pack)
