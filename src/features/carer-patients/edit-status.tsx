@@ -15,8 +15,18 @@ export function EditStatusBadge({ onShift }: { onShift: boolean }) {
   );
 }
 
-/** Off-shift notice above patient Info (CHG-029): explains why the edit controls are absent. */
-export function ViewOnlyNotice({ firstName }: { firstName: string }) {
+/**
+ * Off-shift notice above a patient screen (CHG-029): explains why the edit controls are absent.
+ * `info` is the Info tab; `tasks` is Home, Calendar and Care log, where ticking happens only in
+ * the Calendar's Tasks panel while a shift is in progress (CHG-026).
+ */
+export function ViewOnlyNotice({
+  firstName,
+  purpose = "info",
+}: {
+  firstName: string;
+  purpose?: "info" | "tasks";
+}) {
   return (
     <div
       role="note"
@@ -24,8 +34,10 @@ export function ViewOnlyNotice({ firstName }: { firstName: string }) {
     >
       <Icon name="info" size={16} aria-hidden className="mt-0.5 shrink-0" />
       <p>
-        <span className="font-semibold">View only.</span> You can edit {firstName}&apos;s
-        information once your shift with them starts.
+        <span className="font-semibold">View only.</span>{" "}
+        {purpose === "info"
+          ? `You can edit ${firstName}'s information once your shift with them starts.`
+          : `You can tick off ${firstName}'s tasks from the Calendar once your shift with them starts.`}
       </p>
     </div>
   );

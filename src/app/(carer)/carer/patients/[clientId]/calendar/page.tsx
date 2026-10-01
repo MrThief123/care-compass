@@ -1,7 +1,40 @@
-import { ComingSoon } from "@/features/carer-patients/coming-soon";
+import { ViewOnlyNotice } from "@/features/carer-patients/edit-status";
+import { findCarerPatient } from "@/features/carer-patients/find-patient";
+import { carerPatientBase } from "@/features/carer-patients/patient-routes";
+import { FamilyCalendarView } from "@/features/family-calendar/family-calendar-view";
+import { loadFamilyCalendar } from "@/features/family-calendar/load-calendar";
 
-// Takes the route's params like every patient tab; unused until CAR-04 wires this tab (FD-01).
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export default async function Page(_props: { params: Promise<{ clientId: string }> }) {
-  return <ComingSoon />;
+/**
+ * Carer · patient Calendar (CAR-06, CHG-043): the Family Calendar through the carer's account.
+ * Tick boxes exist only while a shift with this patient is in progress; the database refuses a
+ * tick outside one either way (`set_occurrence_done`). Never an Enter event link (CAR-07 is
+ * post-sprint). A rejected read propagates to `error.tsx`.
+ */
+export default async function CarerPatientCalendarPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ clientId: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const { clientId } = await params;
+  const patient = await findCarerPatient(clientId);
+  const data = await loadFamilyCalendar(clientId, await searchParams, "carer");
+
+  return (
+    <>
+      {!patient.onShift && <ViewOnlyNotice firstName={patient.firstName} purpose="tasks" />}
+      <FamilyCalendarView
+        clientId={clientId}
+        today={data.today}
+        params={data.params}
+        occurrences={data.occurrences}
+        log={data.log}
+        actorName={data.actorName}
+        basePath={carerPatientBase(clientId)}
+        canTick={patient.onShift}
+        canAddEvent={false}
+      />
+    </>
+  );
 }
