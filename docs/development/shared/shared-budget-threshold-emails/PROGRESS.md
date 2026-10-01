@@ -1,6 +1,6 @@
 # Progress — INT-01 Automatic budget threshold emails
 
-Status: READY FOR PR
+Status: MERGED TO DEV (merged to `main` in #190, 2026-10-01)
 Owner: MrThief123
 Lane: B — Backend
 Sprint: STRETCH · planned D11–D12
@@ -115,10 +115,8 @@ Last updated: 2026-10-01
   special-case logic — a transferred client's previous admin is simply never matched by the query.
 
 ## Next action
-- Merge the latest `main` (picks up the already-fixed FAM-UI-03 test), re-run the suite, then open
-  the PR. Separately (not a PR blocker): set `RESEND_API_KEY`/`RESEND_FROM_EMAIL`/`JOBS_SECRET` and
-  wire up the scheduler (OQ-17) before relying on this in any real environment.
+- Merged. Remaining before this runs for real: set `RESEND_API_KEY`/`RESEND_FROM_EMAIL`/
+  `JOBS_SECRET` and wire up the scheduler (OQ-17).
 
 ## Ready for PR
-- Yes — code and tests complete and green; all HUMAN REVIEW items (FD-01, FD-04, FD-05) confirmed
-  by the human, 2026-10-01.
+- Merged in #190.
