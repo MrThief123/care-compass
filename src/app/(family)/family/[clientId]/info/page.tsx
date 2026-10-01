@@ -24,5 +24,5 @@ export default async function FamilyInfoPage({
     return <InfoErrorState />;
   }
 
-  return <FamilyInfoView data={data} canEdit />;
+  return <FamilyInfoView clientId={clientId} data={data} canEdit />;
 }

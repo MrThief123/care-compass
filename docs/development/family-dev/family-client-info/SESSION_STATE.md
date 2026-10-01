@@ -1,14 +1,14 @@
 # Session State — FAM-09 Family — Client info
 
-Last session date: none (no implementation session yet)
-Current branch: n/a — `feature/family-client-info` not created
-Worked on: n/a
-What changed: n/a
-Tests run: none
-Test results: n/a
-Current blocker: OQ-26
-Important discoveries: none
-Important decisions: none
-Exact next action: Run `START FEATURE FAM-09` once dependencies are MERGED TO DEV (or COMPLETE) and blocking decisions are answered.
-Files likely to be touched next: `src/app/(family)/family/[clientId]/info/page.tsx`, `src/components/shared/client-info-view.tsx`, `supabase/migrations/*_client_info.sql`, `src/server/clients/actions.ts`
-Warning for next session: Read PRD.md, ACCEPTANCE_CRITERIA.md and TEST_PLAN.md before writing any code. Do not create the branch from the wrong parent (`family-dev`).
+Last session date: 2026-10-01 (docs + tests-first session)
+Current branch: `feature/family-client-info` in worktree `../care-compass-fam09` (from `main`, CAR-04 already merged)
+Worked on: claim, docs, tests first
+What changed: docs; `family-info-wired.test.tsx`, `family_client_info.test.sql`, `family-client-info.spec.ts`
+Tests run: vitest family-info-wired; supabase test db family_client_info
+Test results: component 10 red / 1 green (expected); pgTAP 12/12 green; e2e not run
+Current blocker: none
+Important discoveries: CAR-04 is merged; family RLS, audit and uploads already exist; plan-status output was stale
+Important decisions: FD-01 to FD-05 (AC-04 follows CAR-04 FD-07)
+Exact next action: PR opened after the human's yes (2026-10-01); temporary patch reverted. Wait for review.
+Files likely to be touched next: `src/features/family-info/*`, the Info `page.tsx`, `family-info.test.tsx`
+Warning for next session: use the worktree; e2e needs local Supabase, never the hosted project; open no PR without human approval.

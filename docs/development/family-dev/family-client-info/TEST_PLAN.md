@@ -1,29 +1,36 @@
 # Test Plan — FAM-09 Family — Client info
 
 ## Approach
-Tests are written **before** production code (TESTING.md §2). Run them, confirm they fail for the expected reason, then implement.
+Tests are written **before** production code (TESTING.md §2). Run them, confirm they fail for the expected reason, then implement. Titles start `[FAM-09][AC-xx]`.
 
 ## Test levels used
-- **component** → `src/**/<component>.test.tsx` (Vitest + Testing Library + axe)
-- **db** → `supabase/tests/<feature>.test.sql` (pgTAP via `supabase test db`)
-- **e2e** → `tests/e2e/<feature>.spec.ts` (Playwright)
+- **component** → `src/features/family-info/family-info-wired.test.tsx` (Vitest + Testing Library + axe). The contract (`src/server/**`) is mocked.
+- **db** → `supabase/tests/family_client_info.test.sql` (pgTAP, `supabase test db`)
+- **e2e** → `tests/e2e/family-client-info.spec.ts` (Playwright, local Supabase only)
 
 ## Test cases
 
 | Test ID | Covers | Level | Test description | Written first? | Result |
 |---|---|---|---|---|---|
-| T-01 | AC-01 | e2e | Given Margaret's Habits section, when Helen clicks Edit, changes the text and saves, then the new text is displayed. | ☐ | NOT RUN |
-| T-02 | AC-02 | component | Given seed data, when Info renders, then Description, Habits, Medical history and Documentation cards appear in that order. | ☐ | NOT RUN |
-| T-03 | AC-03 | component | Given the edit textarea exceeds the maximum length, when saved, then an error is shown and the text is not saved. | ☐ | NOT RUN |
-| T-04 | AC-04 | db | Given Priya (admin), when she updates client_info_sections for Margaret, then the update is rejected. | ☐ | NOT RUN |
-| T-05 | AC-05 | e2e | Given the Documentation card, when Helen adds 'Care plan.pdf', then a tile with that name appears. | ☐ | NOT RUN |
+| T-01 | AC-01, AC-09 | e2e | Helen edits Habits, saves, sees the text, still sees it after a reload; audit row names Helen. Also in the spec: never-written section + 5,001 characters refused with draft kept (AC-03, AC-08) | ☑ | GREEN (e2e 6/6 locally, prod build, local Supabase) |
+| T-01b | AC-01 | component | Save calls `saveClientInfoSection(clientId, kind, text)`, shows the new text, refreshes the route, focus returns to Edit | ☑ | GREEN |
+| T-02 | AC-02 | component | Description, Habits, Medical history, Documentation cards appear in that order | ☑ | GREEN |
+| T-03 | AC-03, AC-07 | component | A 'too long' refusal shows under the box, the draft stays and the old text is not replaced; a failed save does the same | ☑ | GREEN |
+| T-04 | AC-04 | db | Another organisation's admin and an unlinked family member cannot insert or update Margaret's sections; Helen can; an unlinked family member cannot read; Priya (own admin) can (FD-05) | ☑ | GREEN on first run: CAR-04's migration already holds these rules |
+| T-05 | AC-05, AC-06 | e2e | Helen adds 'Care plan.pdf'; the tile appears and is listed after a reload; a file over 20 MB is refused; the row has event_id null | ☑ | GREEN (e2e 6/6 locally, prod build, local Supabase) |
+| T-05b | AC-05 | component | Add file posts a FormData with clientId and no eventId; a tile appears; a saved tile opens its signed URL | ☑ | GREEN |
+| T-06 | AC-06 | component | A refused upload shows the server's message and adds no tile | ☑ | GREEN |
+| T-07 | AC-08 | component | An unwritten section shows 'Nothing added yet.' with Edit, and family still sees all three text cards | ☑ | GREEN |
+| T-08 | AC-09 | db | Helen's section saves write audit_log rows: actor Helen, role family, client Margaret | ☑ | GREEN on first run (audit trigger exists) |
+| T-09 | AC-05 | db | Helen can add a client-level document row (event_id null); an unlinked family member cannot | ☑ | GREEN on first run |
+
+Component file: 11 tests, 10 RED for the right reason (no contract call, no error under the box, no unwritten-section cards, no file input); the order test (T-02) passes already because the FAM-UI-04 UI draws the four cards. `supabase test db supabase/tests/family_client_info.test.sql`: 12/12 pass, so no migration is needed (FD-02).
+
+## Existing tests expected to change at implementation (record in DECISIONS.md, HUMAN REVIEW)
+`src/features/family-info/family-info.test.tsx` [FAM-UI-04]: the "local state only", "Save shows edited text", "blank textarea", "Add file says not available yet" and "trims stray space" cases assume nothing is saved. They move to the wired behaviour above.
 
 ## Regression scope
-- Run the full unit/component suite and `supabase test db` before marking READY FOR PR.
-- Run Playwright e2e tests for this dashboard before opening the PR.
+- Full unit/component suite, `supabase test db`, and Playwright for family and carer info before READY FOR PR. Run locally (CI is down, ci_down_actions_limits); say so in the PR.
 
 ## Test data
-- Use `F0-16` seed data (Banksia Home Care, Margaret, Helen, Aisha R., Priya) unless a test creates its own fixtures.
-
-## Coverage mapping rule
-Every AC must have ≥1 test. Tests may only be modified after implementation begins for reasons in TESTING.md §6, recorded in DECISIONS.md.
+- pgTAP and e2e create their own rows (as CAR-04 does). Component tests use the design text fixtures from family-info.test.tsx.

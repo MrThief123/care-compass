@@ -1,12 +1,17 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useEffect, useId, useRef, useState } from "react";
 
 import { Field } from "@/components/shared/forms";
 import { Button } from "@/components/ui/button";
 import { CardShell } from "@/components/ui/card-shell";
+import { saveClientInfoSection } from "@/server/clients/actions";
+import type { ClientInfoSectionKind } from "@/types/domain";
 
 export interface InfoSectionCardProps {
+  clientId: string;
+  kind: ClientInfoSectionKind;
   title: string;
   content: string;
   /** Absent, not disabled, when false (CLAUDE.md §7). */
@@ -14,13 +19,14 @@ export interface InfoSectionCardProps {
 }
 
 /**
- * One text card (Description, Habits, Medical history). Edit swaps the text for
- * a textarea with Save and Cancel; the edit lives in this card's own state, so
- * cards edit independently and nothing is saved anywhere (Phase 1, PROPOSED
- * interaction). Focus goes into the textarea on Edit and back to Edit on Save or
- * Cancel, so a keyboard user is never left on a control that has disappeared.
+ * One text card (Description, Habits, Medical history). Edit swaps the text for a textarea with
+ * Save and Cancel; Save calls `saveClientInfoSection` (FAM-09). On a refusal (too long) or a
+ * failure the message shows under the box and the draft stays, so nothing typed is lost. Focus
+ * goes into the textarea on Edit and back to Edit on Save or Cancel, so a keyboard user is
+ * never left on a control that has disappeared.
  */
-export function InfoSectionCard({ title, content, canEdit }: InfoSectionCardProps) {
+export function InfoSectionCard({ clientId, kind, title, content, canEdit }: InfoSectionCardProps) {
+  const router = useRouter();
   const headingId = useId();
   const editorRef = useRef<HTMLDivElement>(null);
   const editRef = useRef<HTMLButtonElement>(null);
@@ -29,6 +35,8 @@ export function InfoSectionCard({ title, content, canEdit }: InfoSectionCardProp
   const [text, setText] = useState(content);
   const [draft, setDraft] = useState(content);
   const [editing, setEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | undefined>();
 
   useEffect(() => {
     const target = focusNext.current;
@@ -39,17 +47,37 @@ export function InfoSectionCard({ title, content, canEdit }: InfoSectionCardProp
 
   function startEditing() {
     setDraft(text);
+    setError(undefined);
     focusNext.current = "textarea";
     setEditing(true);
   }
 
-  function stopEditing(save: boolean) {
-    if (save) setText(draft.trim());
+  function cancel() {
+    setError(undefined);
     focusNext.current = "edit";
     setEditing(false);
   }
 
-  // p-3.75 inside the kit's 1px border keeps the design's 16px inset and its 106px card.
+  async function save() {
+    setSaving(true);
+    setError(undefined);
+    try {
+      const result = await saveClientInfoSection(clientId, kind, draft);
+      if (!result.ok) {
+        setError(result.error.message);
+        return;
+      }
+      setText(draft.trim());
+      focusNext.current = "edit";
+      setEditing(false);
+      router.refresh();
+    } catch {
+      setError("Couldn't save your changes. Try again.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
   return (
     <CardShell role="region" aria-labelledby={headingId} className="flex flex-col gap-2.5 p-3.75">
       <div className="flex min-h-11 items-center justify-between gap-3">
@@ -80,11 +108,14 @@ export function InfoSectionCard({ title, content, canEdit }: InfoSectionCardProp
             type="textarea"
             value={draft}
             onChange={setDraft}
+            error={error}
             className="[&>label]:sr-only"
           />
           <div className="flex flex-wrap gap-2">
-            <Button onClick={() => stopEditing(true)}>Save</Button>
-            <Button variant="secondary" onClick={() => stopEditing(false)}>
+            <Button onClick={save} disabled={saving}>
+              Save
+            </Button>
+            <Button variant="secondary" onClick={cancel} disabled={saving}>
               Cancel
             </Button>
           </div>
