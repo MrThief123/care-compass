@@ -60,3 +60,12 @@ Last updated: 2026-10-01 (implementation green)
 
 ## Ready for PR
 - Awaiting human approval
+
+## Real-browser check (2026-10-01, local Supabase, F0-16 seed; Margaret's and Robert's events moved to today locally)
+- Aisha: /carer/patients shows Margaret 'On shift', Robert 'View only'.
+- Margaret Calendar: 4 tick boxes, no Add event link; Physiotherapy stays ticked after a reload.
+- Margaret Home: no tick boxes, no Enter event, no View breakdown. On real data Home shows its error state until FAM-01 (FD-07).
+- Margaret Care log: rows open the read-only Task detail (no Edit event).
+- Robert Calendar: tasks visible, no checkboxes, view-only notice.
+- Helen: /family/<margaretId>/calendar shows 'Done · Aisha Rahman'; no /carer/ links; Family links unchanged.
+- Width sweep 1920/1440/1280/1024/768 on Calendar and Home: no horizontal scroll, nothing overlapping (the only rect overlaps are hour labels clipped inside the calendar's scroll area).
