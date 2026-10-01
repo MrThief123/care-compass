@@ -1,6 +1,6 @@
 # Progress — INT-03 End-to-end: carer care delivery journey
 
-Status: READY FOR PR
+Status: MERGED TO DEV (merged to `main` in #194, 2026-10-01)
 Owner: MrThief123
 Lane: I — Integration
 Sprint: SPRINT · planned D12

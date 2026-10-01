@@ -18,6 +18,11 @@ const DONE = new Set([
   "READY FOR PRODUCTION",
   "COMPLETE",
 ]);
+// A Status: line is often followed by parenthetical detail (e.g. "MERGED TO DEV (merged to
+// `main` in #184, 2026-10-01; ...)" — FAM-08's own established style). Match on prefix, not
+// exact equality, so that detail doesn't silently make a merged feature look unmet to its
+// dependents.
+const isDone = (status) => [...DONE].some((d) => (status ?? "").startsWith(d));
 const ID_RE = /\b(?:FAM-UI|CAR-UI|ADM-UI|FAM|CAR|ADM|INT|F0|UI)-\d{2}\b/g;
 
 const read = (p) => (fs.existsSync(p) ? fs.readFileSync(p, "utf8") : "");
@@ -75,7 +80,7 @@ const dayStart = (d) => Number((d.match(/\d+/) || [99])[0]);
 features.sort((a, b) => dayStart(a.days) - dayStart(b.days) || a.id.localeCompare(b.id));
 
 for (const f of features) {
-  f.unmetDeps = f.deps.filter((d) => !DONE.has(byId[d]?.status));
+  f.unmetDeps = f.deps.filter((d) => !isDone(byId[d]?.status));
   f.openBlockers = f.blockers.filter(oqOpen);
   f.ready =
     ["NOT STARTED", "PLANNED"].includes(f.status) &&
@@ -97,7 +102,7 @@ out +=
   "### Lane summary\n\n| Lane | Features | Done (merged+) | In progress / review | Ready to start | Waiting on dependencies | Waiting on decisions |\n|---|---|---|---|---|---|---|\n";
 for (const l of lanes) {
   const fs_ = features.filter((f) => f.lane === l && f.sprint !== "POST-SPRINT");
-  out += `| ${l} | ${fs_.length} | ${fs_.filter((f) => DONE.has(f.status)).length} | ${fs_.filter((f) => ["IN PROGRESS", "IMPLEMENTED", "READY FOR PR", "PR OPEN"].includes(f.status)).length} | ${fs_.filter((f) => f.ready).length} | ${fs_.filter((f) => !DONE.has(f.status) && f.unmetDeps.length).length} | ${fs_.filter((f) => !DONE.has(f.status) && f.openBlockers.length).length} |\n`;
+  out += `| ${l} | ${fs_.length} | ${fs_.filter((f) => isDone(f.status)).length} | ${fs_.filter((f) => ["IN PROGRESS", "IMPLEMENTED", "READY FOR PR", "PR OPEN"].includes(f.status)).length} | ${fs_.filter((f) => f.ready).length} | ${fs_.filter((f) => !isDone(f.status) && f.unmetDeps.length).length} | ${fs_.filter((f) => !isDone(f.status) && f.openBlockers.length).length} |\n`;
 }
 out +=
   "\n(Post-sprint features excluded from the summary.)\n\n### Ready to start (unclaimed, dependencies merged, no open blocking decision)\n\n";
@@ -111,14 +116,14 @@ out += ready.length
       .join("\n")
   : "- None";
 out += "\n\n### Claimed / in flight\n\n";
-const flight = shown.filter((f) => f.owner !== "unclaimed" && !DONE.has(f.status));
+const flight = shown.filter((f) => f.owner !== "unclaimed" && !isDone(f.status));
 out += flight.length
   ? flight.map((f) => `- **${f.id}** ${f.name} — ${f.status} — ${f.owner}`).join("\n")
   : "- None";
 out +=
   "\n\n### Not startable yet\n\n| ID | Lane | Planned | Status | Waiting on features | Waiting on decisions |\n|---|---|---|---|---|---|\n";
 for (const f of shown.filter(
-  (x) => !x.ready && !DONE.has(x.status) && x.owner === "unclaimed" && x.sprint !== "POST-SPRINT",
+  (x) => !x.ready && !isDone(x.status) && x.owner === "unclaimed" && x.sprint !== "POST-SPRINT",
 ))
   out += `| ${f.id} | ${f.lane} | ${f.days} | ${f.status} | ${f.unmetDeps.join(", ") || "—"} | ${f.openBlockers.join(", ") || "—"} |\n`;
 out +=

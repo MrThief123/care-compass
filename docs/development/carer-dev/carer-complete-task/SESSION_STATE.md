@@ -8,5 +8,5 @@ Tests run: tsc, lint, full vitest, CAR-06 component/integration/e2e, Family e2e 
 Test results: CAR-06 component 15/15, integration green, CAR-06 e2e green except T-01's last step (Family Home on real data needs FAM-01). Full vitest: 2 seed-dependent failures (shared-dev-seed-data, shared-sign-up) on an unseeded local DB. Mock e2e: 54 passed, 3 skipped, 3 failed (all CAR-04, need seeded Supabase data, not CAR-06).
 Current blocker: none. Browser walk-through and width sweep done; checks green (see PROGRESS.md).
 Important decisions: CHG-043, FD-01 to FD-07 (FD-04 HUMAN REVIEW: test removed)
-Exact next action: human says yes to the PR; open questions:  on seed, T-01 last step, Add event conflict (FD-06) and FD-02; then walk-through, push, wait for "yes" before the PR.
+Exact next action: none — merged to `main` in #183, 2026-10-01.
 Warning for next session: FD-02 is unconfirmed. Family defaults and tests must stay unchanged (AC-08). Do not open the PR without the human's "yes".

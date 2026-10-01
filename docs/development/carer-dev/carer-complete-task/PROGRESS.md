@@ -1,6 +1,6 @@
 # Progress — CAR-06 Carer — Mark tasks done
 
-Status: IN PROGRESS (implementation done; awaiting the human's "yes" to open the PR)
+Status: MERGED TO DEV (merged to `main` in #183, 2026-10-01)
 Owner: Dhruv Verma
 Lane: C — Carer
 Sprint: SPRINT · planned D10
@@ -56,10 +56,10 @@ Last updated: 2026-10-01 (implementation green)
 - PROPOSED items in PRD.md are unconfirmed until validated in F0-01 or answered in DECISIONS.md.
 
 ## Next action
-- Wait for the human's answer on the open decisions and the "yes" to open the PR.
+- None — merged.
 
 ## Ready for PR
-- Awaiting human approval
+- Merged in #183.
 
 ## Real-browser check (2026-10-01, local Supabase, F0-16 seed; Margaret's and Robert's events moved to today locally)
 - Aisha: /carer/patients shows Margaret 'On shift', Robert 'View only'.

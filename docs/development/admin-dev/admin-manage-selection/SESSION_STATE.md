@@ -8,6 +8,6 @@ Tests run: ADM-06 tests, lint, typecheck, full vitest serial with local Supabase
 Test results: all green (2358 vitest tests); sweep clean; no e2e spec covers this screen
 Current blocker: None. Waiting for the human's "yes" to open the PR
 Important discoveries: db:seed only uploads files, seed rows come from db reset; admin sign-in needs MFA enrolment (local factor now enrolled for Priya); stale next-server on :3000 from before this session
-Exact next action: on "yes", open the PR to main with the commands and results from PROGRESS.md
+Exact next action: none — merged to `main` in #176, 2026-10-01.
 Files likely to be touched next: none
 Warning for next session: do not touch shared components; do not start ADM-07

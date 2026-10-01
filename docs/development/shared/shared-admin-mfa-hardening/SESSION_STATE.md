@@ -9,6 +9,6 @@ Test results: all green except 2 unrelated FAM-03 budget integration tests (mont
 Current blocker: none
 Important discoveries: aal not checked in RLS (F0-21 AC-01); credentials in URL on pre-hydration submit (F0-21 AC-05); Next dev-only Server Action log line
 Important decisions: CHG-040, CHG-041, FD-01 to FD-05
-Exact next action: wait for human "yes", then open the PR to `main` (local commands and results, CI down, open features merge main, F0-21 plan change, findings)
+Exact next action: none — commits confirmed present on `main` (via #181, folded into shared-client-header-wiring's branch), 2026-10-01.
 Files likely to be touched next: none
 Warning for next session: work in the worktree `/Users/dhruv/Documents/Dev/care-compass-mfa`; never use .env.local for tests; no `supabase db reset`
