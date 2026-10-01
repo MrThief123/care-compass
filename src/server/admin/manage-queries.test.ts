@@ -33,7 +33,9 @@ it("[ADM-UI-02][AC-03] supplies the selected carer's 11:30 - 13:00 conflict", as
     }),
   );
 });
-it("[ADM-UI-02][AC-01] refuses to disguise Supabase mode as mock data", async () => {
+it("[ADM-UI-02][AC-01] does not disguise Supabase mode as mock data", async () => {
+  // ADM-06 FD-06: Supabase mode is implemented now, so it reads the server client (which needs a
+  // request scope) instead of throwing "not implemented"; it must never return the mock lists.
   vi.stubEnv("DATA_SOURCE", "supabase");
-  await expect(getAdminManage()).rejects.toThrow("not implemented");
+  await expect(getAdminManage()).rejects.toThrow();
 });
