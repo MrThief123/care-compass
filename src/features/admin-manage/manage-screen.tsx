@@ -2,7 +2,6 @@
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
-import { z } from "zod";
 
 import { DatePickerGrid } from "@/components/shared/calendar/date-picker-grid";
 import { Field } from "@/components/shared/forms/field";
@@ -13,6 +12,8 @@ import { Button } from "@/components/ui/button";
 import { CardShell } from "@/components/ui/card-shell";
 import { Icon } from "@/components/ui/icon";
 import { cn } from "@/lib/utils";
+import { shiftTimeRangeSchema } from "@/server/admin/assign-shift-schema";
+import { assignShift } from "@/server/admin/manage-actions";
 import type { AdminManageData, ManagePerson } from "@/server/admin/manage-queries";
 
 /** Common shift times, one tap fills the start and end dropdowns. */
@@ -32,11 +33,7 @@ const minuteOptions = Array.from({ length: 12 }, (_, step) => ({
   value: pad(step * 5),
   label: pad(step * 5),
 }));
-const time = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, "Enter a time as HH:MM.");
-const timeRange = z.object({ start: time, end: time }).refine(({ start, end }) => end > start, {
-  message: "End time must be after start time.",
-  path: ["end"],
-});
+const ASSIGN_FAILED = "Couldn't assign the shift. Try again.";
 
 function PersonList({
   title,
@@ -149,12 +146,14 @@ export function ManageScreen({
   const [end, setEnd] = useState("11:00");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [notice, setNotice] = useState("");
+  const [failure, setFailure] = useState("");
+  const [saving, setSaving] = useState(false);
   const [shifts, setShifts] = useState(data.shifts);
   const [justAssignedId, setJustAssignedId] = useState("");
   const staff = data.staff.find((person) => person.id === staffId);
   const client = data.clients.find((person) => person.id === clientId);
   const range = { start, end };
-  const validRange = timeRange.safeParse(range);
+  const validRange = shiftTimeRangeSchema.safeParse(range);
   const overlaps = validRange.success
     ? shifts.filter(
         (shift) =>
@@ -179,6 +178,7 @@ export function ManageScreen({
   function clear() {
     updateUrl({ staff: "", client: "" });
     setNotice("");
+    setFailure("");
     setErrors({});
   }
   function cancel() {
@@ -193,8 +193,9 @@ export function ManageScreen({
     const next = new Date(Date.UTC(year, monthNumber - 1 + offset, 1));
     setMonth(next.toISOString().slice(0, 10));
   }
-  function assign() {
-    if (!staff || !client) return;
+  async function assign() {
+    if (!staff || !client || saving) return;
+    setFailure("");
     if (!validRange.success) {
       setErrors(
         Object.fromEntries(
@@ -204,11 +205,27 @@ export function ManageScreen({
       return;
     }
     setErrors({});
+    setNotice("");
+    setSaving(true);
+    let outcome: Awaited<ReturnType<typeof assignShift>>;
+    try {
+      outcome = await assignShift({ carerId: staffId, clientId, date, ...validRange.data });
+    } catch {
+      // A rejected action is a failed assignment, not a crash; the form stays as it was.
+      outcome = { ok: false, error: { code: "UNEXPECTED", message: ASSIGN_FAILED } };
+    }
+    setSaving(false);
+    if (!outcome.ok) {
+      const messages = outcome.error.fieldErrors;
+      if (messages && Object.keys(messages).length > 0) setErrors(messages);
+      else setFailure(outcome.error.message);
+      return;
+    }
     // The shift just made must not warn about itself; any change to the form clears `notice`,
     // and the shift then counts as an ordinary existing one.
-    const id = `local-${shifts.length}`;
-    setShifts([...shifts, { id, staffId, clientId, date, ...validRange.data }]);
-    setJustAssignedId(id);
+    const created = { ...outcome.data, staffName: staff.name, clientName: client.name };
+    setShifts((current) => [...current, created]);
+    setJustAssignedId(created.id);
     setNotice(
       `Shift assigned: ${staff.name} → ${client.name}, ${date}, ${range.start} - ${range.end}.`,
     );
@@ -296,6 +313,7 @@ export function ManageScreen({
               setEnd(next.end);
               setErrors({});
               setNotice("");
+              setFailure("");
             }}
           />
           {staff && overlaps.length > 0 && (
@@ -303,13 +321,18 @@ export function ManageScreen({
               {overlaps
                 .map(
                   (shift) =>
-                    `${staff.name} already has a shift with ${data.clients.find((person) => person.id === shift.clientId)?.name ?? "another client"} from ${shift.start} - ${shift.end} that overlaps this time.`,
+                    `${staff.name} already has a shift with ${shift.clientName ?? data.clients.find((person) => person.id === shift.clientId)?.name ?? "another client"} from ${shift.start} - ${shift.end} that overlaps this time.`,
                 )
                 .join(" ")}{" "}
               You can still assign it.
             </InlineAlert>
           )}
         </div>
+        {failure && (
+          <p role="alert" className="text-body-default text-text-alert-strong">
+            {failure}
+          </p>
+        )}
         {notice && (
           <p
             role="status"
@@ -323,7 +346,7 @@ export function ManageScreen({
             <Button variant="secondary" onClick={cancel}>
               Cancel
             </Button>
-            <Button onClick={assign} disabled={!staff || !client}>
+            <Button onClick={assign} disabled={!staff || !client || saving}>
               Assign shift
             </Button>
           </div>
@@ -450,7 +473,10 @@ function BookedPanel({
       person: staff,
       rows: onDay
         .filter((shift) => shift.staffId === staff.id)
-        .map((shift) => ({ ...shift, who: nameOf(clientList, shift.clientId, "Another client") })),
+        .map((shift) => ({
+          ...shift,
+          who: shift.clientName ?? nameOf(clientList, shift.clientId, "Another client"),
+        })),
     },
     client && {
       role: "Client",
@@ -458,7 +484,10 @@ function BookedPanel({
       person: client,
       rows: onDay
         .filter((shift) => shift.clientId === client.id)
-        .map((shift) => ({ ...shift, who: nameOf(staffList, shift.staffId, "Another carer") })),
+        .map((shift) => ({
+          ...shift,
+          who: shift.staffName ?? nameOf(staffList, shift.staffId, "Another carer"),
+        })),
     },
   ].filter((group) => Boolean(group));
   const heading = "Current shifts on selected day";
