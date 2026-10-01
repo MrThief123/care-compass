@@ -1,12 +1,12 @@
 # Progress — INT-04 End-to-end: admin rostering journey
 
-Status: NOT STARTED
-Owner: unclaimed
+Status: IN PROGRESS
+Owner: MrThief123
 Lane: I — Integration
 Sprint: SPRINT · planned D12
-Branch: `feature/admin-assign-shift-e2e` (not yet created)
-PR target: `admin-dev`
-Last updated: 2026-09-17 (planning pack generated)
+Branch: `feature/admin-assign-shift-e2e` (from `main`)
+PR target: `main` (CHG-036)
+Last updated: 2026-10-01 (claimed)
 
 ## Blockers
 - OQ-09 — Carer access model
