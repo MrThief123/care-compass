@@ -181,6 +181,13 @@ the query string.
 - E2E T-06 with JavaScript disabled, for sign-in and forgot-password: the request method is POST and
   the URL has no query string.
 
+## 6. Found during close-out (2026-10-02), fixed
+
+| Item | Finding | Fix | Evidence |
+|---|---|---|---|
+| Open redirect | `/auth/confirm?next=` followed `https://…`, `//host`, `/\host`, `javascript:` | Same-origin check (FD-09) | Unit `route.test.ts`; production build on the local stack with real recovery tokens: all four land on `/reset-password` |
+| Dev route in prod | `/api/test` reachable in production | Proxy 404 (FD-10) | Unit `proxy.test.ts`; production build: `/api/test` 404 |
+
 ## Results (all on the isolated stack)
 
 | Suite | Result |

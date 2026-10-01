@@ -109,6 +109,23 @@ is changed, renamed or dropped.
     overlapping_shifts` (this migration's `revoke … from anon`); before it, anon got `200 []`.
 - Human approval: Dhruv561, 2026-10-02 — both migrations approved.
 
+### FD-09 — `/auth/confirm` follows only a same-origin `?next` (found in close-out)
+- Finding: `?next` went straight into `new URL(next, request.url)`, so `https://…`, `//host`,
+  `/\host` and `javascript:` all redirected off-site after a valid email token (open redirect).
+- Decision: resolve `next` against the request and keep it only when its origin matches; otherwise
+  use `/reset-password`. No pattern-matching of bad forms.
+- Asked for by the human (Dhruv561, 2026-10-02) in the close-out PR.
+- Tests: `src/app/(auth)/auth/confirm/route.test.ts` (`[F0-21][FD-09]`). No AC covers it, so the
+  tests carry the decision ID.
+
+### FD-10 — `/api/test` not served in production (found in close-out)
+- Finding: F0-04's connectivity route was still live in production. It uses the caller's session
+  (RLS applies), so it leaked nothing beyond what the caller could already see.
+- Decision: `src/proxy.ts` 404s `/api/test` in production with the same rewrite F0-19 uses for
+  `/dev-preview*`. Its only caller, `/dev-preview-database`, is already 404 in production.
+- Asked for by the human (Dhruv561, 2026-10-02) in the close-out PR.
+- Tests: `src/proxy.test.ts` (`[F0-21][FD-10]`).
+
 ## Test changes (CLAUDE.md §5) — HUMAN REVIEW: test expectation changed
 No assertion was removed or loosened. The simulated session changed because the requirement changed
 (admin authority now needs AAL2).

@@ -24,6 +24,10 @@ Last updated: 2026-10-02
 4. **Scope check — confirmed.** `createStaff` guard (FD-05) and request-time guard (FD-06) belong
    in F0-21.
 
+5. **Close-out fixes, asked for by the human (2026-10-02).** FD-09 (open redirect in
+   `/auth/confirm`) and FD-10 (`/api/test` hidden in production). Tests first: 10 red for the right
+   reason, then green.
+
 ## Blockers
 - None for the merged work. AC-04 waits on the FD-07 follow-up (hosted-project settings).
 
@@ -64,6 +68,13 @@ Last updated: 2026-10-02
     snapshot comparing rows in query order (ties on client id). Fixed to compare as a set
     (`220eeb6`); then 10/10 clean.
 
+- **Close-out PR (2026-10-02):** unit `DATA_SOURCE=mock vitest run src` 2366/2366 (placeholder
+  local env vars; this worktree has no `.env.local`); `tsc --noEmit` clean; `eslint` 0 errors
+  (2 pre-existing warnings); `prettier --check` clean. Production build against the local stack:
+  `/api/test` 404; `/auth/confirm` with real recovery tokens redirects `/reset-password`,
+  `https://evil.example`, `//evil.example/x`, `/\evil.example` and `javascript:alert(1)` all to
+  `/reset-password`.
+
 ## Next action
 - FD-07 follow-up (hosted project, needs the human): record the dashboard's Auth > Rate Limits
   values in AUDIT_REPORT.md §4, enable the MFA Verification Attempt and Password Verification
@@ -72,4 +83,4 @@ Last updated: 2026-10-02
   (the seeded admin Priya now needs TOTP to see admin data).
 
 ## Ready for PR
-- Merged in #195. Close-out docs (decisions, AC statuses) in a separate docs PR.
+- Merged in #195. Close-out PR: decision docs plus the FD-09/FD-10 fixes. Not opened yet.
