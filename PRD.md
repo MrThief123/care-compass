@@ -212,6 +212,8 @@ Note: OOS-5 (rostering out of scope) is superseded by later client meetings and 
 | PL-22 | Front-page extras: 'last updated' indicator, change summary, renameable program title | CIS3 Data 1; CIS5 Front page | OQ-38 |
 | PL-23 | Alert Family (email or Home alert) when a carer switches a task to a plain event | Human, 2026-09-24 (CHG-009) | Audit log records it; no design or notification type yet |
 | PL-24 | Unique identifier for every organisation (e.g. ABN), and verifying a self-registered organisation before it appears in the family organisation picker (lookalike-provider risk) | Human, 2026-09-24 (CHG-010 risk 2) | Identifier to be chosen; no design |
+| PL-25 | Email Family and admins when an event cost goes pending (split from INT-01's card by CHG-044; trigger, idempotency and wording unspecified) | PD-058, REQ-37; INT-01 card | CHG-044 |
+| PL-26 | INT-01's threshold warning email names the bucket (e.g. "Government allocation"), not only the client, for clients with more than one bucket | REQ-31; INT-01 | CHG-044 |
 
 
 ## 18. Dependencies
