@@ -4,8 +4,9 @@ Last session date: 2026-10-01 (third session the same day)
 Third session: human reviewed FD-01 and FD-04, confirmed both as-is. CHG-020's pending-cost email
 and the threshold email's missing bucket name are split out of this PR (root DECISIONS.md CHG-044,
 feature DECISIONS.md FD-05) — now PRD.md §17 Parking lot items PL-25 and PL-26. DEVELOPMENT_PLAN.md's
-INT-01 card updated. Status is now READY FOR PR. Exact next action: merge latest `main` (picks up
-the already-fixed FAM-UI-03 `edit/page.test.tsx` test), re-run the suite, open the PR.
+INT-01 card updated. Merged to `main` in #190, 2026-10-01. Exact next action: none for this feature
+— set `RESEND_API_KEY`/`RESEND_FROM_EMAIL`/`JOBS_SECRET` and wire up the scheduler (OQ-17) when
+ready to run it for real.
 Second session (same day):
 Second session: merged origin/main (clean); verified the first session's results independently;
 FD-03 (pgTAP test 9 assumed an empty database — fixed); FD-04 (pending-only bucket sent all three
