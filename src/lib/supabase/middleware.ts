@@ -3,6 +3,8 @@ import { NextResponse, type NextRequest } from "next/server";
 
 import { env } from "@/lib/env";
 
+import { sessionCookieOptions } from "./cookie-options";
+
 /**
  * Refresh the Supabase session on every navigation. Server Components can't
  * write cookies themselves, so this is the only place an expired session's
@@ -15,6 +17,8 @@ export async function updateSession(request: NextRequest) {
     env.NEXT_PUBLIC_SUPABASE_URL,
     env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
     {
+      // F0-21 AC-02: the same flags as the server client, so a refresh never downgrades them.
+      cookieOptions: sessionCookieOptions(request.headers.get("host") ?? request.nextUrl.host),
       cookies: {
         getAll() {
           return request.cookies.getAll();
