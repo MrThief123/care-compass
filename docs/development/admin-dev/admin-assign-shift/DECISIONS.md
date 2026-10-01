@@ -22,6 +22,7 @@ Non-blocking defaults used: OQ-21 — the fixed common-shift chips ADM-UI-02 bui
 - Alternatives considered: a server action calling `overlapping_shifts` on every date/time change (more faithful wording, but relies on an unguarded definer function); a new guarded RPC (needs a Lane B migration — out of lane).
 - Consequences: **Security follow-up for Lane B (not fixed here — `supabase/**` is Lane B):** `overlapping_shifts` should check the caller is an admin of the carer's organisation (or be `SECURITY INVOKER`), or have `execute` revoked from `authenticated`. Recommend a shared PR.
 - Human confirmation required: yes — confirm this reading of "generated from `overlapping_shifts`" and whether to raise the Lane B fix.
+- Human confirmation: MrThief123, 2026-10-01 (in-session) — accepted as the fix for this feature. The Lane B follow-up (guard `overlapping_shifts` itself) has been raised with the F0-21 (Auth security audit) session, in progress concurrently, rather than tracked as a separate new item.
 
 ### FD-02 — Permissions through F0-10's existing RLS and trigger; no migration
 - Date: 2026-10-01
@@ -44,11 +45,13 @@ Non-blocking defaults used: OQ-21 — the fixed common-shift chips ADM-UI-02 bui
 - Date: 2026-10-01
 - Decision: keep ADM-UI-02's human-reviewed copy (its FD-06): "Shift assigned: Aisha Rahman → Margaret Doyle, 2026-12-01, 07:00 - 11:00." Shown only after the server confirms. Failure shows the server's plain-English message ("Couldn't assign the shift. Try again." / "You can't assign this carer to this client.").
 - Human confirmation required: yes — confirm copy (OQ-39 territory).
+- Human confirmation: MrThief123, 2026-10-01 (in-session) — kept as-is.
 
 ### FD-06 — Assign button disabled, not absent (PRD: PROPOSED/confirm)
 - Date: 2026-10-01
 - Decision: keep ADM-UI-02's behaviour: "Assign shift" is visible and disabled until a staff member and a client are chosen (date and time always have a value), and while a save is in flight. CLAUDE.md §7's "absent, not disabled" rule is about controls the user isn't authorised to use; this is form completeness, not authorisation.
 - Human confirmation required: yes — confirm.
+- Human confirmation: MrThief123, 2026-10-01 (in-session) — disabled, not hidden, confirmed as correct (form completeness, not authorisation).
 
 ### FD-07 — Time entry as built by ADM-UI-02 (no separate "Custom" chip)
 - Date: 2026-10-01

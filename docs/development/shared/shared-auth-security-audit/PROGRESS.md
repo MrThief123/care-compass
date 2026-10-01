@@ -1,6 +1,6 @@
 # Progress — F0-21 Auth security audit
 
-Owner: unassigned
+Owner: unclaimed
 Status: NOT STARTED
 Jira: —
 Branch: `feature/shared-auth-security-audit` (not created yet)

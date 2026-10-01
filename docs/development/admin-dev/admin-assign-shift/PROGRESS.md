@@ -1,6 +1,6 @@
 # Progress — ADM-07 Admin — Assign shift
 
-Status: IN PROGRESS (implementation done and verified; awaiting human confirmation of FD-01, FD-05, FD-06 and approval to open the PR)
+Status: MERGED TO DEV (merged to `main` in #193, 2026-10-01)
 Owner: MrThief123
 Lane: A — Admin
 Sprint: SPRINT · planned D10

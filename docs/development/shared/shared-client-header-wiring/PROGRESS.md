@@ -1,6 +1,6 @@
 # Progress — F0-22 Client header wiring and family route guard
 
-Status: READY FOR PR (awaiting human approval)
+Status: MERGED TO DEV (merged to `main` in #181, 2026-10-01)
 Owner: Dhruv Verma
 Lane: S — Shared
 Sprint: SPRINT
@@ -18,10 +18,10 @@ Last updated: 2026-10-01
 - 8 / 8 MET
 
 ## Next action
-- Human approves, then open the PR to `main` (title `F0-22 Client header wiring and family route guard`).
+- None — merged.
 
 ## Ready for PR
-- Yes, awaiting the human's approval to open it.
+- Merged in #181.
 
 ## Tests written first (2026-10-01)
 - T-01, T-02 (`src/server/clients/header-summary.test.ts`, 14 tests), T-03 (`layout.test.tsx`), T-04 (`layout.mock.test.tsx`), T-05 (`tests/integration/shared-client-header-wiring.test.ts`, 6 tests, run against local Supabase).
