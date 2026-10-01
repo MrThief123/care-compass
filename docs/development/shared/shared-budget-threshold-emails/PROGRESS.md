@@ -1,22 +1,19 @@
 # Progress — INT-01 Automatic budget threshold emails
 
-Status: NOT STARTED
-Owner: unclaimed
+Status: IN PROGRESS
+Owner: MrThief123
 Lane: B — Backend
 Sprint: STRETCH · planned D11–D12
-Branch: `feature/shared-budget-threshold-emails` (not yet created)
-PR target: `main (per OQ-01 — shared work)`
-Last updated: 2026-09-17 (planning pack generated)
+Branch: `feature/shared-budget-threshold-emails`
+PR target: `main` (OQ-01 Option B, CHG-036)
+Last updated: 2026-10-01
 
 ## Blockers
-- OQ-01 — Branch parent and naming for shared (foundation and cross-cutting) work
-- OQ-03 — Budget threshold percentages
-- OQ-17 — Hosting, email, scheduler, environments and availability
-- OQ-28 — Budget email recipients and budget period
+- None — OQ-01, OQ-03, OQ-17, OQ-28 all ANSWERED
 
 ## Dependencies status
-- F0-12 — NOT STARTED
-- FAM-10 — NOT STARTED
+- F0-12 — MERGED TO DEV
+- FAM-10 — MERGED TO DEV
 
 ## Completed
 - Feature documentation drafted (Claude Chat planning pack)
