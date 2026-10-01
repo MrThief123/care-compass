@@ -4,20 +4,17 @@ import type { EmailProvider } from "@/server/email/provider";
 
 import { createAdminClient } from "./supabase-admin";
 
-/** PD-032, kept in the same order budget_threshold_state() escalates through. */
+/** PD-032: the three warning levels, a single configuration constant (OQ-03). */
 const THRESHOLDS = [75, 85, 100] as const;
 
-const THRESHOLD_STATE_ORDER: Record<string, number> = {
-  normal: 0,
-  warning: 1,
-  alert: 2,
-  depleted: 3,
-};
-
-/** Every threshold at or below the bucket's current state (PRD Functional Requirements: a
- * bucket that jumps past several thresholds in one spend sends each one, not only the highest). */
-function thresholdsMet(state: string): readonly number[] {
-  return THRESHOLDS.slice(0, THRESHOLD_STATE_ORDER[state] ?? 0);
+/** Every threshold the bucket's spending this period has reached (PRD Functional Requirements:
+ * a bucket that jumps past several thresholds in one spend sends each one, not only the
+ * highest). Read from `percent_used`, not F0-12's `threshold_state`: that state also turns
+ * 'depleted' when a cost is merely pending (PD-058), which would email "reached 40%" against
+ * the 100% threshold (DECISIONS.md FD-04). */
+function thresholdsMet(percentUsed: number | null): readonly number[] {
+  if (percentUsed === null) return [];
+  return THRESHOLDS.filter((threshold) => percentUsed >= threshold);
 }
 
 interface SnapshotRow {
@@ -118,7 +115,7 @@ export async function runBudgetThresholdsJob(
 
   const snapshot = await supabase.rpc("budget_thresholds_snapshot");
   const rows = (snapshot.data ?? []) as SnapshotRow[];
-  const due = rows.filter((row) => row.threshold_state !== "normal");
+  const due = rows.filter((row) => thresholdsMet(row.percent_used).length > 0);
   if (due.length === 0) return result;
 
   const bucketIds = [...new Set(due.map((row) => row.bucket_id))];
@@ -132,7 +129,7 @@ export async function runBudgetThresholdsJob(
 
   for (const row of due) {
     const percent = row.percent_used ?? 0;
-    const newThresholds = thresholdsMet(row.threshold_state).filter(
+    const newThresholds = thresholdsMet(row.percent_used).filter(
       (threshold) => !alreadySent.has(`${row.bucket_id}:${threshold}:${row.period_start}`),
     );
 
