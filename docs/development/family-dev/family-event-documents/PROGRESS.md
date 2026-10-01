@@ -75,6 +75,11 @@ Last updated: 2026-10-01
 
 ## Decisions
 - See DECISIONS.md FD-01 (Add event's uploads cannot be linked on save this PR — HUMAN REVIEW)
+- See DECISIONS.md FD-02 — **HUMAN REVIEW: test expectation changed.** Fixed a stale FAM-UI-03 page
+  test (`edit/page.test.tsx`) left broken by this feature's real 'Add file' behaviour: it now chooses
+  a file via the hidden input instead of only clicking the tile, so it actually reaches
+  `uploadDocument`'s mock-mode "Documents are not available yet." message. No behaviour changed.
+  Full suite green after the fix (`DATA_SOURCE=mock npx vitest run`: 185 passed, 29 skipped).
 
 ## Problems encountered
 - **T-01 (e2e) could not be run this session: no Docker, so no local Supabase stack.** The spec is
