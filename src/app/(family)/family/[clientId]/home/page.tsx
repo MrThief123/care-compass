@@ -1,6 +1,7 @@
 import { FamilyHomeView } from "@/features/family-home/family-home-view";
 import { loadFamilyHomeData, type FamilyHomeData } from "@/features/family-home/home-data";
 import { HomeErrorState } from "@/features/family-home/home-error-state";
+import { assertClientAccess } from "@/server/clients/queries";
 
 export default async function FamilyHomePage({
   params,
@@ -8,6 +9,10 @@ export default async function FamilyHomePage({
   params: Promise<{ clientId: string }>;
 }) {
   const { clientId } = await params;
+
+  // Outside the try/catch on purpose: a redirect for a client this user cannot
+  // see must not be swallowed into the error state (FD-05).
+  await assertClientAccess(clientId);
 
   let data: FamilyHomeData;
   try {
