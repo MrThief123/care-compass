@@ -1,30 +1,32 @@
 # Progress — F0-21 Auth security audit
 
 Owner: MrThief123
-Status: BLOCKED (DECISION FD-07; was IMPLEMENTED)
+Status: IMPLEMENTED — awaiting the human's own read-through of the two migrations (HUMAN REVIEW item 1); FD-05/06/07 confirmed
 Jira: —
 Branch: `feature/shared-auth-security-audit`
 PR target: `main`
 Last updated: 2026-10-01
 
 ## HUMAN REVIEW (required before READY FOR PR)
-1. **Migrations, PRD requirement: shown to the human before they are applied.** Tested on an
+1. **Migrations, PRD requirement: shown to the human before they are applied — pending the human's
+   own read-through (pasted in full in-session 2026-10-01; not yet confirmed).** Tested on an
    isolated local stack only:
    - `supabase/migrations/20261001121303_admin_aal2_rls.sql`: admin authority needs AAL2; shift
      reassignment guard.
    - `supabase/migrations/20261001123254_overlapping_shifts_caller_check.sql`: caller check on
      `overlapping_shifts`.
-2. **AC-04 rate limits: decision needed** (DECISIONS.md FD-07, AUDIT_REPORT.md §4). Also record the
-   hosted dashboard's Auth rate-limit values.
+2. **AC-04 rate limits — decided.** Ship without it; human confirmed 2026-10-01 (DECISIONS.md FD-07).
+   Tracked as a follow-up (hosted dashboard Auth > Rate Limits values + MFA/password verification
+   hooks), not a PR blocker.
 3. **HUMAN REVIEW: test expectation changed.** Existing pgTAP and integration admin sessions now
    present AAL2 (TC-01, TC-02), and F0-10 T-04 calls `overlapping_shifts` as the admin (TC-03). No
    assertion was removed. TC-04 (post-merge): ADM-07's own `admin-assign-shift.test.ts` merged to
    `main` after this branch was cut and needed the same AAL2 step-up plus a signOut-scope fix.
-4. **Scope check on audit fixes outside the 5 listed items**: `createStaff` guard (FD-05) and
-   request-time guard (FD-06).
+4. **Scope check on audit fixes outside the 5 listed items — decided.** `createStaff` guard (FD-05)
+   and request-time guard (FD-06) both kept in this PR; human confirmed 2026-10-01.
 
 ## Blockers
-- AC-04 needs a human decision (FD-07).
+- None outstanding except the human's own read of the two migrations (item 1).
 
 ## Acceptance criteria status
 - 5 / 6 MET in tests (AC-01 and AC-03 depend on the HUMAN REVIEW migrations being approved).
@@ -35,7 +37,7 @@ Last updated: 2026-10-01
 | AC-01 | MET (pending migration approval) | pgTAP `auth_security_audit.test.sql`; integration T-01 |
 | AC-02 | MET | unit `cookie-options.test.ts`; e2e T-02 |
 | AC-03 | MET (pending migration approval) | pgTAP; integration T-03/T-04; unit `queries.request-time.test.ts`; e2e T-04 |
-| AC-04 | NOT MET | limits measured, gap recorded, decision needed (FD-07) |
+| AC-04 | NOT MET (accepted) | limits measured, gap recorded, human accepted shipping without it (FD-07) |
 | AC-05 | MET | unit `auth-forms-post.test.tsx`; e2e T-06 |
 | AC-06 | MET | `AUDIT_REPORT.md` |
 
@@ -65,8 +67,12 @@ Last updated: 2026-10-01
     (`220eeb6`); then 10/10 clean.
 
 ## Next action
-- Human: review both migrations and decide FD-07. Then run `tests/integration/shared-dev-seed-data.test.ts`
-  on a seeded stack with the migrations, and set READY FOR PR.
+- Human: finish reading the two migrations (pasted in full in-session 2026-10-01). On approval, set
+  READY FOR PR and this can open. Separately, not a PR blocker: run
+  `tests/integration/shared-dev-seed-data.test.ts` on a seeded stack with the migrations applied
+  (the seeded admin Priya will need TOTP to see admin data); confirm hosted Auth rate-limit values
+  and consider enabling the MFA/password verification hooks (FD-07 follow-up).
 
 ## Ready for PR
-- No (HUMAN REVIEW items above). PR not opened.
+- Pending — only the human's own read of the two migrations remains (FD-07, FD-05, FD-06 all
+  confirmed 2026-10-01). PR not opened.

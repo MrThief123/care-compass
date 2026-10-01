@@ -68,6 +68,8 @@ is changed, renamed or dropped.
 - Scope note: `src/server/admin/**` is ADM-02's contract file. This is a guard in front of a
   privileged call, found by this audit. **HUMAN REVIEW: confirm it belongs here and not in a
   separate fix PR.**
+- Human confirmation: MrThief123, 2026-10-01 (in-session) — keep in this PR. Splitting it out would
+  mean shipping `main` with a known privilege-escalation hole in between.
 
 ### FD-06 — Guarded pages never prerendered (AC-03 gap)
 - Finding: building without `DATA_SOURCE` (the project `dockerfile` does) prerendered `/admin/home`,
@@ -81,6 +83,7 @@ is changed, renamed or dropped.
 - Alternative: `export const dynamic = "force-dynamic"` in each dashboard layout. Rejected because it
   edits Lane A/C/F folders and is easy to forget on a new layout.
 - Related recommendation (not done): set `DATA_SOURCE=supabase` as a build ARG in the dockerfile too.
+- Human confirmation: MrThief123, 2026-10-01 (in-session) — keep in this PR, same reasoning as FD-05.
 
 ### FD-07 — AC-04 rate limits: no app throttle added
 - Finding: local GoTrue throttles nothing (300 wrong passwords, 60 wrong TOTP codes). Hosted values
@@ -90,6 +93,9 @@ is changed, renamed or dropped.
   - Hosted per-IP limits see our server's single IP for all users.
 - Decision: no app-level throttle without the human; the options are in AUDIT_REPORT.md §4.
 - **Blocks AC-04.**
+- Human confirmation: MrThief123, 2026-10-01 (in-session) — ship without AC-04 MET; track confirming
+  the hosted dashboard's Auth > Rate Limits values and enabling the MFA/password verification hooks
+  (options a + b, AUDIT_REPORT.md §4 recommendation) as a follow-up, not a PR blocker.
 
 ## Test changes (CLAUDE.md §5) — HUMAN REVIEW: test expectation changed
 No assertion was removed or loosened. The simulated session changed because the requirement changed
