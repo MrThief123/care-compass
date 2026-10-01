@@ -117,10 +117,12 @@ select throws_ok(
 -- ---------------------------------------------------------------------------
 -- budget_thresholds_snapshot(): system-wide, matching budget_bucket_summary()'s math.
 -- ---------------------------------------------------------------------------
+-- One row per live bucket system-wide, compared against budget_buckets rather than a literal,
+-- so the test holds on a database that already has seed or other test data (FD-03).
 select is(
   (select count(*)::int from budget_thresholds_snapshot()),
-  1,
-  '[INT-01] one row for the one bucket that exists'
+  (select count(*)::int from budget_buckets where removed_at is null),
+  '[INT-01] one row for every bucket that exists (system-wide, not one client''s)'
 );
 select is(
   (select percent_used from budget_thresholds_snapshot() where bucket_id = 'c1111111-1111-1111-1111-111111111111'),

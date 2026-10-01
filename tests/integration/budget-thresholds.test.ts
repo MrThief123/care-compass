@@ -199,6 +199,38 @@ describe.skipIf(!hasLocalSupabase)("[INT-01] budget threshold emails", () => {
     }
   }, 15000);
 
+  it("[INT-01][AC-01] T-01b a pending cost alone (spending under 75%) sends no threshold email (FD-04)", async () => {
+    const s = await seedScenario();
+    try {
+      await chargeCost(s.bucketId, s.clientId, 400); // 40% paid this period
+      // A $700 cost the remaining $600 cannot cover is held as pending (PD-058). F0-12's
+      // threshold_state reads this as 'depleted', but the bucket has only reached 40%.
+      const pending = await s.admin.from("budget_costs").insert({
+        bucket_id: s.bucketId,
+        client_id: s.clientId,
+        original_start: new Date().toISOString(),
+        description: "Equipment",
+        amount: 700,
+        status: "pending",
+        incurred_on: new Date().toISOString().slice(0, 10),
+        recorded_by: "00000000-0000-0000-0000-000000000000",
+        recorded_by_name: "Test",
+      });
+      if (pending.error) throw pending.error;
+      const provider = new FakeEmailProvider();
+
+      const result = await runBudgetThresholdsJob(provider);
+
+      expect(result.failures).toEqual([]);
+      const ours = provider.sent.filter((m) => m.to === s.familyEmail || m.to === s.adminEmail);
+      expect(ours).toEqual([]);
+      const recorded = await notificationsAdmin().select("id").eq("bucket_id", s.bucketId);
+      expect(recorded.data).toEqual([]);
+    } finally {
+      await cleanUp(s);
+    }
+  }, 15000);
+
   it("[INT-01][AC-02] T-02 running again in the same period sends nothing more", async () => {
     const s = await seedScenario();
     try {
