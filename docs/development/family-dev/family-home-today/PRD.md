@@ -5,7 +5,7 @@
 | Feature ID | FAM-01 |
 | Dashboard / stream | Family |
 | Phase | Phase 3 — Data wiring & behaviour (parallel: Family · Carer · Admin) |
-| Development branch (PR target) | `family-dev` |
+| Development branch (PR target) | `main` |
 | Feature branch | `feature/family-home-today` |
 | Documentation | `docs/development/family-dev/family-home-today/` |
 | Lane | F — Family |
@@ -51,8 +51,8 @@ The family sees at a glance what care is happening today and whether it has been
 - Matches Family · Home Figma frame; tabular numerals for times.
 
 ## Dependencies
-- Features: F0-11 (Care events, occurrence overrides and append-only completions), F0-16 (Development seed data from the design content), FAM-UI-01 (Family Home screen (UI))
-- Blocking open decisions (must be answered before START FEATURE): OQ-29
+- Features: F0-11 (Care events, occurrence overrides and append-only completions), F0-16 (Development seed data from the design content), FAM-UI-01 (Family Home screen (UI)), F0-22 (Client header wiring and family route guard; provides `assertClientAccess`)
+- Blocking open decisions: OQ-29 — ANSWERED (PD-055, 2026-09-17): the assignee is the carer whose shift covers the start; "—" if none; once Done, the actor.
 - Non-blocking open decisions (proposed defaults apply, confirm when possible): OQ-10
 
 ## Inputs

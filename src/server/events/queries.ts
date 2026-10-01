@@ -7,7 +7,7 @@
  */
 import { melbourneDateKey } from "@/lib/dates/melbourne-time";
 import * as mock from "@/mocks/queries/events";
-import { getDataSourceMode, notImplementedForSupabase } from "@/server/data-source";
+import { getDataSourceMode } from "@/server/data-source";
 import { parseOccurrenceKey } from "@/server/events/occurrence-key";
 import { dbToRecurrence, type DbRecurrence } from "@/server/events/recurrence-mapping";
 import {
@@ -55,7 +55,9 @@ export interface OccurrenceTypeOption {
  * The client's occurrences that start on the reference day (Melbourne
  * calendar day), oldest first, ties by key ascending. Tasks only unless a
  * `type` option is passed; a Today timeline that shows plain events passes
- * `{ type: "all" }`.
+ * `{ type: "all" }`. With `DATA_SOURCE=supabase` (FAM-01) "today" is the
+ * Melbourne date from `getToday()`, read through the same occurrence loader as
+ * `getOccurrences`.
  */
 export async function getTodayOccurrences(clientId: string): Promise<Occurrence[]>;
 export async function getTodayOccurrences(
@@ -71,7 +73,29 @@ export async function getTodayOccurrences(
   if (mode === "mock") {
     return mock.getTodayOccurrences(clientId, { type });
   }
-  notImplementedForSupabase("events", "getTodayOccurrences");
+
+  // FAM-01: the Melbourne day `getToday()` names, read as a one-day range. Same `type` handling
+  // as `getOccurrences` (tasks only by default).
+  const today = await getToday();
+  const { loadOccurrences, melbourneDaysToInstants } = await import("./occurrences");
+  const occurrences = await loadOccurrences(
+    clientId,
+    melbourneDaysToInstants({ from: today, to: today }),
+    new Date(),
+  );
+  return occurrences
+    .filter((occurrence) =>
+      type === "all"
+        ? true
+        : type === "events"
+          ? isPlainEvent(occurrence)
+          : !isPlainEvent(occurrence),
+    )
+    .sort((a, b) => {
+      const byStart = Date.parse(a.start) - Date.parse(b.start);
+      if (byStart !== 0 && !Number.isNaN(byStart)) return byStart;
+      return a.key === b.key ? 0 : a.key < b.key ? -1 : 1;
+    });
 }
 
 /**
