@@ -1,12 +1,12 @@
 # Progress — CAR-06 Carer — Mark tasks done
 
-Status: NOT STARTED
-Owner: unclaimed
+Status: IN PROGRESS
+Owner: Dhruv Verma
 Lane: C — Carer
 Sprint: SPRINT · planned D10
-Branch: `feature/carer-complete-task` (not yet created)
-PR target: `carer-dev`
-Last updated: 2026-09-17 (planning pack generated)
+Branch: `feature/carer-complete-task`
+PR target: `main`
+Last updated: 2026-10-01 (claimed)
 
 ## Blockers
 - OQ-09 — Carer access model
