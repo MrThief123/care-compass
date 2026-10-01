@@ -3,6 +3,7 @@ import Link from "next/link";
 import { StatusPill } from "@/components/shared/status-pill";
 import { CardShell } from "@/components/ui/card-shell";
 import { editEventHrefFrom } from "@/features/family-event-form/event-form-return";
+import { OpenDocumentTile } from "@/features/family-event-form/open-document-tile";
 import { formatTimeOfDay } from "@/features/family-task-log/melbourne-time";
 import { occurrenceNurse } from "@/features/family-task-log/occurrence-display";
 import { statusPillClassName } from "@/features/family-task-log/status-pill-class";
@@ -10,7 +11,6 @@ import { formatLongDate } from "@/lib/format/date";
 import { isPlainEvent, type AnyOccurrence, type EventDocument } from "@/types/domain";
 
 import { BackLink } from "./back-link";
-import { DocumentTile } from "./document-tile";
 
 import type { TaskDetailOrigin } from "./task-detail-origin";
 
@@ -131,7 +131,7 @@ export function TaskDetailView({
           <ul className="grid grid-cols-[repeat(auto-fill,minmax(min(10rem,100%),12rem))] gap-3">
             {documents.map((document) => (
               <li key={document.id} className="min-w-0">
-                <DocumentTile document={document} />
+                <OpenDocumentTile document={document} />
               </li>
             ))}
           </ul>
