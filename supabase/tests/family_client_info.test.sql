@@ -41,7 +41,7 @@ insert into client_info_sections (client_id, key, body) values
 create or replace function pg_temp.login(p_user_id uuid) returns void as $$
 begin
   perform set_config('request.jwt.claim.sub', p_user_id::text, true);
-  perform set_config('request.jwt.claims', json_build_object('sub', p_user_id, 'role', 'authenticated')::text, true);
+  perform set_config('request.jwt.claims', json_build_object('sub', p_user_id, 'role', 'authenticated', 'aal', 'aal2')::text, true);
   set local role authenticated;
 end;
 $$ language plpgsql;
