@@ -113,9 +113,7 @@ describe("[FAM-UI-03] /family/[clientId]/events/[eventId]/edit (real mock contra
 
     // FAM-06 added its own Save-error status region, so this one is scoped to Documents.
     const documents = screen.getByRole("region", { name: "Documents" });
-    expect(
-      await within(documents).findByRole("status"),
-    ).toHaveTextContent(/not available yet/i);
+    expect(await within(documents).findByRole("status")).toHaveTextContent(/not available yet/i);
     expect(screen.getAllByRole("listitem")).toHaveLength(3);
   });
 
