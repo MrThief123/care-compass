@@ -37,7 +37,7 @@ export function ResetPasswordForm() {
 
       {error && <InlineAlert>{error}</InlineAlert>}
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <form method="post" onSubmit={handleSubmit} className="flex flex-col gap-4">
         <Field
           label="New password"
           type="password"

@@ -5,6 +5,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import type { Database } from "@/lib/supabase/database.types";
 import { createAdminClient } from "@/server/jobs/supabase-admin";
 
+import { stepUpIfAdmin } from "../helpers/aal2";
+
 // Requires a running local Supabase stack (`supabase start`, migrations applied). Skips against a
 // hosted project, exactly as tests/integration/family-home-budget-strip.test.ts does.
 const isLocalUrl = /^https?:\/\/(127\.0\.0\.1|localhost)(:|\/|$)/.test(
@@ -137,6 +139,8 @@ async function signIn(email: string) {
   const client = cookieClient(cookieStore);
   const { error } = await client.auth.signInWithPassword({ email, password: PASSWORD });
   expect(error).toBeNull();
+  // F0-21: admin RLS needs an AAL2 session, as a real admin has after TOTP.
+  await stepUpIfAdmin(client);
   return { cookieStore, client };
 }
 

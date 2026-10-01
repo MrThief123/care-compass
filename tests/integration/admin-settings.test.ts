@@ -5,6 +5,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import type { Database } from "@/lib/supabase/database.types";
 import { createAdminClient } from "@/server/jobs/supabase-admin";
 
+import { stepUpIfAdmin } from "../helpers/aal2";
+
 // Requires a running local Supabase stack (`supabase start`, migrations applied).
 // These tests create, change and delete users, and they need the FAM-12
 // migration (ADM-10 adds none), so they run only when NEXT_PUBLIC_SUPABASE_URL is a local address and
@@ -104,11 +106,14 @@ describe.skipIf(!hasLocalSupabase)("[ADM-10] admin settings against local Supaba
 
   async function signIn(a: { email: string }) {
     const cookieStore = new Map<string, string>();
-    const { error } = await cookieClient(cookieStore).auth.signInWithPassword({
+    const client = cookieClient(cookieStore);
+    const { error } = await client.auth.signInWithPassword({
       email: a.email,
       password: PASSWORD,
     });
     expect(error).toBeNull();
+    // F0-21: admin RLS needs an AAL2 session, as a real admin has after TOTP.
+    await stepUpIfAdmin(client);
     return cookieStore;
   }
 

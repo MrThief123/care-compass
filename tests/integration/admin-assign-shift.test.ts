@@ -1,10 +1,13 @@
 // @vitest-environment node
 import { createServerClient } from "@supabase/ssr";
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import type { Database } from "@/lib/supabase/database.types";
 import type { AssignShiftInput } from "@/server/admin/manage-actions";
 import { createAdminClient } from "@/server/jobs/supabase-admin";
+
+import { stepUpIfAdmin } from "../helpers/aal2";
 
 // [ADM-07] Requires a running local Supabase stack (`supabase start`, migrations applied). Skips
 // against a hosted project, as tests/integration/admin-manage-selection.test.ts does. Each test
@@ -139,6 +142,9 @@ async function signIn(email: string) {
   const client = cookieClient(cookieStore);
   const { error } = await client.auth.signInWithPassword({ email, password: PASSWORD });
   expect(error).toBeNull();
+  // F0-21: admin authority in RLS now needs an AAL2 session (migration
+  // 20261001121303_admin_aal2_rls.sql), exactly like a real admin completing TOTP.
+  await stepUpIfAdmin(client);
   return cookieStore;
 }
 
@@ -245,11 +251,28 @@ describe.skipIf(!hasLocalSupabase)("[ADM-07] Assign shift against local Supabase
       });
 
       // The same shift is what F0-10's overlapping_shifts reports for 11:00-15:00 that day.
-      const { data: overlaps, error } = await s.admin.rpc("overlapping_shifts", {
+      // F0-21 scoped this RPC to a signed-in, AAL2 admin of the carer's own organisation (it was
+      // previously callable, unguarded, by anyone) — called here as Priya, not the service role,
+      // which has no acting user for admin_current_org_id() to resolve.
+      const priyaClient = createSupabaseClient<Database>(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        { auth: { autoRefreshToken: false, persistSession: false } },
+      );
+      const signedIn = await priyaClient.auth.signInWithPassword({
+        email: s.priya.email,
+        password: PASSWORD,
+      });
+      expect(signedIn.error).toBeNull();
+      await stepUpIfAdmin(priyaClient);
+      const { data: overlaps, error } = await priyaClient.rpc("overlapping_shifts", {
         p_carer_id: s.aisha.userId,
         p_starts_at: "2026-12-01T00:00:00Z",
         p_ends_at: "2026-12-01T04:00:00Z",
       });
+      // scope: "local" — a plain signOut() is global and would also revoke the `session` cookie
+      // client above (same user, Priya), breaking the assignAs call below.
+      await priyaClient.auth.signOut({ scope: "local" });
       expect(error).toBeNull();
       expect((overlaps as { id: string }[] | null)?.map((row) => row.id)).toEqual([
         s.existingShiftId,

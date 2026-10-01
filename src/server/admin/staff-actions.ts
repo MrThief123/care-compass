@@ -78,6 +78,19 @@ export async function createStaff(input: StaffFieldsInput): Promise<ActionResult
     return { ok: false, error: { code: "NOT_ALLOWED", message: "You must be signed in." } };
   }
 
+  // F0-21: the invite below runs with the service role, which no RLS policy can stop, so the
+  // caller must be proved an active admin with a completed TOTP challenge (AAL2) first — the same
+  // rule `admin_create_staff_profile` applies a step later. A Server Action is a public endpoint:
+  // without this, any signed-in family member or carer could send invites to any email address.
+  // `getUser()` above verified this session's access token, and the AAL is read from that token.
+  const [{ data: callerProfile }, { data: aal }] = await Promise.all([
+    supabase.from("profiles").select("role, is_active").eq("id", caller.user.id).maybeSingle(),
+    supabase.auth.mfa.getAuthenticatorAssuranceLevel(),
+  ]);
+  if (callerProfile?.role !== "admin" || !callerProfile.is_active || aal?.currentLevel !== "aal2") {
+    return { ok: false, error: { code: "NOT_ALLOWED", message: SAVE_FAILED_MESSAGE } };
+  }
+
   const { inviteStaffAccount } = await import("@/server/jobs/admin-invite-staff");
   let userId: string;
   try {

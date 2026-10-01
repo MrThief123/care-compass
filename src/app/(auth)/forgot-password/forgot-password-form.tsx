@@ -55,7 +55,7 @@ export function ForgotPasswordForm() {
 
       {error && <InlineAlert>{error}</InlineAlert>}
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <form method="post" onSubmit={handleSubmit} className="flex flex-col gap-4">
         <Field
           label="Email"
           type="email"
