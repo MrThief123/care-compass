@@ -18,7 +18,8 @@ Last updated: 2026-10-01
    hosted dashboard's Auth rate-limit values.
 3. **HUMAN REVIEW: test expectation changed.** Existing pgTAP and integration admin sessions now
    present AAL2 (TC-01, TC-02), and F0-10 T-04 calls `overlapping_shifts` as the admin (TC-03). No
-   assertion was removed.
+   assertion was removed. TC-04 (post-merge): ADM-07's own `admin-assign-shift.test.ts` merged to
+   `main` after this branch was cut and needed the same AAL2 step-up plus a signOut-scope fix.
 4. **Scope check on audit fixes outside the 5 listed items**: `createStaff` guard (FD-05) and
    request-time guard (FD-06).
 
@@ -48,6 +49,14 @@ Last updated: 2026-10-01
   - e2e T-04 red (static mock admin pages).
 - Passing: all F0-21 tests. Suites: pgTAP 658/658, unit 2334/2334, integration 166/170 (4 = F0-16
   seed tests, no seed on the isolated stack), e2e auth specs 22/22.
+- **Post-merge re-verification (this session), after merging `origin/main` (ADM-07 #193, INT-03
+  #194 had landed after this branch was cut):** found and fixed TC-04 (above), then re-ran
+  everything on the merged branch against the isolated stack: pgTAP 658/658; unit (`DATA_SOURCE=mock
+  vitest run src`) 2349/2349; integration (`--maxWorkers=2`) 172/176 (same 4 unrelated F0-16
+  failures); `tsc --noEmit` clean; `lint` 0 errors (2 pre-existing warnings); `prettier --check`
+  clean; e2e `admin-assign-shift.spec.ts` (ADM-07) and `organisation-transfer.spec.ts` (INT-02) both
+  green against a production build with the AAL2 migrations applied — both already do real TOTP
+  through the browser, so they reach genuine AAL2 unaffected by the RLS change.
 - Flakiness (10 consecutive runs each):
   - pgTAP 10/10, unit 10/10, e2e 50/50 (`--repeat-each=10`).
   - Integration: the first 10 runs were 7/10 clean. I couldn't reproduce failures afterwards
