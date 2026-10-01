@@ -16,6 +16,7 @@ export interface OverdueCardProps {
   occurrences: Occurrence[];
   /** How many are overdue in all, from the contract, which the badge and "View all" show. */
   total: number;
+  basePath?: string;
 }
 
 /**
@@ -23,7 +24,7 @@ export interface OverdueCardProps {
  * overdue than rows, a link to all of them, so nothing overdue is ever out of
  * reach. A calm "All caught up" when nothing is overdue.
  */
-export function OverdueCard({ clientId, occurrences, total }: OverdueCardProps) {
+export function OverdueCard({ clientId, occurrences, total, basePath }: OverdueCardProps) {
   if (total === 0 && occurrences.length === 0) {
     return (
       <section aria-label="Overdue">
@@ -49,7 +50,7 @@ export function OverdueCard({ clientId, occurrences, total }: OverdueCardProps) 
           {occurrences.map((occurrence) => (
             <li key={occurrence.key}>
               <ActivityLinkRow
-                href={homeRoutes.taskDetail(clientId, occurrence.key)}
+                href={homeRoutes.taskDetail(clientId, occurrence.key, basePath)}
                 title={occurrence.title}
                 date={shortDate(occurrence.start)}
                 status="overdue"
@@ -59,7 +60,7 @@ export function OverdueCard({ clientId, occurrences, total }: OverdueCardProps) 
         </ul>
         {total > occurrences.length && (
           <Link
-            href={homeRoutes.overdueTasks(clientId)}
+            href={homeRoutes.overdueTasks(clientId, basePath)}
             className="inline-flex min-h-11 items-center self-start rounded-control text-body-emphasis text-text-alert-strong outline-none hover:underline focus-visible:ring-[3px] focus-visible:ring-ring/50"
           >
             {`View all ${total} overdue`}

@@ -1,3 +1,4 @@
+import { resolveBasePath } from "./base-path";
 import { MAX_PAGE, normaliseQuery, type TaskLogParams } from "./task-log-params";
 
 /**
@@ -31,8 +32,12 @@ function withView(path: string, view: Partial<TaskLogParams> | undefined): strin
 }
 
 /** The Task log for a client; `view` adds the search, Status and page (defaults are left out). */
-export function taskLogHref(clientId: string, view?: Partial<TaskLogParams>): string {
-  return withView(`/family/${encodeURIComponent(clientId)}/tasks`, view);
+export function taskLogHref(
+  clientId: string,
+  view?: Partial<TaskLogParams>,
+  basePath?: string,
+): string {
+  return withView(`${resolveBasePath(clientId, basePath)}/tasks`, view);
 }
 
 /**
@@ -44,16 +49,17 @@ export function taskDetailHref(
   clientId: string,
   occurrenceKey: string,
   view?: Partial<TaskLogParams>,
+  basePath?: string,
 ): string {
-  const path = `/family/${encodeURIComponent(clientId)}/tasks/${encodeURIComponent(occurrenceKey)}`;
+  const path = `${resolveBasePath(clientId, basePath)}/tasks/${encodeURIComponent(occurrenceKey)}`;
   if (!view) return path;
   const query = taskLogQuery(view);
   return `${path}?from=tasks${query ? `&${query}` : ""}`;
 }
 
 /** Task detail's 'Edit event' button goes to the edit-event route for the occurrence's event. */
-export function editEventHref(clientId: string, eventId: string): string {
-  return `/family/${encodeURIComponent(clientId)}/events/${encodeURIComponent(eventId)}/edit`;
+export function editEventHref(clientId: string, eventId: string, basePath?: string): string {
+  return `${resolveBasePath(clientId, basePath)}/events/${encodeURIComponent(eventId)}/edit`;
 }
 
 /**

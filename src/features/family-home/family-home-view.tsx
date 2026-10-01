@@ -12,6 +12,10 @@ export interface FamilyHomeViewProps {
   data: FamilyHomeData;
   /** The day the Today panel is showing. */
   today: Date;
+  /** Where the links go; defaults to `/family/<id>`. A carer's Home sets it (CHG-043). */
+  basePath?: string;
+  /** Carers: no Enter event link and no budget 'View breakdown' link (CHG-026, CHG-043). */
+  readOnly?: boolean;
 }
 
 /**
@@ -25,28 +29,47 @@ export interface FamilyHomeViewProps {
  * (in a 308px card a normal word such as "Physiotherapy" broke mid-word).
  * Every grid item is `min-w-0`, so one long title or name can widen nothing.
  */
-export function FamilyHomeView({ clientId, data, today }: FamilyHomeViewProps) {
+export function FamilyHomeView({
+  clientId,
+  data,
+  today,
+  basePath,
+  readOnly = false,
+}: FamilyHomeViewProps) {
   return (
     <div className="flex min-w-0 flex-col gap-4 px-6 py-5">
       <div className="grid min-w-0 grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_340px] xl:grid-rows-[auto_auto_1fr]">
-        <div className="min-w-0 lg:col-span-2 xl:col-span-1 xl:col-start-2 xl:row-start-1">
-          <EnterEventLink clientId={clientId} />
-        </div>
+        {!readOnly && (
+          <div className="min-w-0 lg:col-span-2 xl:col-span-1 xl:col-start-2 xl:row-start-1">
+            <EnterEventLink clientId={clientId} basePath={basePath} />
+          </div>
+        )}
         <div className="flex min-w-0 lg:col-span-2 xl:col-span-1 xl:col-start-1 xl:row-span-3 xl:row-start-1">
-          <TodayPanel clientId={clientId} occurrences={data.today} dateLabel={shortDate(today)} />
+          <TodayPanel
+            clientId={clientId}
+            occurrences={data.today}
+            dateLabel={shortDate(today)}
+            basePath={basePath}
+          />
         </div>
         <div className="min-w-0 xl:col-start-2 xl:row-start-2">
           <OverdueCard
             clientId={clientId}
             occurrences={data.overdue.items}
             total={data.overdue.total}
+            basePath={basePath}
           />
         </div>
         <div className="min-w-0 xl:col-start-2 xl:row-start-3 xl:self-start">
-          <RecentActivityCard clientId={clientId} occurrences={data.recent} />
+          <RecentActivityCard clientId={clientId} occurrences={data.recent} basePath={basePath} />
         </div>
       </div>
-      <BudgetStrip clientId={clientId} buckets={data.budget} />
+      <BudgetStrip
+        clientId={clientId}
+        buckets={data.budget}
+        basePath={basePath}
+        showBreakdownLink={!readOnly}
+      />
     </div>
   );
 }

@@ -23,6 +23,7 @@ export interface TodayTimelineProps {
   occurrences: Occurrence[];
   /** Pins the current-time line (tests); omit to track the real clock, `null` for no line. */
   now?: Date | null;
+  basePath?: string;
   className?: string;
 }
 
@@ -43,7 +44,13 @@ function statusText(occurrence: Occurrence): string {
  * pill, assignee and duration only on a hover card at these block heights, and
  * a hover card is no use to someone on a keyboard or a touch screen (FD-09).
  */
-export function TodayTimeline({ clientId, occurrences, now, className }: TodayTimelineProps) {
+export function TodayTimeline({
+  clientId,
+  occurrences,
+  now,
+  basePath,
+  className,
+}: TodayTimelineProps) {
   const layout = useMemo(() => layoutDay(occurrences), [occurrences]);
   const clock = useCurrentTime(now);
   const nowY = clock ? layout.yAt(melbourneMinutesOfDay(clock.toISOString())) : null;
@@ -85,7 +92,7 @@ export function TodayTimeline({ clientId, occurrences, now, className }: TodayTi
               style={{ top, height, left: "0px", right: "0px" }}
             >
               <Link
-                href={homeRoutes.taskDetail(clientId, occurrence.key)}
+                href={homeRoutes.taskDetail(clientId, occurrence.key, basePath)}
                 className="absolute inset-x-0 inset-y-px flex items-center gap-3 overflow-hidden rounded-inset border border-border-brand bg-bg-inset pr-3 outline-none hover:bg-bg-brand-pale focus-visible:z-10 focus-visible:bg-bg-brand-pale focus-visible:ring-[3px] focus-visible:ring-ring/50"
               >
                 {/* Colour is only the accent: the status is the pill's word and icon. */}

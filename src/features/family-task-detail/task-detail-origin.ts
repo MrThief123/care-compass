@@ -6,6 +6,7 @@ import {
   parseCalendarParams,
   type CalendarParams,
 } from "@/features/family-calendar/calendar-params";
+import { resolveBasePath } from "@/features/family-task-log/base-path";
 import {
   parseTaskLogParams,
   type RawSearchParams,
@@ -57,8 +58,9 @@ export function taskDetailHrefFrom(
   clientId: string,
   occurrenceKey: string,
   origin: TaskDetailOrigin,
+  basePath?: string,
 ): string {
-  return `${taskDetailHref(clientId, occurrenceKey)}?${taskDetailOriginQuery(origin)}`;
+  return `${taskDetailHref(clientId, occurrenceKey, undefined, basePath)}?${taskDetailOriginQuery(origin)}`;
 }
 
 /**
@@ -91,13 +93,17 @@ export async function resolveTaskDetailOrigin(
 }
 
 /** Task detail's Back link: its label and where it goes. No origin is the Task log. */
-export function backLinkFor(clientId: string, origin?: TaskDetailOrigin): BackLinkTarget {
+export function backLinkFor(
+  clientId: string,
+  origin?: TaskDetailOrigin,
+  basePath?: string,
+): BackLinkTarget {
   switch (origin?.from) {
     case "calendar":
-      return { label: "Back to Calendar", href: calendarHref(clientId, origin.view) };
+      return { label: "Back to Calendar", href: calendarHref(clientId, origin.view, basePath) };
     case "home":
-      return { label: "Back to Home", href: `/family/${encodeURIComponent(clientId)}/home` };
+      return { label: "Back to Home", href: `${resolveBasePath(clientId, basePath)}/home` };
     default:
-      return { label: "Back to Task log", href: taskLogHref(clientId, origin?.view) };
+      return { label: "Back to Task log", href: taskLogHref(clientId, origin?.view, basePath) };
   }
 }

@@ -3,13 +3,10 @@ import userEvent from "@testing-library/user-event";
 import { axe } from "jest-axe";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import CalendarTabPage from "@/app/(carer)/carer/patients/[clientId]/calendar/page";
-import HomeTabPage from "@/app/(carer)/carer/patients/[clientId]/home/page";
 import InfoLoading from "@/app/(carer)/carer/patients/[clientId]/info/loading";
 import InfoPage from "@/app/(carer)/carer/patients/[clientId]/info/page";
 import PatientLayout from "@/app/(carer)/carer/patients/[clientId]/layout";
 import PatientPage from "@/app/(carer)/carer/patients/[clientId]/page";
-import CareLogTabPage from "@/app/(carer)/carer/patients/[clientId]/tasks/page";
 import PatientsLoading from "@/app/(carer)/carer/patients/loading";
 import PatientsPage from "@/app/(carer)/carer/patients/page";
 import type { CarerPatientRow } from "@/server/shifts/queries";
@@ -365,21 +362,6 @@ describe("[CAR-UI-02] Patient Info tab", () => {
     await expect(InfoPage(params("client-stranger"))).rejects.toThrow(
       "NEXT_REDIRECT /carer/patients",
     );
-  });
-});
-
-describe("[CAR-UI-02] Home, Calendar and Care log holding tabs", () => {
-  it.each([
-    ["Home", HomeTabPage],
-    ["Calendar", CalendarTabPage],
-    ["Care log", CareLogTabPage],
-  ])("[CAR-UI-02][AC-08] the %s tab shows 'Coming soon' and no controls", async (_name, Page) => {
-    const { container } = render(await Page(params(MARGARET)));
-
-    expect(screen.getByText("Coming soon")).toBeInTheDocument();
-    expect(screen.queryByRole("button")).not.toBeInTheDocument();
-    expect(screen.queryByRole("checkbox")).not.toBeInTheDocument();
-    expect(await axe(container)).toHaveNoViolations();
   });
 });
 

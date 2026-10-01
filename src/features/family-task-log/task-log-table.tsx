@@ -20,6 +20,7 @@ export interface TaskLogTableProps {
   params: TaskLogParams;
   /** Whole-row pointer navigation; the title link is the keyboard and screen-reader way in. */
   onOpen: (occurrence: Occurrence) => void;
+  basePath?: string;
 }
 
 /**
@@ -58,7 +59,7 @@ const HEAD_CELL = cn(CELL, "text-left text-label-caps text-text-secondary");
  * (`line-clamp`, `truncate`), so the DOM, and a screen reader, keep the whole value; the full
  * text is also in `title` for hover.
  */
-export function TaskLogTable({ clientId, items, params, onOpen }: TaskLogTableProps) {
+export function TaskLogTable({ clientId, items, params, onOpen, basePath }: TaskLogTableProps) {
   return (
     <div className="@container">
       <table role="table" className="block w-full text-left">
@@ -118,7 +119,7 @@ export function TaskLogTable({ clientId, items, params, onOpen }: TaskLogTablePr
                       own click handler serves the pointer, so the link stops the click here. `w-fit`
                       keeps the link (and its focus ring) to the text, `min-h-11` is the 44px target. */}
                   <Link
-                    href={taskDetailHref(clientId, occurrence.key, params)}
+                    href={taskDetailHref(clientId, occurrence.key, params, basePath)}
                     title={occurrence.title}
                     onClick={(event) => event.stopPropagation()}
                     className="flex min-h-11 w-fit max-w-full items-center hover:underline"

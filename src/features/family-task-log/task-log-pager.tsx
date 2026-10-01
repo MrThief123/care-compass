@@ -13,6 +13,7 @@ export interface TaskLogPagerProps {
   params: TaskLogParams;
   total: number;
   pageSize: number;
+  basePath?: string;
 }
 
 /** 44px targets (REQ-N2); the current page is a plain marker, every other control a link. */
@@ -32,13 +33,13 @@ const LINK = cn(CONTROL, "text-text-brand hover:bg-bg-inset hover:underline");
  * Previous and Next, so the three stay on one line and where you are stays
  * visible (DECISIONS.md FD-22). Previous and Next never hide.
  */
-export function TaskLogPager({ clientId, params, total, pageSize }: TaskLogPagerProps) {
+export function TaskLogPager({ clientId, params, total, pageSize, basePath }: TaskLogPagerProps) {
   const last = lastPageFor(total, pageSize);
   if (last <= 1) return null;
 
   const { page } = params;
   const { from, to } = pageRange(page, pageSize, total);
-  const href = (target: number) => taskLogHref(clientId, { ...params, page: target });
+  const href = (target: number) => taskLogHref(clientId, { ...params, page: target }, basePath);
 
   return (
     <nav

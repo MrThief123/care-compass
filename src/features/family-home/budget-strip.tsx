@@ -12,6 +12,9 @@ import { homeRoutes } from "./home-routes";
 export interface BudgetStripProps {
   clientId: string;
   buckets: BudgetBucketSummary[];
+  basePath?: string;
+  /** False for carers: the Budget screen is not one of theirs (CHG-026). */
+  showBreakdownLink?: boolean;
 }
 
 /** The aggregate line: "$17,870 remaining of $32,000 · 44% used", or the overspend when there is one. */
@@ -29,7 +32,12 @@ function aggregateLine({ remaining, total, percentUsed }: BudgetTotals): string 
  * as fit (three side by side at the design's width), so eight buckets make
  * three rows, not a page that scrolls sideways.
  */
-export function BudgetStrip({ clientId, buckets }: BudgetStripProps) {
+export function BudgetStrip({
+  clientId,
+  buckets,
+  basePath,
+  showBreakdownLink = true,
+}: BudgetStripProps) {
   const totals = summariseBudget(buckets);
 
   return (
@@ -46,12 +54,14 @@ export function BudgetStrip({ clientId, buckets }: BudgetStripProps) {
               </p>
             )}
           </div>
-          <Link
-            href={homeRoutes.budget(clientId)}
-            className="inline-flex min-h-11 shrink-0 items-center px-5 text-body-emphasis text-text-brand hover:underline"
-          >
-            View breakdown
-          </Link>
+          {showBreakdownLink && (
+            <Link
+              href={homeRoutes.budget(clientId, basePath)}
+              className="inline-flex min-h-11 shrink-0 items-center px-5 text-body-emphasis text-text-brand hover:underline"
+            >
+              View breakdown
+            </Link>
+          )}
         </div>
         {buckets.length === 0 ? (
           <EmptyState

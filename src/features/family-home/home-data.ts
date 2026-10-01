@@ -110,7 +110,13 @@ export async function loadFamilyHomeData(clientId: string): Promise<FamilyHomeDa
     today,
     overdue: {
       // The newest few overdue, shown in date order as the design lists them.
-      items: sortOldestFirst([...overdue.items].sort(newestFirst).slice(0, OVERDUE_ROWS_SHOWN)),
+      items: sortOldestFirst(
+        overdue.items
+          // The contract already filters; this keeps the card to overdue rows whatever it returns.
+          .filter((occurrence) => occurrence.status === "overdue")
+          .sort(newestFirst)
+          .slice(0, OVERDUE_ROWS_SHOWN),
+      ),
       total: overdue.total,
     },
     recent: selectRecentActivity([...done.items, ...overdue.items]),
