@@ -11,8 +11,8 @@ Tests are written **before** production code (TESTING.md §2). Run them, confirm
 
 | Test ID | Covers | Level | Test description | Written first? | Result |
 |---|---|---|---|---|---|
-| T-01 | AC-01 | db | Given all tables in schema public, when the catalog is queried, then every table has row level security enabled. | ☐ | NOT RUN |
-| T-02 | AC-02 | integration | Given each role, when every dashboard route of other roles is requested, then all are redirected. | ☐ | NOT RUN |
+| T-01 | AC-01 | db | Given all tables in schema public, when the catalog is queried, then every table has row level security enabled. | ☑ | PASS (16/16 tables) |
+| T-02 | AC-02 | integration | Given each role, when every dashboard route of other roles is requested, then all are redirected. | ☑ | PASS (9/9: 6 behavioural + 3 static route-coverage) |
 
 ## Regression scope
 - Run the full unit/component suite and `supabase test db` before marking READY FOR PR.
