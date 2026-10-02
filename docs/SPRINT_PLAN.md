@@ -1,6 +1,6 @@
 # Sprint Plan — Care Compass (2 weeks, parallel lanes)
 
-Plan v0.2 · 17 September 2026. Day numbers are working days (D1–D14 across two calendar weeks; D13–D14 are buffer).
+Plan v0.2 · 17 September 2026. Day numbers are working days (D1–D14 across two calendar weeks; D13–D14 are buffer; extended to D19 by CHG-047).
 Feature detail: `DEVELOPMENT_PLAN.md`. Live status: `node scripts/plan-status.mjs`.
 
 ---
@@ -69,8 +69,13 @@ Record assignments here:
 | D10 | I | Support | FAM-07, FAM-08, FAM-10, FAM-12 | CAR-05 finish, CAR-06, CAR-09 | ADM-07, ADM-10 | **Checkpoint 2:** checks on `main` (CHG-036) |
 | D11 | I | INT-01 budget emails (stretch) | FAM-13, FAM-14, FAM-15 | Fixes | Fixes | Daily sync |
 | D12 | INT-02, INT-03, INT-04 journeys | INT-01 (stretch) | Fixes from e2e | Fixes | Fixes | **Checkpoint 3:** release candidate checks and tag on `main` |
-| D13 | INT-05 access matrix / INT-08 handover (stretch) | Fixes | Fixes | Fixes | Fixes | Demo prep |
-| D14 | Buffer | Buffer | Buffer | Buffer | Buffer | Submission / demo |
+| D13 | INT-05 access matrix | Fixes | Fixes | Fixes | Fixes | Demo prep |
+| D14 | Buffer | Buffer | Buffer | Buffer | Buffer | Original submission / demo date (extended by CHG-047) |
+| D15 | F0-24 auth emails (start) | — | FAM-11 update funds (start) | Fixes | ADM-03 deactivate staff | Human: hosted email set-up (SMTP, site URL, templates) |
+| D16 | F0-24 finish | — | FAM-11 finish | Fixes | ADM-08 carer assignments | Answer OQ-40 |
+| D17 | INT-05 if not yet done | INT-09 care alert emails (after F0-24 and OQ-40) | Fixes | Fixes | ADM-09 edit/cancel shift | Daily sync |
+| D18 | Fixes | INT-09 finish | Fixes | Fixes | ADM-05 remove client | Daily sync |
+| D19 | INT-08 release readiness and handover | Fixes | Fixes | Fixes | Fixes | **Checkpoint 4:** release candidate checks and tag on `main`; demo prep |
 
 A feature only starts when `plan-status` says it is ready. If a lane is waiting (dependency or open decision), pull the next ready feature in that lane, help another lane's screens, or write tests for the next feature.
 
