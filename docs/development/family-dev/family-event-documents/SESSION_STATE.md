@@ -1,39 +1,26 @@
 # Session State — FAM-08 Family — Event documents (file tiles)
 
-Last session date: 2026-10-01
-Current branch: `feature/family-event-documents` (from `main`; claimed and pushed)
-Worked on: `OpenDocumentTile`, `EventDocuments`, wiring them into `EventFormScreen` and
-`TaskDetailView`, component tests (`event-documents.test.tsx`), e2e test
-(`tests/e2e/family-event-documents.spec.ts`).
-What changed: see PROGRESS.md "Files changed"
-Tests run: `npx vitest run src/features/family-event-form/event-documents.test.tsx` (6/6 pass);
-`npm run lint`, `npx tsc --noEmit`, `npx prettier --check` on changed files (clean); the
-feature's directly-relevant existing test files in isolation (98/98 pass). `tests/e2e/family-event-documents.spec.ts`
-was **not** run — no Docker/local Supabase this session.
-Test results: see PROGRESS.md "Tests" for the full breakdown, including the pre-existing
-(unrelated, reproduced with this branch's changes stashed out) `task-detail-view.test.tsx` /
-`task-detail-view.fam15.test.tsx` failures.
-Current blocker: none for merging the Edit-event path; FD-01 (Add event's upload limitation)
-needs human review before this is READY FOR PR, and T-01 needs to actually be run.
+Last session date: 2026-10-02
+Current branch: `fix/family-event-documents-ac01` (from `main` at 09c54f7; worktree
+`care-compass-fam08`). FAM-08 itself merged in #184; this branch only closes AC-01.
+Worked on: running T-01 against the local Supabase stack for the first time.
+What changed: `tests/e2e/family-event-documents.spec.ts` seed (care event `starts_at` truncated to
+a whole second, DECISIONS.md FD-03); AC-01 → MET; TEST_PLAN T-01 → PASS; PROGRESS.md.
+Tests run: T-01 1/1, then 3/3 with `--repeat-each 3`; `event-documents.test.tsx` and the Edit event
+page test (mock); `DATA_SOURCE=mock npx vitest run src tests/unit` 2376/2376; `npm run
+test:integration` 173 passed / 3 failed (local-stack state and parallel-file collisions, not FAM-08 —
+details in PROGRESS.md "Tests"); tsc, eslint, prettier clean.
+Current blocker: none. PR awaits the human's yes.
 Important discoveries:
-- F0-13's `uploadDocument`/`getDocumentUrl`/`getEventDocuments` were already fully implemented
-  (not stubs) — no `src/server/documents/**` or migration changes were needed for Edit event.
-- `documents` (migration `20260927020000_documents.sql`) grants `update (detached_at)` only, so
-  a document's `event_id` can never be set after insert from a client session — this is why Add
-  event's uploads can't be linked on save without a new migration (DECISIONS.md FD-01), and
-  `supabase/**` is Lane B-owned with no dashboard-feature carve-out (`docs/AGENT_REFERENCE.md`),
-  so that migration isn't FAM-08's to write.
-- FAM-09's `family-client-info.spec.ts` is the house pattern for an e2e test that needs a real
-  local Supabase stack (seed via service-role client, sign in, assert, clean up) — followed the
-  same shape for `family-event-documents.spec.ts`.
-Important decisions: DECISIONS.md FD-01 (HUMAN REVIEW).
-Exact next action: human reviews FD-01 and decides whether to ship Edit-event-only this PR or
-wait for the Lane B linking migration; run `npx supabase start` then
-`npx playwright test tests/e2e/family-event-documents.spec.ts` and confirm it's green; on
-approval, open the PR to `main`.
-Files likely to be touched next: none expected, unless FD-01's review or the e2e run surfaces
-something.
-Warning for next session: don't regenerate `database.types.ts` or touch `supabase/**` for this
-feature (FD-01) without the human's go-ahead first — that would be the Lane B follow-up, not
-FAM-08 itself. Re-read DECISIONS.md FD-01 before changing anything about how Add event's
-documents slot behaves.
+- Local stack was 3 migrations behind `main`; applied with `supabase migration up --local` (no reset).
+- Storage uploads need the local-only `idx_objects_current_version_c` index (re-added this session).
+- The worktree has no `.env.local`; export the local stack's URL/anon/service-role keys from
+  `supabase status -o env` before unit, integration or e2e runs, or many files fail at import.
+- T-01's `cleanUp` can't delete its client/org once a document exists (documents are append-only),
+  so each passing run leaves one `fam-08-*` org + client on the local stack. Same as F0-13's
+  integration tests; accepted.
+Important decisions: DECISIONS.md FD-03.
+Exact next action: on the human's yes, open the PR `FAM-08 Family — Event documents (file tiles)`
+(AC-01 follow-up) to `main`.
+Files likely to be touched next: none.
+Warning for next session: Add event uploads (FD-01) are a separate follow-up; don't fold them in here.

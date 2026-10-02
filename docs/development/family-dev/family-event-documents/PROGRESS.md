@@ -6,7 +6,7 @@ Lane: F — Family
 Sprint: SPRINT · planned D10
 Branch: `feature/family-event-documents`
 PR target: `main` (CHG-036; `family-dev` is retired)
-Last updated: 2026-10-01
+Last updated: 2026-10-02 (AC-01 follow-up on `fix/family-event-documents-ac01`)
 
 ## Blockers
 - None — OQ-26 ANSWERED
@@ -37,22 +37,26 @@ Last updated: 2026-10-01
 - A Lane B follow-up (new migration) to let Add event's uploads be linked to the new event on save
   (DECISIONS.md FD-01) — out of this PR's reach under folder ownership (`docs/AGENT_REFERENCE.md`:
   `supabase/**` has no dashboard-feature carve-out).
-- T-01 (e2e) needs to actually be run against a local Supabase stack (see Problems encountered).
 
 ## Acceptance criteria status
-- 2 / 3 MET (AC-02, AC-03). AC-01 implemented and its e2e test written, but not yet run — see below.
+- 3 / 3 MET. AC-01 MET on 2026-10-02: T-01 run against the local Supabase stack and passing.
 
 ## Tests
 - Written: 3 / 3 (T-01 e2e, T-02/T-03 component — see TEST_PLAN.md's note on write order)
-- Passing: T-02, T-03 (`npx vitest run src/features/family-event-form/event-documents.test.tsx`: 6/6,
+- Passing: T-01 (2026-10-02, see below), T-02, T-03 (`npx vitest run src/features/family-event-form/event-documents.test.tsx`: 6/6,
   includes an extra failed-open case and an axe check beyond the 3 ACs)
 - Failing: none
-- Not run: T-01 (`tests/e2e/family-event-documents.spec.ts`) — this session's environment has no
-  Docker, so `supabase start` isn't available and the local-stack-gated Playwright spec could not be
-  executed. Written to the same pattern as FAM-09's `family-client-info.spec.ts` (seeds an org/family
-  member/client/event via the service-role client, signs in, uploads, asserts the tile, a reload, and
-  the `documents` row's `event_id`). **HUMAN REVIEW: run `npx supabase start` then
-  `npx playwright test tests/e2e/family-event-documents.spec.ts` before this is READY FOR PR.**
+- T-01 run 2026-10-02 against the local Supabase stack (`next build` with `DATA_SOURCE=supabase`,
+  then `E2E_PORT=3210 E2E_DATA_SOURCE=supabase npx playwright test tests/e2e/family-event-documents.spec.ts`).
+  First run failed in the spec's own seed (care event `starts_at` had milliseconds; DECISIONS.md FD-03),
+  fixed the seed, then 1 passed, and 3/3 passed with `--repeat-each 3`. The UI path and the
+  `documents.event_id` assertion needed no change.
+- 2026-10-02 regression, with the local stack's env exported: `DATA_SOURCE=mock npx vitest run src
+  tests/unit` 188 files / 2376 tests passed; `npm run test:integration` 173 passed / 3 failed, none
+  FAM-08 — `budget-thresholds` and `shared-sign-up` pass when run alone (they collide with parallel
+  files sharing seed rows); `shared-dev-seed-data` fails on an extra `smd cheat sheet final.pdf` that
+  seed carer Aisha Rahman uploaded to the local stack on 2026-10-01 (manual testing; documents are
+  append-only, so only `supabase db reset` clears it). `npx tsc --noEmit`, eslint, prettier clean.
 - Regression: `npm run lint`, `npx tsc --noEmit`, `npx prettier --check` on all changed/new files — all
   clean. Full `npm test` was noisy (145 failed / 2186 passed on this branch vs. 147 failed / 2184
   passed on the same commit with this feature's changes stashed out — i.e. pre-existing on `main`,
@@ -74,6 +78,7 @@ Last updated: 2026-10-01
   `uploadDocument`/`getDocumentUrl`/`getEventDocuments` were already complete for this feature's scope.
 
 ## Decisions
+- See DECISIONS.md FD-03 (T-01 seed fix, 2026-10-02)
 - See DECISIONS.md FD-01 (Add event's uploads cannot be linked on save this PR — HUMAN REVIEW)
 - See DECISIONS.md FD-02 — **HUMAN REVIEW: test expectation changed.** Fixed a stale FAM-UI-03 page
   test (`edit/page.test.tsx`) left broken by this feature's real 'Add file' behaviour: it now chooses
@@ -82,7 +87,7 @@ Last updated: 2026-10-01
   Full suite green after the fix (`DATA_SOURCE=mock npx vitest run`: 185 passed, 29 skipped).
 
 ## Problems encountered
-- **T-01 (e2e) could not be run this session: no Docker, so no local Supabase stack.** The spec is
+- (Resolved 2026-10-02: T-01 now run and passing — see Tests.) **T-01 (e2e) could not be run this session: no Docker, so no local Supabase stack.** The spec is
   written and gated the same way FAM-09's is (`test.skip(!hasLocalSupabase, ...)`), so it will not
   silently pass — it will skip until someone runs it with the stack up. Flagging rather than claiming
   it passes (CLAUDE.md §5 "Never claim something works without running it").
@@ -101,9 +106,8 @@ Last updated: 2026-10-01
   unlike `src/server/<domain>/`, which is why FD-01's migration need was not acted on directly.
 
 ## Next action
-- Human: review FD-01 (Add event's upload limitation — ship as-is, or authorise/assign the Lane B
-  migration first); run T-01 against a local Supabase stack and confirm it's green; then this is
-  READY FOR PR.
+- Human: approve the PR for `fix/family-event-documents-ac01` (T-01 seed fix + AC-01 MET).
+- Still open, separate follow-up: FD-01 (Add event's uploads can't link to the event on save).
 
 ## Ready for PR
-- No — pending the human review above and T-01 actually being run.
+- Yes for the AC-01 follow-up (`fix/family-event-documents-ac01`), awaiting human approval to open the PR.

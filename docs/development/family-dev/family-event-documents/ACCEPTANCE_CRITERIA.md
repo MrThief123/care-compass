@@ -4,7 +4,7 @@ Each criterion is observable and maps to at least one test in TEST_PLAN.md. Crit
 
 | ID | Story | Type | Criterion (Given / When / Then) | Status |
 |---|---|---|---|---|
-| AC-01 | US-01 | happy | Given the Edit event form, when Helen adds 'Physio referral.pdf' and saves, then a tile 'Physio referral.pdf' appears on the event. | NOT MET — T-01 written, not yet run (no local Supabase/Docker this session; see PROGRESS.md) |
+| AC-01 | US-01 | happy | Given the Edit event form, when Helen adds 'Physio referral.pdf' and saves, then a tile 'Physio referral.pdf' appears on the event. | MET — T-01 passing against the local Supabase stack, 2026-10-02 (see PROGRESS.md) |
 | AC-02 | US-01 | validation | Given a disallowed file type, when selected, then an inline error is shown and no tile is added. | MET |
 | AC-03 | US-01 | happy | Given an existing tile, when clicked, then the document opens via a signed URL. | MET |
 
