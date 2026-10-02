@@ -66,6 +66,15 @@ None. OQ-04, OQ-05, OQ-19 and OQ-03 are ANSWERED in root DECISIONS.md (PD-033, P
 - Consequences: new additive migration (one column, one function); edits the events-lane file `src/server/events/actions.ts` (human confirmed); new ACs AC-09 to AC-12; `charge_ended_event_occurrences` trusts the caller's list of ended occurrences (checked only to be in the past and after the cost was set), as family can already edit the budget freely.
 - Human confirmation required: yes. Given by the user on 2026-10-02.
 
+### FD-08 — Scope addition: Task detail shows what Edit event shows (read-only)
+- Date: 2026-10-02
+- Context: clicking an event opened a card set with Status, Description and Documents only; repeat, times, tick-off, cost and bucket were visible only inside Edit event.
+- Decision (human, in-session): Task detail gets a read-only Details card: Repeats, Start time, End time, Tick-off, Cost, Paid from. Read from `getEvent` and `getBudgetSummary` in the Family page only; the carer page is unchanged.
+- Alternatives considered: none.
+- Consequences: out of the PRD scope, added on the human's instruction. Edits `src/features/family-task-detail/**` and the family task page.
+- Human confirmation required: yes. Given by the user on 2026-10-02.
+- Test changes caused: `tasks/[occurrenceKey]/page.edge.test.tsx`: added `getEvent` and `getBudgetSummary` to its module stubs (the page now calls them). No assertion changed. Approved by the user; flagged for review: yes.
+
 <!-- Template
 ### FD-xx — <title>
 - Date:

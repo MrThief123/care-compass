@@ -36,6 +36,7 @@ Last updated: 2026-10-02 (FD-07 added: event cost saved and ended plain events c
 ## Tests
 - 15 test cases in 5 files: 60 pgTAP, 26 + 9 + 6 Vitest, 1 e2e. All pass.
 - HUMAN REVIEW: test expectation changed: 8 pgTAP assertions in `budget_save_edit.test.sql` were wrong when written (row counts, one message, one top-up amount); see DECISIONS FD-05. No assertion removed.
+- FD-08 (scope addition): Task detail Details card, 4 new tests in `task-detail-view.details.test.tsx`. HUMAN REVIEW: test expectation changed: `page.edge.test.tsx` stubs gained `getEvent` and `getBudgetSummary`; no assertion changed.
 
 ## Files changed
 - Docs: this folder.

@@ -3,8 +3,11 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const getOccurrence = vi.hoisted(() => vi.fn());
 const getEventDocuments = vi.hoisted(() => vi.fn());
+const getEvent = vi.hoisted(() => vi.fn());
+const getBudgetSummary = vi.hoisted(() => vi.fn());
 
-vi.mock("@/server/events/queries", () => ({ getOccurrence }));
+vi.mock("@/server/events/queries", () => ({ getOccurrence, getEvent }));
+vi.mock("@/server/budget/queries", () => ({ getBudgetSummary }));
 vi.mock("@/server/documents/queries", () => ({ getEventDocuments }));
 
 import { makeHistory } from "@/features/family-task-log/fake-task-log";
@@ -51,6 +54,10 @@ describe("[FAM-UI-07] Task detail page edge cases (contract stubbed)", () => {
   beforeEach(() => {
     getOccurrence.mockReset();
     getEventDocuments.mockReset();
+    getEvent.mockReset();
+    getBudgetSummary.mockReset();
+    getEvent.mockResolvedValue(undefined);
+    getBudgetSummary.mockResolvedValue([]);
     getOccurrence.mockResolvedValue(FUTURE);
     getEventDocuments.mockResolvedValue([]);
   });

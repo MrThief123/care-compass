@@ -2,6 +2,8 @@ import Link from "next/link";
 
 import { StatusPill } from "@/components/shared/status-pill";
 import { CardShell } from "@/components/ui/card-shell";
+import { formatDollars } from "@/features/family-event-form/event-cost";
+import { editEventDetailsValues } from "@/features/family-event-form/event-details";
 import { editEventHrefFrom } from "@/features/family-event-form/event-form-return";
 import { OpenDocumentTile } from "@/features/family-event-form/open-document-tile";
 import { lateCompletionNote } from "@/features/family-task-log/late-completion";
@@ -9,7 +11,13 @@ import { formatTimeOfDay } from "@/features/family-task-log/melbourne-time";
 import { occurrenceNurse } from "@/features/family-task-log/occurrence-display";
 import { statusPillClassName } from "@/features/family-task-log/status-pill-class";
 import { formatLongDate } from "@/lib/format/date";
-import { isPlainEvent, type AnyOccurrence, type EventDocument } from "@/types/domain";
+import {
+  isPlainEvent,
+  type AnyOccurrence,
+  type CareEvent,
+  type EventDocument,
+  type RecurrenceFrequency,
+} from "@/types/domain";
 
 import { BackLink } from "./back-link";
 
@@ -29,7 +37,23 @@ export interface TaskDetailViewProps {
   basePath?: string;
   /** False: no Edit event link (a carer with no shift in progress, CHG-048). */
   canEdit?: boolean;
+  /** The event itself: adds the Details card (repeat, times, tick-off, cost). Absent: no card. */
+  event?: CareEvent;
+  /** Name of the bucket that pays the event's cost. */
+  bucketName?: string;
 }
+
+const RECURRENCE_LABELS: Record<RecurrenceFrequency, string> = {
+  none: "Does not repeat",
+  daily: "Daily",
+  weekly: "Weekly",
+  fortnightly: "Fortnightly",
+  monthly: "Monthly",
+  every2months: "Every 2 months",
+  quarterly: "Quarterly",
+  every6months: "Every 6 months",
+  yearly: "Yearly",
+};
 
 const CARD = "flex flex-col gap-3";
 const CARD_TITLE = "text-title-card text-text-primary";
@@ -54,8 +78,31 @@ export function TaskDetailView({
   origin,
   basePath,
   canEdit = true,
+  event,
+  bucketName,
 }: TaskDetailViewProps) {
   const plain = isPlainEvent(occurrence);
+  const details = event
+    ? editEventDetailsValues(
+        event,
+        plain ? { ...occurrence, kind: "task", status: "planned" } : occurrence,
+      )
+    : undefined;
+  const detailRows: [string, string][] = event
+    ? [
+        ["Repeats", RECURRENCE_LABELS[event.recurrenceFrequency]],
+        ["Start time", details!.startTime],
+        ["End time", details!.endTime || "No end time"],
+        [
+          "Tick-off",
+          event.completionMode === "automatic" ? "Not needed" : "A task: must be ticked off",
+        ],
+        ["Cost", event.cost === undefined ? "No cost" : formatDollars(event.cost)],
+        ...(event.cost !== undefined
+          ? ([["Paid from", bucketName ?? "Removed bucket"]] as [string, string][])
+          : []),
+      ]
+    : [];
   const nurse = occurrenceNurse(plain ? { assignee: occurrence.assignee } : occurrence);
   const completedAt = !plain && occurrence.status === "done" ? occurrence.completedAt : undefined;
   const lateNote = !plain ? lateCompletionNote(occurrence) : undefined;
@@ -116,6 +163,22 @@ export function TaskDetailView({
           {lateNote && <p className="text-body-small text-text-secondary">{lateNote}</p>}
         </div>
       </CardShell>
+
+      {event && (
+        <CardShell role="region" aria-labelledby="task-details-heading" className={CARD}>
+          <h2 id="task-details-heading" className={CARD_TITLE}>
+            Details
+          </h2>
+          <dl className="grid grid-cols-[minmax(0,8rem)_minmax(0,1fr)] gap-x-4 gap-y-2 text-body-default">
+            {detailRows.map(([label, value]) => (
+              <div key={label} className="contents">
+                <dt className="text-text-secondary">{label}</dt>
+                <dd className="text-text-primary [overflow-wrap:anywhere]">{value}</dd>
+              </div>
+            ))}
+          </dl>
+        </CardShell>
+      )}
 
       <CardShell role="region" aria-labelledby="task-description-heading" className={CARD}>
         <h2 id="task-description-heading" className={CARD_TITLE}>
