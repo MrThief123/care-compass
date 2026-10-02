@@ -37,6 +37,18 @@ Record feature-level decisions here using the template below. Project-wide decis
 - Decision: AC-01 kept verbatim; AC-02 to AC-09 added; PRD Scope, UI, Edge, Security and Technical rewritten to record FD-01 to FD-04 and PD-053; PR target corrected from the retired `admin-dev` to `main`. `DEVELOPMENT_PLAN.md` card (1 criterion, 1 db) and totals not edited here; update with the PR docs commit once totals are settled (see ADM-03 FD-05).
 - Human confirmation required: no (records answers above).
 
+### FD-06 — `ManageShift.editable` is optional; an Assign warning waits while a failure shows
+- Date: 2026-10-03
+- Decision: (a) `ManageShift.editable` is typed `editable?: boolean` (PRD says `boolean`). `getAdminManage` always sets it; the shape returned by `assignShift` / `updateShift` does not carry it (the screen keeps the row's value), and ADM-07's component tests build shifts without it. Absent means not editable, so no button is offered by accident. (b) While a failure message (a failed save or cancel) is on screen, the Assign form's overlap warning is not shown; it returns as soon as the form changes. T-09 requires exactly one `alert` after a failed cancel, and its fixture's ended 07:00-09:00 shift overlaps the Assign form's default 07:00-11:00. The Assign overlap rule itself (D30) is unchanged and never blocks.
+- Human confirmation required: no (implementation detail), flagged for review in the PR.
+
+### FD-07 — Existing assertion changed: ADM-07 integration test now includes `editable`
+- Date: 2026-10-03
+- Test: `tests/integration/admin-assign-shift.test.ts`, "[ADM-07][AC-02] the existing 11:30-13:00 shift with Robert is loaded with names…".
+- Before: `getAdminManage` shifts `toContainEqual` an exact object without `editable`. After: the same object plus `editable: true` (a 2026-12-01 shift has not ended).
+- Reason: ADM-09 AC-07 / FD-03 requires `getAdminManage` to return `editable`; an exact-shape assertion cannot hold. No assertion removed, nothing relaxed.
+- **HUMAN REVIEW: test expectation changed** (flagged in PROGRESS.md and the PR).
+
 <!-- Template
 ### FD-01 — <title>
 - Date:
