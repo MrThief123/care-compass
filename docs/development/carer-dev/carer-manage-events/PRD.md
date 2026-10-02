@@ -9,7 +9,7 @@
 | Feature branch | `feature/carer-manage-events` |
 | Documentation | `docs/development/carer-dev/carer-manage-events/` |
 | Lane | C — Carer |
-| Sprint | POST-SPRINT · planned — |
+| Sprint | SPRINT · planned D15–D16 |
 | Status / owner | See PROGRESS.md |
 
 > **Plan v0.2 — data wiring feature.** The screen UI is delivered on fixtures by **CAR-UI-02**. Where this PRD's Scope describes layout or visual components, treat them as already built: verify them, then replace fixture data with the Supabase data source, add server actions, permissions and persistence, and make the acceptance criteria pass against real data. Shared components live in the UI kit (UI-01/UI-02/UI-03) — change them only through a shared PR.

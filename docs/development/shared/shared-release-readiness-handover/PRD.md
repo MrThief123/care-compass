@@ -9,7 +9,7 @@
 | Feature branch | `feature/shared-release-readiness-handover` |
 | Documentation | `docs/development/shared/shared-release-readiness-handover/` |
 | Lane | I — Integration |
-| Sprint | SPRINT · planned D19 |
+| Sprint | SPRINT · planned D21 |
 | Status / owner | See PROGRESS.md |
 
 ## Purpose
@@ -45,7 +45,7 @@ The client can keep using and extending the system after the team leaves (NFR-9,
 - —
 
 ## Dependencies
-- Features: INT-02 (End-to-end: organisation transfer journey), INT-03 (End-to-end: carer care delivery journey), INT-04 (End-to-end: admin rostering journey), INT-05 (Access-control regression matrix), F0-24 (Auth emails), INT-09 (Overdue and upcoming care alert emails), FAM-11 (Family — Update funds), ADM-03 (Admin — Deactivate staff), ADM-05 (Admin — Remove client), ADM-08 (Admin — Manage carer-client assignments), ADM-09 (Admin — Edit, extend or cancel a shift). CHG-047 added the last nine so release readiness covers the final state.
+- Features: INT-02 (End-to-end: organisation transfer journey), INT-03 (End-to-end: carer care delivery journey), INT-04 (End-to-end: admin rostering journey), INT-05 (Access-control regression matrix), INT-06 (Accessibility verification across dashboards), INT-07 (Scale and performance verification), F0-24 (Auth emails), INT-09 (Overdue and upcoming care alert emails), FAM-11 (Family — Update funds), CAR-07 (Carer — Add and edit events for a patient), ADM-03 (Admin — Deactivate staff), ADM-05 (Admin — Remove client), ADM-08 (Admin — Manage carer-client assignments), ADM-09 (Admin — Edit, extend or cancel a shift), ADM-11 (Admin — Client view). CHG-047 added the last thirteen so release readiness covers the final state.
 - Blocking open decisions (must be answered before START FEATURE): OQ-01, OQ-17
 - Non-blocking open decisions (proposed defaults apply, confirm when possible): OQ-18
 

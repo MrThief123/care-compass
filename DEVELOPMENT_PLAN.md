@@ -1,7 +1,7 @@
 # DEVELOPMENT PLAN — Care Compass
 
 Version 0.2 · 17 September 2026 · Status: DRAFT (controlled after planning freeze) · Supersedes v0.1 dashboard-by-dashboard phases
-Totals: **90 active features** (91 listed; CAR-08 retired) · **423 acceptance criteria** across 5 phases (UI-04 and its 10 criteria added by CHG-004, 2026-09-19; UI-05 and its 13 criteria added under CHG-009, 2026-09-24; F0-17 and its 8 criteria added by CHG-010, 2026-09-24; CHG-020, 2026-09-25: FAM-UI-08 (6 criteria) and ADM-11 (5) added, FAM-UI-05 +5 criteria, CAR-08 and its 2 criteria retired; CHG-021, 2026-09-25: FAM-UI-05 +4 criteria; CHG-022, 2026-09-25: FAM-UI-05 +5 criteria; CHG-027, 2026-09-26: F0-18 and its 9 criteria added; CHG-037, 2026-09-30: F0-19 and its 6 criteria added; CHG-040, 2026-09-30: F0-20 and its 10 criteria added; CHG-041, 2026-10-01: F0-21 and its 6 criteria added; CHG-042, 2026-10-01: F0-22 and its 8 criteria added; CHG-045, 2026-10-02: F0-23 and its 8 criteria added; CHG-047, 2026-10-02: F0-24 (7 criteria) and INT-09 (5 criteria) added, five post-sprint features pulled into the sprint, sprint extended to D19; the Jira import `docs/JIRA_BACKLOG.csv` predates all six). Jira import: `docs/JIRA_BACKLOG.csv`.
+Totals: **90 active features** (91 listed; CAR-08 retired) · **423 acceptance criteria** across 5 phases (UI-04 and its 10 criteria added by CHG-004, 2026-09-19; UI-05 and its 13 criteria added under CHG-009, 2026-09-24; F0-17 and its 8 criteria added by CHG-010, 2026-09-24; CHG-020, 2026-09-25: FAM-UI-08 (6 criteria) and ADM-11 (5) added, FAM-UI-05 +5 criteria, CAR-08 and its 2 criteria retired; CHG-021, 2026-09-25: FAM-UI-05 +4 criteria; CHG-022, 2026-09-25: FAM-UI-05 +5 criteria; CHG-027, 2026-09-26: F0-18 and its 9 criteria added; CHG-037, 2026-09-30: F0-19 and its 6 criteria added; CHG-040, 2026-09-30: F0-20 and its 10 criteria added; CHG-041, 2026-10-01: F0-21 and its 6 criteria added; CHG-042, 2026-10-01: F0-22 and its 8 criteria added; CHG-045, 2026-10-02: F0-23 and its 8 criteria added; CHG-047, 2026-10-02: F0-24 (7 criteria) and INT-09 (5 criteria) added, every remaining post-sprint feature pulled into the sprint, sprint extended to D21; the Jira import `docs/JIRA_BACKLOG.csv` predates all six). Jira import: `docs/JIRA_BACKLOG.csv`.
 
 ---
 
@@ -185,7 +185,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 | 19 | CAR-04 | Carer — Client info | C | D9 | SPRINT | F0-06, F0-10, F0-13, F0-18, CAR-UI-02 | OQ-09 | `feature/carer-client-info` | NOT STARTED |
 | 20 | CAR-05 | Carer — Calendar (shifts) and selected-shift tasks | C | D9–D10 | SPRINT | F0-10, F0-11, CAR-UI-03 | OQ-33 | `feature/carer-calendar-shifts` | NOT STARTED |
 | 21 | CAR-06 | Carer — Mark tasks done | C | D10 | SPRINT | F0-10, F0-11, F0-18, CAR-UI-02, CAR-04 | OQ-09, OQ-10, OQ-33 | `feature/carer-complete-task` | IN PROGRESS |
-| 22 | CAR-07 | Carer — Add and edit events for a patient | C | — | POST-SPRINT | CAR-04, F0-11, UI-02 | OQ-09, OQ-22, OQ-19 | `feature/carer-manage-events` | NOT STARTED |
+| 22 | CAR-07 | Carer — Add and edit events for a patient | C | D15–D16 | SPRINT | CAR-04, F0-11, UI-02 | OQ-09, OQ-22, OQ-19 | `feature/carer-manage-events` | NOT STARTED |
 | 23 | CAR-08 | ~~Carer — Record an expense~~ (retired, CHG-020) | C | — | POST-SPRINT | F0-12, F0-13 | OQ-19, OQ-04, OQ-05 | `feature/carer-record-expense` | RETIRED (CHG-020) |
 | 24 | CAR-09 | Carer — Settings | C | D10 | SPRINT | F0-07, CAR-UI-04 | OQ-35 | `feature/carer-settings` | NOT STARTED |
 | 25 | ADM-01 | Admin Home — counts and overdue events | A | D8 | SPRINT | F0-11, ADM-UI-01 | OQ-29 | `feature/admin-home` | NOT STARTED |
@@ -198,7 +198,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 | 32 | ADM-08 | Admin — Manage carer-client assignments | A | D16 | SPRINT | ADM-07 | OQ-09, OQ-19 | `feature/admin-carer-assignments` | NOT STARTED |
 | 33 | ADM-09 | Admin — Edit, extend or cancel a shift | A | D17 | SPRINT | ADM-07 | OQ-27, OQ-19 | `feature/admin-edit-shift` | NOT STARTED |
 | 34 | ADM-10 | Admin — Settings | A | D10 | SPRINT | F0-07, ADM-UI-05 | OQ-35 | `feature/admin-settings` | NOT STARTED |
-| 35 | ADM-11 | Admin — Client view: a client's Family screens with full access (CHG-020) | A | — | POST-SPRINT | ADM-04, FAM-01, FAM-04, FAM-06, FAM-07, FAM-09, FAM-10, FAM-11, FAM-14, FAM-15 | — | `feature/admin-client-view` | NOT STARTED |
+| 35 | ADM-11 | Admin — Client view: a client's Family screens with full access (CHG-020) | A | D19–D20 | SPRINT | ADM-04, FAM-01, FAM-04, FAM-06, FAM-07, FAM-09, FAM-10, FAM-11, FAM-14, FAM-15 | — | `feature/admin-client-view` | NOT STARTED |
 
 ### Phase 4 — Integration, hardening & release
 
@@ -209,9 +209,9 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 | 3 | INT-03 | End-to-end: carer care delivery journey | I | D12 | SPRINT | CAR-06, FAM-01 | OQ-33 | `feature/carer-care-delivery-e2e` | NOT STARTED |
 | 4 | INT-04 | End-to-end: admin rostering journey | I | D12 | SPRINT | ADM-07, CAR-02, CAR-05, FAM-01 | OQ-09, OQ-33 | `feature/admin-assign-shift-e2e` | NOT STARTED |
 | 5 | INT-05 | Access-control regression matrix | I | D12–D13 | STRETCH | FAM-15, CAR-06, ADM-07 | OQ-01 | `feature/shared-access-control-regression` | NOT STARTED |
-| 6 | INT-06 | Accessibility verification across dashboards | I | — | POST-SPRINT | FAM-15, CAR-09, ADM-10 | OQ-01 | `feature/shared-accessibility-verification` | NOT STARTED |
-| 7 | INT-07 | Scale and performance verification | I | — | POST-SPRINT | FAM-14, ADM-01 | OQ-01 | `feature/shared-calendar-scale-performance` | NOT STARTED |
-| 8 | INT-08 | Release readiness and client handover | I | D19 | SPRINT | INT-02, INT-03, INT-04, INT-05, F0-24, INT-09, FAM-11, ADM-03, ADM-05, ADM-08, ADM-09 | OQ-01, OQ-17 | `feature/shared-release-readiness-handover` | NOT STARTED |
+| 6 | INT-06 | Accessibility verification across dashboards | I | D20 | SPRINT | FAM-15, CAR-09, ADM-10 | OQ-01 | `feature/shared-accessibility-verification` | NOT STARTED |
+| 7 | INT-07 | Scale and performance verification | I | D19 | SPRINT | FAM-14, ADM-01 | OQ-01 | `feature/shared-calendar-scale-performance` | NOT STARTED |
+| 8 | INT-08 | Release readiness and client handover | I | D21 | SPRINT | INT-02, INT-03, INT-04, INT-05, INT-06, INT-07, F0-24, INT-09, FAM-11, CAR-07, ADM-03, ADM-05, ADM-08, ADM-09, ADM-11 | OQ-01, OQ-17 | `feature/shared-release-readiness-handover` | NOT STARTED |
 | 9 | INT-09 | Overdue and upcoming care alert emails | B | D17–D18 | SPRINT | INT-01, F0-11, F0-24 | OQ-40 | `feature/shared-care-alert-emails` | NOT STARTED |
 
 
@@ -1034,7 +1034,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Docs:** `docs/development/carer-dev/carer-complete-task/` · **Status:** IN PROGRESS
 
 ### CAR-07 — Carer — Add and edit events for a patient
-- **Dashboard / stream:** carer · **Lane:** C · **Days:** — · **Sprint:** POST-SPRINT · **PR target:** `main` · **Branch:** `feature/carer-manage-events`
+- **Dashboard / stream:** carer · **Lane:** C · **Days:** D15–D16 · **Sprint:** SPRINT · **PR target:** `main` · **Branch:** `feature/carer-manage-events`
 - **Description:** Implements sequence Use Case 2: carer opens a rostered patient's calendar and adds a task with date, description and documentation.
 - **User value:** Carers can record needs they observe while caring.
 - **Dependencies:** CAR-04, F0-11, UI-02 · **Blocking decisions:** OQ-09, OQ-22, OQ-19
@@ -1182,7 +1182,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Docs:** `docs/development/admin-dev/admin-settings/` · **Status:** NOT STARTED
 
 ### ADM-11 — Admin — Client view: a client's Family screens with full access
-- **Dashboard / stream:** admin · **Lane:** A · **Days:** — · **Sprint:** POST-SPRINT · **PR target:** `main` · **Branch:** `feature/admin-client-view`
+- **Dashboard / stream:** admin · **Lane:** A · **Days:** D19–D20 · **Sprint:** SPRINT · **PR target:** `main` · **Branch:** `feature/admin-client-view`
 - **Description:** A client's name in Admin · Clients opens `/admin/clients/<id>/home`, which renders that client's Family screens inside the admin layout with every Family action available; each change names the admin. Added by CHG-020.
 - **User value:** Care and money keep being managed when a family is no longer there.
 - **Dependencies:** ADM-04, FAM-01, FAM-04, FAM-06, FAM-07, FAM-09, FAM-10, FAM-11, FAM-14, FAM-15 · **Blocking decisions:** None
@@ -1252,7 +1252,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Docs:** `docs/development/shared/shared-access-control-regression/` · **Status:** NOT STARTED
 
 ### INT-06 — Accessibility verification across dashboards
-- **Dashboard / stream:** shared · **Lane:** I · **Days:** — · **Sprint:** POST-SPRINT · **PR target:** `main (per OQ-01 — shared work)` · **Branch:** `feature/shared-accessibility-verification`
+- **Dashboard / stream:** shared · **Lane:** I · **Days:** D20 · **Sprint:** SPRINT · **PR target:** `main (per OQ-01 — shared work)` · **Branch:** `feature/shared-accessibility-verification`
 - **Description:** Verifies WCAG 2.1 AA across Family, Carer and Admin screens.
 - **User value:** Older and less technical users can use the app (NFR-2, top client complaint).
 - **Dependencies:** FAM-15, CAR-09, ADM-10 · **Blocking decisions:** OQ-01
@@ -1263,7 +1263,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Docs:** `docs/development/shared/shared-accessibility-verification/` · **Status:** NOT STARTED
 
 ### INT-07 — Scale and performance verification
-- **Dashboard / stream:** shared · **Lane:** I · **Days:** — · **Sprint:** POST-SPRINT · **PR target:** `main (per OQ-01 — shared work)` · **Branch:** `feature/shared-calendar-scale-performance`
+- **Dashboard / stream:** shared · **Lane:** I · **Days:** D19 · **Sprint:** SPRINT · **PR target:** `main (per OQ-01 — shared work)` · **Branch:** `feature/shared-calendar-scale-performance`
 - **Description:** Checks the app remains responsive with unlimited care items over long periods.
 - **User value:** Meets 'hundreds of items, no limitation' (brief item 2) and NFR-5.
 - **Dependencies:** FAM-14, ADM-01 · **Blocking decisions:** OQ-01
@@ -1274,10 +1274,10 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Docs:** `docs/development/shared/shared-calendar-scale-performance/` · **Status:** NOT STARTED
 
 ### INT-08 — Release readiness and client handover
-- **Dashboard / stream:** shared · **Lane:** I · **Days:** D19 · **Sprint:** SPRINT · **PR target:** `main (per OQ-01 — shared work)` · **Branch:** `feature/shared-release-readiness-handover`
+- **Dashboard / stream:** shared · **Lane:** I · **Days:** D21 · **Sprint:** SPRINT · **PR target:** `main (per OQ-01 — shared work)` · **Branch:** `feature/shared-release-readiness-handover`
 - **Description:** Prepares the application and documentation for release to main and handover to a non-technical client.
 - **User value:** The client can keep using and extending the system after the team leaves (NFR-9, CM-0309).
-- **Dependencies:** INT-02, INT-03, INT-04, INT-05, F0-24, INT-09, FAM-11, ADM-03, ADM-05, ADM-08, ADM-09 (CHG-047: last, so it covers the final state) · **Blocking decisions:** OQ-01, OQ-17
+- **Dependencies:** INT-02, INT-03, INT-04, INT-05, INT-06, INT-07, F0-24, INT-09, FAM-11, CAR-07, ADM-03, ADM-05, ADM-08, ADM-09, ADM-11 (CHG-047: last, so it covers the final state) · **Blocking decisions:** OQ-01, OQ-17
 - **Jira summary:** Deployment runbook, environment and backup plan, plain-English user guide, glossary and handover pack
 - **Acceptance criteria summary:** 2 criteria — every technical term used appears in the glossary; the app deploys and a backup restore succeeds
 - **Testing summary:** 2 review
