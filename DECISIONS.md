@@ -1017,3 +1017,13 @@ Template for future entries:
 - Impact: INT-01's DEVELOPMENT_PLAN.md card line updated to point at PL-25 instead of asserting it's in scope; PRD.md §17 Parking lot gains PL-25 and PL-26. No change to INT-01's own PRD.md/ACCEPTANCE_CRITERIA.md (neither item was ever listed there). No migration, no code impact beyond INT-01 shipping without either.
 - Human confirmation: MrThief123 (human), 2026-10-01 (in-session).
 - Docs updated: DECISIONS.md (this entry), DEVELOPMENT_PLAN.md (INT-01 card line), PRD.md (§17 Parking lot: PL-25, PL-26); INT-01's own DECISIONS.md/PROGRESS.md record the same split (FD-05).
+
+### CHG-045 — Link uploaded documents to a new event on save (new feature F0-23)
+- Date / requested by: 2026-10-02 / Dhruv Verma (human, project lead)
+- Type: scope addition (new feature)
+- Description: `documents` grants `update (detached_at)` only (F0-13), so a file chosen on Add event, where no event id exists yet, can never be linked to the event once it is saved. FAM-08's Scope line "documents attached on save of Add/Edit event" is only delivered for Edit event (FAM-08 FD-01). New feature **F0-23** adds a guarded `SECURITY DEFINER` function `link_document_to_event` that sets `event_id` once, validated server-side, and wires the Add event form to call it after `createEvent` returns an id.
+- Supersedes: nothing. Closes FAM-08 FD-01's follow-up. The alternative of staging files in the browser and uploading after save (no migration) was considered and rejected: a partly failed save leaves an event with some files, and staged files are lost on refresh.
+- Source / justification: human, in-session 2026-10-02: chose the RPC (option a) and a new feature rather than a FAM-08 follow-up PR, because FAM-08 is merged and the work crosses the migration and family lanes.
+- Impact: new feature F0-23 (Lane S, `docs/development/shared/shared-document-event-linking/`), depends on F0-13, F0-11 and FAM-08. One additive migration (new function; no table or column change, so no other feature's reads change), a new `src/server/documents` action, and the family event form's Add mode (`src/features/family-event-form`, family lane files, on the human's instruction). No second upload pattern. No blocking open decision.
+- Human confirmation: Dhruv Verma, 2026-10-02 (in-session).
+- Docs updated: DECISIONS.md (this entry), DEVELOPMENT_PLAN.md (F0-23 row, card, totals 88 features / 411 ACs), F0-23 feature docs, FAM-08 DECISIONS.md FD-01 (points to F0-23).

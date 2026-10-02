@@ -1,10 +1,12 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { EventForm, type EventFormValues } from "@/components/shared/forms";
 import type { LocalDate } from "@/lib/dates/week-range";
+import { linkDocumentsToEvent } from "@/server/documents/actions";
 import { createEvent, updateEvent } from "@/server/events/actions";
 import type { BudgetBucketSummary, EventDocument } from "@/types/domain";
 
@@ -86,6 +88,9 @@ export function EventFormScreen({
   const [detailsErrors, setDetailsErrors] = useState<Record<string, string>>({});
   const [scope, setScope] = useState<EditScope>("occurrence");
   const [saveError, setSaveError] = useState<string>();
+  // Files chosen on Add event, linked to the event once `createEvent` returns an id (F0-23).
+  const [pendingDocuments, setPendingDocuments] = useState<{ id: string; name: string }[]>([]);
+  const [unlinkedNames, setUnlinkedNames] = useState<string[]>();
   const hasSavedCost = hasCostText(initialCost);
 
   function changeCost(next: EventCostValues) {
@@ -147,7 +152,41 @@ export function EventFormScreen({
       setSaveError(result.error.message);
       return;
     }
+    if (pendingDocuments.length > 0) {
+      const linked = await linkDocumentsToEvent({
+        eventId: result.data.eventId,
+        documentIds: pendingDocuments.map((document) => document.id),
+      });
+      const failedIds = linked.ok ? linked.data.failedIds : pendingDocuments.map(({ id }) => id);
+      if (failedIds.length > 0) {
+        // The event exists now, so the form is replaced by this notice (FD-05): staying on it
+        // would let a second Save create the event again.
+        setUnlinkedNames(
+          pendingDocuments.filter(({ id }) => failedIds.includes(id)).map(({ name }) => name),
+        );
+        return;
+      }
+    }
     router.push(returnHref);
+  }
+
+  if (unlinkedNames) {
+    return (
+      <div className="flex flex-col gap-5 px-6 pb-6 pt-5">
+        <h1 className="text-title-page text-text-primary">{TITLES[mode]}</h1>
+        <p role="alert" className="text-body-small text-text-primary">
+          The event was saved, but {unlinkedNames.join(", ")}{" "}
+          {unlinkedNames.length === 1 ? "didn't" : "didn't all"} attach. Open the event with Edit
+          event to add {unlinkedNames.length === 1 ? "it" : "them"} again.
+        </p>
+        <Link
+          href={returnHref}
+          className="inline-flex h-11 w-fit items-center justify-center rounded-control bg-primary px-6 text-title-card text-primary-foreground transition-colors outline-none hover:bg-primary/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+        >
+          Continue
+        </Link>
+      </div>
+    );
   }
 
   return (
@@ -183,7 +222,18 @@ export function EventFormScreen({
             />
           </>
         }
-        documents={<EventDocuments clientId={clientId} eventId={eventId} documents={documents} />}
+        documents={
+          <EventDocuments
+            clientId={clientId}
+            eventId={eventId}
+            documents={documents}
+            onUploaded={
+              mode === "add"
+                ? (document) => setPendingDocuments((current) => [...current, document])
+                : undefined
+            }
+          />
+        }
       />
       <p
         role="status"
