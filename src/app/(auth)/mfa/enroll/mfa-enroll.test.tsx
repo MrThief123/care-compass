@@ -36,6 +36,12 @@ describe("[F0-21][FD-13] QR image is centred", () => {
     // jsdom has no layout; the real position is checked in a browser (PROGRESS.md).
     expect(screen.getByRole("img", { name: /authenticator/i })).toHaveClass("self-center");
   });
+
+  it("[F0-21][FD-13] asks the auth layout for the wider card so the key fits on one line", () => {
+    render(<MfaEnrollForm factorId="f" qrCode={DATA_URI} secret="JBSWY3DPEHPK3PXP" />);
+
+    expect(screen.getByRole("heading", { level: 1 }).closest("[data-wide]")).not.toBeNull();
+  });
 });
 
 describe("[F0-20][AC-01] QR image", () => {
