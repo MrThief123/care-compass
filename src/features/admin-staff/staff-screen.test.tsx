@@ -280,3 +280,20 @@ describe("[ADM-08][FD-07] Pending carers", () => {
     expect(screen.getByRole("status")).toHaveTextContent("Helen Brown invited");
   });
 });
+
+describe("[ADM-08][AC-11] keyboard focus around the side panel", () => {
+  it("[ADM-08][AC-11] moves focus into the panel on open and back to the opening button on Close or Escape", async () => {
+    render(<StaffScreen data={data} />);
+    const name = screen.getByRole("button", { name: "Edit Aisha Rahman" });
+    await userEvent.click(name);
+    expect(screen.getByLabelText("First name")).toHaveFocus();
+    await userEvent.click(screen.getByRole("button", { name: "Close" }));
+    expect(name).toHaveFocus();
+
+    const add = screen.getByRole("button", { name: "Add Staff" });
+    await userEvent.click(add);
+    expect(screen.getByLabelText("First name")).toHaveFocus();
+    await userEvent.keyboard("{Escape}");
+    expect(add).toHaveFocus();
+  });
+});

@@ -78,13 +78,17 @@ export function StaffScreen({
   const [errors, setErrors] = useState<Partial<Record<keyof Draft, string>>>({});
   const [notice, setNotice] = useState("");
   const panel = useRef<HTMLDivElement>(null);
+  const addButton = useRef<HTMLSpanElement>(null);
+  // The button that opened the panel, so closing it can give keyboard focus back (ADM-08 AC-11).
+  const opener = useRef<HTMLElement | null>(null);
   const selected = staff.find((person) => person.id === selectedId);
 
   useEffect(() => {
     if (open) panel.current?.querySelector("input")?.focus();
   }, [open, selectedId]);
 
-  function edit(person?: StaffMember) {
+  function edit(person?: StaffMember, from?: HTMLElement) {
+    opener.current = from ?? null;
     setSelectedId(person?.id ?? null);
     setDraft(person ? draftFrom(person) : emptyDraft());
     setErrors({});
@@ -93,6 +97,10 @@ export function StaffScreen({
   }
 
   function close(message = "") {
+    const back = opener.current?.isConnected
+      ? opener.current
+      : addButton.current?.querySelector("button");
+    back?.focus();
     setOpen(false);
     setSelectedId(null);
     setDraft(emptyDraft());
@@ -151,10 +159,12 @@ export function StaffScreen({
       <CardShell className="min-w-0 border-transparent p-5">
         <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
           <h2 className="text-title-card text-text-primary">Staff List</h2>
-          <Button onClick={() => edit()}>
-            <Icon name="plus" aria-hidden />
-            Add Staff
-          </Button>
+          <span ref={addButton}>
+            <Button onClick={(event) => edit(undefined, event.currentTarget)}>
+              <Icon name="plus" aria-hidden />
+              Add Staff
+            </Button>
+          </span>
         </div>
         {!open && (
           <p role="status" className="mb-3 text-body-small text-text-secondary">
@@ -177,7 +187,7 @@ export function StaffScreen({
                         variant="ghost"
                         aria-label={"Edit " + fullName(person)}
                         aria-current={open && selectedId === person.id ? "true" : undefined}
-                        onClick={() => edit(person)}
+                        onClick={(event) => edit(person, event.currentTarget)}
                       >
                         {fullName(person)}
                       </Button>

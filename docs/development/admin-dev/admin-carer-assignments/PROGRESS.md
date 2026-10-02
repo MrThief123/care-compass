@@ -29,7 +29,7 @@ Last updated: 2026-10-02 (implemented; awaiting human approval to open the PR)
 - Status page refresh (`node scripts/status-page.mjs`); human "yes" before opening the PR
 
 ## Acceptance criteria status
-- 7 / 7 MET
+- 11 / 11 MET (AC-08 to AC-11 added after implementation for FD-05, FD-07, FD-08)
 
 ## Tests
 - Written: 16 cases (T-16 manual) across 5 files

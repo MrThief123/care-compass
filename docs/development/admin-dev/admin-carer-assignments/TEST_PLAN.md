@@ -35,10 +35,18 @@ Tests are written **before** production code (TESTING.md §2). Run them, confirm
 | T-14 | AC-03 | integration | Other-org admin, other-org carer and the carer herself get UNAUTHORISED; nothing changes. | ☑ | PASSING |
 | T-15 | AC-01, AC-05 | e2e | Admin removes Margaret from Aisha on /admin/staff; row gone, persisted after reload, shift cancelled not deleted. | ☑ | PASSING (local stack, webpack build) |
 | T-16 | AC-07 | manual | Width sweep 1920 to 768: nothing overlaps; Remove buttons 44x44px (real browser, in the implementation session). | — | DONE: no overflow at 1920, 1024, 768, 500; Remove 85.6x44px |
+| T-17 | AC-08 | component | Panel closed on load; a name opens it with details and Clients; Add Staff opens it empty; Close clears; empty staff list; switching rows discards the draft (`staff-screen.test.tsx`, `carer-assignments.test.tsx`). | ☐ (added after implementation, FD-05) | PASSING |
+| T-18 | AC-08 | e2e | Real data: closed until a name or Add Staff; Aisha's panel shows her client; Close clears; Add Staff opens empty (`tests/e2e/admin-staff-panel.spec.ts`). | ☐ | PASSING (local stack) |
+| T-19 | AC-09 | db | `admin_pending_staff_ids` returns only the caller's organisation's unconfirmed carers; carer and anon refused (`supabase/tests/admin_pending_staff.test.sql`, 6 tests). | ☐ | PASSING |
+| T-20 | AC-09 | component | Invited carer labelled Pending in list and panel; a carer just added is Pending at once (`staff-screen.test.tsx`). | ☐ | PASSING |
+| T-21 | AC-09, AC-10 | e2e | Real data: Priya invites Helen; Pending, still Pending after reload, unconfirmed in the database, absent from Manage; after confirmation listed on Manage with Margaret selectable and no longer Pending (`admin-staff-panel.spec.ts`). | ☐ | PASSING (local stack) |
+| T-22 | AC-10 | unit | `assignShift` refuses a pending carer and creates nothing; creates nothing if the pending lookup fails (`manage-actions.test.ts`). | ☐ | PASSING |
+| T-23 | AC-11 | component | Focus moves into the panel on open and back to the opening button on Close and on Escape (`staff-screen.test.tsx`). | ☐ | PASSING |
+| T-24 | AC-08, AC-09 | manual | Real browser at 1920, 1024, 768 and 500: panel open/close, Pending label after reload, no overflow, no console errors (mock-mode build). | — | DONE |
 
 ## Regression scope
 - Run the full unit/component suite, `supabase test db` and `npm run typecheck`/`lint` before marking READY FOR PR.
-- Existing Staff screen tests (`staff-screen.test.tsx`, `staff-states.test.tsx`) must pass unchanged: `assignments` is optional.
+- Existing Staff screen tests pass, except the two ADM-02 expectations FD-05 changed (HUMAN REVIEW); `assignments` and `pendingIds` are optional props/fields.
 - Run Playwright e2e for this dashboard (`--grep-invert "F0-07"`, local stack only) before opening the PR.
 
 ## Test data

@@ -71,6 +71,12 @@ Record feature-level decisions here using the template below. Project-wide decis
 - Test change (infrastructure, not behaviour): `manage-actions.test.ts` fake Supabase client gains `rpc`, returning no pending carers by default, because `assignShift` now calls it. Two new tests there; the real-data spec `admin-staff-panel.spec.ts` now asserts Helen is absent from Manage while pending and present once confirmed.
 - Human confirmation: Dhruv Verma, 2026-10-02.
 
+### FD-09 — AC-08 to AC-11 and focus return added after implementation
+- Date: 2026-10-02
+- Decision: the side panel (FD-05), Pending label (FD-07) and the Manage rule (FD-08) had no acceptance criteria. AC-08 to AC-11 and test rows T-17 to T-24 record them, pointing at tests that already existed, plus one new component test (T-23) for a fix found in review: closing the panel now returns keyboard focus to the button that opened it. Those tests were written after the code, not before; stated here rather than hidden.
+- Known limit, unchanged from FD-08: the "not signed up, so not rostered" rule is app-level, not a database constraint.
+- Human confirmation: Dhruv Verma, 2026-10-02 ("fix 1 and 2, and then open the PR").
+
 <!-- Template
 ### FD-01 — <title>
 - Date:
