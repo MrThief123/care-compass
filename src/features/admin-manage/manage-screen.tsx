@@ -4,6 +4,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
 import { DatePickerGrid } from "@/components/shared/calendar/date-picker-grid";
+import { ConfirmationModal } from "@/components/shared/forms/confirmation-modal";
 import { Field } from "@/components/shared/forms/field";
 import { InlineAlert } from "@/components/shared/forms/inline-alert";
 import { SelectableListRow } from "@/components/shared/lists/selectable-list-row";
@@ -13,8 +14,8 @@ import { CardShell } from "@/components/ui/card-shell";
 import { Icon } from "@/components/ui/icon";
 import { cn } from "@/lib/utils";
 import { shiftTimeRangeSchema } from "@/server/admin/assign-shift-schema";
-import { assignShift } from "@/server/admin/manage-actions";
-import type { AdminManageData, ManagePerson } from "@/server/admin/manage-queries";
+import { assignShift, cancelShift } from "@/server/admin/manage-actions";
+import type { AdminManageData, ManagePerson, ManageShift } from "@/server/admin/manage-queries";
 
 /** Common shift times, one tap fills the start and end dropdowns. */
 const commonShifts = [
@@ -34,6 +35,7 @@ const minuteOptions = Array.from({ length: 12 }, (_, step) => ({
   label: pad(step * 5),
 }));
 const ASSIGN_FAILED = "Couldn't assign the shift. Try again.";
+const CANCEL_FAILED = "Couldn't cancel the shift. Try again.";
 
 function PersonList({
   title,
@@ -150,8 +152,15 @@ export function ManageScreen({
   const [saving, setSaving] = useState(false);
   const [shifts, setShifts] = useState(data.shifts);
   const [justAssignedId, setJustAssignedId] = useState("");
+  const [cancelling, setCancelling] = useState<ManageShift | null>(null);
   const staff = data.staff.find((person) => person.id === staffId);
   const client = data.clients.find((person) => person.id === clientId);
+  const carerNameOf = (shift: ManageShift) =>
+    shift.staffName ?? data.staff.find((person) => person.id === shift.staffId)?.name ?? "Carer";
+  const clientNameOf = (shift: ManageShift) =>
+    shift.clientName ??
+    data.clients.find((person) => person.id === shift.clientId)?.name ??
+    "Another client";
   const range = { start, end };
   const validRange = shiftTimeRangeSchema.safeParse(range);
   const overlaps = validRange.success
@@ -230,6 +239,32 @@ export function ManageScreen({
       `Shift assigned: ${staff.name} → ${client.name}, ${date}, ${range.start} - ${range.end}.`,
     );
   }
+  /** Cancel a live shift once the admin confirms; the row and its date dot go, the history stays. */
+  async function confirmCancel() {
+    const shift = cancelling;
+    if (!shift || saving) return;
+    setCancelling(null);
+    setFailure("");
+    setNotice("");
+    setSaving(true);
+    let outcome: Awaited<ReturnType<typeof cancelShift>>;
+    try {
+      outcome = await cancelShift(shift.id);
+    } catch {
+      // A rejected action is a failed cancel, not a crash; the shift stays.
+      outcome = { ok: false, error: { code: "UNEXPECTED", message: CANCEL_FAILED } };
+    }
+    setSaving(false);
+    if (!outcome.ok) {
+      setFailure(outcome.error.message);
+      return;
+    }
+    setShifts((current) => current.filter((row) => row.id !== shift.id));
+    setJustAssignedId("");
+    setNotice(
+      `Shift cancelled: ${carerNameOf(shift)} → ${clientNameOf(shift)}, ${shift.date}, ${shift.start} - ${shift.end}.`,
+    );
+  }
   return (
     <div className="grid gap-5 p-6 lg:grid-cols-[240px_240px_minmax(0,1fr)] xl:grid-cols-[290px_290px_minmax(0,1fr)] lg:min-h-[calc(100vh-76px)]">
       <PersonList
@@ -300,6 +335,7 @@ export function ManageScreen({
               shifts={shifts}
               staffList={data.staff}
               clientList={data.clients}
+              onCancel={setCancelling}
             />
           )}
         </div>
@@ -316,7 +352,7 @@ export function ManageScreen({
               setFailure("");
             }}
           />
-          {staff && overlaps.length > 0 && (
+          {staff && !failure && overlaps.length > 0 && (
             <InlineAlert>
               {overlaps
                 .map(
@@ -352,6 +388,20 @@ export function ManageScreen({
           </div>
         </div>
       </CardShell>
+      <ConfirmationModal
+        open={cancelling !== null}
+        title="Cancel this shift?"
+        body={
+          cancelling
+            ? `${carerNameOf(cancelling)} with ${clientNameOf(cancelling)}, ${cancelling.date}, ${cancelling.start} - ${cancelling.end}. The shift is removed from the roster and its history is kept.`
+            : ""
+        }
+        confirmLabel="Cancel shift"
+        cancelLabel="Keep shift"
+        tone="destructive"
+        onConfirm={() => void confirmCancel()}
+        onCancel={() => setCancelling(null)}
+      />
     </div>
   );
 }
@@ -453,6 +503,7 @@ function BookedPanel({
   shifts,
   staffList,
   clientList,
+  onCancel,
 }: {
   date: string;
   staff?: ManagePerson;
@@ -460,6 +511,7 @@ function BookedPanel({
   shifts: AdminManageData["shifts"];
   staffList: ManagePerson[];
   clientList: ManagePerson[];
+  onCancel: (shift: ManageShift) => void;
 }) {
   const onDay = shifts
     .filter((shift) => shift.date === date)
@@ -476,6 +528,8 @@ function BookedPanel({
         .map((shift) => ({
           ...shift,
           who: shift.clientName ?? nameOf(clientList, shift.clientId, "Another client"),
+          carer: staff.name,
+          client: shift.clientName ?? nameOf(clientList, shift.clientId, "Another client"),
         })),
     },
     client && {
@@ -487,6 +541,8 @@ function BookedPanel({
         .map((shift) => ({
           ...shift,
           who: shift.staffName ?? nameOf(staffList, shift.staffId, "Another carer"),
+          carer: shift.staffName ?? nameOf(staffList, shift.staffId, "Another carer"),
+          client: client.name,
         })),
     },
   ].filter((group) => Boolean(group));
@@ -518,12 +574,21 @@ function BookedPanel({
                     {group.rows.map((row) => (
                       <li
                         key={row.id}
-                        className="flex flex-wrap justify-between gap-x-3 text-body-default text-text-primary"
+                        className="flex flex-wrap justify-between gap-x-3 gap-y-2 text-body-default text-text-primary"
                       >
                         <span className="min-w-0 break-words">{row.who}</span>
                         <span>
                           {row.start} - {row.end}
                         </span>
+                        {row.editable && (
+                          <Button
+                            variant="secondary"
+                            aria-label={`Cancel shift, ${row.carer}, ${row.client}, ${row.start} - ${row.end}`}
+                            onClick={() => onCancel(row)}
+                          >
+                            Cancel
+                          </Button>
+                        )}
                       </li>
                     ))}
                   </ul>

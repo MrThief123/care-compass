@@ -10,9 +10,12 @@
  * `shifts_before_insert` trigger requires the carer to be in that same organisation (and sets
  * `organisation_id` itself). Overlaps are never blocked (D30); the screen warns about them.
  */
+import { z } from "zod";
+
 import { fieldErrors } from "@/components/shared/forms/validation";
 import { localToMelbourneIso } from "@/lib/dates/melbourne-time";
 import type { Database } from "@/lib/supabase/database.types";
+import { ADMIN_MANAGE } from "@/mocks/admin-manage";
 import { getDataSourceMode } from "@/server/data-source";
 
 import { assignShiftSchema, type AssignShiftValues } from "./assign-shift-schema";
@@ -81,7 +84,7 @@ export async function assignShift(input: AssignShiftInput): Promise<AssignShiftR
     // fails closed: if the lookup itself fails, no shift is created.
     const pending = await supabase.rpc("admin_pending_staff_ids");
     if (pending.error) {
-      logFailure(pending.error.code);
+      logFailure("assignShift", pending.error.code);
       return { ok: false, error: { code: "UNEXPECTED", message: ASSIGN_FAILED } };
     }
     if ((pending.data ?? []).includes(carerId)) {
@@ -106,17 +109,83 @@ export async function assignShift(input: AssignShiftInput): Promise<AssignShiftR
       if (error && REFUSAL_CODES.has(error.code)) {
         return { ok: false, error: { code: "UNAUTHORISED", message: NOT_ALLOWED } };
       }
-      logFailure(error?.code);
+      logFailure("assignShift", error?.code);
       return { ok: false, error: { code: "UNEXPECTED", message: ASSIGN_FAILED } };
     }
     return { ok: true, data: toManageShift(data) };
   } catch (error) {
-    logFailure(error instanceof Error ? error.name : undefined);
+    logFailure("assignShift", error instanceof Error ? error.name : undefined);
     return { ok: false, error: { code: "UNEXPECTED", message: ASSIGN_FAILED } };
   }
 }
 
 /** A feature tag and an error code only: the message may carry client data (ARCHITECTURE.md §12.5). */
-function logFailure(code: string | undefined) {
-  console.error("[admin-manage] assignShift failed:", code ?? "unknown");
+
+type ShiftFailure = {
+  ok: false;
+  error: {
+    code: "VALIDATION" | "UNAUTHORISED" | "NOT_FOUND" | "UNEXPECTED";
+    message: string;
+    fieldErrors?: Record<string, string>;
+  };
+};
+export type CancelShiftResult = { ok: true; data: { id: string } } | ShiftFailure;
+
+const cancelShiftSchema = z.string().trim().min(1, "Choose a shift.");
+
+const CANCEL_FAILED = "Couldn't cancel the shift. Try again.";
+const CANT_CHANGE = "That shift can't be changed.";
+const notFound = (): ShiftFailure => ({
+  ok: false,
+  error: { code: "NOT_FOUND", message: CANT_CHANGE },
+});
+
+/** Cancel a live shift: sets `cancelled_at`, keeps the row (PD-053). Ended shifts are NOT_FOUND. */
+export async function cancelShift(shiftId: string): Promise<CancelShiftResult> {
+  const parsed = cancelShiftSchema.safeParse(shiftId);
+  if (!parsed.success) {
+    const message = parsed.error.issues[0]?.message ?? "Choose a shift.";
+    return { ok: false, error: { code: "VALIDATION", message, fieldErrors: { shiftId: message } } };
+  }
+  const id = parsed.data;
+
+  if (getDataSourceMode() === "mock") {
+    return ADMIN_MANAGE.shifts.some((row) => row.id === id)
+      ? { ok: true, data: { id } }
+      : notFound();
+  }
+
+  try {
+    const { createClient } = await import("@/lib/supabase/server");
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return { ok: false, error: { code: "UNAUTHORISED", message: CANT_CHANGE } };
+
+    // The policy only lets a live shift be updated, so zero rows is "ended, cancelled or not yours".
+    const { data, error } = await supabase
+      .from("shifts")
+      .update({ cancelled_at: new Date().toISOString() })
+      .eq("id", id)
+      .select("id")
+      .maybeSingle();
+    if (error) {
+      if (REFUSAL_CODES.has(error.code)) {
+        return { ok: false, error: { code: "UNAUTHORISED", message: CANT_CHANGE } };
+      }
+      logFailure("cancelShift", error.code);
+      return { ok: false, error: { code: "UNEXPECTED", message: CANCEL_FAILED } };
+    }
+    if (!data) return notFound();
+    return { ok: true, data: { id: data.id } };
+  } catch (error) {
+    logFailure("cancelShift", error instanceof Error ? error.name : undefined);
+    return { ok: false, error: { code: "UNEXPECTED", message: CANCEL_FAILED } };
+  }
+}
+
+/** A feature tag and an error code only: the message may carry client data (ARCHITECTURE.md §12.5). */
+function logFailure(action: string, code: string | undefined) {
+  console.error(`[admin-manage] ${action} failed:`, code ?? "unknown");
 }

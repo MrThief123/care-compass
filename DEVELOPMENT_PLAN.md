@@ -1,7 +1,7 @@
 # DEVELOPMENT PLAN — Care Compass
 
 Version 0.2 · 17 September 2026 · Status: DRAFT (controlled after planning freeze) · Supersedes v0.1 dashboard-by-dashboard phases
-Totals: **93 active features** (94 listed; CAR-08 retired) · **452 acceptance criteria** across 5 phases (UI-04 and its 10 criteria added by CHG-004, 2026-09-19; UI-05 and its 13 criteria added under CHG-009, 2026-09-24; F0-17 and its 8 criteria added by CHG-010, 2026-09-24; CHG-020, 2026-09-25: FAM-UI-08 (6 criteria) and ADM-11 (5) added, FAM-UI-05 +5 criteria, CAR-08 and its 2 criteria retired; CHG-021, 2026-09-25: FAM-UI-05 +4 criteria; CHG-022, 2026-09-25: FAM-UI-05 +5 criteria; CHG-027, 2026-09-26: F0-18 and its 9 criteria added; CHG-037, 2026-09-30: F0-19 and its 6 criteria added; CHG-040, 2026-09-30: F0-20 and its 10 criteria added; CHG-041, 2026-10-01: F0-21 and its 6 criteria added; CHG-042, 2026-10-01: F0-22 and its 8 criteria added; CHG-045, 2026-10-02: F0-23 and its 8 criteria added; CHG-047, 2026-10-02: F0-24 (7 criteria) and INT-09 (5 criteria) added, every remaining post-sprint feature pulled into the sprint, sprint extended to D21; CHG-050, 2026-10-02: INT-10 and its 4 criteria added (PL-26 promoted); CHG-051, 2026-10-02: FAM-16 and its 11 criteria added (PL-27 promoted); CHG-052, 2026-10-02: INT-11 and its 8 criteria added (PL-25 promoted); the Jira import `docs/JIRA_BACKLOG.csv` predates all eight). Jira import: `docs/JIRA_BACKLOG.csv`.
+Totals: **93 active features** (94 listed; CAR-08 retired) · **460 acceptance criteria** across 5 phases (UI-04 and its 10 criteria added by CHG-004, 2026-09-19; UI-05 and its 13 criteria added under CHG-009, 2026-09-24; F0-17 and its 8 criteria added by CHG-010, 2026-09-24; CHG-020, 2026-09-25: FAM-UI-08 (6 criteria) and ADM-11 (5) added, FAM-UI-05 +5 criteria, CAR-08 and its 2 criteria retired; CHG-021, 2026-09-25: FAM-UI-05 +4 criteria; CHG-022, 2026-09-25: FAM-UI-05 +5 criteria; CHG-027, 2026-09-26: F0-18 and its 9 criteria added; CHG-037, 2026-09-30: F0-19 and its 6 criteria added; CHG-040, 2026-09-30: F0-20 and its 10 criteria added; CHG-041, 2026-10-01: F0-21 and its 6 criteria added; CHG-042, 2026-10-01: F0-22 and its 8 criteria added; CHG-045, 2026-10-02: F0-23 and its 8 criteria added; CHG-047, 2026-10-02: F0-24 (7 criteria) and INT-09 (5 criteria) added, every remaining post-sprint feature pulled into the sprint, sprint extended to D21; CHG-050, 2026-10-02: INT-10 and its 4 criteria added (PL-26 promoted); CHG-051, 2026-10-02: FAM-16 and its 11 criteria added (PL-27 promoted); CHG-052, 2026-10-02: INT-11 and its 8 criteria added (PL-25 promoted); ADM-09, 2026-10-03: 1 criterion grown to 9 (+8, FD-05); the Jira import `docs/JIRA_BACKLOG.csv` predates all eight). Jira import: `docs/JIRA_BACKLOG.csv`.
 
 ---
 
@@ -1114,7 +1114,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Acceptance criteria summary:** 9 criteria — zero rows are returned; those tasks still show 'Done · Marcus C.'; shifts cancelled and ended, refused for non-admins, idempotent, signed out next request, confirm dialog, Inactive section, failure alert
 - **Testing summary:** 2 db files, 1 integration file, 1 unit file, 1 component file
 - **Requirements:** REQ-06, REQ-N6
-- **Docs:** `docs/development/admin-dev/admin-staff-deactivate/` · **Status:** READY FOR PR
+- **Docs:** `docs/development/admin-dev/admin-staff-deactivate/` · **Status:** IN REVIEW (PR #212)
 
 ### ADM-04 — Admin — Clients list and add client
 - **Dashboard / stream:** admin · **Lane:** A · **Days:** D9 · **Sprint:** SPRINT · **PR target:** `main` · **Branch:** `feature/admin-clients`
@@ -1173,16 +1173,16 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Requirements:** REQ-05, REQ-06
 - **Docs:** `docs/development/admin-dev/admin-carer-assignments/` · **Status:** NOT STARTED
 
-### ADM-09 — Admin — Edit, extend or cancel a shift
+### ADM-09 — Admin — Edit, extend or cancel a shift (cancel only, CHG-053)
 - **Dashboard / stream:** admin · **Lane:** A · **Days:** D17 · **Sprint:** SPRINT · **PR target:** `main` · **Branch:** `feature/admin-edit-shift`
 - **Description:** Supports the client's need to extend a shift when a manager asks a carer to stay longer.
 - **User value:** Rosters reflect reality; edit rights follow actual working time.
 - **Dependencies:** ADM-07 · **Blocking decisions:** OQ-27, OQ-19
-- **Jira summary:** Change shift times, extend a shift by extra hours, or cancel it (not designed)
-- **Acceptance criteria summary:** 1 criteria — it returns true
-- **Testing summary:** 1 db
+- **Jira summary:** Cancel a shift (editing and extending dropped, CHG-053)
+- **Acceptance criteria summary:** 9 criteria — a shift's carer, times and client are guarded by the database; cancel sets `cancelled_at` and keeps the row; ended and cancelled shifts are frozen; a deactivated, other-organisation carer or a new client is refused; mock validation and NOT_FOUND; real-data cancel; Cancel button on editable shifts only; Cancel dialog (FD-05, CHG-053: editing dropped)
+- **Testing summary:** 1 db file, 1 unit file, 1 integration file, 1 component file, 1 e2e file
 - **Requirements:** REQ-24
-- **Docs:** `docs/development/admin-dev/admin-edit-shift/` · **Status:** NOT STARTED
+- **Docs:** `docs/development/admin-dev/admin-edit-shift/` · **Status:** IN REVIEW (PR #212)
 
 ### ADM-10 — Admin — Settings
 - **Dashboard / stream:** admin · **Lane:** A · **Days:** D10 · **Sprint:** SPRINT · **PR target:** `main` · **Branch:** `feature/admin-settings`

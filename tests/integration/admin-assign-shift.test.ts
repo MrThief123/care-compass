@@ -248,6 +248,7 @@ describe.skipIf(!hasLocalSupabase)("[ADM-07] Assign shift against local Supabase
         end: "13:00",
         staffName: "Aisha Rahman",
         clientName: "Robert Hale",
+        editable: true,
       });
 
       // The same shift is what F0-10's overlapping_shifts reports for 11:00-15:00 that day.

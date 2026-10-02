@@ -24,6 +24,11 @@ export interface ManageShift {
    */
   staffName?: string;
   clientName?: string;
+  /**
+   * Whether the shift can still be edited or cancelled: it has not ended (ADM-09 FD-03). Set by
+   * `getAdminManage`; absent means not editable, so nothing is offered by accident.
+   */
+  editable?: boolean;
 }
 export interface AdminManageData {
   referenceDate: string;
@@ -92,6 +97,11 @@ function startOfPreviousMonth(date: string) {
 export async function getAdminManage(search: AdminManageSearch = {}): Promise<AdminManageData> {
   if (getDataSourceMode() === "mock") {
     const data = structuredClone(ADMIN_MANAGE);
+    // Fixtures have no clock: a shift is editable from the reference day on (ADM-09).
+    const shifts = data.shifts.map((shift) => ({
+      ...shift,
+      editable: shift.date >= data.referenceDate,
+    }));
     // A carer deactivated on the Staff screen is no longer offered (ADM-03); the fixture list
     // is matched to the staff store by name.
     const inactive = new Set(
@@ -101,6 +111,7 @@ export async function getAdminManage(search: AdminManageSearch = {}): Promise<Ad
     );
     return {
       ...data,
+      shifts,
       staff: data.staff.filter(
         (person) => !inactive.has(person.name) && matchesName(person.name, search.staffSearch),
       ),
@@ -160,6 +171,9 @@ export async function getAdminManage(search: AdminManageSearch = {}): Promise<Ad
     referenceDate,
     staff: staff.data.filter((row) => !pendingIds.has(row.id)).map(toPerson),
     clients: clients.data.map(toPerson),
-    shifts: shifts.data.map(({ carer, client, ...row }) => toManageShift(row, { carer, client })),
+    shifts: shifts.data.map(({ carer, client, ...row }) => ({
+      ...toManageShift(row, { carer, client }),
+      editable: new Date(row.ends_at).getTime() > Date.now(),
+    })),
   };
 }

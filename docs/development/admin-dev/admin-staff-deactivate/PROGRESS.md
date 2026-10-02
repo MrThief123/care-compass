@@ -1,6 +1,6 @@
 # Progress — ADM-03 Admin — Deactivate staff
 
-Status: PR OPEN
+Status: MERGED TO DEV (merged to `main` in #211, 2026-10-02)
 Owner: Dhruv Verma
 Lane: A — Admin
 Sprint: SPRINT · planned D15
