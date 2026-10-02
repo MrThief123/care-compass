@@ -285,13 +285,14 @@ describe("[CAR-07][AC-03] the entry points exist on shift only, and stay in the 
 });
 
 describe("[CAR-07][AC-04] the carer Add event form", () => {
-  it("[CAR-07][AC-04] T-04 opens the Family form, empty, with Title, Start time, Duration and Documents", async () => {
+  it("[CAR-07][AC-04] T-04 opens the Family form, empty, with Title, Start time, End time and Documents", async () => {
     await renderNew();
 
     expect(screen.getByRole("heading", { level: 1, name: "Add event" })).toBeInTheDocument();
     expect(screen.getByLabelText("Title")).toHaveValue("");
     expect(screen.getByLabelText("Start time")).toBeInTheDocument();
-    expect(screen.getByLabelText("Duration")).toBeInTheDocument();
+    expect(screen.getByLabelText("End time")).toBeInTheDocument();
+    expect(screen.queryByLabelText("Duration")).not.toBeInTheDocument();
     expect(screen.getByLabelText("Date")).toHaveValue("");
     expect(screen.getByLabelText("Recurring")).toHaveValue("none");
     expect(screen.getByRole("switch", { name: /task/i })).toBeInTheDocument();
