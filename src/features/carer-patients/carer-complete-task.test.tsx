@@ -285,8 +285,11 @@ describe("[CAR-06][AC-06] Calendar, Home and Care log read the patient's data an
 });
 
 describe("[CAR-06][AC-07] carers never get the family-only controls", () => {
+  // CHG-048 (CAR-07): on shift the Calendar has 'Enter event' and Task detail has 'Edit event',
+  // so the Add/Edit event half of this test now allows exactly those two, on shift only
+  // (HUMAN REVIEW: test expectation changed, CAR-07 FD-03). Home, Care log and the budget link
+  // are unchanged.
   it.each([
-    ["Calendar", renderCarerCalendar, "Physiotherapy"],
     ["Home", renderCarerHome, "Physiotherapy"],
     ["Care log", renderCarerCareLog, "Weekly weigh-in"],
   ])(
@@ -305,6 +308,19 @@ describe("[CAR-06][AC-07] carers never get the family-only controls", () => {
     },
   );
 
+  it("[CAR-06][AC-07] T-07 the Calendar on shift has Enter event (CAR-07) but no Edit event or View breakdown link", async () => {
+    const { container } = await renderCarerCalendar();
+
+    expect(screen.getAllByText("Physiotherapy").length).toBeGreaterThan(0);
+    expect(screen.getByRole("link", { name: "Enter event" })).toHaveAttribute(
+      "href",
+      expect.stringMatching(new RegExp(`^/carer/patients/${MARGARET}/events/new`)),
+    );
+    expect(screen.queryByRole("link", { name: /edit event/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /view breakdown/i })).not.toBeInTheDocument();
+    expect(container.innerHTML).not.toContain("/family/");
+  });
+
   it("[CAR-06][AC-07] T-07 Home has no tick boxes, on shift or off", async () => {
     await renderCarerHome();
     expect(screen.getByText("Physiotherapy")).toBeVisible();
@@ -318,6 +334,12 @@ describe("[CAR-06][AC-07] carers never get the family-only controls", () => {
     expect(screen.queryByRole("link", { name: /enter event|add event/i })).not.toBeInTheDocument();
     expect(screen.queryByRole("link", { name: /view breakdown/i })).not.toBeInTheDocument();
     expect(container.innerHTML).not.toContain("/family/");
+  });
+
+  it("[CAR-06][AC-07] T-07 off shift the Calendar has no Add event link either", async () => {
+    await renderCarerCalendar(ROBERT);
+
+    expect(screen.queryByRole("link", { name: /enter event|add event/i })).not.toBeInTheDocument();
   });
 });
 
