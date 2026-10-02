@@ -18,7 +18,7 @@ Tests first (TESTING.md §2; CLAUDE.md §5). New `tests/integration/pending-cost
 | T-09 | edge | integration | Client with no recipients: nothing sent, nothing recorded, no failure; adding a Family member then re-running sends. | ☐ | — |
 
 ## Regression scope
-- `npm run lint`, `npm run typecheck`, unit suite, `tests/integration/budget-thresholds.test.ts`, `tests/integration/pending-cost-emails.test.ts`, `supabase test db` (migration added), db reset then storage index note in memory not relevant here.
+- `npm run lint`, `npm run typecheck`, unit suite, `tests/integration/budget-thresholds.test.ts`, `tests/integration/pending-cost-emails.test.ts`, `supabase test db` (migration added).
 - No e2e (no UI). Do not trigger workflow runs; run locally and say so in the PR (CI down).
 
 ## Test data
