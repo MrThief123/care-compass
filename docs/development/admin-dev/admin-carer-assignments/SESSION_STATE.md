@@ -1,14 +1,11 @@
 # Session State — ADM-08 Admin — Manage carer-client assignments
 
 Last session date: 2026-10-02
-Current branch: `feature/admin-carer-assignments` (from `main`, pushed), worktree `../care-compass-adm08`
-Worked on: claim; ACs, test plan and decisions; tests first. No implementation.
-What changed: docs in this folder; `supabase/tests/admin_carer_assignments.test.sql`; `src/server/admin/assignments-actions.test.ts`; `src/features/admin-staff/carer-assignments.test.tsx`; `tests/integration/admin-carer-assignments.test.ts`; `tests/e2e/admin-carer-assignments.spec.ts`.
-Tests run: pgTAP file (fails: function missing), unit and component (fail: modules/props missing), integration against the local stack (fail: modules missing; seeding works). e2e not run.
-Test results: all red for the expected reason. Lint clean on the new files.
+Current branch: `feature/admin-carer-assignments`, worktree `../care-compass-adm08`
+Worked on: implementation of the migration, server files, mock store and Staff screen Clients list.
+What changed: see PROGRESS.md "Files changed". Uncommitted at the time of writing.
+Tests run: `supabase test db` (all pass), vitest (ADM-08 and admin-staff files pass), integration T-11..T-14 pass, e2e T-15 pass on a local-Supabase webpack build, typecheck, lint, prettier clean.
 Current blocker: none.
-Important discoveries: no assignment table exists (PD-041/F0-18); access = non-cancelled shifts with end after now. `transfer_client_organisation` is the pattern to copy for ending shifts. Admin RLS needs AAL2.
-Important decisions: FD-01 to FD-03 (human-confirmed): Staff screen per carer, Remove only, shifts-derived.
-Exact next action: implement per the contract in TEST_PLAN.md ("Contract the tests are written against"): `supabase migration new` for `admin_end_carer_assignment`, then server files, mock store, UI.
-Files likely to be touched next: see DECISIONS.md FD-02 consequences, plus `src/lib/supabase/database.types.ts` (regen), `src/app/(admin)/admin/staff/page.tsx`.
-Warning for next session: worktree has no `.env.local`; use `supabase status -o env` vars for integration/e2e (never the hosted project). ADM-03 also edits staff-screen.tsx. Refresh the status page in the PR (`node scripts/status-page.mjs`).
+Important discoveries: the axe `region` rule fails on `axe(document.body)` because StaffScreen is rendered without the admin layout's `<main>` (FD-04). Worktree needs `next build --webpack` (symlinked node_modules).
+Exact next action: refresh the status page, commit, push, then ask the human for "yes" before opening the PR.
+Warning for next session: ADM-03 also edits staff-screen.tsx. No `.env.local` in the worktree; use `supabase status -o env`.

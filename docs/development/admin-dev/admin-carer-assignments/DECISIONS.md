@@ -30,6 +30,14 @@ Record feature-level decisions here using the template below. Project-wide decis
 - Decision: AC-01 kept verbatim; AC-02 to AC-07 added to record FD-01/FD-02 (the original single AC could not cover the list, confirmation, permissions or errors). Recorded as a controlled change to this feature's ACs before any code, on the human's answers above. PRD.md is left as written (its "BLOCKED until designed" and `admin-dev` target are stale; OQ-19 and CHG-036 supersede them).
 - Human confirmation: Dhruv Verma, 2026-10-02.
 
+### FD-04 — T-10 axe call: `region` rule disabled (HUMAN REVIEW: test expectation changed)
+- Date: 2026-10-02
+- Test: `[ADM-08][AC-07]` in `src/features/admin-staff/carer-assignments.test.tsx`
+- Before: `expect(await axe(document.body)).toHaveNoViolations()`
+- After: `axe(document.body, { rules: { region: { enabled: false } } })`
+- Reason: with the confirmation open the test audits the whole body. `region` ("all content in a landmark") then flags the existing Staff table and form, which are outside any landmark only because the test renders `StaffScreen` alone. In the app `src/app/(admin)/admin/layout.tsx` wraps pages in `<main>`. Every other rule still runs; the first `axe(container)` call is unchanged. The new Clients list is its own labelled `region`.
+- Human confirmation required: yes (flagged in PROGRESS.md and the PR).
+
 <!-- Template
 ### FD-01 — <title>
 - Date:

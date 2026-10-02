@@ -19,22 +19,22 @@ Tests are written **before** production code (TESTING.md §2). Run them, confirm
 
 | Test ID | Covers | Level | Test description | Written first? | Result |
 |---|---|---|---|---|---|
-| T-01 | AC-01 | db | Given Aisha's assignment to Elsie is ended, when Aisha queries Elsie, then zero rows are returned. | ☑ | FAILING (function missing) |
-| T-02 | AC-02 | db | Pair's future shifts cancelled, in-progress ended, count returned; finished, already-cancelled and other pairs unchanged; Aisha loses Margaret, keeps Nell; Daniel keeps Margaret; repeat returns 0; null client refused. | ☑ | FAILING |
-| T-03 | AC-03 | db | Carer, other carer, family, other-org admin, AAL1 admin, other-org carer and anon are all refused; nothing changed. | ☑ | FAILING |
-| T-04 | AC-04 | unit | Mock list shows full client names, shift count and next shift. | ☑ | FAILING |
-| T-05 | AC-02 | unit | Mock remove drops only that pair; repeat is ok with 0. | ☑ | FAILING |
-| T-06 | AC-06 | unit | Empty carer or client id rejected, store unchanged. | ☑ | FAILING |
-| T-07 | AC-04 | component | Selected carer's clients by full name with Remove; switches on Edit; empty state; no list when adding; works with no assignments prop. | ☑ | FAILING |
-| T-08 | AC-05 | component | Confirmation names both; Cancel does nothing; Confirm calls the action, drops the row, shows status; last client leaves empty state. | ☑ | FAILING |
-| T-09 | AC-06 | component | Action failure keeps the row and shows the server message. | ☑ | FAILING |
-| T-10 | AC-07 | component | No axe violations with list and confirmation open. | ☑ | FAILING |
-| T-11 | AC-04 | integration | List scoped to own organisation; cancelled and finished shifts don't count. | ☑ | FAILING |
-| T-12 | AC-01 | integration | After removal Aisha reads zero Elsie rows under her own session; list no longer shows the pair. | ☑ | FAILING |
-| T-13 | AC-02 | integration | Removal effects on the four shift states; other pairs still readable. | ☑ | FAILING |
-| T-14 | AC-03 | integration | Other-org admin, other-org carer and the carer herself get UNAUTHORISED; nothing changes. | ☑ | FAILING |
-| T-15 | AC-01, AC-05 | e2e | Admin removes Margaret from Aisha on /admin/staff; row gone, persisted after reload, shift cancelled not deleted. | ☑ | NOT RUN (needs local stack + app) |
-| T-16 | AC-07 | manual | Width sweep 1920 to 768: nothing overlaps; Remove buttons 44x44px (real browser, in the implementation session). | — | NOT RUN |
+| T-01 | AC-01 | db | Given Aisha's assignment to Elsie is ended, when Aisha queries Elsie, then zero rows are returned. | ☑ | PASSING |
+| T-02 | AC-02 | db | Pair's future shifts cancelled, in-progress ended, count returned; finished, already-cancelled and other pairs unchanged; Aisha loses Margaret, keeps Nell; Daniel keeps Margaret; repeat returns 0; null client refused. | ☑ | PASSING |
+| T-03 | AC-03 | db | Carer, other carer, family, other-org admin, AAL1 admin, other-org carer and anon are all refused; nothing changed. | ☑ | PASSING |
+| T-04 | AC-04 | unit | Mock list shows full client names, shift count and next shift. | ☑ | PASSING |
+| T-05 | AC-02 | unit | Mock remove drops only that pair; repeat is ok with 0. | ☑ | PASSING |
+| T-06 | AC-06 | unit | Empty carer or client id rejected, store unchanged. | ☑ | PASSING |
+| T-07 | AC-04 | component | Selected carer's clients by full name with Remove; switches on Edit; empty state; no list when adding; works with no assignments prop. | ☑ | PASSING |
+| T-08 | AC-05 | component | Confirmation names both; Cancel does nothing; Confirm calls the action, drops the row, shows status; last client leaves empty state. | ☑ | PASSING |
+| T-09 | AC-06 | component | Action failure keeps the row and shows the server message. | ☑ | PASSING |
+| T-10 | AC-07 | component | No axe violations with list and confirmation open. | ☑ | PASSING |
+| T-11 | AC-04 | integration | List scoped to own organisation; cancelled and finished shifts don't count. | ☑ | PASSING |
+| T-12 | AC-01 | integration | After removal Aisha reads zero Elsie rows under her own session; list no longer shows the pair. | ☑ | PASSING |
+| T-13 | AC-02 | integration | Removal effects on the four shift states; other pairs still readable. | ☑ | PASSING |
+| T-14 | AC-03 | integration | Other-org admin, other-org carer and the carer herself get UNAUTHORISED; nothing changes. | ☑ | PASSING |
+| T-15 | AC-01, AC-05 | e2e | Admin removes Margaret from Aisha on /admin/staff; row gone, persisted after reload, shift cancelled not deleted. | ☑ | PASSING (local stack, webpack build) |
+| T-16 | AC-07 | manual | Width sweep 1920 to 768: nothing overlaps; Remove buttons 44x44px (real browser, in the implementation session). | — | DONE: no overflow at 1920, 1024, 768, 500; Remove 85.6x44px |
 
 ## Regression scope
 - Run the full unit/component suite, `supabase test db` and `npm run typecheck`/`lint` before marking READY FOR PR.
