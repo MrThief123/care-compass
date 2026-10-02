@@ -1,6 +1,6 @@
 # Progress — FAM-11 Family — Update funds (Edit budget)
 
-Status: READY FOR PR (awaiting human approval)
+Status: MERGED TO DEV (merged to `main` in #210, 2026-10-02)
 Owner: Dhruv Verma
 Lane: F — Family
 Sprint: SPRINT · planned D15–D16

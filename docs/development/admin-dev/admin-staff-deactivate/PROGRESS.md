@@ -1,6 +1,6 @@
 # Progress — ADM-03 Admin — Deactivate staff
 
-Status: READY FOR PR (awaiting human approval)
+Status: PR OPEN
 Owner: Dhruv Verma
 Lane: A — Admin
 Sprint: SPRINT · planned D15

@@ -1,6 +1,6 @@
 # Progress — CAR-07 Carer — Add and edit events for a patient
 
-Status: READY FOR PR
+Status: MERGED TO DEV (merged to `main` in #204, 2026-10-02)
 Owner: Dhruv Verma
 Lane: C — Carer
 Sprint: SPRINT · planned D15–D16

@@ -1,6 +1,6 @@
 # Progress — INT-10 Budget threshold email names the bucket
 
-Status: READY FOR PR
+Status: MERGED TO DEV (merged to `main` in #205, 2026-10-02)
 Owner: Dhruv Verma
 Lane: B — Backend
 Sprint: SPRINT · planned D18
