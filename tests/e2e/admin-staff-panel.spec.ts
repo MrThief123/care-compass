@@ -178,7 +178,14 @@ test.describe("[ADM-08] Staff screen against real data", () => {
       const account = await db().auth.admin.getUserById(profile.data!.id);
       expect(account.data.user?.email_confirmed_at ?? null).toBeNull();
 
+      // Manage reads the same carers: Helen is there to pick before she has signed in, and a shift
+      // can be started for her with Margaret.
+      await page.goto(`/admin/manage?staff=${profile.data!.id}&client=${s.clientId}`);
+      await expect(page.getByText("Helen Brown").first()).toBeVisible();
+      await expect(page.getByText(/Helen Brown → Margaret Doyle-/)).toBeVisible();
+
       // Helen follows the invite link: Pending goes away.
+      await page.goto("/admin/staff");
       const confirmed = await db().auth.admin.updateUserById(profile.data!.id, {
         email_confirm: true,
       });
