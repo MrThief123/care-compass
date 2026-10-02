@@ -119,16 +119,24 @@ describe("[FAM-08] EventDocuments", () => {
   });
 
   describe("[FAM-08][FD-01] Add event (no eventId yet)", () => {
-    it("explains that a file can be added once the event is saved, rather than opening the picker", async () => {
+    // F0-23 (CHG-045): this used to assert the "Save the event first" explanation. Add event
+    // now uploads without an event id and links the file on save (see
+    // event-form-add-documents.test.tsx). HUMAN REVIEW: test expectation changed.
+    it("[F0-23] opens the picker and uploads with no event id, then reports the document", async () => {
+      mocks.uploadDocument.mockResolvedValue({
+        ok: true,
+        data: { documentId: "doc-new", storagePath: `clients/${CLIENT_ID}/doc-new` },
+      });
+      const onUploaded = vi.fn();
       const user = userEvent.setup();
-      render(<EventDocuments clientId={CLIENT_ID} documents={[]} />);
+      render(<EventDocuments clientId={CLIENT_ID} documents={[]} onUploaded={onUploaded} />);
 
-      await user.click(screen.getByRole("button", { name: "Add file" }));
+      await user.upload(screen.getByLabelText("Choose a file to add"), pdf("Care summary.pdf"));
 
-      expect(
-        await screen.findByText("Save the event first, then open it again to add files."),
-      ).toBeInTheDocument();
-      expect(mocks.uploadDocument).not.toHaveBeenCalled();
+      const form = mocks.uploadDocument.mock.calls[0]?.[0] as FormData;
+      expect(form.get("eventId")).toBeNull();
+      expect(onUploaded).toHaveBeenCalledWith({ id: "doc-new", name: "Care summary.pdf" });
+      expect(screen.queryByText(/save the event first/i)).not.toBeInTheDocument();
     });
   });
 
