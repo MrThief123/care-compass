@@ -16,6 +16,6 @@ Important discoveries:
 - An admin actor must complete TOTP enrolment before `evaluateRoleGuard` reaches the role-mismatch check — the MFA gate (OQ-08) runs first in `resolveActiveProfile`. Test fixed to enrol+verify TOTP for admin profiles first (same sequence as F0-07's AC-10 test).
 - Two unrelated pre-existing integration test failures exist on `main` (F0-16, F0-17) — confirmed independent of this feature, not fixed here.
 Important decisions: FD-01 (see DECISIONS.md) — pre-existing unrelated failures not fixed in this feature's scope.
-Exact next action: None — READY FOR PR. Update status page (CLAUDE.md §8) and open the PR once the human approves.
+Exact next action: None — PR #209 open (https://github.com/MrThief123/care-compass/pull/209), status page refreshed. Waiting on human/reviewer merge.
 Files touched: `supabase/tests/access_control_regression.test.sql`, `tests/integration/shared-access-control-regression.test.ts`, `scripts/generate-permission-matrix.mjs`, `docs/security/PERMISSION_MATRIX.md`, `package.json`, this feature's `PROGRESS.md`/`ACCEPTANCE_CRITERIA.md`/`TEST_PLAN.md`/`DECISIONS.md`/`SESSION_STATE.md`
 Warning for next session: `.env.local` and the local Supabase stack (`supabase start`) must stay set up to re-run `supabase test db` or the integration suite — if Docker was stopped, run `supabase start` again first.
