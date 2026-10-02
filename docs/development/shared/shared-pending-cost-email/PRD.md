@@ -2,14 +2,14 @@
 
 | Field | Value |
 |---|---|
-| Feature ID | INT-11 (PROPOSED, next free INT number once INT-10 merges) |
+| Feature ID | INT-11 |
 | Dashboard / stream | Shared |
 | Phase | Phase 4 — Integration, hardening & release |
 | Development branch (PR target) | `main` |
 | Feature branch | `feature/shared-pending-cost-email` |
 | Documentation | `docs/development/shared/shared-pending-cost-email/` |
 | Lane | B — Backend |
-| Sprint | SPRINT · planned D19 (proposed) |
+| Sprint | SPRINT · planned D19 |
 | Status / owner | See PROGRESS.md |
 
 ## Purpose
@@ -50,7 +50,7 @@ Family and admins add funds promptly, so pending costs clear and the bucket is n
 - Features: INT-01 (merged: `EmailProvider`, `createAdminClient`, recipient pattern, cron route pattern), F0-12 (merged: `budget_costs`, pending model), F0-11 (merged: completions)
 - Features that touch the same files: INT-10 edits `budget-thresholds.ts` only; INT-11 adds new files and does not edit it (see DECISIONS.md FD-08 on sharing `resolveRecipients`).
 - Blocking open decisions: None (trigger, idempotency, wording, recipients answered by the human 2026-10-02)
-- Non-blocking open decisions: FD-03 digest, FD-07 cadence and stale pending, listed in DECISIONS.md
+- Non-blocking open decisions: none (FD-03, FD-07, FD-09 confirmed 2026-10-02)
 
 ## Inputs
 - `budget_pending_costs_to_notify()` rows: cost id, amount, description (event title as charged), bucket name, client id, organisation id.
@@ -67,7 +67,7 @@ Family and admins add funds promptly, so pending costs clear and the bucket is n
 - Bucket removed: cannot happen with costs (`remove_bucket` refuses), so the bucket name always resolves.
 - Two overlapping runs: unique key on `cost_id` makes the second insert a no-op; a duplicate send in that tiny window is possible and accepted, as in INT-01.
 - Several pending costs across several buckets of one client in one run: one digest, each line names its own bucket.
-- Backlog on first deploy: every currently pending cost is un-notified and would be emailed once on the first run. FD-09 asks the human whether to seed existing pending costs as notified.
+- Backlog on first deploy: every currently pending cost is un-notified and would be emailed once on the first run. FD-09 (confirmed): they are emailed once, digest-grouped.
 
 ## Security / Permissions
 - Service-role job only; endpoint guarded as INT-01 (bare 401 without the secret).
@@ -82,7 +82,7 @@ Family and admins add funds promptly, so pending costs clear and the bucket is n
 
 ## Traceability
 - Product requirements: REQ-37 (primary), REQ-28
-- Sources: PD-058, CHG-044 (PL-25), proposed CHG-051-or-next (DECISIONS.md), INT-01
+- Sources: PD-058, CHG-044 (PL-25), CHG-052, INT-01
 
 ## Labels
-CONFIRMED (human, 2026-10-02: trigger, idempotency, wording, recipients); PROPOSED: digest, marker table, cadence
+CONFIRMED (human, 2026-10-02: trigger, idempotency, wording, recipients, digest, skip-if-paid, backlog, cadence, CHG-052)

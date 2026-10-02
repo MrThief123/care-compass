@@ -2,12 +2,12 @@
 
 Last session date: 2026-10-02
 Current branch: `feature/shared-pending-cost-email`
-Worked on: drafting the doc pack only
-What changed: pack under docs/development/shared/shared-pending-cost-email/
-Tests run: none (docs only)
-Test results: n/a
-Current blocker: human approval of pack and proposed CHG
-Important decisions: FD-01 to FD-09; digest, cadence and backlog seeding await the human
-Exact next action: human approves; then claim, add the CHG, plan row/card, PRD §17 mark, run `node scripts/status-page.mjs`, write failing tests (T-01 to T-09), then migration and job
-Files likely to be touched next: new migration, src/server/jobs/pending-cost-emails.ts, src/app/api/jobs/pending-cost-emails/route.ts, vercel.json, tests
-Warning for next session: do not edit PRD.md or DEVELOPMENT_PLAN.md until the CHG is confirmed; do not open the PR without human approval
+Worked on: CHG-052 promotion, tests first, migration, job, route, cron
+What changed: see PROGRESS.md Files changed
+Tests run: see PROGRESS.md Checks run locally
+Test results: see PROGRESS.md
+Current blocker: none; waiting for human approval to open the PR
+Important decisions: FD-01 to FD-14, CHG-052 (all final)
+Exact next action: human approves, then open the PR to `main` with the commands from PROGRESS.md; mention the totals/next-number/CHG-number conflict with INT-10 and FAM-16 branches
+Files likely to be touched next: none
+Warning for next session: do not open the PR without human approval; INT-01's route test cron assertion was changed deliberately (FD-12)

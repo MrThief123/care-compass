@@ -120,11 +120,9 @@ export async function runPendingCostEmailsJob(
   }
 
   for (const costs of byClient.values()) {
-    const recipients = await resolveRecipients(
-      supabase,
-      costs[0].client_id,
-      costs[0].organisation_id,
-    );
+    const first = costs[0];
+    if (!first) continue;
+    const recipients = await resolveRecipients(supabase, first.client_id, first.organisation_id);
     if (recipients.length === 0) continue;
 
     const text = emailBody(costs);
