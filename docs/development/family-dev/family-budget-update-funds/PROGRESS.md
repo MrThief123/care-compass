@@ -23,7 +23,7 @@ Last updated: 2026-10-02 (implemented; all FAM-11 tests green; visual check next
 - All FAM-11 tests green (TEST_PLAN "Results"); FAM-UI-05's tests pass unedited.
 
 ## In progress
-- Visual check in a real browser, status page refresh, then ask the human before opening the PR.
+- Nothing. Visual check done (Playwright/Chromium, production build, local Supabase): +$1,000 saved and kept after reload, over-balance refused on its field, no overlap 1920 to 768, 0 console errors.
 
 ## Remaining
 - Open the PR only after the human says yes.
@@ -53,4 +53,4 @@ Last updated: 2026-10-02 (implemented; all FAM-11 tests green; visual check next
 - Visual check, status page, then ask the human to approve the PR.
 
 ## Ready for PR
-- No
+- Yes, pending the human's approval to open it
