@@ -38,6 +38,17 @@ Record feature-level decisions here using the template below. Project-wide decis
 - Reason: with the confirmation open the test audits the whole body. `region` ("all content in a landmark") then flags the existing Staff table and form, which are outside any landmark only because the test renders `StaffScreen` alone. In the app `src/app/(admin)/admin/layout.tsx` wraps pages in `<main>`. Every other rule still runs; the first `axe(container)` call is unchanged. The new Clients list is its own labelled `region`.
 - Human confirmation required: yes (flagged in PROGRESS.md and the PR).
 
+### FD-05 — Staff screen: side panel instead of an always-visible form (HUMAN REVIEW: test expectations changed)
+- Date: 2026-10-02
+- Decision: the human asked (in session) for the Staff screen to show only the list and an always-present Add Staff button. Pressing a name opens a side panel with that person's details and their Clients list (with Remove); Add Staff opens the same panel empty. Close, Cancel-equivalent ("Close"), Escape or a successful Save closes it and clears the draft. The separate per-row Edit buttons are gone; the name is the button (accessible name stays "Edit {name}", which contains the visible text). Success messages show above the list when the panel is closed. Done inside ADM-08 (option 1) rather than as a separate feature. Unlike ADM-02, nothing is selected by default.
+- Overlap: this widens the overlap with ADM-03, which also edits `staff-screen.tsx`; the PR says so.
+- Test changes (HUMAN REVIEW: test expectation changed):
+  - `staff-screen.test.tsx` "shows an empty list and allows adding the first staff member": before, the First name field was present and empty with no staff; after, it is absent until Add Staff is pressed.
+  - `staff-screen.test.tsx` "editing a different row discards unsaved draft changes": before, the form was open on the first person at render; after, the test first presses "Edit Aisha Rahman".
+  - New: "the panel is closed until Add Staff or a name is pressed, and closing clears it".
+  - `carer-assignments.test.tsx` (ADM-08): `renderScreen` now presses "Edit Aisha Rahman" first, because the Clients list is no longer visible by default; "switches to another carer's clients" wording updated; new test that no Clients list shows until a name is pressed and none after Close.
+- Human confirmation: Dhruv Verma, 2026-10-02 ("Do it here").
+
 <!-- Template
 ### FD-01 — <title>
 - Date:

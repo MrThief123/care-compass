@@ -41,12 +41,14 @@ Last updated: 2026-10-02 (implemented; awaiting human approval to open the PR)
 - `src/server/admin/assignments-{queries,actions,mock-store}.ts`
 - `src/features/admin-staff/carer-assignments.tsx`; `staff-screen.tsx` (optional `assignments` prop); `src/app/(admin)/admin/staff/page.tsx`
 - `src/lib/supabase/database.types.ts` (regenerated; also picks up tables from earlier migrations that were missing from the committed file)
-- `src/features/admin-staff/carer-assignments.test.tsx` (one assertion, see DECISIONS FD-04: HUMAN REVIEW)
+- `src/features/admin-staff/carer-assignments.test.tsx` (FD-04 axe rule, FD-05 open-the-panel step: HUMAN REVIEW)
+- `src/features/admin-staff/staff-screen.tsx`, `staff-screen.test.tsx` (FD-05 side panel; two ADM-02 expectations changed: HUMAN REVIEW)
 
 ## Decisions
 - See DECISIONS.md
 
 ## Problems encountered
+- FD-05: Staff screen redesigned to a click-a-name / Add Staff side panel at the human's request; ADM-02 tests updated (HUMAN REVIEW).
 - T-10 failed on the `region` axe rule; recorded as FD-04 (HUMAN REVIEW: test expectation changed).
 - Turbopack rejects the symlinked node_modules in this worktree; the e2e build used `next build --webpack`.
 - Full-suite failures not in this feature's files: storage-upload, seed-data, sign-up and auth-audit integration tests, and 13 mock-mode e2e specs (carer/family client info, documents, care delivery, organisation transfer). Not run on `main` to compare.

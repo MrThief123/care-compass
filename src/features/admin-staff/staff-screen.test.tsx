@@ -214,10 +214,21 @@ describe("Admin Staff", () => {
     render(<StaffScreen data={{ ...data, staff: [] }} />);
     expect(screen.getByText("No staff yet")).toBeVisible();
     expect(screen.getByRole("button", { name: "Add Staff" })).toBeEnabled();
+    expect(screen.queryByLabelText("First name")).not.toBeInTheDocument();
+  });
+  it("[ADM-02][AC-03] the panel is closed until Add Staff or a name is pressed, and closing clears it", async () => {
+    render(<StaffScreen data={data} />);
+    expect(screen.queryByLabelText("First name")).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "Edit Aisha Rahman" }));
+    expect(screen.getByLabelText("First name")).toHaveValue("Aisha");
+    await userEvent.click(screen.getByRole("button", { name: "Close" }));
+    expect(screen.queryByLabelText("First name")).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "Add Staff" }));
     expect(screen.getByLabelText("First name")).toHaveValue("");
   });
   it("[ADM-02][AC-03] editing a different row discards unsaved draft changes", async () => {
     render(<StaffScreen data={data} />);
+    await userEvent.click(screen.getByRole("button", { name: "Edit Aisha Rahman" }));
     await userEvent.clear(screen.getByLabelText("First name"));
     await userEvent.type(screen.getByLabelText("First name"), "Unsaved");
     await userEvent.click(screen.getByRole("button", { name: "Edit Marcus Chen" }));

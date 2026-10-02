@@ -71,8 +71,13 @@ const assignments: CarerAssignment[] = [
   },
 ];
 
-function renderScreen() {
-  return render(<StaffScreen data={data} assignments={assignments} />);
+const openAisha = () => userEvent.click(screen.getByRole("button", { name: "Edit Aisha Rahman" }));
+
+/** The panel is closed until a name is pressed, so this renders the screen and opens Aisha's. */
+async function renderScreen() {
+  const view = render(<StaffScreen data={data} assignments={assignments} />);
+  await openAisha();
+  return view;
 }
 
 const clientsList = () => screen.getByRole("region", { name: "Clients for Aisha Rahman" });
@@ -86,8 +91,8 @@ afterEach(() => {
 });
 
 describe("[ADM-08][AC-04] the carer's Clients list", () => {
-  it("[ADM-08][AC-04] shows only the selected carer's clients, by full name, each with a Remove button", () => {
-    renderScreen();
+  it("[ADM-08][AC-04] shows only the selected carer's clients, by full name, each with a Remove button", async () => {
+    await renderScreen();
     const list = clientsList();
     expect(within(list).getByText("Margaret Doyle")).toBeInTheDocument();
     expect(within(list).getByText("Elsie Marsh")).toBeInTheDocument();
@@ -97,8 +102,8 @@ describe("[ADM-08][AC-04] the carer's Clients list", () => {
     ).toBeInTheDocument();
   });
 
-  it("[ADM-08][AC-04] switches to another carer's clients when Edit is pressed for them", async () => {
-    renderScreen();
+  it("[ADM-08][AC-04] switches to another carer's clients when their name is pressed", async () => {
+    await renderScreen();
     await userEvent.click(screen.getByRole("button", { name: "Edit Daniel Kelly" }));
     const list = screen.getByRole("region", { name: "Clients for Daniel Kelly" });
     expect(within(list).getByText("Robert Hale")).toBeInTheDocument();
@@ -106,21 +111,31 @@ describe("[ADM-08][AC-04] the carer's Clients list", () => {
   });
 
   it("[ADM-08][AC-04] shows an empty state for a carer with no clients", async () => {
-    renderScreen();
+    await renderScreen();
     await userEvent.click(screen.getByRole("button", { name: "Edit Sarah Nguyen" }));
     const list = screen.getByRole("region", { name: "Clients for Sarah Nguyen" });
     expect(within(list).getByText("No clients assigned")).toBeInTheDocument();
     expect(within(list).queryByRole("button")).not.toBeInTheDocument();
   });
 
+  it("[ADM-08][AC-04] shows no Clients list until a name is pressed, and none after closing", async () => {
+    render(<StaffScreen data={data} assignments={assignments} />);
+    expect(screen.queryByRole("region", { name: /^Clients for / })).not.toBeInTheDocument();
+    await openAisha();
+    expect(clientsList()).toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "Close" }));
+    expect(screen.queryByRole("region", { name: /^Clients for / })).not.toBeInTheDocument();
+  });
+
   it("[ADM-08][AC-04] has no Clients list while adding a new staff member", async () => {
-    renderScreen();
+    await renderScreen();
     await userEvent.click(screen.getByRole("button", { name: "Add Staff" }));
     expect(screen.queryByRole("region", { name: /^Clients for / })).not.toBeInTheDocument();
   });
 
-  it("[ADM-08][AC-04] renders with no assignments at all as the empty state, not an error", () => {
+  it("[ADM-08][AC-04] renders with no assignments at all as the empty state, not an error", async () => {
     render(<StaffScreen data={data} />);
+    await openAisha();
     expect(
       within(screen.getByRole("region", { name: "Clients for Aisha Rahman" })).getByText(
         "No clients assigned",
@@ -131,7 +146,7 @@ describe("[ADM-08][AC-04] the carer's Clients list", () => {
 
 describe("[ADM-08][AC-05] removing a client from a carer", () => {
   it("[ADM-08][AC-05] asks for confirmation naming both people and does nothing until confirmed", async () => {
-    renderScreen();
+    await renderScreen();
     await userEvent.click(
       screen.getByRole("button", { name: "Remove Margaret Doyle from Aisha Rahman" }),
     );
@@ -147,7 +162,7 @@ describe("[ADM-08][AC-05] removing a client from a carer", () => {
   });
 
   it("[ADM-08][AC-05] on confirm calls the action for that pair, drops the row and says so", async () => {
-    renderScreen();
+    await renderScreen();
     await userEvent.click(
       screen.getByRole("button", { name: "Remove Margaret Doyle from Aisha Rahman" }),
     );
@@ -168,7 +183,7 @@ describe("[ADM-08][AC-05] removing a client from a carer", () => {
   });
 
   it("[ADM-08][AC-05] removing the last client leaves the empty state", async () => {
-    renderScreen();
+    await renderScreen();
     await userEvent.click(screen.getByRole("button", { name: "Edit Daniel Kelly" }));
     await userEvent.click(
       screen.getByRole("button", { name: "Remove Robert Hale from Daniel Kelly" }),
@@ -184,7 +199,7 @@ describe("[ADM-08][AC-06] when removing fails", () => {
       ok: false,
       error: { code: "UNEXPECTED", message: "Couldn't remove this client. Try again." },
     });
-    renderScreen();
+    await renderScreen();
     await userEvent.click(
       screen.getByRole("button", { name: "Remove Margaret Doyle from Aisha Rahman" }),
     );
@@ -200,7 +215,7 @@ describe("[ADM-08][AC-06] when removing fails", () => {
 
 describe("[ADM-08][AC-07] accessibility", () => {
   it("[ADM-08][AC-07] has no axe violations with the list and the confirmation open", async () => {
-    const { container } = renderScreen();
+    const { container } = await renderScreen();
     expect(await axe(container)).toHaveNoViolations();
     await userEvent.click(
       screen.getByRole("button", { name: "Remove Margaret Doyle from Aisha Rahman" }),
