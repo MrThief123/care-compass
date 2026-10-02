@@ -26,7 +26,7 @@ Last updated: 2026-10-02
 
 5. **Close-out fixes, asked for by the human (2026-10-02).** FD-09 (open redirect in
    `/auth/confirm`) and FD-10 (`/api/test` hidden in production). Tests first: 10 red for the right
-   reason, then green.
+   reason, then green. FD-11 (HSTS header) added the same way: 1 red (no header), then green.
 
 ## Blockers
 - None for the merged work. AC-04 waits on the FD-07 follow-up (hosted-project settings).
@@ -74,6 +74,9 @@ Last updated: 2026-10-02
   `/api/test` 404; `/auth/confirm` with real recovery tokens redirects `/reset-password`,
   `https://evil.example`, `//evil.example/x`, `/\evil.example` and `javascript:alert(1)` all to
   `/reset-password`.
+- **FD-11 (HSTS):** unit 2367/2367; `tsc --noEmit` clean; `eslint` 0 errors (2 pre-existing
+  warnings); `prettier --check` clean. Production build: `/sign-in` returns
+  `Strict-Transport-Security: max-age=63072000`.
 
 ## Next action
 - FD-07 follow-up (hosted project, needs the human): record the dashboard's Auth > Rate Limits
@@ -83,4 +86,4 @@ Last updated: 2026-10-02
   (the seeded admin Priya now needs TOTP to see admin data).
 
 ## Ready for PR
-- Merged in #195. Close-out PR: decision docs plus the FD-09/FD-10 fixes. Not opened yet.
+- Merged in #195. Close-out PR: decision docs plus the FD-09/FD-10/FD-11 fixes. Not opened yet.

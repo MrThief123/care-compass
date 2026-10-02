@@ -126,6 +126,15 @@ is changed, renamed or dropped.
 - Asked for by the human (Dhruv561, 2026-10-02) in the close-out PR.
 - Tests: `src/proxy.test.ts` (`[F0-21][FD-10]`).
 
+### FD-11 — HSTS header on every route (found in close-out)
+- Finding: `next.config.ts` set no security headers, so nothing told browsers to use HTTPS only.
+  A first visit over plain HTTP, or a downgrade on hostile Wi-Fi, could expose the sign-in POST.
+- Decision: `Strict-Transport-Security: max-age=63072000` (2 years) on `/:path*`, per the Next.js
+  headers guide. No `includeSubDomains` or `preload`: the production domain isn't settled and both
+  are hard to undo. Browsers ignore HSTS over plain HTTP, so `http://localhost` is unaffected.
+- Asked for by the human (Dhruv561, 2026-10-02) in the close-out PR.
+- Tests: `src/next-config.test.ts` (`[F0-21][FD-11]`).
+
 ## Test changes (CLAUDE.md §5) — HUMAN REVIEW: test expectation changed
 No assertion was removed or loosened. The simulated session changed because the requirement changed
 (admin authority now needs AAL2).

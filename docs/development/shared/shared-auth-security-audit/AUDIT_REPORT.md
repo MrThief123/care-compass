@@ -187,6 +187,7 @@ the query string.
 |---|---|---|---|
 | Open redirect | `/auth/confirm?next=` followed `https://…`, `//host`, `/\host`, `javascript:` | Same-origin check (FD-09) | Unit `route.test.ts`; production build on the local stack with real recovery tokens: all four land on `/reset-password` |
 | Dev route in prod | `/api/test` reachable in production | Proxy 404 (FD-10) | Unit `proxy.test.ts`; production build: `/api/test` 404 |
+| No HTTPS-only header | `next.config.ts` set no HSTS | `Strict-Transport-Security: max-age=63072000` (FD-11) | Unit `next-config.test.ts`; production build: header present on `/sign-in` |
 
 ## Results (all on the isolated stack)
 
