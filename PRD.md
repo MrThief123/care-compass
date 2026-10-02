@@ -207,14 +207,14 @@ Note: OOS-5 (rostering out of scope) is superseded by later client meetings and 
 | PL-17 | Mobile/phone-optimised views and phone warnings | CIS5 Q&A | REQ-N10 |
 | PL-18 | Add/Delete organisation by an operator (self-serve organisation **registration** moved into F0-17 by CHG-010) | CM-0309 | OQ-06; CHG-010 |
 | PL-19 | Organisation-configurable shift patterns | CIS5 Rostering | OQ-21 |
-| PL-20 | Admin/Carer task log and task detail equivalents | UI-Q14 | OQ-37 |
+| PL-20 | Admin/Carer task log and task detail equivalents. Admin half superseded by ADM-11: Admin Home overdue rows open the client's page in the admin client view (OQ-37 answered, PD-061); Carer half stays parked | UI-Q14 | OQ-37; PD-061 |
 | PL-21 | Comments/notes and evidence on events and completions | BRIEF item 4; CIS5 Q&A; US C-3, C-10 | OQ-34 |
 | PL-22 | Front-page extras: 'last updated' indicator, change summary, renameable program title | CIS3 Data 1; CIS5 Front page | OQ-38 |
 | PL-23 | Alert Family (email or Home alert) when a carer switches a task to a plain event | Human, 2026-09-24 (CHG-009) | Audit log records it; no design or notification type yet |
 | PL-24 | Unique identifier for every organisation (e.g. ABN), and verifying a self-registered organisation before it appears in the family organisation picker (lookalike-provider risk) | Human, 2026-09-24 (CHG-010 risk 2) | Identifier to be chosen; no design |
 | PL-25 | **Promoted to INT-11 by CHG-052.** Email Family and admins when an event cost goes pending (split from INT-01's card by CHG-044) | PD-058, REQ-37; INT-01 card | CHG-044; CHG-052 |
-| PL-26 | INT-01's threshold warning email names the bucket (e.g. "Government allocation"), not only the client, for clients with more than one bucket | REQ-31; INT-01 | CHG-044 |
-| PL-27 | Event form and calendar polish, one feature: (1) a completed overdue task says how late it was done ("Completed 2 days, 3 hours late") on Task detail and the Log; (2) the "Pick a date" calendar rings today's date lightly and always shows the month of the active date, for every role; (3) the event form takes a start and end time like shift assignments, instead of Duration in minutes | Human, 2026-10-02 (CAR-07 review) | CHG-049 |
+| PL-26 | **Promoted to INT-10 by CHG-050.** INT-01's threshold warning email names the bucket (e.g. "Government allocation"), not only the client, for clients with more than one bucket | REQ-31; INT-01 | CHG-044 |
+| PL-27 | **Promoted to FAM-16 by CHG-051.** Event form and calendar polish, one feature: (1) a completed overdue task says how late it was done ("Completed 2 days, 3 hours late") on Task detail and the Log; (2) the "Pick a date" calendar rings today's date lightly and always shows the month of the active date, for every role; (3) the event form takes a start and end time like shift assignments, instead of Duration in minutes | Human, 2026-10-02 (CAR-07 review) | CHG-049 |
 
 
 ## 18. Dependencies

@@ -417,6 +417,14 @@ CONFIRMED.
 - Consequences: see CHG-022.
 - Human confirmation: CONFIRMED 2026-09-25 (Dhruv Verma, in-session).
 
+### PD-061 — Admin Home overdue rows open the client's page in the admin client view
+- Date: 2026-10-02 · Decided by: Dhruv Verma (in-session, answering OQ-37)
+- Decision: an overdue row on Admin Home links to that client's page in the admin client view (ADM-11, `/admin/clients/<clientId>/...`), where the admin sees the client's information and the Care log and finds the overdue event. No separate Admin task log or task detail screen is built. Overdue rows must keep appearing on Admin Home as soon as an event goes overdue (REQ-34).
+- Reason: ADM-11 already gives an admin the Family screens, including Care log and Task detail, inside the admin layout (REQ-38), so the chevron gets a real destination without new design or screens.
+- Alternatives: build a separate Admin task log and task detail (PL-20; rejected, duplicates ADM-11); remove the chevrons (rejected; the admin could not act on an overdue event).
+- Consequences: PL-20's Admin half is superseded by ADM-11; its Carer half stays parked. The row link is wired after ADM-11 merges, as a small follow-up feature (lane A); until then rows stay unlinked. The exact landing (Care log, or the occurrence's Task detail) is settled in that follow-up's PRD.
+- Human confirmation: CONFIRMED 2026-10-02 (Dhruv Verma, in-session).
+
 ---
 
 ## 3. Open decisions (human input required)
@@ -463,7 +471,7 @@ Claude Code never changes a status in this table, never adds an ANSWERED heading
 | OQ-34 | Event notes and comments | CIS5 Q&A and brief item 4 require comments on completed tasks; the Carer notification 'Helen added a note to today's Afternoon check-in' implies notes exist; no note/comment UI is designed. | BRIEF item 4(i, iii); CIS5 Q&A; US C-3, C-10; Design Carer Home | no | — | Parked (PL-21) until designed. | OPEN |
 | OQ-35 | Settings forms save behaviour | Family info, My info and Organisation info cards show inputs but no Save button. Unclear whether carers can edit Role and whether email changes the login email. | Design Family/Carer/Admin Settings | YES | FAM-12, CAR-09, ADM-10 | Add a Save button per card; Role read-only for carers; email field is contact email only. | ANSWERED |
 | OQ-36 | Staff deactivation | FR-5.6/US A-2 and CIS5 require withdrawing access when staff leave; the Staff design has no deactivate/remove control. | FR-5.6; US A-2; CIS5 Q&A; Design Staff | YES | ADM-03 | Design a Deactivate action in the Add/edit panel with confirmation. | ANSWERED |
-| OQ-37 | Admin Home overdue row destination | Rows have chevrons but Admin has no task detail or task log screen (UI Q14). | UI-Q14; Design Admin Home | no | — | Omit navigation until an admin detail view is designed (PL-20). | OPEN |
+| OQ-37 | Admin Home overdue row destination | Rows have chevrons but Admin has no task detail or task log screen (UI Q14). | UI-Q14; Design Admin Home | no | — | Omit navigation until an admin detail view is designed (PL-20). | ANSWERED |
 | OQ-38 | Client information fields | CIS3/CIS5 request DOB, contacts (parents, POA), disability, behaviours of concern up front, date admitted, 'last updated', photo, expandable headings with summary flags and SPO forms with archive. The Info design has Description, Habits, Medical history and Documentation only. | CIS3 Data 1–2; CIS5 Front page; Design Family Info | no | — | Build the design for MVP; remaining fields parked (PL-13, PL-22) pending client confirmation. | OPEN |
 | OQ-39 | Design copy and visual inconsistencies | Manage warning example (11:30–13:00) does not overlap the selected 07:00–11:00 slot; States sheet repeats no-results copy twice; Budget screen bar colours differ from Home; Task log Nurse column misaligned on Planned rows; Task log status filter is a dropdown despite 'chips over dropdowns'; Staff and Clients rail items share an icon. | Design images; DD §5, §7 | no | — | Follow tokens and the rules in UI-§5; generate warning text from real data; confirm copy. | OPEN |
 | OQ-40 | Overdue and upcoming care alert emails | REQ-33 asks for reminders for upcoming care and alerts for overdue care (SHOULD). Undefined: what counts as an alert (every overdue task, or a daily digest per client); recipients (Family only, Family and the organisation's admins as INT-01 does, or the carer on shift); how long after the due time; whether upcoming-care reminders are included and how far ahead; email wording; quiet hours (Australia/Melbourne). | REQ-33; US C-8; UC-F04; CIS5 Notifications; CHG-047 | YES | INT-09 | Do not build on a default. Suggested for discussion: one email per overdue task, to the same recipients as INT-01 (family and current org admins, OQ-28), 30 minutes after the due time, no upcoming reminders in v1, no quiet hours. | OPEN |
@@ -487,6 +495,11 @@ Docs updated: DECISIONS.md
 Answer: The current repository is authoritative and starts empty; no existing Supabase project/schema/CI exists to adopt.
 Recorded as: PD-031
 Docs updated: DECISIONS.md
+
+### OQ-37 — ANSWERED 2026-10-02 by Dhruv Verma
+Answer: an overdue row on Admin Home opens that client's page in the admin client view (ADM-11), where the admin sees the client's information and Care log and finds the overdue event. No separate Admin task log or task detail.
+Recorded as: PD-061
+Docs updated: DECISIONS.md, PRD.md (§17 PL-20), docs/development/admin-dev/admin-home/PRD.md and DECISIONS.md
 
 ---
 
@@ -1065,6 +1078,25 @@ Template for future entries:
 - Impact: CAR-07 T-03 (Patients card, Home) and CAR-06 T-07 (Home) change; flagged HUMAN REVIEW: test expectation changed (CAR-07 FD-08). CHG-048's mention of the Patients card link is superseded. PL-27 has no feature ID, lane or schedule yet.
 - Human confirmation: Dhruv Verma, 2026-10-02 (in-session).
 - Docs updated: DECISIONS.md (this entry), PRD.md §17 (PL-27); CAR-07 pack at hand-off.
+
+### CHG-050 — New feature INT-10: threshold email names the bucket (PL-26 promoted)
+- Date / requested by: 2026-10-02 / Dhruv Verma (human, project lead)
+- Type: scope addition (new feature; Parking lot promotion)
+- Description: promotes PL-26 (parked by CHG-044). INT-01's threshold warning email names only the client; for a client with more than one bucket it does not say which bucket crossed the threshold. New feature **INT-10** adds the bucket name to the email body. The job reads `budget_buckets.name` with its existing admin client; no migration, no new dependency. Wording is chosen in INT-10 FD-01.
+- Supersedes: nothing. Closes CHG-044's PL-26. PL-25 stays parked.
+- Source / justification: human, in-session 2026-10-02: approved the item and the ID INT-10 (next free INT number; DEVELOPMENT_PLAN.md §7's "next number" line was stale, INT-09 is taken).
+- Impact: new feature INT-10 (Lane B, `docs/development/shared/shared-budget-threshold-email-bucket-name/`), depends on INT-01 (merged). Changes `src/server/jobs/budget-thresholds.ts`'s email body only. No other feature reads it. No blocking open decision. Totals 91 active features / 433 acceptance criteria.
+- Human confirmation: Dhruv Verma, 2026-10-02 (in-session).
+- Docs updated: DECISIONS.md (this entry), DEVELOPMENT_PLAN.md (INT-10 row, card, totals, next-number line), PRD.md §17 (PL-26 marked promoted), root PROGRESS.md (INT-10 row), INT-10 feature docs. `docs/JIRA_BACKLOG.csv` not updated (predates CHG-047 and later additions).
+
+### CHG-051 — Event form and calendar polish (promotes PL-27 to new feature FAM-16)
+- Date / requested by: 2026-10-02 / Dhruv Verma (human, project lead)
+- Type: new feature (promotes the Parking lot item PL-27, parked by CHG-049) with a flagged Lane S edit
+- Description: FAM-16 (Family lane, `feature/family-event-form-calendar-polish`, planned D18, 11 criteria) builds PL-27 as one feature: (1) a Done task completed after its due time (the occurrence start) says how late, e.g. "Completed 2 days, 3 hours late", on Task detail and the Log (carers get it too through the shared components); (2) the "Pick a date" calendar rings today's date lightly and always shows the month of the active date, for every role; (3) the event form takes Start time and End time instead of Duration in minutes. End may be blank (duration 0); End must be after Start; no overnight. The stored value is unchanged (`care_events.duration_minutes`, `createEvent`/`updateEvent` take `durationMinutes`), so there is no migration or contract change. Part (2) is a flagged additive edit to Lane S files (`DatePickerGrid`: optional `today`; `EventForm`: month follows `values.date`), kept inside this PR at the human's choice, as CAR-07 did for `EventFormScreen`. The Admin Manage picker must keep working.
+- Source / justification: human, in-session 2026-10-02: asked to build PL-27 now; chose one feature with the shared date-picker edit inside the PR (over a separate shared PR first); confirmed the end-time rules.
+- Impact: DEVELOPMENT_PLAN.md gains the FAM-16 row and card (totals 90 → 91 active, 429 → 440 criteria; "next number" becomes FAM-17); PRD.md §17 marks PL-27 promoted. Tests changed (HUMAN REVIEW: test expectation changed): `event-details.test.ts` and `event-details-fields.test.tsx` (duration to end time), CAR-07 `[CAR-07][AC-04] T-04` (Duration label to End time). CAR-07's form shows Start and End time too. FAM-06/FAM-07 ACs that mention Duration are superseded by FAM-16 AC-08 to AC-10. Local test runs need `DATA_SOURCE=mock` (feature FD-01).
+- Human confirmation: Dhruv Verma, 2026-10-02 (in-session).
+- Docs updated: DECISIONS.md (this entry), DEVELOPMENT_PLAN.md (row, card, totals, next number), PRD.md (§17 PL-27), the FAM-16 pack.
 
 ### CHG-052 — New feature INT-11: email Family and admins when an event cost goes pending (PL-25 promoted)
 - Date / requested by: 2026-10-02 / Dhruv Verma (human, project lead)

@@ -50,7 +50,7 @@ export interface EventFormScreenProps {
   buckets: BudgetBucketSummary[];
   /** The event's saved cost and bucket on Edit event; none on Add event. */
   initialCost?: EventCostValues;
-  /** Title, Start time and Duration (PD-047): the event's own, on Edit; empty on Add. */
+  /** Title, Start time and End time (PD-047): the event's own, on Edit; empty on Add. */
   initialDetails?: EventDetailsValues;
   /** Where Save event and Cancel go (CHG-015, `event-form-return.ts`); already validated. */
   returnHref: string;
@@ -63,7 +63,7 @@ const TITLES = { add: "Add event", edit: "Edit event" } as const;
 /**
  * Family · Add event and Edit event (FAM-UI-03, FAM-06, FAM-07). Add event persists through
  * `createEvent`; Edit event through `updateEvent`. Save event validates (EventForm, then
- * Cost/Paid from and Title/Start time/Duration) and only then saves; Cancel goes to
+ * Cost/Paid from and Title/Start time/End time) and only then saves; Cancel goes to
  * `returnHref` without changes (FD-04, CHG-015).
  */
 export function EventFormScreen({
@@ -111,7 +111,7 @@ export function EventFormScreen({
   }
 
   // EventForm has already checked its own fields (Date); Cost (FD-02) and Title/Start
-  // time/Duration are checked here, then the event is created or updated before navigating away.
+  // time/End time are checked here, then the event is created or updated before navigating away.
   async function save() {
     const nextCostErrors = validateEventCost(cost, buckets);
     const nextDetailsErrors = validateEventDetails(details);
@@ -211,7 +211,7 @@ export function EventFormScreen({
         className="lg:grid-cols-[minmax(0,1fr)_21rem] lg:gap-10"
         extraFields={
           <>
-            {/* Title, Start time and Duration (OQ-22/PD-047). */}
+            {/* Title, Start time and End time (OQ-22/PD-047). */}
             <EventDetailsFields values={details} onChange={changeDetails} errors={detailsErrors} />
             {/* PD-045: only meaningful for a recurring event — a one-off's one occurrence is
                 its whole series, so there is nothing to choose between. */}
