@@ -57,6 +57,13 @@ None. OQ-06 (PD-036) and OQ-07 (PD-037) are ANSWERED, and OQ-19 is ANSWERED as P
 - Decision: the removal-confirmation dialog keeps the ADM-04 title and buttons and adds a second paragraph (staff lose access; family keeps all records and chooses a new organisation). The Family confirmation after a removal uses its own wording ("gives them access to <name>'s routines…"), because the standard text names the outgoing organisation, which a removed client no longer has. The banner is one component, `src/features/family-settings/organisation-removed-banner.tsx`, used by Settings (with a button) and Home (with a link). The banner title is a paragraph, not a heading, so it cannot break the page's heading order.
 - Human confirmation required: yes, copy at PR review (with FD-04).
 
+### FD-08 — Test fix: two pgTAP counts scoped to their own fixtures
+- Date: 2026-10-03
+- Test changed: `supabase/tests/admin_client_remove.test.sql`, assertions 28 (AC-03) and 29 (AC-07).
+- Before: 28 counted every completion by actor name "Aisha Rahman"; 29 counted every organisation Tom is offered.
+- After: 28 counts the completions of Doris; 29 counts only the two fixture organisations.
+- Reason: genuine test bug. `supabase test db` runs against the seeded database, which holds 2 organisations and 4 "Aisha Rahman" completions, so the global counts were 9 and 4, not 5 and 2. Found after `supabase db reset`. No behaviour or expectation about the feature changed. Not a HUMAN REVIEW item.
+
 <!-- Template
 ### FD-01 — <title>
 - Date:

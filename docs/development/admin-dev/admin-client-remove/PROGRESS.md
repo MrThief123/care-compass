@@ -27,14 +27,14 @@ Last updated: 2026-10-03
 - None
 
 ## Remaining
-- Human approval to open the PR. Before it: `supabase db reset` then re-run `admin_client_remove.test.sql` (two count assertions are polluted by the local database, see TEST_PLAN Results).
+- Human approval to open the PR.
 
 ## Acceptance criteria status
 - 10 / 10 MET
 
 ## Tests
 - Written: 11 / 11 (T-01 to T-11)
-- Passing: all (pgTAP 30 of 32, the other 2 are database-pollution counts; see TEST_PLAN Results)
+- Passing: all (pgTAP 32 of 32 files after a db reset; two count assertions fixed, FD-08)
 - Failing: none caused by this feature
 
 ## Files changed

@@ -225,7 +225,7 @@ select is(
 
 select is(
   (select count(*)::int from care_events where client_id = 'b1111111-1111-1111-1111-111111111111')
-  + (select count(*)::int from care_event_completions where actor_display_name = 'Aisha Rahman')
+  + (select count(*)::int from care_event_completions where client_id = 'b1111111-1111-1111-1111-111111111111')
   + (select count(*)::int from budget_buckets where client_id = 'b1111111-1111-1111-1111-111111111111')
   + (select count(*)::int from client_family_members where client_id = 'b1111111-1111-1111-1111-111111111111'),
   5, 'AC-03: events (2), completion (1), budget bucket (1) and family link (1) are all kept');
@@ -235,7 +235,8 @@ select is(
 -- ---------------------------------------------------------------------------
 select pg_temp.login('a1111111-1111-1111-1111-111111111111');
 select is(
-  (select count(*)::int from list_organisations_for_transfer('b1111111-1111-1111-1111-111111111111')),
+  (select count(*)::int from list_organisations_for_transfer('b1111111-1111-1111-1111-111111111111')
+    where id in ('11111111-1111-1111-1111-111111111111', '22222222-2222-2222-2222-222222222222')),
   2, 'AC-07: with no organisation, Tom is still offered both organisations');
 select is(
   (select count(*)::int from list_organisations_for_transfer('b1111111-1111-1111-1111-111111111111') where is_current),

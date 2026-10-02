@@ -20,7 +20,7 @@ Tests are written **before** production code (TESTING.md §2). Run them, confirm
 | T-05 | AC-05 | component | Dialog wording, Cancel and Escape, Confirm calls removeClient with the id, row leaves, status message (no "reload" text), focus to heading, empty state, axe. | ☑ | PASS |
 | T-06 | AC-06 | component | removeClient failing or throwing keeps the row, shows an alert, closes the dialog, never says removed. | ☑ | PASS |
 | T-07 | AC-06 | unit | removeClient in mock mode: removes and getAdminClients reflects it; VALIDATION blank; NOT_FOUND unknown and repeat. | ☑ | PASS |
-| T-08 | AC-07 | db | A client that signed up with no organisation has no removal marker; with no organisation, the family still gets the organisation list (none current) and `transfer_client_organisation` works and clears the marker. | ☑ | PASS in pgTAP logic; 2 assertions count rows an un-reset local DB holds (see Results note) |
+| T-08 | AC-07 | db | A client that signed up with no organisation has no removal marker; with no organisation, the family still gets the organisation list (none current) and `transfer_client_organisation` works and clears the marker. | ☑ | PASS (after FD-08) |
 | T-09 | AC-08 | component | Settings banner and Choose organisation button; picker with none current; confirm moves the client and clears the banner; failure keeps it; absent when not removed; no Change/Choose for a never-registered client; axe; long name wraps. | ☑ | PASS |
 | T-10 | AC-09 | component | Home banner with a link to Settings; absent when false or unset; no alert or status role; axe. | ☑ | PASS |
 | T-11 | AC-10, AC-07 | integration | removeClient end to end for an admin session: list drops the client, carer reads nothing, family keeps the client and events and header.organisationRemoved is true; refused for a carer session; after the family moves the client the header no longer reports removal. | ☑ | PASS (local stack) |
@@ -35,6 +35,15 @@ Existing tests expected to change at implementation, recorded in FD-05 and flagg
 
 ## Test data
 - pgTAP: its own fixtures in the ADM-03 style (Banksia Home Care, Priya admin, Aisha carer, Wendy admin of Wattle Care, Tom family of Doris, Sam family of a client with no organisation).
+- Integration: creates and removes its own users, organisations, client, shifts and event.
+- Component: the Admin tests use their own two-client list; the Family tests use the mock header for `client-margaret` with overrides.
+
+## Coverage mapping rule
+Every AC must have ≥1 test. Tests may only be modified after implementation begins for reasons in TESTING.md §6, recorded in DECISIONS.md.
+
+
+## Results (2026-10-03)
+- `supabase test db` after `supabase db reset`: all 32 files pass (889 assertions). Two assertions in `admin_client_remove.test.sql` counted rows across the whole seeded database; scoped to their own fixtures (FD-08, a test bug, not a feature change).
 - Integration: creates and removes its own users, organisations, client, shifts and event.
 - Component: the Admin tests use their own two-client list; the Family tests use the mock header for `client-margaret` with overrides.
 
