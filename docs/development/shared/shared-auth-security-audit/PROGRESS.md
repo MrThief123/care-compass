@@ -101,4 +101,4 @@ Last updated: 2026-10-02
   (the seeded admin Priya now needs TOTP to see admin data).
 
 ## Ready for PR
-- Merged in #195. Close-out PR: decision docs plus the FD-09 to FD-13 fixes. Not opened yet.
+- Merged in #195. Close-out PR #198 (decision docs plus the FD-09 to FD-13 fixes), opened 2026-10-02.
