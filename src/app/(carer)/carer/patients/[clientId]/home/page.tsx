@@ -7,7 +7,8 @@ import { HomeErrorState } from "@/features/family-home/home-error-state";
 
 /**
  * Carer · patient Home (CAR-06, CHG-043): the Family Home through the carer's account. Read-only:
- * no ticking, no Enter event, no budget 'View breakdown'. Off shift, the View only notice shows.
+ * no ticking, no budget 'View breakdown'. On shift it has Enter event (CAR-07, CHG-048); off shift
+ * the View only notice shows instead.
  */
 export default async function CarerPatientHomePage({
   params,
@@ -39,6 +40,7 @@ export default async function CarerPatientHomePage({
         today={new Date()}
         basePath={carerPatientBase(clientId)}
         readOnly
+        canAddEvent={patient.onShift}
       />
     </>
   );

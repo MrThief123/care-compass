@@ -288,11 +288,8 @@ describe("[CAR-06][AC-07] carers never get the family-only controls", () => {
   // CHG-048 (CAR-07): on shift the Calendar has 'Enter event' and Task detail has 'Edit event',
   // so the Add/Edit event half of this test now allows exactly those two, on shift only
   // (HUMAN REVIEW: test expectation changed, CAR-07 FD-03). Home, Care log and the budget link
-  // are unchanged.
-  it.each([
-    ["Home", renderCarerHome, "Physiotherapy"],
-    ["Care log", renderCarerCareLog, "Weekly weigh-in"],
-  ])(
+  // are unchanged. The Home also has 'Enter event' on shift (CAR-07 FD-08, HUMAN REVIEW).
+  it.each([["Care log", renderCarerCareLog, "Weekly weigh-in"]])(
     "[CAR-06][AC-07] T-07 %s on shift has no Add event, Edit event or View breakdown link",
     async (_name, renderIt, shows) => {
       const { container } = await renderIt();
@@ -315,6 +312,19 @@ describe("[CAR-06][AC-07] carers never get the family-only controls", () => {
     expect(screen.getByRole("link", { name: "Enter event" })).toHaveAttribute(
       "href",
       expect.stringMatching(new RegExp(`^/carer/patients/${MARGARET}/events/new`)),
+    );
+    expect(screen.queryByRole("link", { name: /edit event/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /view breakdown/i })).not.toBeInTheDocument();
+    expect(container.innerHTML).not.toContain("/family/");
+  });
+
+  it("[CAR-06][AC-07] T-07 the Home on shift has Enter event (CAR-07) but no Edit event or View breakdown link", async () => {
+    const { container } = await renderCarerHome();
+
+    expect(screen.getAllByText("Physiotherapy").length).toBeGreaterThan(0);
+    expect(screen.getByRole("link", { name: "Enter event" })).toHaveAttribute(
+      "href",
+      `/carer/patients/${MARGARET}/events/new`,
     );
     expect(screen.queryByRole("link", { name: /edit event/i })).not.toBeInTheDocument();
     expect(screen.queryByRole("link", { name: /view breakdown/i })).not.toBeInTheDocument();

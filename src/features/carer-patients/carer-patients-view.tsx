@@ -19,8 +19,7 @@ const SEARCH_DEBOUNCE_MS = 400;
 /**
  * Carer · Patients: a card per patient, soonest shift first (FD-03). Search is
  * the URL's `?q=`, answered by the server (CAR-03 FD-01); this view shows what
- * it is given and moves the URL, as Family's Task log does. On shift, a card also has 'Add event
- * for <first name>' beside (not inside) the card's own link (CAR-07, CHG-048).
+ * it is given and moves the URL, as Family's Task log does.
  */
 export function CarerPatientsView({
   patients,
@@ -108,7 +107,7 @@ export function CarerPatientsView({
       {patients.length > 0 && (
         <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {patients.map((patient) => (
-            <li key={patient.clientId} className="flex min-w-0 flex-col gap-2">
+            <li key={patient.clientId} className="min-w-0">
               <Link
                 href={`/carer/patients/${patient.clientId}`}
                 className="relative block rounded-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring [&>div]:hover:bg-bg-inset"
@@ -122,14 +121,6 @@ export function CarerPatientsView({
                   <EditStatusBadge onShift={patient.onShift} />
                 </span>
               </Link>
-              {patient.onShift && (
-                <Link
-                  href={`/carer/patients/${patient.clientId}/events/new`}
-                  className="inline-flex h-11 items-center self-start rounded-control px-4 text-body-emphasis text-text-brand underline-offset-4 outline-none hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
-                >
-                  Add event for {patient.firstName}
-                </Link>
-              )}
             </li>
           ))}
         </ul>

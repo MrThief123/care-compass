@@ -273,15 +273,10 @@ describe("[CAR-07][AC-03] the entry points exist on shift only, and stay in the 
     expect(screen.queryByRole("link", { name: "Edit event" })).not.toBeInTheDocument();
   });
 
-  it("[CAR-07][AC-03] T-03 the Patients card has 'Add event for Margaret' on shift, and nothing for Robert", async () => {
+  it("[CAR-07][AC-03] T-03 the Patients card has no Add event link, on shift or not: it stays one link to the patient", async () => {
     await renderPatients();
 
-    expect(screen.getByRole("link", { name: "Add event for Margaret" })).toHaveAttribute(
-      "href",
-      expect.stringMatching(new RegExp(`^/carer/patients/${MARGARET}/events/new`)),
-    );
-    expect(screen.queryByRole("link", { name: /add event for robert/i })).not.toBeInTheDocument();
-    // A card link never nests another link: the card stays one link to the patient.
+    expect(screen.queryByRole("link", { name: /add event/i })).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: /Margaret Doyle/ })).toHaveAttribute(
       "href",
       `/carer/patients/${MARGARET}`,
@@ -549,12 +544,25 @@ describe("[CAR-07][AC-08] the Family screens are unchanged", () => {
   });
 });
 
-describe("[CAR-07][AC-03] carer screens elsewhere stay as CAR-06 left them", () => {
-  it("[CAR-07][AC-03] T-03 on shift the Care log and Home still have no Add event link (the entry points are Calendar, Task detail and Patients only)", async () => {
+describe("[CAR-07][AC-03] the carer Home", () => {
+  async function renderHome(clientId: string) {
     const { default: CarerHomePage } = await import(
       "@/app/(carer)/carer/patients/[clientId]/home/page"
     );
-    const { container } = render(await CarerHomePage(params(MARGARET)));
+    return render(await CarerHomePage(params(clientId)));
+  }
+
+  it("[CAR-07][AC-03] T-03 on shift the Home has 'Enter event' to the carer Add event route", async () => {
+    await renderHome(MARGARET);
+
+    expect(screen.getByRole("link", { name: "Enter event" })).toHaveAttribute(
+      "href",
+      `/carer/patients/${MARGARET}/events/new`,
+    );
+  });
+
+  it("[CAR-07][AC-03] T-03 off shift the Home has no 'Enter event' link", async () => {
+    const { container } = await renderHome(ROBERT);
 
     expect(screen.queryByRole("link", { name: /enter event|add event/i })).not.toBeInTheDocument();
     expect(hrefs(container).some((href) => href.includes("/events/"))).toBe(false);
