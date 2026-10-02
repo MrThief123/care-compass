@@ -1,11 +1,11 @@
 # Progress — ADM-08 Admin — Manage carer-client assignments
 
-Status: NOT STARTED
-Owner: unclaimed
+Status: IN PROGRESS
+Owner: Dhruv Verma
 Lane: A — Admin
-Sprint: POST-SPRINT · planned —
-Branch: `feature/admin-carer-assignments` (not yet created)
-PR target: `admin-dev`
+Sprint: SPRINT · planned D16
+Branch: `feature/admin-carer-assignments`
+PR target: `main`
 Last updated: 2026-09-17 (planning pack generated)
 
 ## Blockers
