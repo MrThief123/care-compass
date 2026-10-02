@@ -1027,3 +1027,12 @@ Template for future entries:
 - Impact: new feature F0-23 (Lane S, `docs/development/shared/shared-document-event-linking/`), depends on F0-13, F0-11 and FAM-08. One additive migration (new function; no table or column change, so no other feature's reads change), a new `src/server/documents` action, and the family event form's Add mode (`src/features/family-event-form`, family lane files, on the human's instruction). No second upload pattern. No blocking open decision.
 - Human confirmation: Dhruv Verma, 2026-10-02 (in-session).
 - Docs updated: DECISIONS.md (this entry), DEVELOPMENT_PLAN.md (F0-23 row, card, totals 88 features / 411 ACs), F0-23 feature docs, FAM-08 DECISIONS.md FD-01 (points to F0-23).
+
+### CHG-046 — Scheduler is Vercel Cron; the job endpoint accepts its bearer-secret GET
+- Date / requested by: 2026-10-02 / Dhruv Verma (human, project lead)
+- Type: decision detail (narrows PD-050 / OQ-17) + small change to merged INT-01
+- Description: PD-050 left the scheduler as "Vercel Cron or pg_cron". The human chose **Vercel Cron**. Vercel Cron calls with `GET` and `Authorization: Bearer $CRON_SECRET`, but INT-01's route only accepted `POST` with `x-jobs-secret`. `/api/jobs/budget-thresholds` now also has a `GET` handler that checks `CRON_SECRET` (constant-time, bare 401 otherwise, job not run); `POST` with `JOBS_SECRET` stays as a manual trigger. `vercel.json` schedules the route once a day at `0 21 * * *` (UTC; 07:00 or 08:00 Melbourne). The job is idempotent per bucket/threshold/period, so a daily run is enough.
+- Source / justification: human, in-session 2026-10-02: "Vercel cron is fine", then "start the Vercel Cron route change".
+- Impact: INT-01 AC-04 still holds for both methods (tests added). No migration, no new dependency, no table touched. New env var `CRON_SECRET` (Vercel project env, names only in `.env.example`). pg_cron is not used and PD-050's "or pg_cron" is no longer open.
+- Human confirmation: Dhruv Verma, 2026-10-02 (in-session).
+- Docs updated: DECISIONS.md (this entry), INT-01 DECISIONS.md (FD-02 note, FD-06) and PROGRESS.md, `.env.example`.
