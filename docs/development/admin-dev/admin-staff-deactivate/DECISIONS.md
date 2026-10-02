@@ -41,6 +41,20 @@ None. OQ-36 answered as PD-039 and OQ-19 as PD-052 (both 2026-09-17, root DECISI
 - AC-02 wording: it says 'Done · Marcus C.', but CHG-032 shows full names everywhere and completions store the full name, so the test asserts 'Marcus Chen'. Same behaviour, current naming; flagged for the PR.
 - Human confirmation: CONFIRMED 2026-10-02 (answers in session).
 
+### FD-06 — Admin can read inactive carers of their own organisation (new RLS policy)
+- Date: 2026-10-02
+- Context: FD-03 needs the Staff list to show inactive carers, but `profiles_select_same_org` only matches `is_active` rows, so after deactivation `getAdminStaff` returned nothing for that carer (T-10 failed for this reason, not for a missing function).
+- Decision: the same migration adds `is_admin_of_organisation(uuid)` (SECURITY DEFINER, active admin at AAL2 of that organisation) and the policy `profiles_select_inactive_carers_for_admin` (`role = 'carer' and not is_active and is_admin_of_organisation(organisation_id)`). Additive; no existing policy changed.
+- Reason: smallest way to meet AC-08 under RLS without a second read path; Manage's pickers still filter `is_active = true` themselves, so deactivated carers are not offered when assigning.
+- Alternatives considered: a SECURITY DEFINER `admin_inactive_staff()` list function (rejected: a second read path the Staff query would need to merge).
+- Consequences: a PR that alters `profiles` read access, so it is called out in the PR summary. `supabase/tests/admin_inactive_carers_rls.test.sql` (6 assertions) added for the policy's edges.
+- Human confirmation required: yes, at PR review (access-control change).
+
+### FD-07 — Notes from implementation
+- Mock-mode Manage (`/admin/manage`) is a static fixture (`ADMIN_MANAGE`) that never reflects the mock staff store, so a carer deactivated in mock mode still appears there. Real data excludes them (checked with a throwaway integration run). Not changed: out of ADM-03 scope.
+- The worktree's `node_modules` is a symlink to the main checkout; Turbopack refuses it, so `next build`/`next dev` are run with `--webpack` here.
+- The full vitest run shows 197 failures in 14 files (family task screens, family budget, admin-manage, carer-complete-task, etc.). 41 of them reproduce on this branch with ADM-03 changes stashed, in the files re-run; none are in ADM-03 files. Not investigated here.
+
 <!-- Template
 ### FD-01 — <title>
 - Date:

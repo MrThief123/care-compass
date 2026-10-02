@@ -13,16 +13,18 @@ Tests are written **before** production code (TESTING.md §2). Run them, confirm
 
 | Test ID | Covers | Level | Test description | Written first? | Result |
 |---|---|---|---|---|---|
-| T-01 | AC-01 | db | After deactivation the carer reads zero clients rows (and no shifts). | ☑ | FAILS (expected) |
-| T-02 | AC-02 | integration | A carer's earlier completions still show their name in the family task log after deactivation. | ☑ | FAILS (expected) |
-| T-03 | AC-03 | db | Profile kept inactive; future shifts (two clients) cancelled; in-progress shift ended now; past, already-cancelled and other carers' shifts unchanged; completions untouched. | ☑ | FAILS (expected) |
-| T-04 | AC-04 | db | Refused (42501) for the carer, another carer, family, other-org admin, admin at AAL1, no session, an admin target, another org's carer; nothing changes. | ☑ | FAILS (expected) |
-| T-05 | AC-05 | db | Second deactivation succeeds and changes no shift. | ☑ | FAILS (expected) |
-| T-06 | AC-06 | integration | A carer signed in before deactivation: next profile read shows inactive; sign-in is refused afterwards. | ☑ | FAILS (expected) |
-| T-07 | AC-07 | component | Deactivate button visibility, dialog content, Cancel, Confirm, success message, move to Inactive. | ☑ | FAILS (expected) |
-| T-08 | AC-08 | component | Inactive section shown with tag, hidden when empty; active list excludes them. | ☑ | FAILS (expected) |
-| T-09 | AC-09 | component + unit | Failure keeps the carer active and shows an alert; action validation, NOT_FOUND (mock), mock store marks inactive, getAdminStaff reflects it. | ☑ | FAILS (expected) |
-| T-10 | AC-03, AC-07 | integration | deactivateStaff against local Supabase end to end for an admin session; refused for a carer session. | ☑ | FAILS (expected) |
+| T-01 | AC-01 | db | After deactivation the carer reads zero clients rows (and no shifts). | ☑ | PASSES |
+| T-02 | AC-02 | integration | A carer's earlier completions still show their name in the family task log after deactivation. | ☑ | PASSES |
+| T-03 | AC-03 | db | Profile kept inactive; future shifts (two clients) cancelled; in-progress shift ended now; past, already-cancelled and other carers' shifts unchanged; completions untouched. | ☑ | PASSES |
+| T-04 | AC-04 | db | Refused (42501) for the carer, another carer, family, other-org admin, admin at AAL1, no session, an admin target, another org's carer; nothing changes. | ☑ | PASSES |
+| T-05 | AC-05 | db | Second deactivation succeeds and changes no shift. | ☑ | PASSES |
+| T-06 | AC-06 | integration | A carer signed in before deactivation: next profile read shows inactive; sign-in is refused afterwards. | ☑ | PASSES |
+| T-07 | AC-07 | component | Deactivate button visibility, dialog content, Cancel, Confirm, success message, move to Inactive. | ☑ | PASSES |
+| T-08 | AC-08 | component | Inactive section shown with tag, hidden when empty; active list excludes them. | ☑ | PASSES |
+| T-09 | AC-09 | component + unit | Failure keeps the carer active and shows an alert; action validation, NOT_FOUND (mock), mock store marks inactive, getAdminStaff reflects it. | ☑ | PASSES |
+| T-10 | AC-03, AC-07 | integration | deactivateStaff against local Supabase end to end for an admin session; refused for a carer session. | ☑ | PASSES |
+
+| T-11 | AC-08 | db | (added at implementation, FD-06) `profiles_select_inactive_carers_for_admin`: an AAL2 admin reads their own organisation's inactive carer; an admin at AAL1, a carer colleague, another organisation's admin and the inactive carer themself do not. `supabase/tests/admin_inactive_carers_rls.test.sql` | ☐ (written with the policy) | PASSES |
 
 ## Regression scope
 - Run the full unit/component suite and `supabase test db` before marking READY FOR PR.
