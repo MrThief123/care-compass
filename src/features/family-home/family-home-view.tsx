@@ -1,3 +1,7 @@
+import Link from "next/link";
+
+import { OrganisationRemovedBanner } from "@/features/family-settings/organisation-removed-banner";
+
 import { BudgetStrip } from "./budget-strip";
 import { EnterEventLink } from "./enter-event-link";
 import { shortDate } from "./home-format";
@@ -18,6 +22,10 @@ export interface FamilyHomeViewProps {
   readOnly?: boolean;
   /** Read-only Home that still has Enter event: a carer on shift (CAR-07, CHG-048). */
   canAddEvent?: boolean;
+  /** Family only (ADM-05): the organisation removed the client; shows a banner linking to Settings. */
+  organisationRemoved?: boolean;
+  /** Names the client in that banner. */
+  clientFirstName?: string;
 }
 
 /**
@@ -38,9 +46,24 @@ export function FamilyHomeView({
   basePath,
   readOnly = false,
   canAddEvent = false,
+  organisationRemoved = false,
+  clientFirstName = "your family member",
 }: FamilyHomeViewProps) {
   return (
     <div className="flex min-w-0 flex-col gap-4 px-6 py-5">
+      {organisationRemoved && (
+        <OrganisationRemovedBanner
+          clientFirstName={clientFirstName}
+          action={
+            <Link
+              href={`/family/${clientId}/settings`}
+              className="inline-flex h-11 items-center justify-center rounded-control bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors outline-none hover:bg-primary/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+            >
+              Choose organisation
+            </Link>
+          }
+        />
+      )}
       <div className="grid min-w-0 grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_340px] xl:grid-rows-[auto_auto_1fr]">
         {(!readOnly || canAddEvent) && (
           <div className="min-w-0 lg:col-span-2 xl:col-span-1 xl:col-start-2 xl:row-start-1">
