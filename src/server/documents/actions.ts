@@ -38,6 +38,13 @@ const NOT_FOUND_MESSAGE = "Couldn't find that document.";
 /** PRD: a short-lived signed URL. 60 seconds, as PRD.md's PROPOSED default. */
 const SIGNED_URL_TTL_SECONDS = 60;
 
+// `z.guid()`, not `z.uuid()`: Postgres accepts any 8-4-4-4-12 hex id and seed ids carry no
+// RFC version bits (F0-22 FD-07).
+const LinkInputSchema = z.object({
+  eventId: z.guid(),
+  documentIds: z.array(z.guid()).max(50),
+});
+
 const UploadInputSchema = z.object({
   clientId: z.uuid(),
   eventId: z.uuid().optional(),
@@ -178,4 +185,51 @@ export async function detachDocument(documentId: string): Promise<DocumentAction
   }
 
   return { ok: true, data: undefined };
+}
+
+/**
+ * F0-23 (CHG-045): after Add event's `createEvent` returns an id, links the files chosen
+ * before the event existed. Each id goes through the guarded `link_document_to_event`
+ * function (the only way `documents.event_id` is set), so the database decides who may link
+ * what. One refusal never stops the others: `failedIds` lists the documents that did not
+ * attach, and the caller names them to the user. Errors carry no filename, id or detail.
+ */
+export async function linkDocumentsToEvent(input: {
+  eventId: string;
+  documentIds: string[];
+}): Promise<DocumentActionResult<{ failedIds: string[] }>> {
+  if (getDataSourceMode() === "mock") {
+    return { ok: false, error: { code: "NOT_AVAILABLE", message: NOT_AVAILABLE_MESSAGE } };
+  }
+
+  const parsed = LinkInputSchema.safeParse(input);
+  if (!parsed.success) {
+    return {
+      ok: false,
+      error: { code: "VALIDATION", message: "Couldn't attach those files to the event." },
+    };
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return { ok: false, error: { code: "NOT_ALLOWED", message: "Sign in to attach files." } };
+  }
+
+  const failedIds: string[] = [];
+  for (const documentId of parsed.data.documentIds) {
+    try {
+      const { error } = await supabase.rpc("link_document_to_event", {
+        p_document_id: documentId,
+        p_event_id: parsed.data.eventId,
+      });
+      if (error) failedIds.push(documentId);
+    } catch {
+      failedIds.push(documentId);
+    }
+  }
+
+  return { ok: true, data: { failedIds } };
 }

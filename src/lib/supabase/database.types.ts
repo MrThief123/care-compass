@@ -1121,6 +1121,13 @@ export type Database = {
         };
         Returns: boolean;
       };
+      link_document_to_event: {
+        Args: {
+          p_document_id: string;
+          p_event_id: string;
+        };
+        Returns: undefined;
+      };
       list_organisations_for_transfer: {
         Args: {
           p_client_id: string;
