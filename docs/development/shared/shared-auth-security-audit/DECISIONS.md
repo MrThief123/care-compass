@@ -135,6 +135,16 @@ is changed, renamed or dropped.
 - Asked for by the human (Dhruv561, 2026-10-02) in the close-out PR.
 - Tests: `src/next-config.test.ts` (`[F0-21][FD-11]`).
 
+### FD-12 — Show/hide toggle on password fields (asked for in close-out)
+- Request: the human (Dhruv561, 2026-10-02) asked for an eye button that reveals the password,
+  hidden by default.
+- Decision: the shared `Field` adds the toggle to every `type="password"` field, so sign-in,
+  sign-up (both fields) and reset-password all get it with no form changes. 44×44 button, eye /
+  eye-off icons (`Eye`, `EyeOff` added to the existing lucide `Icon` set, no new dependency),
+  `type="button"`, disabled with the field. Its name ("Show password" / "Hide password") is sr-only
+  text, not `aria-label`, so `getByLabel("Password")` in the e2e specs still finds only the input.
+- Tests: `src/components/shared/forms/field.test.tsx` (`[F0-21][FD-12]`).
+
 ## Test changes (CLAUDE.md §5) — HUMAN REVIEW: test expectation changed
 No assertion was removed or loosened. The simulated session changed because the requirement changed
 (admin authority now needs AAL2).
