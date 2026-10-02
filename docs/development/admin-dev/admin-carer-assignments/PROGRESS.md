@@ -1,12 +1,12 @@
 # Progress — ADM-08 Admin — Manage carer-client assignments
 
-Status: IN PROGRESS
+Status: PR OPEN
 Owner: Dhruv Verma
 Lane: A — Admin
 Sprint: SPRINT · planned D16
 Branch: `feature/admin-carer-assignments`
 PR target: `main`
-Last updated: 2026-10-02 (implemented; awaiting human approval to open the PR)
+Last updated: 2026-10-02 (PR #203 open, awaiting review and merge)
 
 ## Blockers
 - None. OQ-09 and OQ-19 are ANSWERED (see DECISIONS.md)
@@ -59,7 +59,7 @@ Last updated: 2026-10-02 (implemented; awaiting human approval to open the PR)
 - PROPOSED items in PRD.md are unconfirmed until validated in F0-01 or answered in DECISIONS.md.
 
 ## Next action
-- Human review, then "yes" to open the PR. PR must say: design gap, built from tokens, please review; touches staff-screen.tsx, which ADM-03 also edits.
+- Human review and merge of PR #203 (it says: design gap, built from tokens, please review; touches staff-screen.tsx, which ADM-03 also edits). Afterwards F0-24 adds Resend invite using `admin_pending_staff_ids()`.
 
 ## Ready for PR
 - No
