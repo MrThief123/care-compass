@@ -1,6 +1,6 @@
 # Progress — FAM-11 Family — Update funds (Edit budget)
 
-Status: IN PROGRESS
+Status: READY FOR PR (awaiting human approval)
 Owner: Dhruv Verma
 Lane: F — Family
 Sprint: SPRINT · planned D15–D16
