@@ -49,6 +49,12 @@ Record feature-level decisions here using the template below. Project-wide decis
   - `carer-assignments.test.tsx` (ADM-08): `renderScreen` now presses "Edit Aisha Rahman" first, because the Clients list is no longer visible by default; "switches to another carer's clients" wording updated; new test that no Clients list shows until a name is pressed and none after Close.
 - Human confirmation: Dhruv Verma, 2026-10-02 ("Do it here").
 
+### FD-06 — Mock stores shared through `globalThis` (staff and assignments)
+- Date: 2026-10-02
+- Context: in mock mode a carer added on the Staff screen, or a client removed from a carer, vanished on refresh or after visiting another page. Next bundles Server Actions and pages separately, so each got its own copy of the module-level store.
+- Decision: both mock stores (`assignments-mock-store.ts`, and the ADM-02 `staff-mock-store.ts`, same lane) now keep their rows on `globalThis`. Mock mode only; the database path is unchanged. Verified in a production build: an added carer survives reload, a removed client stays removed after navigating away and back.
+- Human confirmation required: no (mock-only defect fix; ADM-02 file touched, noted in the PR).
+
 <!-- Template
 ### FD-01 — <title>
 - Date:
