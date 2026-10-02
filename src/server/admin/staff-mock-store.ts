@@ -46,6 +46,15 @@ export function addMockStaff(
   return { ...created };
 }
 
+/** Marks a carer inactive (ADM-03). Idempotent; undefined for an unknown id. */
+export function deactivateMockStaff(id: string): StaffMember | undefined {
+  const index = store.rows.findIndex((member) => member.id === id);
+  if (index === -1) return undefined;
+  const updated: StaffMember = { ...store.rows[index]!, isActive: false };
+  store.rows = [...store.rows.slice(0, index), updated, ...store.rows.slice(index + 1)];
+  return { ...updated };
+}
+
 export function updateMockStaff(
   id: string,
   input: Omit<StaffMember, "id" | "organisationId" | "isActive">,

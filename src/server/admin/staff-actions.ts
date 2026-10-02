@@ -8,7 +8,7 @@
 import { z } from "zod";
 
 import { requiredPhoneError } from "@/lib/phone/au-phone";
-import { addMockStaff, updateMockStaff } from "@/server/admin/staff-mock-store";
+import { addMockStaff, deactivateMockStaff, updateMockStaff } from "@/server/admin/staff-mock-store";
 import { getDataSourceMode } from "@/server/data-source";
 import type { StaffMember } from "@/types/domain";
 
@@ -185,6 +185,59 @@ export async function updateStaff(
       error: {
         code: error?.code === "42501" ? "NOT_ALLOWED" : "UNEXPECTED",
         message: SAVE_FAILED_MESSAGE,
+      },
+    };
+  }
+
+  return {
+    ok: true,
+    data: {
+      id: data.id,
+      organisationId: data.organisation_id ?? "",
+      firstName: data.first_name ?? "",
+      lastName: data.last_name ?? "",
+      jobTitle: data.job_title ?? "",
+      email: data.email ?? "",
+      phone: data.phone ?? undefined,
+      isActive: data.is_active,
+    },
+  };
+}
+
+const DEACTIVATE_FAILED_MESSAGE = "Couldn't deactivate. Please try again.";
+
+/**
+ * Deactivates a carer of the caller's organisation (ADM-03, FD-01): `admin_deactivate_staff` sets
+ * `is_active` false and cancels their future shifts. Idempotent; the profile and every completion
+ * are kept. The function refuses (42501) a caller who is not an active admin at AAL2 and a target
+ * who is not a carer of that organisation.
+ */
+export async function deactivateStaff(id: string): Promise<ActionResult<StaffMember>> {
+  if (!id.trim()) {
+    return { ok: false, error: { code: "VALIDATION", message: "Choose a staff member." } };
+  }
+
+  const mode = getDataSourceMode();
+  if (mode === "mock") {
+    const updated = deactivateMockStaff(id);
+    if (!updated) {
+      return {
+        ok: false,
+        error: { code: "NOT_FOUND", message: "That staff member was not found." },
+      };
+    }
+    return { ok: true, data: updated };
+  }
+
+  const { createClient } = await import("@/lib/supabase/server");
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("admin_deactivate_staff", { p_profile_id: id });
+  if (error || !data) {
+    return {
+      ok: false,
+      error: {
+        code: error?.code === "42501" ? "NOT_ALLOWED" : "UNEXPECTED",
+        message: DEACTIVATE_FAILED_MESSAGE,
       },
     };
   }
