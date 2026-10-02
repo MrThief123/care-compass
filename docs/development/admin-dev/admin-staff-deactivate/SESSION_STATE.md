@@ -1,14 +1,14 @@
 # Session State — ADM-03 Admin — Deactivate staff
 
-Last session date: none (no implementation session yet)
-Current branch: n/a — `feature/admin-staff-deactivate` not created
-Worked on: n/a
-What changed: n/a
-Tests run: none
-Test results: n/a
-Current blocker: OQ-36, OQ-19
-Important discoveries: none
-Important decisions: none
-Exact next action: Run `START FEATURE ADM-03` once dependencies are MERGED TO DEV (or COMPLETE) and blocking decisions are answered.
-Files likely to be touched next: `src/features/admin-staff/deactivate.tsx`, `supabase/migrations/*_deactivate_staff.sql`
-Warning for next session: Read PRD.md, ACCEPTANCE_CRITERIA.md and TEST_PLAN.md before writing any code. Do not create the branch from the wrong parent (`admin-dev`).
+Last session date: 2026-10-02
+Current branch: `feature/admin-staff-deactivate` (worktree `../care-compass-adm-03`, cut from main at b662bfe)
+Worked on: START FEATURE ADM-03 — docs and tests only
+What changed: docs updated (FD-01 to FD-05, AC-01 to AC-09); four test files added
+Tests run: new tests only (vitest component + unit, pgTAP, integration against local Supabase)
+Test results: all fail for the expected reason, except 2 component tests that already hold
+Current blocker: none
+Important discoveries: `is_active` already gates RLS helpers, sign-in and the route guard (`evaluateRoleGuard` signs out with `/sign-in?reason=inactive`), and the admin carer pickers already filter `is_active`; so no service role or auth ban is needed. Completions snapshot `actor_display_name` with no FK, so history survives.
+Important decisions: FD-01 to FD-05 (Inactive section, no reactivation, cancel future + end in-progress shifts)
+Exact next action: implement per PROGRESS.md "Remaining", starting with the migration
+Files likely to be touched next: see PROGRESS.md
+Warning for next session: do not edit tests to get green; integration tests need the local stack env vars (the worktree's `.env.local` is the hosted project and skips them).
