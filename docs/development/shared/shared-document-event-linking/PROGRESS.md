@@ -34,3 +34,11 @@ Run after merging `main` (up to date at 09c54f7) in this worktree, local Supabas
 - `vitest run tests/integration` with the local env from `npx supabase status -o env`: 37 files passed, 1 failed. The failure is `shared-dev-seed-data.test.ts` ([F0-16][AC-01] and [AC-03]): the seed test finds extra `documents` rows in the local database. `documents` rows cannot be deleted (append-only), so every documents integration run, including this feature's, leaves rows behind. Same failure F0-22 recorded; not caused by changed code. Not re-run on `main`.
 - Migration: `20261002005045_document_event_linking.sql`, created with `supabase migration new`, applied locally with `supabase migration up --local`. Adds one function; no table, column, grant or policy change, so no other feature's reads change.
 - `database.types.ts`: one entry added by hand. `npm run db:types` was not used because it reorders and adds unrelated tables (budget thresholds) from other branches.
+
+## Real-browser check and re-merge (2026-10-02)
+- Merged `origin/main` again (62e61ed, includes the FAM-08 AC-01 fix, PR #199) with no conflicts; `npm run verify` re-run after the merge: 195 files / 2408 tests passed, 33 skipped.
+- Real browser (Playwright, Chromium) against the local stack with `DATA_SOURCE=supabase`, signed in as Helen on Margaret:
+  - Add event with two files (`care-plan.pdf`, `photo.png`) then Save: both `documents` rows linked to the new event; Edit event shows both tiles.
+  - Forced failure (one uploaded file detached in the database before Save): the event is saved once, the form is replaced by the "didn't attach" alert with Continue, and Save is gone, so the event cannot be created twice.
+  - Edit event at 1920, 1440, 1280, 1024 and 768 px: no horizontal overflow.
+- The owner also tried the flow by hand and found it fine.
