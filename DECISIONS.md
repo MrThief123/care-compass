@@ -1066,6 +1066,16 @@ Template for future entries:
 - Human confirmation: Dhruv Verma, 2026-10-02 (in-session).
 - Docs updated: DECISIONS.md (this entry), PRD.md §17 (PL-27); CAR-07 pack at hand-off.
 
+### CHG-050 — New feature INT-10: threshold email names the bucket (PL-26 promoted)
+- Date / requested by: 2026-10-02 / Dhruv Verma (human, project lead)
+- Type: scope addition (new feature; Parking lot promotion)
+- Description: promotes PL-26 (parked by CHG-044). INT-01's threshold warning email names only the client; for a client with more than one bucket it does not say which bucket crossed the threshold. New feature **INT-10** adds the bucket name to the email body. The job reads `budget_buckets.name` with its existing admin client; no migration, no new dependency. Wording is chosen in INT-10 FD-01.
+- Supersedes: nothing. Closes CHG-044's PL-26. PL-25 stays parked.
+- Source / justification: human, in-session 2026-10-02: approved the item and the ID INT-10 (next free INT number; DEVELOPMENT_PLAN.md §7's "next number" line was stale, INT-09 is taken).
+- Impact: new feature INT-10 (Lane B, `docs/development/shared/shared-budget-threshold-email-bucket-name/`), depends on INT-01 (merged). Changes `src/server/jobs/budget-thresholds.ts`'s email body only. No other feature reads it. No blocking open decision. Totals 91 active features / 433 acceptance criteria.
+- Human confirmation: Dhruv Verma, 2026-10-02 (in-session).
+- Docs updated: DECISIONS.md (this entry), DEVELOPMENT_PLAN.md (INT-10 row, card, totals, next-number line), PRD.md §17 (PL-26 marked promoted), root PROGRESS.md (INT-10 row), INT-10 feature docs. `docs/JIRA_BACKLOG.csv` not updated (predates CHG-047 and later additions).
+
 ### CHG-051 — Event form and calendar polish (promotes PL-27 to new feature FAM-16)
 - Date / requested by: 2026-10-02 / Dhruv Verma (human, project lead)
 - Type: new feature (promotes the Parking lot item PL-27, parked by CHG-049) with a flagged Lane S edit
