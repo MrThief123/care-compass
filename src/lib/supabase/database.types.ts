@@ -642,6 +642,7 @@ export type Database = {
           id: string;
           last_name: string;
           organisation_id: string | null;
+          organisation_removed_at: string | null;
           suburb: string | null;
           updated_at: string;
         };
@@ -653,6 +654,7 @@ export type Database = {
           id?: string;
           last_name: string;
           organisation_id?: string | null;
+          organisation_removed_at?: string | null;
           suburb?: string | null;
           updated_at?: string;
         };
@@ -664,6 +666,7 @@ export type Database = {
           id?: string;
           last_name?: string;
           organisation_id?: string | null;
+          organisation_removed_at?: string | null;
           suburb?: string | null;
           updated_at?: string;
         };
@@ -993,6 +996,7 @@ export type Database = {
         Returns: number;
       };
       admin_pending_staff_ids: { Args: never; Returns: string[] };
+      admin_remove_client: { Args: { p_client_id: string }; Returns: undefined };
       admin_update_organisation: {
         Args: {
           p_abn: string;
@@ -1186,7 +1190,10 @@ export type Database = {
         }[];
       };
       is_admin_of_client: { Args: { p_client_id: string }; Returns: boolean };
-      is_admin_of_organisation: { Args: { p_organisation_id: string }; Returns: boolean };
+      is_admin_of_organisation: {
+        Args: { p_organisation_id: string };
+        Returns: boolean;
+      };
       is_assigned_carer: { Args: { p_client_id: string }; Returns: boolean };
       is_family_of: { Args: { p_client_id: string }; Returns: boolean };
       link_document_to_event: {
