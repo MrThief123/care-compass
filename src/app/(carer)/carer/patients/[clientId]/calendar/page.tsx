@@ -7,8 +7,8 @@ import { loadFamilyCalendar } from "@/features/family-calendar/load-calendar";
 /**
  * Carer · patient Calendar (CAR-06, CHG-043): the Family Calendar through the carer's account.
  * Tick boxes exist only while a shift with this patient is in progress; the database refuses a
- * tick outside one either way (`set_occurrence_done`). Never an Enter event link (CAR-07 is
- * post-sprint). A rejected read propagates to `error.tsx`.
+ * tick outside one either way (`set_occurrence_done`). 'Enter event' (CAR-07, CHG-048) shows
+ * under the same condition. A rejected read propagates to `error.tsx`.
  */
 export default async function CarerPatientCalendarPage({
   params,
@@ -33,7 +33,7 @@ export default async function CarerPatientCalendarPage({
         actorName={data.actorName}
         basePath={carerPatientBase(clientId)}
         canTick={patient.onShift}
-        canAddEvent={false}
+        canAddEvent={patient.onShift}
       />
     </>
   );

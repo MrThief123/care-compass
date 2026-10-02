@@ -16,6 +16,8 @@ export interface FamilyHomeViewProps {
   basePath?: string;
   /** Carers: no Enter event link and no budget 'View breakdown' link (CHG-026, CHG-043). */
   readOnly?: boolean;
+  /** Read-only Home that still has Enter event: a carer on shift (CAR-07, CHG-048). */
+  canAddEvent?: boolean;
 }
 
 /**
@@ -35,11 +37,12 @@ export function FamilyHomeView({
   today,
   basePath,
   readOnly = false,
+  canAddEvent = false,
 }: FamilyHomeViewProps) {
   return (
     <div className="flex min-w-0 flex-col gap-4 px-6 py-5">
       <div className="grid min-w-0 grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_340px] xl:grid-rows-[auto_auto_1fr]">
-        {!readOnly && (
+        {(!readOnly || canAddEvent) && (
           <div className="min-w-0 lg:col-span-2 xl:col-span-1 xl:col-start-2 xl:row-start-1">
             <EnterEventLink clientId={clientId} basePath={basePath} />
           </div>

@@ -26,7 +26,7 @@ export interface TaskDetailViewProps {
   origin?: TaskDetailOrigin;
   /** Where the links go; defaults to `/family/<id>` (a carer sets it, CHG-043). */
   basePath?: string;
-  /** Carers: no Edit event link (CHG-043, CAR-07 is post-sprint). */
+  /** False: no Edit event link (a carer with no shift in progress, CHG-048). */
   canEdit?: boolean;
 }
 

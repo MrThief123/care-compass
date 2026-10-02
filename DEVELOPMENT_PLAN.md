@@ -1,7 +1,7 @@
 # DEVELOPMENT PLAN — Care Compass
 
 Version 0.2 · 17 September 2026 · Status: DRAFT (controlled after planning freeze) · Supersedes v0.1 dashboard-by-dashboard phases
-Totals: **90 active features** (91 listed; CAR-08 retired) · **423 acceptance criteria** across 5 phases (UI-04 and its 10 criteria added by CHG-004, 2026-09-19; UI-05 and its 13 criteria added under CHG-009, 2026-09-24; F0-17 and its 8 criteria added by CHG-010, 2026-09-24; CHG-020, 2026-09-25: FAM-UI-08 (6 criteria) and ADM-11 (5) added, FAM-UI-05 +5 criteria, CAR-08 and its 2 criteria retired; CHG-021, 2026-09-25: FAM-UI-05 +4 criteria; CHG-022, 2026-09-25: FAM-UI-05 +5 criteria; CHG-027, 2026-09-26: F0-18 and its 9 criteria added; CHG-037, 2026-09-30: F0-19 and its 6 criteria added; CHG-040, 2026-09-30: F0-20 and its 10 criteria added; CHG-041, 2026-10-01: F0-21 and its 6 criteria added; CHG-042, 2026-10-01: F0-22 and its 8 criteria added; CHG-045, 2026-10-02: F0-23 and its 8 criteria added; CHG-047, 2026-10-02: F0-24 (7 criteria) and INT-09 (5 criteria) added, every remaining post-sprint feature pulled into the sprint, sprint extended to D21; the Jira import `docs/JIRA_BACKLOG.csv` predates all six). Jira import: `docs/JIRA_BACKLOG.csv`.
+Totals: **90 active features** (91 listed; CAR-08 retired) · **429 acceptance criteria** across 5 phases (UI-04 and its 10 criteria added by CHG-004, 2026-09-19; UI-05 and its 13 criteria added under CHG-009, 2026-09-24; F0-17 and its 8 criteria added by CHG-010, 2026-09-24; CHG-020, 2026-09-25: FAM-UI-08 (6 criteria) and ADM-11 (5) added, FAM-UI-05 +5 criteria, CAR-08 and its 2 criteria retired; CHG-021, 2026-09-25: FAM-UI-05 +4 criteria; CHG-022, 2026-09-25: FAM-UI-05 +5 criteria; CHG-027, 2026-09-26: F0-18 and its 9 criteria added; CHG-037, 2026-09-30: F0-19 and its 6 criteria added; CHG-040, 2026-09-30: F0-20 and its 10 criteria added; CHG-041, 2026-10-01: F0-21 and its 6 criteria added; CHG-042, 2026-10-01: F0-22 and its 8 criteria added; CHG-045, 2026-10-02: F0-23 and its 8 criteria added; CHG-047, 2026-10-02: F0-24 (7 criteria) and INT-09 (5 criteria) added, every remaining post-sprint feature pulled into the sprint, sprint extended to D21; the Jira import `docs/JIRA_BACKLOG.csv` predates all six). Jira import: `docs/JIRA_BACKLOG.csv`.
 
 ---
 
@@ -185,7 +185,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 | 19 | CAR-04 | Carer — Client info | C | D9 | SPRINT | F0-06, F0-10, F0-13, F0-18, CAR-UI-02 | OQ-09 | `feature/carer-client-info` | NOT STARTED |
 | 20 | CAR-05 | Carer — Calendar (shifts) and selected-shift tasks | C | D9–D10 | SPRINT | F0-10, F0-11, CAR-UI-03 | OQ-33 | `feature/carer-calendar-shifts` | NOT STARTED |
 | 21 | CAR-06 | Carer — Mark tasks done | C | D10 | SPRINT | F0-10, F0-11, F0-18, CAR-UI-02, CAR-04 | OQ-09, OQ-10, OQ-33 | `feature/carer-complete-task` | IN PROGRESS |
-| 22 | CAR-07 | Carer — Add and edit events for a patient | C | D15–D16 | SPRINT | CAR-04, F0-11, UI-02 | OQ-09, OQ-22, OQ-19 | `feature/carer-manage-events` | NOT STARTED |
+| 22 | CAR-07 | Carer — Add and edit events for a patient | C | D15–D16 | SPRINT | CAR-04, F0-11, UI-02 | OQ-09, OQ-22, OQ-19 | `feature/carer-manage-events` | IN PROGRESS |
 | 23 | CAR-08 | ~~Carer — Record an expense~~ (retired, CHG-020) | C | — | POST-SPRINT | F0-12, F0-13 | OQ-19, OQ-04, OQ-05 | `feature/carer-record-expense` | RETIRED (CHG-020) |
 | 24 | CAR-09 | Carer — Settings | C | D10 | SPRINT | F0-07, CAR-UI-04 | OQ-35 | `feature/carer-settings` | NOT STARTED |
 | 25 | ADM-01 | Admin Home — counts and overdue events | A | D8 | SPRINT | F0-11, ADM-UI-01 | OQ-29 | `feature/admin-home` | NOT STARTED |
@@ -1035,16 +1035,16 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 
 ### CAR-07 — Carer — Add and edit events for a patient
 - **Dashboard / stream:** carer · **Lane:** C · **Days:** D15–D16 · **Sprint:** SPRINT · **PR target:** `main` · **Branch:** `feature/carer-manage-events`
-- **Description:** Implements sequence Use Case 2: carer opens a rostered patient's calendar and adds a task with date, description and documentation.
+- **Description:** Implements sequence Use Case 2: carer opens a rostered patient's calendar and adds a task with date, description and documentation. Built by CHG-048: on-shift carers get Add event (Calendar, Home) and Edit event (Task detail) on the Family event form, under `/carer/patients/<id>/…`.
 - **User value:** Carers can record needs they observe while caring.
-- **Dependencies:** CAR-04, F0-11, UI-02 · **Blocking decisions:** OQ-09, OQ-22, OQ-19
+- **Dependencies:** CAR-04, F0-11, UI-02 · **Blocking decisions:** OQ-09, OQ-22, OQ-19 (all ANSWERED)
 - **Jira summary:** Carer creates/edits a patient's event during an active shift (entry point not designed)
-- **Acceptance criteria summary:** 2 criteria — it appears on Margaret's family calendar; it is rejected
-- **Testing summary:** 1 e2e, 1 integration
+- **Acceptance criteria summary:** 8 criteria — appears on Margaret's family calendar; rejected off shift; entry points on shift only; Add form saves; Edit form saves; shift ends mid-form; routes redirect off shift; Family unchanged
+- **Testing summary:** 1 e2e file (2 tests), 1 integration file, component tests
 - **Requirements:** REQ-18
 - **CHG-009 (tasks and plain events, REQ-35):** the form has the task switch (on by default); a carer on shift can switch either way; the change is audited.
-- **CHG-020 (PD-058):** a carer may set a cost and bucket when creating an event (reusing FAM-UI-08's fields), and change them later only on events they created.
-- **Docs:** `docs/development/carer-dev/carer-manage-events/` · **Status:** NOT STARTED
+- **CHG-020 (PD-058):** a carer may set a cost and bucket when creating an event (reusing FAM-UI-08's fields), and change them later only on events they created. The fields show as on Family; saving a cost is not wired for anyone yet and is not added here (CHG-048).
+- **Docs:** `docs/development/carer-dev/carer-manage-events/` · **Status:** IN PROGRESS
 
 ### CAR-08 — Carer — Record an expense
 - **Dashboard / stream:** carer · **Lane:** C · **Days:** — · **Sprint:** POST-SPRINT · **PR target:** `main` · **Branch:** `feature/carer-record-expense`

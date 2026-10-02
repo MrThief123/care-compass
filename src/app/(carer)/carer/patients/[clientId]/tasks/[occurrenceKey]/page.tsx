@@ -9,8 +9,8 @@ import { getEventDocuments } from "@/server/documents/queries";
 import { getOccurrence, getToday } from "@/server/events/queries";
 
 /**
- * Carer · Task detail (CAR-06 FD-02, unconfirmed): the Family Task detail, read-only, under the
- * carer's own path. No Edit event link and no ticking. An unknown key, or one that belongs to
+ * Carer · Task detail (CAR-06 FD-02, CHG-048): the Family Task detail under the carer's own
+ * path. 'Edit event' shows only while a shift with this patient is in progress (CAR-07). An unknown key, or one that belongs to
  * another client, is a 404.
  */
 export default async function CarerTaskDetailPage({
@@ -21,7 +21,7 @@ export default async function CarerTaskDetailPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { clientId, occurrenceKey } = await params;
-  await findCarerPatient(clientId);
+  const patient = await findCarerPatient(clientId);
   const origin = await resolveTaskDetailOrigin(await searchParams, () => getToday());
   const occurrence = await getOccurrence(clientId, decodeOccurrenceKey(occurrenceKey), {
     type: "all",
@@ -38,7 +38,7 @@ export default async function CarerTaskDetailPage({
       documents={documents}
       origin={origin}
       basePath={carerPatientBase(clientId)}
-      canEdit={false}
+      canEdit={patient.onShift}
     />
   );
 }
