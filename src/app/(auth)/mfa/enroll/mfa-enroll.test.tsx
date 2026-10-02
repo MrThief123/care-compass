@@ -29,6 +29,15 @@ beforeEach(() => {
   vi.resetAllMocks();
 });
 
+describe("[F0-21][FD-13] QR image is centred", () => {
+  it("[F0-21][FD-13] centres the QR code in the card", () => {
+    render(<MfaEnrollForm factorId="f" qrCode={DATA_URI} secret="JBSWY3DPEHPK3PXP" />);
+
+    // jsdom has no layout; the real position is checked in a browser (PROGRESS.md).
+    expect(screen.getByRole("img", { name: /authenticator/i })).toHaveClass("self-center");
+  });
+});
+
 describe("[F0-20][AC-01] QR image", () => {
   it("[F0-20][AC-01] uses a data: URI value as it is, without wrapping it a second time", () => {
     render(<MfaEnrollForm factorId="f" qrCode={DATA_URI} secret="JBSWY3DPEHPK3PXP" />);
