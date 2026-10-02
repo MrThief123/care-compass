@@ -11,10 +11,10 @@ export type Database = {
     Functions: {
       graphql: {
         Args: {
+          extensions?: Json;
           operationName?: string;
           query?: string;
           variables?: Json;
-          extensions?: Json;
         };
         Returns: Json;
       };
@@ -247,6 +247,38 @@ export type Database = {
             columns: ["client_id"];
             isOneToOne: false;
             referencedRelation: "clients";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      budget_threshold_notifications: {
+        Row: {
+          bucket_id: string;
+          id: string;
+          period_start: string;
+          sent_at: string;
+          threshold: number;
+        };
+        Insert: {
+          bucket_id: string;
+          id?: string;
+          period_start: string;
+          sent_at?: string;
+          threshold: number;
+        };
+        Update: {
+          bucket_id?: string;
+          id?: string;
+          period_start?: string;
+          sent_at?: string;
+          threshold?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "budget_threshold_notifications_bucket_id_fkey";
+            columns: ["bucket_id"];
+            isOneToOne: false;
+            referencedRelation: "budget_buckets";
             referencedColumns: ["id"];
           },
         ];
@@ -827,10 +859,10 @@ export type Database = {
       add_bucket: {
         Args: {
           p_client_id: string;
-          p_name: string;
-          p_starting_amount: number;
           p_kind?: string;
+          p_name: string;
           p_note?: string;
+          p_starting_amount: number;
         };
         Returns: {
           client_id: string;
@@ -842,13 +874,15 @@ export type Database = {
           removed_at: string | null;
           updated_at: string;
         };
+        SetofOptions: {
+          from: "*";
+          to: "budget_buckets";
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
       };
       add_funds: {
-        Args: {
-          p_bucket_id: string;
-          p_amount: number;
-          p_note?: string;
-        };
+        Args: { p_amount: number; p_bucket_id: string; p_note?: string };
         Returns: {
           amount: number;
           bucket_id: string;
@@ -863,23 +897,25 @@ export type Database = {
           recorded_by_name: string;
           seq: number;
         };
+        SetofOptions: {
+          from: "*";
+          to: "budget_fund_entries";
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
       };
       admin_check_staff_fields: {
-        Args: {
-          p_first_name: string;
-          p_last_name: string;
-          p_email: string;
-        };
+        Args: { p_email: string; p_first_name: string; p_last_name: string };
         Returns: undefined;
       };
       admin_create_staff_profile: {
         Args: {
-          p_user_id: string;
+          p_email: string;
           p_first_name: string;
+          p_job_title: string;
           p_last_name: string;
           p_phone: string;
-          p_email: string;
-          p_job_title: string;
+          p_user_id: string;
         };
         Returns: {
           address: string | null;
@@ -893,23 +929,29 @@ export type Database = {
           phone: string | null;
           role: Database["public"]["Enums"]["app_role"];
         };
-      };
-      admin_current_org_id: {
-        Args: Record<PropertyKey, never>;
-        Returns: string;
-      };
-      admin_discard_staff_invite: {
-        Args: {
-          p_user_id: string;
+        SetofOptions: {
+          from: "*";
+          to: "profiles";
+          isOneToOne: true;
+          isSetofReturn: false;
         };
+      };
+      admin_current_org_id: { Args: never; Returns: string };
+      admin_discard_staff_invite: {
+        Args: { p_user_id: string };
         Returns: undefined;
       };
+      admin_end_carer_assignment: {
+        Args: { p_carer_id: string; p_client_id: string };
+        Returns: number;
+      };
+      admin_pending_staff_ids: { Args: never; Returns: string[] };
       admin_update_organisation: {
         Args: {
-          p_name: string;
           p_abn: string;
-          p_phone: string;
           p_address: string;
+          p_name: string;
+          p_phone: string;
         };
         Returns: {
           abn: string | null;
@@ -919,15 +961,21 @@ export type Database = {
           name: string;
           phone: string | null;
         };
+        SetofOptions: {
+          from: "*";
+          to: "organisations";
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
       };
       admin_update_staff: {
         Args: {
-          p_profile_id: string;
+          p_email: string;
           p_first_name: string;
+          p_job_title: string;
           p_last_name: string;
           p_phone: string;
-          p_email: string;
-          p_job_title: string;
+          p_profile_id: string;
         };
         Returns: {
           address: string | null;
@@ -941,21 +989,17 @@ export type Database = {
           phone: string | null;
           role: Database["public"]["Enums"]["app_role"];
         };
-      };
-      budget_actor_name: {
-        Args: Record<PropertyKey, never>;
-        Returns: string;
-      };
-      budget_bucket_balance: {
-        Args: {
-          p_bucket_id: string;
+        SetofOptions: {
+          from: "*";
+          to: "profiles";
+          isOneToOne: true;
+          isSetofReturn: false;
         };
-        Returns: number;
       };
+      budget_actor_name: { Args: never; Returns: string };
+      budget_bucket_balance: { Args: { p_bucket_id: string }; Returns: number };
       budget_bucket_for_write: {
-        Args: {
-          p_bucket_id: string;
-        };
+        Args: { p_bucket_id: string };
         Returns: {
           client_id: string;
           created_at: string;
@@ -966,114 +1010,87 @@ export type Database = {
           removed_at: string | null;
           updated_at: string;
         };
+        SetofOptions: {
+          from: "*";
+          to: "budget_buckets";
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
       };
       budget_bucket_summary: {
-        Args: {
-          p_client_id: string;
-        };
+        Args: { p_client_id: string };
         Returns: {
           bucket_id: string;
-          name: string;
           kind: string;
+          name: string;
+          pending_count: number;
+          pending_total: number;
+          percent_used: number;
+          period_end: string;
+          period_start: string;
+          period_used: number;
+          remaining: number;
+          threshold_state: string;
           total: number;
           used: number;
-          remaining: number;
-          percent_used: number;
-          threshold_state: string;
-          pending_total: number;
-          pending_count: number;
-          period_start: string;
-          period_end: string;
-          period_used: number;
         }[];
       };
       budget_check_amount: {
-        Args: {
-          p_amount: number;
-          p_allow_zero?: boolean;
-        };
+        Args: { p_allow_zero?: boolean; p_amount: number };
         Returns: undefined;
       };
-      budget_clean_name: {
-        Args: {
-          p_name: string;
-        };
-        Returns: string;
-      };
+      budget_clean_name: { Args: { p_name: string }; Returns: string };
       budget_settle_pending: {
-        Args: {
-          p_bucket_id: string;
-        };
+        Args: { p_bucket_id: string };
         Returns: undefined;
       };
       budget_threshold_state: {
         Args: {
-          p_percent: number;
-          p_pending_count: number;
           p_exhausted?: boolean;
+          p_pending_count: number;
+          p_percent: number;
         };
         Returns: string;
       };
-      budget_today: {
-        Args: Record<PropertyKey, never>;
-        Returns: string;
-      };
-      can_access_client_documents: {
-        Args: {
-          p_client_id: string;
-        };
-        Returns: boolean;
-      };
-      can_edit_budget: {
-        Args: {
-          p_client_id: string;
-        };
-        Returns: boolean;
-      };
-      can_edit_care_events: {
-        Args: {
-          p_client_id: string;
-        };
-        Returns: boolean;
-      };
-      can_read_budget: {
-        Args: {
-          p_client_id: string;
-        };
-        Returns: boolean;
-      };
-      can_read_care_events: {
-        Args: {
-          p_client_id: string;
-        };
-        Returns: boolean;
-      };
-      carer_on_active_shift: {
-        Args: {
-          p_client_id: string;
-        };
-        Returns: boolean;
-      };
-      client_shift_carers: {
-        Args: {
-          p_client_id: string;
-          p_from: string;
-          p_to: string;
-        };
+      budget_thresholds_snapshot: {
+        Args: never;
         Returns: {
-          shift_id: string;
-          carer_id: string;
-          carer_display_name: string;
-          starts_at: string;
-          ends_at: string;
+          bucket_id: string;
+          client_id: string;
+          client_name: string;
+          organisation_id: string;
+          percent_used: number;
+          period_start: string;
+          threshold_state: string;
         }[];
       };
-      current_organisation_id: {
-        Args: Record<PropertyKey, never>;
-        Returns: string;
+      budget_today: { Args: never; Returns: string };
+      can_access_client_documents: {
+        Args: { p_client_id: string };
+        Returns: boolean;
       };
+      can_edit_budget: { Args: { p_client_id: string }; Returns: boolean };
+      can_edit_care_events: { Args: { p_client_id: string }; Returns: boolean };
+      can_read_budget: { Args: { p_client_id: string }; Returns: boolean };
+      can_read_care_events: { Args: { p_client_id: string }; Returns: boolean };
+      can_upload_client_documents: {
+        Args: { p_client_id: string };
+        Returns: boolean;
+      };
+      carer_on_active_shift: { Args: { p_client_id: string }; Returns: boolean };
+      client_shift_carers: {
+        Args: { p_client_id: string; p_from: string; p_to: string };
+        Returns: {
+          carer_display_name: string;
+          carer_id: string;
+          ends_at: string;
+          shift_id: string;
+          starts_at: string;
+        }[];
+      };
+      current_organisation_id: { Args: never; Returns: string };
       current_profile: {
-        Args: Record<PropertyKey, never>;
+        Args: never;
         Returns: {
           address: string | null;
           email: string | null;
@@ -1086,11 +1103,14 @@ export type Database = {
           phone: string | null;
           role: Database["public"]["Enums"]["app_role"];
         };
+        SetofOptions: {
+          from: "*";
+          to: "profiles";
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
       };
-      discard_unregistered_account: {
-        Args: Record<PropertyKey, never>;
-        Returns: undefined;
-      };
+      discard_unregistered_account: { Args: never; Returns: undefined };
       get_carer_shifts: {
         Args: { p_carer_id: string; p_from: string; p_to: string };
         Returns: {
@@ -1103,47 +1123,23 @@ export type Database = {
           starts_at: string;
         }[];
       };
-      is_admin_of_client: {
-        Args: {
-          p_client_id: string;
-        };
-        Returns: boolean;
-      };
-      is_assigned_carer: {
-        Args: {
-          p_client_id: string;
-        };
-        Returns: boolean;
-      };
-      is_family_of: {
-        Args: {
-          p_client_id: string;
-        };
-        Returns: boolean;
-      };
+      is_admin_of_client: { Args: { p_client_id: string }; Returns: boolean };
+      is_assigned_carer: { Args: { p_client_id: string }; Returns: boolean };
+      is_family_of: { Args: { p_client_id: string }; Returns: boolean };
       link_document_to_event: {
-        Args: {
-          p_document_id: string;
-          p_event_id: string;
-        };
+        Args: { p_document_id: string; p_event_id: string };
         Returns: undefined;
       };
       list_organisations_for_transfer: {
-        Args: {
-          p_client_id: string;
-        };
+        Args: { p_client_id: string };
         Returns: {
           id: string;
-          name: string;
           is_current: boolean;
+          name: string;
         }[];
       };
       overlapping_shifts: {
-        Args: {
-          p_carer_id: string;
-          p_starts_at: string;
-          p_ends_at: string;
-        };
+        Args: { p_carer_id: string; p_ends_at: string; p_starts_at: string };
         Returns: {
           cancelled_at: string | null;
           carer_id: string;
@@ -1155,23 +1151,26 @@ export type Database = {
           organisation_id: string;
           starts_at: string;
         }[];
+        SetofOptions: {
+          from: "*";
+          to: "shifts";
+          isOneToOne: false;
+          isSetofReturn: true;
+        };
       };
       register_account: {
         Args: {
-          p_role: Database["public"]["Enums"]["app_role"];
-          p_first_name: string;
-          p_last_name: string;
           p_client_first_name?: string;
           p_client_last_name?: string;
+          p_first_name: string;
+          p_last_name: string;
           p_organisation_name?: string;
+          p_role: Database["public"]["Enums"]["app_role"];
         };
         Returns: Json;
       };
       remove_bucket: {
-        Args: {
-          p_bucket_id: string;
-          p_note?: string;
-        };
+        Args: { p_bucket_id: string; p_note?: string };
         Returns: {
           client_id: string;
           created_at: string;
@@ -1182,13 +1181,15 @@ export type Database = {
           removed_at: string | null;
           updated_at: string;
         };
+        SetofOptions: {
+          from: "*";
+          to: "budget_buckets";
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
       };
       remove_funds: {
-        Args: {
-          p_bucket_id: string;
-          p_amount: number;
-          p_note?: string;
-        };
+        Args: { p_amount: number; p_bucket_id: string; p_note?: string };
         Returns: {
           amount: number;
           bucket_id: string;
@@ -1203,12 +1204,15 @@ export type Database = {
           recorded_by_name: string;
           seq: number;
         };
+        SetofOptions: {
+          from: "*";
+          to: "budget_fund_entries";
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
       };
       rename_bucket: {
-        Args: {
-          p_bucket_id: string;
-          p_name: string;
-        };
+        Args: { p_bucket_id: string; p_name: string };
         Returns: {
           client_id: string;
           created_at: string;
@@ -1219,13 +1223,16 @@ export type Database = {
           removed_at: string | null;
           updated_at: string;
         };
-      };
-      set_event_cost: {
-        Args: {
-          p_event_id: string;
-          p_cost: number;
-          p_bucket_id: string;
+        SetofOptions: {
+          from: "*";
+          to: "budget_buckets";
+          isOneToOne: true;
+          isSetofReturn: false;
         };
+      };
+      session_is_aal2: { Args: never; Returns: boolean };
+      set_event_cost: {
+        Args: { p_bucket_id: string; p_cost: number; p_event_id: string };
         Returns: {
           bucket_id: string | null;
           client_id: string;
@@ -1244,12 +1251,15 @@ export type Database = {
           title: string;
           updated_at: string;
         };
+        SetofOptions: {
+          from: "*";
+          to: "care_events";
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
       };
       set_occurrence_done: {
-        Args: {
-          p_event_id: string;
-          p_original_start: string;
-        };
+        Args: { p_event_id: string; p_original_start: string };
         Returns: {
           action: string;
           actor_display_name: string;
@@ -1261,13 +1271,16 @@ export type Database = {
           organisation_id: string | null;
           original_start: string;
           seq: number;
+        };
+        SetofOptions: {
+          from: "*";
+          to: "care_event_completions";
+          isOneToOne: true;
+          isSetofReturn: false;
         };
       };
       set_occurrence_undone: {
-        Args: {
-          p_event_id: string;
-          p_original_start: string;
-        };
+        Args: { p_event_id: string; p_original_start: string };
         Returns: {
           action: string;
           actor_display_name: string;
@@ -1280,12 +1293,15 @@ export type Database = {
           original_start: string;
           seq: number;
         };
+        SetofOptions: {
+          from: "*";
+          to: "care_event_completions";
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
       };
       transfer_client_organisation: {
-        Args: {
-          p_client_id: string;
-          p_new_org_id: string;
-        };
+        Args: { p_client_id: string; p_new_org_id: string };
         Returns: undefined;
       };
     };
@@ -1298,25 +1314,31 @@ export type Database = {
   };
 };
 
-type PublicSchema = Database[Extract<keyof Database, "public">];
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">;
+
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">];
 
 export type Tables<
-  PublicTableNameOrOptions extends
-    | keyof (PublicSchema["Tables"] & PublicSchema["Views"])
-    | { schema: keyof Database },
-  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-    ? keyof (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
-        Database[PublicTableNameOrOptions["schema"]]["Views"])
+  DefaultSchemaTableNameOrOptions extends
+    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals;
+  }
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
     : never = never,
-> = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
-      Database[PublicTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals;
+}
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
       Row: infer R;
     }
     ? R
     : never
-  : PublicTableNameOrOptions extends keyof (PublicSchema["Tables"] & PublicSchema["Views"])
-    ? (PublicSchema["Tables"] & PublicSchema["Views"])[PublicTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] & DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
         Row: infer R;
       }
       ? R
@@ -1324,18 +1346,24 @@ export type Tables<
     : never;
 
 export type TablesInsert<
-  PublicTableNameOrOptions extends keyof PublicSchema["Tables"] | { schema: keyof Database },
-  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-    ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals;
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals;
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Insert: infer I;
     }
     ? I
     : never
-  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
-    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
         Insert: infer I;
       }
       ? I
@@ -1343,18 +1371,24 @@ export type TablesInsert<
     : never;
 
 export type TablesUpdate<
-  PublicTableNameOrOptions extends keyof PublicSchema["Tables"] | { schema: keyof Database },
-  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-    ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals;
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals;
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Update: infer U;
     }
     ? U
     : never
-  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
-    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
         Update: infer U;
       }
       ? U
@@ -1362,27 +1396,46 @@ export type TablesUpdate<
     : never;
 
 export type Enums<
-  PublicEnumNameOrOptions extends keyof PublicSchema["Enums"] | { schema: keyof Database },
-  EnumName extends PublicEnumNameOrOptions extends { schema: keyof Database }
-    ? keyof Database[PublicEnumNameOrOptions["schema"]]["Enums"]
+  DefaultSchemaEnumNameOrOptions extends
+    | keyof DefaultSchema["Enums"]
+    | { schema: keyof DatabaseWithoutInternals },
+  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals;
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
     : never = never,
-> = PublicEnumNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicEnumNameOrOptions["schema"]]["Enums"][EnumName]
-  : PublicEnumNameOrOptions extends keyof PublicSchema["Enums"]
-    ? PublicSchema["Enums"][PublicEnumNameOrOptions]
+> = DefaultSchemaEnumNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals;
+}
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
+    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
     : never;
 
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
-    | keyof PublicSchema["CompositeTypes"]
-    | { schema: keyof Database },
+    | keyof DefaultSchema["CompositeTypes"]
+    | { schema: keyof DatabaseWithoutInternals },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
-    schema: keyof Database;
+    schema: keyof DatabaseWithoutInternals;
   }
-    ? keyof Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
     : never = never,
-> = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
-  : PublicCompositeTypeNameOrOptions extends keyof PublicSchema["CompositeTypes"]
-    ? PublicSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+> = PublicCompositeTypeNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals;
+}
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
+    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never;
+
+export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
+  public: {
+    Enums: {
+      app_role: ["family", "carer", "admin"],
+    },
+  },
+} as const;

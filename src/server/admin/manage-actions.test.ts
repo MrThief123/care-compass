@@ -12,11 +12,16 @@ const mocks = vi.hoisted(() => {
   const insert = vi.fn(() => ({ select }));
   const from = vi.fn(() => ({ insert }));
   const getUser = vi.fn();
-  return { single, select, insert, from, getUser };
+  const rpc = vi.fn();
+  return { single, select, insert, from, getUser, rpc };
 });
 
 vi.mock("@/lib/supabase/server", () => ({
-  createClient: async () => ({ from: mocks.from, auth: { getUser: mocks.getUser } }),
+  createClient: async () => ({
+    from: mocks.from,
+    rpc: mocks.rpc,
+    auth: { getUser: mocks.getUser },
+  }),
 }));
 
 const ADMIN_ID = "a2222222-2222-2222-2222-222222222222";
@@ -31,6 +36,8 @@ const VALID = {
 beforeEach(() => {
   vi.stubEnv("DATA_SOURCE", "supabase");
   mocks.getUser.mockResolvedValue({ data: { user: { id: ADMIN_ID } }, error: null });
+  // ADM-08 FD-08: assignShift now asks which carers are still pending; none, unless a test says.
+  mocks.rpc.mockResolvedValue({ data: [], error: null });
   mocks.single.mockResolvedValue({
     data: {
       id: "c1111111-1111-1111-1111-111111111111",
@@ -183,5 +190,33 @@ describe("[ADM-07] assignShift permissions", () => {
       ok: false,
       error: { code: "UNEXPECTED", message: "Couldn't assign the shift. Try again." },
     });
+  });
+});
+
+describe("[ADM-08][FD-08] a carer who has not signed up yet is not rostered", () => {
+  it("[ADM-08][FD-08] refuses a pending carer and creates nothing", async () => {
+    mocks.rpc.mockResolvedValue({ data: [VALID.carerId], error: null });
+    const { assignShift } = await import("@/server/admin/manage-actions");
+
+    const result = await assignShift(VALID);
+
+    expect(result).toEqual({
+      ok: false,
+      error: {
+        code: "UNAUTHORISED",
+        message: "This carer hasn't signed up yet, so they can't be given shifts.",
+      },
+    });
+    expect(mocks.insert).not.toHaveBeenCalled();
+  });
+
+  it("[ADM-08][FD-08] creates nothing when it cannot tell whether the carer has signed up", async () => {
+    mocks.rpc.mockResolvedValue({ data: null, error: { code: "XX000", message: "boom" } });
+    const { assignShift } = await import("@/server/admin/manage-actions");
+
+    const result = await assignShift(VALID);
+
+    expect(result.ok).toBe(false);
+    expect(mocks.insert).not.toHaveBeenCalled();
   });
 });

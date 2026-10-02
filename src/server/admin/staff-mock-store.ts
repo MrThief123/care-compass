@@ -13,10 +13,23 @@ import type { StaffMember } from "@/types/domain";
  * DECISIONS.md FD-01 — out of this feature's scope, likely ADM-10 Admin Settings territory). */
 export const STAFF_JOB_TITLES = ["Registered Nurse", "Enrolled Nurse", "Support Worker"];
 
-let staff: StaffMember[] = STAFF_MEMBERS.map((member) => ({ ...member }));
+// Held on `globalThis`: Next bundles Server Actions and pages separately, so a plain module-level
+// variable would be two copies and a page would never see what an action wrote.
+const shared = globalThis as {
+  __adminMockStaff?: { rows: StaffMember[]; pending: string[] };
+};
+const store = (shared.__adminMockStaff ??= {
+  rows: STAFF_MEMBERS.map((member) => ({ ...member })),
+  pending: [],
+});
+
+/** Carers added in this session have not accepted their invite yet. */
+export function listMockPendingStaffIds(): string[] {
+  return [...store.pending];
+}
 
 export function listMockStaff(): StaffMember[] {
-  return staff.map((member) => ({ ...member }));
+  return store.rows.map((member) => ({ ...member }));
 }
 
 export function addMockStaff(
@@ -28,7 +41,8 @@ export function addMockStaff(
     isActive: true,
     ...input,
   };
-  staff = [...staff, created];
+  store.rows = [...store.rows, created];
+  store.pending = [...store.pending, created.id];
   return { ...created };
 }
 
@@ -36,9 +50,9 @@ export function updateMockStaff(
   id: string,
   input: Omit<StaffMember, "id" | "organisationId" | "isActive">,
 ): StaffMember | undefined {
-  const index = staff.findIndex((member) => member.id === id);
+  const index = store.rows.findIndex((member) => member.id === id);
   if (index === -1) return undefined;
-  const updated: StaffMember = { ...staff[index]!, ...input };
-  staff = [...staff.slice(0, index), updated, ...staff.slice(index + 1)];
+  const updated: StaffMember = { ...store.rows[index]!, ...input };
+  store.rows = [...store.rows.slice(0, index), updated, ...store.rows.slice(index + 1)];
   return { ...updated };
 }

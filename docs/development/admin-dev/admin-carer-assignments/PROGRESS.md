@@ -1,51 +1,65 @@
 # Progress — ADM-08 Admin — Manage carer-client assignments
 
-Status: NOT STARTED
-Owner: unclaimed
+Status: PR OPEN
+Owner: Dhruv Verma
 Lane: A — Admin
-Sprint: POST-SPRINT · planned —
-Branch: `feature/admin-carer-assignments` (not yet created)
-PR target: `admin-dev`
-Last updated: 2026-09-17 (planning pack generated)
+Sprint: SPRINT · planned D16
+Branch: `feature/admin-carer-assignments`
+PR target: `main`
+Last updated: 2026-10-02 (PR #203 open, awaiting review and merge)
 
 ## Blockers
-- OQ-09 — Carer access model
-- OQ-19 — Figma access and remaining design gaps
+- None. OQ-09 and OQ-19 are ANSWERED (see DECISIONS.md)
 
 ## Dependencies status
-- ADM-07 — NOT STARTED
+- ADM-07 — MERGED
 
 ## Completed
 - Feature documentation drafted (Claude Chat planning pack)
+- Claimed; ACs expanded to AC-01..AC-07, TEST_PLAN, FD-01..FD-03 (human-confirmed)
+- Tests written first (pgTAP, unit, component, integration, e2e); all fail for the expected reason
 
 ## In progress
 - None
 
+- Migration `admin_end_carer_assignment`, server queries/actions/mock store, Staff screen Clients list + Remove confirmation, db types regen
+- T-01..T-15 pass; T-16 checked in a real browser
+
 ## Remaining
-- Assignment list and remove/reassign actions (design required).
+- Status page refresh (`node scripts/status-page.mjs`); human "yes" before opening the PR
 
 ## Acceptance criteria status
-- 0 / 1 MET
+- 11 / 11 MET (AC-08 to AC-11 added after implementation for FD-05, FD-07, FD-08)
 
 ## Tests
-- Written: 0 / 1
-- Passing: 0
+- Written: 16 cases (T-16 manual) across 5 files
+- Passing: 16
 - Failing: 0
 
 ## Files changed
-- None yet. Likely files: `src/features/admin-manage/assignments.tsx`
+- `supabase/migrations/20261002020153_admin_end_carer_assignment.sql`
+- `src/server/admin/assignments-{queries,actions,mock-store}.ts`
+- `src/features/admin-staff/carer-assignments.tsx`; `staff-screen.tsx` (optional `assignments` prop); `src/app/(admin)/admin/staff/page.tsx`
+- `src/lib/supabase/database.types.ts` (regenerated; also picks up tables from earlier migrations that were missing from the committed file)
+- `src/features/admin-staff/carer-assignments.test.tsx` (FD-04 axe rule, FD-05 open-the-panel step: HUMAN REVIEW)
+- `src/features/admin-staff/staff-screen.tsx`, `staff-screen.test.tsx` (FD-05 side panel; two ADM-02 expectations changed: HUMAN REVIEW)
 
 ## Decisions
 - See DECISIONS.md
 
 ## Problems encountered
-- None
+- FD-08: Manage hides and refuses carers who have not signed up (query + assignShift, fail closed).
+- FD-06/FD-07: mock stores shared via globalThis; Pending label for invited carers (new migration, pgTAP, 2 component tests).
+- FD-05: Staff screen redesigned to a click-a-name / Add Staff side panel at the human's request; ADM-02 tests updated (HUMAN REVIEW).
+- T-10 failed on the `region` axe rule; recorded as FD-04 (HUMAN REVIEW: test expectation changed).
+- Turbopack rejects the symlinked node_modules in this worktree; the e2e build used `next build --webpack`.
+- Full-suite failures not in this feature's files: storage-upload, seed-data, sign-up and auth-audit integration tests, and 13 mock-mode e2e specs (carer/family client info, documents, care delivery, organisation transfer). Not run on `main` to compare.
 
 ## Assumptions
 - PROPOSED items in PRD.md are unconfirmed until validated in F0-01 or answered in DECISIONS.md.
 
 ## Next action
-- Wait for answers to OQ-09, OQ-19; then complete dependencies, run START FEATURE ADM-08, and write the tests in TEST_PLAN.md first.
+- Human review and merge of PR #203 (it says: design gap, built from tokens, please review; touches staff-screen.tsx, which ADM-03 also edits). Afterwards F0-24 adds Resend invite using `admin_pending_staff_ids()`.
 
 ## Ready for PR
 - No

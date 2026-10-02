@@ -214,10 +214,21 @@ describe("Admin Staff", () => {
     render(<StaffScreen data={{ ...data, staff: [] }} />);
     expect(screen.getByText("No staff yet")).toBeVisible();
     expect(screen.getByRole("button", { name: "Add Staff" })).toBeEnabled();
+    expect(screen.queryByLabelText("First name")).not.toBeInTheDocument();
+  });
+  it("[ADM-02][AC-03] the panel is closed until Add Staff or a name is pressed, and closing clears it", async () => {
+    render(<StaffScreen data={data} />);
+    expect(screen.queryByLabelText("First name")).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "Edit Aisha Rahman" }));
+    expect(screen.getByLabelText("First name")).toHaveValue("Aisha");
+    await userEvent.click(screen.getByRole("button", { name: "Close" }));
+    expect(screen.queryByLabelText("First name")).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "Add Staff" }));
     expect(screen.getByLabelText("First name")).toHaveValue("");
   });
   it("[ADM-02][AC-03] editing a different row discards unsaved draft changes", async () => {
     render(<StaffScreen data={data} />);
+    await userEvent.click(screen.getByRole("button", { name: "Edit Aisha Rahman" }));
     await userEvent.clear(screen.getByLabelText("First name"));
     await userEvent.type(screen.getByLabelText("First name"), "Unsaved");
     await userEvent.click(screen.getByRole("button", { name: "Edit Marcus Chen" }));
@@ -227,5 +238,62 @@ describe("Admin Staff", () => {
   it("[ADM-02][PRD] has no detectable accessibility violations", async () => {
     const { container } = render(<StaffScreen data={data} />);
     expect(await axe(container)).toHaveNoViolations();
+  });
+});
+
+describe("[ADM-08][FD-07] Pending carers", () => {
+  it("[ADM-08][FD-07] labels an invited carer Pending in the list and in their panel", async () => {
+    render(<StaffScreen data={{ ...data, pendingIds: [data.staff[2]!.id] }} />);
+    expect(
+      within(screen.getByRole("row", { name: /Sarah Nguyen/ })).getByText("Pending"),
+    ).toBeVisible();
+    expect(
+      within(screen.getByRole("row", { name: /Aisha Rahman/ })).queryByText("Pending"),
+    ).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "Edit Sarah Nguyen" }));
+    expect(screen.getByText("Invite sent. Pending until they sign up.")).toBeVisible();
+  });
+
+  it("[ADM-08][FD-07] a carer just added shows as Pending straight away", async () => {
+    mocks.createStaff.mockResolvedValue({
+      ok: true,
+      data: {
+        id: "staff-new",
+        organisationId: "org-banksia",
+        firstName: "Helen",
+        lastName: "Brown",
+        jobTitle: "Support Worker",
+        email: "helen.brown@example.com",
+        phone: "0412 345 678",
+        isActive: true,
+      },
+    });
+    render(<StaffScreen data={data} />);
+    await userEvent.click(screen.getByRole("button", { name: "Add Staff" }));
+    await userEvent.type(screen.getByLabelText("First name"), "Helen");
+    await userEvent.type(screen.getByLabelText("Last name"), "Brown");
+    await userEvent.type(screen.getByLabelText("Email"), "helen.brown@example.com");
+    await userEvent.type(screen.getByLabelText("Phone"), "0412 345 678");
+    await userEvent.click(screen.getByRole("button", { name: "Save" }));
+    const row = await screen.findByRole("row", { name: /Helen Brown/ });
+    expect(within(row).getByText("Pending")).toBeVisible();
+    expect(screen.getByRole("status")).toHaveTextContent("Helen Brown invited");
+  });
+});
+
+describe("[ADM-08][AC-11] keyboard focus around the side panel", () => {
+  it("[ADM-08][AC-11] moves focus into the panel on open and back to the opening button on Close or Escape", async () => {
+    render(<StaffScreen data={data} />);
+    const name = screen.getByRole("button", { name: "Edit Aisha Rahman" });
+    await userEvent.click(name);
+    expect(screen.getByLabelText("First name")).toHaveFocus();
+    await userEvent.click(screen.getByRole("button", { name: "Close" }));
+    expect(name).toHaveFocus();
+
+    const add = screen.getByRole("button", { name: "Add Staff" });
+    await userEvent.click(add);
+    expect(screen.getByLabelText("First name")).toHaveFocus();
+    await userEvent.keyboard("{Escape}");
+    expect(add).toHaveFocus();
   });
 });

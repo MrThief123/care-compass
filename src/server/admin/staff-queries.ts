@@ -1,4 +1,8 @@
-import { listMockStaff, STAFF_JOB_TITLES } from "@/server/admin/staff-mock-store";
+import {
+  listMockPendingStaffIds,
+  listMockStaff,
+  STAFF_JOB_TITLES,
+} from "@/server/admin/staff-mock-store";
 import { getDataSourceMode } from "@/server/data-source";
 import type { StaffMember } from "@/types/domain";
 
@@ -7,6 +11,8 @@ export type { StaffMember };
 export interface AdminStaffData {
   staff: StaffMember[];
   roles: string[];
+  /** Carers invited but not yet signed up (ids in `staff`); shown as "Pending" (ADM-08, FD-07). */
+  pendingIds?: string[];
 }
 
 /**
@@ -17,17 +23,24 @@ export interface AdminStaffData {
  */
 export async function getAdminStaff(): Promise<AdminStaffData> {
   if (getDataSourceMode() === "mock") {
-    return { staff: listMockStaff(), roles: [...STAFF_JOB_TITLES] };
+    return {
+      staff: listMockStaff(),
+      roles: [...STAFF_JOB_TITLES],
+      pendingIds: listMockPendingStaffIds(),
+    };
   }
 
   const { createClient } = await import("@/lib/supabase/server");
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("profiles")
-    .select("id, organisation_id, first_name, last_name, job_title, email, phone, is_active")
-    .eq("role", "carer")
-    .order("first_name", { ascending: true })
-    .order("last_name", { ascending: true });
+  const [{ data, error }, pending] = await Promise.all([
+    supabase
+      .from("profiles")
+      .select("id, organisation_id, first_name, last_name, job_title, email, phone, is_active")
+      .eq("role", "carer")
+      .order("first_name", { ascending: true })
+      .order("last_name", { ascending: true }),
+    supabase.rpc("admin_pending_staff_ids"),
+  ]);
   // The message names no client (ARCHITECTURE.md §12.5).
   if (error || !data) throw new Error("getAdminStaff: could not load the organisation's staff.");
 
@@ -43,5 +56,7 @@ export async function getAdminStaff(): Promise<AdminStaffData> {
       isActive: row.is_active,
     })),
     roles: [...STAFF_JOB_TITLES],
+    // If this one lookup fails the list still loads, just without Pending labels.
+    pendingIds: pending.error ? [] : (pending.data ?? []),
   };
 }
