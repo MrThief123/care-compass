@@ -1,5 +1,6 @@
 "use client";
 
+import { melbourneDateKey } from "@/lib/dates/melbourne-time";
 import { monthGrid } from "@/lib/dates/month-grid";
 import type { LocalDate } from "@/lib/dates/week-range";
 import { cn } from "@/lib/utils";
@@ -26,6 +27,8 @@ export interface DatePickerGridProps {
   /** Any date within the month to display. */
   month: LocalDate;
   selected?: LocalDate;
+  /** Ringed lightly. Defaults to today's Australia/Melbourne date (FAM-16). */
+  today?: LocalDate;
   datesWithItems?: LocalDate[];
   onSelect?: (date: LocalDate) => void;
   onPrevMonth?: () => void;
@@ -42,6 +45,7 @@ function monthLabel(month: LocalDate): string {
 export function DatePickerGrid({
   month,
   selected,
+  today = melbourneDateKey(new Date().toISOString()),
   datesWithItems = [],
   onSelect,
   onPrevMonth,
@@ -82,6 +86,7 @@ export function DatePickerGrid({
         {weeks.map((week) =>
           week.map((cell) => {
             const isSelected = cell.date === selected;
+            const isToday = cell.date === today;
             const hasItems = itemDates.has(cell.date);
             const dayNumber = Number(cell.date.split("-")[2]);
             return (
@@ -91,6 +96,8 @@ export function DatePickerGrid({
                 data-testid={`date-picker-day-${cell.date}`}
                 data-in-month={cell.inMonth}
                 data-has-items={hasItems}
+                data-today={isToday}
+                aria-current={isToday ? "date" : undefined}
                 aria-pressed={isSelected}
                 onClick={() => onSelect?.(cell.date)}
                 className={cn(
@@ -98,6 +105,7 @@ export function DatePickerGrid({
                   !cell.inMonth && "text-text-muted",
                   cell.inMonth && !isSelected && "text-text-primary",
                   isSelected && "bg-primary text-primary-foreground",
+                  isToday && "ring-1 ring-inset ring-border-brand",
                 )}
               >
                 <span>{dayNumber}</span>

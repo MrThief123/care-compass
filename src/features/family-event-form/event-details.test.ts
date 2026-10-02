@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 
+import type { CareEvent } from "@/types/domain";
+
 import {
   EMPTY_EVENT_DETAILS,
   editEventDetailsValues,
@@ -7,7 +9,6 @@ import {
   validateEventDetails,
 } from "./event-details";
 
-import type { CareEvent } from "@/types/domain";
 
 describe("[FAM-06][AC-02] validateEventDetails", () => {
   it("[FAM-06][AC-02] a blank title is refused", () => {
