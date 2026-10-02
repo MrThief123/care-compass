@@ -33,6 +33,7 @@ Record feature-level decisions here using the template below. Project-wide decis
 - Human confirmation required: yes — HUMAN REVIEW (set `RESEND_API_KEY`/`RESEND_FROM_EMAIL`/`JOBS_SECRET` before relying on this in any real environment; separately investigate the seed.sql failure if it recurs for other features)
 - Test changes caused: none
 - Human confirmation: MrThief123, 2026-10-01 (in-session) — accepted as-is; per-recipient tracking is a bigger schema change, deferred unless it proves disruptive in practice.
+- Update 2026-10-02: the seed.sql failure was **not reproducible**. `supabase db reset --local` (CLI 2.117.0, main at 44831b6) ran twice with no error and loaded 14 users, 14 profiles, 2 organisations and 8 clients; `seed.sql` is unchanged since F0-16. Closed as not reproducible on the human's instruction; reopen if it recurs, with `supabase db reset --debug` output and the CLI version. `seed_users` is `on commit drop`, which would break if a CLI version ran each statement in its own transaction — the likeliest explanation, unconfirmed.
 
 ### FD-03 — pgTAP snapshot row count compared against `budget_buckets`, not the literal 1
 - Date: 2026-10-01 (second session)
@@ -63,6 +64,17 @@ Record feature-level decisions here using the template below. Project-wide decis
 - Human confirmation required: yes — HUMAN REVIEW
 - Human confirmation: MrThief123, 2026-10-01 (in-session) — split into PL-25 and PL-26 per root DECISIONS.md CHG-044.
 - Test changes caused: none.
+
+### FD-06 — Vercel Cron authentication (CHG-046)
+- Date: 2026-10-02
+- Context: OQ-17/PD-050 left "Vercel Cron or pg_cron"; the human chose Vercel Cron. Vercel Cron sends `GET` with `Authorization: Bearer $CRON_SECRET`; the route only took `POST` + `x-jobs-secret`.
+- Decision: add `GET` checking `CRON_SECRET` (separate from `JOBS_SECRET`, so neither secret opens the other path); keep `POST` + `JOBS_SECRET` for manual runs; schedule in `vercel.json` daily at `0 21 * * *` UTC.
+- Reason: smallest change that fits the platform's fixed call shape, with the same constant-time check and bare 401 as AC-04.
+- Alternatives considered: one shared secret for both methods (rejected: a leaked manual-trigger secret would also open the cron path and vice versa, and Vercel's bearer secret is set by Vercel's `CRON_SECRET` convention); pg_cron (not chosen by the human).
+- Consequences: `CRON_SECRET`, `JOBS_SECRET`, `RESEND_API_KEY`, `RESEND_FROM_EMAIL` and `SUPABASE_SERVICE_ROLE_KEY` must be set in the Vercel project before the first scheduled run; until then the job returns 401 or throws its clear missing-env error. Not run against a real Vercel deployment or Resend account.
+- Human confirmation required: yes — HUMAN REVIEW (set the variables; check the first scheduled run in Vercel's cron logs)
+- Test changes caused: none (new tests in `src/app/api/jobs/budget-thresholds/route.test.ts`).
+- Human confirmation: Dhruv Verma, 2026-10-02 (in-session).
 
 <!-- Template
 ### FD-01 — <title>

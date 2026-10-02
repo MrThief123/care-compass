@@ -1,0 +1,3 @@
+{
+  "crons": [{ "path": "/api/jobs/budget-thresholds", "schedule": "0 21 * * *" }]
+}

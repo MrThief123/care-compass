@@ -115,8 +115,9 @@ Last updated: 2026-10-01
   special-case logic — a transferred client's previous admin is simply never matched by the query.
 
 ## Next action
-- Merged. Remaining before this runs for real: set `RESEND_API_KEY`/`RESEND_FROM_EMAIL`/
-  `JOBS_SECRET` and wire up the scheduler (OQ-17).
+- Merged. Scheduler wired as Vercel Cron (CHG-046, FD-06, branch `fix/shared-budget-threshold-cron-auth`).
+  Remaining before this runs for real: set `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, `JOBS_SECRET`,
+  `CRON_SECRET` and `SUPABASE_SERVICE_ROLE_KEY` in the Vercel project.
 
 ## Ready for PR
 - Merged in #190.
