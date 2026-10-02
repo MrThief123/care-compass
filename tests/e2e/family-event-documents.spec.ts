@@ -74,7 +74,8 @@ async function seed() {
     .insert({
       client_id: client.data.id,
       title: "Physiotherapy",
-      starts_at: new Date(Date.now() + 60 * 60_000).toISOString(),
+      // care_events.starts_at must be a whole second (care_events_starts_at_whole_second).
+      starts_at: new Date(Math.floor((Date.now() + 60 * 60_000) / 1000) * 1000).toISOString(),
     })
     .select("id")
     .single();

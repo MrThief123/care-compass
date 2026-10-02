@@ -11,7 +11,7 @@ Tests are written **before** production code (TESTING.md §2). Run them, confirm
 
 | Test ID | Covers | Level | Test description | Written first? | Result |
 |---|---|---|---|---|---|
-| T-01 | AC-01 | e2e | Given the Edit event form, when Helen adds 'Physio referral.pdf' and saves, then a tile 'Physio referral.pdf' appears on the event. | ☐* | NOT RUN — `tests/e2e/family-event-documents.spec.ts`, needs a local Supabase stack (no Docker this session) |
+| T-01 | AC-01 | e2e | Given the Edit event form, when Helen adds 'Physio referral.pdf' and saves, then a tile 'Physio referral.pdf' appears on the event. | ☐* | PASS (2026-10-02, local Supabase stack; seed fixed first, DECISIONS.md FD-03) — `tests/e2e/family-event-documents.spec.ts` |
 | T-02 | AC-02 | component | Given a disallowed file type, when selected, then an inline error is shown and no tile is added. | ☐* | PASS |
 | T-03 | AC-03 | component | Given an existing tile, when clicked, then the document opens via a signed URL. | ☐* | PASS |
 
