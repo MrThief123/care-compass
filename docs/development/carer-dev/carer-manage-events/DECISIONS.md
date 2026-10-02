@@ -4,15 +4,49 @@ Record feature-level decisions here using the template below. Project-wide decis
 
 ## Open decisions affecting this feature
 
-| ID | Decision needed | Blocking? | Proposed default |
+| ID | Decision needed | Blocking? | Status |
 |---|---|---|---|
-| OQ-09 | Carer access model | YES | Assignment created automatically on first shift and ended by admin or transfer; edits allowed only within [shift start, shift end); carers may create/edit events and client info only during shift. |
-| OQ-22 | Event fields | YES | Add Title, Start time and Duration fields to the event form (design update). |
-| OQ-19 | Figma access and remaining design gaps | YES | Claude Code re-checks Figma in F0-01; each gap blocks only the features that cite it. |
+| OQ-09 | Carer access model | YES | ANSWERED (PD-041, CHG-027): edit only while a shift with the client is in progress. |
+| OQ-22 | Event fields | YES | ANSWERED (PD-047): Title, Start time, Duration. |
+| OQ-19 | Figma access and remaining design gaps | YES | ANSWERED: Claude Code builds the carer add-event entry from tokens and flags it in the PR. |
 
 ## Feature decisions log
 
-_No decisions recorded yet._
+All three blocking OQs are ANSWERED in root DECISIONS.md. CHG-048 (2026-10-02) rewrites this feature's scope.
+
+### FD-01 — The form is reused unchanged, cost fields included
+- Date: 2026-10-02
+- Context: PD-058 lets a carer set an event's cost and bucket; CAR-08 is retired. Today the Family form validates Cost but `createEvent` and `updateEvent` do not save it for anyone.
+- Decision: carers get the Family `EventFormScreen` as is, Cost and Paid from showing. CAR-07 does not add cost persistence. Hiding them behind a flag was offered and declined.
+- Human confirmation: Dhruv Verma, 2026-10-02 (in-session): "Show it, same as Family".
+- Consequences: a carer who types a cost sees it validated and then not kept, exactly as a family member does today. The gap belongs to whichever feature wires event cost (PD-058); noted for the PR.
+
+### FD-02 — Entry points: Calendar, Task detail and Patients card, on shift only
+- Date: 2026-10-02
+- Decision: 'Enter event' on the Calendar toolbar (`canAddEvent`), 'Edit event' on Task detail (`canEdit`), and 'Add event for <first name>' on the Patients card. All absent off shift. Routes redirect to the Calendar off shift. This reverses CAR-06 FD-02 (read-only Task detail) and FD-06 (no Add event link) for on-shift carers.
+- Human confirmation: Dhruv Verma, 2026-10-02 (in-session); recorded as CHG-048.
+
+### FD-03 — CAR-06 T-07 changed (HUMAN REVIEW: test expectation changed)
+- Date: 2026-10-02
+- Test: `src/features/carer-patients/carer-complete-task.test.tsx` `[CAR-06][AC-07] T-07`.
+- Before: Calendar, Home and Care log on shift have no Add event, Edit event or View breakdown link.
+- After: Home and Care log unchanged; the Calendar on shift has 'Enter event' (and still no Edit event or View breakdown); off shift the Calendar has none.
+- Reason: recorded requirement change (CHG-048). Flagged in PROGRESS and the PR.
+
+### FD-04 — Shift-ended message through an additive `notAllowedMessage` prop (assumption)
+- Date: 2026-10-02
+- Context: `createEvent` and `updateEvent` already map the database refusal to `NOT_ALLOWED` with a family-oriented message. The carer needs the shift-ended wording and Family must not change.
+- Decision: add an optional `notAllowedMessage` prop to Lane F's `EventFormScreen` (default: the action's own message). Carer pages pass "Your shift with <first name> has ended, so this event wasn't saved." Considered instead: a role lookup inside the actions (rejected: a second query in a Lane B contract for a copy change).
+- Human confirmation required: yes (Lane F edit, additive, CHG-043's pattern). The human approved the additive-prop approach in principle on 2026-10-02; this exact prop is for the PR review.
+
+### FD-05 — Off shift redirects rather than showing a read-only form
+- Date: 2026-10-02
+- Decision: `/carer/patients/<id>/events/new` and `/events/<eventId>/edit` redirect to the patient's Calendar when no shift is in progress (the View only notice explains why). A patient with no shift at all redirects to Patients (`findCarerPatient`, CAR-UI-02 AC-09). Assumption: not asked of the human; consistent with "absent, not disabled".
+
+### FD-06 — Pre-existing failure in CAR-06's T-08 (not caused by this feature)
+- Date: 2026-10-02
+- Context: on `main`, `[CAR-06][AC-08] T-08 the Family Home keeps its /family links…` fails: "No 'getLandingPath' export is defined on the '@/server/auth/queries' mock". FAM-01 (merged after CAR-06's tests) made the Family Home call `getLandingPath`.
+- Decision: left as is here (outside this feature's scope). One-line fix: add `getLandingPath` to that file's `@/server/auth/queries` mock. Raised to the human.
 
 <!-- Template
 ### FD-01 — <title>
