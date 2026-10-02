@@ -29,11 +29,12 @@ describe("[INT-01][AC-04] budget-thresholds job endpoint auth (Vercel Cron, CHG-
 
   it("[INT-01][AC-04] GET without, or with the wrong, bearer secret returns 401 and does nothing", async () => {
     const { GET } = await import("./route");
-    for (const headers of [
+    const attempts: Record<string, string>[] = [
       {},
       { authorization: "Bearer nope" },
       { authorization: "cron-secret" },
-    ]) {
+    ];
+    for (const headers of attempts) {
       const response = await GET(new Request(URL_, { headers }));
       expect(response.status).toBe(401);
     }
