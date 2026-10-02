@@ -44,15 +44,6 @@ Every AC must have ≥1 test. Tests may only be modified after implementation be
 
 ## Results (2026-10-03)
 - `supabase test db` after `supabase db reset`: all 32 files pass (889 assertions). Two assertions in `admin_client_remove.test.sql` counted rows across the whole seeded database; scoped to their own fixtures (FD-08, a test bug, not a feature change).
-- Integration: creates and removes its own users, organisations, client, shifts and event.
-- Component: the Admin tests use their own two-client list; the Family tests use the mock header for `client-margaret` with overrides.
-
-## Coverage mapping rule
-Every AC must have ≥1 test. Tests may only be modified after implementation begins for reasons in TESTING.md §6, recorded in DECISIONS.md.
-
-
-## Results (2026-10-03)
-- `supabase test db supabase/tests/admin_client_remove.test.sql`: 30 of 32 pass. The two that fail (28: `Aisha Rahman` completions, 29: organisations offered to Tom) count rows across the whole local database (14 other "Aisha Rahman" completions and 221 organisations from earlier test runs: 14+5=19 and 221+2=223, the numbers reported). They assume a freshly reset database; `supabase db reset` is lane B only, so it was not run. Every other pgTAP file passes (31 of 32 files; 889 assertions in total, those two the only failures). Needs `supabase db reset` then a re-run before the PR; recorded here, not hidden.
 - Integration `tests/integration/admin-client-remove.test.ts` against local Supabase: 3 of 3 pass.
 - Vitest: the six new/changed files pass. Full `npm test`: 197 failed in 14 files, the same count and files as `main` (ADM-03 FD-07; the `redirect`/`cookies` mock gaps), none touching ADM-05.
 - `npm run lint` 0 errors (3 warnings in files this feature does not touch); `typecheck`; `format:check` clean.
