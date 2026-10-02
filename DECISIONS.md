@@ -1056,3 +1056,12 @@ Template for future entries:
 - Impact: CAR-06's T-07 (`carer-complete-task.test.tsx`) changes from "no Add/Edit event link on any carer screen" to "present on shift, absent off shift"; flagged HUMAN REVIEW: test expectation changed. CAR-07 grows from 2 to 8 criteria (totals 423 → 429). FAM-06/FAM-07 behaviour unchanged (AC-08 guards it). No other feature affected; CAR-08 stays retired.
 - Human confirmation: Dhruv Verma, 2026-10-02 (in-session).
 - Docs updated: DECISIONS.md (this entry), DEVELOPMENT_PLAN.md (CAR-07 card, totals), CAR-07 PRD, ACCEPTANCE_CRITERIA, USER_STORIES, TEST_PLAN, DECISIONS, PROGRESS, SESSION_STATE; CAR-06 notes updated at implementation time.
+
+### CHG-049 — CAR-07 swaps the Patients card link for Enter event on the carer Home; PL-27 parked
+- Date / requested by: 2026-10-02 / Dhruv Verma (human, project lead)
+- Type: scope change (amends CHG-048) + Parking lot addition
+- Description: after trying CAR-07 locally the human did not want an event link on the Patients card; editing starts once a patient is open. CHG-048's entry points become Calendar, Home and Task detail, all on shift only: the carer patient Home shows the Family 'Enter event' button (`FamilyHomeView` gains an additive `canAddEvent`, default off) and the Patients card has no event link. The human also asked for three further changes, parked together as **PL-27** to be built as one feature: late-completion note, today ring and active-month in the date picker (all roles), and start and end time instead of Duration minutes in the event form.
+- Source / justification: human, in-session 2026-10-02. The three PL-27 items change Family and shared code outside CAR-07's scope (CLAUDE.md §6).
+- Impact: CAR-07 T-03 (Patients card, Home) and CAR-06 T-07 (Home) change; flagged HUMAN REVIEW: test expectation changed (CAR-07 FD-08). CHG-048's mention of the Patients card link is superseded. PL-27 has no feature ID, lane or schedule yet.
+- Human confirmation: Dhruv Verma, 2026-10-02 (in-session).
+- Docs updated: DECISIONS.md (this entry), PRD.md §17 (PL-27); CAR-07 pack at hand-off.
