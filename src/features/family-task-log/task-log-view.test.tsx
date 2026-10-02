@@ -45,12 +45,15 @@ function dataRows(): HTMLElement[] {
   return screen.queryAllByRole("row").slice(1);
 }
 
-/** Visible text of the DATE, TASK, NURSE and STATUS cells (the chevron cell is decorative). */
+/**
+ * Visible text of the DATE, TASK, NURSE and STATUS cells (the chevron cell is decorative). The
+ * STATUS cell is the pill only: the late-completion note under it is FAM-16's, tested there.
+ */
 function cellTexts(row: HTMLElement): string[] {
   return within(row)
     .getAllByRole("cell")
     .slice(0, 4)
-    .map((cell) => cell.textContent ?? "");
+    .map((cell, index) => (index === 3 ? cell.firstElementChild : cell)?.textContent ?? "");
 }
 
 /** Page 1 of Margaret's log, read through the real contract (mock data source). */
