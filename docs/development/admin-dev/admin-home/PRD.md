@@ -34,11 +34,11 @@ Managers see what needs attention across ~42 clients (accountable).
 - Stat cards: 'Clients 42', 'Staff 17' (counts for admin's organisation; Staff is the count of active carers, PD-039).
 - Overdue events card (alert tone), caption 'across all clients': rows Client · Event · Nurse · Overdue pill · chevron. Nurse name is a full name (PD-038), not the abbreviated "Aisha R." form the design and this PRD's original AC-02 text used.
 - Empty state 'All caught up'.
-- Chevron behaviour per OQ-37 (not linked until answered).
+- Chevron behaviour per OQ-37 (answered, PD-061): the rows stay unlinked in this feature; the link to the client's page in the admin client view is wired after ADM-11 merges, as a follow-up.
 - **Upcoming shifts card (CHG-034, human 2026-09-29):** CHG-006 built this on ADM-UI-01's fixtures only and explicitly excluded live shift queries; CHG-034 brings it into ADM-01's own scope. Client · Carer · Date · Time columns, org-scoped, ordered by start time ascending, empty state 'No upcoming shifts' (already built).
 
 ## Out of Scope
-- Admin task detail/log (PL-20)
+- Admin task detail/log (PL-20; superseded by ADM-11 per PD-061)
 
 ## Functional Requirements
 - Overdue = derived status across current clients of the organisation.
@@ -49,7 +49,7 @@ Managers see what needs attention across ~42 clients (accountable).
 ## Dependencies
 - Features: F0-11 (Care events, occurrence overrides and append-only completions), ADM-UI-01 (Admin Home screen (UI))
 - Blocking open decisions (must be answered before START FEATURE): OQ-29
-- Non-blocking open decisions (proposed defaults apply, confirm when possible): OQ-37
+- Non-blocking open decisions (proposed defaults apply, confirm when possible): none (OQ-37 answered, PD-061)
 
 ## Inputs
 - session admin

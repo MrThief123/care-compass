@@ -417,6 +417,14 @@ CONFIRMED.
 - Consequences: see CHG-022.
 - Human confirmation: CONFIRMED 2026-09-25 (Dhruv Verma, in-session).
 
+### PD-061 — Admin Home overdue rows open the client's page in the admin client view
+- Date: 2026-10-02 · Decided by: Dhruv Verma (in-session, answering OQ-37)
+- Decision: an overdue row on Admin Home links to that client's page in the admin client view (ADM-11, `/admin/clients/<clientId>/...`), where the admin sees the client's information and the Care log and finds the overdue event. No separate Admin task log or task detail screen is built. Overdue rows must keep appearing on Admin Home as soon as an event goes overdue (REQ-34).
+- Reason: ADM-11 already gives an admin the Family screens, including Care log and Task detail, inside the admin layout (REQ-38), so the chevron gets a real destination without new design or screens.
+- Alternatives: build a separate Admin task log and task detail (PL-20; rejected, duplicates ADM-11); remove the chevrons (rejected; the admin could not act on an overdue event).
+- Consequences: PL-20's Admin half is superseded by ADM-11; its Carer half stays parked. The row link is wired after ADM-11 merges, as a small follow-up feature (lane A); until then rows stay unlinked. The exact landing (Care log, or the occurrence's Task detail) is settled in that follow-up's PRD.
+- Human confirmation: CONFIRMED 2026-10-02 (Dhruv Verma, in-session).
+
 ---
 
 ## 3. Open decisions (human input required)
@@ -463,7 +471,7 @@ Claude Code never changes a status in this table, never adds an ANSWERED heading
 | OQ-34 | Event notes and comments | CIS5 Q&A and brief item 4 require comments on completed tasks; the Carer notification 'Helen added a note to today's Afternoon check-in' implies notes exist; no note/comment UI is designed. | BRIEF item 4(i, iii); CIS5 Q&A; US C-3, C-10; Design Carer Home | no | — | Parked (PL-21) until designed. | OPEN |
 | OQ-35 | Settings forms save behaviour | Family info, My info and Organisation info cards show inputs but no Save button. Unclear whether carers can edit Role and whether email changes the login email. | Design Family/Carer/Admin Settings | YES | FAM-12, CAR-09, ADM-10 | Add a Save button per card; Role read-only for carers; email field is contact email only. | ANSWERED |
 | OQ-36 | Staff deactivation | FR-5.6/US A-2 and CIS5 require withdrawing access when staff leave; the Staff design has no deactivate/remove control. | FR-5.6; US A-2; CIS5 Q&A; Design Staff | YES | ADM-03 | Design a Deactivate action in the Add/edit panel with confirmation. | ANSWERED |
-| OQ-37 | Admin Home overdue row destination | Rows have chevrons but Admin has no task detail or task log screen (UI Q14). | UI-Q14; Design Admin Home | no | — | Omit navigation until an admin detail view is designed (PL-20). | OPEN |
+| OQ-37 | Admin Home overdue row destination | Rows have chevrons but Admin has no task detail or task log screen (UI Q14). | UI-Q14; Design Admin Home | no | — | Omit navigation until an admin detail view is designed (PL-20). | ANSWERED |
 | OQ-38 | Client information fields | CIS3/CIS5 request DOB, contacts (parents, POA), disability, behaviours of concern up front, date admitted, 'last updated', photo, expandable headings with summary flags and SPO forms with archive. The Info design has Description, Habits, Medical history and Documentation only. | CIS3 Data 1–2; CIS5 Front page; Design Family Info | no | — | Build the design for MVP; remaining fields parked (PL-13, PL-22) pending client confirmation. | OPEN |
 | OQ-39 | Design copy and visual inconsistencies | Manage warning example (11:30–13:00) does not overlap the selected 07:00–11:00 slot; States sheet repeats no-results copy twice; Budget screen bar colours differ from Home; Task log Nurse column misaligned on Planned rows; Task log status filter is a dropdown despite 'chips over dropdowns'; Staff and Clients rail items share an icon. | Design images; DD §5, §7 | no | — | Follow tokens and the rules in UI-§5; generate warning text from real data; confirm copy. | OPEN |
 | OQ-40 | Overdue and upcoming care alert emails | REQ-33 asks for reminders for upcoming care and alerts for overdue care (SHOULD). Undefined: what counts as an alert (every overdue task, or a daily digest per client); recipients (Family only, Family and the organisation's admins as INT-01 does, or the carer on shift); how long after the due time; whether upcoming-care reminders are included and how far ahead; email wording; quiet hours (Australia/Melbourne). | REQ-33; US C-8; UC-F04; CIS5 Notifications; CHG-047 | YES | INT-09 | Do not build on a default. Suggested for discussion: one email per overdue task, to the same recipients as INT-01 (family and current org admins, OQ-28), 30 minutes after the due time, no upcoming reminders in v1, no quiet hours. | OPEN |
@@ -487,6 +495,11 @@ Docs updated: DECISIONS.md
 Answer: The current repository is authoritative and starts empty; no existing Supabase project/schema/CI exists to adopt.
 Recorded as: PD-031
 Docs updated: DECISIONS.md
+
+### OQ-37 — ANSWERED 2026-10-02 by Dhruv Verma
+Answer: an overdue row on Admin Home opens that client's page in the admin client view (ADM-11), where the admin sees the client's information and Care log and finds the overdue event. No separate Admin task log or task detail.
+Recorded as: PD-061
+Docs updated: DECISIONS.md, PRD.md (§17 PL-20), docs/development/admin-dev/admin-home/PRD.md and DECISIONS.md
 
 ---
 

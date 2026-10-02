@@ -7,7 +7,7 @@ Record feature-level decisions here using the template below. Project-wide decis
 | ID | Decision needed | Blocking? | Proposed default |
 |---|---|---|---|
 | OQ-29 | Which nurse is shown on an event | YES | Derive from the carer whose shift covers the occurrence start; '—' if none; for Done show the actor. |
-| OQ-37 | Admin Home overdue row destination | no | Omit navigation until an admin detail view is designed (PL-20). |
+| OQ-37 | Admin Home overdue row destination | no | ANSWERED 2026-10-02 (PD-061): link to the client's page in the admin client view (ADM-11), wired as a follow-up after ADM-11 merges. Rows stay unlinked in ADM-01. |
 
 ## Feature decisions log
 
