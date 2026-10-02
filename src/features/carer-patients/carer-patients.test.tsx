@@ -176,9 +176,11 @@ async function renderLayout(clientId: string, tab = "info") {
 }
 
 function cardLinks() {
-  return screen
-    .queryAllByRole("link")
-    .filter((link) => link.getAttribute("href")?.startsWith("/carer/patients/"));
+  return screen.queryAllByRole("link").filter((link) => {
+    const href = link.getAttribute("href") ?? "";
+    // 'Add event for <name>' (CAR-07) sits beside the card, not as one.
+    return href.startsWith("/carer/patients/") && !href.endsWith("/events/new");
+  });
 }
 
 describe("[CAR-UI-02] Carer Patients grid", () => {
