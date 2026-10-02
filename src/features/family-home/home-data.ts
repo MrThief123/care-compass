@@ -4,6 +4,7 @@
  * totals can be tested without rendering anything.
  */
 import { getBudgetSummary } from "@/server/budget/queries";
+import { settleEndedEventCosts } from "@/server/budget/settle";
 import { getTaskLog, getTodayOccurrences } from "@/server/events/queries";
 import type { BudgetBucketSummary, Occurrence } from "@/types/domain";
 
@@ -99,6 +100,8 @@ export function summariseBudget(buckets: BudgetBucketSummary[]): BudgetTotals {
  * a test pins (DECISIONS.md FD-16).
  */
 export async function loadFamilyHomeData(clientId: string): Promise<FamilyHomeData> {
+  // FAM-11: charge any plain event that has ended, so the budget tiles include it.
+  await settleEndedEventCosts(clientId);
   const [today, overdue, done, budget] = await Promise.all([
     getTodayOccurrences(clientId),
     getTaskLog(clientId, { status: "overdue" }),

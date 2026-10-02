@@ -198,6 +198,46 @@ export async function setOccurrenceUndone(key: string): Promise<ActionResult<und
 const LOCAL_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 const LOCAL_TIME_PATTERN = /^([01]\d|2[0-3]):([0-5]\d)$/;
 
+/** An event's cost and the bucket that pays it (FAM-11, FD-07). */
+const EventCostSchema = z.object({
+  amount: z.number().positive().multipleOf(0.01),
+  bucketId: z.string().min(1),
+});
+
+/**
+ * Saves an event's cost and bucket through `set_event_cost`; `null` clears both. The cost applies to the
+ * occurrences from now on (F0-12). Returns an error result, or undefined when saved.
+ */
+async function saveEventCost(
+  supabase: Awaited<ReturnType<typeof import("@/lib/supabase/server").createClient>>,
+  eventId: string,
+  cost: z.infer<typeof EventCostSchema> | null,
+): Promise<ActionResult<never> | undefined> {
+  // The generated types make both arguments required; the function takes null to clear.
+  const { error } = await supabase.rpc("set_event_cost", {
+    p_event_id: eventId,
+    p_cost: (cost ? cost.amount : null) as number,
+    p_bucket_id: (cost ? cost.bucketId : null) as string,
+  });
+  if (!error) return undefined;
+  if (error.code === "42501") {
+    return {
+      ok: false,
+      error: { code: "NOT_ALLOWED", message: "Not permitted to change this event's cost." },
+    };
+  }
+  if (error.code === "22023") {
+    return {
+      ok: false,
+      error: { code: "VALIDATION", message: "Check the cost and the bucket and try again." },
+    };
+  }
+  return {
+    ok: false,
+    error: { code: "UNEXPECTED", message: "Couldn't save the cost. Please try again." },
+  };
+}
+
 const CreateEventInputSchema = z.object({
   clientId: z.string().min(1),
   title: z.string().trim().min(1),
@@ -207,6 +247,8 @@ const CreateEventInputSchema = z.object({
   durationMinutes: z.number().int().nonnegative(),
   recurrence: RecurrenceFrequencySchema,
   isTask: z.boolean(),
+  /** Cost and bucket (FAM-11); absent for no cost. */
+  cost: EventCostSchema.optional(),
 });
 export type CreateEventInput = z.infer<typeof CreateEventInputSchema>;
 
@@ -234,8 +276,17 @@ export async function createEvent(
       error: { code: "VALIDATION", message: "Check the event's fields and try again." },
     };
   }
-  const { clientId, title, description, date, startTime, durationMinutes, recurrence, isTask } =
-    parsed.data;
+  const {
+    clientId,
+    title,
+    description,
+    date,
+    startTime,
+    durationMinutes,
+    recurrence,
+    isTask,
+    cost,
+  } = parsed.data;
   const startsAt = localToMelbourneIso(`${date}T${startTime}`);
   const completionMode = isTask ? "manual" : "automatic";
 
@@ -294,6 +345,20 @@ export async function createEvent(
       }
     }
 
+    if (cost) {
+      const costFailure = await saveEventCost(supabase, data.id, cost);
+      if (costFailure) {
+        return {
+          ok: false,
+          error: {
+            code: costFailure.ok ? "UNEXPECTED" : costFailure.error.code,
+            message:
+              "The event was saved, but its cost wasn't. Open the event and add the cost again.",
+          },
+        };
+      }
+    }
+
     return { ok: true, data: { eventId: data.id } };
   } catch (error) {
     console.error("[events] createEvent failed:", error instanceof Error ? error.name : "unknown");
@@ -325,6 +390,8 @@ const UpdateEventInputSchema = z.object({
   recurrence: RecurrenceFrequencySchema,
   isTask: z.boolean(),
   scope: UpdateEventScopeSchema,
+  /** Cost and bucket (FAM-11): a value sets them, `null` clears them, absent leaves them as they are. */
+  cost: EventCostSchema.nullable().optional(),
 });
 export type UpdateEventInput = z.infer<typeof UpdateEventInputSchema>;
 
@@ -375,6 +442,7 @@ export async function updateEvent(
     recurrence,
     isTask,
     scope,
+    cost,
   } = parsed.data;
   const startsAt = localToMelbourneIso(`${date}T${startTime}`);
   const completionMode = isTask ? "manual" : "automatic";
@@ -439,6 +507,10 @@ export async function updateEvent(
         { onConflict: "event_id,original_start" },
       );
       if (overrideError) return mapUpdateEventError(overrideError.code);
+      if (cost !== undefined) {
+        const costFailure = await saveEventCost(supabase, eventId, cost);
+        if (costFailure) return costFailure;
+      }
       return { ok: true, data: { eventId } };
     }
 
@@ -471,6 +543,11 @@ export async function updateEvent(
       .select("id")
       .single();
     if (error) return mapUpdateEventError(error.code);
+
+    if (cost !== undefined) {
+      const costFailure = await saveEventCost(supabase, eventId, cost);
+      if (costFailure) return costFailure;
+    }
 
     return { ok: true, data: { eventId } };
   } catch (error) {
