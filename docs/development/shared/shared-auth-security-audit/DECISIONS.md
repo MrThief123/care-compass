@@ -153,6 +153,8 @@ is changed, renamed or dropped.
   card is marked `data-wide` and the auth layout gives such a card `max-w-md` (448px) instead of
   `max-w-sm` (384px). Every other auth screen keeps 384px. At 390px wide the card shrinks to the
   viewport as before, so the key can still wrap on a phone.
+- Second follow-up (same day): heading, intro and manual-key line are centred (`text-center`); the
+  6-digit code field and its label stay left-aligned, as asked.
 - Tests: `src/app/(auth)/mfa/enroll/mfa-enroll.test.tsx` (`[F0-21][FD-13]`) guards the class and the
   `data-wide` marker; jsdom has no layout, so position and wrapping were checked in Chromium.
 

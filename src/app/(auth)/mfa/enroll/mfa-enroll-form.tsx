@@ -57,7 +57,7 @@ export function MfaEnrollForm({ factorId, qrCode, secret }: MfaEnrollFormProps) 
   return (
     // `data-wide`: the auth layout widens this card so the 32-character key fits on one line (FD-13).
     <CardShell data-wide className="flex flex-col gap-6">
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-1 text-center">
         <h1 className="text-title-page text-text-primary">Set up two-factor authentication</h1>
         <p className="text-body-default text-text-secondary">
           Admin accounts require an authenticator app. Scan the code below, or enter the key
@@ -74,7 +74,7 @@ export function MfaEnrollForm({ factorId, qrCode, secret }: MfaEnrollFormProps) 
         className="self-center"
       />
 
-      <p className="break-all text-body-small text-text-secondary">
+      <p className="break-all text-center text-body-small text-text-secondary">
         Manual entry key:{" "}
         <span className="font-mono" data-testid="mfa-manual-key">
           {secret}

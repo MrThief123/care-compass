@@ -90,6 +90,8 @@ Last updated: 2026-10-02
 - **FD-13 follow-up (wider enrolment card):** 1 red, then green; unit 2375/2375; `tsc` clean;
   `eslint` 0 errors. Chromium: enrolment card 448px with the key on one line; sign-in card still
   384px; no horizontal scroll at 768px or 390px.
+- **FD-13 follow-up (centred text):** 1 red, then green; unit 2376/2376; `tsc` clean; `eslint` 0
+  errors. Chromium at 1280px and 390px: heading, intro and key centred, code field left-aligned.
 
 ## Next action
 - FD-07 follow-up (hosted project, needs the human): record the dashboard's Auth > Rate Limits
