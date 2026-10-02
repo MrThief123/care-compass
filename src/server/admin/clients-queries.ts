@@ -1,4 +1,5 @@
 import { ADMIN_CLIENTS } from "@/mocks/admin-clients";
+import { isMockClientRemoved } from "@/server/admin/clients-mock-store";
 import { getDataSourceMode } from "@/server/data-source";
 
 export interface AdminClient {
@@ -22,7 +23,10 @@ function fullName(firstName: string | null, lastName: string | null): string {
  * undesigned corners (PRD.md Error/Edge Cases, PROPOSED).
  */
 export async function getAdminClients(): Promise<AdminClientsData> {
-  if (getDataSourceMode() === "mock") return structuredClone(ADMIN_CLIENTS);
+  if (getDataSourceMode() === "mock") {
+    const data = structuredClone(ADMIN_CLIENTS);
+    return { ...data, clients: data.clients.filter((client) => !isMockClientRemoved(client.id)) };
+  }
 
   const { createClient } = await import("@/lib/supabase/server");
   const supabase = await createClient();

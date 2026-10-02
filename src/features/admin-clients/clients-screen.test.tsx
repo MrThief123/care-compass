@@ -1,9 +1,17 @@
-import { render, screen, within } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { axe } from "jest-axe";
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ClientsScreen } from "./clients-screen";
+
+// ADM-05: Remove now calls the `removeClient` Server Action (feature DECISIONS.md FD-05).
+const mocks = vi.hoisted(() => ({ removeClient: vi.fn() }));
+vi.mock("@/server/admin/clients-actions", () => ({ removeClient: mocks.removeClient }));
+beforeEach(() => {
+  mocks.removeClient.mockReset();
+  mocks.removeClient.mockImplementation(async (id: string) => ({ ok: true, data: { id } }));
+});
 
 const data = {
   clients: [
@@ -48,19 +56,18 @@ describe("Admin Clients", () => {
   });
 });
 
-it("[ADM-04][PRD] removes only the confirmed client and restores fixtures on remount", async () => {
-  const view = render(<ClientsScreen data={data} />);
+it("[ADM-04][PRD] removes only the confirmed client", async () => {
+  render(<ClientsScreen data={data} />);
   await userEvent.click(screen.getByRole("button", { name: "Remove Margaret Doyle" }));
   await userEvent.click(screen.getByRole("button", { name: "Yes, remove" }));
-  expect(screen.queryByRole("row", { name: /Margaret Doyle/ })).not.toBeInTheDocument();
+  await waitFor(() =>
+    expect(screen.queryByRole("row", { name: /Margaret Doyle/ })).not.toBeInTheDocument(),
+  );
   expect(screen.getByRole("row", { name: /Doris Petrov/ })).toBeVisible();
   expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   expect(screen.getByRole("status")).toHaveTextContent("Margaret Doyle removed");
   expect(screen.getByRole("heading", { name: "Client List" })).toHaveFocus();
   expect(data.clients).toHaveLength(2);
-  view.unmount();
-  render(<ClientsScreen data={data} />);
-  expect(screen.getByRole("row", { name: /Margaret Doyle/ })).toBeVisible();
 });
 it("[ADM-04][PRD] Cancel and Escape leave the client unchanged and return focus", async () => {
   render(<ClientsScreen data={data} />);
@@ -80,6 +87,9 @@ it("[ADM-04][AC-03] removes the final client into the empty state", async () => 
   for (const name of ["Margaret Doyle", "Doris Petrov"]) {
     await userEvent.click(screen.getByRole("button", { name: "Remove " + name }));
     await userEvent.click(screen.getByRole("button", { name: "Yes, remove" }));
+    await waitFor(() =>
+      expect(screen.queryByRole("row", { name: new RegExp(name) })).not.toBeInTheDocument(),
+    );
   }
   expect(screen.getByText("No clients yet")).toBeVisible();
 });
