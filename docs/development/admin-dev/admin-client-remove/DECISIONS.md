@@ -52,6 +52,11 @@ None. OQ-06 (PD-036) and OQ-07 (PD-037) are ANSWERED, and OQ-19 is ANSWERED as P
 - Decision: `src/server/admin/clients-mock-store.ts` (on `globalThis`, like the staff store) holds the removed ids; `getAdminClients` and `removeClient` use it in mock mode. A mock-mode removal does not reach the Family screens: Admin fixture ids (`margaret`) and Family fixture ids (`client-margaret`) differ, and FAM-13's mock action is a stub. The Family banner is therefore checked with local Supabase for the visual run, and by component tests with `organisationRemoved` set.
 - Human confirmation: no.
 
+### FD-07 — Implementation notes
+- Date: 2026-10-03
+- Decision: the removal-confirmation dialog keeps the ADM-04 title and buttons and adds a second paragraph (staff lose access; family keeps all records and chooses a new organisation). The Family confirmation after a removal uses its own wording ("gives them access to <name>'s routines…"), because the standard text names the outgoing organisation, which a removed client no longer has. The banner is one component, `src/features/family-settings/organisation-removed-banner.tsx`, used by Settings (with a button) and Home (with a link). The banner title is a paragraph, not a heading, so it cannot break the page's heading order.
+- Human confirmation required: yes, copy at PR review (with FD-04).
+
 <!-- Template
 ### FD-01 — <title>
 - Date:
