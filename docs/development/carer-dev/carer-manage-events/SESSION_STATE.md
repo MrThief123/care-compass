@@ -2,13 +2,12 @@
 
 Last session date: 2026-10-02
 Current branch: `feature/carer-manage-events` (worktree `../care-compass-car07`)
-Worked on: claim, docs rewrite (CHG-048), tests first
-What changed: docs and four test files; no production code
-Tests run: component file (via a stub harness, then real: it fails to import until the two routes exist); integration file against local Supabase; `tsc` (only the two missing-route imports error); eslint and prettier clean
-Test results: integration 8/8 pass; component 20 fail / 6 pass with the routes stubbed; e2e not run
+Worked on: implementation, browser check, CHG-049 (Home 'Enter event' replaces the Patients card link), PL-27, docs
+What changed: carer events routes, entry points, two additive props, tests (see PROGRESS.md "Files changed")
+Tests run: carer suites, Family suites unchanged, `npm run verify`, integration and e2e on the local stack, real-browser sweep
+Test results: component 26/26, integration 8/8, e2e 4/4; full vitest has 150 failures identical on `main` (FD-09)
 Current blocker: none
-Important discoveries: the backend already allows it (RLS `can_edit_care_events`, `createEvent`, `updateEvent`, `canAddEvent`, `canEdit`); the work is carer routes, entry points and the shift-ended message. The human's earlier "hide Cost" idea conflicted with PD-058 and was dropped (FD-01). CAR-06 T-08 (Family Home) is already red on `main` (FD-06).
-Important decisions: CHG-048; FD-01 to FD-06
-Exact next action: implement per PROGRESS.md "Remaining"; run the component file, then the e2e spec against the local stack
-Files likely to be touched next: see PROGRESS.md "Files changed"
-Warning for next session: `.env.local` is the hosted project, never run e2e or integration against it; do not edit Family files beyond the `notAllowedMessage` prop; do not change the tests except for a recorded reason.
+Important discoveries: a streamed redirect (loading.tsx) lands just after page load; the pre-existing red suite is date- or fixture-sensitive
+Important decisions: CHG-048, CHG-049; FD-01 to FD-09
+Exact next action: human reviews and merges the PR
+Warning for next session: `.env.local` is the hosted project, never run e2e or integration against it.

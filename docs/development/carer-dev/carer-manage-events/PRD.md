@@ -32,7 +32,7 @@ Carers can record needs they observe while caring, and the family sees them at o
 ## Scope
 - **Add event** at `/carer/patients/[clientId]/events/new`: the Family `EventFormScreen` in add mode, unchanged (Title, Start time, Duration, Date, Recurring, task switch, Cost and Paid from, Description, Documents). Saves through `createEvent`; Save and Cancel return to the Calendar view it was opened from, else to the patient's Home tab, all under `/carer/patients/<id>/`.
 - **Edit event** at `/carer/patients/[clientId]/events/[eventId]/edit?occurrence=<key>`: the Family edit screen under the carer path, with the occurrence/series scope choice for a recurring event. Saves through `updateEvent`; Save and Cancel return to that occurrence's carer Task detail.
-- **Entry points, on shift only** (absent, not disabled, when off shift): 'Enter event' on the patient's Calendar toolbar; 'Add event for <first name>' on the patient's card in Patients; 'Edit event' on the carer Task detail.
+- **Entry points, on shift only** (absent, not disabled, when off shift): 'Enter event' on the patient's Calendar toolbar and on the patient's Home; 'Edit event' on the carer Task detail. The Patients card has no event link (CHG-049).
 - **Off shift:** both routes redirect to the patient's Calendar (which shows the View only notice). A patient the carer has no shift with redirects to Patients (`findCarerPatient`).
 - **Shift ends mid-form:** the database refuses the save; the form stays as typed and shows "Your shift with <first name> has ended, so this event wasn't saved."; no navigation.
 - Documents attach and upload as on Family (storage and `documents` RLS already admit an assigned carer).

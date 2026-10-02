@@ -1035,7 +1035,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 
 ### CAR-07 — Carer — Add and edit events for a patient
 - **Dashboard / stream:** carer · **Lane:** C · **Days:** D15–D16 · **Sprint:** SPRINT · **PR target:** `main` · **Branch:** `feature/carer-manage-events`
-- **Description:** Implements sequence Use Case 2: carer opens a rostered patient's calendar and adds a task with date, description and documentation. Built by CHG-048: on-shift carers get Add event (Calendar, Patients card) and Edit event (Task detail) on the Family event form, under `/carer/patients/<id>/…`.
+- **Description:** Implements sequence Use Case 2: carer opens a rostered patient's calendar and adds a task with date, description and documentation. Built by CHG-048: on-shift carers get Add event (Calendar, Home) and Edit event (Task detail) on the Family event form, under `/carer/patients/<id>/…`.
 - **User value:** Carers can record needs they observe while caring.
 - **Dependencies:** CAR-04, F0-11, UI-02 · **Blocking decisions:** OQ-09, OQ-22, OQ-19 (all ANSWERED)
 - **Jira summary:** Carer creates/edits a patient's event during an active shift (entry point not designed)

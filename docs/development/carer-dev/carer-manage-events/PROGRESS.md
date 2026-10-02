@@ -1,57 +1,60 @@
 # Progress — CAR-07 Carer — Add and edit events for a patient
 
-Status: IN PROGRESS
+Status: READY FOR PR
 Owner: Dhruv Verma
 Lane: C — Carer
 Sprint: SPRINT · planned D15–D16
 Branch: `feature/carer-manage-events`
 PR target: `main`
-Last updated: 2026-10-02 (docs rewritten for CHG-048; tests written first, red)
+Last updated: 2026-10-02 (implemented, all 8 ACs MET, browser-checked)
 
 ## Blockers
 - None. OQ-09, OQ-22 and OQ-19 are ANSWERED.
-- FD-04 (the `notAllowedMessage` prop in a Lane F file) needs the human's sign-off in the PR.
-- Pre-existing red: `[CAR-06][AC-08] T-08` Family Home (FD-06). Not this feature's.
+- For the human in the PR: FD-04 (additive `notAllowedMessage` prop in a Lane F file) and FD-08 (additive `canAddEvent` on the Family Home view).
+- **HUMAN REVIEW: test expectation changed** (FD-03, FD-08): CAR-06 T-07; CAR-07 T-03 (Patients card, Home).
+- Pre-existing red, not this feature's: `[CAR-06][AC-08] T-08` (FD-06) and 150 vitest failures in 12 files, identical on clean `main` (FD-09).
 
 ## Dependencies status
 - CAR-04, F0-11, UI-02 — MERGED to main. Also builds on CAR-06, FAM-06, FAM-07 and F0-23 (all merged).
 
 ## Completed
-- Claimed; branch cut from `main`; CHG-048 recorded; PRD, ACs (2 → 8), user stories, test plan, decisions rewritten
-- Tests first: component (26), integration (8), e2e (4); CAR-06 T-07 changed (FD-03, HUMAN REVIEW)
+- Claimed; CHG-048 and CHG-049 recorded; docs rewritten; tests first (component 26, integration 8, e2e 4)
+- Routes `events/new` and `events/[eventId]/edit` with loading, error, not-found; off shift redirects to the Calendar before any data is read
+- Entry points on shift only: Calendar and Home 'Enter event', Task detail 'Edit event'; none on the Patients card
+- `notAllowedMessage` on `EventFormScreen`; `canAddEvent` on `FamilyHomeView`
+- Verified in a real browser, 1920 to 768; shift inserted for the check and deleted afterwards
+- PL-27 parked (root PRD.md §17)
 
 ## In progress
-- None (stopped after the red tests, as asked)
+- None
 
 ## Remaining
-- Carer routes `events/new` and `events/[eventId]/edit` (+ loading, error, not-found)
-- Entry points: Calendar `canAddEvent`, Task detail `canEdit`, Patients card link (outside the card's own link)
-- `notAllowedMessage` prop on `EventFormScreen`; carer return hrefs under `/carer/patients/<id>/`
-- Make the component tests and the e2e spec green; refresh the status page; pre-PR suite run; PR (after the human says yes)
+- Human review of the PR; merge by the human
 
 ## Acceptance criteria status
-- 0 / 8 MET (database side of AC-02, AC-05 and AC-06 already passes in integration; the UI half is NOT MET)
+- 8 / 8 MET
 
 ## Tests
-- Written: 8 / 8 ACs covered
-- Component: 20 failing, 6 passing (the passing ones guard Family and off-shift behaviour). Integration: 8 passing against local Supabase. e2e: written, not run (needs the routes).
+- Component 26/26; integration 8/8 and e2e 4/4 on the local stack. See TEST_PLAN.md "Results".
+- `npm run verify`: lint, typecheck, format clean; tests fail only on the 150 pre-existing failures.
+- CI is down: all of this was run locally after merging `origin/main` (up to date).
 
 ## Files changed
-- Docs: this folder, root DECISIONS.md (CHG-048), DEVELOPMENT_PLAN.md
-- Tests: `src/features/carer-patients/carer-manage-events.test.tsx`, `src/features/carer-patients/carer-complete-task.test.tsx` (T-07), `tests/integration/carer-manage-events.test.ts`, `tests/e2e/carer-manage-events.spec.ts`
-- Likely production files: `src/app/(carer)/carer/patients/[clientId]/events/**`, `…/calendar/page.tsx`, `…/tasks/[occurrenceKey]/page.tsx`, `src/features/carer-patients/carer-patients-view.tsx`, `src/features/family-event-form/event-form-screen.tsx` (prop only)
+- Production: `src/app/(carer)/carer/patients/[clientId]/events/**` (new), `…/calendar/page.tsx`, `…/home/page.tsx`, `…/tasks/[occurrenceKey]/page.tsx`, `src/features/family-event-form/event-form-screen.tsx` (prop), `src/features/family-home/family-home-view.tsx` (prop), `src/features/family-task-detail/task-detail-view.tsx` (comment)
+- Tests: `carer-manage-events.test.tsx`, `carer-complete-task.test.tsx` (T-07), integration and e2e specs
+- Docs: this folder, root DECISIONS.md (CHG-048, CHG-049), PRD.md (PL-27), DEVELOPMENT_PLAN.md, status page
 
 ## Decisions
-- See DECISIONS.md (FD-01 to FD-06) and root CHG-048
+- See DECISIONS.md (FD-01 to FD-09) and root CHG-048, CHG-049
 
 ## Problems encountered
-- `.env.local` points at the hosted Supabase project; integration tests were run with the local stack's URL and keys passed on the command line.
+- `.env.local` points at the hosted Supabase project; integration and e2e were run against the local stack only.
 
 ## Assumptions
-- FD-04 and FD-05 are assumptions (not asked of the human).
+- FD-04, FD-05 assumptions; design gap noted in FD-09.
 
 ## Next action
-- Implement in a fresh session using the prompt in SESSION_STATE.md.
+- Human reviews the PR.
 
 ## Ready for PR
-- No
+- Yes
