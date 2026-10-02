@@ -106,8 +106,8 @@ Last updated: 2026-10-02 (AC-01 follow-up on `fix/family-event-documents-ac01`)
   unlike `src/server/<domain>/`, which is why FD-01's migration need was not acted on directly.
 
 ## Next action
-- Human: approve the PR for `fix/family-event-documents-ac01` (T-01 seed fix + AC-01 MET).
+- Human: review and merge PR #199 (T-01 seed fix + AC-01 MET).
 - Still open, separate follow-up: FD-01 (Add event's uploads can't link to the event on save).
 
 ## Ready for PR
-- Yes for the AC-01 follow-up (`fix/family-event-documents-ac01`), awaiting human approval to open the PR.
+- AC-01 follow-up: PR #199 open to `main` (2026-10-02).

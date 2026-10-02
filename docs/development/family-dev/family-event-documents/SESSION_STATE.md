@@ -10,7 +10,7 @@ Tests run: T-01 1/1, then 3/3 with `--repeat-each 3`; `event-documents.test.tsx`
 page test (mock); `DATA_SOURCE=mock npx vitest run src tests/unit` 2376/2376; `npm run
 test:integration` 173 passed / 3 failed (local-stack state and parallel-file collisions, not FAM-08 —
 details in PROGRESS.md "Tests"); tsc, eslint, prettier clean.
-Current blocker: none. PR awaits the human's yes.
+Current blocker: none. PR #199 open to `main` (human tested the Edit event upload manually first).
 Important discoveries:
 - Local stack was 3 migrations behind `main`; applied with `supabase migration up --local` (no reset).
 - Storage uploads need the local-only `idx_objects_current_version_c` index (re-added this session).
@@ -20,7 +20,6 @@ Important discoveries:
   so each passing run leaves one `fam-08-*` org + client on the local stack. Same as F0-13's
   integration tests; accepted.
 Important decisions: DECISIONS.md FD-03.
-Exact next action: on the human's yes, open the PR `FAM-08 Family — Event documents (file tiles)`
-(AC-01 follow-up) to `main`.
+Exact next action: human reviews and merges PR #199.
 Files likely to be touched next: none.
 Warning for next session: Add event uploads (FD-01) are a separate follow-up; don't fold them in here.
