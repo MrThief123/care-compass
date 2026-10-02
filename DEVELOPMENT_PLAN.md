@@ -1,7 +1,7 @@
 # DEVELOPMENT PLAN — Care Compass
 
 Version 0.2 · 17 September 2026 · Status: DRAFT (controlled after planning freeze) · Supersedes v0.1 dashboard-by-dashboard phases
-Totals: **87 active features** (88 listed; CAR-08 retired) · **403 acceptance criteria** across 5 phases (UI-04 and its 10 criteria added by CHG-004, 2026-09-19; UI-05 and its 13 criteria added under CHG-009, 2026-09-24; F0-17 and its 8 criteria added by CHG-010, 2026-09-24; CHG-020, 2026-09-25: FAM-UI-08 (6 criteria) and ADM-11 (5) added, FAM-UI-05 +5 criteria, CAR-08 and its 2 criteria retired; CHG-021, 2026-09-25: FAM-UI-05 +4 criteria; CHG-022, 2026-09-25: FAM-UI-05 +5 criteria; CHG-027, 2026-09-26: F0-18 and its 9 criteria added; CHG-037, 2026-09-30: F0-19 and its 6 criteria added; CHG-040, 2026-09-30: F0-20 and its 10 criteria added; CHG-041, 2026-10-01: F0-21 and its 6 criteria added; CHG-042, 2026-10-01: F0-22 and its 8 criteria added; the Jira import `docs/JIRA_BACKLOG.csv` predates all six). Jira import: `docs/JIRA_BACKLOG.csv`.
+Totals: **88 active features** (89 listed; CAR-08 retired) · **411 acceptance criteria** across 5 phases (UI-04 and its 10 criteria added by CHG-004, 2026-09-19; UI-05 and its 13 criteria added under CHG-009, 2026-09-24; F0-17 and its 8 criteria added by CHG-010, 2026-09-24; CHG-020, 2026-09-25: FAM-UI-08 (6 criteria) and ADM-11 (5) added, FAM-UI-05 +5 criteria, CAR-08 and its 2 criteria retired; CHG-021, 2026-09-25: FAM-UI-05 +4 criteria; CHG-022, 2026-09-25: FAM-UI-05 +5 criteria; CHG-027, 2026-09-26: F0-18 and its 9 criteria added; CHG-037, 2026-09-30: F0-19 and its 6 criteria added; CHG-040, 2026-09-30: F0-20 and its 10 criteria added; CHG-041, 2026-10-01: F0-21 and its 6 criteria added; CHG-042, 2026-10-01: F0-22 and its 8 criteria added; CHG-045, 2026-10-02: F0-23 and its 8 criteria added; the Jira import `docs/JIRA_BACKLOG.csv` predates all six). Jira import: `docs/JIRA_BACKLOG.csv`.
 
 ---
 
@@ -157,6 +157,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 | 14 | F0-20 | Admin TOTP MFA hardening | S | D11 | SPRINT | F0-07, F0-17 | — | `feature/shared-admin-mfa-hardening` | IN PROGRESS |
 | 15 | F0-21 | Auth security audit | S | D12 | SPRINT | F0-07, F0-20 | — | `feature/shared-auth-security-audit` | NOT STARTED |
 | 16 | F0-22 | Client header wiring and family route guard | S | D12 | SPRINT | F0-06, F0-07, F0-15 | — | `feature/shared-client-header-wiring` | NOT STARTED |
+| 17 | F0-23 | Link uploaded documents to a new event | S | D13 | SPRINT | F0-11, F0-13, FAM-08 | — | `feature/shared-document-event-linking` | IN PROGRESS |
 
 ### Phase 3 — Data wiring & behaviour (parallel: Family · Carer · Admin)
 
@@ -739,6 +740,17 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Testing summary:** 2 unit, 2 component, 1 integration
 - **Requirements:** REQ-02, REQ-05
 - **Docs:** `docs/development/shared/shared-client-header-wiring/` · **Status:** NOT STARTED
+
+### F0-23 — Link uploaded documents to a new event
+- **Dashboard / stream:** shared · **Lane:** S · **Days:** D13 · **Sprint:** SPRINT · **PR target:** `main` · **Branch:** `feature/shared-document-event-linking`
+- **Description:** Adds a guarded `link_document_to_event` function (additive migration) and wires the Add event form to link its uploaded files to the new event after `createEvent` returns an id. Closes FAM-08 FD-01. Added by CHG-045.
+- **User value:** Files attached while adding an event end up on that event, as they already do when editing one.
+- **Dependencies:** F0-11, F0-13, FAM-08 · **Blocking decisions:** None
+- **Jira summary:** Link Add event uploads to the saved event; guarded database function
+- **Acceptance criteria summary:** 8 criteria — link succeeds, no client access refused, already linked or detached refused, other client's event refused, another user's upload refused, Add event links on save, link failure keeps the event, Add file works before save
+- **Testing summary:** 1 pgTAP, 1 unit, 1 component, 1 integration
+- **Requirements:** REQ-22
+- **Docs:** `docs/development/shared/shared-document-event-linking/` · **Status:** IN PROGRESS
 
 ## Phase 3 — Data wiring & behaviour (parallel: Family · Carer · Admin) — feature detail
 
