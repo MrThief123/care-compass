@@ -205,6 +205,9 @@ describe("[ADM-08][AC-07] accessibility", () => {
     await userEvent.click(
       screen.getByRole("button", { name: "Remove Margaret Doyle from Aisha Rahman" }),
     );
-    expect(await axe(document.body)).toHaveNoViolations();
+    // `region` is off: StaffScreen renders alone here, without the admin layout's <main>.
+    expect(
+      await axe(document.body, { rules: { region: { enabled: false } } }),
+    ).toHaveNoViolations();
   });
 });

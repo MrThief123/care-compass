@@ -11,9 +11,12 @@ import { Button } from "@/components/ui/button";
 import { CardShell } from "@/components/ui/card-shell";
 import { Icon } from "@/components/ui/icon";
 import { requiredPhoneError } from "@/lib/phone/au-phone";
+import type { CarerAssignment } from "@/server/admin/assignments-queries";
 import { createStaff, updateStaff } from "@/server/admin/staff-actions";
 import type { AdminStaffData } from "@/server/admin/staff-queries";
 import type { StaffMember } from "@/types/domain";
+
+import { CarerAssignments } from "./carer-assignments";
 
 interface Draft {
   firstName: string;
@@ -41,7 +44,14 @@ function fullName(person: Pick<StaffMember, "firstName" | "lastName">): string {
   return `${person.firstName} ${person.lastName}`.trim();
 }
 
-export function StaffScreen({ data }: { data: AdminStaffData }) {
+export function StaffScreen({
+  data,
+  assignments = [],
+}: {
+  data: AdminStaffData;
+  /** Every carer's clients (ADM-08); the selected carer's are listed under the form. */
+  assignments?: CarerAssignment[];
+}) {
   const [staff, setStaff] = useState(() => data.staff.map((person) => ({ ...person })));
   const [selectedId, setSelectedId] = useState<string | null>(data.staff[0]?.id ?? null);
   const emptyDraft = (): Draft => ({
@@ -64,6 +74,7 @@ export function StaffScreen({ data }: { data: AdminStaffData }) {
   const [errors, setErrors] = useState<Partial<Record<keyof Draft, string>>>({});
   const [notice, setNotice] = useState("");
   const panel = useRef<HTMLDivElement>(null);
+  const selected = staff.find((person) => person.id === selectedId);
 
   function edit(person?: StaffMember) {
     setSelectedId(person?.id ?? null);
@@ -161,51 +172,61 @@ export function StaffScreen({ data }: { data: AdminStaffData }) {
           <EmptyState title="No staff yet" body="Add a staff member to get started." />
         )}
       </CardShell>
-      <div ref={panel} className="min-h-[520px]">
-        <SidePanelForm
-          title="Add / Edit Staff"
-          submitLabel="Save"
-          onSubmit={save}
-          className="border-transparent"
-        >
-          <Field
-            label="First name"
-            value={draft.firstName}
-            onChange={(value) => change("firstName", value)}
-            error={errors.firstName}
+      <div className="flex min-w-0 flex-col gap-5">
+        <div ref={panel} className="min-h-[520px]">
+          <SidePanelForm
+            title="Add / Edit Staff"
+            submitLabel="Save"
+            onSubmit={save}
+            className="border-transparent"
+          >
+            <Field
+              label="First name"
+              value={draft.firstName}
+              onChange={(value) => change("firstName", value)}
+              error={errors.firstName}
+            />
+            <Field
+              label="Last name"
+              value={draft.lastName}
+              onChange={(value) => change("lastName", value)}
+              error={errors.lastName}
+            />
+            <Field
+              label="Phone"
+              type="tel"
+              value={draft.phone}
+              onChange={(value) => change("phone", value)}
+              error={errors.phone}
+            />
+            <Field
+              label="Email"
+              name="email"
+              value={draft.email}
+              onChange={(value) => change("email", value)}
+              error={errors.email}
+            />
+            <Field
+              label="Role"
+              type="select"
+              value={draft.jobTitle}
+              options={data.roles.map((role) => ({ value: role, label: role }))}
+              onChange={(value) => change("jobTitle", value)}
+              error={errors.jobTitle}
+            />
+            <p role="status" className="text-body-small text-text-secondary">
+              {notice}
+            </p>
+          </SidePanelForm>
+        </div>
+        {selected && (
+          <CarerAssignments
+            key={selected.id}
+            carer={{ id: selected.id, name: fullName(selected) }}
+            assignments={assignments}
+            onRemoved={setNotice}
           />
-          <Field
-            label="Last name"
-            value={draft.lastName}
-            onChange={(value) => change("lastName", value)}
-            error={errors.lastName}
-          />
-          <Field
-            label="Phone"
-            type="tel"
-            value={draft.phone}
-            onChange={(value) => change("phone", value)}
-            error={errors.phone}
-          />
-          <Field
-            label="Email"
-            name="email"
-            value={draft.email}
-            onChange={(value) => change("email", value)}
-            error={errors.email}
-          />
-          <Field
-            label="Role"
-            type="select"
-            value={draft.jobTitle}
-            options={data.roles.map((role) => ({ value: role, label: role }))}
-            onChange={(value) => change("jobTitle", value)}
-            error={errors.jobTitle}
-          />
-          <p role="status" className="text-body-small text-text-secondary">
-            {notice}
-          </p>
-        </SidePanelForm>
+        )}
       </div>
     </div>
   );
