@@ -214,7 +214,7 @@ Note: OOS-5 (rostering out of scope) is superseded by later client meetings and 
 | PL-24 | Unique identifier for every organisation (e.g. ABN), and verifying a self-registered organisation before it appears in the family organisation picker (lookalike-provider risk) | Human, 2026-09-24 (CHG-010 risk 2) | Identifier to be chosen; no design |
 | PL-25 | Email Family and admins when an event cost goes pending (split from INT-01's card by CHG-044; trigger, idempotency and wording unspecified) | PD-058, REQ-37; INT-01 card | CHG-044 |
 | PL-26 | INT-01's threshold warning email names the bucket (e.g. "Government allocation"), not only the client, for clients with more than one bucket | REQ-31; INT-01 | CHG-044 |
-| PL-27 | Event form and calendar polish, one feature: (1) a completed overdue task says how late it was done ("Completed 2 days, 3 hours late") on Task detail and the Log; (2) the "Pick a date" calendar rings today's date lightly and always shows the month of the active date, for every role; (3) the event form takes a start and end time like shift assignments, instead of Duration in minutes | Human, 2026-10-02 (CAR-07 review) | CHG-049 |
+| PL-27 | **Promoted to FAM-16 by CHG-051.** Event form and calendar polish, one feature: (1) a completed overdue task says how late it was done ("Completed 2 days, 3 hours late") on Task detail and the Log; (2) the "Pick a date" calendar rings today's date lightly and always shows the month of the active date, for every role; (3) the event form takes a start and end time like shift assignments, instead of Duration in minutes | Human, 2026-10-02 (CAR-07 review) | CHG-049 |
 
 
 ## 18. Dependencies

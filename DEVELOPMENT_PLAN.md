@@ -1,7 +1,7 @@
 # DEVELOPMENT PLAN — Care Compass
 
 Version 0.2 · 17 September 2026 · Status: DRAFT (controlled after planning freeze) · Supersedes v0.1 dashboard-by-dashboard phases
-Totals: **90 active features** (91 listed; CAR-08 retired) · **429 acceptance criteria** across 5 phases (UI-04 and its 10 criteria added by CHG-004, 2026-09-19; UI-05 and its 13 criteria added under CHG-009, 2026-09-24; F0-17 and its 8 criteria added by CHG-010, 2026-09-24; CHG-020, 2026-09-25: FAM-UI-08 (6 criteria) and ADM-11 (5) added, FAM-UI-05 +5 criteria, CAR-08 and its 2 criteria retired; CHG-021, 2026-09-25: FAM-UI-05 +4 criteria; CHG-022, 2026-09-25: FAM-UI-05 +5 criteria; CHG-027, 2026-09-26: F0-18 and its 9 criteria added; CHG-037, 2026-09-30: F0-19 and its 6 criteria added; CHG-040, 2026-09-30: F0-20 and its 10 criteria added; CHG-041, 2026-10-01: F0-21 and its 6 criteria added; CHG-042, 2026-10-01: F0-22 and its 8 criteria added; CHG-045, 2026-10-02: F0-23 and its 8 criteria added; CHG-047, 2026-10-02: F0-24 (7 criteria) and INT-09 (5 criteria) added, every remaining post-sprint feature pulled into the sprint, sprint extended to D21; the Jira import `docs/JIRA_BACKLOG.csv` predates all six). Jira import: `docs/JIRA_BACKLOG.csv`.
+Totals: **91 active features** (92 listed; CAR-08 retired) · **440 acceptance criteria** across 5 phases (UI-04 and its 10 criteria added by CHG-004, 2026-09-19; UI-05 and its 13 criteria added under CHG-009, 2026-09-24; F0-17 and its 8 criteria added by CHG-010, 2026-09-24; CHG-020, 2026-09-25: FAM-UI-08 (6 criteria) and ADM-11 (5) added, FAM-UI-05 +5 criteria, CAR-08 and its 2 criteria retired; CHG-021, 2026-09-25: FAM-UI-05 +4 criteria; CHG-022, 2026-09-25: FAM-UI-05 +5 criteria; CHG-027, 2026-09-26: F0-18 and its 9 criteria added; CHG-037, 2026-09-30: F0-19 and its 6 criteria added; CHG-040, 2026-09-30: F0-20 and its 10 criteria added; CHG-041, 2026-10-01: F0-21 and its 6 criteria added; CHG-042, 2026-10-01: F0-22 and its 8 criteria added; CHG-045, 2026-10-02: F0-23 and its 8 criteria added; CHG-047, 2026-10-02: F0-24 (7 criteria) and INT-09 (5 criteria) added, every remaining post-sprint feature pulled into the sprint, sprint extended to D21; CHG-051, 2026-10-02: FAM-16 and its 11 criteria added (PL-27 promoted); the Jira import `docs/JIRA_BACKLOG.csv` predates all six). Jira import: `docs/JIRA_BACKLOG.csv`.
 
 ---
 
@@ -179,6 +179,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 | 13 | FAM-13 | Family — Change organisation | F | D11 | SPRINT | F0-06, F0-10, FAM-UI-06 | OQ-06, OQ-15 | `feature/family-change-organisation` | NOT STARTED |
 | 14 | FAM-14 | Family — Task log | F | D11 | SPRINT | F0-11, FAM-UI-07 | OQ-29 | `feature/family-task-log` | NOT STARTED |
 | 15 | FAM-15 | Family — Task detail | F | D11 | SPRINT | F0-11, F0-13, FAM-UI-07 | OQ-29, OQ-10 | `feature/family-task-detail` | NOT STARTED |
+| 15a | FAM-16 | Family — Event form and calendar polish (CHG-051) | F | D18 | SPRINT | FAM-06, FAM-07, FAM-14, FAM-15, CAR-07, UI-01, UI-02 | — | `feature/family-event-form-calendar-polish` | IN PROGRESS |
 | 16 | CAR-01 | ~~Carer Home — Today's calendar and Tasks~~ (retired, CHG-033) | C | — | SPRINT | F0-10, F0-11, CAR-UI-01 | OQ-33, OQ-09 | `feature/carer-home-today` | RETIRED (CHG-033) |
 | 17 | CAR-02 | Carer — Notifications card and bell | C | D9 | SPRINT | F0-10, F0-13, CAR-UI-01 | OQ-14 | `feature/carer-notifications` | NOT STARTED |
 | 18 | CAR-03 | Carer — Patients | C | D8 | SPRINT | F0-06, F0-10, F0-18, CAR-UI-02 | OQ-09 | `feature/carer-patients` | IN PROGRESS |
@@ -951,6 +952,17 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **FAM-15 start (2026-09-30, FD-01 to FD-05):** most of the screen exists (FAM-UI-07); remaining scope is plain events opening (CHG-009, no 'Care log' rename), a cancelled-after-completion occurrence still opening as Done, and real-data verification. Stays read-only (no Mark done / Undo). ACs rewritten to 8 (docs updated when it started).
 - **Docs:** `docs/development/family-dev/family-task-detail/` · **Status:** NOT STARTED
 
+### FAM-16 — Family — Event form and calendar polish
+- **Dashboard / stream:** family · **Lane:** F · **Days:** D18 · **Sprint:** SPRINT · **PR target:** `main` · **Branch:** `feature/family-event-form-calendar-polish`
+- **Description:** PL-27 as one feature (CHG-051): a Done task completed late says how late on Task detail and the Log; the "Pick a date" calendar rings today and shows the month of the active date for every role (flagged additive Lane S edit); the event form takes Start time and End time instead of Duration (stored `durationMinutes` unchanged).
+- **User value:** Late care is visible, today is easy to find, and an event's time is entered like a shift.
+- **Dependencies:** FAM-06, FAM-07, FAM-14, FAM-15, CAR-07, UI-01, UI-02 · **Blocking decisions:** None
+- **Jira summary:** Late-completion note, date picker today ring and month, start and end time in the event form
+- **Acceptance criteria summary:** 11 criteria — late note on Task detail and Log; none when on time or not done; wording boundaries; today ring; month follows the date; Admin picker unaffected; Start and End time saving duration; End validation; Edit shows End; Carer and Family regressions
+- **Testing summary:** 2 unit, 7 component
+- **Requirements:** REQ-17, REQ-18, REQ-19, PD-047
+- **Docs:** `docs/development/family-dev/family-event-form-calendar-polish/` · **Status:** IN PROGRESS
+
 ### CAR-01 — Carer Home — Today's calendar and Tasks
 - **Dashboard / stream:** carer · **Lane:** C · **Days:** D8 · **Sprint:** SPRINT · **PR target:** `main` · **Branch:** `feature/carer-home-today`
 - **Description:** The Carer Home screen's top cards listing today's occurrences across the carer's assigned clients.
@@ -1302,7 +1314,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 See PRD.md §17. Promotion requires a CHG entry, human confirmation, and new feature docs from `docs/templates/FEATURE_TEMPLATE/`.
 
 ## 7. Adding a new feature
-1. Propose ID (next number: `FAM-16`, `FAM-UI-09`, `CAR-10`, `ADM-12`, `UI-04`, `INT-09`, `F0-18`), slug `<stream>-<name>`, lane and planned day.
+1. Propose ID (next number: `FAM-17`, `FAM-UI-09`, `CAR-10`, `ADM-12`, `UI-04`, `INT-09`, `F0-18`), slug `<stream>-<name>`, lane and planned day.
 2. Record CHG-xxx in DECISIONS.md; get human confirmation if material.
 3. Copy `docs/templates/FEATURE_TEMPLATE/` to `docs/development/<stream>/<slug>/` and complete it.
 4. Add the row to §4 and a card to §5; add to `docs/JIRA_BACKLOG.csv`; update root PROGRESS.md.
