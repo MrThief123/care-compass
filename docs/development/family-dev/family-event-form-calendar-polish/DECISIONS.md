@@ -31,7 +31,17 @@
 - Decision: the due time is the occurrence start (`dueTime`, F0-11), so lateness is `completedAt - start`, in elapsed whole minutes, rounded down; under a minute is not late. Assumption, consistent with how Overdue is derived.
 
 ### FD-05 — Existing tests changed (HUMAN REVIEW: test expectation changed)
-- Filled in at implementation (event-details, event-details-fields, carer-manage-events T-04).
+- Date: 2026-10-02. Reason for all: recorded requirement change (CHG-051); flagged **HUMAN REVIEW: test expectation changed**.
+- `event-details.test.ts` (FAM-06 AC-01/AC-02 tests): Duration to End time. Before: a non-numeric duration is refused, blank allowed, minutes parsed from typed text. After: a malformed End is refused, End not after Start is refused, blank allowed, minutes are end minus start. No assertion removed without a replacement.
+- `event-details-fields.test.tsx`: the field labelled "Duration" (value "45") is now "End time" (value "10:15"), and Duration is asserted absent.
+- `carer-manage-events.test.tsx` `[CAR-07][AC-04] T-04`: "Duration" label to "End time"; Duration asserted absent.
+- `task-log-view.test.tsx` `cellTexts`: the STATUS cell is read from the pill only (the late note beneath it is tested by FAM-16), because fixture rows such as Morning medication (due 09:00, done 09:14) now carry a note.
+- `tasks/page.test.tsx` (two tests): Mon 30 Nov Morning medication status text is now "Done · Aisha RahmanCompleted 14 minutes late" (cell text content).
+- New: FAM-16 tests listed in TEST_PLAN.md; added cases appended to `event-form-add.test.tsx` and `event-form-edit.test.tsx`.
+
+### FD-06 — Dev server and preview notes
+- A symlinked `node_modules` breaks Turbopack ("points out of the filesystem root"); the worktree uses an APFS clone (`cp -cR`). The dev server answers script chunks 403 on `127.0.0.1`; browse via `localhost`.
+- The mock Family fixtures are dated November 2026, so the Add event picker (which opens on the date, else this month) shows October 2026 and rings Friday 2 October 2026, today.
 
 <!-- Template
 ### FD-01 — <title>

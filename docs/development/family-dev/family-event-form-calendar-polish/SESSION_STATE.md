@@ -2,12 +2,12 @@
 
 Last session date: 2026-10-02
 Current branch: `feature/family-event-form-calendar-polish` (worktree `../care-compass-pl27`)
-Worked on: claim, CHG-051, docs pack
-What changed: docs only
-Tests run: baseline vitest on clean `main`
-Test results: 2463 passed, 0 failed with `DATA_SOURCE=mock`
+Worked on: claim, CHG-051, docs, tests first, implementation, browser sweep
+What changed: see PROGRESS.md "Files changed"
+Tests run: full vitest (mock), lint, typecheck, format, integration and e2e on the local stack, browser sweep
+Test results: 2488 passed, 0 failed; integration 28/28; e2e 29/29
 Current blocker: none
 Important discoveries: `.env.local` `DATA_SOURCE=supabase` causes the "150 failures" (FD-01)
-Important decisions: CHG-051; FD-01 to FD-03
-Exact next action: write the tests first from TEST_PLAN.md and confirm they fail
+Important decisions: CHG-051; FD-01 to FD-06
+Exact next action: human reviews and merges the PR
 Warning for next session: run vitest with `DATA_SOURCE=mock`; `.env.local` is the hosted project, never run e2e or integration against it.
