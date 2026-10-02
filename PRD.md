@@ -207,7 +207,7 @@ Note: OOS-5 (rostering out of scope) is superseded by later client meetings and 
 | PL-17 | Mobile/phone-optimised views and phone warnings | CIS5 Q&A | REQ-N10 |
 | PL-18 | Add/Delete organisation by an operator (self-serve organisation **registration** moved into F0-17 by CHG-010) | CM-0309 | OQ-06; CHG-010 |
 | PL-19 | Organisation-configurable shift patterns | CIS5 Rostering | OQ-21 |
-| PL-20 | Admin/Carer task log and task detail equivalents | UI-Q14 | OQ-37 |
+| PL-20 | Admin/Carer task log and task detail equivalents. Admin half superseded by ADM-11: Admin Home overdue rows open the client's page in the admin client view (OQ-37 answered, PD-061); Carer half stays parked | UI-Q14 | OQ-37; PD-061 |
 | PL-21 | Comments/notes and evidence on events and completions | BRIEF item 4; CIS5 Q&A; US C-3, C-10 | OQ-34 |
 | PL-22 | Front-page extras: 'last updated' indicator, change summary, renameable program title | CIS3 Data 1; CIS5 Front page | OQ-38 |
 | PL-23 | Alert Family (email or Home alert) when a carer switches a task to a plain event | Human, 2026-09-24 (CHG-009) | Audit log records it; no design or notification type yet |
