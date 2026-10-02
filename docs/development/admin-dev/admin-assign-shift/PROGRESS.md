@@ -6,10 +6,10 @@ Lane: A — Admin
 Sprint: SPRINT · planned D10
 Branch: `feature/admin-assign-shift`
 PR target: `main` (CHG-036; PRD.md's `admin-dev` is the retired pre-CHG-036 value)
-Last updated: 2026-10-01
+Last updated: 2026-10-02
 
 ## Blockers
-- None (OQ-09 ANSWERED). Human confirmations pending: FD-01 (overlap warning source + Lane B security follow-up on `overlapping_shifts`), FD-05 (success copy), FD-06 (disabled Assign button).
+- None (OQ-09 ANSWERED). FD-01, FD-05 and FD-06 confirmed by the human on 2026-10-01 (DECISIONS.md). The `overlapping_shifts` caller check shipped in F0-21 (migration `20261001123254`).
 
 ## Dependencies status
 - F0-10 — MERGED
@@ -33,8 +33,7 @@ Last updated: 2026-10-01
 - None
 
 ## Remaining
-- Human: confirm FD-01, FD-05, FD-06; decide whether to raise the Lane B fix for `overlapping_shifts` (FD-01).
-- Merge latest `main` again and re-run the suite before the PR; human approval, then the PR.
+- None. Merged in #193.
 
 ## Acceptance criteria status
 - 4 / 4 MET (AC-01 MET incl. e2e; AC-02; AC-03; AC-04)

@@ -9,3 +9,6 @@ package-lock.json
 # reformatted by tooling — Prettier covers source and config files only.
 *.md
 docs/
+
+# Status page: hand-edited prose plus a generated data line (scripts/status-page.mjs).
+care-compass-status.html

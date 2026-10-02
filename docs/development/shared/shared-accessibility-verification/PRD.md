@@ -9,7 +9,7 @@
 | Feature branch | `feature/shared-accessibility-verification` |
 | Documentation | `docs/development/shared/shared-accessibility-verification/` |
 | Lane | I — Integration |
-| Sprint | POST-SPRINT · planned — |
+| Sprint | SPRINT · planned D20 |
 | Status / owner | See PROGRESS.md |
 
 ## Purpose

@@ -1,0 +1,597 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Care Compass Status</title>
+<style>
+:root{
+  --bg:#f3f5f7; --surface:#fff; --surface-2:#f7f9fa; --text:#13202c; --muted:#546474; --border:#dbe1e7;
+  --brand:#0a7f8b; --brand-soft:#e2f3f5;
+  --done:#16693a; --done-bg:#e2f3e8; --done-solid:#187a42; --on-done:#fff;
+  --prog:#7c5200; --prog-bg:#fdf0d0; --prog-solid:#e3a417;
+  --ready:#1c4fd0; --ready-bg:#e6edff; --ready-solid:#3b6cf0;
+  --block:#55616e; --block-bg:#e9edf1;
+  --post:#697585;
+  --bad:#b0281c; --bad-bg:#fde9e6; --warn:#8a5a00; --warn-bg:#fdf0d0; --good:#16693a; --good-bg:#e2f3e8;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --shadow:0 1px 2px rgba(19,32,44,.06),0 4px 14px rgba(19,32,44,.04);
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#0d1318; --surface:#151d25; --surface-2:#1a242e; --text:#e7edf3; --muted:#9aa9b8; --border:#293644;
+    --brand:#52c6d3; --brand-soft:#12313a;
+    --done:#63d18d; --done-bg:#12301f; --done-solid:#43c07b; --on-done:#04210e;
+    --prog:#f3c455; --prog-bg:#33290e; --prog-solid:#d69a12;
+    --ready:#94b3ff; --ready-bg:#15264f; --ready-solid:#4a78e8;
+    --block:#a7b3bf; --block-bg:#212b36;
+    --post:#8894a3;
+    --bad:#ff9186; --bad-bg:#3a1613; --warn:#f3c455; --warn-bg:#33290e; --good:#63d18d; --good-bg:#12301f;
+    --shadow:none;
+  }
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:72px}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 var(--sans);-webkit-font-smoothing:antialiased}
+a{color:var(--brand)}
+h1,h2,h3{line-height:1.2;margin:0}
+.wrap{max-width:1240px;margin:0 auto;padding:0 20px}
+:focus-visible{outline:3px solid var(--brand);outline-offset:2px;border-radius:4px}
+
+/* top bar */
+.top{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--surface) 92%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--border)}
+.top .wrap{display:flex;align-items:center;gap:20px;min-height:52px;flex-wrap:wrap}
+.brand{font-weight:700;letter-spacing:-.01em;display:flex;align-items:center;gap:8px}
+.brand i{width:12px;height:12px;border-radius:50%;background:var(--brand);display:inline-block}
+.top nav{display:flex;gap:4px;flex-wrap:wrap}
+.top nav a{padding:6px 12px;border-radius:8px;text-decoration:none;color:var(--muted);font-weight:600;font-size:14px}
+.top nav a:hover{background:var(--brand-soft);color:var(--brand)}
+.snap{margin-left:auto;font-size:12.5px;color:var(--muted)}
+
+section{padding:36px 0 8px}
+.eyebrow{font:700 12px/1 var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--brand);margin-bottom:8px}
+h1{font-size:clamp(26px,4vw,38px);letter-spacing:-.02em}
+h2{font-size:clamp(20px,2.6vw,25px);letter-spacing:-.01em;margin-bottom:6px}
+.lede{color:var(--muted);max-width:74ch;margin:6px 0 0}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow);padding:20px}
+
+/* hero */
+.hero{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:18px;margin-top:22px}
+.big{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.big b{font-size:clamp(48px,8vw,72px);line-height:1;letter-spacing:-.03em}
+.big span{color:var(--muted);font-size:17px}
+.pct{margin-left:auto;font-size:28px;font-weight:700;color:var(--done)}
+.bar{display:flex;height:22px;border-radius:8px;overflow:hidden;gap:2px;background:var(--surface-2);margin:16px 0 12px}
+.bar.slim{height:10px;margin:0;border-radius:5px;gap:1px}
+.seg{min-width:3px;height:100%}
+.seg.done{background:var(--done-solid)}
+.seg.dev{background:var(--done-bg);box-shadow:inset 0 0 0 2px var(--done-solid)}
+.seg.progress{background:var(--prog-solid)}
+.seg.ready{background:var(--ready-bg);box-shadow:inset 0 0 0 2px var(--ready-solid)}
+.seg.blocked{background:repeating-linear-gradient(135deg,var(--block-bg) 0 5px,var(--surface) 5px 9px);box-shadow:inset 0 0 0 1.5px var(--border)}
+.legend{display:flex;flex-wrap:wrap;gap:8px}
+.chip{display:inline-flex;align-items:center;gap:7px;padding:6px 11px;border-radius:999px;border:1px solid var(--border);background:var(--surface);color:var(--text);font:600 13px/1 var(--sans);cursor:pointer}
+.chip:hover{border-color:var(--brand)}
+.chip[aria-pressed=true]{background:var(--brand-soft);border-color:var(--brand);color:var(--brand)}
+.chip .n{font-family:var(--mono);color:var(--muted)}
+.sw{width:14px;height:14px;border-radius:4px;display:inline-block;flex:none}
+.sw.done{background:var(--done-solid)}
+.sw.dev{background:var(--done-bg);border:2px dashed var(--done-solid)}
+.sw.progress{background:var(--prog-solid)}
+.sw.ready{background:var(--ready-bg);border:2px solid var(--ready-solid)}
+.sw.blocked{background:repeating-linear-gradient(135deg,var(--block-bg) 0 3px,var(--surface) 3px 6px);border:1.5px solid var(--border)}
+.sw.post{border:2px dotted var(--post)}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+.kpi{background:var(--surface-2);border:1px solid var(--border);border-radius:10px;padding:10px 12px}
+.kpi b{display:block;font-size:22px;letter-spacing:-.02em}
+.kpi small{color:var(--muted);font-size:12.5px;line-height:1.3;display:block}
+
+table{border-collapse:collapse;width:100%}
+th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--border);vertical-align:middle}
+th{font:700 12px/1.2 var(--sans);text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+tr:last-child td{border-bottom:0}
+.matrix td.k{font-weight:700;white-space:nowrap}
+.mini{display:grid;gap:5px}
+.mini span{font:600 12.5px var(--mono);color:var(--muted)}
+.insights{margin:14px 0 0;padding:0;list-style:none;display:grid;gap:8px}
+.insights li{padding-left:22px;position:relative;font-size:14.5px}
+.insights li:before{content:"";position:absolute;left:4px;top:.55em;width:8px;height:8px;border-radius:2px;background:var(--brand)}
+
+/* project map */
+.map{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:18px}
+.blk h3{font-size:18px;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.blk h3 em{font:600 13px var(--mono);font-style:normal;color:var(--muted);margin-left:auto}
+.blk p{margin:4px 0 0;color:var(--muted);font-size:13.5px}
+.track{margin-top:14px}
+.track h4{margin:0 0 7px;font:700 11.5px var(--sans);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);display:flex;justify-content:space-between}
+.cells{display:flex;flex-wrap:wrap;gap:6px}
+.cell{display:inline-flex;align-items:center;gap:6px;padding:0 9px;min-height:32px;border-radius:8px;font:600 11.5px var(--mono);text-decoration:none;border:2px solid transparent;color:var(--text)}
+.cell .g{font-size:12px}
+.cell.done{background:var(--done-solid);color:var(--on-done)}
+.cell.done.dev{background:var(--done-bg);color:var(--done);border:2px dashed var(--done-solid)}
+.cell.progress{background:var(--prog-solid);color:#2b1c00}
+.cell.ready{background:var(--ready-bg);color:var(--ready);border-color:var(--ready-solid)}
+.cell.blocked{background:repeating-linear-gradient(135deg,var(--block-bg) 0 5px,transparent 5px 10px);color:var(--block);border-color:var(--border)}
+.cell.post,.cell.retired{border:2px dotted var(--border);color:var(--post)}
+.cell.retired{text-decoration:line-through}
+.cell:hover{transform:translateY(-1px);filter:brightness(1.05)}
+.keyrow{display:flex;flex-wrap:wrap;gap:14px;margin-top:14px;font-size:13px;color:var(--muted)}
+.keyrow span{display:inline-flex;align-items:center;gap:7px}
+
+/* board */
+.tools{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;margin:16px 0}
+.tools .grp{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.tools label.lab{font:700 11.5px var(--sans);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-right:2px}
+input[type=search]{font:inherit;padding:8px 12px;border:1px solid var(--border);border-radius:9px;background:var(--surface);color:var(--text);min-width:220px}
+.lane{margin-top:22px}
+.lane>header{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:0 4px 8px}
+.lane>header h3{font-size:18px}
+.lane>header .cnt{font:600 13px var(--mono);color:var(--muted)}
+.lane>header .bar{flex:1;min-width:120px;max-width:280px;margin:0}
+.sub{font:700 11.5px var(--sans);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:12px 4px 6px}
+.list{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+details.row{border-bottom:1px solid var(--border)}
+details.row:last-child{border-bottom:0}
+details.row>summary{list-style:none;cursor:pointer;display:grid;grid-template-columns:150px 82px minmax(0,1fr) 210px 104px;gap:12px;align-items:center;padding:11px 14px;min-height:52px}
+details.row>summary::-webkit-details-marker{display:none}
+details.row>summary:hover{background:var(--surface-2)}
+details.row[open]>summary{background:var(--surface-2)}
+details.row:target{outline:3px solid var(--brand);outline-offset:-3px}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;font:700 12px/1 var(--sans);white-space:nowrap}
+.pill.done{background:var(--done-bg);color:var(--done)}
+.pill.progress{background:var(--prog-bg);color:var(--prog)}
+.pill.ready{background:var(--ready-bg);color:var(--ready)}
+.pill.blocked{background:var(--block-bg);color:var(--block)}
+.pill.post,.pill.retired{background:transparent;border:1px dashed var(--border);color:var(--post)}
+.fid{font:700 12.5px var(--mono)}
+.fname{font-weight:600;overflow-wrap:anywhere}
+.fmeta{display:block;font-weight:400;font-size:12.5px;color:var(--muted)}
+.where{display:flex;flex-wrap:wrap;gap:5px;align-items:center;font-size:12.5px}
+.tag{display:inline-flex;align-items:center;gap:.3em;padding:3px 8px;border-radius:6px;font:600 11.5px var(--sans);border:1px solid var(--border);color:var(--muted);white-space:nowrap}
+.tag.main{background:var(--done-bg);color:var(--done);border-color:transparent}
+.tag.dev{border-style:dashed;color:var(--done);border-color:var(--done-solid)}
+.tag.stale{background:var(--warn-bg);color:var(--warn);border-color:transparent}
+.tag.wait{color:var(--block);white-space:normal;max-width:100%}
+.ac{font:600 12px var(--mono);color:var(--muted)}
+.ac .bar{height:6px;margin:4px 0 0;background:var(--border);border-radius:3px}
+.ac .bar i{display:block;height:100%;background:var(--done-solid);border-radius:3px}
+.detail{padding:6px 16px 16px 16px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 28px;background:var(--surface-2);font-size:13.5px}
+.detail dl{margin:0;display:grid;grid-template-columns:120px minmax(0,1fr);gap:6px 12px}
+.detail dt{color:var(--muted);font-weight:600}
+.detail dd{margin:0;overflow-wrap:anywhere}
+.depchip{display:inline-flex;gap:4px;align-items:center;font:600 11.5px var(--mono);padding:2px 7px;border-radius:6px;background:var(--surface);border:1px solid var(--border);margin:0 4px 4px 0;text-decoration:none;color:var(--text)}
+.depchip.done{border-color:var(--done-solid);color:var(--done)}
+.empty{padding:26px;text-align:center;color:var(--muted)}
+
+/* housekeeping */
+.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:16px}
+.verdict{display:inline-block;padding:3px 9px;border-radius:6px;font:700 12px var(--sans);white-space:nowrap}
+.verdict.good{background:var(--good-bg);color:var(--good)}
+.verdict.warn{background:var(--warn-bg);color:var(--warn)}
+.verdict.bad{background:var(--bad-bg);color:var(--bad)}
+.verdict.neutral{background:var(--block-bg);color:var(--block)}
+.tblwrap{overflow-x:auto}
+td small{color:var(--muted);display:block;font-size:12.5px}
+.steps{counter-reset:s;list-style:none;margin:12px 0 0;padding:0;display:grid;gap:10px}
+.steps li{counter-increment:s;display:grid;grid-template-columns:34px minmax(0,1fr);gap:12px;align-items:start;padding:12px 14px;background:var(--surface-2);border:1px solid var(--border);border-radius:10px}
+.steps li:before{content:counter(s);display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--brand);color:#04252a;font-weight:800}
+.steps b{display:block}
+.steps span{color:var(--muted);font-size:13.5px}
+.bigbar{display:flex;height:26px;border-radius:8px;overflow:hidden;gap:2px;margin:12px 0 8px}
+.bigbar div{display:grid;place-items:center;font:700 12px var(--mono);color:var(--on-done)}
+.bigbar .m{background:var(--done-solid)}
+.bigbar .u{background:var(--prog-solid);color:#2b1c00}
+.ul{margin:10px 0 0;padding-left:18px;color:var(--text)}
+.ul li{margin:4px 0}
+.note{margin-top:16px;padding:12px 14px;border-radius:10px;background:var(--brand-soft);color:var(--text);font-size:14px;border:1px solid color-mix(in srgb,var(--brand) 30%,transparent)}
+footer{padding:36px 0 60px;color:var(--muted);font-size:13px}
+
+@media (max-width:1020px){
+  .hero,.two{grid-template-columns:minmax(0,1fr)}
+  .map{grid-template-columns:repeat(2,minmax(0,1fr))}
+  details.row>summary{grid-template-columns:130px 78px minmax(0,1fr) 96px}
+  details.row>summary .where{grid-column:1 / -1;grid-row:2}
+}
+@media (max-width:680px){
+  .wrap{padding:0 16px}
+  .map{grid-template-columns:minmax(0,1fr)}
+  .kpis{grid-template-columns:1fr 1fr}
+  .snap{margin-left:0;flex-basis:100%;padding-bottom:8px}
+  .top{position:relative}
+  html{scroll-padding-top:12px}
+  details.row>summary{grid-template-columns:minmax(0,1fr) auto;gap:6px 10px}
+  details.row>summary .fid{grid-column:1;grid-row:1}
+  details.row>summary .stt{grid-column:2;grid-row:1;justify-self:end}
+  details.row>summary .fn{grid-column:1 / -1;grid-row:2}
+  details.row>summary .where{grid-column:1 / -1;grid-row:3}
+  details.row>summary .ac{grid-column:1 / -1;grid-row:4}
+  .detail,.detail dl{grid-template-columns:1fr}
+  input[type=search]{min-width:0;width:100%}
+}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.cell:hover{transform:none}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <div class="brand"><i></i>Care Compass</div>
+    <nav aria-label="Sections">
+      <a href="#overview">Overview</a><a href="#map">Project map</a><a href="#board">All features</a><a href="#plan">Plan update</a><a href="#housekeeping">Housekeeping</a>
+    </nav>
+    <div class="snap" id="snap"></div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section id="overview">
+    <div class="eyebrow">Project status</div>
+    <h1>Where Care Compass stands</h1>
+    <p class="lede">Every in-scope feature in the plan, whether it has been built, what is ready to pick up next, and what is still waiting. Built from the repository docs and GitHub pull requests. A feature with an open pull request counts as in progress until it is merged.</p>
+
+    <div class="hero">
+      <div class="card">
+        <div class="big"><b id="bigDone"></b><span id="bigOf"></span><div class="pct" id="bigPct"></div></div>
+        <div class="bar" id="mainBar" role="img" aria-label="Feature status split"></div>
+        <div class="legend" id="legend"></div>
+        <div class="kpis" id="kpis"></div>
+        <h3 style="font-size:15px;margin:20px 0 4px">Ready to pick up next <span id="readyN" style="color:var(--muted);font-weight:500"></span></h3>
+        <p class="lede" style="font-size:13px;margin:0 0 10px">Unclaimed, every dependency merged, no open decision. Select one to see its details.</p>
+        <div class="cells" id="readyCells"></div>
+      </div>
+      <div class="card">
+        <h2 style="font-size:18px">Each dashboard: screens versus real data</h2>
+        <p class="lede" style="font-size:13.5px;margin-bottom:8px">Screens are built first on fixture data. "Wired" means connected to the database.</p>
+        <div class="tblwrap"><table class="matrix" id="matrix"></table></div>
+        <ul class="insights" id="insights"></ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="map">
+    <div class="eyebrow">At a glance</div>
+    <h2>Project map</h2>
+    <p class="lede">One tile per feature, grouped by area. Select a tile to jump to its detail row.</p>
+    <div class="keyrow" id="mapKey"></div>
+    <div class="map" id="mapGrid"></div>
+  </section>
+
+  <section id="board">
+    <div class="eyebrow">Every feature</div>
+    <h2>Feature board</h2>
+    <p class="lede">Open a row for its branch, dependencies, pull request and acceptance criteria.</p>
+    <div class="tools">
+      <div class="grp" id="fState" role="group" aria-label="Filter by status"><label class="lab">Status</label></div>
+      <div class="grp" id="fLane" role="group" aria-label="Filter by area"><label class="lab">Area</label></div>
+      <div class="grp"><label class="lab" for="q">Search</label><input id="q" type="search" placeholder="ID, name or person"></div>
+    </div>
+    <div id="boardOut"></div>
+  </section>
+
+  <section id="plan">
+    <div class="eyebrow">Plan update, 2 Oct</div>
+    <h2>Sprint extended to D21 (CHG-047)</h2>
+    <p class="lede">Recorded in CHG-047 and confirmed by you in session. It lives in the docs PR on branch <code>docs/chg-047-sprint-extension</code>, so it is not on <code>main</code> until that PR merges.</p>
+
+    <div class="two">
+      <div class="card">
+        <h3 style="font-size:17px">Email check on the local stack</h3>
+        <div class="tblwrap"><table>
+          <tr><th>Flow</th><th>Result</th></tr>
+          <tr><td><b>Password reset</b></td><td><span class="verdict bad">Broken</span> The emailed link lands on <code>/auth/confirm?code=…</code>, but the route only reads <code>token_hash</code> and <code>type</code>, so every real link ends at "reset link expired".</td></tr>
+          <tr><td><b>Carer invite, set password, sign in</b></td><td><span class="verdict bad">Broken</span> The invite link lands on <code>/#access_token=…</code> (token in the URL hash). No page or handler uses it, so an invited carer cannot set a password.</td></tr>
+          <tr><td><b>Family sign-up</b></td><td><span class="verdict neutral">Works</span> Email confirmation is not required (your decision), so no email is involved.</td></tr>
+          <tr><td><b>Budget threshold emails</b></td><td><span class="verdict warn">Code done</span> Vercel Cron wired (#201). The Resend key, <code>CRON_SECRET</code> and other env vars are still unset.</td></tr>
+        </table></div>
+        <p style="margin:10px 0 0;color:var(--muted);font-size:13.5px">Why it slipped through: the confirm-route tests only used a <code>token_hash</code> URL, no test read a real email, and there are no custom email templates. Hosted settings could not be checked from here.</p>
+      </div>
+      <div class="card">
+        <h3 style="font-size:17px">New and pulled-in work</h3>
+        <ol class="steps">
+          <li><div><b>F0-24 Auth emails (new, D15–D16)</b><span>Templates, a fixed confirm route, a set-password page, resend invite, Mailpit end-to-end tests and the hosted email checklist. Ready to start.</span></div></li>
+          <li><div><b>INT-09 Care alert emails (new, D17–D18)</b><span>Overdue and upcoming-care alerts (REQ-33). Blocked by OQ-40, which is open.</span></div></li>
+          <li><div><b>Everything post-sprint is now in scope</b><span>CAR-07 carer events and FAM-11 update funds (D15–D16), ADM-03 deactivate staff (D15), ADM-08 carer assignments (D16), ADM-09 edit or cancel a shift (D17), ADM-05 remove client (D18), INT-07 performance (D19), ADM-11 admin client view (D19–D20), INT-06 accessibility (D20). They now count in the tally at the top. CAR-08 stays retired.</span></div></li>
+          <li><div><b>INT-08 release readiness moves to D21</b><span>It now waits on all of the above, so the handover covers the final state.</span></div></li>
+          <li><div><b>Not added</b><span>Admin lost-authenticator recovery, auth rate limits (already the F0-21 FD-07 follow-up) and error monitoring.</span></div></li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="two" style="margin-top:16px">
+      <div class="card">
+        <h3 style="font-size:17px">Extension schedule</h3>
+        <div class="tblwrap"><table>
+          <tr><th>Day</th><th>Planned</th></tr>
+          <tr><td><b>D15</b></td><td>F0-24 starts · FAM-11 starts · CAR-07 starts · ADM-03 · you: hosted email set-up</td></tr>
+          <tr><td><b>D16</b></td><td>F0-24, FAM-11 and CAR-07 finish · ADM-08 · you: answer OQ-40</td></tr>
+          <tr><td><b>D17</b></td><td>INT-09 starts (after F0-24 and OQ-40) · ADM-09 · INT-05 if not done</td></tr>
+          <tr><td><b>D18</b></td><td>INT-09 finishes · ADM-05</td></tr>
+          <tr><td><b>D19</b></td><td>INT-07 scale and performance · ADM-11 starts</td></tr>
+          <tr><td><b>D20</b></td><td>INT-06 accessibility · ADM-11 finishes</td></tr>
+          <tr><td><b>D21</b></td><td>INT-08 release readiness and handover · checkpoint 4</td></tr>
+        </table></div>
+      </div>
+      <div class="card">
+        <h3 style="font-size:17px">Waiting on you</h3>
+        <ol class="steps">
+          <li><div><b>OQ-40</b><span>What triggers an alert, who receives it, how soon, and the wording. My suggestion is in the OQ row and is not applied.</span></div></li>
+          <li><div><b>Hosted email checklist (F0-24)</b><span>Custom SMTP through Resend, verified sender domain, site URL, redirect allow-list, templates, and a real reset and invite to an outside address.</span></div></li>
+          <li><div><b>Vercel env vars (INT-01)</b><span><code>RESEND_API_KEY</code>, <code>RESEND_FROM_EMAIL</code>, <code>JOBS_SECRET</code>, <code>CRON_SECRET</code>, <code>SUPABASE_SERVICE_ROLE_KEY</code>. Names only here, never values.</span></div></li>
+          <li><div><b>Approve the docs PR</b><span>Three commits: status sync, CHG-047, and your confirmation.</span></div></li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <section id="housekeeping">
+    <div class="eyebrow">Housekeeping</div>
+    <h2>Cleanup findings</h2>
+    <p class="lede">Refreshed 2 Oct. What changed since 30 Sep is listed first. The tables show what is still open.</p>
+
+    <div class="card" style="margin-bottom:16px">
+      <h3 style="font-size:17px">What changed since 30 Sep</h3>
+      <ol class="steps">
+        <li><div><b>CI flake fixed</b><span>Vitest timeouts raised to 30 s so the cold-import auth integration tests stop timing out on the runner (#197).</span></div></li>
+        <li><div><b>F0-21 closed out</b><span>Your decisions on FD-05, FD-06 and FD-07 and the migration approval are on <code>main</code> (#198), with fixes for the <code>/auth/confirm</code> redirect, <code>/api/test</code> in production, an HSTS header, a password show/hide toggle and the MFA QR layout. AC-04 (rate limits) is still NOT MET until the hosted settings are done.</span></div></li>
+        <li><div><b>FAM-08 AC-01 met</b><span>T-01 now passes on the local stack (#199).</span></div></li>
+        <li><div><b>F0-23 merged</b><span>Add event now links its uploaded files to the saved event through a guarded <code>link_document_to_event</code> function (#200, CHG-045).</span></div></li>
+        <li><div><b>INT-01 scheduler chosen</b><span>Vercel Cron, with a bearer-secret GET on the job route (#201, CHG-046). The <code>seed.sql</code> reset failure was not reproducible.</span></div></li>
+      </ol>
+    </div>
+
+    <div class="two">
+      <div class="card">
+        <h3 style="font-size:17px">Open pull requests <span style="color:var(--muted);font-weight:500">(10)</span></h3>
+        <div class="tblwrap"><table id="prTable"></table></div>
+      </div>
+      <div class="card">
+        <h3 style="font-size:17px">Branches on GitHub</h3>
+        <div class="bigbar" role="img" aria-label="134 merged, 6 unmerged"><div class="m" style="flex:134">134 merged</div><div class="u" style="flex:6">6</div></div>
+        <p style="margin:0;color:var(--muted);font-size:13.5px">140 feature, fix, sync, chore, docs and dev branches (not counting 10 Dependabot branches), plus <b>main</b>. The 134 merged ones can be deleted. Deleting any branch is your call.</p>
+        <h4 style="margin:16px 0 4px;font-size:13px">The 6 unmerged</h4>
+        <div class="tblwrap"><table id="orphans"></table></div>
+      </div>
+    </div>
+
+    <div class="two">
+      <div class="card">
+        <h3 style="font-size:17px">Stale documents</h3>
+        <div class="tblwrap"><table id="docs"></table></div>
+      </div>
+      <div class="card">
+        <h3 style="font-size:17px">Local clone</h3>
+        <ul class="ul">
+          <li>Local clone is on <code>main</code>, clean and level with origin. <code>origin/main</code> is at <code id="fdSha"></code>.</li>
+          <li>Two personal <code>.claude/settings.json</code> stashes exist. Leave them out of commits.</li>
+          <li>Twelve git worktrees exist beside the clone. Several are for merged features (car06, cron, doclink, f021, fam01, fam08, fam09, hdr, mfa) and can be removed once you are done with them.</li>
+          <li>Run e2e against local Supabase, never the hosted project (use <code>--grep-invert "F0-07"</code>). After switching branches, delete <code>.next</code> before building.</li>
+        </ul>
+        <div class="note"><b>CI is down:</b> GitHub Actions is limited. Run the full suite locally and say so in each PR. All ten Dependabot PRs show failing checks. TypeScript 7, ESLint 10 and jsdom 30 are major bumps that need a DECISIONS entry (CLAUDE.md).</div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <h3 style="font-size:17px">Still open, one step at a time</h3>
+      <ol class="steps">
+        <li><div><b>Open the docs PR</b><span>Status sync, CHG-047 and this page, on <code>docs/chg-047-sprint-extension</code>. Waiting for your yes.</span></div></li>
+        <li><div><b>Start F0-24 first</b><span>Auth emails unblock carer onboarding and INT-09. Ready now: F0-24, FAM-11, CAR-07, ADM-03, ADM-05, ADM-08, ADM-09, ADM-11, INT-05, INT-06 and INT-07.</span></div></li>
+        <li><div><b>Answer OQ-40</b><span>INT-09 stays blocked until you do.</span></div></li>
+        <li><div><b>Hosted email and Vercel set-up</b><span>See Plan update. These are your steps, not code.</span></div></li>
+        <li><div><b>Plan row for the F0-21 FD-07 follow-up</b><span>Hosted rate limits and Auth Hooks have no feature row yet.</span></div></li>
+        <li><div><b>Late-completion wording (not scheduled)</b><span>Show "Done · 2 days late" and the original due date on tasks completed while overdue. It needs a CHG entry and your confirmation first. Recorded as FD-07 in FAM-15.</span></div></li>
+        <li><div><b>Admin Staff page overflow</b><span>Last seen 26 Sep: /admin/staff scrolled 126px sideways at 338px. Not re-checked since.</span></div></li>
+        <li><div><b>Dependabot PRs</b><span>Close the three major bumps (#25, #120, #122) or record a decision. Rebase or close the other seven.</span></div></li>
+      </ol>
+    </div>
+  </section>
+</main>
+<footer class="wrap" id="foot"></footer>
+
+<script>
+const D = {"meta":{"generatedAt":"2026-10-02T01:41:48.495Z","main":"578054d"},"features":[{"id":"F0-01","slug":"shared-plan-validation","stream":"shared","name":"Validate planning pack against repository, Figma and sources","phase":"Phase 0 — Foundation & shared UI kit","lane":"S","sprint":"SPRINT","days":"D1","branch":"feature/shared-plan-validation","deps":[],"blockers":["OQ-01","OQ-20"],"status":"MERGED TO DEV","owner":"Dhruv Verma","unmetDeps":[],"openBlockers":[],"ready":false,"docsStatus":"MERGED TO DEV","inDevBranch":true,"onMain":true,"docsStale":false,"state":"done","track":"core","readyViaOverlay":false,"acTotal":4,"acMet":4,"pr":{"n":5,"base":"main","state":"MERGED","url":"https://github.com/MrThief123/care-compass/pull/5","at":"2026-09-17T10:06:07Z","by":"Dhruv561"}},{"id":"F0-02","slug":"shared-tooling-baseline","stream":"shared","name":"Tooling baseline: TypeScript, lint, format, test runners","phase":"Phase 0 — Foundation & shared UI kit","lane":"S","sprint":"SPRINT","days":"D1","branch":"feature/shared-tooling-baseline","deps":["F0-01"],"blockers":["OQ-01"],"status":"MERGED TO DEV","owner":"Dhruv Verma","unmetDeps":[],"openBlockers":[],"ready":false,"docsStatus":"MERGED TO DEV","inDevBranch":true,"onMain":true,"docsStale":false,"state":"done","track":"core","readyViaOverlay":false,"acTotal":4,"acMet":3,"pr":{"n":8,"base":"main","state":"MERGED","url":"https://github.com/MrThief123/care-compass/pull/8","at":"2026-09-17T12:09:42Z","by":"Dhruv561"}},{"id":"F0-05","slug":"shared-design-tokens","stream":"shared","name":"Design tokens, typography and base styles","phase":"Phase 0 — Foundation & shared UI kit","lane":"S","sprint":"SPRINT","days":"D1","branch":"feature/shared-design-tokens","deps":["F0-02"],"blockers":["OQ-01"],"status":"MERGED TO DEV","owner":"Dhruv Verma","unmetDeps":[],"openBlockers":[],"ready":false,"docsStatus":"MERGED TO DEV","inDevBranch":true,"onMain":true,"docsStale":false,"state":"done","track":"core","readyViaOverlay":false,"acTotal":4,"acMet":4,"pr":{"n":9,"base":"main","state":"MERGED","url":"https://github.com/MrThief123/care-compass/pull/9","at":"2026-09-17T12:49:22Z","by":"Dhruv561"}},{"id":"F0-03","slug":"shared-ci-pipeline","stream":"shared","name":"Continuous integration pipeline","phase":"Phase 0 — Foundation & shared UI kit","lane":"S","sprint":"SPRINT","days":"D2","branch":"feature/shared-ci-pipeline","deps":["F0-02"],"blockers":["OQ-01"],"status":"MERGED TO DEV","owner":"MrThief123","unmetDeps":[],"openBlockers":[],"ready":false,"docsStatus":"MERGED TO DEV","inDevBranch":true,"onMain":true,"docsStale":false,"state":"done","track":"core","readyViaOverlay":false,"acTotal":4,"acMet":3,"pr":{"n":19,"base":"main","state":"MERGED","url":"https://github.com/MrThief123/care-compass/pull/19","at":"2026-09-18T02:52:30Z","by":"MrThief123"}},{"id":"F0-04","slug":"shared-supabase-environment","stream":"shared","name":"Environment configuration and Supabase integration","phase":"Phase 2 — Backend & data layer (parallel with Phase 1)","lane":"B","sprint":"SPRINT","days":"D2","branch":"feature/shared-supabase-environment","deps":["F0-02"],"blockers":["OQ-01"],"status":"MERGED TO DEV","owner":"MrThief123","unmetDeps":[],"openBlockers":[],"ready":false,"docsStatus":"MERGED TO DEV","inDevBranch":true,"onMain":true,"docsStale":false,"state":"done","track":"core","readyViaOverlay":false,"acTotal":4,"acMet":4,"pr":{"n":30,"base":"main","state":"MERGED","url":"https://github.com/MrThief123/care-compass/pull/30","at":"2026-09-18T04:52:35Z","by":"MrThief123"}},{"id":"F0-09","slug":"shared-recurrence-engine","stream":"shared","name":"Recurrence engine (pure TypeScript)","phase":"Phase 2 — Backend & data layer (parallel with Phase 1)","lane":"B","sprint":"SPRINT","days":"D2–D3","branch":"feature/shared-recurrence-engine","deps":["F0-02"],"blockers":["OQ-01","OQ-12"],"status":"MERGED TO DEV","owner":"Dhruv Verma","unmetDeps":[],"openBlockers":[],"ready":false,"docsStatus":"MERGED TO DEV","inDevBranch":true,"onMain":true,"docsStale":false,"state":"done","track":"core","readyViaOverlay":false,"acTotal":8,"acMet":8,"pr":{"n":10,"base":"main","state":"MERGED","url":"https://github.com/MrThief123/care-compass/pull/10","at":"2026-09-18T01:15:40Z","by":"Dhruv561"}},{"id":"F0-14","slug":"shared-ui-primitives","stream":"shared","name":"Core UI primitives and state components","phase":"Phase 0 — Foundation & shared UI kit","lane":"S","sprint":"SPRINT","days":"D2","branch":"feature/shared-ui-primitives","deps":["F0-05"],"blockers":["OQ-01"],"status":"MERGED TO DEV","owner":"Dhruv Verma","unmetDeps":[],"openBlockers":[],"ready":false,"docsStatus":"MERGED TO DEV","inDevBranch":true,"onMain":true,"docsStale":false,"state":"done","track":"core","readyViaOverlay":false,"acTotal":6,"acMet":6,"pr":{"n":17,"base":"main","state":"MERGED","url":"https://github.com/MrThief123/care-compass/pull/17","at":"2026-09-18T02:11:52Z","by":"MrThief123"}},{"id":"UI-00","slug":"shared-domain-contracts-fixtures","stream":"shared","name":"Domain types, data-access contracts and design fixtures","phase":"Phase 0 — Foundation & shared UI kit","lane":"S","sprint":"SPRINT","days":"D2","branch":"feature/shared-domain-contracts-fixtures","deps":["F0-02"],"blockers":["OQ-01"],"status":"MERGED TO DEV","owner":"Dhruv Verma","unmetDeps":[],"openBlockers":[],"ready":false,"docsStatus":"MERGED TO DEV","inDevBranch":true,"onMain":true,"docsStale":false,"state":"done","track":"core","readyViaOverlay":false,"acTotal":6,"acMet":6,"pr":{"n":11,"base":"main","state":"MERGED","url":"https://github.com/MrThief123/care-compass/pull/11","at":"2026-09-18T01:15:26Z","by":"Dhruv561"}},{"id":"F0-06","slug":"shared-tenancy-schema-rls","stream":"shared","name":"Identity, organisation and client access schema with RLS","phase":"Phase 2 — Backend & data layer (parallel with Phase 1)","lane":"B","sprint":"SPRINT","days":"D3–D4","branch":"feature/shared-tenancy-schema-rls","deps":["F0-04"],"blockers":["OQ-01","OQ-07","OQ-09","OQ-16"],"status":"MERGED TO DEV","owner":"Prajeet","unmetDeps":[],"openBlockers":[],"ready":false,"docsStatus":"MERGED TO DEV","inDevBranch":true,"onMain":true,"docsStale":false,"state":"done","track":"core","readyViaOverlay":false,"acTotal":8,"acMet":8,"pr":{"n":65,"base":"main","state":"MERGED","url":"https://github.com/MrThief123/care-compass/pull/65","at":"2026-09-22T08:58:12Z","by":"MrThief123"}},{"id":"F0-15","slug":"shared-app-shell","stream":"shared","name":"Role app shell: rail, header and layouts","phase":"Phase 0 — Foundation & shared UI kit","lane":"S","sprint":"SPRINT","days":"D3","branch":"feature/shared-app-shell","deps":["F0-14","UI-00"],"blockers":["OQ-01"],"status":"MERGED TO DEV","owner":"MrThief123","unmetDeps":[],"openBlockers":[],"ready":false,"docsStatus":"MERGED TO DEV","inDevBranch":true,"onMain":true,"docsStale":false,"state":"done","track":"core","readyViaOverlay":false,"acTotal":6,"acMet":6,"pr":{"n":33,"base":"main","state":"MERGED","url":"https://github.com/MrThief123/care-compass/pull/33","at":"2026-09-18T08:09:58Z","by":"MrThief123"}},{"id":"UI-01","slug":"shared-calendar-kit","stream":"shared","name":"Calendar kit: week/day/month grids, event blocks, date picker","phase":"Phase 0 — Foundation & shared UI kit","lane":"S","sprint":"SPRINT","days":"D3","branch":"feature/shared-calendar-kit","deps":["F0-14","UI-00"],"blockers":["OQ-01"],"status":"MERGED TO DEV","owner":"Dhruv Verma","unmetDeps":[],"openBlockers":[],"ready":false,"docsStatus":"MERGED TO DEV","inDevBranch":true,"onMain":true,"docsStale":false,"state":"done","track":"core","readyViaOverlay":false,"acTotal":6,"acMet":6,"pr":{"n":36,"base":"main","state":"MERGED","url":"https://github.com/MrThief123/care-compass/pull/36","at":"2026-09-18T23:07:24Z","by":"Dhruv561"}},{"id":"UI-02","slug":"shared-forms-kit","stream":"shared","name":"Forms kit: fields, settings cards, side panels, chips, modal, event form","phase":"Phase 0 — Foundation & shared UI kit","lane":"S","sprint":"SPRINT","days":"D3–D4","branch":"feature/shared-forms-kit","deps":["F0-14","UI-00","UI-01"],"blockers":["OQ-01"],"status":"MERGED TO DEV","owner":"Dhruv Verma","unmetDeps":[],"openBlockers":[],"ready":false,"docsStatus":"MERGED TO DEV","inDevBranch":true,"onMain":true,"docsStale":false,"state":"done","track":"core","readyViaOverlay":false,"acTotal":6,"acMet":6,"pr":{"n":41,"base":"main","state":"MERGED","url":"https://github.com/MrThief123/care-compass/pull/41","at":"2026-09-19T00:26:59Z","by":"Dhruv561"}},{"id":"UI-03","slug":"shared-lists-cards-kit","stream":"shared","name":"Lists and cards kit: tables, rows, person/stat/budget/alert cards, client info view","phase":"Phase 0 — Foundation & shared UI kit","lane":"S","sprint":"SPRINT","days":"D3","branch":"feature/shared-lists-cards-kit","deps":["F0-14","UI-00"],"blockers":["OQ-01"],"status":"MERGED TO DEV","owner":"MrThief123","unmetDeps":[],"openBlockers":[],"ready":false,"docsStatus":"MERGED TO DEV","inDevBranch":true,"onMain":true,"docsStale":false,"state":"done","track":"core","readyViaOverlay":false,"acTotal":6,"acMet":6,"pr":{"n":34,"base":"main","state":"MERGED","url":"https://github.com/MrThief123/care-compass/pull/34","at":"2026-09-18T08:10:50Z","by":"MrThief123"}},{"id":"ADM-UI-01","slug":"admin-ui-home","stream":"admin-dev","name":"Admin Home screen (UI)","phase":"Phase 1 — Screens on fixtures (parallel: Family · Carer · Admin)","lane":"A","sprint":"SPRINT","days":"D4","branch":"feature/admin-ui-home","deps":["F0-15","UI-03"],"blockers":[],"status":"MERGED TO DEV","owner":"Kav1sh-11","unmetDeps":[],"openBlockers":[],"ready":false,"docsStatus":"MERGED TO DEV","inDevBranch":true,"onMain":true,"docsStale":false,"state":"done","track":"screen","readyViaOverlay":false,"acTotal":4,"acMet":4,"pr":{"n":95,"base":"admin-dev","state":"MERGED","url":"https://github.com/MrThief123/care-compass/pull/95","at":"2026-09-25T07:37:55Z","by":"MrThief123"}},{"id":"ADM-UI-02","slug":"admin-ui-manage","stream":"admin-dev","name":"Admin Manage screen (UI)","phase":"Phase 1 — Screens on fixtures (parallel: Family · Carer · Admin)","lane":"A","sprint":"SPRINT","days":"D4–D5","branch":"feature/admin-ui-manage","deps":["F0-15","UI-01","UI-02","UI-03"],"blockers":[],"status":"MERGED TO DEV","owner":"Kav1sh-11","unmetDeps":[],"openBlockers":[],"ready":false,"docsStatus":"MERGED TO DEV","inDevBranch":true,"onMain":true,"docsStale":false,"state":"done","track":"screen","readyViaOverlay":false,"acTotal":4,"acMet":4,"pr":{"n":96,"base":"admin-dev","state":"MERGED","url":"https://github.com/MrThief123/care-compass/pull/96","at":"2026-09-25T07:39:56Z","by":"MrThief123"}},{"id":"CAR-UI-01","slug":"carer-ui-home","stream":"carer-dev","name":"Carer Home screen (UI)","phase":"Phase 1 — Screens on fixtures (parallel: Family · Carer · Admin)","lane":"C","sprint":"SPRINT","days":"D4","branch":"feature/carer-ui-home","deps":["F0-15","UI-03"],"blockers":[],"status":"MERGED TO DEV","owner":"Dhruv Verma","unmetDeps":[],"openBlockers":[],"ready":false,"docsStatus":"MERGED TO DEV","inDevBranch":true,"onMain":true,"docsStale":false,"state":"done","track":"screen","readyViaOverlay":false,"acTotal":10,"acMet":10,"pr":{"n":124,"base":"carer-dev","state":"MERGED","url":"https://github.com/MrThief123/care-compass/pull/124","at":"2026-09-26T09:49:51Z","by":"Dhruv561"}},{"id":"CAR-UI-02","slug":"carer-ui-patients-info","stream":"carer-dev","name":"Carer Patients and patient info screens (UI)","phase":"Phase 1 — Screens on fixtures (parallel: Family · Carer · Admin)","lane":"C","sprint":"SPRINT","days":"D4–D5","branch":"feature/carer-ui-patients-info","deps":["F0-15","UI-03"],"blockers":[],"status":"MERGED TO DEV","owner":"Dhruv Verma","unmetDeps":[],"openBlockers":[],"ready":false,"docsStatus":"MERGED TO DEV","inDevBranch":true,"onMain":true,"docsStale":false,"state":"done","track":"screen","readyViaOverlay":false,"acTotal":15,"acMet":15,"pr":{"n":125,"base":"carer-dev","state":"MERGED","url":"https://github.com/MrThief123/care-compass/pull/125","at":"2026-09-27T01:25:32Z","by":"cryptic-jeetus"}},{"id":"F0-08","slug":"shared-audit-log-capture","stream":"shared","name":"Append-only audit log capture","phase":"Phase 2 — Backend & data layer (parallel with Phase 1)","lane":"B","sprint":"SPRINT","days":"D4","branch":"feature/shared-audit-log-capture","deps":["F0-06"],"blockers":["OQ-01"],"status":"MERGED TO DEV","owner":"Prajeet","unmetDeps":[],"openBlockers":[],"ready":false,"docsStatus":"MERGED TO DEV","inDevBranch":true,"onMain":true,"docsStale":false,"state":"done","track":"core","readyViaOverlay":false,"acTotal":3,"acMet":3,"pr":{"n":91,"base":"main","state":"MERGED","url":"https://github.com/MrThief123/care-compass/pull/91","at":"2026-09-25T00:44:06Z","by":"Dhruv561"}},{"id":"F0-10","slug":"shared-shifts-schema","stream":"shared","name":"Shifts schema, active-shift function and conflict query","phase":"Phase 2 — Backend & data layer (parallel with Phase 1)","lane":"B","sprint":"SPRINT","days":"D4–D5","branch":"feature/shared-shifts-schema","deps":["F0-06"],"blockers":["OQ-01","OQ-09"],"status":"MERGED TO DEV","owner":"Prajeet","unmetDeps":[],"openBlockers":[],"ready":false,"docsStatus":"MERGED TO DEV","inDevBranch":true,"onMain":true,"docsStale":false,"state":"done","track":"core","readyViaOverlay":false,"acTotal":7,"acMet":7,"pr":{"n":69,"base":"main","state":"MERGED","url":"https://github.com/MrThief123/care-compass/pull/69","at":"2026-09-24T07:30:01Z","by":"cryptic-jeetus"}},{"id":"FAM-UI-01","slug":"family-ui-home","stream":"family-dev","name":"Family Home screen (UI)","phase":"Phase 1 — Screens on fixtures (parallel: Family · Carer · Admin)","lane":"F","sprint":"SPRINT","days":"D4","branch":"feature/family-ui-home","deps":["F0-15","UI-01","UI-03"],"blockers":[],"status":"MERGED TO DEV","owner":"Dhruv Verma","unmetDeps":[],"openBlockers":[],"ready":false,"docsStatus":"MERGED TO DEV","inDevBranch":true,"onMain":true,"docsStale":false,"state":"done","track":"screen","readyViaOverlay":false,"acTotal":6,"acMet":6,"pr":{"n":54,"base":"family-dev","state":"MERGED","url":"https://github.com/MrThief123/care-compass/pull/54","at":"2026-09-20T01:54:37Z","by":"Dhruv561"}},{"id":"FAM-UI-02","slug":"family-ui-calendar","stream":"family-dev","name":"Family Calendar screen (UI)","phase":"Phase 1 — Screens on fixtures (parallel: Family · Carer · Admin)","lane":"F","sprint":"SPRINT","days":"D4–D5","branch":"feature/family-ui-calendar","deps":["F0-15","UI-01","UI-03"],"blockers":[],"status":"MERGED TO DEV","owner":"Dhruv Verma","unmetDeps":[],"openBlockers":[],"ready":false,"docsStatus":"MERGED TO DEV","inDevBranch":true,"onMain":true,"docsStale":false,"state":"done","track":"screen","readyViaOverlay":false,"acTotal":9,"acMet":9,"pr":{"n":77,"base":"family-dev","state":"MERGED","url":"https://github.com/MrThief123/care-compass/pull/77","at":"2026-09-24T11:45:15Z","by":"Dhruv561"}},{"id":"ADM-UI-03","slug":"admin-ui-staff","stream":"admin-dev","name":"Admin Staff screen (UI)","phase":"Phase 1 — Screens on fixtures (parallel: Family · Carer · Admin)","lane":"A","sprint":"SPRINT","days":"D5–D6","branch":"feature/admin-ui-staff","deps":["F0-15","UI-02","UI-03"],"blockers":[],"status":"MERGED TO DEV","owner":"Kavis","unmetDeps":[],"openBlockers":[],"ready":false,"docsStatus":"MERGED TO DEV","inDevBranch":true,"onMain":true,"docsStale":false,"state":"done","track":"screen","readyViaOverlay":false,"acTotal":3,"acMet":3,"pr":{"n":97,"base":"admin-dev","state":"MERGED","url":"https://github.com/MrThief123/care-compass/pull/97","at":"2026-09-25T07:39:46Z","by":"MrThief123"}},{"id":"CAR-UI-03","slug":"carer-ui-calendar","stream":"carer-dev","name":"Carer Calendar screen (UI)","phase":"Phase 1 — Screens on fixtures (parallel: Family · Carer · Admin)","lane":"C","sprint":"SPRINT","days":"D5–D6","branch":"feature/carer-ui-calendar","deps":["F0-15","UI-01","UI-03"],"blockers":[],"status":"MERGED TO DEV","owner":"Dhruv Verma","unmetDeps":[],"openBlockers":[],"ready":false,"docsStatus":"MERGED TO DEV","inDevBranch":true,"onMain":true,"docsStale":false,"state":"done","track":"screen","readyViaOverlay":false,"acTotal":11,"acMet":11,"pr":{"n":126,"base":"carer-dev","state":"MERGED","url":"https://github.com/MrThief123/care-compass/pull/126","at":"2026-09-27T03:11:18Z","by":"MrThief123"}},{"id":"F0-07","slug":"shared-authentication","stream":"shared","name":"Sign-in, sign-out, password reset and role-based routing","phase":"Phase 2 — Backend & data layer (parallel with Phase 1)","lane":"B","sprint":"SPRINT","days":"D5","branch":"feature/shared-authentication","deps":["F0-06","F0-15","UI-02"],"blockers":["OQ-01","OQ-08"],"status":"MERGED TO DEV","owner":"Prajeet","unmetDeps":[],"openBlockers":[],"ready":false,"docsStatus":"MERGED TO DEV","inDevBranch":true,"onMain":true,"docsStale":false,"state":"done","track":"core","readyViaOverlay":false,"acTotal":10,"acMet":10,"pr":{"n":67,"base":"main","state":"MERGED","url":"https://github.com/MrThief123/care-compass/pull/67","at":"2026-09-23T01:17:28Z","by":"MrThief123"}},{"id":"F0-11","slug":"shared-care-events-schema","stream":"shared","name":"Care events, occurrence overrides and append-only completions","phase":"Phase 2 — Backend & data layer (parallel with Phase 1)","lane":"B","sprint":"SPRINT","days":"D5–D6","branch":"feature/shared-care-events-schema","deps":["F0-06","F0-09","F0-10","F0-08"],"blockers":["OQ-01","OQ-10","OQ-22","OQ-29","OQ-09","OQ-33"],"status":"MERGED TO DEV","owner":"Dhruv Verma","unmetDeps":[],"openBlockers":[],"ready":false,"docsStatus":"MERGED TO DEV","inDevBranch":true,"onMain":true,"docsStale":false,"state":"done","track":"core","readyViaOverlay":false,"acTotal":8,"acMet":8,"pr":{"n":107,"base":"family-dev","state":"MERGED","url":"https://github.com/MrThief123/care-compass/pull/107","at":"2026-09-25T09:15:15Z","by":"MrThief123"}},{"id":"FAM-UI-03","slug":"family-ui-event-form","stream":"family-dev","name":"Family Add / Edit event screens (UI)","phase":"Phase 1 — Screens on fixtures (parallel: Family · Carer · Admin)","lane":"F","sprint":"SPRINT","days":"D5","branch":"feature/family-ui-event-form","deps":["F0-15","UI-02","UI-01","UI-03"],"blockers":[],"status":"MERGED TO DEV","owner":"Dhruv Verma","unmetDeps":[],"openBlockers":[],"ready":false,"docsStatus":"MERGED TO DEV","inDevBranch":true,"onMain":true,"docsStale":false,"state":"done","track":"screen","readyViaOverlay":false,"acTotal":10,"acMet":10,"pr":{"n":79,"base":"family-dev","state":"MERGED","url":"https://github.com/MrThief123/care-compass/pull/79","at":"2026-09-24T05:21:38Z","by":"Dhruv561"}},{"id":"FAM-UI-04","slug":"family-ui-info","stream":"family-dev","name":"Family Info screen (UI)","phase":"Phase 1 — Screens on fixtures (parallel: Family · Carer · Admin)","lane":"F","sprint":"SPRINT","days":"D5","branch":"feature/family-ui-info","deps":["F0-15","UI-03"],"blockers":[],"status":"MERGED TO DEV","owner":"Dhruv Verma","unmetDeps":[],"openBlockers":[],"ready":false,"docsStatus":"MERGED TO DEV","inDevBranch":true,"onMain":true,"docsStale":false,"state":"done","track":"screen","readyViaOverlay":false,"acTotal":3,"acMet":3,"pr":{"n":89,"base":"family-dev","state":"MERGED","url":"https://github.com/MrThief123/care-compass/pull/89","at":"2026-09-24T23:31:34Z","by":"cryptic-jeetus"}},{"id":"ADM-UI-04","slug":"admin-ui-clients","stream":"admin-dev","name":"Admin Clients screen (UI)","phase":"Phase 1 — Screens on fixtures (parallel: Family · Carer · Admin)","lane":"A","sprint":"SPRINT","days":"D6","branch":"feature/admin-ui-clients","deps":["F0-15","UI-02","UI-03"],"blockers":[],"status":"MERGED TO DEV","owner":"Kavis","unmetDeps":[],"openBlockers":[],"ready":false,"docsStatus":"MERGED TO DEV","inDevBranch":true,"onMain":true,"docsStale":false,"state":"done","track":"screen","readyViaOverlay":false,"acTotal":4,"acMet":1,"pr":{"n":130,"base":"admin-dev","state":"MERGED","url":"https://github.com/MrThief123/care-compass/pull/130","at":"2026-09-27T22:18:17Z","by":"Dhruv561"}},{"id":"ADM-UI-05","slug":"admin-ui-settings","stream":"admin-dev","name":"Admin Settings screen (UI)","phase":"Phase 1 — Screens on fixtures (parallel: Family · Carer · Admin)","lane":"A","sprint":"SPRINT","days":"D6","branch":"feature/admin-ui-settings","deps":["F0-15","UI-02"],"blockers":[],"status":"MERGED TO DEV","owner":"Kavis","unmetDeps":[],"openBlockers":[],"ready":false,"docsStatus":"MERGED TO DEV","inDevBranch":true,"onMain":true,"docsStale":false,"state":"done","track":"screen","readyViaOverlay":false,"acTotal":2,"acMet":0,"pr":{"n":134,"base":"admin-dev","state":"MERGED","url":"https://github.com/MrThief123/care-compass/pull/134","at":"2026-09-27T22:18:28Z","by":"Dhruv561"}},{"id":"CAR-UI-04","slug":"carer-ui-settings","stream":"carer-dev","name":"Carer Settings screen (UI)","phase":"Phase 1 — Screens on fixtures (parallel: Family · Carer · Admin)","lane":"C","sprint":"SPRINT","days":"D6","branch":"feature/carer-ui-settings","deps":["F0-15","UI-02"],"blockers":[],"status":"MERGED TO DEV","owner":"Dhruv Verma","unmetDeps":[],"openBlockers":[],"ready":false,"docsStatus":"MERGED TO DEV","inDevBranch":true,"onMain":true,"docsStale":false,"state":"done","track":"screen","readyViaOverlay":false,"acTotal":2,"acMet":2,"pr":{"n":127,"base":"carer-dev","state":"MERGED","url":"https://github.com/MrThief123/care-compass/pull/127","at":"2026-09-27T02:55:15Z","by":"MrThief123"}},{"id":"F0-12","slug":"shared-budget-schema","stream":"shared","name":"Budget buckets, fund top-ups, spending and summary calculation","phase":"Phase 2 — Backend & data layer (parallel with Phase 1)","lane":"B","sprint":"SPRINT","days":"D6","branch":"feature/shared-budget-schema","deps":["F0-06","F0-08"],"blockers":[],"status":"MERGED TO DEV","owner":"Prajeet","unmetDeps":[],"openBlockers":[],"ready":false,"docsStatus":"MERGED TO DEV","inDevBranch":true,"onMain":true,"docsStale":false,"state":"done","track":"core","readyViaOverlay":false,"acTotal":18,"acMet":18,"pr":{"n":128,"base":"main","state":"MERGED","url":"https://github.com/MrThief123/care-compass/pull/128","at":"2026-09-27T12:18:54Z","by":"MrThief123"}},{"id":"F0-13","slug":"shared-document-storage","stream":"shared","name":"Client document storage","phase":"Phase 2 — Backend & data layer (parallel with Phase 1)","lane":"B","sprint":"SPRINT","days":"D6–D7","branch":"feature/shared-document-storage","deps":["F0-06","F0-11"],"blockers":["OQ-01","OQ-26"],"status":"MERGED TO DEV","owner":"MrThief123","unmetDeps":[],"openBlockers":[],"ready":false,"docsStatus":"MERGED TO DEV","inDevBranch":true,"onMain":true,"docsStale":false,"state":"done","track":"core","readyViaOverlay":false,"acTotal":5,"acMet":5,"pr":{"n":131,"base":"main","state":"MERGED","url":"https://github.com/MrThief123/care-compass/pull/131","at":"2026-09-27T08:12:50Z","by":"MrThief123"}},{"id":"FAM-UI-05","slug":"family-ui-budget","stream":"family-dev","name":"Family Budget screen (UI)","phase":"Phase 1 — Screens on fixtures (parallel: Family · Carer · Admin)","lane":"F","sprint":"SPRINT","days":"D6","branch":"feature/family-ui-budget","deps":["F0-15","UI-03"],"blockers":[],"status":"MERGED TO DEV","owner":"Dhruv Verma","unmetDeps":[],"openBlockers":[],"ready":false,"docsStatus":"MERGED TO DEV","inDevBranch":true,"onMain":true,"docsStale":false,"state":"done","track":"screen","readyViaOverlay":false,"acTotal":17,"acMet":17,"pr":{"n":92,"base":"family-dev","state":"MERGED","url":"https://github.com/MrThief123/care-compass/pull/92","at":"2026-09-25T07:36:29Z","by":"MrThief123"}},{"id":"FAM-UI-06","slug":"family-ui-settings","stream":"family-dev","name":"Family Settings screen (UI)","phase":"Phase 1 — Screens on fixtures (parallel: Family · Carer · Admin)","lane":"F","sprint":"SPRINT","days":"D6","branch":"feature/family-ui-settings","deps":["F0-15","UI-02"],"blockers":[],"status":"MERGED TO DEV","owner":"Dhruv Verma","unmetDeps":[],"openBlockers":[],"ready":false,"docsStatus":"MERGED TO DEV","inDevBranch":true,"onMain":true,"docsStale":false,"state":"done","track":"screen","readyViaOverlay":false,"acTotal":11,"acMet":11,"pr":{"n":93,"base":"family-dev","state":"MERGED","url":"https://github.com/MrThief123/care-compass/pull/93","at":"2026-09-25T07:35:30Z","by":"MrThief123"}},{"id":"FAM-UI-07","slug":"family-ui-task-log-detail","stream":"family-dev","name":"Family Task log and Task detail screens (UI)","phase":"Phase 1 — Screens on fixtures (parallel: Family · Carer · Admin)","lane":"F","sprint":"SPRINT","days":"D6–D7","branch":"feature/family-ui-task-log-detail","deps":["F0-15","UI-03","UI-02"],"blockers":[],"status":"MERGED TO DEV","owner":"Dhruv Verma","unmetDeps":[],"openBlockers":[],"ready":false,"docsStatus":"MERGED TO DEV","inDevBranch":true,"onMain":true,"docsStale":false,"state":"done","track":"screen","readyViaOverlay":false,"acTotal":11,"acMet":11,"pr":{"n":55,"base":"family-dev","state":"MERGED","url":"https://github.com/MrThief123/care-compass/pull/55","at":"2026-09-20T01:54:28Z","by":"Dhruv561"}},{"id":"UI-04","slug":"shared-screen-contracts-fixtures","stream":"shared","name":"Screen data contracts and fixtures: full-history Task log, single occurrence, event documents","phase":"Phase 0 — Foundation & shared UI kit (late addition, CHG-004)","lane":"S","sprint":"SPRINT","days":"D6","branch":"feature/shared-screen-contracts-fixtures","deps":["UI-00"],"blockers":["OQ-01"],"status":"MERGED TO DEV","owner":"Dhruv Verma","unmetDeps":[],"openBlockers":[],"ready":false,"docsStatus":"MERGED TO DEV","inDevBranch":true,"onMain":true,"docsStale":false,"state":"done","track":"core","readyViaOverlay":false,"acTotal":10,"acMet":10,"pr":{"n":52,"base":"main","state":"MERGED","url":"https://github.com/MrThief123/care-compass/pull/52","at":"2026-09-20T01:21:45Z","by":"Dhruv561"}},{"id":"F0-16","slug":"shared-dev-seed-data","stream":"shared","name":"Development seed data from the design content","phase":"Phase 2 — Backend & data layer (parallel with Phase 1)","lane":"B","sprint":"SPRINT","days":"D7","branch":"feature/shared-dev-seed-data","deps":["F0-11","F0-12","F0-13","F0-10"],"blockers":["OQ-01"],"status":"MERGED TO DEV","owner":"Prajeet","unmetDeps":[],"openBlockers":[],"ready":false,"docsStatus":"MERGED TO DEV","inDevBranch":true,"onMain":true,"docsStale":false,"state":"done","track":"core","readyViaOverlay":false,"acTotal":3,"acMet":3,"pr":{"n":172,"base":"main","state":"MERGED","url":"https://github.com/MrThief123/care-compass/pull/172","at":"2026-09-30T09:58:42Z","by":"Dhruv561"}},{"id":"ADM-01","slug":"admin-home","stream":"admin-dev","name":"Admin Home — counts and overdue events","phase":"Phase 3 — Data wiring & behaviour (parallel: Family · Carer · Admin)","lane":"A","sprint":"SPRINT","days":"D8","branch":"feature/admin-home","deps":["F0-11","ADM-UI-01"],"blockers":["OQ-29"],"status":"MERGED TO DEV","owner":"MrThief123","unmetDeps":[],"openBlockers":[],"ready":false,"docsStatus":"MERGED TO DEV","inDevBranch":true,"onMain":true,"docsStale":false,"state":"done","track":"wired","readyViaOverlay":false,"acTotal":5,"acMet":5,"pr":{"n":163,"base":"main","state":"MERGED","url":"https://github.com/MrThief123/care-compass/pull/163","at":"2026-09-29T11:58:40Z","by":"MrThief123"}},{"id":"ADM-02","slug":"admin-staff","stream":"admin-dev","name":"Admin — Staff list and add/edit staff","phase":"Phase 3 — Data wiring & behaviour (parallel: Family · Carer · Admin)","lane":"A","sprint":"SPRINT","days":"D8–D9","branch":"feature/admin-staff","deps":["F0-06","F0-07","ADM-UI-03"],"blockers":["OQ-08","OQ-13"],"status":"MERGED TO DEV","owner":"MrThief123","unmetDeps":[],"openBlockers":[],"ready":false,"docsStatus":"MERGED TO DEV","inDevBranch":true,"onMain":true,"docsStale":false,"state":"done","track":"wired","readyViaOverlay":false,"acTotal":4,"acMet":4,"pr":{"n":165,"base":"main","state":"MERGED","url":"https://github.com/MrThief123/care-compass/pull/165","at":"2026-09-29T11:59:02Z","by":"MrThief123"}},{"id":"CAR-01","slug":"carer-home-today","stream":"carer-dev","name":"Carer Home — Today's calendar and Tasks","phase":"Phase 3 — Data wiring & behaviour (parallel: Family · Carer · Admin)","lane":"C","sprint":"SPRINT","days":"D8","branch":"feature/carer-home-today","deps":["F0-10","F0-11","CAR-UI-01"],"blockers":["OQ-33","OQ-09"],"status":"RETIRED (CHG-033)","owner":"unclaimed","unmetDeps":[],"openBlockers":[],"ready":false,"docsStatus":"RETIRED (CHG-033)","inDevBranch":false,"onMain":false,"docsStale":false,"state":"retired","track":"wired","readyViaOverlay":false,"acTotal":3,"acMet":0,"pr":null},{"id":"CAR-03","slug":"carer-patients","stream":"carer-dev","name":"Carer — Patients","phase":"Phase 3 — Data wiring & behaviour (parallel: Family · Carer · Admin)","lane":"C","sprint":"SPRINT","days":"D8","branch":"feature/carer-patients","deps":["F0-06","F0-10","F0-18","CAR-UI-02"],"blockers":["OQ-09"],"status":"MERGED TO DEV","owner":"Dhruv Verma","unmetDeps":[],"openBlockers":[],"ready":false,"docsStatus":"MERGED TO DEV","inDevBranch":true,"onMain":true,"docsStale":false,"state":"done","track":"wired","readyViaOverlay":false,"acTotal":8,"acMet":0,"pr":{"n":160,"base":"main","state":"MERGED","url":"https://github.com/MrThief123/care-compass/pull/160","at":"2026-09-29T09:35:27Z","by":"MrThief123"}},{"id":"F0-17","slug":"shared-sign-up","stream":"shared","name":"Self-serve sign-up for Family and Organisation accounts","phase":"Phase 2 — Backend & data layer (parallel with Phase 1)","lane":"B","sprint":"SPRINT","days":"D8","branch":"feature/shared-sign-up","deps":["F0-06","F0-07"],"blockers":["OQ-01","OQ-07","OQ-08"],"status":"MERGED TO DEV","owner":"MrThief123","unmetDeps":[],"openBlockers":[],"ready":false,"docsStatus":"MERGED TO DEV","inDevBranch":true,"onMain":true,"docsStale":false,"state":"done","track":"core","readyViaOverlay":false,"acTotal":8,"acMet":8,"pr":{"n":129,"base":"main","state":"MERGED","url":"https://github.com/MrThief123/care-compass/pull/129","at":"2026-09-27T07:38:12Z","by":"MrThief123"}},{"id":"F0-18","slug":"shared-carer-shift-access","stream":"shared","name":"Carer view access derived from shifts","phase":"Phase 2 — Backend & data layer (parallel with Phase 1)","lane":"B","sprint":"SPRINT","days":"D8","branch":"feature/shared-carer-shift-access","deps":["F0-06","F0-10","F0-08"],"blockers":[],"status":"MERGED TO DEV","owner":"MrThief123","unmetDeps":[],"openBlockers":[],"ready":false,"docsStatus":"MERGED TO DEV","inDevBranch":true,"onMain":true,"docsStale":false,"state":"done","track":"core","readyViaOverlay":false,"acTotal":9,"acMet":9,"pr":{"n":132,"base":"main","state":"MERGED","url":"https://github.com/MrThief123/care-compass/pull/132","at":"2026-09-27T08:41:40Z","by":"MrThief123"}},{"id":"FAM-01","slug":"family-home-today","stream":"family-dev","name":"Family Home — Today day-view timeline","phase":"Phase 3 — Data wiring & behaviour (parallel: Family · Carer · Admin)","lane":"F","sprint":"SPRINT","days":"D8","branch":"feature/family-home-today","deps":["F0-11","F0-16","FAM-UI-01","F0-22"],"blockers":[],"status":"MERGED TO DEV (merged to `main` in #182, 2026-10-01)","owner":"Dhruv Verma","unmetDeps":[],"openBlockers":[],"ready":false,"docsStatus":"MERGED TO DEV (merged to `main` in #182, 2026-10-01)","inDevBranch":true,"onMain":true,"docsStale":false,"state":"done","track":"wired","readyViaOverlay":false,"acTotal":6,"acMet":6,"pr":{"n":182,"base":"main","state":"MERGED","url":"https://github.com/MrThief123/care-compass/pull/182","at":"2026-10-01T00:50:04Z","by":"Dhruv561"}},{"id":"FAM-02","slug":"family-home-overdue-activity","stream":"family-dev","name":"Family Home — Overdue card and Recent activity","phase":"Phase 3 — Data wiring & behaviour (parallel: Family · Carer · Admin)","lane":"F","sprint":"SPRINT","days":"D8","branch":"feature/family-home-overdue-activity","deps":["F0-11","FAM-UI-01"],"blockers":[],"status":"MERGED TO DEV","owner":"MrThief123","unmetDeps":[],"openBlockers":[],"ready":false,"docsStatus":"MERGED TO DEV","inDevBranch":true,"onMain":true,"docsStale":false,"state":"done","track":"wired","readyViaOverlay":false,"acTotal":4,"acMet":4,"pr":{"n":133,"base":"main","state":"MERGED","url":"https://github.com/MrThief123/care-compass/pull/133","at":"2026-09-27T09:02:12Z","by":"MrThief123"}},{"id":"FAM-03","slug":"family-home-budget-strip","stream":"family-dev","name":"Family Home — Budget strip","phase":"Phase 3 — Data wiring & behaviour (parallel: Family · Carer · Admin)","lane":"F","sprint":"SPRINT","days":"D8","branch":"feature/family-home-budget-strip","deps":["F0-12","FAM-UI-01"],"blockers":["OQ-03","OQ-04"],"status":"MERGED TO DEV","owner":"MrThief123","unmetDeps":[],"openBlockers":[],"ready":false,"docsStatus":"MERGED TO DEV","inDevBranch":true,"onMain":true,"docsStale":false,"state":"done","track":"wired","readyViaOverlay":false,"acTotal":4,"acMet":4,"pr":{"n":147,"base":"main","state":"MERGED","url":"https://github.com/MrThief123/care-compass/pull/147","at":"2026-09-28T01:41:32Z","by":"MrThief123"}},{"id":"FAM-04","slug":"family-calendar-views","stream":"family-dev","name":"Family Calendar — day, week and month views","phase":"Phase 3 — Data wiring & behaviour (parallel: Family · Carer · Admin)","lane":"F","sprint":"SPRINT","days":"D8–D9","branch":"feature/family-calendar-views","deps":["F0-11","FAM-UI-02"],"blockers":[],"status":"MERGED TO DEV","owner":"MrThief123","unmetDeps":[],"openBlockers":[],"ready":false,"docsStatus":"MERGED TO DEV","inDevBranch":true,"onMain":true,"docsStale":false,"state":"done","track":"wired","readyViaOverlay":false,"acTotal":6,"acMet":6,"pr":{"n":136,"base":"main","state":"MERGED","url":"https://github.com/MrThief123/care-compass/pull/136","at":"2026-09-27T10:08:50Z","by":"MrThief123"}},{"id":"UI-05","slug":"shared-plain-events","stream":"shared","name":"Plain events in the shared kit and contracts (CHG-009)","phase":"Phase 0 — Foundation & shared UI kit (late addition, CHG-009)","lane":"S","sprint":"SPRINT","days":"D8","branch":"feature/shared-plain-events","deps":["UI-00","UI-01","UI-02","UI-03","UI-04"],"blockers":["OQ-01"],"status":"MERGED TO DEV","owner":"Dhruv Verma","unmetDeps":[],"openBlockers":[],"ready":false,"docsStatus":"MERGED TO DEV","inDevBranch":true,"onMain":true,"docsStale":false,"state":"done","track":"core","readyViaOverlay":false,"acTotal":13,"acMet":13,"pr":{"n":81,"base":"main","state":"MERGED","url":"https://github.com/MrThief123/care-compass/pull/81","at":"2026-09-24T09:29:43Z","by":"Dhruv561"}},{"id":"ADM-04","slug":"admin-clients","stream":"admin-dev","name":"Admin — Clients list and add client","phase":"Phase 3 — Data wiring & behaviour (parallel: Family · Carer · Admin)","lane":"A","sprint":"SPRINT","days":"D9","branch":"feature/admin-clients","deps":["F0-06","ADM-UI-04"],"blockers":["OQ-07"],"status":"MERGED TO DEV","owner":"MrThief123","unmetDeps":[],"openBlockers":[],"ready":false,"docsStatus":"MERGED TO DEV","inDevBranch":true,"onMain":true,"docsStale":false,"state":"done","track":"wired","readyViaOverlay":false,"acTotal":4,"acMet":4,"pr":{"n":164,"base":"main","state":"MERGED","url":"https://github.com/MrThief123/care-compass/pull/164","at":"2026-09-29T12:06:13Z","by":"MrThief123"}},{"id":"ADM-06","slug":"admin-manage-selection","stream":"admin-dev","name":"Admin — Manage: staff and client selection","phase":"Phase 3 — Data wiring & behaviour (parallel: Family · Carer · Admin)","lane":"A","sprint":"SPRINT","days":"D9","branch":"feature/admin-manage-selection","deps":["F0-06","ADM-UI-02"],"blockers":[],"status":"MERGED TO DEV (merged to `main` in #176, 2026-10-01)","owner":"Dhruv Verma","unmetDeps":[],"openBlockers":[],"ready":false,"docsStatus":"MERGED TO DEV (merged to `main` in #176, 2026-10-01)","inDevBranch":true,"onMain":true,"docsStale":false,"state":"done","track":"wired","readyViaOverlay":false,"acTotal":6,"acMet":6,"pr":{"n":176,"base":"main","state":"MERGED","url":"https://github.com/MrThief123/care-compass/pull/176","at":"2026-10-01T05:20:41Z","by":"MrThief123"}},{"id":"CAR-02","slug":"carer-notifications","stream":"carer-dev","name":"Carer — Notifications card and bell","phase":"Phase 3 — Data wiring & behaviour (parallel: Family · Carer · Admin)","lane":"C","sprint":"SPRINT","days":"D9","branch":"feature/carer-notifications","deps":["F0-10","F0-13","CAR-UI-01"],"blockers":["OQ-14"],"status":"MERGED TO DEV","owner":"Dhruv Verma","unmetDeps":[],"openBlockers":[],"ready":false,"docsStatus":"MERGED TO DEV","inDevBranch":true,"onMain":true,"docsStale":false,"state":"done","track":"wired","readyViaOverlay":false,"acTotal":12,"acMet":12,"pr":{"n":174,"base":"main","state":"MERGED","url":"https://github.com/MrThief123/care-compass/pull/174","at":"2026-09-30T09:59:56Z","by":"cryptic-jeetus"}},{"id":"CAR-04","slug":"carer-client-info","stream":"carer-dev","name":"Carer — Client info","phase":"Phase 3 — Data wiring & behaviour (parallel: Family · Carer · Admin)","lane":"C","sprint":"SPRINT","days":"D9","branch":"feature/carer-client-info","deps":["F0-06","F0-10","F0-13","F0-18","CAR-UI-02"],"blockers":[],"status":"MERGED TO DEV","owner":"Dhruv Verma","unmetDeps":[],"openBlockers":[],"ready":false,"docsStatus":"MERGED TO DEV","inDevBranch":true,"onMain":true,"docsStale":false,"state":"done","track":"wired","readyViaOverlay":false,"acTotal":10,"acMet":1,"pr":{"n":173,"base":"main","state":"MERGED","url":"https://github.com/MrThief123/care-compass/pull/173","at":"2026-09-30T09:59:33Z","by":"cryptic-jeetus"}},{"id":"CAR-05","slug":"carer-calendar-shifts","stream":"carer-dev","name":"Carer — Calendar (shifts) and selected-shift tasks","phase":"Phase 3 — Data wiring & behaviour (parallel: Family · Carer · Admin)","lane":"C","sprint":"SPRINT","days":"D9–D10","branch":"feature/carer-calendar-shifts","deps":["F0-10","F0-18","CAR-UI-03","CAR-UI-01"],"blockers":[],"status":"MERGED TO DEV","owner":"Dhruv Verma","unmetDeps":[],"openBlockers":[],"ready":false,"docsStatus":"MERGED TO DEV","inDevBranch":true,"onMain":true,"docsStale":false,"state":"done","track":"wired","readyViaOverlay":false,"acTotal":10,"acMet":10,"pr":{"n":158,"base":"main","state":"MERGED","url":"https://github.com/MrThief123/care-compass/pull/158","at":"2026-09-29T05:27:51Z","by":"MrThief123"}},{"id":"FAM-05","slug":"family-calendar-tasks-log","stream":"family-dev","name":"Family Calendar — Tasks panel and Log panel","phase":"Phase 3 — Data wiring & behaviour (parallel: Family · Carer · Admin)","lane":"F","sprint":"SPRINT","days":"D9","branch":"feature/family-calendar-tasks-log","deps":["F0-11","FAM-UI-02"],"blockers":["OQ-10"],"status":"MERGED TO DEV","owner":"MrThief123","unmetDeps":[],"openBlockers":[],"ready":false,"docsStatus":"MERGED TO DEV","inDevBranch":true,"onMain":true,"docsStale":false,"state":"done","track":"wired","readyViaOverlay":false,"acTotal":4,"acMet":4,"pr":{"n":137,"base":"main","state":"MERGED","url":"https://github.com/MrThief123/care-compass/pull/137","at":"2026-09-27T10:21:22Z","by":"MrThief123"}},{"id":"FAM-06","slug":"family-add-event","stream":"family-dev","name":"Family — Add event (Enter event)","phase":"Phase 3 — Data wiring & behaviour (parallel: Family · Carer · Admin)","lane":"F","sprint":"SPRINT","days":"D9","branch":"feature/family-add-event","deps":["F0-09","F0-11","FAM-UI-03"],"blockers":["OQ-22","OQ-12","OQ-10"],"status":"MERGED TO DEV","owner":"MrThief123","unmetDeps":[],"openBlockers":[],"ready":false,"docsStatus":"MERGED TO DEV","inDevBranch":true,"onMain":true,"docsStale":false,"state":"done","track":"wired","readyViaOverlay":false,"acTotal":5,"acMet":5,"pr":{"n":140,"base":"main","state":"MERGED","url":"https://github.com/MrThief123/care-compass/pull/140","at":"2026-09-27T11:08:19Z","by":"MrThief123"}},{"id":"FAM-09","slug":"family-client-info","stream":"family-dev","name":"Family — Client info","phase":"Phase 3 — Data wiring & behaviour (parallel: Family · Carer · Admin)","lane":"F","sprint":"SPRINT","days":"D9","branch":"feature/family-client-info","deps":["F0-06","F0-13","FAM-UI-04","CAR-04"],"blockers":[],"status":"MERGED TO DEV (merged to `main` in #179, 2026-10-01)","owner":"Dhruv Verma","unmetDeps":[],"openBlockers":[],"ready":false,"docsStatus":"MERGED TO DEV (merged to `main` in #179, 2026-10-01)","inDevBranch":true,"onMain":true,"docsStale":false,"state":"done","track":"wired","readyViaOverlay":false,"acTotal":9,"acMet":9,"pr":{"n":179,"base":"main","state":"MERGED","url":"https://github.com/MrThief123/care-compass/pull/179","at":"2026-10-01T05:20:54Z","by":"MrThief123"}},{"id":"ADM-07","slug":"admin-assign-shift","stream":"admin-dev","name":"Admin — Assign shift","phase":"Phase 3 — Data wiring & behaviour (parallel: Family · Carer · Admin)","lane":"A","sprint":"SPRINT","days":"D10","branch":"feature/admin-assign-shift","deps":["F0-10","ADM-06"],"blockers":["OQ-09"],"status":"MERGED TO DEV (merged to `main` in #193, 2026-10-01)","owner":"MrThief123","unmetDeps":[],"openBlockers":[],"ready":false,"docsStatus":"MERGED TO DEV (merged to `main` in #193, 2026-10-01)","inDevBranch":true,"onMain":true,"docsStale":false,"state":"done","track":"wired","readyViaOverlay":false,"acTotal":4,"acMet":4,"pr":{"n":193,"base":"main","state":"MERGED","url":"https://github.com/MrThief123/care-compass/pull/193","at":"2026-10-01T12:28:37Z","by":"MrThief123"}},{"id":"ADM-10","slug":"admin-settings","stream":"admin-dev","name":"Admin — Settings","phase":"Phase 3 — Data wiring & behaviour (parallel: Family · Carer · Admin)","lane":"A","sprint":"SPRINT","days":"D10","branch":"feature/admin-settings","deps":["F0-07","ADM-UI-05"],"blockers":["OQ-35"],"status":"MERGED TO DEV","owner":"Dhruv Verma","unmetDeps":[],"openBlockers":[],"ready":false,"docsStatus":"MERGED TO DEV","inDevBranch":true,"onMain":true,"docsStale":false,"state":"done","track":"wired","readyViaOverlay":false,"acTotal":8,"acMet":8,"pr":{"n":170,"base":"main","state":"MERGED","url":"https://github.com/MrThief123/care-compass/pull/170","at":"2026-09-30T10:01:06Z","by":"cryptic-jeetus"}},{"id":"CAR-06","slug":"carer-complete-task","stream":"carer-dev","name":"Carer — Mark tasks done","phase":"Phase 3 — Data wiring & behaviour (parallel: Family · Carer · Admin)","lane":"C","sprint":"SPRINT","days":"D10","branch":"feature/carer-complete-task","deps":["F0-10","F0-11","F0-18","CAR-UI-02","CAR-04"],"blockers":["OQ-09","OQ-10","OQ-33"],"status":"MERGED TO DEV (merged to `main` in #183, 2026-10-01)","owner":"Dhruv Verma","unmetDeps":[],"openBlockers":[],"ready":false,"docsStatus":"MERGED TO DEV (merged to `main` in #183, 2026-10-01)","inDevBranch":true,"onMain":true,"docsStale":false,"state":"done","track":"wired","readyViaOverlay":false,"acTotal":8,"acMet":8,"pr":{"n":183,"base":"main","state":"MERGED","url":"https://github.com/MrThief123/care-compass/pull/183","at":"2026-10-01T05:21:18Z","by":"MrThief123"}},{"id":"CAR-09","slug":"carer-settings","stream":"carer-dev","name":"Carer — Settings","phase":"Phase 3 — Data wiring & behaviour (parallel: Family · Carer · Admin)","lane":"C","sprint":"SPRINT","days":"D10","branch":"feature/carer-settings","deps":["F0-07","CAR-UI-04"],"blockers":[],"status":"MERGED TO DEV","owner":"Dhruv Verma","unmetDeps":[],"openBlockers":[],"ready":false,"docsStatus":"MERGED TO DEV","inDevBranch":true,"onMain":true,"docsStale":false,"state":"done","track":"wired","readyViaOverlay":false,"acTotal":5,"acMet":0,"pr":{"n":159,"base":"main","state":"MERGED","url":"https://github.com/MrThief123/care-compass/pull/159","at":"2026-09-29T09:06:39Z","by":"MrThief123"}},{"id":"FAM-07","slug":"family-edit-event","stream":"family-dev","name":"Family — Edit event","phase":"Phase 3 — Data wiring & behaviour (parallel: Family · Carer · Admin)","lane":"F","sprint":"SPRINT","days":"D10","branch":"feature/family-edit-event","deps":["FAM-06"],"blockers":["OQ-10","OQ-11","OQ-22"],"status":"MERGED TO DEV","owner":"MrThief123","unmetDeps":[],"openBlockers":[],"ready":false,"docsStatus":"MERGED TO DEV","inDevBranch":true,"onMain":true,"docsStale":false,"state":"done","track":"wired","readyViaOverlay":false,"acTotal":4,"acMet":4,"pr":{"n":146,"base":"main","state":"MERGED","url":"https://github.com/MrThief123/care-compass/pull/146","at":"2026-09-28T01:41:24Z","by":"MrThief123"}},{"id":"FAM-08","slug":"family-event-documents","stream":"family-dev","name":"Family — Event documents (file tiles)","phase":"Phase 3 — Data wiring & behaviour (parallel: Family · Carer · Admin)","lane":"F","sprint":"SPRINT","days":"D10","branch":"feature/family-event-documents","deps":["F0-13","FAM-UI-03"],"blockers":["OQ-26"],"status":"MERGED TO DEV (merged to `main` in #184, 2026-10-01; FD-01's follow-up, linking Add event's uploads on save, was delivered by F0-23 in #200)","owner":"MrThief123","unmetDeps":[],"openBlockers":[],"ready":false,"docsStatus":"MERGED TO DEV (merged to `main` in #184, 2026-10-01; FD-01's follow-up, linking Add event's uploads on save, was delivered by F0-23 in #200)","inDevBranch":true,"onMain":true,"docsStale":false,"state":"done","track":"wired","readyViaOverlay":false,"acTotal":3,"acMet":3,"pr":{"n":184,"base":"main","state":"MERGED","url":"https://github.com/MrThief123/care-compass/pull/184","at":"2026-10-01T07:52:06Z","by":"MrThief123"}},{"id":"FAM-10","slug":"family-budget-overview","stream":"family-dev","name":"Family — Budget overview and history","phase":"Phase 3 — Data wiring & behaviour (parallel: Family · Carer · Admin)","lane":"F","sprint":"SPRINT","days":"D10","branch":"feature/family-budget-overview","deps":["F0-12","FAM-UI-05"],"blockers":["OQ-04","OQ-05"],"status":"MERGED TO DEV","owner":"MrThief123","unmetDeps":[],"openBlockers":[],"ready":false,"docsStatus":"MERGED TO DEV","inDevBranch":true,"onMain":true,"docsStale":false,"state":"done","track":"wired","readyViaOverlay":false,"acTotal":4,"acMet":4,"pr":{"n":161,"base":"main","state":"MERGED","url":"https://github.com/MrThief123/care-compass/pull/161","at":"2026-09-29T10:55:24Z","by":"MrThief123"}},{"id":"FAM-12","slug":"family-settings-profile","stream":"family-dev","name":"Family — Settings: family info and password reset","phase":"Phase 3 — Data wiring & behaviour (parallel: Family · Carer · Admin)","lane":"F","sprint":"SPRINT","days":"D10","branch":"feature/family-settings-profile","deps":["F0-07","FAM-UI-06"],"blockers":["OQ-35"],"status":"MERGED TO DEV","owner":"Dhruv Verma","unmetDeps":[],"openBlockers":[],"ready":false,"docsStatus":"MERGED TO DEV","inDevBranch":true,"onMain":true,"docsStale":false,"state":"done","track":"wired","readyViaOverlay":false,"acTotal":4,"acMet":4,"pr":{"n":102,"base":"family-dev","state":"MERGED","url":"https://github.com/MrThief123/care-compass/pull/102","at":"2026-09-25T08:12:32Z","by":"MrThief123"}},{"id":"F0-19","slug":"shared-root-route","stream":"shared","name":"Root route and production guard for dev previews","phase":"Phase 2 — Backend & data layer (parallel with Phase 1)","lane":"S","sprint":"SPRINT","days":"D11","branch":"feature/shared-root-route","deps":["F0-07"],"blockers":[],"status":"MERGED TO DEV","owner":"Dhruv Verma","unmetDeps":[],"openBlockers":[],"ready":false,"docsStatus":"MERGED TO DEV","inDevBranch":true,"onMain":true,"docsStale":false,"state":"done","track":"core","readyViaOverlay":false,"acTotal":7,"acMet":7,"pr":{"n":171,"base":"main","state":"MERGED","url":"https://github.com/MrThief123/care-compass/pull/171","at":"2026-09-30T10:01:29Z","by":"cryptic-jeetus"}},{"id":"F0-20","slug":"shared-admin-mfa-hardening","stream":"shared","name":"Admin TOTP MFA hardening","phase":"Phase 2 — Backend & data layer (added after F0-07 and F0-17)","lane":"S","sprint":"SPRINT","days":"D11","branch":"feature/shared-admin-mfa-hardening","deps":["F0-07","F0-17"],"blockers":[],"status":"MERGED TO DEV (commits present on `main` via #181, folded into shared-client-header-wiring's branch — confirmed by `git merge-base --is-ancestor` and src/app/(auth)/mfa/** existing on `main`, 2026-10-01)","owner":"Dhruv Verma","unmetDeps":[],"openBlockers":[],"ready":false,"docsStatus":"MERGED TO DEV (commits present on `main` via #181, folded into shared-client-header-wiring's branch — confirmed by `git merge-base --is-ancestor` and src/app/(auth)/mfa/** existing on `main`, 2026-10-01)","inDevBranch":true,"onMain":true,"docsStale":false,"state":"done","track":"core","readyViaOverlay":false,"acTotal":9,"acMet":9,"pr":{"n":177,"base":"main","state":"MERGED","url":"https://github.com/MrThief123/care-compass/pull/177","at":"2026-09-30T23:32:46Z","by":"Dhruv561"}},{"id":"FAM-13","slug":"family-change-organisation","stream":"family-dev","name":"Family — Change organisation","phase":"Phase 3 — Data wiring & behaviour (parallel: Family · Carer · Admin)","lane":"F","sprint":"SPRINT","days":"D11","branch":"feature/family-change-organisation","deps":["F0-06","F0-10","FAM-UI-06"],"blockers":["OQ-06","OQ-15"],"status":"MERGED TO DEV","owner":"Dhruv Verma","unmetDeps":[],"openBlockers":[],"ready":false,"docsStatus":"MERGED TO DEV","inDevBranch":true,"onMain":true,"docsStale":false,"state":"done","track":"wired","readyViaOverlay":false,"acTotal":6,"acMet":6,"pr":{"n":105,"base":"family-dev","state":"MERGED","url":"https://github.com/MrThief123/care-compass/pull/105","at":"2026-09-25T08:30:54Z","by":"MrThief123"}},{"id":"FAM-14","slug":"family-task-log","stream":"family-dev","name":"Family — Task log","phase":"Phase 3 — Data wiring & behaviour (parallel: Family · Carer · Admin)","lane":"F","sprint":"SPRINT","days":"D11","branch":"feature/family-task-log","deps":["F0-11","FAM-UI-07"],"blockers":["OQ-29"],"status":"MERGED TO DEV","owner":"MrThief123","unmetDeps":[],"openBlockers":[],"ready":false,"docsStatus":"MERGED TO DEV","inDevBranch":true,"onMain":true,"docsStale":false,"state":"done","track":"wired","readyViaOverlay":false,"acTotal":5,"acMet":5,"pr":{"n":139,"base":"main","state":"MERGED","url":"https://github.com/MrThief123/care-compass/pull/139","at":"2026-09-27T10:48:25Z","by":"MrThief123"}},{"id":"FAM-15","slug":"family-task-detail","stream":"family-dev","name":"Family — Task detail","phase":"Phase 3 — Data wiring & behaviour (parallel: Family · Carer · Admin)","lane":"F","sprint":"SPRINT","days":"D11","branch":"feature/family-task-detail","deps":["F0-11","F0-13","FAM-UI-07"],"blockers":[],"status":"MERGED TO DEV","owner":"Dhruv Verma","unmetDeps":[],"openBlockers":[],"ready":false,"docsStatus":"MERGED TO DEV","inDevBranch":true,"onMain":true,"docsStale":false,"state":"done","track":"wired","readyViaOverlay":false,"acTotal":8,"acMet":8,"pr":{"n":175,"base":"main","state":"MERGED","url":"https://github.com/MrThief123/care-compass/pull/175","at":"2026-09-30T10:00:33Z","by":"cryptic-jeetus"}},{"id":"INT-01","slug":"shared-budget-threshold-emails","stream":"shared","name":"Automatic budget threshold emails","phase":"Phase 4 — Integration, hardening & release","lane":"B","sprint":"STRETCH","days":"D11–D12","branch":"feature/shared-budget-threshold-emails","deps":["F0-12","FAM-10"],"blockers":["OQ-01","OQ-03","OQ-17","OQ-28"],"status":"MERGED TO DEV (merged to `main` in #190, 2026-10-01)","owner":"MrThief123","unmetDeps":[],"openBlockers":[],"ready":false,"docsStatus":"MERGED TO DEV (merged to `main` in #190, 2026-10-01)","inDevBranch":true,"onMain":true,"docsStale":false,"state":"done","track":"core","readyViaOverlay":false,"acTotal":5,"acMet":5,"pr":{"n":190,"base":"main","state":"MERGED","url":"https://github.com/MrThief123/care-compass/pull/190","at":"2026-10-01T09:54:51Z","by":"MrThief123"}},{"id":"F0-21","slug":"shared-auth-security-audit","stream":"shared","name":"Auth security audit","phase":"Phase 2 — Backend & data layer (added by CHG-041)","lane":"S","sprint":"SPRINT","days":"D12","branch":"feature/shared-auth-security-audit","deps":["F0-07","F0-20"],"blockers":[],"status":"MERGED TO DEV (merged to `main` in #195, 2026-10-01; AC-04 NOT MET — FD-07 follow-up open)","owner":"MrThief123","unmetDeps":[],"openBlockers":[],"ready":false,"docsStatus":"MERGED TO DEV (merged to `main` in #195, 2026-10-01; AC-04 NOT MET — FD-07 follow-up open)","inDevBranch":true,"onMain":true,"docsStale":false,"state":"done","track":"core","readyViaOverlay":false,"acTotal":6,"acMet":5,"pr":{"n":195,"base":"main","state":"MERGED","url":"https://github.com/MrThief123/care-compass/pull/195","at":"2026-10-01T13:14:31Z","by":"MrThief123"}},{"id":"INT-02","slug":"family-organisation-transfer-e2e","stream":"family-dev","name":"End-to-end: organisation transfer journey","phase":"Phase 4 — Integration, hardening & release","lane":"I","sprint":"SPRINT","days":"D12","branch":"feature/family-organisation-transfer-e2e","deps":["FAM-13","ADM-04","CAR-03"],"blockers":["OQ-06","OQ-15"],"status":"MERGED TO DEV (merged to `main` in #187, 2026-10-01)","owner":"MrThief123","unmetDeps":[],"openBlockers":[],"ready":false,"docsStatus":"MERGED TO DEV (merged to `main` in #187, 2026-10-01)","inDevBranch":true,"onMain":true,"docsStale":false,"state":"done","track":"core","readyViaOverlay":false,"acTotal":3,"acMet":3,"pr":{"n":187,"base":"main","state":"MERGED","url":"https://github.com/MrThief123/care-compass/pull/187","at":"2026-10-01T09:23:22Z","by":"MrThief123"}},{"id":"INT-03","slug":"carer-care-delivery-e2e","stream":"carer-dev","name":"End-to-end: carer care delivery journey","phase":"Phase 4 — Integration, hardening & release","lane":"I","sprint":"SPRINT","days":"D12","branch":"feature/carer-care-delivery-e2e","deps":["CAR-06","FAM-01"],"blockers":["OQ-33"],"status":"MERGED TO DEV (merged to `main` in #194, 2026-10-01)","owner":"MrThief123","unmetDeps":[],"openBlockers":[],"ready":false,"docsStatus":"MERGED TO DEV (merged to `main` in #194, 2026-10-01)","inDevBranch":true,"onMain":true,"docsStale":false,"state":"done","track":"core","readyViaOverlay":false,"acTotal":2,"acMet":2,"pr":{"n":194,"base":"main","state":"MERGED","url":"https://github.com/MrThief123/care-compass/pull/194","at":"2026-10-01T12:28:57Z","by":"MrThief123"}},{"id":"INT-04","slug":"admin-assign-shift-e2e","stream":"admin-dev","name":"End-to-end: admin rostering journey","phase":"Phase 4 — Integration, hardening & release","lane":"I","sprint":"SPRINT","days":"D12","branch":"feature/admin-assign-shift-e2e","deps":["ADM-07","CAR-02","CAR-05","FAM-01"],"blockers":["OQ-09","OQ-33"],"status":"MERGED TO DEV (merged to `main` in #196, 2026-10-01)","owner":"MrThief123","unmetDeps":[],"openBlockers":[],"ready":false,"docsStatus":"MERGED TO DEV (merged to `main` in #196, 2026-10-01)","inDevBranch":true,"onMain":true,"docsStale":false,"state":"done","track":"core","readyViaOverlay":false,"acTotal":2,"acMet":2,"pr":{"n":196,"base":"main","state":"MERGED","url":"https://github.com/MrThief123/care-compass/pull/196","at":"2026-10-01T13:13:51Z","by":"MrThief123"}},{"id":"INT-05","slug":"shared-access-control-regression","stream":"shared","name":"Access-control regression matrix","phase":"Phase 4 — Integration, hardening & release","lane":"I","sprint":"STRETCH","days":"D12–D13","branch":"feature/shared-access-control-regression","deps":["FAM-15","CAR-06","ADM-07"],"blockers":["OQ-01"],"status":"NOT STARTED","owner":"unclaimed","unmetDeps":[],"openBlockers":[],"ready":true,"docsStatus":"NOT STARTED","inDevBranch":false,"onMain":false,"docsStale":false,"state":"ready","track":"core","readyViaOverlay":false,"acTotal":2,"acMet":0,"pr":null},{"id":"ADM-03","slug":"admin-staff-deactivate","stream":"admin-dev","name":"Admin — Deactivate staff","phase":"Phase 3 — Data wiring & behaviour (parallel: Family · Carer · Admin)","lane":"A","sprint":"SPRINT","days":"D15","branch":"feature/admin-staff-deactivate","deps":["ADM-02"],"blockers":["OQ-36","OQ-19"],"status":"NOT STARTED","owner":"unclaimed","unmetDeps":[],"openBlockers":[],"ready":true,"docsStatus":"NOT STARTED","inDevBranch":false,"onMain":false,"docsStale":false,"state":"ready","track":"wired","readyViaOverlay":false,"acTotal":2,"acMet":0,"pr":null},{"id":"CAR-07","slug":"carer-manage-events","stream":"carer-dev","name":"Carer — Add and edit events for a patient","phase":"Phase 3 — Data wiring & behaviour (parallel: Family · Carer · Admin)","lane":"C","sprint":"SPRINT","days":"D15–D16","branch":"feature/carer-manage-events","deps":["CAR-04","F0-11","UI-02"],"blockers":["OQ-09","OQ-22","OQ-19"],"status":"NOT STARTED","owner":"unclaimed","unmetDeps":[],"openBlockers":[],"ready":true,"docsStatus":"NOT STARTED","inDevBranch":false,"onMain":false,"docsStale":false,"state":"ready","track":"wired","readyViaOverlay":false,"acTotal":2,"acMet":0,"pr":null},{"id":"F0-24","slug":"shared-auth-emails","stream":"shared","name":"Auth emails: working reset and invite links, set-password page","phase":"Phase 2 — Backend & data layer (with small Admin and auth-page changes)","lane":"S","sprint":"SPRINT","days":"D15–D16","branch":"feature/shared-auth-emails","deps":["F0-07","F0-17","ADM-02"],"blockers":[],"status":"NOT STARTED","owner":"unclaimed","unmetDeps":[],"openBlockers":[],"ready":true,"docsStatus":"NOT STARTED","inDevBranch":false,"onMain":false,"docsStale":false,"state":"ready","track":"core","readyViaOverlay":false,"acTotal":7,"acMet":0,"pr":null},{"id":"FAM-11","slug":"family-budget-update-funds","stream":"family-dev","name":"Family — Update funds","phase":"Phase 3 — Data wiring & behaviour (parallel: Family · Carer · Admin)","lane":"F","sprint":"SPRINT","days":"D15–D16","branch":"feature/family-budget-update-funds","deps":["FAM-10"],"blockers":["OQ-05","OQ-04","OQ-19"],"status":"NOT STARTED","owner":"unclaimed","unmetDeps":[],"openBlockers":[],"ready":true,"docsStatus":"NOT STARTED","inDevBranch":false,"onMain":false,"docsStale":false,"state":"ready","track":"wired","readyViaOverlay":false,"acTotal":3,"acMet":0,"pr":null},{"id":"ADM-08","slug":"admin-carer-assignments","stream":"admin-dev","name":"Admin — Manage carer-client assignments","phase":"Phase 3 — Data wiring & behaviour (parallel: Family · Carer · Admin)","lane":"A","sprint":"SPRINT","days":"D16","branch":"feature/admin-carer-assignments","deps":["ADM-07"],"blockers":["OQ-09","OQ-19"],"status":"NOT STARTED","owner":"unclaimed","unmetDeps":[],"openBlockers":[],"ready":true,"docsStatus":"NOT STARTED","inDevBranch":false,"onMain":false,"docsStale":false,"state":"ready","track":"wired","readyViaOverlay":false,"acTotal":1,"acMet":0,"pr":null},{"id":"ADM-09","slug":"admin-edit-shift","stream":"admin-dev","name":"Admin — Edit, extend or cancel a shift","phase":"Phase 3 — Data wiring & behaviour (parallel: Family · Carer · Admin)","lane":"A","sprint":"SPRINT","days":"D17","branch":"feature/admin-edit-shift","deps":["ADM-07"],"blockers":["OQ-27","OQ-19"],"status":"NOT STARTED","owner":"unclaimed","unmetDeps":[],"openBlockers":[],"ready":true,"docsStatus":"NOT STARTED","inDevBranch":false,"onMain":false,"docsStale":false,"state":"ready","track":"wired","readyViaOverlay":false,"acTotal":1,"acMet":0,"pr":null},{"id":"INT-09","slug":"shared-care-alert-emails","stream":"shared","name":"Overdue and upcoming care alert emails","phase":"Phase 4 — Integration, hardening & release","lane":"B","sprint":"SPRINT","days":"D17–D18","branch":"feature/shared-care-alert-emails","deps":["INT-01","F0-11","F0-24"],"blockers":["OQ-40"],"status":"NOT STARTED","owner":"unclaimed","unmetDeps":["F0-24"],"openBlockers":["OQ-40"],"ready":false,"docsStatus":"NOT STARTED","inDevBranch":false,"onMain":false,"docsStale":false,"state":"blocked","track":"core","readyViaOverlay":false,"acTotal":5,"acMet":0,"pr":null},{"id":"ADM-05","slug":"admin-client-remove","stream":"admin-dev","name":"Admin — Remove client","phase":"Phase 3 — Data wiring & behaviour (parallel: Family · Carer · Admin)","lane":"A","sprint":"SPRINT","days":"D18","branch":"feature/admin-client-remove","deps":["ADM-04"],"blockers":["OQ-06","OQ-07","OQ-19"],"status":"NOT STARTED","owner":"unclaimed","unmetDeps":[],"openBlockers":[],"ready":true,"docsStatus":"NOT STARTED","inDevBranch":false,"onMain":false,"docsStale":false,"state":"ready","track":"wired","readyViaOverlay":false,"acTotal":2,"acMet":0,"pr":null},{"id":"ADM-11","slug":"admin-client-view","stream":"admin-dev","name":"Admin — Client view: a client's Family screens with full access","phase":"Phase 3 — Data wiring & behaviour (parallel: Family · Carer · Admin)","lane":"A","sprint":"SPRINT","days":"D19–D20","branch":"feature/admin-client-view","deps":["ADM-04","FAM-01","FAM-04","FAM-06","FAM-07","FAM-09","FAM-10","FAM-11","FAM-14","FAM-15"],"blockers":[],"status":"NOT STARTED","owner":"unclaimed","unmetDeps":["FAM-11"],"openBlockers":[],"ready":false,"docsStatus":"NOT STARTED","inDevBranch":false,"onMain":false,"docsStale":false,"state":"blocked","track":"wired","readyViaOverlay":false,"acTotal":5,"acMet":0,"pr":null},{"id":"INT-07","slug":"shared-calendar-scale-performance","stream":"shared","name":"Scale and performance verification","phase":"Phase 4 — Integration, hardening & release","lane":"I","sprint":"SPRINT","days":"D19","branch":"feature/shared-calendar-scale-performance","deps":["FAM-14","ADM-01"],"blockers":["OQ-01"],"status":"NOT STARTED","owner":"unclaimed","unmetDeps":[],"openBlockers":[],"ready":true,"docsStatus":"NOT STARTED","inDevBranch":false,"onMain":false,"docsStale":false,"state":"ready","track":"core","readyViaOverlay":false,"acTotal":1,"acMet":0,"pr":null},{"id":"INT-06","slug":"shared-accessibility-verification","stream":"shared","name":"Accessibility verification across dashboards","phase":"Phase 4 — Integration, hardening & release","lane":"I","sprint":"SPRINT","days":"D20","branch":"feature/shared-accessibility-verification","deps":["FAM-15","CAR-09","ADM-10"],"blockers":["OQ-01"],"status":"NOT STARTED","owner":"unclaimed","unmetDeps":[],"openBlockers":[],"ready":true,"docsStatus":"NOT STARTED","inDevBranch":false,"onMain":false,"docsStale":false,"state":"ready","track":"core","readyViaOverlay":false,"acTotal":2,"acMet":0,"pr":null},{"id":"INT-08","slug":"shared-release-readiness-handover","stream":"shared","name":"Release readiness and client handover","phase":"Phase 4 — Integration, hardening & release","lane":"I","sprint":"SPRINT","days":"D21","branch":"feature/shared-release-readiness-handover","deps":["INT-02","INT-03","INT-04","INT-05","INT-06","INT-07","F0-24","INT-09","FAM-11","CAR-07","ADM-03","ADM-05","ADM-08","ADM-09","ADM-11"],"blockers":["OQ-01","OQ-17"],"status":"NOT STARTED","owner":"unclaimed","unmetDeps":["INT-05","INT-06","INT-07","F0-24","INT-09","FAM-11","CAR-07","ADM-03","ADM-05","ADM-08","ADM-09","ADM-11"],"openBlockers":[],"ready":false,"docsStatus":"NOT STARTED","inDevBranch":false,"onMain":false,"docsStale":false,"state":"blocked","track":"core","readyViaOverlay":false,"acTotal":2,"acMet":0,"pr":null},{"id":"CAR-08","slug":"carer-record-expense","stream":"carer-dev","name":"Carer — Record an expense","phase":"Phase 3 — Data wiring & behaviour (parallel: Family · Carer · Admin)","lane":"C","sprint":"POST-SPRINT","days":"—","branch":"feature/carer-record-expense","deps":["F0-12","F0-13"],"blockers":["OQ-19","OQ-04","OQ-05"],"status":"RETIRED (CHG-020)","owner":"unclaimed","unmetDeps":[],"openBlockers":[],"ready":false,"docsStatus":"RETIRED (CHG-020)","inDevBranch":false,"onMain":false,"docsStale":false,"state":"post","track":"wired","readyViaOverlay":false,"acTotal":2,"acMet":0,"pr":null},{"id":"F0-22","slug":"shared-client-header-wiring","stream":"shared","name":"Client header wiring and family route guard","phase":"Phase 2 — Backend & data layer","lane":"S","sprint":"SPRINT","days":"","branch":"feature/shared-client-header-wiring","deps":["F0-06","F0-07","F0-15","F0-13","FAM-13"],"blockers":[],"status":"MERGED TO DEV (merged to `main` in #181, 2026-10-01)","owner":"Dhruv Verma","unmetDeps":[],"openBlockers":[],"ready":false,"docsStatus":"MERGED TO DEV (merged to `main` in #181, 2026-10-01)","inDevBranch":true,"onMain":true,"docsStale":false,"state":"done","track":"core","readyViaOverlay":false,"acTotal":8,"acMet":0,"pr":{"n":181,"base":"main","state":"MERGED","url":"https://github.com/MrThief123/care-compass/pull/181","at":"2026-09-30T23:32:44Z","by":"Dhruv561"}},{"id":"F0-23","slug":"shared-document-event-linking","stream":"shared","name":"Link uploaded documents to a new event","phase":"Phase 2 — Backend & data layer (with a small Family wiring change)","lane":"S","sprint":"SPRINT","days":"","branch":"feature/shared-document-event-linking","deps":["F0-11","F0-13","FAM-08"],"blockers":[],"status":"MERGED TO DEV (merged to `main` in #200, 2026-10-02)","owner":"Dhruv Verma","unmetDeps":[],"openBlockers":[],"ready":false,"docsStatus":"MERGED TO DEV (merged to `main` in #200, 2026-10-02)","inDevBranch":true,"onMain":true,"docsStale":false,"state":"done","track":"core","readyViaOverlay":false,"acTotal":8,"acMet":8,"pr":{"n":200,"base":"main","state":"MERGED","url":"https://github.com/MrThief123/care-compass/pull/200","at":"2026-10-02T01:08:20Z","by":"MrThief123"}},{"id":"FAM-UI-08","slug":"family-ui-event-cost","stream":"family-dev","name":"Family event cost fields (UI)","phase":"Phase 1 — Screens on fixtures (parallel: Family · Carer · Admin)","lane":"F","sprint":"SPRINT","days":"—","branch":"feature/family-ui-event-cost","deps":["FAM-UI-03","FAM-UI-05"],"blockers":[],"status":"MERGED TO DEV","owner":"Dhruv Verma","unmetDeps":[],"openBlockers":[],"ready":false,"docsStatus":"MERGED TO DEV","inDevBranch":true,"onMain":true,"docsStale":false,"state":"done","track":"screen","readyViaOverlay":false,"acTotal":6,"acMet":6,"pr":{"n":99,"base":"family-dev","state":"MERGED","url":"https://github.com/MrThief123/care-compass/pull/99","at":"2026-09-25T07:52:15Z","by":"MrThief123"}}]};
+const F = D.features, M = D.meta;
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const $ = id => document.getElementById(id);
+
+const STATE = {
+  done:{label:"Done",g:"✓"}, progress:{label:"In progress",g:"◐"}, ready:{label:"Ready to start",g:"→"},
+  blocked:{label:"Waiting on dependencies",short:"Waiting",g:"⋯"}, post:{label:"Post-sprint",g:"○"}, retired:{label:"Retired",g:"×"}
+};
+const LANES = [
+  {id:"F",name:"Family dashboard",blurb:"Families schedule care events and watch the budget"},
+  {id:"C",name:"Carer dashboard",blurb:"Carers see patients and shifts and tick off care"},
+  {id:"A",name:"Admin dashboard",blurb:"Organisation admins manage staff, clients and shifts"},
+  {id:"S",name:"Shared UI kit",blurb:"Design tokens, calendar, forms and list kits, app shell, contracts"},
+  {id:"B",name:"Backend and data",blurb:"Database, sign-in, access rules, audit log, budgets, storage"},
+  {id:"I",name:"Integration and e2e",blurb:"Whole-journey checks across dashboards"},
+];
+const TRACKS = {screen:"Screens on fixtures",wired:"Wired to real data",core:"Core work"};
+const inScope = f => f.state !== "post" && f.state !== "retired";
+const scope = F.filter(inScope);
+const cnt = (arr, k) => arr.reduce((m,f)=>(m[k(f)]=(m[k(f)]||0)+1,m),{});
+const sum = arr => ({
+  total:arr.length, done:arr.filter(f=>f.state==="done").length, main:arr.filter(f=>f.state==="done"&&f.onMain).length,
+  progress:arr.filter(f=>f.state==="progress").length, ready:arr.filter(f=>f.state==="ready").length, blocked:arr.filter(f=>f.state==="blocked").length
+});
+const fmtDate = s => s ? new Date(s).toLocaleDateString("en-AU",{day:"numeric",month:"short"}) : "";
+const days = f => (f.days && f.days !== "—") ? f.days : "unscheduled";
+const owner = f => f.owner !== "unclaimed" ? f.owner : (f.builder ? f.builder + " (commits)" : "unclaimed");
+
+/* header */
+const snapTime = new Date(M.generatedAt).toLocaleString("en-AU",{day:"numeric",month:"short",hour:"numeric",minute:"2-digit",timeZone:"Australia/Melbourne"});
+$("snap").textContent = `Snapshot ${snapTime} · main ${M.main}`;
+$("fdSha").textContent = M.main;
+
+/* hero */
+const all = sum(scope);
+const devOnly = all.done - all.main;
+$("bigDone").textContent = all.done;
+$("bigOf").textContent = `of ${all.total} in-scope features done`;
+$("bigPct").textContent = Math.round(all.done/all.total*100) + "%";
+const segs = [["done",all.main],["dev",devOnly],["progress",all.progress],["ready",all.ready],["blocked",all.blocked]];
+$("mainBar").innerHTML = segs.filter(s=>s[1]).map(([c,n])=>`<div class="seg ${c}" style="flex:${n}" title="${n}"></div>`).join("");
+const LEG = [
+  ["all","",`All`,all.total],["done","done","Done",all.done],["progress","progress","In progress",all.progress],
+  ["ready","ready","Ready to start",all.ready],["blocked","blocked","Waiting on dependencies",all.blocked]
+];
+$("legend").innerHTML = LEG.map(([k,sw,l,n])=>`<button class="chip" data-jump="${k}">${sw?`<i class="sw ${sw}"></i>`:""}${l} <span class="n">${n}</span></button>`).join("");
+const ac = scope.reduce((a,f)=>({t:a.t+f.acTotal,m:a.m+f.acMet}),{t:0,m:0});
+$("kpis").innerHTML = `
+  <div class="kpi"><b>${all.main}</b><small>Done and merged to the <span style="font-weight:700">main</span> branch</small></div>
+  <div class="kpi"><b>${all.progress}</b><small>In review: pull request open, waiting for approval</small></div>
+  <div class="kpi"><b>${ac.m}<span style="font-size:14px;color:var(--muted)"> / ${ac.t}</span></b><small>Acceptance criteria recorded as met</small></div>`;
+
+$("readyN").textContent = `(${all.ready})`;
+/* matrix */
+const dash = [["F","Family"],["C","Carer"],["A","Admin"]];
+const cellTxt = (arr) => { const s = sum(arr); return `<div class="mini"><span>${s.done} / ${s.total} done${s.ready?` · ${s.ready} ready`:""}</span>${bar(s,true)}</div>`; };
+function bar(s, slim){
+  const dv = s.done - s.main;
+  const parts = [["done",s.main],["dev",dv],["progress",s.progress],["ready",s.ready],["blocked",s.blocked]].filter(p=>p[1]);
+  return `<div class="bar${slim?" slim":""}">${parts.map(([c,n])=>`<div class="seg ${c}" style="flex:${n}"></div>`).join("")}</div>`;
+}
+$("matrix").innerHTML = `<tr><th></th><th>Screens</th><th>Wired</th></tr>` + dash.map(([l,n])=>{
+  const a = scope.filter(f=>f.lane===l);
+  return `<tr><td class="k">${n}</td><td>${cellTxt(a.filter(f=>f.track==="screen"))}</td><td>${cellTxt(a.filter(f=>f.track==="wired"))}</td></tr>`;
+}).join("");
+
+/* insights, computed from the data */
+const ids = (lane, st) => F.filter(f=>f.lane===lane&&f.state===st).map(f=>f.id).join(", ");
+const S = (l,t) => sum(scope.filter(f=>f.lane===l&&f.track===t));
+const wired = sum(scope.filter(f=>f.track==="wired"));
+const back = sum(scope.filter(f=>f.lane==="B"));
+const integ = sum(scope.filter(f=>f.lane==="I"));
+$("insights").innerHTML = [
+  `<b>Screens:</b> Family ${S("F","screen").done}/${S("F","screen").total} built, Admin ${S("A","screen").done}/${S("A","screen").total}, Carer ${S("C","screen").done}/${S("C","screen").total}.`,
+  `<b>Real data:</b> ${wired.done} of ${wired.total} dashboard wiring features are done, and Integration is ${integ.done}/${integ.total}. Nothing is tested end to end yet.`,
+  `<b>Backend:</b> ${back.done}/${back.total} done. Ready now: ${ids("B","ready")}.`,
+  `<b>In review:</b> ${ids("F","progress")}, ${ids("C","progress")}, ${ids("A","progress")}, ${ids("B","progress")}, ${ids("S","progress")}. Merging F0-16 and CAR-04 unlocks FAM-01 and CAR-06.`.replace(/(, )+/g,", ").replace(", .","."),
+  `<b>Next up:</b> ${F.filter(f=>f.state==="ready").map(f=>f.id).join(", ")} have no open dependency and no owner.`
+].map(t=>`<li>${t}</li>`).join("");
+
+/* project map */
+const cell = f => {
+  const dev = f.state==="done" && !f.onMain;
+  const tip = `${f.id}: ${f.name}. ${STATE[f.state].label}${f.state==="done"?(f.onMain?", on main":", dev branch only"):""}`;
+  return `<a class="cell ${f.state}${dev?" dev":""}" href="#f-${f.id}" data-open="${f.id}" title="${esc(tip)}"><span class="g" aria-hidden="true">${STATE[f.state].g}</span>${f.id}<span class="sr" style="position:absolute;left:-9999px">${esc(tip)}</span></a>`;
+};
+$("mapKey").innerHTML = [["done","Done, on main"],["dev","Done, dev branch only (dashed edge)"],["progress","In progress"],["ready","Ready to start"],["blocked","Waiting on dependencies (hatched)"],["post","Post-sprint or retired (dotted)"]]
+  .map(([c,l])=>`<span><i class="sw ${c}"></i>${l}</span>`).join("");
+$("mapGrid").innerHTML = LANES.map(L=>{
+  const arr = F.filter(f=>f.lane===L.id), sc = sum(arr.filter(inScope));
+  const tracks = ["screen","wired","core"].map(t=>{
+    const a = arr.filter(f=>f.track===t); if(!a.length) return "";
+    const ts = sum(a.filter(inScope));
+    return `<div class="track"><h4><span>${TRACKS[t]}</span><span>${ts.done}/${ts.total}</span></h4><div class="cells">${a.map(cell).join("")}</div></div>`;
+  }).join("");
+  return `<div class="card blk"><h3>${L.name}<em>${sc.done}/${sc.total} done</em></h3><p>${L.blurb}</p>${bar(sc)}${tracks}</div>`;
+}).join("");
+
+$("readyCells").innerHTML = F.filter(f=>f.state==="ready").map(cell).join("");
+
+/* board */
+const view = {state:"all", lane:"all", q:""};
+const STATE_FILTERS = [["all","All"],["done","Done"],["progress","In progress"],["ready","Ready"],["blocked","Waiting"],["other","Post-sprint or retired"]];
+const matchState = f => view.state==="all" || f.state===view.state || (view.state==="other" && (f.state==="post"||f.state==="retired"));
+function renderTools(){
+  $("fState").innerHTML = `<label class="lab">Status</label>` + STATE_FILTERS.map(([k,l])=>{
+    const n = F.filter(f=>k==="all"||f.state===k||(k==="other"&&(f.state==="post"||f.state==="retired"))).length;
+    return `<button class="chip" data-state="${k}" aria-pressed="${view.state===k}">${l} <span class="n">${n}</span></button>`;
+  }).join("");
+  $("fLane").innerHTML = `<label class="lab">Area</label>` + [{id:"all",name:"All"},...LANES].map(L=>
+    `<button class="chip" data-lane="${L.id}" aria-pressed="${view.lane===L.id}">${L.id==="all"?"All":L.name.split(" ")[0]}</button>`).join("");
+}
+function depChips(f){
+  return f.deps.length ? f.deps.map(d=>{const x=F.find(y=>y.id===d);const done=x&&x.state==="done";
+    return `<a class="depchip ${done?"done":""}" href="#f-${d}" data-open="${d}">${done?"✓":"⋯"} ${d}</a>`;}).join("") : "None";
+}
+function row(f){
+  const st = STATE[f.state];
+  const pr = f.pr ? `<a href="${esc(f.pr.url)}" target="_blank" rel="noopener">#${f.pr.n}</a>` : "";
+  let where = "";
+  if (f.state==="done") where = `${pr?`<span class="tag">PR ${pr} to ${esc(f.pr.base)}</span>`:""}<span class="tag ${f.onMain?"main":"dev"}">${f.onMain?"on main":"dev branch only"}</span>${f.docsStale?`<span class="tag stale">docs out of date</span>`:""}`;
+  else if (f.state==="progress") where = pr?`<span class="tag">PR ${pr}</span>`:`<span class="tag">in flight</span>`;
+  else if (f.state==="ready") where = `<span class="tag main">no blockers</span>${f.readyViaOverlay?`<span class="tag stale">unblocked per GitHub</span>`:""}`;
+  else if (f.state==="blocked") where = `<span class="tag wait">needs ${f.unmetDeps.map(esc).join(", ")||"a decision"}</span>`;
+  else where = `<span class="tag">${f.state==="retired"?"retired":"not in sprint scope"}</span>`;
+  const acHtml = f.acTotal ? `${f.acMet}/${f.acTotal} AC<div class="bar"><i style="width:${f.acMet/f.acTotal*100}%"></i></div>` : `<span style="color:var(--muted)">no AC</span>`;
+  return `<details class="row" id="f-${f.id}"><summary>
+    <span class="stt"><span class="pill ${f.state}" title="${st.label}"><span aria-hidden="true">${st.g}</span>${st.short||st.label}</span></span>
+    <span class="fid">${f.id}</span>
+    <span class="fname fn">${esc(f.name)}<span class="fmeta">${esc(days(f))} · ${esc(owner(f))}</span></span>
+    <span class="where">${where}</span>
+    <span class="ac">${acHtml}</span></summary>
+    <div class="detail">
+      <dl><dt>Branch</dt><dd><code>${esc(f.branch)}</code></dd>
+        <dt>Phase</dt><dd>${esc(f.phase)}</dd>
+        <dt>Planned</dt><dd>${esc(days(f))} (${esc(f.sprint.toLowerCase())})</dd>
+        <dt>Owner</dt><dd>${esc(owner(f))}</dd></dl>
+      <dl><dt>Depends on</dt><dd>${depChips(f)}</dd>
+        <dt>Open decisions</dt><dd>${f.openBlockers.length?f.openBlockers.join(", "):"None"}</dd>
+        <dt>Docs say</dt><dd>${esc(f.docsStatus)}${f.docsStale?` <span class="tag stale">GitHub shows it merged${f.pr?` (PR #${f.pr.n}, ${fmtDate(f.pr.at)})`:""}</span>`:""}</dd>
+        <dt>Pull request</dt><dd>${f.pr?`${pr} ${f.pr.state.toLowerCase()} into ${esc(f.pr.base)}${f.pr.at?", "+fmtDate(f.pr.at):""}`:"None found"}</dd></dl>
+    </div></details>`;
+}
+function renderBoard(){
+  const q = view.q.trim().toLowerCase();
+  const rows = F.filter(f => matchState(f) && (view.lane==="all"||f.lane===view.lane) &&
+    (!q || (f.id+" "+f.name+" "+owner(f)).toLowerCase().includes(q)));
+  if(!rows.length){ $("boardOut").innerHTML = `<div class="card empty">No features match these filters.</div>`; return; }
+  $("boardOut").innerHTML = LANES.map(L=>{
+    const arr = rows.filter(f=>f.lane===L.id); if(!arr.length) return "";
+    const full = sum(F.filter(f=>f.lane===L.id&&inScope(f)));
+    const multi = new Set(arr.map(f=>f.track)).size>1;
+    const body = ["screen","wired","core"].map(t=>{
+      const a = arr.filter(f=>f.track===t); if(!a.length) return "";
+      return `${multi?`<div class="sub">${TRACKS[t]}</div>`:""}<div class="list">${a.map(row).join("")}</div>`;
+    }).join("");
+    return `<div class="lane"><header><h3>${L.name}</h3><span class="cnt">${full.done}/${full.total} done</span>${bar(full)}</header>${body}</div>`;
+  }).join("");
+}
+function openFeature(id){
+  view.state="all"; view.lane="all"; view.q=""; $("q").value=""; renderTools(); renderBoard();
+  const el = $("f-"+id); if(el){ el.open = true; el.scrollIntoView({block:"center"}); history.replaceState(null,"","#f-"+id); }
+}
+document.addEventListener("click", e=>{
+  const s = e.target.closest("[data-state]"); if(s){ view.state=s.dataset.state; renderTools(); renderBoard(); return; }
+  const l = e.target.closest("[data-lane]"); if(l){ view.lane=l.dataset.lane; renderTools(); renderBoard(); return; }
+  const j = e.target.closest("[data-jump]"); if(j){ view.state = j.dataset.jump; view.lane="all"; renderTools(); renderBoard(); $("board").scrollIntoView(); return; }
+  const o = e.target.closest("[data-open]"); if(o){ e.preventDefault(); openFeature(o.dataset.open); }
+});
+$("q").addEventListener("input", e=>{ view.q=e.target.value; renderBoard(); });
+renderTools(); renderBoard();
+if(location.hash.startsWith("#f-")) openFeature(location.hash.slice(3));
+
+/* housekeeping (findings from the review; static) */
+const V = (t,l)=>`<span class="verdict ${t}">${l}</span>`;
+$("prTable").innerHTML = `<tr><th>PR</th><th>Route</th><th>Verdict</th></tr>` + [
+  ["#118, #119","Docker actions bumps (2)","build-push-action 6 to 7, setup-buildx-action 3 to 4. Checks failing.",V("warn","Stale, rebase")],
+  ["#20, #22, #23","GitHub Actions bumps (3)","upload-artifact, setup-node, checkout. Checks failing.",V("warn","Stale, rebase")],
+  ["#27, #121","jest-dom 6 to 7, Playwright 1.56 to 1.63","Minor-line bumps for test tooling. Checks failing.",V("warn","Stale, rebase")],
+  ["#25","TypeScript 5 to 7","Major bump. Lint, unit, commitlint and e2e failed.",V("bad","Close or decide")],
+  ["#120","ESLint 9 to 10","Major bump. Six checks failing.",V("bad","Close or decide")],
+  ["#122","jsdom 27 to 30","Major bump. Checks failing.",V("bad","Close or decide")]
+].map(r=>`<tr><td><b>${r[0]}</b></td><td>${r[1]}<small>${r[2]}</small></td><td>${r[3]}</td></tr>`).join("");
+$("orphans").innerHTML = `<tr><th>Branch</th><th>What it holds</th></tr>` + [
+  ["feature/shared-auth-security-audit","Merged in #195. Its two later decision commits were re-recorded on main by #198 under new hashes, so git still lists it as unmerged. "+V("neutral","Delete")],
+  ["carer-dev","Retired dev branch (CHG-036). One merge commit (#153) is not in main; its work reached main through #158. Check before deleting. "+V("warn","Check")],
+  ["revert-105-family-change-organisation","Closed revert PR #106. "+V("neutral","Delete")],
+  ["chore/plan-status-refresh-2026-09-22","Prajeet's status refresh, superseded. "+V("neutral","Delete")],
+  ["chore/codebase-cleanup","Already applied elsewhere. "+V("neutral","Delete")],
+  ["feature/shared-ui-primitives","One trivial status commit, superseded. "+V("neutral","Delete")]
+].map(r=>`<tr><td><code style="font-size:12px;overflow-wrap:anywhere">${r[0]}</code></td><td>${r[1]}</td></tr>`).join("");
+$("docs").innerHTML = `<tr><th>Where</th><th>What is wrong</th></tr>` + [
+  ["INT-03 AC-01 wording","The criterion says 'Done · Aisha R.' but the test asserts 'Aisha Rahman' (PD-038). Needs a human-confirmed CHG; drafted, not applied. "+V("warn","Open")],
+  ["Feature Status fields","Merged features still say MERGED TO DEV although the dev branches are retired (CHG-036). plan-status treats them as done, so nothing is blocked by it. "+V("neutral","Cosmetic")],
+  ["Status and AC fields synced","F0-21, INT-04, F0-23, FAM-08, INT-01, ADM-07 and INT-03 progress files are corrected in the docs PR. "+V("warn","Fixed in PR")],
+  ["F0-21 AC-04","Genuinely NOT MET: the hosted rate limits and Auth Hooks are the FD-07 follow-up and have no plan row yet. "+V("warn","Open")],
+  ["End-to-end specs","INT-02, INT-03 and INT-04 e2e results are from the local stack only; CI skips e2e on main. "+V("neutral","Known")],
+  ["CAR-07 Carer add and edit events","Post-sprint. Carers cannot add events until it lands. "+V("neutral","Tracked")],
+  ["docs/DEVELOPMENT_WORKFLOW.md","Merged PRs keep leaving feature Status fields stale. Add a post-merge step to update PROGRESS.md (a controlled change, your call). "+V("warn","Open")],
+  ["docs/SPRINT_PLAN.md §2","Lane owner table is empty. Dropped: owners are not needed. "+V("neutral","Won't fix")]
+].map(r=>`<tr><td style="white-space:nowrap"><b>${r[0]}</b></td><td>${r[1]}</td></tr>`).join("");
+
+$("foot").innerHTML = `Generated ${snapTime} by <code>scripts/status-page.mjs</code> from <code>plan-status.mjs --json</code> at origin/main ${M.main} plus the working tree, merged and open PRs from GitHub. In scope means SPRINT and STRETCH features, excluding post-sprint and retired ones. A feature counts as "on main" when its branch or merged PR reached main.`;
+</script>
+</body>
+</html>

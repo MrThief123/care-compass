@@ -1,6 +1,6 @@
 # Progress — F0-23 Link uploaded documents to a new event
 
-Status: IN PROGRESS
+Status: MERGED TO DEV (merged to `main` in #200, 2026-10-02)
 Owner: Dhruv Verma
 Lane: S — Shared
 Sprint: SPRINT
@@ -18,10 +18,10 @@ Last updated: 2026-10-02
 - 8 / 8 MET
 
 ## Next action
-- Real-browser check of Add event against the local stack (not done yet), then human approval before any PR.
+- None. Real-browser check done (below); merged in #200.
 
 ## Ready for PR
-- No.
+- Done: merged in #200.
 
 ## Tests written first
 - 2026-10-02: T-01, T-02 (`supabase/tests/document_event_linking.test.sql`, 24 assertions). Run against the local stack: fail because `link_document_to_event` does not exist (the script stops at the first `has_function_privilege` call). 

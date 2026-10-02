@@ -127,6 +127,12 @@ Root `PROGRESS.md`/`SESSION_STATE.md` and multi-worktree setup: `docs/AGENT_REFE
 - PR title `<ID> <Feature name>`; body from `docs/DEVELOPMENT_WORKFLOW.md` §8. Never open the PR without prior human approval (`docs/DEVELOPMENT_WORKFLOW.md` §7).
 - No AI-attribution lines in commits or PRs: never add `Co-Authored-By: Claude …` trailers or a "Generated with Claude Code" footer. Commits and PRs are authored under the human owner's name only.
 
+### Status page (shared, committed)
+`care-compass-status.html` at the repo root is the team's shared status view. It is tracked in git: never keep a local-only copy or add it to `.git/info/exclude`.
+- Whenever your work changes anything it shows (a feature's Status or ACs, a merge, the plan, sprint days, a CHG or OQ, open PRs or branches), refresh it **in the same PR**: run `node scripts/status-page.mjs` (rewrites only the data line from `plan-status.mjs --json`, the AC files and `gh`), then edit the Plan update / Housekeeping prose by hand if it is now wrong.
+- Open the page in a real browser before pushing: no console errors, no horizontal overflow at 390 px.
+- A status-only sync goes through a normal docs PR (`docs/status-sync-<date>`), like any other change. Never push it straight to `main`.
+
 ### Definition of Done (feature → READY FOR PR)
 - [ ] In-scope ACs MET with tests written first and passing
 - [ ] Blocking decisions answered; non-blocking defaults used are noted
@@ -134,6 +140,7 @@ Root `PROGRESS.md`/`SESSION_STATE.md` and multi-worktree setup: `docs/AGENT_REFE
 - [ ] Relevant suite green (§5)
 - [ ] Only owned folders changed (§4.2)
 - [ ] Feature PROGRESS.md, SESSION_STATE.md, DECISIONS.md updated
+- [ ] Status page refreshed if anything it shows changed (§8)
 - [ ] Branch pushed; PR opened to the correct target
 
 ---
@@ -171,6 +178,7 @@ Client data is health and financial information about vulnerable people. Only sy
 | Command definitions | `docs/AGENT_COMMANDS.md` |
 | Reference tables (folder ownership, test matrix, status values, phase table) | `docs/AGENT_REFERENCE.md` |
 | Live status (generated) | `node scripts/plan-status.mjs`, `PROGRESS.md` |
+| Shared status page (committed; refresh per §8) | `care-compass-status.html`, `node scripts/status-page.mjs` |
 | Backlog and feature cards | `DEVELOPMENT_PLAN.md` |
 | Tickets | `docs/JIRA_TICKETS.md`, `docs/JIRA_BACKLOG.csv` |
 | Requirements and traceability | `PRD.md`, `docs/SOURCES.md` |

@@ -1,12 +1,12 @@
 # Progress — INT-04 End-to-end: admin rostering journey
 
-Status: READY FOR PR
+Status: MERGED TO DEV (merged to `main` in #196, 2026-10-01)
 Owner: MrThief123
 Lane: I — Integration
 Sprint: SPRINT · planned D12
 Branch: `feature/admin-assign-shift-e2e` (from `main`)
 PR target: `main` (CHG-036)
-Last updated: 2026-10-01
+Last updated: 2026-10-02
 
 ## Blockers
 - None. OQ-09 and OQ-33 ANSWERED in root DECISIONS.md.
@@ -22,10 +22,10 @@ Last updated: 2026-10-01
 - All four pass against a real local Supabase stack. No production code, migration or shared helper changed; no integration gap found (FD-01).
 
 ## In progress
-- Nothing. Waiting for the human's approval to open the PR.
+- Nothing.
 
 ## Remaining
-- Human approval, then merge latest `main` in, re-run, open PR `INT-04 End-to-end: admin rostering journey` to `main`.
+- None. Not run in CI (e2e is skipped on `main`); results above are from the local stack.
 
 ## Acceptance criteria status
 - 2 / 2 MET
@@ -54,7 +54,7 @@ Last updated: 2026-10-01
 - None beyond FD-01 to FD-04.
 
 ## Next action
-- Human: approve opening the PR (and note FD-02/FD-03 in its summary).
+- None.
 
 ## Ready for PR
-- Yes, pending human approval to open it.
+- Done: merged in #196.

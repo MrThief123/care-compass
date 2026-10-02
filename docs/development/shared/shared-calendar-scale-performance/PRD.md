@@ -9,7 +9,7 @@
 | Feature branch | `feature/shared-calendar-scale-performance` |
 | Documentation | `docs/development/shared/shared-calendar-scale-performance/` |
 | Lane | I — Integration |
-| Sprint | POST-SPRINT · planned — |
+| Sprint | SPRINT · planned D19 |
 | Status / owner | See PROGRESS.md |
 
 ## Purpose

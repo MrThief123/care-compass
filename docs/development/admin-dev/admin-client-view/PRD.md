@@ -9,7 +9,7 @@
 | Feature branch | `feature/admin-client-view` |
 | Documentation | `docs/development/admin-dev/admin-client-view/` |
 | Lane | A — Admin |
-| Sprint | POST-SPRINT · planned — |
+| Sprint | SPRINT · planned D19–D20 |
 | Status / owner | See PROGRESS.md |
 
 > Added by **CHG-020** (PD-058, 2026-09-25). Renders the Family screens already built and wired by Lane F; it does not rebuild them.
