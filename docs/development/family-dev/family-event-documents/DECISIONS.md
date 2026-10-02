@@ -43,6 +43,23 @@ Record feature-level decisions here using the template below. Project-wide decis
 - Test changes caused: `[FAM-UI-03][PRD] 'Add file' uploads nothing and says so` — before: clicked
   the tile only; after: clicks the tile then chooses a file via the hidden input. Flagged below.
 
+### FD-03 — Fix T-01's seed: care event start must be a whole second
+- Date: 2026-10-02
+- Context: T-01 (`tests/e2e/family-event-documents.spec.ts`) was first run on 2026-10-02 against
+  the local Supabase stack. It failed in its own `seed()`, before the page opened: the care event's
+  `starts_at` was `new Date(Date.now() + 1h)`, which carries milliseconds, and `care_events` rejects
+  that (`23514`, check `care_events_starts_at_whole_second`, migration
+  `20260925030000_care_events.sql`). Never seen before because the spec had never run.
+- Decision: Truncate the seeded `starts_at` to a whole second, the same way the carer e2e specs'
+  `at()` helper does (`carer-complete-task.spec.ts`).
+- Reason: Genuine test bug (invalid assumption about the schema). No product code changed.
+- Alternatives considered: none.
+- Consequences: T-01 passes (1 run, then 3 more with `--repeat-each 3`), so AC-01 is MET.
+- Human confirmation required: no (CLAUDE.md §5 genuine test bug; no assertion removed, no
+  behaviour changed)
+- Test changes caused: T-01 seed only — before: `starts_at` had milliseconds; after: truncated to
+  the second. Every assertion unchanged.
+
 <!-- Template
 ### FD-01 — <title>
 - Date:
