@@ -8,7 +8,7 @@ import { createAdminClient } from "@/server/jobs/supabase-admin";
 
 import { stepUpIfAdmin } from "../helpers/aal2";
 
-// [ADM-09] Requires a running local Supabase stack (`supabase start`, migrations applied). Skips
+// [ADM-09] Cancel only (editing a shift was dropped, CHG-053). Requires a running local Supabase stack (`supabase start`, migrations applied). Skips
 // against a hosted project, like tests/integration/admin-assign-shift.test.ts. Each test seeds its
 // own organisations, people and shifts, and removes them afterwards.
 const isLocalUrl = /^https?:\/\/(127\.0\.0\.1|localhost)(:|\/|$)/.test(
@@ -190,12 +190,6 @@ async function withSession<T>(cookieStore: Map<string, string>, run: () => Promi
   }
 }
 
-type UpdateInput = { shiftId: string; carerId: string; start: string; end: string };
-const updateAs = (session: Map<string, string>, input: UpdateInput) =>
-  withSession(session, async () => {
-    const { updateShift } = await import("@/server/admin/manage-actions");
-    return updateShift(input);
-  });
 const cancelAs = (session: Map<string, string>, shiftId: string) =>
   withSession(session, async () => {
     const { cancelShift } = await import("@/server/admin/manage-actions");
@@ -225,102 +219,12 @@ describe.skipIf(!hasLocalSupabase)(
       vi.unstubAllEnvs();
     });
 
-    it("[ADM-09][AC-07] extending 07:00-11:00 to 13:00 stores Melbourne time on the shift's own date, and Manage shows it", async () => {
-      const s = await seed();
-      try {
-        const session = await signIn(s.priya.email);
-        const result = await updateAs(session, {
-          shiftId: s.futureId,
-          carerId: s.aisha.userId,
-          start: "07:00",
-          end: "13:00",
-        });
-        expect(result).toMatchObject({
-          ok: true,
-          data: {
-            id: s.futureId,
-            staffId: s.aisha.userId,
-            date: FUTURE_DATE,
-            start: "07:00",
-            end: "13:00",
-          },
-        });
-
-        const stored = await row(s, s.futureId);
-        expect(new Date(stored.starts_at).toISOString()).toBe(at("07:00"));
-        expect(new Date(stored.ends_at).toISOString()).toBe(at("13:00"));
-
-        const data = await manageAs(session);
-        expect(data.shifts).toContainEqual(
-          expect.objectContaining({
-            id: s.futureId,
-            date: FUTURE_DATE,
-            end: "13:00",
-            editable: true,
-          }),
-        );
-      } finally {
-        await cleanUp(s);
-      }
-    });
-
-    it("[ADM-09][AC-07] an edit that overlaps another shift of the carer is not blocked", async () => {
-      const s = await seed();
-      try {
-        const session = await signIn(s.priya.email);
-        // 07:00-13:00 overlaps Aisha's 12:00-14:00 shift on the same day.
-        const result = await updateAs(session, {
-          shiftId: s.futureId,
-          carerId: s.aisha.userId,
-          start: "07:00",
-          end: "13:00",
-        });
-        expect(result.ok).toBe(true);
-      } finally {
-        await cleanUp(s);
-      }
-    });
-
-    it("[ADM-09][AC-07] reassigning to another active carer of the organisation works; a deactivated carer or another organisation's carer is UNAUTHORISED", async () => {
-      const s = await seed();
-      try {
-        const session = await signIn(s.priya.email);
-        const base = { shiftId: s.futureId, start: "07:00", end: "11:00" };
-
-        expect(await updateAs(session, { ...base, carerId: s.dean.userId })).toMatchObject({
-          ok: false,
-          error: { code: "UNAUTHORISED" },
-        });
-        expect(await updateAs(session, { ...base, carerId: s.bea.userId })).toMatchObject({
-          ok: false,
-          error: { code: "UNAUTHORISED" },
-        });
-        expect((await row(s, s.futureId)).carer_id).toBe(s.aisha.userId);
-
-        expect(await updateAs(session, { ...base, carerId: s.daniel.userId })).toMatchObject({
-          ok: true,
-          data: { staffId: s.daniel.userId },
-        });
-        expect((await row(s, s.futureId)).carer_id).toBe(s.daniel.userId);
-      } finally {
-        await cleanUp(s);
-      }
-    });
-
-    it("[ADM-09][AC-07] a shift that has ended is NOT_FOUND to change or cancel, is unchanged, and Manage marks it not editable", async () => {
+    it("[ADM-09][AC-07] a shift that has ended is NOT_FOUND to cancel, is unchanged, and Manage marks it not editable", async () => {
       const s = await seed();
       try {
         const session = await signIn(s.priya.email);
         const before = await row(s, s.endedId);
 
-        expect(
-          await updateAs(session, {
-            shiftId: s.endedId,
-            carerId: s.aisha.userId,
-            start: "00:00",
-            end: "23:00",
-          }),
-        ).toMatchObject({ ok: false, error: { code: "NOT_FOUND" } });
         expect(await cancelAs(session, s.endedId)).toMatchObject({
           ok: false,
           error: { code: "NOT_FOUND" },
@@ -330,6 +234,9 @@ describe.skipIf(!hasLocalSupabase)(
         const data = await manageAs(session);
         expect(data.shifts.find((shift) => shift.id === s.endedId)).toMatchObject({
           editable: false,
+        });
+        expect(data.shifts.find((shift) => shift.id === s.futureId)).toMatchObject({
+          editable: true,
         });
       } finally {
         await cleanUp(s);
@@ -342,14 +249,6 @@ describe.skipIf(!hasLocalSupabase)(
         const session = await signIn(s.olga.email);
         const before = await row(s, s.futureId);
 
-        expect(
-          await updateAs(session, {
-            shiftId: s.futureId,
-            carerId: s.bea.userId,
-            start: "07:00",
-            end: "13:00",
-          }),
-        ).toMatchObject({ ok: false, error: { code: "NOT_FOUND" } });
         expect(await cancelAs(session, s.futureId)).toMatchObject({
           ok: false,
           error: { code: "NOT_FOUND" },

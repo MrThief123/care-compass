@@ -13,7 +13,6 @@ import { ManageScreen } from "./manage-screen";
  */
 const mocks = vi.hoisted(() => ({
   assign: vi.fn(),
-  update: vi.fn(),
   cancel: vi.fn(),
   replace: vi.fn(),
 }));
@@ -25,7 +24,6 @@ vi.mock("next/navigation", () => ({
 }));
 vi.mock("@/server/admin/manage-actions", () => ({
   assignShift: mocks.assign,
-  updateShift: mocks.update,
   cancelShift: mocks.cancel,
 }));
 
@@ -77,18 +75,6 @@ const data = {
 };
 
 beforeEach(() => {
-  mocks.update.mockImplementation(
-    async (input: { shiftId: string; carerId: string; start: string; end: string }) => ({
-      ok: true,
-      data: {
-        ...live,
-        id: input.shiftId,
-        staffId: input.carerId,
-        start: input.start,
-        end: input.end,
-      },
-    }),
-  );
   mocks.cancel.mockImplementation(async (shiftId: string) => ({ ok: true, data: { id: shiftId } }));
 });
 afterEach(() => vi.resetAllMocks());
@@ -96,15 +82,10 @@ afterEach(() => vi.resetAllMocks());
 const day = (date: string) => screen.getByTestId(`date-picker-day-${date}`);
 const carerRows = () => within(screen.getByRole("list", { name: "Aisha Rahman's shifts" }));
 
-describe("[ADM-09][AC-08] Edit and Cancel appear only on shifts that can still change", () => {
-  it("[ADM-09][AC-08] the live and the later shift have both buttons; the ended shift has neither", () => {
+describe("[ADM-09][AC-08] Cancel appears only on shifts that can still change", () => {
+  it("[ADM-09][AC-08] the live and the later shift have a Cancel button; the ended shift has none; nobody has Edit", () => {
     render(<ManageScreen data={data} selection={selection} />);
 
-    expect(
-      carerRows().getByRole("button", {
-        name: "Edit shift, Aisha Rahman, Margaret Doyle, 11:30 - 13:00",
-      }),
-    ).toBeVisible();
     expect(
       carerRows().getByRole("button", {
         name: "Cancel shift, Aisha Rahman, Margaret Doyle, 11:30 - 13:00",
@@ -112,7 +93,7 @@ describe("[ADM-09][AC-08] Edit and Cancel appear only on shifts that can still c
     ).toBeVisible();
     expect(
       carerRows().getByRole("button", {
-        name: "Edit shift, Aisha Rahman, Robert Hale, 14:00 - 16:00",
+        name: "Cancel shift, Aisha Rahman, Robert Hale, 14:00 - 16:00",
       }),
     ).toBeVisible();
     // Absent, not disabled (CLAUDE.md §7).
@@ -122,129 +103,8 @@ describe("[ADM-09][AC-08] Edit and Cancel appear only on shifts that can still c
       }),
     ).not.toBeInTheDocument();
     expect(carerRows().getByText("07:00 - 09:00")).toBeVisible();
-  });
-});
-
-describe("[ADM-09][AC-08] Edit panel", () => {
-  async function openEdit() {
-    await userEvent.click(
-      carerRows().getByRole("button", {
-        name: "Edit shift, Aisha Rahman, Margaret Doyle, 11:30 - 13:00",
-      }),
-    );
-  }
-
-  it("[ADM-09][AC-08] opens pre-filled with the shift's carer, start and end", async () => {
-    render(<ManageScreen data={data} selection={selection} />);
-    await openEdit();
-
-    expect(screen.getByRole("heading", { name: "Edit shift" })).toBeVisible();
-    expect(screen.getByLabelText("Carer")).toHaveValue("aisha");
-    expect(screen.getByLabelText("Start hour")).toHaveValue("11");
-    expect(screen.getByLabelText("Start minute")).toHaveValue("30");
-    expect(screen.getByLabelText("End hour")).toHaveValue("13");
-    expect(screen.getByLabelText("End minute")).toHaveValue("00");
-    // The Assign form is replaced while editing.
-    expect(screen.queryByRole("button", { name: "Assign shift" })).not.toBeInTheDocument();
-  });
-
-  it("[ADM-09][AC-08] extending to 15:00 and saving calls updateShift with exactly that, updates the row and shows a status", async () => {
-    render(<ManageScreen data={data} selection={selection} />);
-    await openEdit();
-    await userEvent.selectOptions(screen.getByLabelText("End hour"), "15");
-    await userEvent.click(screen.getByRole("button", { name: "Save changes" }));
-
-    expect(mocks.update).toHaveBeenCalledTimes(1);
-    expect(mocks.update).toHaveBeenCalledWith({
-      shiftId: "live",
-      carerId: "aisha",
-      start: "11:30",
-      end: "15:00",
-    });
-    expect(await screen.findByRole("status")).toHaveTextContent(
-      "Shift updated: Aisha Rahman → Margaret Doyle, 2026-11-30, 11:30 - 15:00.",
-    );
-    expect(carerRows().getByText("11:30 - 15:00")).toBeVisible();
-    expect(carerRows().queryByText("11:30 - 13:00")).not.toBeInTheDocument();
-    // The panel is back to Assign.
-    expect(screen.queryByRole("heading", { name: "Edit shift" })).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Assign shift" })).toBeVisible();
-  });
-
-  it("[ADM-09][AC-08] choosing another carer sends that carer", async () => {
-    render(<ManageScreen data={data} selection={selection} />);
-    await openEdit();
-    await userEvent.selectOptions(screen.getByLabelText("Carer"), "daniel");
-    await userEvent.click(screen.getByRole("button", { name: "Save changes" }));
-
-    expect(mocks.update).toHaveBeenCalledWith(
-      expect.objectContaining({ shiftId: "live", carerId: "daniel" }),
-    );
-  });
-
-  it("[ADM-09][AC-08] the overlap warning names the carer's other shift and never the shift being edited, and Save stays available", async () => {
-    render(<ManageScreen data={data} selection={selection} />);
-    await openEdit();
-
-    // 12:00-13:00 sits inside the shift's own 11:30-13:00: not an overlap with another shift.
-    await userEvent.selectOptions(screen.getByLabelText("Start hour"), "12");
-    await userEvent.selectOptions(screen.getByLabelText("Start minute"), "00");
-    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
-
-    await userEvent.selectOptions(screen.getByLabelText("End hour"), "15");
-    expect(screen.getByRole("alert")).toHaveTextContent(
-      "Aisha Rahman already has a shift with Robert Hale from 14:00 - 16:00 that overlaps this time. You can still save it.",
-    );
-    expect(screen.getByRole("alert")).not.toHaveTextContent("Margaret Doyle");
-    const save = screen.getByRole("button", { name: "Save changes" });
-    expect(save).toBeEnabled();
-    await userEvent.click(save);
-    expect(mocks.update).toHaveBeenCalledWith(expect.objectContaining({ end: "15:00" }));
-  });
-
-  it("[ADM-09][AC-08] an end before the start shows the time error and calls nothing", async () => {
-    render(<ManageScreen data={data} selection={selection} />);
-    await openEdit();
-    await userEvent.selectOptions(screen.getByLabelText("End hour"), "10");
-    await userEvent.click(screen.getByRole("button", { name: "Save changes" }));
-
-    expect(screen.getByText("End time must be after start time.")).toBeVisible();
-    expect(mocks.update).not.toHaveBeenCalled();
-  });
-
-  it("[ADM-09][AC-08] a refused save shows the server's message and keeps the old times", async () => {
-    mocks.update.mockResolvedValue({
-      ok: false,
-      error: { code: "NOT_FOUND", message: "That shift can't be changed." },
-    });
-    render(<ManageScreen data={data} selection={selection} />);
-    await openEdit();
-    await userEvent.selectOptions(screen.getByLabelText("End hour"), "15");
-    await userEvent.click(screen.getByRole("button", { name: "Save changes" }));
-
-    expect(await screen.findByText("That shift can't be changed.")).toBeVisible();
-    expect(carerRows().getByText("11:30 - 13:00")).toBeVisible();
-    expect(screen.queryByText(/Shift updated/)).not.toBeInTheDocument();
-  });
-
-  it("[ADM-09][AC-08] a thrown action is a failed save, not a crash", async () => {
-    mocks.update.mockRejectedValue(new Error("network"));
-    render(<ManageScreen data={data} selection={selection} />);
-    await openEdit();
-    await userEvent.click(screen.getByRole("button", { name: "Save changes" }));
-
-    expect(await screen.findByText("Couldn't update the shift. Try again.")).toBeVisible();
-    expect(screen.getByRole("button", { name: "Save changes" })).toBeEnabled();
-  });
-
-  it("[ADM-09][AC-08] Stop editing closes the panel and calls nothing", async () => {
-    render(<ManageScreen data={data} selection={selection} />);
-    await openEdit();
-    await userEvent.click(screen.getByRole("button", { name: "Stop editing" }));
-
-    expect(screen.queryByRole("heading", { name: "Edit shift" })).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Assign shift" })).toBeVisible();
-    expect(mocks.update).not.toHaveBeenCalled();
+    // Editing a shift was dropped (CHG-053): cancel it and assign it again.
+    expect(screen.queryByRole("button", { name: /^Edit shift/ })).not.toBeInTheDocument();
   });
 });
 
@@ -318,18 +178,10 @@ describe("[ADM-09][AC-09] Cancel shift", () => {
     expect(carerRows().getByText("11:30 - 13:00")).toBeVisible();
   });
 
-  it("[ADM-09][AC-09] the screen passes axe with the dialog open, and with the edit panel open", async () => {
+  it("[ADM-09][AC-09] the screen passes axe with the dialog open", async () => {
     const { container } = render(<ManageScreen data={data} selection={selection} />);
     await userEvent.click(cancelButton());
     expect(screen.getByRole("dialog")).toBeVisible();
-    expect(await axe(container)).toHaveNoViolations();
-    await userEvent.click(screen.getByRole("button", { name: "Keep shift" }));
-
-    await userEvent.click(
-      carerRows().getByRole("button", {
-        name: "Edit shift, Aisha Rahman, Margaret Doyle, 11:30 - 13:00",
-      }),
-    );
     expect(await axe(container)).toHaveNoViolations();
   });
 });

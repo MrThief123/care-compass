@@ -1,5 +1,7 @@
 # ADM-09 — Admin — Edit, extend or cancel a shift
 
+> **CHG-053 (2026-10-03): editing and extending dropped; this feature is cancel only.** Wherever this PRD describes the Edit panel, `updateShift` or the edit schema, that part is not built. To change a shift, cancel it and assign again.
+
 | Field | Value |
 |---|---|
 | Feature ID | ADM-09 |
@@ -15,7 +17,7 @@
 > **Plan v0.2 — data wiring feature.** The screen UI is delivered on fixtures by **ADM-UI-02**. Where this PRD's Scope describes layout or visual components, treat them as already built: verify them, then replace fixture data with the Supabase data source, add server actions, permissions and persistence, and make the acceptance criteria pass against real data. Shared components live in the UI kit (UI-01/UI-02/UI-03) — change them only through a shared PR.
 
 ## Purpose
-Let an admin correct the roster: change a shift's start, end or carer (which covers extending it when a manager asks a carer to stay longer), or cancel it.
+Let an admin correct the roster by cancelling a shift (editing and extending were dropped, CHG-053).
 
 ## Problem
 ADM-07 can only create shifts. A shift entered wrongly, or one that runs long, can only be fixed in the database. Edit rights follow actual working time (F0-10), so an extension has to reach `ends_at` for the carer to keep recording care.
@@ -31,7 +33,7 @@ Rosters reflect reality; edit rights follow actual working time.
 
 ## Scope
 Built on the Admin Manage screen (ADM-UI-02, wired by ADM-07). **Design gap built from tokens (PD-052); flag "design gap, built from tokens, please review" in the PR.** Answers recorded in FD-01 to FD-05.
-- **Row actions.** Each shift row in the "Current shifts on selected day" panel gets **Edit** and **Cancel** buttons, only on shifts that have not ended (FD-03). Ended shifts show no buttons (absent, not disabled, CLAUDE.md §7).
+- **Row actions.** Each shift row in the "Current shifts on selected day" panel gets a **Cancel** button (the Edit button below was dropped, CHG-053), only on shifts that have not ended (FD-03). Ended shifts show no buttons (absent, not disabled, CLAUDE.md §7).
 - **Edit panel.** Edit opens an inline panel (replacing the Assign panel's form while open) pre-filled from the shift: carer picker (active, signed-up carers of the organisation), start and end using the same hour/minute dropdowns and common-shift chips as Assign, the date shown but fixed. Buttons: Save changes, Cancel editing. The same soft overlap warning as Assign (D30), computed over the carer's other shifts and excluding the shift being edited. Never blocks.
 - **Cancel shift.** A confirmation dialog: "Cancel this shift?" naming carer, client, date and times, with "Keep shift" and "Cancel shift" buttons. Confirm sets `cancelled_at`; the row leaves the panel and the date's dot goes if it was the carer's last shift that day.
 - **Server Actions** in `src/server/admin/manage-actions.ts` (extend, not recreate): `updateShift({ shiftId, carerId, start, end })` and `cancelShift(shiftId)`. The date is read from the stored shift (Melbourne), never sent by the client. Result shape per ARCHITECTURE.md §4.
@@ -41,7 +43,7 @@ Built on the Admin Manage screen (ADM-UI-02, wired by ADM-07). **Design gap buil
 - Recurring shifts (D31). Moving a shift to another date or to another client (cancel and assign again). Un-cancelling. Editing or cancelling an ended shift. Overnight shifts (FD-04 of ADM-07). Notifying the carer of a change (not requested).
 
 ## Functional Requirements
-- Edit changes `starts_at`, `ends_at` and/or `carer_id` of one shift; extending is editing `ends_at` (PD-053).
+- (Dropped, CHG-053.) Edit changes `starts_at`, `ends_at` and/or `carer_id` of one shift; extending is editing `ends_at` (PD-053).
 - Cancel sets `cancelled_at = now()`; the row is never deleted.
 - Both are audited by the existing `audit_shifts` trigger (before and after, actor).
 - After an extension, `carer_on_active_shift` is true for the carer until the new end (half-open interval).
@@ -80,9 +82,9 @@ Built on the Admin Manage screen (ADM-UI-02, wired by ADM-07). **Design gap buil
 - Existing guard `shifts_before_update_assignment_trg` (F0-21) already refuses an other-organisation carer on update; do not duplicate it.
 
 ## Traceability
-- Product requirements: REQ-24 (Shifts can be edited and extended.)
+- Product requirements: REQ-24 (now: shifts can be cancelled, CHG-053).
 - Sources: CIS5 Staff Time Table Rostering (extend shift); CM-0309 (shifts editable; confirm extension workflow)
-- Decisions: PD-053, PD-052; feature FD-01 to FD-05.
+- Decisions: PD-053 (edit part superseded by CHG-053), PD-052; feature FD-01 to FD-08.
 - Source abbreviations are defined in `docs/SOURCES.md`.
 
 ## Labels

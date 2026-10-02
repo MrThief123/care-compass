@@ -117,7 +117,7 @@ async function signInAsAdmin(page: Page, email: string) {
   await expect(page).toHaveURL(/\/admin\/home$/);
 }
 
-test.describe("[ADM-09] Edit, extend or cancel a shift against real data", () => {
+test.describe("[ADM-09] Cancel a shift against real data", () => {
   test.skip(!enabled, "Needs local Supabase and E2E_DATA_SOURCE=supabase — see the comment above.");
 
   async function openDay(page: Page, s: Awaited<ReturnType<typeof seed>>) {
@@ -130,7 +130,7 @@ test.describe("[ADM-09] Edit, extend or cancel a shift against real data", () =>
     return day;
   }
 
-  test("[ADM-09][AC-01] extend 07:00 - 11:00 to 13:00, then cancel the 14:00 shift: both are in the database and survive a reload", async ({
+  test("[ADM-09][AC-03] cancel the 14:00 shift: it is cancelled in the database, the 07:00 shift is untouched, and both survive a reload", async ({
     page,
   }) => {
     const s = await seed();
@@ -139,11 +139,7 @@ test.describe("[ADM-09] Edit, extend or cancel a shift against real data", () =>
       const day = await openDay(page, s);
 
       const carerShifts = page.getByRole("list", { name: /Aisha Rahman's shifts/ });
-      await carerShifts.getByRole("button", { name: /^Edit shift, .*07:00 - 11:00$/ }).click();
-      await page.getByLabel("End hour").selectOption("13");
-      await page.getByRole("button", { name: "Save changes" }).click();
-      await expect(page.getByRole("status")).toContainText("Shift updated");
-      await expect(carerShifts.getByText("07:00 - 13:00")).toBeVisible();
+      await expect(page.getByRole("button", { name: /^Edit shift/ })).toHaveCount(0);
 
       await carerShifts.getByRole("button", { name: /^Cancel shift, .*14:00 - 16:00$/ }).click();
       await page
@@ -158,15 +154,15 @@ test.describe("[ADM-09] Edit, extend or cancel a shift against real data", () =>
         .select("id, ends_at, cancelled_at")
         .eq("client_id", s.clientId);
       expect(error).toBeNull();
-      const extended = rows!.find((row) => row.id === s.extendId)!;
+      const kept = rows!.find((row) => row.id === s.extendId)!;
       const cancelled = rows!.find((row) => row.id === s.cancelId)!;
-      expect(new Date(extended.ends_at).toISOString()).toBe("2026-12-15T02:00:00.000Z");
-      expect(extended.cancelled_at).toBeNull();
+      expect(new Date(kept.ends_at).toISOString()).toBe("2026-12-15T00:00:00.000Z");
+      expect(kept.cancelled_at).toBeNull();
       expect(cancelled.cancelled_at).not.toBeNull();
 
       await page.reload();
       await openDay(page, s);
-      await expect(carerShifts.getByText("07:00 - 13:00")).toBeVisible();
+      await expect(carerShifts.getByText("07:00 - 11:00")).toBeVisible();
       await expect(carerShifts.getByText("14:00 - 16:00")).toHaveCount(0);
       await expect(day).toHaveAttribute("data-has-items", "true");
     } finally {

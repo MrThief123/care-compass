@@ -1173,13 +1173,13 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Requirements:** REQ-05, REQ-06
 - **Docs:** `docs/development/admin-dev/admin-carer-assignments/` · **Status:** NOT STARTED
 
-### ADM-09 — Admin — Edit, extend or cancel a shift
+### ADM-09 — Admin — Edit, extend or cancel a shift (cancel only, CHG-053)
 - **Dashboard / stream:** admin · **Lane:** A · **Days:** D17 · **Sprint:** SPRINT · **PR target:** `main` · **Branch:** `feature/admin-edit-shift`
 - **Description:** Supports the client's need to extend a shift when a manager asks a carer to stay longer.
 - **User value:** Rosters reflect reality; edit rights follow actual working time.
 - **Dependencies:** ADM-07 · **Blocking decisions:** OQ-27, OQ-19
-- **Jira summary:** Change shift times, extend a shift by extra hours, or cancel it (not designed)
-- **Acceptance criteria summary:** 9 criteria — an extended shift is active until its new end; cancel sets `cancelled_at` and keeps the row; ended and cancelled shifts are frozen; a deactivated, other-organisation carer or a new client is refused; mock validation and NOT_FOUND; real-data update and cancel; Edit panel; Cancel dialog (FD-05)
+- **Jira summary:** Cancel a shift (editing and extending dropped, CHG-053)
+- **Acceptance criteria summary:** 9 criteria — a shift's carer, times and client are guarded by the database; cancel sets `cancelled_at` and keeps the row; ended and cancelled shifts are frozen; a deactivated, other-organisation carer or a new client is refused; mock validation and NOT_FOUND; real-data cancel; Cancel button on editable shifts only; Cancel dialog (FD-05, CHG-053: editing dropped)
 - **Testing summary:** 1 db file, 1 unit file, 1 integration file, 1 component file, 1 e2e file
 - **Requirements:** REQ-24
 - **Docs:** `docs/development/admin-dev/admin-edit-shift/` · **Status:** READY FOR PR

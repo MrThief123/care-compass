@@ -5,6 +5,7 @@ import { useState } from "react";
 
 import { DatePickerGrid } from "@/components/shared/calendar/date-picker-grid";
 import { ConfirmationModal } from "@/components/shared/forms/confirmation-modal";
+import { Field } from "@/components/shared/forms/field";
 import { InlineAlert } from "@/components/shared/forms/inline-alert";
 import { SelectableListRow } from "@/components/shared/lists/selectable-list-row";
 import { EmptyState } from "@/components/shared/states";
@@ -13,14 +14,27 @@ import { CardShell } from "@/components/ui/card-shell";
 import { Icon } from "@/components/ui/icon";
 import { cn } from "@/lib/utils";
 import { shiftTimeRangeSchema } from "@/server/admin/assign-shift-schema";
-import { assignShift, cancelShift, updateShift } from "@/server/admin/manage-actions";
+import { assignShift, cancelShift } from "@/server/admin/manage-actions";
 import type { AdminManageData, ManagePerson, ManageShift } from "@/server/admin/manage-queries";
 
-import { EditShiftPanel, type EditShiftValues } from "./edit-shift-panel";
-import { TimeRangePicker } from "./time-range-picker";
-
+/** Common shift times, one tap fills the start and end dropdowns. */
+const commonShifts = [
+  { start: "07:00", end: "11:00" },
+  { start: "11:00", end: "15:00" },
+  { start: "15:00", end: "19:00" },
+  { start: "08:00", end: "16:00" },
+  { start: "09:00", end: "17:00" },
+];
+const pad = (n: number) => String(n).padStart(2, "0");
+const hourOptions = Array.from({ length: 24 }, (_, hour) => ({
+  value: pad(hour),
+  label: pad(hour),
+}));
+const minuteOptions = Array.from({ length: 12 }, (_, step) => ({
+  value: pad(step * 5),
+  label: pad(step * 5),
+}));
 const ASSIGN_FAILED = "Couldn't assign the shift. Try again.";
-const UPDATE_FAILED = "Couldn't update the shift. Try again.";
 const CANCEL_FAILED = "Couldn't cancel the shift. Try again.";
 
 function PersonList({
@@ -138,11 +152,9 @@ export function ManageScreen({
   const [saving, setSaving] = useState(false);
   const [shifts, setShifts] = useState(data.shifts);
   const [justAssignedId, setJustAssignedId] = useState("");
-  const [editingId, setEditingId] = useState("");
   const [cancelling, setCancelling] = useState<ManageShift | null>(null);
   const staff = data.staff.find((person) => person.id === staffId);
   const client = data.clients.find((person) => person.id === clientId);
-  const editing = shifts.find((shift) => shift.id === editingId);
   const carerNameOf = (shift: ManageShift) =>
     shift.staffName ?? data.staff.find((person) => person.id === shift.staffId)?.name ?? "Carer";
   const clientNameOf = (shift: ManageShift) =>
@@ -174,7 +186,6 @@ export function ManageScreen({
   }
   function clear() {
     updateUrl({ staff: "", client: "" });
-    setEditingId("");
     setNotice("");
     setFailure("");
     setErrors({});
@@ -228,51 +239,7 @@ export function ManageScreen({
       `Shift assigned: ${staff.name} → ${client.name}, ${date}, ${range.start} - ${range.end}.`,
     );
   }
-  function startEditing(shift: ManageShift) {
-    setEditingId(shift.id);
-    setNotice("");
-    setFailure("");
-    setErrors({});
-  }
-  /** Save from the Edit panel. Resolves with the server's field messages, if it refused the times. */
-  async function saveEdit(
-    shift: ManageShift,
-    values: EditShiftValues,
-  ): Promise<Record<string, string> | void> {
-    if (saving) return;
-    setFailure("");
-    setNotice("");
-    setSaving(true);
-    let outcome: Awaited<ReturnType<typeof updateShift>>;
-    try {
-      outcome = await updateShift({ shiftId: shift.id, ...values });
-    } catch {
-      // A rejected action is a failed save, not a crash; the panel stays as it was.
-      outcome = { ok: false, error: { code: "UNEXPECTED", message: UPDATE_FAILED } };
-    }
-    setSaving(false);
-    if (!outcome.ok) {
-      const messages = outcome.error.fieldErrors;
-      if (messages && Object.keys(messages).length > 0) return messages;
-      setFailure(outcome.error.message);
-      return;
-    }
-    const carer = data.staff.find((person) => person.id === outcome.data.staffId);
-    // The server's times and carer win; names and `editable` carry over from the row being replaced.
-    const updated: ManageShift = {
-      ...shift,
-      ...outcome.data,
-      staffName: carer?.name ?? shift.staffName,
-      clientName: clientNameOf(shift),
-      editable: shift.editable,
-    };
-    setShifts((current) => current.map((row) => (row.id === shift.id ? updated : row)));
-    setJustAssignedId("");
-    setEditingId("");
-    setNotice(
-      `Shift updated: ${carerNameOf(updated)} → ${clientNameOf(updated)}, ${updated.date}, ${updated.start} - ${updated.end}.`,
-    );
-  }
+  /** Cancel a live shift once the admin confirms; the row and its date dot go, the history stays. */
   async function confirmCancel() {
     const shift = cancelling;
     if (!shift || saving) return;
@@ -284,6 +251,7 @@ export function ManageScreen({
     try {
       outcome = await cancelShift(shift.id);
     } catch {
+      // A rejected action is a failed cancel, not a crash; the shift stays.
       outcome = { ok: false, error: { code: "UNEXPECTED", message: CANCEL_FAILED } };
     }
     setSaving(false);
@@ -293,7 +261,6 @@ export function ManageScreen({
     }
     setShifts((current) => current.filter((row) => row.id !== shift.id));
     setJustAssignedId("");
-    if (editingId === shift.id) setEditingId("");
     setNotice(
       `Shift cancelled: ${carerNameOf(shift)} → ${clientNameOf(shift)}, ${shift.date}, ${shift.start} - ${shift.end}.`,
     );
@@ -310,7 +277,6 @@ export function ManageScreen({
         onSelect={(id) => {
           updateUrl({ staff: id });
           setNotice("");
-          setEditingId("");
         }}
       />
       <PersonList
@@ -323,13 +289,10 @@ export function ManageScreen({
         onSelect={(id) => {
           updateUrl({ client: id });
           setNotice("");
-          setEditingId("");
         }}
       />
       <CardShell className="flex min-w-0 flex-col gap-5 border-transparent p-5">
-        <h2 className="text-title-section text-text-primary">
-          {editing ? "Edit shift" : "Assign shift"}
-        </h2>
+        <h2 className="text-title-section text-text-primary">Assign shift</h2>
         <div className="flex flex-wrap items-center justify-between gap-2 rounded-inset bg-bg-inset p-3">
           <p className="min-w-0 break-words text-body-emphasis text-text-primary">
             {staff && client
@@ -346,26 +309,24 @@ export function ManageScreen({
             (staff || client) && "2xl:grid-cols-[minmax(0,336px)_minmax(0,1fr)]",
           )}
         >
-          {!editing && (
-            <section aria-label="Shift date" className="space-y-3 overflow-x-auto">
-              <h3 className="text-body-emphasis text-text-primary">Date</h3>
-              <DatePickerGrid
-                month={month}
-                selected={date}
-                datesWithItems={shifts
-                  .filter((shift) => shift.staffId === staffId)
-                  .map((shift) => shift.date)}
-                onSelect={(value) => {
-                  setDate(value);
-                  setMonth(value);
-                  setNotice("");
-                }}
-                onPrevMonth={() => changeMonth(-1)}
-                onNextMonth={() => changeMonth(1)}
-                className="min-w-[332px] max-w-[336px] [&_button]:min-h-11 [&_button]:min-w-11 [&_button]:justify-center"
-              />
-            </section>
-          )}
+          <section aria-label="Shift date" className="space-y-3 overflow-x-auto">
+            <h3 className="text-body-emphasis text-text-primary">Date</h3>
+            <DatePickerGrid
+              month={month}
+              selected={date}
+              datesWithItems={shifts
+                .filter((shift) => shift.staffId === staffId)
+                .map((shift) => shift.date)}
+              onSelect={(value) => {
+                setDate(value);
+                setMonth(value);
+                setNotice("");
+              }}
+              onPrevMonth={() => changeMonth(-1)}
+              onNextMonth={() => changeMonth(1)}
+              className="min-w-[332px] max-w-[336px] [&_button]:min-h-11 [&_button]:min-w-11 [&_button]:justify-center"
+            />
+          </section>
           {(staff || client) && (
             <BookedPanel
               date={date}
@@ -374,82 +335,58 @@ export function ManageScreen({
               shifts={shifts}
               staffList={data.staff}
               clientList={data.clients}
-              onEdit={startEditing}
               onCancel={setCancelling}
             />
           )}
         </div>
-        {editing ? (
-          <EditShiftPanel
-            key={editing.id}
-            shift={editing}
-            carers={data.staff}
-            carerName={carerNameOf(editing)}
-            clientName={clientNameOf(editing)}
-            dateLabel={dayFormat.format(new Date(`${editing.date}T00:00:00Z`))}
-            otherShifts={shifts}
-            clients={data.clients}
-            saving={saving}
-            failure={failure}
-            onChange={() => setFailure("")}
-            onSave={(values) => saveEdit(editing, values)}
-            onStop={() => {
-              setEditingId("");
+        <div className="flex min-w-0 flex-col gap-5">
+          <TimeRangePicker
+            start={start}
+            end={end}
+            error={errors.end ?? errors.start}
+            onChange={(next) => {
+              setStart(next.start);
+              setEnd(next.end);
+              setErrors({});
+              setNotice("");
               setFailure("");
             }}
           />
-        ) : (
-          <>
-            <div className="flex min-w-0 flex-col gap-5">
-              <TimeRangePicker
-                start={start}
-                end={end}
-                error={errors.end ?? errors.start}
-                onChange={(next) => {
-                  setStart(next.start);
-                  setEnd(next.end);
-                  setErrors({});
-                  setNotice("");
-                  setFailure("");
-                }}
-              />
-              {staff && !failure && overlaps.length > 0 && (
-                <InlineAlert>
-                  {overlaps
-                    .map(
-                      (shift) =>
-                        `${staff.name} already has a shift with ${shift.clientName ?? data.clients.find((person) => person.id === shift.clientId)?.name ?? "another client"} from ${shift.start} - ${shift.end} that overlaps this time.`,
-                    )
-                    .join(" ")}{" "}
-                  You can still assign it.
-                </InlineAlert>
-              )}
-            </div>
-            {failure && (
-              <p role="alert" className="text-body-default text-text-alert-strong">
-                {failure}
-              </p>
-            )}
-            {notice && (
-              <p
-                role="status"
-                className="rounded-inset bg-bg-inset p-3 text-body-default text-text-brand"
-              >
-                {notice}
-              </p>
-            )}
-            <div className="mt-auto space-y-3 pt-6">
-              <div className="grid grid-cols-2 gap-3">
-                <Button variant="secondary" onClick={cancel}>
-                  Cancel
-                </Button>
-                <Button onClick={assign} disabled={!staff || !client || saving}>
-                  Assign shift
-                </Button>
-              </div>
-            </div>
-          </>
+          {staff && !failure && overlaps.length > 0 && (
+            <InlineAlert>
+              {overlaps
+                .map(
+                  (shift) =>
+                    `${staff.name} already has a shift with ${shift.clientName ?? data.clients.find((person) => person.id === shift.clientId)?.name ?? "another client"} from ${shift.start} - ${shift.end} that overlaps this time.`,
+                )
+                .join(" ")}{" "}
+              You can still assign it.
+            </InlineAlert>
+          )}
+        </div>
+        {failure && (
+          <p role="alert" className="text-body-default text-text-alert-strong">
+            {failure}
+          </p>
         )}
+        {notice && (
+          <p
+            role="status"
+            className="rounded-inset bg-bg-inset p-3 text-body-default text-text-brand"
+          >
+            {notice}
+          </p>
+        )}
+        <div className="mt-auto space-y-3 pt-6">
+          <div className="grid grid-cols-2 gap-3">
+            <Button variant="secondary" onClick={cancel}>
+              Cancel
+            </Button>
+            <Button onClick={assign} disabled={!staff || !client || saving}>
+              Assign shift
+            </Button>
+          </div>
+        </div>
       </CardShell>
       <ConfirmationModal
         open={cancelling !== null}
@@ -469,6 +406,88 @@ export function ManageScreen({
   );
 }
 
+function TimePicker({
+  label,
+  value,
+  onChange,
+}: {
+  label: "Start" | "End";
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  const [hour = "00", minute = "00"] = value.split(":");
+  return (
+    <div className="grid grid-cols-2 gap-3">
+      <Field
+        label={`${label} hour`}
+        type="select"
+        value={hour}
+        options={hourOptions}
+        onChange={(next) => onChange(`${next}:${minute}`)}
+      />
+      <Field
+        label={`${label} minute`}
+        type="select"
+        value={minute}
+        options={minuteOptions}
+        onChange={(next) => onChange(`${hour}:${next}`)}
+      />
+    </div>
+  );
+}
+
+function TimeRangePicker({
+  start,
+  end,
+  error,
+  onChange,
+}: {
+  start: string;
+  end: string;
+  error?: string;
+  onChange: (range: { start: string; end: string }) => void;
+}) {
+  return (
+    <section aria-label="Shift time" className="flex min-w-0 flex-col gap-4">
+      <h3 className="text-body-emphasis text-text-primary">Time</h3>
+      <div className="grid gap-4 md:grid-cols-2 md:gap-8">
+        <TimePicker
+          label="Start"
+          value={start}
+          onChange={(next) => onChange({ start: next, end })}
+        />
+        <TimePicker label="End" value={end} onChange={(next) => onChange({ start, end: next })} />
+      </div>
+      {error && <p className="text-body-small text-text-alert-strong">{error}</p>}
+      <div className="flex flex-col gap-2">
+        <span className="text-body-default text-text-secondary">Common shifts</span>
+        <div className="flex flex-wrap gap-2">
+          {commonShifts.map((shift) => {
+            const pressed = shift.start === start && shift.end === end;
+            return (
+              <button
+                key={`${shift.start}-${shift.end}`}
+                type="button"
+                aria-pressed={pressed}
+                onClick={() => onChange(shift)}
+                className={cn(
+                  "h-11 rounded-control border px-4 text-body-default transition-colors",
+                  "outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
+                  pressed
+                    ? "border-border-brand bg-primary text-primary-foreground"
+                    : "border-border-brand bg-bg-surface text-text-primary hover:bg-bg-inset",
+                )}
+              >
+                {shift.start} - {shift.end}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 const dayFormat = new Intl.DateTimeFormat("en-AU", {
   day: "numeric",
   month: "long",
@@ -484,7 +503,6 @@ function BookedPanel({
   shifts,
   staffList,
   clientList,
-  onEdit,
   onCancel,
 }: {
   date: string;
@@ -493,7 +511,6 @@ function BookedPanel({
   shifts: AdminManageData["shifts"];
   staffList: ManagePerson[];
   clientList: ManagePerson[];
-  onEdit: (shift: ManageShift) => void;
   onCancel: (shift: ManageShift) => void;
 }) {
   const onDay = shifts
@@ -564,22 +581,13 @@ function BookedPanel({
                           {row.start} - {row.end}
                         </span>
                         {row.editable && (
-                          <span className="flex w-full flex-wrap gap-2">
-                            <Button
-                              variant="secondary"
-                              aria-label={`Edit shift, ${row.carer}, ${row.client}, ${row.start} - ${row.end}`}
-                              onClick={() => onEdit(row)}
-                            >
-                              Edit
-                            </Button>
-                            <Button
-                              variant="secondary"
-                              aria-label={`Cancel shift, ${row.carer}, ${row.client}, ${row.start} - ${row.end}`}
-                              onClick={() => onCancel(row)}
-                            >
-                              Cancel
-                            </Button>
-                          </span>
+                          <Button
+                            variant="secondary"
+                            aria-label={`Cancel shift, ${row.carer}, ${row.client}, ${row.start} - ${row.end}`}
+                            onClick={() => onCancel(row)}
+                          >
+                            Cancel
+                          </Button>
                         )}
                       </li>
                     ))}

@@ -49,6 +49,18 @@ Record feature-level decisions here using the template below. Project-wide decis
 - Reason: ADM-09 AC-07 / FD-03 requires `getAdminManage` to return `editable`; an exact-shape assertion cannot hold. No assertion removed, nothing relaxed.
 - **HUMAN REVIEW: test expectation changed** (flagged in PROGRESS.md and the PR).
 
+### FD-08 — Editing and extending a shift dropped; cancel only (CHG-053)
+- Date: 2026-10-03 · Human confirmation: Dhruv Verma, 2026-10-03: "remove it just because it makes the UI so clunky ... if this main functionality already exists, then it's all right. I don't think there's any benefit."
+- Decision: removed the Edit panel, `updateShift`, `edit-shift-schema.ts` and the shared `time-range-picker.tsx` (Manage's Assign form is back to its ADM-07 shape). Kept: Cancel, `cancelShift`, `ManageShift.editable`, and the whole migration, including the trigger refusing a client change or a reassign to an inactive carer (hardening; the human may ask for it to be removed). Criteria count stays 9 (AC-02, AC-06, AC-07, AC-08 reworded), so the plan totals are unchanged.
+- Tests removed or changed (**HUMAN REVIEW: test expectation changed**; the removed behaviour no longer exists):
+  - `src/features/admin-manage/edit-shift.test.tsx` [ADM-09][AC-08] T-08: the Edit-panel tests (pre-filled panel, Save payload, list and dots update, overlap warning excluding the edited shift, time validation, failed save keeps old times) removed. Before: Edit and Cancel buttons expected on editable rows. After: Cancel only, and no Edit button. The Cancel dialog tests (T-09) are unchanged except axe, which now runs with the dialog open only.
+  - `src/server/admin/shift-edit-actions.test.ts` [AC-06] T-06: the `updateShift` validation, NOT_FOUND and success cases removed; `cancelShift` cases unchanged.
+  - `tests/integration/admin-edit-shift.test.ts` [AC-07] T-07: the update tests (Melbourne times, extend, overlap not blocked, reassign) removed; the ended-shift test is cancel only and also asserts `editable`; cancel and other-organisation cases unchanged.
+  - `tests/e2e/admin-edit-shift.spec.ts` T-10: the extend-to-13:00 steps removed; it now cancels the 14:00 shift and asserts the 07:00 shift is untouched.
+  - pgTAP `admin_edit_shift.test.sql` (T-01 to T-05) unchanged and passing: the database rules still hold.
+- Alternatives: keep Edit (recommended earlier; the human decided against it).
+- Open for the human: the client's "extend a shift" need (CIS5) is now met by cancel and assign again; confirm that with the client.
+
 <!-- Template
 ### FD-01 — <title>
 - Date:
