@@ -6,6 +6,7 @@ import { formatShortDate } from "@/lib/format/date";
 import { cn } from "@/lib/utils";
 import type { Occurrence } from "@/types/domain";
 
+import { lateCompletionNote } from "./late-completion";
 import { occurrenceNurse } from "./occurrence-display";
 import { statusPillClassName } from "./status-pill-class";
 import { taskDetailHref } from "./task-routes";
@@ -90,6 +91,7 @@ export function TaskLogTable({ clientId, items, params, onOpen, basePath }: Task
         <tbody role="rowgroup" className="block">
           {items.map((occurrence) => {
             const nurse = occurrenceNurse(occurrence);
+            const lateNote = lateCompletionNote(occurrence);
             // Only a Done pill carries a name that can be cut; its whole text is on hover.
             const pillText = occurrence.status === "done" ? `Done · ${nurse}` : undefined;
 
@@ -145,7 +147,13 @@ export function TaskLogTable({ clientId, items, params, onOpen, basePath }: Task
                   </span>
                 </td>
 
-                <td role="cell" className={cn(CELL, "[grid-area:status]")}>
+                <td
+                  role="cell"
+                  className={cn(
+                    CELL,
+                    "[grid-area:status] flex min-w-0 flex-col items-start justify-center gap-0.5",
+                  )}
+                >
                   {/* The pill may shrink below its text; its label then ends in an ellipsis. The
                       whole text stays in the DOM, so assistive technology reads all of it. */}
                   <span title={pillText} className="flex min-w-0 max-w-full">
@@ -155,6 +163,11 @@ export function TaskLogTable({ clientId, items, params, onOpen, basePath }: Task
                       className={statusPillClassName(occurrence.status)}
                     />
                   </span>
+                  {lateNote && (
+                    <span className="max-w-full text-body-secondary text-text-secondary [overflow-wrap:anywhere]">
+                      {lateNote}
+                    </span>
+                  )}
                 </td>
 
                 <td role="cell" className={cn(CELL, "[grid-area:chev]")}>

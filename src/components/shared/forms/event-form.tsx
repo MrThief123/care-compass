@@ -102,6 +102,11 @@ interface PlainEventFormProps extends EventFormBaseProps {
  */
 export type EventFormProps = TaskEventFormProps | PlainEventFormProps;
 
+/** `YYYY-MM-DD` -> its month's first day, `YYYY-MM-01`. */
+function monthOf(date: LocalDate): LocalDate {
+  return `${date.slice(0, 7)}-01`;
+}
+
 function shiftMonth(month: LocalDate, step: number): LocalDate {
   const [year, monthIndex] = month.split("-").map(Number);
   const date = new Date(Date.UTC(year!, monthIndex! - 1 + step, 1));
@@ -127,8 +132,18 @@ export function EventForm(props: EventFormProps) {
   } = props;
   const [errors, setErrors] = useState<Record<string, string>>({});
   // Uncontrolled month, so callers that do not care about paging still get it.
-  const [ownMonth, setOwnMonth] = useState(month);
+  const [ownMonth, setOwnMonth] = useState(values.date ? monthOf(values.date) : month);
   const shownMonth = onMonthChange ? month : ownMonth;
+  // The calendar shows the month of the active date (FAM-16): it opens on it and follows the date
+  // whenever the date changes, but not on paging, so the arrows still move away from it. A caller
+  // that controls `month` (`onMonthChange`) owns it; picking a day here still reports its month.
+  const [seenDate, setSeenDate] = useState(values.date);
+  if (values.date !== seenDate) {
+    setSeenDate(values.date);
+    if (values.date && !onMonthChange && monthOf(values.date) !== monthOf(ownMonth)) {
+      setOwnMonth(monthOf(values.date));
+    }
+  }
 
   function changeMonth(step: number) {
     const next = shiftMonth(shownMonth, step);
@@ -208,7 +223,12 @@ export function EventForm(props: EventFormProps) {
             month={shownMonth}
             selected={values.date || undefined}
             datesWithItems={datesWithItems}
-            onSelect={(date) => onChange({ ...values, date })}
+            onSelect={(date) => {
+              onChange({ ...values, date });
+              if (onMonthChange && monthOf(date) !== monthOf(shownMonth)) {
+                onMonthChange(monthOf(date));
+              }
+            }}
             onPrevMonth={() => changeMonth(-1)}
             onNextMonth={() => changeMonth(1)}
           />

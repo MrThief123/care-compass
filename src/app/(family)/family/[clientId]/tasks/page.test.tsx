@@ -59,7 +59,12 @@ describe("[FAM-UI-07] /family/[clientId]/tasks page (real mock contract, DATA_SO
     expect(firstThree).toEqual([
       ["Mon 30 Nov", "Afternoon check-in", "Aisha Rahman", "Planned"],
       ["Mon 30 Nov", "Physiotherapy", "Aisha Rahman", "Planned"],
-      ["Mon 30 Nov", "Morning medication", "Aisha Rahman", "Done · Aisha Rahman"],
+      [
+        "Mon 30 Nov",
+        "Morning medication",
+        "Aisha Rahman",
+        "Done · Aisha RahmanCompleted 14 minutes late",
+      ],
     ]);
   });
 
@@ -270,7 +275,12 @@ describe("[FAM-14] Family — Task log", () => {
       .filter((row) => row[0] === "Mon 30 Nov");
     expect(monday).toEqual(
       expect.arrayContaining([
-        ["Mon 30 Nov", "Morning medication", "Aisha Rahman", "Done · Aisha Rahman"],
+        [
+          "Mon 30 Nov",
+          "Morning medication",
+          "Aisha Rahman",
+          "Done · Aisha RahmanCompleted 14 minutes late",
+        ],
         ["Mon 30 Nov", "Physiotherapy", "Aisha Rahman", "Planned"],
         ["Mon 30 Nov", "Afternoon check-in", "Aisha Rahman", "Planned"],
       ]),

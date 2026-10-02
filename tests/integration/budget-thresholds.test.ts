@@ -321,3 +321,89 @@ describe.skipIf(!hasLocalSupabase)("[INT-01] budget threshold emails", () => {
     expect(wrongSecret.status).toBe(401);
   });
 });
+
+describe.skipIf(!hasLocalSupabase)("[INT-10] threshold email names the bucket", () => {
+  async function addSecondBucket(s: Awaited<ReturnType<typeof seedScenario>>, name: string) {
+    const bucket = await s.admin
+      .from("budget_buckets")
+      .insert({ client_id: s.clientId, name })
+      .select("id")
+      .single();
+    if (bucket.error || !bucket.data) throw bucket.error ?? new Error("bucket");
+    const funds = await s.admin.from("budget_fund_entries").insert({
+      bucket_id: bucket.data.id,
+      client_id: s.clientId,
+      kind: "bucket_added",
+      amount: 1000,
+      recorded_by: s.familyUserId,
+      recorded_by_name: "Helen Doyle",
+    });
+    if (funds.error) throw funds.error;
+  }
+
+  it("[INT-10][AC-01] T-01 with two buckets the email names the one that crossed, not the other", async () => {
+    const s = await seedScenario();
+    try {
+      await addSecondBucket(s, "NDIS plan");
+      await chargeCost(s.bucketId, s.clientId, 760); // Government at 76%; NDIS plan untouched
+      const provider = new FakeEmailProvider();
+
+      const result = await runBudgetThresholdsJob(provider);
+
+      expect(result.failures).toEqual([]);
+      expect(provider.sent).toHaveLength(2);
+      for (const message of provider.sent) {
+        expect(message.text).toContain("Margaret");
+        expect(message.text).toContain("76%");
+        expect(message.text).toContain("Government allocation");
+        expect(message.text).not.toContain("NDIS plan");
+      }
+    } finally {
+      await cleanUp(s);
+    }
+  }, 15000);
+
+  it("[INT-10][AC-02] T-02 a single-bucket client's email reads as one plain sentence naming the bucket", async () => {
+    const s = await seedScenario();
+    try {
+      await chargeCost(s.bucketId, s.clientId, 760);
+      const provider = new FakeEmailProvider();
+
+      await runBudgetThresholdsJob(provider);
+
+      expect(provider.sent).toHaveLength(2);
+      for (const message of provider.sent) {
+        expect(message.text).toMatch(
+          /^The Schedule of Care Program for Margaret \S+ has reached 76% of its Government allocation for the present period\. Log in and refer to plan\.$/,
+        );
+      }
+    } finally {
+      await cleanUp(s);
+    }
+  }, 15000);
+
+  it("[INT-10][AC-03] T-03 no bucket name, client name or address reaches the logs or the job result", async () => {
+    const s = await seedScenario();
+    const spies = (["log", "info", "warn", "error", "debug"] as const).map((level) =>
+      vi.spyOn(console, level).mockImplementation(() => {}),
+    );
+    try {
+      await chargeCost(s.bucketId, s.clientId, 760);
+      const provider = new FakeEmailProvider();
+
+      const result = await runBudgetThresholdsJob(provider);
+
+      const logged = JSON.stringify(spies.flatMap((spy) => spy.mock.calls));
+      const returned = JSON.stringify(result);
+      for (const text of [logged, returned]) {
+        expect(text).not.toContain("Government");
+        expect(text).not.toContain("Margaret");
+        expect(text).not.toContain(s.familyEmail);
+        expect(text).not.toContain(s.adminEmail);
+      }
+    } finally {
+      spies.forEach((spy) => spy.mockRestore());
+      await cleanUp(s);
+    }
+  }, 15000);
+});

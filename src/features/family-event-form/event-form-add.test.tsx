@@ -133,3 +133,33 @@ describe("[FAM-06][AC-05] Cancel discards unsaved input", () => {
     expect(mocks.push).toHaveBeenCalledWith(RETURN_HREF);
   });
 });
+
+describe("[FAM-16][AC-08] Start time and End time", () => {
+  it("[FAM-16][AC-08] saves the minutes between Start time and End time", async () => {
+    const user = userEvent.setup();
+    renderAdd();
+    await fillRequiredFields(user);
+    await user.type(screen.getByLabelText("End time"), "10:15");
+
+    await user.click(screen.getByRole("button", { name: "Save event" }));
+
+    expect(mocks.createEvent).toHaveBeenCalledExactlyOnceWith(
+      expect.objectContaining({ startTime: "09:30", durationMinutes: 45 }),
+    );
+  });
+
+  it("[FAM-16][AC-09] an End time not after Start time is refused and createEvent is never called", async () => {
+    const user = userEvent.setup();
+    renderAdd();
+    await fillRequiredFields(user);
+    await user.type(screen.getByLabelText("End time"), "09:00");
+
+    await user.click(screen.getByRole("button", { name: "Save event" }));
+
+    expect(screen.getByLabelText("End time")).toBeInvalid();
+    expect(screen.getByLabelText("End time")).toHaveAccessibleDescription(
+      expect.stringContaining("End time must be after the start time."),
+    );
+    expect(mocks.createEvent).not.toHaveBeenCalled();
+  });
+});

@@ -34,8 +34,10 @@ interface Recipient {
 
 const EMAIL_SUBJECT = "Schedule of Care Program — budget update";
 
-function emailBody(clientName: string, percent: number): string {
-  return `The Schedule of Care Program for ${clientName} has reached ${percent}% of its allocation for the present period. Log in and refer to plan.`;
+/** INT-10 (FD-01): names the bucket. No bucket name (removed mid-run) falls back to INT-01's wording. */
+function emailBody(clientName: string, percent: number, bucketName: string | undefined): string {
+  const allocation = bucketName ? `its ${bucketName} allocation` : "its allocation";
+  return `The Schedule of Care Program for ${clientName} has reached ${percent}% of ${allocation} for the present period. Log in and refer to plan.`;
 }
 
 export interface BudgetThresholdsJobResult {
@@ -127,6 +129,11 @@ export async function runBudgetThresholdsJob(
     (sent.data ?? []).map((row) => `${row.bucket_id}:${row.threshold}:${row.period_start}`),
   );
 
+  const names = await supabase.from("budget_buckets").select("id, name").in("id", bucketIds);
+  const bucketNames = new Map(
+    (names.data ?? []).map((row) => [row.id as string, row.name as string]),
+  );
+
   for (const row of due) {
     const percent = row.percent_used ?? 0;
     const newThresholds = thresholdsMet(row.percent_used).filter(
@@ -142,7 +149,7 @@ export async function runBudgetThresholdsJob(
           emailProvider.send({
             to: recipient.email,
             subject: EMAIL_SUBJECT,
-            text: emailBody(row.client_name, percent),
+            text: emailBody(row.client_name, percent, bucketNames.get(row.bucket_id)),
           }),
         ),
       );
