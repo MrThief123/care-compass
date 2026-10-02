@@ -1,6 +1,6 @@
 "use client";
 
-import { useId } from "react";
+import { useId, useState } from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -67,6 +67,7 @@ export function Field({
   className,
 }: FieldProps) {
   const id = useId();
+  const [revealed, setRevealed] = useState(false);
   const hintId = `${id}-hint`;
   const errorId = `${id}-error`;
   const hasError = Boolean(error);
@@ -123,10 +124,30 @@ export function Field({
         <div className="relative">
           <input
             {...shared}
-            type={type}
+            type={type === "password" && revealed ? "text" : type}
             onChange={(event) => onChange(event.target.value)}
-            className={cn(CONTROL, controlTone(hasError), "h-11", adornment && "pr-10")}
+            className={cn(
+              CONTROL,
+              controlTone(hasError),
+              "h-11",
+              adornment && "pr-10",
+              type === "password" && "pr-12",
+            )}
           />
+          {type === "password" && (
+            // F0-21 FD-12: hidden by default. The name is sr-only text, not aria-label, so
+            // getByLabel("Password") still finds only the input.
+            <button
+              type="button"
+              onClick={() => setRevealed((shown) => !shown)}
+              disabled={disabled}
+              aria-controls={id}
+              className="absolute right-0 top-0 flex h-11 w-11 items-center justify-center rounded-control text-text-brand outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <Icon name={revealed ? "eye-off" : "eye"} size={20} aria-hidden />
+              <span className="sr-only">{revealed ? "Hide password" : "Show password"}</span>
+            </button>
+          )}
           {adornment && (
             <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-text-brand">
               {adornment}
