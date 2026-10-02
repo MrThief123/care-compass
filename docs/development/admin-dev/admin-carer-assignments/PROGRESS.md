@@ -6,34 +6,35 @@ Lane: A — Admin
 Sprint: SPRINT · planned D16
 Branch: `feature/admin-carer-assignments`
 PR target: `main`
-Last updated: 2026-09-17 (planning pack generated)
+Last updated: 2026-10-02 (docs and tests written; not implemented)
 
 ## Blockers
-- OQ-09 — Carer access model
-- OQ-19 — Figma access and remaining design gaps
+- None. OQ-09 and OQ-19 are ANSWERED (see DECISIONS.md)
 
 ## Dependencies status
-- ADM-07 — NOT STARTED
+- ADM-07 — MERGED
 
 ## Completed
 - Feature documentation drafted (Claude Chat planning pack)
+- Claimed; ACs expanded to AC-01..AC-07, TEST_PLAN, FD-01..FD-03 (human-confirmed)
+- Tests written first (pgTAP, unit, component, integration, e2e); all fail for the expected reason
 
 ## In progress
 - None
 
 ## Remaining
-- Assignment list and remove/reassign actions (design required).
+- Migration `admin_end_carer_assignment`, server queries/actions/mock store, Staff screen Clients list + Remove confirmation, db types regen, status page refresh
 
 ## Acceptance criteria status
-- 0 / 1 MET
+- 0 / 7 MET
 
 ## Tests
-- Written: 0 / 1
+- Written: 16 cases (T-16 manual) across 5 files
 - Passing: 0
-- Failing: 0
+- Failing: 14 (T-15 e2e not run)
 
 ## Files changed
-- None yet. Likely files: `src/features/admin-manage/assignments.tsx`
+- Tests and docs only so far (see TEST_PLAN.md).
 
 ## Decisions
 - See DECISIONS.md
@@ -45,7 +46,7 @@ Last updated: 2026-09-17 (planning pack generated)
 - PROPOSED items in PRD.md are unconfirmed until validated in F0-01 or answered in DECISIONS.md.
 
 ## Next action
-- Wait for answers to OQ-09, OQ-19; then complete dependencies, run START FEATURE ADM-08, and write the tests in TEST_PLAN.md first.
+- Implement in a clean session (handoff prompt), then PR approval from the human.
 
 ## Ready for PR
 - No
