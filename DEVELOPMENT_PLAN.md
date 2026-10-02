@@ -1,7 +1,7 @@
 # DEVELOPMENT PLAN — Care Compass
 
 Version 0.2 · 17 September 2026 · Status: DRAFT (controlled after planning freeze) · Supersedes v0.1 dashboard-by-dashboard phases
-Totals: **92 active features** (93 listed; CAR-08 retired) · **444 acceptance criteria** across 5 phases (UI-04 and its 10 criteria added by CHG-004, 2026-09-19; UI-05 and its 13 criteria added under CHG-009, 2026-09-24; F0-17 and its 8 criteria added by CHG-010, 2026-09-24; CHG-020, 2026-09-25: FAM-UI-08 (6 criteria) and ADM-11 (5) added, FAM-UI-05 +5 criteria, CAR-08 and its 2 criteria retired; CHG-021, 2026-09-25: FAM-UI-05 +4 criteria; CHG-022, 2026-09-25: FAM-UI-05 +5 criteria; CHG-027, 2026-09-26: F0-18 and its 9 criteria added; CHG-037, 2026-09-30: F0-19 and its 6 criteria added; CHG-040, 2026-09-30: F0-20 and its 10 criteria added; CHG-041, 2026-10-01: F0-21 and its 6 criteria added; CHG-042, 2026-10-01: F0-22 and its 8 criteria added; CHG-045, 2026-10-02: F0-23 and its 8 criteria added; CHG-047, 2026-10-02: F0-24 (7 criteria) and INT-09 (5 criteria) added, every remaining post-sprint feature pulled into the sprint, sprint extended to D21; CHG-050, 2026-10-02: INT-10 and its 4 criteria added (PL-26 promoted); CHG-051, 2026-10-02: FAM-16 and its 11 criteria added (PL-27 promoted); the Jira import `docs/JIRA_BACKLOG.csv` predates all seven). Jira import: `docs/JIRA_BACKLOG.csv`.
+Totals: **93 active features** (94 listed; CAR-08 retired) · **452 acceptance criteria** across 5 phases (UI-04 and its 10 criteria added by CHG-004, 2026-09-19; UI-05 and its 13 criteria added under CHG-009, 2026-09-24; F0-17 and its 8 criteria added by CHG-010, 2026-09-24; CHG-020, 2026-09-25: FAM-UI-08 (6 criteria) and ADM-11 (5) added, FAM-UI-05 +5 criteria, CAR-08 and its 2 criteria retired; CHG-021, 2026-09-25: FAM-UI-05 +4 criteria; CHG-022, 2026-09-25: FAM-UI-05 +5 criteria; CHG-027, 2026-09-26: F0-18 and its 9 criteria added; CHG-037, 2026-09-30: F0-19 and its 6 criteria added; CHG-040, 2026-09-30: F0-20 and its 10 criteria added; CHG-041, 2026-10-01: F0-21 and its 6 criteria added; CHG-042, 2026-10-01: F0-22 and its 8 criteria added; CHG-045, 2026-10-02: F0-23 and its 8 criteria added; CHG-047, 2026-10-02: F0-24 (7 criteria) and INT-09 (5 criteria) added, every remaining post-sprint feature pulled into the sprint, sprint extended to D21; CHG-050, 2026-10-02: INT-10 and its 4 criteria added (PL-26 promoted); CHG-051, 2026-10-02: FAM-16 and its 11 criteria added (PL-27 promoted); CHG-052, 2026-10-02: INT-11 and its 8 criteria added (PL-25 promoted); the Jira import `docs/JIRA_BACKLOG.csv` predates all eight). Jira import: `docs/JIRA_BACKLOG.csv`.
 
 ---
 
@@ -215,6 +215,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 | 8 | INT-08 | Release readiness and client handover | I | D21 | SPRINT | INT-02, INT-03, INT-04, INT-05, INT-06, INT-07, F0-24, INT-09, FAM-11, CAR-07, ADM-03, ADM-05, ADM-08, ADM-09, ADM-11 | OQ-01, OQ-17 | `feature/shared-release-readiness-handover` | NOT STARTED |
 | 9 | INT-09 | Overdue and upcoming care alert emails | B | D17–D18 | SPRINT | INT-01, F0-11, F0-24 | OQ-40 | `feature/shared-care-alert-emails` | NOT STARTED |
 | 10 | INT-10 | Budget threshold email names the bucket | B | D18 | SPRINT | INT-01 | — | `feature/shared-budget-threshold-email-bucket-name` | READY FOR PR |
+| 11 | INT-11 | Pending-cost email | B | D19 | SPRINT | INT-01, F0-11, F0-12 | — | `feature/shared-pending-cost-email` | IN PROGRESS |
 
 
 ---
@@ -1216,7 +1217,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Acceptance criteria summary:** 5 criteria — one email per eligible recipient is sent with the client's name and percentage; no email is sent; they receive no email …
 - **Testing summary:** 5 integration
 - **Requirements:** REQ-31
-- **Split out by CHG-044:** the pending-cost email mentioned here under the original CHG-020 note was never incorporated into this feature's own PRD/ACs and is not built; tracked as PL-25 instead. INT-01 itself ships threshold emails only (5/5 ACs).
+- **Split out by CHG-044:** the pending-cost email mentioned here under the original CHG-020 note was never incorporated into this feature's own PRD/ACs and was not built; tracked as PL-25, promoted to INT-11 by CHG-052. INT-01 itself ships threshold emails only (5/5 ACs).
 - **Docs:** `docs/development/shared/shared-budget-threshold-emails/` · **Status:** See PROGRESS.md
 
 ### INT-02 — End-to-end: organisation transfer journey
@@ -1305,8 +1306,19 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Jira summary:** Scheduled overdue-care alert emails (and upcoming-care reminders if decided)
 - **Acceptance criteria summary:** 5 criteria (provisional, rewritten once OQ-40 is answered) — an overdue task emails the decided recipients once; the same task is not emailed twice; a completed task is never emailed; a send failure retries and records nothing; the endpoint refuses callers without the secret
 - **Testing summary:** 1 pgTAP, 1 unit, 1 integration
-- **Requirements:** REQ-33 (PL-03 promoted; PL-23 and PL-25 stay parked)
+- **Requirements:** REQ-33 (PL-03 promoted; PL-23 stays parked; PL-25 was promoted to INT-11 by CHG-052)
 - **Docs:** `docs/development/shared/shared-care-alert-emails/` · **Status:** NOT STARTED
+
+### INT-11 — Pending-cost email
+- **Dashboard / stream:** shared · **Lane:** B · **Days:** D19 · **Sprint:** SPRINT · **PR target:** `main` · **Branch:** `feature/shared-pending-cost-email`
+- **Description:** A scheduled job that emails the client's Family and active organisation admins once per cost when an event cost is first held pending: "A cost of $X for <event> could not be covered by <BUCKET> and is pending. Add funds to pay it. Log in and refer to plan." Digest per client per run; carers are not emailed. Reuses INT-01's `EmailProvider`, Vercel Cron and secret-checked job route. PL-25 promoted by CHG-052.
+- **User value:** Family and admins add funds promptly, so pending costs clear and the bucket is not left silently overdrawn.
+- **Dependencies:** INT-01, F0-11, F0-12 · **Blocking decisions:** None (trigger, idempotency, wording and recipients answered 2026-10-02)
+- **Jira summary:** Scheduled job emails Family and admins once per cost held pending
+- **Acceptance criteria summary:** 8 criteria — a pending cost emails Family and the client's admins with the approved sentence; never emailed twice; a paid cost, or one paid off before the run, is never emailed; several costs in one run make one digest; only Family and the current organisation's active admins receive it; a provider failure records nothing and is retried; no PII in logs or the result and the table, function and endpoint are locked down; INT-01 and F0-12 tests pass unchanged
+- **Testing summary:** 1 pgTAP, 1 route, 1 integration
+- **Requirements:** REQ-37 (PL-25 promoted)
+- **Docs:** `docs/development/shared/shared-pending-cost-email/` · **Status:** See PROGRESS.md
 
 
 ### INT-10 — Budget threshold email names the bucket
@@ -1326,7 +1338,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 See PRD.md §17. Promotion requires a CHG entry, human confirmation, and new feature docs from `docs/templates/FEATURE_TEMPLATE/`.
 
 ## 7. Adding a new feature
-1. Propose ID (next number: `FAM-17`, `FAM-UI-09`, `CAR-10`, `ADM-12`, `UI-04`, `INT-11`, `F0-18`), slug `<stream>-<name>`, lane and planned day.
+1. Propose ID (next number: `FAM-17`, `FAM-UI-09`, `CAR-10`, `ADM-12`, `UI-04`, `INT-12`, `F0-18`), slug `<stream>-<name>`, lane and planned day.
 2. Record CHG-xxx in DECISIONS.md; get human confirmation if material.
 3. Copy `docs/templates/FEATURE_TEMPLATE/` to `docs/development/<stream>/<slug>/` and complete it.
 4. Add the row to §4 and a card to §5; add to `docs/JIRA_BACKLOG.csv`; update root PROGRESS.md.
