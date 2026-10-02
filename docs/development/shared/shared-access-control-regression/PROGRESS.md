@@ -1,12 +1,13 @@
 # Progress — INT-05 Access-control regression matrix
 
-Status: READY FOR PR
+Status: PR OPEN
 Owner: Shwethan Potu
 Lane: I — Integration
 Sprint: STRETCH · planned D12–D13
 Branch: `feature/shared-access-control-regression`
 PR target: `main`
-Last updated: 2026-10-02 (implemented, both ACs MET, suites green)
+PR: https://github.com/MrThief123/care-compass/pull/209
+Last updated: 2026-10-02 (PR opened)
 
 ## Blockers
 - None. OQ-01 is ANSWERED (CHG-036: shared work branches from and PRs to `main`).
