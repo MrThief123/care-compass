@@ -12,5 +12,9 @@ Each criterion is observable and maps to at least one test in TEST_PLAN.md. Crit
 | AC-06 | US-01 | happy | Given a bucket at $240 with a pending $310 cost, when '100' is added and saved, then the pending cost is paid (bucket remaining $30, no pending line, the cost shows 'Paid on <date>'); a $50 top-up on the same bucket pays nothing. | MET |
 | AC-07 | US-01 | happy | Given Edit budget with `DATA_SOURCE=supabase`, when Save passes the page's checks, then the action is called once with the checked edit and the page goes back to Budget with a refresh; a field refusal from the action marks that field and keeps the page; any other failure shows one message above Save with the values kept; a save with no changes calls nothing. | MET |
 | AC-08 | US-01 | regression | Given `DATA_SOURCE=mock`, when Save passes, then no action is called and the Phase 1 local-state behaviour is unchanged. | MET |
+| AC-09 | US-03 | happy | Given Add event or Edit event with a cost and a bucket, when saved, then the event's cost and bucket are stored (a reload shows them); clearing the cost clears both; a cost with no bucket is refused with the action's message. | MET |
+| AC-10 | US-03 | happy | Given a plain event with a cost that has ended, when Budget or Family home loads, then its cost is charged once to the bucket (paid, or pending when the bucket cannot cover it in full) and the bucket's remaining drops; loading again charges nothing more. | MET |
+| AC-11 | US-03 | edge | Given a plain event that has not ended, a cancelled occurrence, an event with no cost, or an occurrence from before the cost was set, when Budget loads, then nothing is charged. | MET |
+| AC-12 | US-03 | permission | Given a carer, or a family member of another client, when they call `charge_ended_event_occurrences` for the client, then it is rejected (`42501`) and nothing is charged. | MET |
 
 Status values: NOT MET · MET (test passing) · BLOCKED (cite OQ/PD).

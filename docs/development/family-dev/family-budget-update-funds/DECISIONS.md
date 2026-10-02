@@ -58,6 +58,14 @@ None. OQ-04, OQ-05, OQ-19 and OQ-03 are ANSWERED in root DECISIONS.md (PD-033, P
 - Consequences: touches the FAM-10 query `src/server/budget/queries.ts`; no test changed; ordering by date is unchanged.
 - Human confirmation required: yes. Option 1 chosen by the user on 2026-10-02.
 
+### FD-07 — Controlled change: an event's cost and bucket are saved, and an ended plain event is charged
+- Date: 2026-10-02
+- Context: the Add/Edit event form already collects Cost and Paid from, but `createEvent` and `updateEvent` drop them and nothing calls `set_event_cost`, so no event cost is ever stored. Tasks are charged by the F0-12 trigger when ticked Done. Plain events (CHG-009) are never ticked, so they were never charged.
+- Decision (human, in-session): (1) the event actions save the cost and bucket through `set_event_cost`; (2) a plain event with a cost is charged once, in full, after it ends: the same paid-or-pending rule as a Done task (PD-058). No scheduled job: `settleEndedEventCosts(clientId)` runs when Budget or Family home loads, finds ended occurrences of plain events with a cost, and calls the new `charge_ended_event_occurrences` function. Only occurrences that start after the cost was set are charged (new `care_events.cost_set_at`), so a past-dated event is not charged retroactively. A cancelled occurrence is not charged.
+- Alternatives considered: a scheduled job (rejected by the user: "it'd just be an event"); writing a `done` completion for plain events (rejected: CHG-009).
+- Consequences: new additive migration (one column, one function); edits the events-lane file `src/server/events/actions.ts` (human confirmed); new ACs AC-09 to AC-12; `charge_ended_event_occurrences` trusts the caller's list of ended occurrences (checked only to be in the past and after the cost was set), as family can already edit the budget freely.
+- Human confirmation required: yes. Given by the user on 2026-10-02.
+
 <!-- Template
 ### FD-xx — <title>
 - Date:

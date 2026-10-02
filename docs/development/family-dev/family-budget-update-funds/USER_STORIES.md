@@ -13,3 +13,9 @@ As the person who owns the budget, I want only the family and the client's organ
 
 - Acceptance criteria: AC-03
 - Requirements: REQ-29, REQ-38
+
+## US-03
+As a family member, I want an event's cost to be saved with the event and taken from its bucket once the event is over, so that the budget reflects what has been spent without me recording it twice.
+
+- Acceptance criteria: AC-09, AC-10, AC-11, AC-12
+- Requirements: PD-058, CHG-020 (added by FD-07, 2026-10-02)
