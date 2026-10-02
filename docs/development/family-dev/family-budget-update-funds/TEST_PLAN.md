@@ -37,6 +37,14 @@ Tests are written **before** production code (TESTING.md §2). Run them, confirm
 - `vitest run tests/integration/family-budget-update-funds.test.ts` (local stack): 6 fail, `Cannot find package '@/server/budget/actions'`; seeding and cleanup ran.
 - `playwright test tests/e2e/family-budget-update-funds.spec.ts` (production build, local stack, a throwaway action stub deleted afterwards): fails at the reload, `$15,880` is not stored.
 
+## Results (implementation, 2026-10-02, local Supabase only)
+- `supabase test db supabase/tests/budget_save_edit.test.sql`: 60/60 pass (after the 8 expectation fixes in DECISIONS FD-05). `supabase test db` (all): 26 files, 785 tests, PASS.
+- `vitest run src/server/budget/actions.test.ts`: 26/26. `src/features/family-budget` (incl. `edit-budget-save.test.tsx` 9/9, `family-budget.test.tsx`, `budget-edit.test.ts` unedited): all pass.
+- `vitest run tests/integration/family-budget-update-funds.test.ts`: 6/6. Budget integration (`family-budget-overview`, `budget-thresholds`, `family-home-budget-strip`, `pending-cost-emails`): all pass.
+- `playwright test tests/e2e/family-budget-update-funds.spec.ts` (`npm run build`, DATA_SOURCE and E2E_DATA_SOURCE=supabase, port 3112, local keys): 1/1.
+- `npm run lint`: 0 errors, 3 warnings, all in files this feature does not touch. `tsc --noEmit`: clean.
+- `npm test` (whole suite, includes `tests/integration`): 2722 pass. After `supabase db reset` the local storage index and the dev seed had to be re-applied (documents, CAR-04, F0-23 integration tests); one timing test (`expand.test.ts` 500 rules < 100 ms) failed once under load and passed alone. One failure remains that this feature does not touch: `shared-dev-seed-data.test.ts` [F0-16][AC-01] (`overlapping_shifts` called with the service-role key returns no rows; comes from main's `overlapping_shifts_caller_check` migration; not run on main to confirm).
+
 ## Regression scope
 - Full unit/component suite (`npm test`), `supabase test db`, integration for budget (`family-budget-overview`, `budget-thresholds`, `family-home-budget-strip`, `pending-cost-emails`), e2e for this feature locally. CI is unavailable: list the commands and results in the PR.
 - Existing FAM-UI-05 tests (`budget-edit.test.ts`, `family-budget.test.tsx`) must stay green with no assertion changed.

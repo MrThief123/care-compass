@@ -133,7 +133,8 @@ export async function saveBudgetEdit(
         name,
         starting_amount: startingAmount,
       })),
-      p_note: note?.trim() || null,
+      // The generated type omits null for a defaulted argument; the database takes it.
+      p_note: (note?.trim() || null) as string | undefined,
     });
 
     if (!error) return { ok: true, data: undefined };
