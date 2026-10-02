@@ -149,8 +149,12 @@ is changed, renamed or dropped.
 - Request: the human (Dhruv561, 2026-10-02) reported the QR code sat at the left of the card.
 - Cause: the `<img>` is a child of the card's flex column with no alignment of its own.
 - Decision: `self-center` on the image. Nothing else on the screen moves.
-- Tests: `src/app/(auth)/mfa/enroll/mfa-enroll.test.tsx` (`[F0-21][FD-13]`) guards the class; jsdom
-  has no layout, so the position was checked in Chromium.
+- Follow-up request (same day): the 32-character manual key wrapped by one character. The enrolment
+  card is marked `data-wide` and the auth layout gives such a card `max-w-md` (448px) instead of
+  `max-w-sm` (384px). Every other auth screen keeps 384px. At 390px wide the card shrinks to the
+  viewport as before, so the key can still wrap on a phone.
+- Tests: `src/app/(auth)/mfa/enroll/mfa-enroll.test.tsx` (`[F0-21][FD-13]`) guards the class and the
+  `data-wide` marker; jsdom has no layout, so position and wrapping were checked in Chromium.
 
 ## Test changes (CLAUDE.md §5) — HUMAN REVIEW: test expectation changed
 No assertion was removed or loosened. The simulated session changed because the requirement changed

@@ -87,6 +87,9 @@ Last updated: 2026-10-02
   on the dev server: hidden by default, eye reveals, eye-off hides.
 - **FD-13 (QR centred):** unit 2374/2374; `tsc` clean; `eslint` 0 errors; checked in Chromium on
   `/mfa/enroll` as the local seed admin: equal space either side of the QR.
+- **FD-13 follow-up (wider enrolment card):** 1 red, then green; unit 2375/2375; `tsc` clean;
+  `eslint` 0 errors. Chromium: enrolment card 448px with the key on one line; sign-in card still
+  384px; no horizontal scroll at 768px or 390px.
 
 ## Next action
 - FD-07 follow-up (hosted project, needs the human): record the dashboard's Auth > Rate Limits

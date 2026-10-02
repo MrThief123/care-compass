@@ -4,7 +4,8 @@ import type { ReactNode } from "react";
 export default function AuthLayout({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-screen items-center justify-center bg-bg-canvas px-4 py-12">
-      <div className="w-full max-w-sm">{children}</div>
+      {/* A card marked `data-wide` (MFA enrolment, F0-21 FD-13) gets a wider column. */}
+      <div className="w-full max-w-sm has-[[data-wide]]:max-w-md">{children}</div>
     </div>
   );
 }
