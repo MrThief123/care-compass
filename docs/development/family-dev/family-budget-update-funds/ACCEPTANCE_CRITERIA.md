@@ -1,11 +1,20 @@
-# Acceptance Criteria — FAM-11 Family — Update funds
+# Acceptance Criteria — FAM-11 Family — Update funds (Edit budget)
 
-Each criterion is observable and maps to at least one test in TEST_PLAN.md. Criteria may not be changed after implementation starts without a controlled change recorded in DECISIONS.md.
+Each criterion is observable and maps to at least one test in TEST_PLAN.md. Criteria may not be changed after implementation starts without a controlled change recorded in DECISIONS.md. Rewritten on start under CHG-020/021/022 (see PRD.md); the original AC-01 to AC-03 are kept in intent (happy, validation, permission) and widened.
 
 | ID | Story | Type | Criterion (Given / When / Then) | Status |
 |---|---|---|---|---|
-| AC-01 | US-01 | happy | Given NDIS remaining $14,880, when $1,000 is added to NDIS, then the NDIS card shows $15,880 and History's first row shows '+$1,000'. | NOT MET |
-| AC-02 | US-01 | validation | Given amount '-50', when submitted, then a validation error is shown and nothing is saved. | NOT MET |
-| AC-03 | US-01 | permission | Given a user without fund-edit rights (per OQ-05), when they call the action, then it is rejected. | NOT MET |
+| AC-01 | US-01 | happy | Given a signed-in family member and a bucket with remaining $14,880, when they add '1000' to it on Edit budget and save, then Budget shows $15,880 for it, History's first row reads '+$1,000', and both are still there after a reload (stored, not local). | MET |
+| AC-02 | US-01 | validation | Given amount '-50', '12.345' or 'abc' (on the page, a typed '0' too; the stored edit uses 0 for no change), or a removal over the balance ('Only $X available'), or an empty, 41-character or duplicate name (ignoring case and spaces), or a new bucket with no starting amount, when saved, then the save is refused with the message on that field and nothing is written — including nothing from the other, valid changes in the same save. | MET |
+| AC-03 | US-02 | permission | Given a carer (assigned or not), a family member of another client, or an admin of another organisation, when they call the action or `save_budget_edit` for the client, then it is rejected (`NOT_ALLOWED` / `42501`) and nothing changes; given an admin of the client's organisation, it is accepted and the History rows name that admin as the recorder. | MET |
+| AC-04 | US-01 | validation | Given one save with a valid top-up and one wrong field, when saved, then the database holds none of it (all-or-nothing); the refusal carries the field path of the wrong field. | MET |
+| AC-05 | US-01 | happy | Given one save that adds to one bucket, removes from another, renames a third, adds a new bucket ('Council grant', $1,200) and removes an unspent one, with the note 'Q3 plan review', when saved, then History gains 'Funds added', 'Funds removed', 'Bucket added' and 'Bucket removed' rows each with the note and the signed-in person's name, the rename adds no row, and the removed bucket's money leaves as minus its balance. | MET |
+| AC-06 | US-01 | happy | Given a bucket at $240 with a pending $310 cost, when '100' is added and saved, then the pending cost is paid (bucket remaining $30, no pending line, the cost shows 'Paid on <date>'); a $50 top-up on the same bucket pays nothing. | MET |
+| AC-07 | US-01 | happy | Given Edit budget with `DATA_SOURCE=supabase`, when Save passes the page's checks, then the action is called once with the checked edit and the page goes back to Budget with a refresh; a field refusal from the action marks that field and keeps the page; any other failure shows one message above Save with the values kept; a save with no changes calls nothing. | MET |
+| AC-08 | US-01 | regression | Given `DATA_SOURCE=mock`, when Save passes, then no action is called and the Phase 1 local-state behaviour is unchanged. | MET |
+| AC-09 | US-03 | happy | Given Add event or Edit event with a cost and a bucket, when saved, then the event's cost and bucket are stored (a reload shows them); clearing the cost clears both; a cost with no bucket is refused with the action's message. | MET |
+| AC-10 | US-03 | happy | Given a plain event with a cost that has ended, when Budget or Family home loads, then its cost is charged once to the bucket (paid, or pending when the bucket cannot cover it in full) and the bucket's remaining drops; loading again charges nothing more. | MET |
+| AC-11 | US-03 | edge | Given a plain event that has not ended, a cancelled occurrence, an event with no cost, or an occurrence from before the cost was set, when Budget loads, then nothing is charged. | MET |
+| AC-12 | US-03 | permission | Given a carer, or a family member of another client, when they call `charge_ended_event_occurrences` for the client, then it is rejected (`42501`) and nothing is charged. | MET |
 
 Status values: NOT MET · MET (test passing) · BLOCKED (cite OQ/PD).

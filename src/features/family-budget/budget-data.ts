@@ -4,6 +4,7 @@
  * header owns it (DECISIONS.md FD-08).
  */
 import { getBudgetSummary, getFundHistory } from "@/server/budget/queries";
+import { settleEndedEventCosts } from "@/server/budget/settle";
 import { getToday } from "@/server/events/queries";
 import type { BudgetBucketSummary, FundEntry } from "@/types/domain";
 
@@ -16,6 +17,8 @@ export interface FamilyBudgetData {
 }
 
 export async function loadFamilyBudgetData(clientId: string): Promise<FamilyBudgetData> {
+  // FAM-11: charge any plain event that has ended, so the figures below include it.
+  await settleEndedEventCosts(clientId);
   const [buckets, history, today] = await Promise.all([
     getBudgetSummary(clientId),
     getFundHistory(clientId),

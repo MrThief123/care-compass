@@ -1,14 +1,13 @@
-# Session State — FAM-11 Family — Update funds
+# Session State — FAM-11 Family — Update funds (Edit budget)
 
-Last session date: none (no implementation session yet)
-Current branch: n/a — `feature/family-budget-update-funds` not created
-Worked on: n/a
-What changed: n/a
-Tests run: none
-Test results: n/a
-Current blocker: OQ-05, OQ-04, OQ-19
-Important discoveries: none
-Important decisions: none
-Exact next action: Run `START FEATURE FAM-11` once dependencies are MERGED TO DEV (or COMPLETE) and blocking decisions are answered.
-Files likely to be touched next: `src/features/family-budget/update-funds.tsx`, `src/server/budget/actions.ts`
-Warning for next session: Read PRD.md, ACCEPTANCE_CRITERIA.md and TEST_PLAN.md before writing any code. Do not create the branch from the wrong parent (`family-dev`).
+Last session date: 2026-10-02
+Current branch: `feature/family-budget-update-funds` (worktree `/Users/dhruv/Documents/Dev/care-compass-fam-11`)
+Worked on: implemented FAM-11 (migration, action, view wiring); fixed 8 wrong pgTAP expectations (FD-05, human chose this).
+What changed: new migration `20261002113224_budget_save_edit.sql`, `database.types.ts`, `src/server/budget/actions.ts`, `edit-budget-view.tsx` (action imported lazily so mock-mode tests need no Supabase env), the edit `page.tsx`, docs.
+Tests run: pgTAP 60/60 and full `supabase test db` PASS; actions 26/26; edit-budget-save 9/9; existing budget tests unedited and green; integration and e2e green on local Supabase; lint 0 errors; tsc clean. See TEST_PLAN "Results" (one unrelated F0-16 failure noted there).
+Current blocker: none.
+Important discoveries: F0-12 already has `add_funds`, `remove_funds`, `add_bucket`, `rename_bucket`, `remove_bucket` and `can_edit_budget` (family + the client's admins), so FAM-11 is a thin atomic wrapper, an action and the wiring. `EditBudgetView` currently only holds local state (`budget-holder.tsx`).
+Important decisions: FD-01 (new `save_budget_edit` migration, human CONFIRMED), FD-02 (mock keeps local state, human CONFIRMED).
+FD-07 (2026-10-02): event cost and bucket are saved; an ended plain event is charged once when Budget or Family home loads (no scheduled job). A cost added to an event is never charged for occurrences that started before it was set. If saving the cost fails after a new event is created, the event exists without a cost and the form says so.
+Exact next action (before FD-07, still open): real-browser visual check (production build, port 3111, local keys, DATA_SOURCE=supabase; seeded local DB), run `node scripts/status-page.mjs`, check the page, commit and push, then ask the human before opening the PR.
+Warning for next session: local Supabase needs the storage index (memory: local-storage-upload-index) and `npm run db:seed` after any `db reset`. Never run e2e against the hosted project. Ask the human before opening the PR.

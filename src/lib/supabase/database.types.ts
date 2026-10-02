@@ -427,6 +427,7 @@ export type Database = {
           client_id: string;
           completion_mode: string;
           cost: number | null;
+          cost_set_at: string | null;
           created_at: string;
           created_by: string | null;
           deactivated_at: string | null;
@@ -445,6 +446,7 @@ export type Database = {
           client_id: string;
           completion_mode?: string;
           cost?: number | null;
+          cost_set_at?: string | null;
           created_at?: string;
           created_by?: string | null;
           deactivated_at?: string | null;
@@ -463,6 +465,7 @@ export type Database = {
           client_id?: string;
           completion_mode?: string;
           cost?: number | null;
+          cost_set_at?: string | null;
           created_at?: string;
           created_by?: string | null;
           deactivated_at?: string | null;
@@ -1112,6 +1115,10 @@ export type Database = {
         Returns: boolean;
       };
       carer_on_active_shift: { Args: { p_client_id: string }; Returns: boolean };
+      charge_ended_event_occurrences: {
+        Args: { p_client_id: string; p_items: Json };
+        Returns: number;
+      };
       client_shift_carers: {
         Args: { p_client_id: string; p_from: string; p_to: string };
         Returns: {
@@ -1264,6 +1271,15 @@ export type Database = {
           isSetofReturn: false;
         };
       };
+      save_budget_edit: {
+        Args: {
+          p_added: Json;
+          p_buckets: Json;
+          p_client_id: string;
+          p_note?: string;
+        };
+        Returns: undefined;
+      };
       session_is_aal2: { Args: never; Returns: boolean };
       set_event_cost: {
         Args: { p_bucket_id: string; p_cost: number; p_event_id: string };
@@ -1272,6 +1288,7 @@ export type Database = {
           client_id: string;
           completion_mode: string;
           cost: number | null;
+          cost_set_at: string | null;
           created_at: string;
           created_by: string | null;
           deactivated_at: string | null;

@@ -3,8 +3,9 @@ import { notFound } from "next/navigation";
 import { resolveTaskDetailOrigin } from "@/features/family-task-detail/task-detail-origin";
 import { TaskDetailView } from "@/features/family-task-detail/task-detail-view";
 import { decodeOccurrenceKey } from "@/features/family-task-log/task-routes";
+import { getBudgetSummary } from "@/server/budget/queries";
 import { getEventDocuments } from "@/server/documents/queries";
-import { getOccurrence, getToday } from "@/server/events/queries";
+import { getEvent, getOccurrence, getToday } from "@/server/events/queries";
 
 /**
  * Family · Task detail (FAM-UI-07). Any task or plain event opens, past or future, by its key alone
@@ -30,7 +31,12 @@ export default async function TaskDetailPage({
 
   if (!occurrence) notFound();
 
-  const documents = await getEventDocuments(clientId, occurrence.eventId);
+  const [documents, event, buckets] = await Promise.all([
+    getEventDocuments(clientId, occurrence.eventId),
+    getEvent(clientId, occurrence.eventId),
+    getBudgetSummary(clientId),
+  ]);
+  const bucketName = buckets.find((bucket) => bucket.id === event?.bucketId)?.label;
 
   return (
     <TaskDetailView
@@ -38,6 +44,8 @@ export default async function TaskDetailPage({
       occurrence={occurrence}
       documents={documents}
       origin={origin}
+      event={event}
+      bucketName={bucketName}
     />
   );
 }

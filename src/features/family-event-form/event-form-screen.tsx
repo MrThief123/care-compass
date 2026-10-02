@@ -14,6 +14,7 @@ import { EditScopeFields } from "./edit-scope-fields";
 import {
   EMPTY_EVENT_COST,
   hasCostText,
+  parseEventCost,
   validateEventCost,
   type EventCostValues,
 } from "./event-cost";
@@ -121,6 +122,7 @@ export function EventFormScreen({
       return;
     }
     const parsedDetails = parseEventDetails(details)!;
+    const parsedCost = parseEventCost(cost);
     setSaveError(undefined);
 
     if (mode === "edit") {
@@ -136,6 +138,12 @@ export function EventFormScreen({
         recurrence: values.recurrence,
         isTask,
         scope,
+        // FAM-11: the cost as typed, `null` when a saved cost was cleared, left out when there never was one.
+        ...(parsedCost
+          ? { cost: { amount: parsedCost.amount, bucketId: parsedCost.bucketId } }
+          : hasSavedCost
+            ? { cost: null }
+            : {}),
       });
       if (!result.ok) {
         setSaveError(refusalMessage(result.error));
@@ -154,6 +162,7 @@ export function EventFormScreen({
       durationMinutes: parsedDetails.durationMinutes,
       recurrence: values.recurrence,
       isTask,
+      ...(parsedCost ? { cost: { amount: parsedCost.amount, bucketId: parsedCost.bucketId } } : {}),
     });
     if (!result.ok) {
       setSaveError(refusalMessage(result.error));
