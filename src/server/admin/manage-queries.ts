@@ -4,6 +4,7 @@ import {
   melbourneDateKey,
 } from "@/lib/dates/melbourne-time";
 import { ADMIN_MANAGE } from "@/mocks/admin-manage";
+import { listMockStaff } from "@/server/admin/staff-mock-store";
 import { getDataSourceMode } from "@/server/data-source";
 
 export interface ManagePerson {
@@ -91,9 +92,18 @@ function startOfPreviousMonth(date: string) {
 export async function getAdminManage(search: AdminManageSearch = {}): Promise<AdminManageData> {
   if (getDataSourceMode() === "mock") {
     const data = structuredClone(ADMIN_MANAGE);
+    // A carer deactivated on the Staff screen is no longer offered (ADM-03); the fixture list
+    // is matched to the staff store by name.
+    const inactive = new Set(
+      listMockStaff()
+        .filter((person) => !person.isActive)
+        .map((person) => `${person.firstName} ${person.lastName}`.trim()),
+    );
     return {
       ...data,
-      staff: data.staff.filter((person) => matchesName(person.name, search.staffSearch)),
+      staff: data.staff.filter(
+        (person) => !inactive.has(person.name) && matchesName(person.name, search.staffSearch),
+      ),
       clients: data.clients.filter((person) => matchesName(person.name, search.clientSearch)),
     };
   }

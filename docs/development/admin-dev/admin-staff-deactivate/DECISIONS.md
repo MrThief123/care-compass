@@ -66,3 +66,7 @@ None. OQ-36 answered as PD-039 and OQ-19 as PD-052 (both 2026-09-17, root DECISI
 - Human confirmation required: yes/no (who, when)
 - Test changes caused (if any): test ID, reason, flagged for review yes/no
 -->
+
+## FD-08 — Manage stops offering a deactivated carer in mock mode
+Reported at review: a deactivated carer could still be picked in Manage and given a shift. Real data already excluded them (`is_active` filter on the list). Mock Manage is a static fixture, so `getAdminManage` now drops carers the staff store marks inactive (matched by full name). Test `[ADM-03][AC-08]` added in `manage-queries.test.ts`.
+**Open (not built, scope):** `assignShift` and the `shifts_before_insert` trigger do not refuse an inactive carer, so a stale Manage tab or a direct call could still create a shift. Fix would be a trigger check in a new migration; needs a human call.
