@@ -213,7 +213,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 | 7 | INT-07 | Scale and performance verification | I | D19 | SPRINT | FAM-14, ADM-01 | OQ-01 | `feature/shared-calendar-scale-performance` | NOT STARTED |
 | 8 | INT-08 | Release readiness and client handover | I | D21 | SPRINT | INT-02, INT-03, INT-04, INT-05, INT-06, INT-07, F0-24, INT-09, FAM-11, CAR-07, ADM-03, ADM-05, ADM-08, ADM-09, ADM-11 | OQ-01, OQ-17 | `feature/shared-release-readiness-handover` | NOT STARTED |
 | 9 | INT-09 | Overdue and upcoming care alert emails | B | D17–D18 | SPRINT | INT-01, F0-11, F0-24 | OQ-40 | `feature/shared-care-alert-emails` | NOT STARTED |
-| 10 | INT-10 | Budget threshold email names the bucket | B | D18 | SPRINT | INT-01 | — | `feature/shared-budget-threshold-email-bucket-name` | IN PROGRESS |
+| 10 | INT-10 | Budget threshold email names the bucket | B | D18 | SPRINT | INT-01 | — | `feature/shared-budget-threshold-email-bucket-name` | READY FOR PR |
 
 
 ---
