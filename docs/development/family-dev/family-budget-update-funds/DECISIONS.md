@@ -37,8 +37,17 @@ None. OQ-04, OQ-05, OQ-19 and OQ-03 are ANSWERED in root DECISIONS.md (PD-033, P
 - Decision: the page uses `applyBudgetEdit(...).changed` to skip the call; the database function also writes nothing for rows with amount 0, no rename and no removal. A typed `0` stays refused on the page (PD-059); the stored edit uses 0 for "no change".
 - Human confirmation required: no.
 
-### FD-05 — Tests changed
-None. No existing test or assertion changes; FAM-UI-05's tests must stay green unedited.
+### FD-05 — Tests changed (HUMAN REVIEW: test expectation changed)
+- Date: 2026-10-02
+- Context: running `supabase/tests/budget_save_edit.test.sql` against the real function, 8 of 60 assertions failed on wrong expected values written before the function existed. The F0-12 functions behave as documented.
+- Decision: genuine test bugs fixed; no assertion removed, no behaviour weakened. Human chose this (Dhruv Verma, in-session). FAM-UI-05's tests and every other existing test are untouched.
+
+| Test | Before | After | Reason |
+|---|---|---|---|
+| 6, 8, 30 (baseline / "write nothing" / "no History row") | 17 rows | 7 rows | seed is 6 `funds_added` rows plus the one top-up |
+| 26 (AC-04 wrong amount) | "an amount must be more than $0…" | "enter an amount more than $0…" | F0-12 `budget_check_amount` message; AC-02's test already expects it |
+| 46-48 (AC-06 Government top-up) | $100 top-up, $0 pending, remaining $30 | $150 top-up, remaining $40 | $240 - $40 + $100 = $300 cannot pay the $310 pending cost; $150 can ($200 + $150 - $310) |
+| 58 (AC-03 "nothing changed") | 30 rows | 17 rows | equals the 17 asserted just before the permission checks |
 
 <!-- Template
 ### FD-xx — <title>

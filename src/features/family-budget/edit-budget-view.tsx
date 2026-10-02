@@ -16,6 +16,7 @@ import {
   nameSuggestions,
   removalRefusal,
   validateBudgetEdit,
+  type BudgetEdit,
   type BudgetEditValues,
   type FundDirection,
 } from "./budget-edit";
@@ -29,6 +30,8 @@ const CHANGE_OPTIONS = [
 ];
 
 const TITLE_ID = "edit-budget-title";
+
+const SAVE_FAILED = "Couldn’t save the budget. Try again.";
 
 type SavedRow = BudgetEditValues["buckets"][number];
 /** A new bucket's values, with a key that stays with it while others are discarded. */
@@ -48,8 +51,21 @@ interface FormValues {
  * refused save marks each field in error and focuses the first. A save that
  * passes is applied to the route's holder (local state only, Phase 1) and goes
  * back to Budget; Cancel and Escape go back with nothing changed.
+ *
+ * With `persist` (DATA_SOURCE=supabase, FAM-11 FD-02) Save instead calls
+ * `saveBudgetEdit` (one transaction) and goes back to Budget, which re-reads
+ * the stored figures. A refusal marks the fields it names; any other failure
+ * shows one message above Save. Entered values are kept in both cases.
  */
-export function EditBudgetView({ clientId, data }: { clientId: string; data: FamilyBudgetData }) {
+export function EditBudgetView({
+  clientId,
+  data,
+  persist = false,
+}: {
+  clientId: string;
+  data: FamilyBudgetData;
+  persist?: boolean;
+}) {
   const router = useRouter();
   const source = useHeldBudget(clientId, data);
   const { keep, nextSave } = useBudgetHolder();
@@ -59,6 +75,8 @@ export function EditBudgetView({ clientId, data }: { clientId: string; data: Fam
     added: [],
   }));
   const [errors, setErrors] = useState<FieldErrors>({});
+  const [failure, setFailure] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
   const [focusRequest, setFocusRequest] = useState<{ selector: string } | null>(null);
   const addedKeys = useRef(0);
   const form = useRef<HTMLFormElement>(null);
@@ -113,12 +131,50 @@ export function EditBudgetView({ clientId, data }: { clientId: string; data: Fam
     router.push(budgetHref);
   }
 
+  async function saveStored(edit: BudgetEdit) {
+    setSaving(true);
+    setFailure(null);
+    try {
+      // Loaded on Save only: the action's module reads the Supabase environment when it loads, which
+      // the mock-mode screens (and their tests) neither have nor need.
+      const { saveBudgetEdit } = await import("@/server/budget/actions");
+      const saved = await saveBudgetEdit(clientId, edit);
+      if (saved.ok) {
+        router.push(budgetHref);
+        router.refresh();
+        return;
+      }
+      if (saved.error.fields) {
+        setErrors(saved.error.fields);
+        setFocusRequest({ selector: '[aria-invalid="true"]' });
+      } else {
+        setFailure(saved.error.message);
+      }
+    } catch {
+      setFailure(SAVE_FAILED);
+    }
+    setSaving(false);
+  }
+
   function submit(event: SyntheticEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (saving) return;
+    setFailure(null);
     const result = validateBudgetEdit(values, source.buckets);
     if (!result.ok) {
       setErrors(result.errors);
       setFocusRequest({ selector: '[aria-invalid="true"]' });
+      return;
+    }
+    setErrors({});
+    if (persist) {
+      const stored = applyBudgetEdit(source, result.data, {
+        clientId,
+        date: data.today,
+        save: 0,
+      });
+      if (stored.changed) void saveStored(result.data);
+      else router.push(budgetHref);
       return;
     }
     const next = applyBudgetEdit(source, result.data, {
@@ -199,8 +255,16 @@ export function EditBudgetView({ clientId, data }: { clientId: string; data: Fam
           className="max-w-xl"
         />
 
+        {failure && (
+          <p role="alert" className="text-body-small text-text-alert-strong">
+            {failure}
+          </p>
+        )}
+
         <div className="flex flex-wrap gap-3">
-          <Button type="submit">Save</Button>
+          <Button type="submit" disabled={saving} aria-busy={saving || undefined}>
+            Save
+          </Button>
           <Button type="button" variant="secondary" onClick={cancel}>
             Cancel
           </Button>

@@ -1,6 +1,7 @@
 import { loadFamilyBudgetData, type FamilyBudgetData } from "@/features/family-budget/budget-data";
 import { BudgetErrorState } from "@/features/family-budget/budget-error-state";
 import { EditBudgetView } from "@/features/family-budget/edit-budget-view";
+import { getDataSourceMode } from "@/server/data-source";
 
 export default async function EditBudgetPage({
   params,
@@ -22,5 +23,7 @@ export default async function EditBudgetPage({
     return <BudgetErrorState />;
   }
 
-  return <EditBudgetView clientId={clientId} data={data} />;
+  return (
+    <EditBudgetView clientId={clientId} data={data} persist={getDataSourceMode() === "supabase"} />
+  );
 }

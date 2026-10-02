@@ -129,10 +129,10 @@ select is((select entry_date from budget_fund_entries where bucket_id = pg_temp.
 select is((select recorded_by_name from budget_fund_entries where bucket_id = pg_temp.bid(1) and amount = 1000), 'Helen Doyle',
   '[FAM-11][AC-01] the recorder is the signed-in person');
 
-select is((select count(*) from budget_fund_entries where client_id = 'b1111111-1111-1111-1111-111111111111'), 17::bigint, '[FAM-11] baseline: 6 seeded rows plus the top-up');
+select is((select count(*) from budget_fund_entries where client_id = 'b1111111-1111-1111-1111-111111111111'), 7::bigint, '[FAM-11] baseline: 6 seeded rows plus the top-up');
 select is(pg_temp.save(jsonb_build_array(pg_temp.row(1, 'NDIS', 'add', 0), pg_temp.row(2, 'Fixed', 'remove', 0))), 'ok',
   '[FAM-11][AC-01] rows with no amount, no rename and no removal are accepted');
-select is((select count(*) from budget_fund_entries where client_id = 'b1111111-1111-1111-1111-111111111111'), 17::bigint, '[FAM-11][AC-01] and write nothing');
+select is((select count(*) from budget_fund_entries where client_id = 'b1111111-1111-1111-1111-111111111111'), 7::bigint, '[FAM-11][AC-01] and write nothing');
 select is(pg_temp.save('[]'::jsonb), 'ok', '[FAM-11][AC-01] an empty save is accepted and writes nothing');
 
 -- ---------------------------------------------------------------------------
@@ -161,12 +161,12 @@ select alike(pg_temp.save(jsonb_build_array(pg_temp.row(10, 'Robert bucket', 'ad
 -- AC-04: one wrong field refuses the whole save
 -- ---------------------------------------------------------------------------
 select is(pg_temp.save(jsonb_build_array(pg_temp.row(1, 'NDIS', 'add', 100), pg_temp.row(5, 'Renamed', 'add', 5), pg_temp.row(2, 'Fixed', 'add', -1)),
-  '[{"name": "Fresh", "starting_amount": 10}]', 'whole'), '22023|buckets.2.amount|an amount must be more than $0, with at most 2 decimal places',
+  '[{"name": "Fresh", "starting_amount": 10}]', 'whole'), '22023|buckets.2.amount|enter an amount more than $0, with at most 2 decimal places',
   '[FAM-11][AC-04] a valid top-up, a rename and a new bucket beside one wrong amount: refused, naming the wrong one');
 select is((select remaining from budget_bucket_summary('b1111111-1111-1111-1111-111111111111') where name = 'NDIS'), 15880.00::numeric, '[FAM-11][AC-04] the top-up was not kept');
 select is((select name from budget_buckets where id = pg_temp.bid(5)), 'Unspent', '[FAM-11][AC-04] the rename was not kept');
 select is((select count(*) from budget_buckets where name = 'Fresh'), 0::bigint, '[FAM-11][AC-04] the new bucket was not kept');
-select is((select count(*) from budget_fund_entries where client_id = 'b1111111-1111-1111-1111-111111111111'), 17::bigint, '[FAM-11][AC-04] no History row was added');
+select is((select count(*) from budget_fund_entries where client_id = 'b1111111-1111-1111-1111-111111111111'), 7::bigint, '[FAM-11][AC-04] no History row was added');
 
 -- ---------------------------------------------------------------------------
 -- AC-05: a mixed save, with a note, a recorder, and names freed within it
@@ -202,11 +202,11 @@ select is((select count(*) from budget_buckets where client_id = 'b1111111-1111-
 -- ---------------------------------------------------------------------------
 select is(pg_temp.save(jsonb_build_array(pg_temp.row(8, 'Gov2', 'add', 50))), 'ok', '[FAM-11][AC-06] a $50 top-up on $240 with a $310 pending cost');
 select is((select count(*) from budget_costs where bucket_id = pg_temp.bid(8) and status = 'pending'), 1::bigint, '[FAM-11][AC-06] pays nothing: $290 cannot cover $310');
-select is(pg_temp.save(jsonb_build_array(pg_temp.row(3, 'Government', 'add', 100))), 'ok', '[FAM-11][AC-06] a $100 top-up on Government');
+select is(pg_temp.save(jsonb_build_array(pg_temp.row(3, 'Government', 'add', 150))), 'ok', '[FAM-11][AC-06] a $150 top-up on Government');
 select is((select count(*) from budget_costs where bucket_id = pg_temp.bid(3) and status = 'pending'), 0::bigint, '[FAM-11][AC-06] pays the $310 pending cost');
 select is((select paid_on from budget_costs where bucket_id = pg_temp.bid(3) and amount = 310), budget_today(), '[FAM-11][AC-06] recording today as the day it was paid');
-select is((select remaining from budget_bucket_summary('b1111111-1111-1111-1111-111111111111') where name = 'Government'), 30.00::numeric,
-  '[FAM-11][AC-06] and remaining is $30 ($240 - $40 removed + $100 - $310)');
+select is((select remaining from budget_bucket_summary('b1111111-1111-1111-1111-111111111111') where name = 'Government'), 40.00::numeric,
+  '[FAM-11][AC-06] and remaining is $40 ($240 - $40 removed + $150 - $310)');
 select is(pg_temp.save(jsonb_build_array(pg_temp.row(9, 'Queue', 'add', 50))), 'ok', '[FAM-11][AC-06] $50 on a bucket with pending $40, $10, $30');
 select is((select string_agg(amount::text || ':' || status, ',' order by incurred_on) from budget_costs where bucket_id = pg_temp.bid(9)), '40.00:paid,10.00:paid,30.00:pending',
   '[FAM-11][AC-06] pays $40 then $10, strictly oldest first, and stops at the $30 it cannot cover');
@@ -230,7 +230,7 @@ reset role;
 set local role anon;
 select alike(pg_temp.save(jsonb_build_array(pg_temp.row(1, 'NDIS', 'add', 5))), '42501%', '[FAM-11][AC-03] a signed-out caller is refused');
 reset role;
-select is((select count(*) from budget_fund_entries where client_id = 'b1111111-1111-1111-1111-111111111111'), 30::bigint, '[FAM-11][AC-03] nothing changed');
+select is((select count(*) from budget_fund_entries where client_id = 'b1111111-1111-1111-1111-111111111111'), 17::bigint, '[FAM-11][AC-03] nothing changed');
 
 select pg_temp.login('a2222222-2222-2222-2222-222222222222');
 select is(pg_temp.save(jsonb_build_array(pg_temp.row(1, 'NDIS', 'add', 5)), '[]', 'admin top-up'), 'ok', '[FAM-11][AC-03] an admin of the client''s organisation is accepted');

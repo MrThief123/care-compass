@@ -1264,6 +1264,15 @@ export type Database = {
           isSetofReturn: false;
         };
       };
+      save_budget_edit: {
+        Args: {
+          p_added: Json;
+          p_buckets: Json;
+          p_client_id: string;
+          p_note?: string;
+        };
+        Returns: undefined;
+      };
       session_is_aal2: { Args: never; Returns: boolean };
       set_event_cost: {
         Args: { p_bucket_id: string; p_cost: number; p_event_id: string };
