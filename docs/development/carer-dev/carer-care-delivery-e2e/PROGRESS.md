@@ -6,7 +6,7 @@ Lane: I — Integration
 Sprint: SPRINT · planned D12
 Branch: `feature/carer-care-delivery-e2e`
 PR target: `main` (CHG-036; `carer-dev` retired)
-Last updated: 2026-10-01
+Last updated: 2026-10-02
 
 ## Blockers
 - None (OQ-33 ANSWERED — PD-043, amended by CHG-025)
@@ -25,9 +25,7 @@ Last updated: 2026-10-01
 - None
 
 ## Remaining
-- Human approval to open the PR (target `main`)
-- Optional wording CHG for AC-01 ("Aisha R." → "Aisha Rahman", FD-01)
-- Before PR: merge latest `main`, re-run this spec
+- Optional wording CHG for AC-01 ("Aisha R." → "Aisha Rahman", FD-01): needs a human-confirmed CHG (CLAUDE.md §9); not yet raised
 
 ## Acceptance criteria status
 - 2 / 2 MET (AC-01 asserted with full name per PD-038 — FD-01)
@@ -51,7 +49,7 @@ Last updated: 2026-10-01
 - None beyond DECISIONS.md
 
 ## Next action
-- Owner review; with approval, merge `main`, re-run, open PR `INT-03 End-to-end: carer care delivery journey` to `main`.
+- None. Merged in #194.
 
 ## Ready for PR
-- Yes, pending human approval to open it (HUMAN REVIEW: AC-01 wording, FD-01)
+- Done: merged in #194. Open: AC-01 wording CHG (FD-01).

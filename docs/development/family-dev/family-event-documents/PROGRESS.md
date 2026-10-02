@@ -1,6 +1,6 @@
 # Progress — FAM-08 Family — Event documents (file tiles)
 
-Status: MERGED TO DEV (merged to `main` in #184, 2026-10-01; FD-01's Lane B follow-up — Add event's uploads can't link to the event on save — is still open and not tracked as a new DEVELOPMENT_PLAN row)
+Status: MERGED TO DEV (merged to `main` in #184, 2026-10-01; FD-01's follow-up, linking Add event's uploads on save, was delivered by F0-23 in #200)
 Owner: MrThief123
 Lane: F — Family
 Sprint: SPRINT · planned D10
@@ -34,9 +34,7 @@ Last updated: 2026-10-02 (AC-01 follow-up on `fix/family-event-documents-ac01`)
 - None
 
 ## Remaining
-- A Lane B follow-up (new migration) to let Add event's uploads be linked to the new event on save
-  (DECISIONS.md FD-01) — out of this PR's reach under folder ownership (`docs/AGENT_REFERENCE.md`:
-  `supabase/**` has no dashboard-feature carve-out).
+- None. The Add event linking follow-up (DECISIONS.md FD-01) shipped as F0-23 (CHG-045, #200).
 
 ## Acceptance criteria status
 - 3 / 3 MET. AC-01 MET on 2026-10-02: T-01 run against the local Supabase stack and passing.

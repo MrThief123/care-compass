@@ -75,4 +75,4 @@ Last updated: 2026-10-01
 - None — merged to `main` in #187.
 
 ## Ready for PR
-- Yes
+- Done: merged in #187

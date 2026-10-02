@@ -6,7 +6,7 @@ Lane: B — Backend
 Sprint: STRETCH · planned D11–D12
 Branch: `feature/shared-budget-threshold-emails`
 PR target: `main` (OQ-01 Option B, CHG-036)
-Last updated: 2026-10-01
+Last updated: 2026-10-02
 
 ## Blockers
 - None — OQ-01, OQ-03, OQ-17, OQ-28 all ANSWERED
@@ -47,8 +47,7 @@ Last updated: 2026-10-01
   can send a real email or be triggered for real (DECISIONS.md FD-02). Deploy-time, not a PR blocker.
 - The scheduler itself (Vercel Cron or pg_cron, OQ-17) is not configured — out of this PR's code,
   a deploy-time task.
-- `supabase/seed.sql`'s batching failure under `supabase db reset` in this environment (DECISIONS.md
-  FD-02) is unresolved and unrelated to this feature; flagging in case it affects others.
+- `supabase/seed.sql`'s `db reset` failure: not reproducible on 2026-10-02 (DECISIONS.md FD-02 update); closed.
 - PL-25 (pending-cost email) and PL-26 (threshold email bucket name) are tracked in root PRD.md
   §17 for future scheduling (DECISIONS.md FD-05) — not this PR's scope.
 
