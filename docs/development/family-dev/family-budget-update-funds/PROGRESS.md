@@ -1,12 +1,12 @@
 # Progress — FAM-11 Family — Update funds
 
-Status: NOT STARTED
-Owner: unclaimed
+Status: IN PROGRESS
+Owner: Dhruv Verma
 Lane: F — Family
 Sprint: POST-SPRINT · planned —
-Branch: `feature/family-budget-update-funds` (not yet created)
-PR target: `family-dev`
-Last updated: 2026-09-17 (planning pack generated)
+Branch: `feature/family-budget-update-funds`
+PR target: `main`
+Last updated: 2026-10-02 (claimed)
 
 ## Blockers
 - OQ-05 — Who can add funds and record spending; Budget History contents
