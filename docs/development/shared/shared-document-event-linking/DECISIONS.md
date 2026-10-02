@@ -12,4 +12,7 @@ None.
 - FD-06 (2026-10-02): ids are validated with `z.guid()` (as F0-22 FD-07), because seed event ids carry no RFC version bits.
 
 ## Test changes
-None yet.
+- **HUMAN REVIEW: test expectation changed.** `src/features/family-event-form/event-documents.test.tsx`, the FAM-08 case under "Add event (no eventId yet)".
+  - Before: clicking Add file shows "Save the event first, then open it again to add files." and `uploadDocument` is not called.
+  - After: choosing a file uploads it with no `eventId` and reports the document through `onUploaded`; the old message is not shown.
+  - Reason: recorded requirement change (CHG-045). FAM-08 FD-01 shipped that message only because linking was impossible; F0-23 makes it possible. No assertion was dropped without a replacement (also covered by event-form-add-documents.test.tsx).

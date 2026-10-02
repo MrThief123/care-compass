@@ -13,11 +13,11 @@ Tests first (TESTING.md §2); confirm each fails for the expected reason before 
 
 | Test ID | Covers | Level | Test description | Written first? | Result |
 |---|---|---|---|---|---|
-| T-01 | AC-01, AC-03, AC-04 | pgTAP | Uploader links own unlinked document to a same-client event; `event_id` set, other columns and storage path unchanged; audit row written; second link, detached document, other client's event, unknown ids all raise. | ☑ | FAIL (expected): `link_document_to_event` does not exist |
-| T-02 | AC-02, AC-05 | pgTAP | Another family, unassigned carer, other-organisation admin and a signed-out caller are refused; a user with client access who is not the uploader is refused; `anon` has no execute grant. | ☑ | FAIL (expected): `link_document_to_event` does not exist |
-| T-03 | AC-06, AC-07 | unit | `linkDocumentsToEvent`: validates ids, calls the function per id, reports failed ids without stopping, `NOT_AVAILABLE` in mock mode, no PII in the error. | ☑ | FAIL (expected): `linkDocumentsToEvent` is not exported / Add event does not link |
-| T-04 | AC-06, AC-07, AC-08 | component | Add event: picker opens, tile appears, save calls `createEvent` then `linkDocumentsToEvent`; partial failure message names the file and the event still opens; no "Save the event first" text; Edit mode unchanged. | ☑ | FAIL (expected): `linkDocumentsToEvent` is not exported / Add event does not link |
-| T-05 | AC-01, AC-06 | integration | Real Helen and Margaret: upload with no event, `createEvent`, `linkDocumentsToEvent`, the event's documents list includes the file; Rosa cannot link Helen's upload. | ☑ | FAIL (expected): `linkDocumentsToEvent` is not exported / Add event does not link |
+| T-01 | AC-01, AC-03, AC-04 | pgTAP | Uploader links own unlinked document to a same-client event; `event_id` set, other columns and storage path unchanged; audit row written; second link, detached document, other client's event, unknown ids all raise. | ☑ | PASS |
+| T-02 | AC-02, AC-05 | pgTAP | Another family, unassigned carer, other-organisation admin and a signed-out caller are refused; a user with client access who is not the uploader is refused; `anon` has no execute grant. | ☑ | PASS |
+| T-03 | AC-06, AC-07 | unit | `linkDocumentsToEvent`: validates ids, calls the function per id, reports failed ids without stopping, `NOT_AVAILABLE` in mock mode, no PII in the error. | ☑ | PASS |
+| T-04 | AC-06, AC-07, AC-08 | component | Add event: picker opens, tile appears, save calls `createEvent` then `linkDocumentsToEvent`; partial failure message names the file and the event still opens; no "Save the event first" text; Edit mode unchanged. | ☑ | PASS |
+| T-05 | AC-01, AC-06 | integration | Real Helen and Margaret: upload with no event, `createEvent`, `linkDocumentsToEvent`, the event's documents list includes the file; Rosa cannot link Helen's upload. | ☑ | PASS |
 
 ## Regression scope
 `src/server/documents`, `src/features/family-event-form`, `src/features/family-info`, `src/app/(family)/family/[clientId]/events`, `supabase/tests/documents.test.sql`, full unit suite, pgTAP suite, typecheck, lint.
