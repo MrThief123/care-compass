@@ -54,6 +54,8 @@ export interface EventFormScreenProps {
   initialDetails?: EventDetailsValues;
   /** Where Save event and Cancel go (CHG-015, `event-form-return.ts`); already validated. */
   returnHref: string;
+  /** Shown instead of the action's own message when a save is refused as NOT_ALLOWED (CHG-048). */
+  notAllowedMessage?: string;
 }
 
 const TITLES = { add: "Add event", edit: "Edit event" } as const;
@@ -78,6 +80,7 @@ export function EventFormScreen({
   initialCost = EMPTY_EVENT_COST,
   initialDetails = EMPTY_EVENT_DETAILS,
   returnHref,
+  notAllowedMessage,
 }: EventFormScreenProps) {
   const router = useRouter();
   const [values, setValues] = useState(initialValues);
@@ -92,6 +95,10 @@ export function EventFormScreen({
   const [pendingDocuments, setPendingDocuments] = useState<{ id: string; name: string }[]>([]);
   const [unlinkedNames, setUnlinkedNames] = useState<string[]>();
   const hasSavedCost = hasCostText(initialCost);
+
+  function refusalMessage(error: { code: string; message: string }): string {
+    return error.code === "NOT_ALLOWED" && notAllowedMessage ? notAllowedMessage : error.message;
+  }
 
   function changeCost(next: EventCostValues) {
     setCost(next);
@@ -131,7 +138,7 @@ export function EventFormScreen({
         scope,
       });
       if (!result.ok) {
-        setSaveError(result.error.message);
+        setSaveError(refusalMessage(result.error));
         return;
       }
       router.push(returnHref);
@@ -149,7 +156,7 @@ export function EventFormScreen({
       isTask,
     });
     if (!result.ok) {
-      setSaveError(result.error.message);
+      setSaveError(refusalMessage(result.error));
       return;
     }
     if (pendingDocuments.length > 0) {
