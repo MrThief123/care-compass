@@ -25,7 +25,7 @@ Checked on the local stack on 2026-10-02:
 - Hosted: the built-in Supabase mail sender is heavily rate-limited and, as of writing, delivers only to project team members; custom SMTP, the site URL and the redirect allow-list for the hosted project are not recorded anywhere.
 
 ## Description
-1. **Templates.** Add `supabase/templates/recovery.html` and `invite.html` (and `confirmation.html` if hosted sign-up confirmation is on) that link to `{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=<type>&next=<path>`, and register them in `supabase/config.toml`. This form works for both the app's reset (PKCE) and the admin API's invite (no code verifier).
+1. **Templates.** Add `supabase/templates/recovery.html` and `invite.html`  that link to `{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=<type>&next=<path>`, and register them in `supabase/config.toml`. This form works for both the app's reset (PKCE) and the admin API's invite (no code verifier).
 2. **Confirm route.** Keep `token_hash` + `type` as the primary path. Also accept `?code=` (`exchangeCodeForSession`) so a link generated the default way still works. Keep F0-21 FD-09's same-origin `next` rule. An expired, used or malformed link goes to `/sign-in?reason=reset-link-expired`.
 3. **Set-password page** for invited carers: `/set-password`, reusing the reset-password form and layout with welcome wording. After saving, the carer is signed in and sent to the role home (`resolvePostSignInPath`).
 4. **Resend invite** for an admin, for a carer who has not yet signed in (Admin Staff edit panel). Admin-only, AAL2 as everything else under F0-21. Refused for an account that has already accepted.
@@ -40,7 +40,7 @@ Carers (invited), all roles (reset), Admins (resend invite).
 
 ## Scope
 - The templates and config; the confirm route; `/set-password`; the resend-invite action and button; tests; the hosted checklist.
-- Sign-up confirmation email only if the hosted project turns confirmations on (FD-02).
+- Nothing for sign-up confirmation: email confirmation is not required (FD-02).
 
 ## Out of Scope
 - Email change, MFA reset or recovery codes, magic-link sign-in, SMS.

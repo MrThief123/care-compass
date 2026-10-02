@@ -756,7 +756,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 
 ### F0-24 — Auth emails: working reset and invite links, set-password page
 - **Dashboard / stream:** shared · **Lane:** S · **Days:** D15–D16 · **Sprint:** SPRINT · **PR target:** `main` · **Branch:** `feature/shared-auth-emails`
-- **Description:** Makes the emailed password-reset and carer-invite links work end to end. `/auth/confirm` accepts both the `code` and `token_hash` forms; custom Supabase email templates (reset, invite, and sign-up confirmation if enabled) link to it; a set-password page completes an invite; an admin can resend an invite. Adds the hosted-project email checklist (custom SMTP, site URL, redirect allow-list, templates). Added by CHG-047.
+- **Description:** Makes the emailed password-reset and carer-invite links work end to end. `/auth/confirm` accepts both the `code` and `token_hash` forms; custom Supabase email templates (reset and invite) link to it; a set-password page completes an invite; an admin can resend an invite. Adds the hosted-project email checklist (custom SMTP, site URL, redirect allow-list, templates). Added by CHG-047.
 - **User value:** A new carer can accept their invite, set a password and sign in; anyone can reset a forgotten password from the email.
 - **Dependencies:** F0-07, F0-17, ADM-02 · **Blocking decisions:** None (the sender address and domain are a human set-up step, not a code blocker)
 - **Jira summary:** Fix reset and invite email links; set-password page; resend invite; Mailpit end-to-end tests
