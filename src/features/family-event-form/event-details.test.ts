@@ -9,7 +9,6 @@ import {
   validateEventDetails,
 } from "./event-details";
 
-
 describe("[FAM-06][AC-02] validateEventDetails", () => {
   it("[FAM-06][AC-02] a blank title is refused", () => {
     const errors = validateEventDetails({ ...EMPTY_EVENT_DETAILS, title: "  " });
