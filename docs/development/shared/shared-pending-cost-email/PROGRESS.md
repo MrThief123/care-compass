@@ -1,6 +1,6 @@
 # Progress — INT-11 Email Family and admins when an event cost goes pending
 
-Status: READY FOR PR
+Status: MERGED TO DEV (merged to `main` in #207, 2026-10-02)
 Owner: Dhruv Verma
 Lane: B — Backend
 Sprint: SPRINT · planned D19

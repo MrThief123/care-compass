@@ -39,3 +39,11 @@ it("[ADM-UI-02][AC-01] does not disguise Supabase mode as mock data", async () =
   vi.stubEnv("DATA_SOURCE", "supabase");
   await expect(getAdminManage()).rejects.toThrow();
 });
+it("[ADM-03][AC-08] does not offer a deactivated carer in mock Manage", async () => {
+  vi.stubEnv("DATA_SOURCE", "mock");
+  const { deactivateMockStaff } = await import("./staff-mock-store");
+  deactivateMockStaff("staff-fatima");
+  const data = await getAdminManage();
+  expect(data.staff.map((person) => person.name)).not.toContain("Fatima Ali");
+  expect(data.staff.map((person) => person.name)).toContain("Aisha Rahman");
+});

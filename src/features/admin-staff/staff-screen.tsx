@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { z } from "zod";
 
+import { ConfirmationModal } from "@/components/shared/forms/confirmation-modal";
 import { Field } from "@/components/shared/forms/field";
 import { SidePanelForm } from "@/components/shared/forms/side-panel-form";
 import { DataTable } from "@/components/shared/lists/data-table";
@@ -13,7 +14,7 @@ import { Icon } from "@/components/ui/icon";
 import { requiredPhoneError } from "@/lib/phone/au-phone";
 import { cn } from "@/lib/utils";
 import type { CarerAssignment } from "@/server/admin/assignments-queries";
-import { createStaff, updateStaff } from "@/server/admin/staff-actions";
+import { createStaff, deactivateStaff, updateStaff } from "@/server/admin/staff-actions";
 import type { AdminStaffData } from "@/server/admin/staff-queries";
 import type { StaffMember } from "@/types/domain";
 
@@ -41,8 +42,67 @@ const DraftSchema = z.object({
   jobTitle: z.string(),
 });
 
+const DEACTIVATE_FAILED = "Couldn't deactivate. Please try again.";
+
+function Tag({ children }: { children: string }) {
+  return (
+    <span className="ml-1 inline-flex items-center rounded-pill border border-bg-muted bg-bg-surface px-2 py-1 text-body-small font-medium text-text-secondary">
+      {children}
+    </span>
+  );
+}
+
 function fullName(person: Pick<StaffMember, "firstName" | "lastName">): string {
   return `${person.firstName} ${person.lastName}`.trim();
+}
+
+function StaffTable({
+  rows,
+  pendingIds,
+  selectedId,
+  onEdit,
+}: {
+  rows: StaffMember[];
+  pendingIds: Set<string>;
+  /** The person whose panel is open, if any. */
+  selectedId: string | null;
+  onEdit: (person: StaffMember, from: HTMLElement) => void;
+}) {
+  return (
+    <div className="overflow-x-auto">
+      <DataTable
+        className="min-w-[440px] [&_td]:py-1"
+        rows={rows}
+        rowKey={(person) => person.id}
+        columns={[
+          {
+            key: "name",
+            header: "Name",
+            render: (person) => (
+              <>
+                <Button
+                  variant="ghost"
+                  aria-label={"Edit " + fullName(person)}
+                  aria-current={selectedId === person.id ? "true" : undefined}
+                  className="h-auto min-h-11 whitespace-normal break-words text-left"
+                  onClick={(event) => onEdit(person, event.currentTarget)}
+                >
+                  {fullName(person)}
+                </Button>
+                {!person.isActive && <Tag>Inactive</Tag>}
+                {person.isActive && pendingIds.has(person.id) && <Tag>Pending</Tag>}
+              </>
+            ),
+          },
+          {
+            key: "role",
+            header: "Role",
+            render: (person) => <span className="text-text-secondary">{person.jobTitle}</span>,
+          },
+        ]}
+      />
+    </div>
+  );
 }
 
 export function StaffScreen({
@@ -77,11 +137,16 @@ export function StaffScreen({
   const [draft, setDraft] = useState<Draft>(emptyDraft);
   const [errors, setErrors] = useState<Partial<Record<keyof Draft, string>>>({});
   const [notice, setNotice] = useState("");
+  const [confirmDeactivate, setConfirmDeactivate] = useState(false);
+  const [deactivateError, setDeactivateError] = useState("");
+  const inactiveHeadingId = useId();
   const panel = useRef<HTMLDivElement>(null);
   const addButton = useRef<HTMLSpanElement>(null);
   // The button that opened the panel, so closing it can give keyboard focus back (ADM-08 AC-11).
   const opener = useRef<HTMLElement | null>(null);
   const selected = staff.find((person) => person.id === selectedId);
+  const activeStaff = staff.filter((person) => person.isActive);
+  const inactiveStaff = staff.filter((person) => !person.isActive);
 
   useEffect(() => {
     if (open) panel.current?.querySelector("input")?.focus();
@@ -93,6 +158,7 @@ export function StaffScreen({
     setDraft(person ? draftFrom(person) : emptyDraft());
     setErrors({});
     setNotice("");
+    setDeactivateError("");
     setOpen(true);
   }
 
@@ -143,6 +209,20 @@ export function StaffScreen({
     close(fullName(saved) + (selectedId ? " saved" : " invited. Pending until they sign up."));
   }
 
+  async function confirmDeactivation() {
+    const target = selected;
+    setConfirmDeactivate(false);
+    if (!target) return;
+    const outcome = await deactivateStaff(target.id);
+    if (!outcome.ok) {
+      setDeactivateError(outcome.error.message || DEACTIVATE_FAILED);
+      return;
+    }
+    const saved = outcome.data;
+    setStaff((current) => current.map((person) => (person.id === saved.id ? saved : person)));
+    close(`${fullName(saved)} deactivated. Their future shifts were cancelled.`);
+  }
+
   function change(field: keyof Draft, value: string) {
     setDraft((current) => ({ ...current, [field]: value }));
     setNotice("");
@@ -172,43 +252,31 @@ export function StaffScreen({
           </p>
         )}
         {staff.length ? (
-          <div className="overflow-x-auto">
-            <DataTable
-              className="min-w-[440px] [&_td]:py-1"
-              rows={staff}
-              rowKey={(person) => person.id}
-              columns={[
+          <>
+            {activeStaff.length > 0 && (
+              <StaffTable
+                rows={activeStaff}
+                pendingIds={pendingIds}
+                selectedId={open ? selectedId : null}
+                onEdit={edit}
+              />
+            )}
+            {inactiveStaff.length > 0 && (
+              <section aria-labelledby={inactiveHeadingId} className="mt-6 flex flex-col gap-2">
+                <h3 id={inactiveHeadingId} className="text-title-card text-text-primary">
+                  Inactive staff
+                </h3>
                 {
-                  key: "name",
-                  header: "Name",
-                  render: (person) => (
-                    <>
-                      <Button
-                        variant="ghost"
-                        aria-label={"Edit " + fullName(person)}
-                        aria-current={open && selectedId === person.id ? "true" : undefined}
-                        onClick={(event) => edit(person, event.currentTarget)}
-                      >
-                        {fullName(person)}
-                      </Button>
-                      {pendingIds.has(person.id) && (
-                        <span className="ml-1 inline-flex items-center rounded-pill border border-bg-muted bg-bg-surface px-2 py-1 text-body-small font-medium text-text-secondary">
-                          Pending
-                        </span>
-                      )}
-                    </>
-                  ),
-                },
-                {
-                  key: "role",
-                  header: "Role",
-                  render: (person) => (
-                    <span className="text-text-secondary">{person.jobTitle}</span>
-                  ),
-                },
-              ]}
-            />
-          </div>
+                  <StaffTable
+                    rows={inactiveStaff}
+                    pendingIds={pendingIds}
+                    selectedId={open ? selectedId : null}
+                    onEdit={edit}
+                  />
+                }
+              </section>
+            )}
+          </>
         ) : (
           <EmptyState title="No staff yet" body="Add a staff member to get started." />
         )}
@@ -273,6 +341,28 @@ export function StaffScreen({
               </p>
             </SidePanelForm>
           </div>
+          {selected?.isActive && (
+            <CardShell className="border-transparent p-5">
+              <div className="flex flex-col gap-3">
+                {deactivateError && (
+                  <p role="alert" className="text-body-small break-words text-destructive">
+                    {deactivateError}
+                  </p>
+                )}
+                <Button
+                  type="button"
+                  variant="destructive"
+                  className="h-auto min-h-11 whitespace-normal break-words"
+                  onClick={() => {
+                    setDeactivateError("");
+                    setConfirmDeactivate(true);
+                  }}
+                >
+                  Deactivate {fullName(selected)}
+                </Button>
+              </div>
+            </CardShell>
+          )}
           {selected && (
             <CarerAssignments
               key={selected.id}
@@ -283,6 +373,19 @@ export function StaffScreen({
           )}
         </div>
       )}
+      <ConfirmationModal
+        open={confirmDeactivate}
+        title="Deactivate staff member?"
+        body={
+          selected
+            ? `${fullName(selected)} will lose access straight away. Their future shifts will be cancelled and any shift in progress will end now. Their records are kept.`
+            : ""
+        }
+        confirmLabel="Deactivate"
+        tone="destructive"
+        onConfirm={() => void confirmDeactivation()}
+        onCancel={() => setConfirmDeactivate(false)}
+      />
     </div>
   );
 }

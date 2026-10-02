@@ -1,6 +1,6 @@
 # Progress — ADM-08 Admin — Manage carer-client assignments
 
-Status: PR OPEN
+Status: MERGED TO DEV (merged to `main` in #203, 2026-10-02)
 Owner: Dhruv Verma
 Lane: A — Admin
 Sprint: SPRINT · planned D16

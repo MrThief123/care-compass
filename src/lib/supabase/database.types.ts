@@ -963,6 +963,27 @@ export type Database = {
         };
       };
       admin_current_org_id: { Args: never; Returns: string };
+      admin_deactivate_staff: {
+        Args: { p_profile_id: string };
+        Returns: {
+          address: string | null;
+          email: string | null;
+          first_name: string | null;
+          id: string;
+          is_active: boolean;
+          job_title: string | null;
+          last_name: string | null;
+          organisation_id: string | null;
+          phone: string | null;
+          role: Database["public"]["Enums"]["app_role"];
+        };
+        SetofOptions: {
+          from: "*";
+          to: "profiles";
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
+      };
       admin_discard_staff_invite: {
         Args: { p_user_id: string };
         Returns: undefined;
@@ -1165,6 +1186,7 @@ export type Database = {
         }[];
       };
       is_admin_of_client: { Args: { p_client_id: string }; Returns: boolean };
+      is_admin_of_organisation: { Args: { p_organisation_id: string }; Returns: boolean };
       is_assigned_carer: { Args: { p_client_id: string }; Returns: boolean };
       is_family_of: { Args: { p_client_id: string }; Returns: boolean };
       link_document_to_event: {

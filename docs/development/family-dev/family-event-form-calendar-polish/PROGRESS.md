@@ -1,6 +1,6 @@
 # Progress — FAM-16 Family — Event form and calendar polish
 
-Status: READY FOR PR
+Status: MERGED TO DEV (merged to `main` in #206, 2026-10-02)
 Owner: Dhruv Verma
 Lane: F — Family
 Sprint: SPRINT · planned D18

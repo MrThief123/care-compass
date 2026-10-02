@@ -1111,10 +1111,10 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **User value:** Access is withdrawn when staff leave (CIS5).
 - **Dependencies:** ADM-02 · **Blocking decisions:** OQ-36, OQ-19
 - **Jira summary:** Withdraw a staff member's access without deleting their recorded work (not designed)
-- **Acceptance criteria summary:** 2 criteria — zero rows are returned; those tasks still show 'Done · Marcus C.'
-- **Testing summary:** 1 db, 1 integration
+- **Acceptance criteria summary:** 9 criteria — zero rows are returned; those tasks still show 'Done · Marcus C.'; shifts cancelled and ended, refused for non-admins, idempotent, signed out next request, confirm dialog, Inactive section, failure alert
+- **Testing summary:** 2 db files, 1 integration file, 1 unit file, 1 component file
 - **Requirements:** REQ-06, REQ-N6
-- **Docs:** `docs/development/admin-dev/admin-staff-deactivate/` · **Status:** NOT STARTED
+- **Docs:** `docs/development/admin-dev/admin-staff-deactivate/` · **Status:** READY FOR PR
 
 ### ADM-04 — Admin — Clients list and add client
 - **Dashboard / stream:** admin · **Lane:** A · **Days:** D9 · **Sprint:** SPRINT · **PR target:** `main` · **Branch:** `feature/admin-clients`

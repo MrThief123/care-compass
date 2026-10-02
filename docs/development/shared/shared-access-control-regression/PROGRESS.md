@@ -1,6 +1,6 @@
 # Progress — INT-05 Access-control regression matrix
 
-Status: PR OPEN
+Status: MERGED TO DEV (merged to `main` in #209, 2026-10-02)
 Owner: Shwethan Potu
 Lane: I — Integration
 Sprint: STRETCH · planned D12–D13
