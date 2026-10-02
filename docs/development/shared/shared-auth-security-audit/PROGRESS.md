@@ -27,7 +27,8 @@ Last updated: 2026-10-02
 5. **Close-out fixes, asked for by the human (2026-10-02).** FD-09 (open redirect in
    `/auth/confirm`) and FD-10 (`/api/test` hidden in production). Tests first: 10 red for the right
    reason, then green. FD-11 (HSTS header) added the same way: 1 red (no header), then green.
-   FD-12 (password show/hide toggle): 4 red (no toggle) plus 2 guards, then green.
+   FD-12 (password show/hide toggle): 4 red (no toggle) plus 2 guards, then green. FD-13 (QR
+   centred): 1 red, then green.
 6. **Reported, not reproduced (2026-10-02):** the human sometimes can't type into the sign-in fields
    until a refresh. Not reproduced in Chromium on the dev server: cold load, typing with JS held
    back 4 s, sign-up → sign-in link, sign-out → sign-in, Back after sign-in. Skipped at the human's
@@ -84,6 +85,8 @@ Last updated: 2026-10-02
   `Strict-Transport-Security: max-age=63072000`.
 - **FD-12 (password toggle):** unit 2373/2373; `tsc` clean; `eslint` 0 errors; checked in Chromium
   on the dev server: hidden by default, eye reveals, eye-off hides.
+- **FD-13 (QR centred):** unit 2374/2374; `tsc` clean; `eslint` 0 errors; checked in Chromium on
+  `/mfa/enroll` as the local seed admin: equal space either side of the QR.
 
 ## Next action
 - FD-07 follow-up (hosted project, needs the human): record the dashboard's Auth > Rate Limits
@@ -93,4 +96,4 @@ Last updated: 2026-10-02
   (the seeded admin Priya now needs TOTP to see admin data).
 
 ## Ready for PR
-- Merged in #195. Close-out PR: decision docs plus the FD-09 to FD-12 fixes. Not opened yet.
+- Merged in #195. Close-out PR: decision docs plus the FD-09 to FD-13 fixes. Not opened yet.

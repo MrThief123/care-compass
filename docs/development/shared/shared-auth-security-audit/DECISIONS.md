@@ -145,6 +145,13 @@ is changed, renamed or dropped.
   text, not `aria-label`, so `getByLabel("Password")` in the e2e specs still finds only the input.
 - Tests: `src/components/shared/forms/field.test.tsx` (`[F0-21][FD-12]`).
 
+### FD-13 — MFA enrolment QR code centred (asked for in close-out)
+- Request: the human (Dhruv561, 2026-10-02) reported the QR code sat at the left of the card.
+- Cause: the `<img>` is a child of the card's flex column with no alignment of its own.
+- Decision: `self-center` on the image. Nothing else on the screen moves.
+- Tests: `src/app/(auth)/mfa/enroll/mfa-enroll.test.tsx` (`[F0-21][FD-13]`) guards the class; jsdom
+  has no layout, so the position was checked in Chromium.
+
 ## Test changes (CLAUDE.md §5) — HUMAN REVIEW: test expectation changed
 No assertion was removed or loosened. The simulated session changed because the requirement changed
 (admin authority now needs AAL2).

@@ -7,7 +7,7 @@ Worked on: the whole audit. Tests first for every gap, fixes, AUDIT_REPORT.md. S
 ## Close-out (2026-10-02)
 - #195 merged 2026-10-01. Decision commit `42b52c1` (left on the feature branch) brought to `main` via
   `docs/f0-21-closeout`, with the confirmations re-recorded as the human's (Dhruv561).
-- FD-09 (open redirect), FD-10 (`/api/test`) FD-11 (HSTS) and FD-12 (password toggle) done at the human's
+- FD-09 (open redirect), FD-10 (`/api/test`) FD-11 (HSTS) and FD-12 (password toggle) and FD-13 (QR centred) done at the human's
   request. Sign-in "can't type until refresh" reported but not reproduced (PROGRESS item 6).
 - FD-05/06 confirmed in scope; FD-07 decided (a) + (b) follow-up; migrations approved (FD-08).
 - Hosted check method: see DECISIONS.md FD-08. `.env.local`'s anon key has a stray leading `e`

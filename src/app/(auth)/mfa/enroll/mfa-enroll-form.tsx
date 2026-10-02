@@ -70,6 +70,7 @@ export function MfaEnrollForm({ factorId, qrCode, secret }: MfaEnrollFormProps) 
         alt="Scan with your authenticator app"
         width={200}
         height={200}
+        className="self-center"
       />
 
       <p className="break-all text-body-small text-text-secondary">
