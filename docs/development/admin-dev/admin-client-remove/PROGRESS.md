@@ -1,6 +1,6 @@
 # Progress — ADM-05 Admin — Remove client
 
-Status: READY FOR PR
+Status: IN PROGRESS
 Owner: Dhruv Verma
 Lane: A — Admin
 Sprint: SPRINT · planned D18
