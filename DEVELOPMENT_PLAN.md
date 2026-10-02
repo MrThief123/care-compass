@@ -1114,7 +1114,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Acceptance criteria summary:** 9 criteria — zero rows are returned; those tasks still show 'Done · Marcus C.'; shifts cancelled and ended, refused for non-admins, idempotent, signed out next request, confirm dialog, Inactive section, failure alert
 - **Testing summary:** 2 db files, 1 integration file, 1 unit file, 1 component file
 - **Requirements:** REQ-06, REQ-N6
-- **Docs:** `docs/development/admin-dev/admin-staff-deactivate/` · **Status:** READY FOR PR
+- **Docs:** `docs/development/admin-dev/admin-staff-deactivate/` · **Status:** IN REVIEW (PR #212)
 
 ### ADM-04 — Admin — Clients list and add client
 - **Dashboard / stream:** admin · **Lane:** A · **Days:** D9 · **Sprint:** SPRINT · **PR target:** `main` · **Branch:** `feature/admin-clients`
@@ -1182,7 +1182,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Acceptance criteria summary:** 9 criteria — a shift's carer, times and client are guarded by the database; cancel sets `cancelled_at` and keeps the row; ended and cancelled shifts are frozen; a deactivated, other-organisation carer or a new client is refused; mock validation and NOT_FOUND; real-data cancel; Cancel button on editable shifts only; Cancel dialog (FD-05, CHG-053: editing dropped)
 - **Testing summary:** 1 db file, 1 unit file, 1 integration file, 1 component file, 1 e2e file
 - **Requirements:** REQ-24
-- **Docs:** `docs/development/admin-dev/admin-edit-shift/` · **Status:** READY FOR PR
+- **Docs:** `docs/development/admin-dev/admin-edit-shift/` · **Status:** IN REVIEW (PR #212)
 
 ### ADM-10 — Admin — Settings
 - **Dashboard / stream:** admin · **Lane:** A · **Days:** D10 · **Sprint:** SPRINT · **PR target:** `main` · **Branch:** `feature/admin-settings`

@@ -1,6 +1,6 @@
 # Progress — ADM-09 Admin — Edit, extend or cancel a shift
 
-Status: READY FOR PR
+Status: IN REVIEW (PR #212)
 Owner: Dhruv Verma
 Lane: A — Admin
 Sprint: SPRINT · planned D17
@@ -51,7 +51,7 @@ Last updated: 2026-10-03
 - PROPOSED items in PRD.md are unconfirmed until validated in F0-01 or answered in DECISIONS.md.
 
 ## Next action
-- Ask the human for "yes", then open the PR.
+- Review and merge PR #212 (human).
 
 ## Ready for PR
-- Yes, awaiting the human's approval to open it
+- Yes, PR #212 is open
