@@ -1,6 +1,6 @@
 # Progress — INT-11 Email Family and admins when an event cost goes pending
 
-Status: DRAFT (doc pack awaiting human approval; no code, tests or migration written)
+Status: IN PROGRESS
 Owner: Dhruv Verma
 Lane: B — Backend
 Sprint: SPRINT · planned D19 (proposed)
@@ -23,7 +23,8 @@ Last updated: 2026-10-02
 - 0 / 8 MET (proposed)
 
 ## Tests
-- Written: 0 / 9
+- Written first (2026-10-02): integration `tests/integration/pending-cost-emails.test.ts` (T-01..T-07, T-09; T-02 and T-02b), route test `src/app/api/jobs/pending-cost-emails/route.test.ts`, pgTAP `supabase/tests/budget_pending_cost_notifications.test.sql`.
+- Red run before implementation: vitest fails with 'Failed to resolve import' for the missing job and route modules; `supabase test db` fails the new pgTAP file (table and function do not exist yet). Right reason: nothing implemented.
 
 ## Files changed
 - This doc pack only.
