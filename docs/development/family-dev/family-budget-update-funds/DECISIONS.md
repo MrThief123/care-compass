@@ -49,6 +49,15 @@ None. OQ-04, OQ-05, OQ-19 and OQ-03 are ANSWERED in root DECISIONS.md (PD-033, P
 | 46-48 (AC-06 Government top-up) | $100 top-up, $0 pending, remaining $30 | $150 top-up, remaining $40 | $240 - $40 + $100 = $300 cannot pay the $310 pending cost; $150 can ($200 + $150 - $310) |
 | 58 (AC-03 "nothing changed") | 30 rows | 17 rows | equals the 17 asserted just before the permission checks |
 
+### FD-06 — History tie-break: newest recorded first
+- Date: 2026-10-02
+- Context: History sorted by date only, so entries on the same day came out in no fixed order (found testing Edit budget saves). Seeded entries are dated after the real clock, so they also sit above today's entries; that part is seed data, not a fault.
+- Decision: `getFundHistory` sorts by date (newest first), then by `created_at` (newest first). Rows written by one save share a timestamp and still tie.
+- Reason: a save's entries should read in the order they were made.
+- Alternatives considered: sort by recorded time first (rejected: changes FAM-10 date ordering); fix seed dates only.
+- Consequences: touches the FAM-10 query `src/server/budget/queries.ts`; no test changed; ordering by date is unchanged.
+- Human confirmation required: yes. Option 1 chosen by the user on 2026-10-02.
+
 <!-- Template
 ### FD-xx — <title>
 - Date:

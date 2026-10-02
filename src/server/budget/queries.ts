@@ -80,13 +80,13 @@ export async function getFundHistory(clientId: string): Promise<FundEntry[]> {
     supabase
       .from("budget_fund_entries")
       .select(
-        "id, client_id, bucket_id, amount, entry_date, description, note, recorded_by_name, bucket:budget_buckets(kind)",
+        "id, client_id, bucket_id, amount, entry_date, created_at, description, note, recorded_by_name, bucket:budget_buckets(kind)",
       )
       .eq("client_id", clientId),
     supabase
       .from("budget_costs")
       .select(
-        "id, client_id, bucket_id, amount, status, incurred_on, paid_on, description, note, recorded_by_name, bucket:budget_buckets(kind)",
+        "id, client_id, bucket_id, amount, status, incurred_on, paid_on, created_at, description, note, recorded_by_name, bucket:budget_buckets(kind)",
       )
       .eq("client_id", clientId),
   ]);
@@ -95,36 +95,48 @@ export async function getFundHistory(clientId: string): Promise<FundEntry[]> {
     throw new Error("getFundHistory: could not load the budget history.");
   }
 
-  const topUpsAndAdjustments: FundEntry[] = fundEntries.data.map((row) => ({
-    id: row.id,
-    clientId: row.client_id,
-    bucketId: row.bucket_id,
-    bucketKind: (row.bucket?.kind as BudgetBucketKind | null) ?? undefined,
-    type: row.amount >= 0 ? "topup" : "expense",
-    amount: row.amount,
-    date: row.entry_date,
-    description: row.description || undefined,
-    recordedBy: row.recorded_by_name,
-    note: row.note ?? undefined,
-  }));
+  const recordedAt = new Map<string, string>();
+  const topUpsAndAdjustments: FundEntry[] = fundEntries.data.map((row) => {
+    recordedAt.set(row.id, row.created_at);
+    return {
+      id: row.id,
+      clientId: row.client_id,
+      bucketId: row.bucket_id,
+      bucketKind: (row.bucket?.kind as BudgetBucketKind | null) ?? undefined,
+      type: row.amount >= 0 ? "topup" : "expense",
+      amount: row.amount,
+      date: row.entry_date,
+      description: row.description || undefined,
+      recordedBy: row.recorded_by_name,
+      note: row.note ?? undefined,
+    };
+  });
 
-  const expenses: FundEntry[] = costs.data.map((row) => ({
-    id: row.id,
-    clientId: row.client_id,
-    bucketId: row.bucket_id,
-    bucketKind: (row.bucket?.kind as BudgetBucketKind | null) ?? undefined,
-    type: "expense",
-    amount: -row.amount,
-    date: row.incurred_on,
-    description: row.description || undefined,
-    recordedBy: row.recorded_by_name,
-    pending: row.status === "pending" ? true : undefined,
-    paidOn:
-      row.status === "paid" && row.paid_on && row.paid_on !== row.incurred_on
-        ? row.paid_on
-        : undefined,
-    note: row.note ?? undefined,
-  }));
+  const expenses: FundEntry[] = costs.data.map((row) => {
+    recordedAt.set(row.id, row.created_at);
+    return {
+      id: row.id,
+      clientId: row.client_id,
+      bucketId: row.bucket_id,
+      bucketKind: (row.bucket?.kind as BudgetBucketKind | null) ?? undefined,
+      type: "expense",
+      amount: -row.amount,
+      date: row.incurred_on,
+      description: row.description || undefined,
+      recordedBy: row.recorded_by_name,
+      pending: row.status === "pending" ? true : undefined,
+      paidOn:
+        row.status === "paid" && row.paid_on && row.paid_on !== row.incurred_on
+          ? row.paid_on
+          : undefined,
+      note: row.note ?? undefined,
+    };
+  });
 
-  return [...topUpsAndAdjustments, ...expenses].sort((a, b) => b.date.localeCompare(a.date));
+  // Newest date first; entries on the same day newest recorded first, so a save's rows read in the order made.
+  return [...topUpsAndAdjustments, ...expenses].sort(
+    (a, b) =>
+      b.date.localeCompare(a.date) ||
+      (recordedAt.get(b.id) ?? "").localeCompare(recordedAt.get(a.id) ?? ""),
+  );
 }

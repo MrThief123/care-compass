@@ -17,7 +17,7 @@ Last updated: 2026-10-02 (implemented; all FAM-11 tests green; visual check next
 - FAM-UI-05 — MERGED TO DEV
 
 ## Completed
-- Docs rewritten under CHG-020/021/022: PRD, ACs (8), USER_STORIES, TEST_PLAN (15 tests), DECISIONS (FD-01 to FD-05).
+- Docs rewritten under CHG-020/021/022: PRD, ACs (8), USER_STORIES, TEST_PLAN (15 tests), DECISIONS (FD-01 to FD-06).
 - Tests written first and confirmed failing for the right reason (see TEST_PLAN "Run record").
 - Migration `20261002113224_budget_save_edit.sql` (`save_budget_edit`), `database.types.ts` regenerated, `src/server/budget/actions.ts`, `EditBudgetView` + edit page wired (`persist`).
 - All FAM-11 tests green (TEST_PLAN "Results"); FAM-UI-05's tests pass unedited.
