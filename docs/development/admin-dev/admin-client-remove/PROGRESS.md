@@ -1,12 +1,12 @@
 # Progress — ADM-05 Admin — Remove client
 
-Status: NOT STARTED
-Owner: unclaimed
+Status: IN PROGRESS
+Owner: Dhruv Verma
 Lane: A — Admin
 Sprint: POST-SPRINT · planned —
-Branch: `feature/admin-client-remove` (not yet created)
-PR target: `admin-dev`
-Last updated: 2026-09-17 (planning pack generated)
+Branch: `feature/admin-client-remove`
+PR target: `main` (CHG-036)
+Last updated: 2026-10-03
 
 ## Blockers
 - OQ-06 — Organisation change model
