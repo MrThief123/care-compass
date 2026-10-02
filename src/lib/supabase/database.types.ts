@@ -251,6 +251,29 @@ export type Database = {
           },
         ];
       };
+      budget_pending_cost_notifications: {
+        Row: {
+          cost_id: string;
+          sent_at: string;
+        };
+        Insert: {
+          cost_id: string;
+          sent_at?: string;
+        };
+        Update: {
+          cost_id?: string;
+          sent_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "budget_pending_cost_notifications_cost_id_fkey";
+            columns: ["cost_id"];
+            isOneToOne: true;
+            referencedRelation: "budget_costs";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       budget_threshold_notifications: {
         Row: {
           bucket_id: string;
@@ -1040,6 +1063,17 @@ export type Database = {
         Returns: undefined;
       };
       budget_clean_name: { Args: { p_name: string }; Returns: string };
+      budget_pending_costs_to_notify: {
+        Args: never;
+        Returns: {
+          amount: number;
+          bucket_name: string;
+          client_id: string;
+          cost_id: string;
+          description: string;
+          organisation_id: string;
+        }[];
+      };
       budget_settle_pending: {
         Args: { p_bucket_id: string };
         Returns: undefined;

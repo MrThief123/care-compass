@@ -3,7 +3,7 @@
 -- budget_pending_costs_to_notify() returning pending, un-notified costs only. The job's
 -- behaviour is covered by tests/integration/pending-cost-emails.test.ts.
 begin;
-select plan(15);
+select plan(14);
 
 insert into organisations (id, name) values
   ('11111111-1111-1111-1111-111111111111', 'Banksia Home Care');

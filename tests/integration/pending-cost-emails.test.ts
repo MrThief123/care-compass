@@ -135,8 +135,25 @@ async function pendingCost(
   return row.data.id as string;
 }
 
+/** Adds the funds that pay the cost off first (what `add_funds` does), so no bucket ends up past
+ * 100% and trips INT-01's threshold tests running in parallel against the same database. */
 async function payOff(admin: Admin, costId: string) {
   const today = new Date().toISOString().slice(0, 10);
+  const cost = await admin
+    .from("budget_costs")
+    .select("bucket_id, client_id, amount")
+    .eq("id", costId)
+    .single();
+  if (cost.error || !cost.data) throw cost.error ?? new Error("cost");
+  const funds = await admin.from("budget_fund_entries").insert({
+    bucket_id: cost.data.bucket_id,
+    client_id: cost.data.client_id,
+    kind: "funds_added",
+    amount: cost.data.amount,
+    recorded_by: "00000000-0000-0000-0000-000000000000",
+    recorded_by_name: "Test",
+  });
+  if (funds.error) throw funds.error;
   const res = await admin
     .from("budget_costs")
     .update({ status: "paid", paid_on: today })
