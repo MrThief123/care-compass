@@ -4,6 +4,7 @@ import { StatusPill } from "@/components/shared/status-pill";
 import { CardShell } from "@/components/ui/card-shell";
 import { editEventHrefFrom } from "@/features/family-event-form/event-form-return";
 import { OpenDocumentTile } from "@/features/family-event-form/open-document-tile";
+import { lateCompletionNote } from "@/features/family-task-log/late-completion";
 import { formatTimeOfDay } from "@/features/family-task-log/melbourne-time";
 import { occurrenceNurse } from "@/features/family-task-log/occurrence-display";
 import { statusPillClassName } from "@/features/family-task-log/status-pill-class";
@@ -57,6 +58,7 @@ export function TaskDetailView({
   const plain = isPlainEvent(occurrence);
   const nurse = occurrenceNurse(plain ? { assignee: occurrence.assignee } : occurrence);
   const completedAt = !plain && occurrence.status === "done" ? occurrence.completedAt : undefined;
+  const lateNote = !plain ? lateCompletionNote(occurrence) : undefined;
   const pillText = !plain && occurrence.status === "done" ? `Done · ${nurse}` : undefined;
 
   return (
@@ -111,6 +113,7 @@ export function TaskDetailView({
               {`Completed at ${formatTimeOfDay(completedAt)}`}
             </p>
           )}
+          {lateNote && <p className="text-body-small text-text-secondary">{lateNote}</p>}
         </div>
       </CardShell>
 

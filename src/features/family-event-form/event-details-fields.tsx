@@ -7,12 +7,12 @@ import type { EventDetailsValues } from "./event-details";
 export interface EventDetailsFieldsProps {
   values: EventDetailsValues;
   onChange: (values: EventDetailsValues) => void;
-  /** Messages keyed `title`, `startTime`, `duration` (`validateEventDetails`). */
-  errors?: { title?: string; startTime?: string; duration?: string };
+  /** Messages keyed `title`, `startTime`, `endTime` (`validateEventDetails`). */
+  errors?: { title?: string; startTime?: string; endTime?: string };
 }
 
 /**
- * Title, Start time and Duration (OQ-22/PD-047): first-class event fields the
+ * Title, Start time and End time (OQ-22/PD-047, CHG-051): first-class event fields the
  * kit's `EventForm` does not have (it only has Date, Recurring, Status and
  * Description). Built here, not in the shared kit, like `EventCostFields`
  * (FAM-UI-08) — the same `extraFields` slot.
@@ -36,11 +36,11 @@ export function EventDetailsFields({ values, onChange, errors }: EventDetailsFie
         required
       />
       <Field
-        label="Duration"
-        value={values.duration}
-        onChange={(duration) => onChange({ ...values, duration })}
-        hint="In minutes. Leave empty for 0."
-        error={errors?.duration}
+        label="End time"
+        value={values.endTime}
+        onChange={(endTime) => onChange({ ...values, endTime })}
+        hint="24-hour, e.g. 10:15, after the start time. Leave empty for no end."
+        error={errors?.endTime}
       />
     </div>
   );

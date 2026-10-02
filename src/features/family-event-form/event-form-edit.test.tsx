@@ -130,3 +130,20 @@ describe("[FAM-07][Scope] the scope selector (PD-045)", () => {
     expect(screen.getByRole("radiogroup", { name: "Scope" })).toBeInTheDocument();
   });
 });
+
+describe("[FAM-16][AC-10] Edit event shows Start time and End time", () => {
+  it("[FAM-16][AC-10] End time is the start plus the duration, and Save sends the same duration", async () => {
+    const user = userEvent.setup();
+    renderEdit(physio);
+
+    expect(screen.queryByLabelText("Duration")).not.toBeInTheDocument();
+    expect(screen.getByLabelText("Start time")).toHaveValue("11:30");
+    expect(screen.getByLabelText("End time")).toHaveValue("13:00");
+
+    await user.click(screen.getByRole("button", { name: "Save event" }));
+
+    expect(mocks.updateEvent).toHaveBeenCalledWith(
+      expect.objectContaining({ durationMinutes: physio.durationMinutes }),
+    );
+  });
+});
