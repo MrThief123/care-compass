@@ -36,6 +36,7 @@ export type AssignShiftResult =
 
 const ASSIGN_FAILED = "Couldn't assign the shift. Try again.";
 const NOT_ALLOWED = "You can't assign this carer to this client.";
+const NOT_SIGNED_UP = "This carer hasn't signed up yet, so they can't be given shifts.";
 /** RLS refusal, and the F0-10 org trigger's `raise exception`. */
 const REFUSAL_CODES = new Set(["42501", "P0001"]);
 
@@ -75,6 +76,17 @@ export async function assignShift(input: AssignShiftInput): Promise<AssignShiftR
       data: { user },
     } = await supabase.auth.getUser();
     if (!user) return { ok: false, error: { code: "UNAUTHORISED", message: NOT_ALLOWED } };
+
+    // A carer who has been invited but has not signed up yet is not rostered (ADM-08 FD-08). This
+    // fails closed: if the lookup itself fails, no shift is created.
+    const pending = await supabase.rpc("admin_pending_staff_ids");
+    if (pending.error) {
+      logFailure(pending.error.code);
+      return { ok: false, error: { code: "UNEXPECTED", message: ASSIGN_FAILED } };
+    }
+    if ((pending.data ?? []).includes(carerId)) {
+      return { ok: false, error: { code: "UNAUTHORISED", message: NOT_SIGNED_UP } };
+    }
 
     // `organisation_id` is not sent: F0-10's `shifts_before_insert` trigger always sets it from the
     // client, so the caller can't choose it. The generated types can't know that, hence the cast.

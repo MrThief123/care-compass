@@ -141,7 +141,7 @@ test.describe("[ADM-08] Staff screen against real data", () => {
     }
   });
 
-  test("[ADM-08][FD-07] an invited carer is Pending, stays Pending after a reload, and stops being Pending once they confirm", async ({
+  test("[ADM-08][FD-07] an invited carer is Pending, is not on Manage, and appears there once they confirm", async ({
     page,
   }) => {
     const s = await seed();
@@ -178,11 +178,10 @@ test.describe("[ADM-08] Staff screen against real data", () => {
       const account = await db().auth.admin.getUserById(profile.data!.id);
       expect(account.data.user?.email_confirmed_at ?? null).toBeNull();
 
-      // Manage reads the same carers: Helen is there to pick before she has signed in, and a shift
-      // can be started for her with Margaret.
-      await page.goto(`/admin/manage?staff=${profile.data!.id}&client=${s.clientId}`);
-      await expect(page.getByText("Helen Brown").first()).toBeVisible();
-      await expect(page.getByText(/Helen Brown → Margaret Doyle-/)).toBeVisible();
+      // Manage does not offer her yet: she can't be rostered until she has signed up (FD-08).
+      await page.goto("/admin/manage");
+      await expect(page.getByText("Aisha Rahman").first()).toBeVisible();
+      await expect(page.getByText("Helen Brown")).toHaveCount(0);
 
       // Helen follows the invite link: Pending goes away.
       await page.goto("/admin/staff");

@@ -63,6 +63,14 @@ Record feature-level decisions here using the template below. Project-wide decis
 - Test changes: none to existing tests; two added to `staff-screen.test.tsx` and a pgTAP file `admin_pending_staff.test.sql` (6 tests).
 - Human confirmation: Dhruv Verma, 2026-10-02.
 
+### FD-08 — Manage does not list or roster carers who have not signed up
+- Date: 2026-10-02
+- Decision: the human's rule: a carer appears on Manage, and can be given shifts, only once they have accepted their invite. `getAdminManage()` drops the ids returned by `admin_pending_staff_ids()` (FD-07) from its staff list, and `assignShift` refuses a pending carer ("This carer hasn't signed up yet, so they can't be given shifts.", UNAUTHORISED) without inserting. Both fail closed: if the pending lookup errors, Manage errors and no shift is created.
+- Known limit: enforced in the app (query and Server Action), not by a database trigger. A trigger on `shifts` would reject every fixture that inserts an unconfirmed `auth.users` row, across many pgTAP and integration tests. An admin calling the database API directly could still insert a shift for a pending carer. Tightening that is a separate decision.
+- Mock mode is unchanged: the Manage fixtures are a separate list from the Staff mock store.
+- Test change (infrastructure, not behaviour): `manage-actions.test.ts` fake Supabase client gains `rpc`, returning no pending carers by default, because `assignShift` now calls it. Two new tests there; the real-data spec `admin-staff-panel.spec.ts` now asserts Helen is absent from Manage while pending and present once confirmed.
+- Human confirmation: Dhruv Verma, 2026-10-02.
+
 <!-- Template
 ### FD-01 — <title>
 - Date:
