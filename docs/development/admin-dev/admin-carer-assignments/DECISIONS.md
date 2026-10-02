@@ -55,6 +55,14 @@ Record feature-level decisions here using the template below. Project-wide decis
 - Decision: both mock stores (`assignments-mock-store.ts`, and the ADM-02 `staff-mock-store.ts`, same lane) now keep their rows on `globalThis`. Mock mode only; the database path is unchanged. Verified in a production build: an added carer survives reload, a removed client stays removed after navigating away and back.
 - Human confirmation required: no (mock-only defect fix; ADM-02 file touched, noted in the PR).
 
+### FD-07 — "Pending" label for invited carers who have not signed up
+- Date: 2026-10-02
+- Context: a carer added on the Staff screen is invited by email (ADM-02) and cannot sign in until they accept, but the list looked the same as an active carer.
+- Decision: the human asked for it to be added here, in ADM-08 ("Can you add the pending thing here?"). New SECURITY DEFINER function `admin_pending_staff_ids()` (migration `20261002023548_admin_pending_staff.sql`) returns the ids of the caller's own organisation's carers whose `auth.users.email_confirmed_at` is null, the only auth.users fact it exposes. `getAdminStaff()` returns them as optional `pendingIds`; the Staff list shows a "Pending" pill (text, not colour alone) beside the name, and the panel says "Invite sent. Pending until they sign up." A carer just added shows Pending at once and "{name} invited. Pending until they sign up." replaces "saved". If the lookup fails the list loads without labels. `StaffMember` (shared `src/types/domain.ts`) is untouched; the ids travel beside it. Mock mode: carers added in the session are pending; the seeded ones are not.
+- Reuses the ADM-02 `admin_current_org_id()` guard (42501 for non-admins). Touches ADM-02's `staff-queries.ts`, `staff-mock-store.ts` and `staff-screen.tsx`; `database.types.ts` regenerated again. The PR says so.
+- Test changes: none to existing tests; two added to `staff-screen.test.tsx` and a pgTAP file `admin_pending_staff.test.sql` (6 tests).
+- Human confirmation: Dhruv Verma, 2026-10-02.
+
 <!-- Template
 ### FD-01 — <title>
 - Date:

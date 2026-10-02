@@ -945,6 +945,7 @@ export type Database = {
         Args: { p_carer_id: string; p_client_id: string };
         Returns: number;
       };
+      admin_pending_staff_ids: { Args: never; Returns: string[] };
       admin_update_organisation: {
         Args: {
           p_abn: string;

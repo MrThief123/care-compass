@@ -240,3 +240,43 @@ describe("Admin Staff", () => {
     expect(await axe(container)).toHaveNoViolations();
   });
 });
+
+describe("[ADM-08][FD-07] Pending carers", () => {
+  it("[ADM-08][FD-07] labels an invited carer Pending in the list and in their panel", async () => {
+    render(<StaffScreen data={{ ...data, pendingIds: [data.staff[2]!.id] }} />);
+    expect(
+      within(screen.getByRole("row", { name: /Sarah Nguyen/ })).getByText("Pending"),
+    ).toBeVisible();
+    expect(
+      within(screen.getByRole("row", { name: /Aisha Rahman/ })).queryByText("Pending"),
+    ).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "Edit Sarah Nguyen" }));
+    expect(screen.getByText("Invite sent. Pending until they sign up.")).toBeVisible();
+  });
+
+  it("[ADM-08][FD-07] a carer just added shows as Pending straight away", async () => {
+    mocks.createStaff.mockResolvedValue({
+      ok: true,
+      data: {
+        id: "staff-new",
+        organisationId: "org-banksia",
+        firstName: "Helen",
+        lastName: "Brown",
+        jobTitle: "Support Worker",
+        email: "helen.brown@example.com",
+        phone: "0412 345 678",
+        isActive: true,
+      },
+    });
+    render(<StaffScreen data={data} />);
+    await userEvent.click(screen.getByRole("button", { name: "Add Staff" }));
+    await userEvent.type(screen.getByLabelText("First name"), "Helen");
+    await userEvent.type(screen.getByLabelText("Last name"), "Brown");
+    await userEvent.type(screen.getByLabelText("Email"), "helen.brown@example.com");
+    await userEvent.type(screen.getByLabelText("Phone"), "0412 345 678");
+    await userEvent.click(screen.getByRole("button", { name: "Save" }));
+    const row = await screen.findByRole("row", { name: /Helen Brown/ });
+    expect(within(row).getByText("Pending")).toBeVisible();
+    expect(screen.getByRole("status")).toHaveTextContent("Helen Brown invited");
+  });
+});

@@ -53,6 +53,9 @@ export function StaffScreen({
   /** Every carer's clients (ADM-08); the selected carer's are listed in their panel. */
   assignments?: CarerAssignment[];
 }) {
+  // Invited carers who have not signed up yet; a carer added here is pending until a reload shows
+  // otherwise (the server is the source of truth, `getAdminStaff().pendingIds`).
+  const [pendingIds, setPendingIds] = useState(() => new Set(data.pendingIds ?? []));
   const [staff, setStaff] = useState(() => data.staff.map((person) => ({ ...person })));
   // The side panel is closed until a name or Add Staff is pressed; `selectedId` null means adding.
   const [open, setOpen] = useState(false);
@@ -128,7 +131,8 @@ export function StaffScreen({
         ? current.map((person) => (person.id === selectedId ? saved : person))
         : [...current, saved],
     );
-    close(fullName(saved) + " saved");
+    if (!selectedId) setPendingIds((current) => new Set(current).add(saved.id));
+    close(fullName(saved) + (selectedId ? " saved" : " invited. Pending until they sign up."));
   }
 
   function change(field: keyof Draft, value: string) {
@@ -168,14 +172,21 @@ export function StaffScreen({
                   key: "name",
                   header: "Name",
                   render: (person) => (
-                    <Button
-                      variant="ghost"
-                      aria-label={"Edit " + fullName(person)}
-                      aria-current={open && selectedId === person.id ? "true" : undefined}
-                      onClick={() => edit(person)}
-                    >
-                      {fullName(person)}
-                    </Button>
+                    <>
+                      <Button
+                        variant="ghost"
+                        aria-label={"Edit " + fullName(person)}
+                        aria-current={open && selectedId === person.id ? "true" : undefined}
+                        onClick={() => edit(person)}
+                      >
+                        {fullName(person)}
+                      </Button>
+                      {pendingIds.has(person.id) && (
+                        <span className="ml-1 inline-flex items-center rounded-pill border border-bg-muted bg-bg-surface px-2 py-1 text-body-small font-medium text-text-secondary">
+                          Pending
+                        </span>
+                      )}
+                    </>
                   ),
                 },
                 {
@@ -242,6 +253,11 @@ export function StaffScreen({
                 onChange={(value) => change("jobTitle", value)}
                 error={errors.jobTitle}
               />
+              {selectedId && pendingIds.has(selectedId) && (
+                <p className="text-body-small text-text-secondary">
+                  Invite sent. Pending until they sign up.
+                </p>
+              )}
               <p role="status" className="text-body-small text-text-secondary">
                 {notice}
               </p>

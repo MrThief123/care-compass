@@ -48,6 +48,7 @@ Last updated: 2026-10-02 (implemented; awaiting human approval to open the PR)
 - See DECISIONS.md
 
 ## Problems encountered
+- FD-06/FD-07: mock stores shared via globalThis; Pending label for invited carers (new migration, pgTAP, 2 component tests).
 - FD-05: Staff screen redesigned to a click-a-name / Add Staff side panel at the human's request; ADM-02 tests updated (HUMAN REVIEW).
 - T-10 failed on the `region` axe rule; recorded as FD-04 (HUMAN REVIEW: test expectation changed).
 - Turbopack rejects the symlinked node_modules in this worktree; the e2e build used `next build --webpack`.

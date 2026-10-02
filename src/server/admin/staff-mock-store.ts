@@ -15,10 +15,18 @@ export const STAFF_JOB_TITLES = ["Registered Nurse", "Enrolled Nurse", "Support 
 
 // Held on `globalThis`: Next bundles Server Actions and pages separately, so a plain module-level
 // variable would be two copies and a page would never see what an action wrote.
-const shared = globalThis as { __adminMockStaff?: { rows: StaffMember[] } };
+const shared = globalThis as {
+  __adminMockStaff?: { rows: StaffMember[]; pending: string[] };
+};
 const store = (shared.__adminMockStaff ??= {
   rows: STAFF_MEMBERS.map((member) => ({ ...member })),
+  pending: [],
 });
+
+/** Carers added in this session have not accepted their invite yet. */
+export function listMockPendingStaffIds(): string[] {
+  return [...store.pending];
+}
 
 export function listMockStaff(): StaffMember[] {
   return store.rows.map((member) => ({ ...member }));
@@ -34,6 +42,7 @@ export function addMockStaff(
     ...input,
   };
   store.rows = [...store.rows, created];
+  store.pending = [...store.pending, created.id];
   return { ...created };
 }
 
