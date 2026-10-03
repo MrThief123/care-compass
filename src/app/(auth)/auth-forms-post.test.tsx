@@ -5,6 +5,7 @@ import { ForgotPasswordForm } from "./forgot-password/forgot-password-form";
 import { MfaEnrollForm } from "./mfa/enroll/mfa-enroll-form";
 import { MfaVerifyForm } from "./mfa/verify/mfa-verify-form";
 import { ResetPasswordForm } from "./reset-password/reset-password-form";
+import { SetPasswordForm } from "./set-password/set-password-form";
 import { SignInForm } from "./sign-in/sign-in-form";
 import { SignUpForm } from "./sign-up/sign-up-form";
 
@@ -16,6 +17,7 @@ vi.mock("@/server/auth/actions", () => ({
   signUp: vi.fn(),
   requestPasswordReset: vi.fn(),
   resetPassword: vi.fn(),
+  setPassword: vi.fn(),
   verifyMfaCode: vi.fn(),
   enrollMfaFactor: vi.fn(),
 }));
@@ -32,6 +34,7 @@ const FORMS = [
   ["sign-up", <SignUpForm key="b" />],
   ["forgot-password", <ForgotPasswordForm key="c" />],
   ["reset-password", <ResetPasswordForm key="d" />],
+  ["set-password", <SetPasswordForm key="g" />],
   ["mfa/verify", <MfaVerifyForm key="e" factorId="factor-1" />],
   [
     "mfa/enroll",
