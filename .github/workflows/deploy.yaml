@@ -1,25 +1,26 @@
 name: Deploy
 
-# Deploys the image CI just pushed: only after the whole CI workflow succeeded on main (the
-# image is built and pushed by CI's last job), or by hand. Never on a push to another branch.
-# on:
-#   workflow_run:
-#     workflows: [CI]
-#     types: [completed]
-#     branches: [main]
-#   workflow_dispatch:
-#     inputs:
-#       action:
-#         description: "Choose deployment action"
-#         required: true
-#         type: choice
-#         options:
-#           - deploy
-#           - stop
-
-on: 
+# TEMPORARY, FOR TESTING: deploys on EVERY push to EVERY branch (and by hand, which also offers
+# Stop). It deploys whatever image `latest` is on Docker Hub, which only a push to main builds: a
+# push on another branch redeploys the current main image, and a push to main can deploy the
+# previous image if this run finishes before CI's image build does.
+# To go back to the safe trigger, replace the `on:` block with:
+#   on:
+#     workflow_run: { workflows: [CI], types: [completed], branches: [main] }
+#     workflow_dispatch: { ...same inputs... }
+# and set the deploy job's `if` to: github.event_name == 'workflow_dispatch' && inputs.action == 'deploy'
+#   || github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success'
+on:
   push:
-
+  workflow_dispatch:
+    inputs:
+      action:
+        description: "Choose deployment action"
+        required: true
+        type: choice
+        options:
+          - deploy
+          - stop
 
 env:
   AWS_REGION: ${{ secrets.AWS_REGION }}
@@ -27,9 +28,8 @@ env:
 jobs:
   deploy:
     name: Deploy to EC2
-    # if: >-
-    #   (github.event_name == 'workflow_dispatch' && inputs.action == 'deploy') ||
-    #   (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
+    # TEMPORARY: every push deploys; a manual run deploys only when 'deploy' is chosen.
+    if: github.event_name == 'push' || inputs.action == 'deploy'
     runs-on: ubuntu-latest
 
     # environment:
@@ -192,7 +192,8 @@ jobs:
 
   stop:
     name: Stop EC2
-    # if: inputs.action == 'stop'
+    # Never on a push (that would stop the server the deploy job just started): manual run only.
+    if: github.event_name == 'workflow_dispatch' && inputs.action == 'stop'
     runs-on: ubuntu-latest
 
     steps:
