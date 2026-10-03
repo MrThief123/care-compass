@@ -44,5 +44,4 @@
 - Date: 2026-10-03
 - Context: CHG-032 already says every displayed person name, the client's included, is first and last name, but no feature has swept every screen (the sweep is not scheduled). The human asked that INT-12 make sure of it everywhere, including the client's name on the Family Home.
 - Decision: AC-45 opens every screen of each dashboard with people who share first names and fails on any bare first name. Each screen found showing a first name only is a defect under FD-02: recorded with its screen and element, marked `test.fail()`, and raised with the human for a fix feature.
-- Human confirmation required: no (human request, 2026-10-03; follows CHG-032)
-- Human confirmation required: yes (with CHG-055)
+- Human confirmation required: yes (with CHG-055; requested by the human on 2026-10-03, follows CHG-032)
