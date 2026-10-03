@@ -20,7 +20,7 @@ env:
 jobs:
   deploy:
     name: Deploy to EC2
-    if: inputs.action == 'deploy'
+    # if: inputs.action == 'deploy'
     runs-on: ubuntu-latest
 
     environment:
