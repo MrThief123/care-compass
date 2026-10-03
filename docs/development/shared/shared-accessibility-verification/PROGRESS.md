@@ -52,3 +52,9 @@ Last updated: 2026-10-03
 
 ## Ready for PR
 - No
+
+## 2026-10-03 test-first evidence
+
+Added tests/e2e/a11y.spec.ts and the PRD-required axe Playwright adapter before creating the report or changing production code. The seeded route run found serious color-contrast violations on Family, Carer and Admin pages; Helen's keyboard-only completion passed. Route failures stay failing. All 920 database tests passed.
+
+HUMAN REVIEW: test expectation changed — the initial H1 readiness assertion was invalid for existing Home screens. The subsequent heading requirement was also invalid for the Patients directory. Readiness now checks populated main content, expected route, HTTP 200 and absence of known error states; axe rules/severity are unchanged. See DECISIONS.md FD-03.
