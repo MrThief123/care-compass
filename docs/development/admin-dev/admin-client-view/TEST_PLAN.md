@@ -25,7 +25,7 @@ Tests are written before production code (TESTING.md §2). Run them and confirm 
 | T-10 | AC-04 | integration | Admin session: `saveClientInfoSection`, `createEvent` with a cost, `setOccurrenceDone` and `setOccurrenceUndone` succeed and name the admin | ☑ | FAIL (expected: `createEvent` refused by RLS until the migration) |
 | T-11 | AC-05 | integration | Other organisation's admin: `getClientHeaderSummary` throws, `saveBudgetEdit` / `createEvent` / `saveClientInfoSection` refused, nothing changes | ☑ | PASS already (regression guard: refusal holds before and after) |
 | T-12 | AC-01, AC-02 | e2e | Click a client's name; Family Home shows in the admin layout with the bar and Back link; move through Home, Info, Calendar, Budget, Care log keeping that client; links never leave `/admin/clients/<id>/` | ☑ | WRITTEN, NOT RUN (needs a build on the local stack, see handoff) |
-| T-13 | AC-03, AC-04 | e2e | In the browser: add $500 in Edit budget, History reads "Recorded by <admin>"; edit Description; add an event; tick a task, Care log reads "Done by <admin>" | ☑ | WRITTEN, NOT RUN (needs a build on the local stack, see handoff) |
+| T-13 | AC-03 | e2e | In the browser: add $500 in Edit budget; Budget shows the new total, History is recorded by the admin, and Edit budget returns under the client view (info, event and tick writes are covered by T-07 and T-10) | ☑ | WRITTEN, NOT RUN (needs a build on the local stack, see handoff) |
 | T-14 | AC-05 | e2e | Another organisation's admin, an unknown id and a malformed id each show the not-found page | ☑ | WRITTEN, NOT RUN (needs a build on the local stack, see handoff) |
 
 Test titles start `[ADM-11][AC-xx]`.
