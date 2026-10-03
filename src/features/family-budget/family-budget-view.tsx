@@ -36,7 +36,16 @@ import type { OpenEntryDetails } from "./entry-row";
  * as fit (three side by side at the design's width), so any number of buckets
  * wraps rather than scrolls sideways (FD-01).
  */
-export function FamilyBudgetView({ clientId, data }: { clientId: string; data: FamilyBudgetData }) {
+export function FamilyBudgetView({
+  clientId,
+  data,
+  basePath,
+}: {
+  clientId: string;
+  data: FamilyBudgetData;
+  /** Where the client's screens live; defaults to `/family/<clientId>` (ADM-11 FD-02). */
+  basePath?: string;
+}) {
   const { buckets, history } = useHeldBudget(clientId, data);
   const { takeAnnouncement } = useBudgetHolder();
   const [message, setMessage] = useState("");
@@ -67,7 +76,7 @@ export function FamilyBudgetView({ clientId, data }: { clientId: string; data: F
             </h2>
             {/* It navigates, so it is a link styled as the kit's primary Button (as Home's 'Enter event'). */}
             <Link
-              href={`/family/${clientId}/budget/edit`}
+              href={`${basePath ?? `/family/${clientId}`}/budget/edit`}
               className="inline-flex h-11 shrink-0 items-center justify-center rounded-control bg-primary px-5 text-body-emphasis text-primary-foreground transition-colors outline-none hover:bg-primary/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
             >
               Edit

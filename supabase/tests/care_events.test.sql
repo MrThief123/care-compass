@@ -182,9 +182,10 @@ select is(
 );
 
 select pg_temp.login('a2222222-2222-2222-2222-222222222222');
-select throws_ok(
-  $$ insert into care_events (client_id, title, starts_at, created_by) values ('b1111111-1111-1111-1111-111111111111', 'Admin write', now(), 'a2222222-2222-2222-2222-222222222222') $$,
-  '42501', null, 'Priya (admin) cannot create events: admin access is read only');
+-- HUMAN REVIEW: test expectation changed (ADM-11 FD-01, PD-058). Was throws_ok 42501 'admin access is read only'.
+select lives_ok(
+  $$ insert into care_events (client_id, title, starts_at, created_by) values ('b1111111-1111-1111-1111-111111111111', 'Admin write', date_trunc('second', now()), 'a2222222-2222-2222-2222-222222222222') $$,
+  '[ADM-11][AC-04] Priya (admin of the client''s organisation) can create events: admins act as Family (PD-058)');
 
 -- ---------------------------------------------------------------------------
 -- Ticking off (AC-04, AC-05) and who may
@@ -262,9 +263,10 @@ select throws_ok(
   '42501', null, 'a carer with no assignment is refused');
 
 select pg_temp.login('a2222222-2222-2222-2222-222222222222');
-select throws_ok(
+-- HUMAN REVIEW: test expectation changed (ADM-11 FD-01, PD-058). Was throws_ok 42501 'an admin cannot tick off'.
+select lives_ok(
   $$ select set_occurrence_done('e1111111-1111-1111-1111-111111111111', '2026-12-28 09:00:00+11') $$,
-  '42501', null, 'an admin cannot tick off');
+  '[ADM-11][AC-04] an admin of the client''s organisation can tick off (PD-058)');
 
 select pg_temp.login('a6666666-6666-6666-6666-666666666666');
 select throws_ok(

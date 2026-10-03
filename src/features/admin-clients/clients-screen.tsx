@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
 import { ConfirmationModal } from "@/components/shared/forms/confirmation-modal";
@@ -7,6 +8,7 @@ import { DataTable } from "@/components/shared/lists/data-table";
 import { EmptyState } from "@/components/shared/states";
 import { Button } from "@/components/ui/button";
 import { CardShell } from "@/components/ui/card-shell";
+import { adminClientBase } from "@/features/admin-client-view/client-routes";
 import { removeClient } from "@/server/admin/clients-actions";
 
 export interface ClientRow {
@@ -84,9 +86,12 @@ export function ClientsScreen({ data }: { data: { clients: ClientRow[] } }) {
                   key: "name",
                   header: "Name",
                   render: (client) => (
-                    <span className="inline-block max-w-64 [overflow-wrap:anywhere]">
+                    <Link
+                      href={`${adminClientBase(client.id)}/home`}
+                      className="inline-block max-w-64 rounded-control text-text-brand underline-offset-4 [overflow-wrap:anywhere] hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+                    >
                       {client.name}
-                    </span>
+                    </Link>
                   ),
                 },
                 {

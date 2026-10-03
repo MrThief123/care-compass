@@ -5,7 +5,7 @@
 | Feature ID | ADM-11 |
 | Dashboard / stream | Admin |
 | Phase | Phase 3 — Data wiring & behaviour (parallel: Family · Carer · Admin) |
-| Development branch (PR target) | `admin-dev` |
+| Development branch (PR target) | `main` (CHG-036; `admin-dev` is retired) |
 | Feature branch | `feature/admin-client-view` |
 | Documentation | `docs/development/admin-dev/admin-client-view/` |
 | Lane | A — Admin |
@@ -31,11 +31,13 @@ Care and money keep being managed when a family steps away, without a second cop
 
 ## Scope
 - Client names in the Admin · Clients list link to `/admin/clients/<clientId>/home`.
-- Routes under `/admin/clients/<clientId>/` for home, info, calendar, budget, log, events (new / edit) and task detail, each rendering the matching Family screen for that client.
+- Routes under `/admin/clients/<clientId>/` for home, info, calendar, budget (and Edit budget), tasks (the Care log), events (new / edit) and task detail, each rendering the matching Family screen for that client. The Care log lives at `tasks`, as the Family route helpers expect (FD-04).
 - A client bar above the screen (client name, "Back to clients") and a client-level nav between the Family screens, inside the admin layout.
 - Full Family write access: add / edit events and costs, mark tasks done, edit client information and documents, add or remove funds.
 - Every write records the admin as its actor (History "Recorded by", Care log "Done by").
-- An admin opening a client outside their organisation gets the not-found page.
+- An admin opening a client outside their organisation gets the not-found page (a new admin-only guard, FD-03).
+- One additive migration so admins can add and edit events and tick or untick occurrences, as PD-058 says (FD-01).
+- An additive optional `basePath` on the Family Budget and Edit budget views (the CHG-043 / CHG-048 pattern), flagged in the PR (FD-02).
 
 ## Out of Scope
 - Changing the client's organisation (Family only; see Security)
@@ -64,11 +66,12 @@ Care and money keep being managed when a family steps away, without a second cop
 - Unknown clientId: not-found.
 
 ## Security / Permissions
-- RLS grants admins of the client's current organisation the same read and write rights as the client's family (F0-06, F0-11, F0-12, F0-13 policies). The UI never grants access on its own.
+- RLS already grants admins of the client's current organisation the family's rights on client info, documents and the budget (F0-06, F0-12, F0-13). Care events did not: `can_edit_care_events` has no admin clause, so ADM-11's migration adds it (FD-01). The UI never grants access on its own.
 - Changing organisation stays Family only (PD-058, human answer 2026-09-25).
 
 ## Technical Considerations
-- If reusing the Family screens needs code moved out of `src/features/family-*` (Lane F folders), that move goes through a shared PR first (CLAUDE.md §4.2); ADM-11 does not edit Lane F folders.
+- Lane F folders: the human approved an additive `basePath` on two Family views inside ADM-11 instead of a shared PR (FD-02, 2026-10-03). Nothing else in `src/features/family-*` or `src/app/(family)` is edited, and Family tests are not changed.
+- The Family screens already take `basePath` (CHG-043); follow `src/app/(carer)/carer/patients/[clientId]/` for how a route reuses them.
 - Read `node_modules/next/dist/docs/` on nested dynamic routes and layouts before building.
 
 ## Traceability

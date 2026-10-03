@@ -1,6 +1,6 @@
 # Progress — ADM-05 Admin — Remove client
 
-Status: IN PROGRESS
+Status: MERGED TO DEV (merged to `main` in #213, 2026-10-03)
 Owner: Dhruv Verma
 Lane: A — Admin
 Sprint: SPRINT · planned D18

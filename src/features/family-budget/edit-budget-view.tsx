@@ -61,10 +61,13 @@ export function EditBudgetView({
   clientId,
   data,
   persist = false,
+  basePath,
 }: {
   clientId: string;
   data: FamilyBudgetData;
   persist?: boolean;
+  /** Where the client's screens live; defaults to `/family/<clientId>` (ADM-11 FD-02). */
+  basePath?: string;
 }) {
   const router = useRouter();
   const source = useHeldBudget(clientId, data);
@@ -87,7 +90,7 @@ export function EditBudgetView({
     if (focusRequest) form.current?.querySelector<HTMLElement>(focusRequest.selector)?.focus();
   }, [focusRequest]);
 
-  const budgetHref = `/family/${clientId}/budget`;
+  const budgetHref = `${basePath ?? `/family/${clientId}`}/budget`;
 
   function setBucket(index: number, change: Partial<SavedRow>) {
     setValues((current) => ({
