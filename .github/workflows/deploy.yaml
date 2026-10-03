@@ -128,13 +128,10 @@ jobs:
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
-          RESEND_FROM_EMAIL: ${{ secrets.RESEND_FROM_EMAIL }}
-          CRON_SECRET: ${{ secrets.CRON_SECRET }}
-          JOBS_SECRET: ${{ secrets.JOBS_SECRET }}
         run: |
           umask 077
           for name in DATA_SOURCE NEXT_PUBLIC_SUPABASE_URL NEXT_PUBLIC_SUPABASE_ANON_KEY \
-                      SUPABASE_SERVICE_ROLE_KEY RESEND_API_KEY RESEND_FROM_EMAIL CRON_SECRET JOBS_SECRET; do
+                      SUPABASE_SERVICE_ROLE_KEY RESEND_API_KEY; do
             if [ -z "${!name}" ]; then
               echo "::error::GitHub secret $name is not set"
               exit 1
@@ -146,9 +143,6 @@ jobs:
             printf 'NEXT_PUBLIC_SUPABASE_ANON_KEY=%s\n' "$NEXT_PUBLIC_SUPABASE_ANON_KEY"
             printf 'SUPABASE_SERVICE_ROLE_KEY=%s\n' "$SUPABASE_SERVICE_ROLE_KEY"
             printf 'RESEND_API_KEY=%s\n' "$RESEND_API_KEY"
-            printf 'RESEND_FROM_EMAIL=%s\n' "$RESEND_FROM_EMAIL"
-            printf 'CRON_SECRET=%s\n' "$CRON_SECRET"
-            printf 'JOBS_SECRET=%s\n' "$JOBS_SECRET"
           } > runtime.env
           ssh \
             -o StrictHostKeyChecking=no \
