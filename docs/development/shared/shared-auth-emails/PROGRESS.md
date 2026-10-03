@@ -1,7 +1,7 @@
 # Progress — F0-24 Auth emails: working reset and invite links, set-password page
 
 Owner: MrThief123
-Status: IN PROGRESS
+Status: MERGED TO DEV (merged to `main` in #218, 2026-10-03). Hosted SMTP and template set-up (AC-07) is a human step, tracked in DECISIONS.md
 Jira: —
 Branch: `feature/shared-auth-emails`
 PR target: `main`
