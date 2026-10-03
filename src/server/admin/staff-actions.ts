@@ -118,7 +118,19 @@ export async function createStaff(input: StaffFieldsInput): Promise<ActionResult
     p_job_title: fields.jobTitle,
   });
   if (error || !data) {
-    await supabase.rpc("admin_discard_staff_invite", { p_user_id: userId });
+    // Code and message only: the message can name a missing function or a constraint, never the
+    // invitee's details (no PII in logs, CLAUDE.md §7).
+    console.error("createStaff: admin_create_staff_profile failed", error?.code, error?.message);
+    const { error: discardError } = await supabase.rpc("admin_discard_staff_invite", {
+      p_user_id: userId,
+    });
+    if (discardError) {
+      console.error(
+        "createStaff: admin_discard_staff_invite failed",
+        discardError.code,
+        discardError.message,
+      );
+    }
     return {
       ok: false,
       error: {

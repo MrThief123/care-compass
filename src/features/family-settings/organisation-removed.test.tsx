@@ -137,11 +137,26 @@ describe("[ADM-05][AC-08] the banner on Settings", () => {
     expect(screen.getByRole("button", { name: "Change" })).toBeVisible();
   });
 
-  it("[ADM-05][AC-08] a client that never had an organisation has no banner, no Change and no Choose button (FAM-13 AC-06 stands)", () => {
+  it("[ADM-05][AC-08] a client that never had an organisation has no banner or Change, but can choose one (CHG: register from Settings)", async () => {
+    const user = userEvent.setup();
     renderSettings({ organisationName: undefined, organisationRemoved: false });
 
     expect(screen.queryByRole("region", { name: "Organisation removed" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Change" })).not.toBeInTheDocument();
+    expect(screen.getByText("Not registered with an organisation.")).toBeVisible();
+
+    await user.click(screen.getByRole("button", { name: "Choose organisation" }));
+    await user.click(screen.getByRole("radio", { name: /Wattle Care/ }));
+    await user.click(screen.getByRole("button", { name: "Continue" }));
+    expect(screen.getByRole("dialog")).toHaveTextContent(/gives them access to Margaret/);
+    await user.click(screen.getByRole("button", { name: "Change organisation" }));
+
+    expect(mocks.change).toHaveBeenCalledWith(expect.any(String), "org-wattle");
+  });
+
+  it("[ADM-05][AC-08] with no organisation and none to choose from there is no Choose button", () => {
+    renderSettings({ organisationName: undefined, organisationRemoved: false }, []);
+
     expect(screen.queryByRole("button", { name: "Choose organisation" })).not.toBeInTheDocument();
     expect(screen.getByText("Not registered with an organisation.")).toBeVisible();
   });
