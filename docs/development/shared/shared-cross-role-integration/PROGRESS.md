@@ -9,17 +9,15 @@ PR target: `main` (CHG-036)
 Last updated: 2026-10-03
 
 ## Blockers
-- Waiting on F0-24 (invite and reset links) and ADM-11 (admin client view) to merge.
+- None. F0-24 (#218) and ADM-11 (#214) are merged. Note: this branch is cut from `docs/int-09-merged`, which marks ADM-11 and INT-09 merged in the plan; merge that docs PR first.
 
 ## Dependencies status
-- F0-24 — NOT STARTED
-- ADM-11 — IN PROGRESS
-- All other dependencies — MERGED
+- All dependencies — MERGED
 
 ## Phase status
 | Phase | Name | Status | ACs |
 |---|---|---|---|
-| 0 | Harness | NOT STARTED | AC-01 to AC-03 |
+| 0 | Harness | DONE (local stack, 2026-10-03) | AC-01 to AC-03 |
 | 1 | Accounts, sign-in, 2FA and passwords | NOT STARTED | AC-04 to AC-11 |
 | 2 | Family core | NOT STARTED | AC-12 to AC-18 |
 | 3 | Family → Admin and Carer | NOT STARTED | AC-19 to AC-23 |
@@ -31,19 +29,20 @@ Last updated: 2026-10-03
 
 ## Completed
 - Feature pack written (CHG-055).
+- Phase 0 — harness: `tests/e2e/int-12/support.ts`, `phase-0-harness.spec.ts`, `playwright.journey.config.ts`, `npm run test:journey`. 11 / 11 pass on the local stack; in guarded mode (hosted `.env.local`) 4 pass and 7 skip with the reason and nothing is written; after the run the database holds no `int-12-` user, profile, organisation or Margaret Carter client.
 
 ## In progress
-- Nothing.
+- Nothing. Waiting for the human to say start Phase 1 (the test plan asks for a check-in between phases).
 
 ## Remaining
-- Phases 0 to 8.
+- Phases 1 to 8. Phase 0's manual real-Chrome walkthrough (AC-43) is part of the Phase 8 sign-off.
 
 ## Acceptance criteria status
-- 0 / 45 MET
+- 3 / 45 MET (AC-01, AC-02, AC-03)
 
 ## Tests
-- Written: 0 / 45
-- Passing: 0
+- Written: 5 / 45 (T-01 to T-03; Phase 0)
+- Passing: 5 (all Phase 0 tests; the forced-failure test passes as an expected failure)
 - Failing: 0
 
 ## Defects found
@@ -56,7 +55,7 @@ Last updated: 2026-10-03
 - FD-01 to FD-05.
 
 ## Next action
-- Once F0-24 and ADM-11 are merged: START FEATURE INT-12, then Phase 0.
+- Phase 1 (accounts, sign-in, 2FA, passwords; AC-04 to AC-11) once the human says go.
 
 ## Ready for PR
 - No
