@@ -1,10 +1,10 @@
 # Progress — INT-12 Cross-role integration journey
 
-Status: NOT STARTED
-Owner: unclaimed
+Status: IN PROGRESS
+Owner: MrThief123
 Lane: I — Integration
 Sprint: SPRINT · planned D20–D21
-Branch: `feature/shared-cross-role-integration` (not yet created)
+Branch: `feature/shared-cross-role-integration`
 PR target: `main` (CHG-036)
 Last updated: 2026-10-03
 
