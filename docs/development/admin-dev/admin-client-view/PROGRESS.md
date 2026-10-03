@@ -1,6 +1,6 @@
 # Progress — ADM-11 Admin — Client view
 
-Status: READY FOR PR (awaiting human approval)
+Status: IN PROGRESS
 Owner: Dhruv Verma
 Lane: A — Admin
 Sprint: SPRINT · planned D19–D20
