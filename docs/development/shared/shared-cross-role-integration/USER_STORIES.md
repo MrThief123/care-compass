@@ -46,3 +46,9 @@ As a Family member or admin, I want budget warnings and pending costs emailed to
 
 - Acceptance criteria: AC-40, AC-41
 - Requirements: REQ-31, REQ-37
+
+## US-09
+As any user, I want every person, the client included, shown by their full name everywhere, so that I never mix up two people who share a first name.
+
+- Acceptance criteria: AC-45
+- Decision: CHG-032

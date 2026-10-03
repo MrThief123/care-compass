@@ -27,7 +27,7 @@ Last updated: 2026-10-03
 | 5 | Carer → Family and Admin | NOT STARTED | AC-32 to AC-38 |
 | 6 | Organisation change | NOT STARTED | AC-39 |
 | 7 | Budget emails | NOT STARTED | AC-40, AC-41 |
-| 8 | Whole-suite run and sign-off | NOT STARTED | AC-42 to AC-44 |
+| 8 | Full-names sweep, whole-suite run and sign-off | NOT STARTED | AC-42 to AC-45 |
 
 ## Completed
 - Feature pack written (CHG-055).
@@ -39,10 +39,10 @@ Last updated: 2026-10-03
 - Phases 0 to 8.
 
 ## Acceptance criteria status
-- 0 / 44 MET
+- 0 / 45 MET
 
 ## Tests
-- Written: 0 / 44
+- Written: 0 / 45
 - Passing: 0
 - Failing: 0
 

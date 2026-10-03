@@ -85,10 +85,11 @@ Names below (Helen Carter, family; Margaret Carter, client; Aisha Rahman, carer;
 | AC-40 | US-08 | sync | Given Aisha's completion pushes a bucket past a warning threshold, when the threshold job route runs, then Helen and Priya each receive one email naming Margaret and the bucket, Aisha receives none, and running the job again sends nothing new. | NOT MET |
 | AC-41 | US-08 | sync | Given Aisha's completion leaves a cost pending, when the pending-cost job route runs, then Helen and Priya each receive one email with the approved sentence, Aisha receives none, and running the job again sends nothing new. | NOT MET |
 
-## Phase 8 — Whole-suite run and sign-off
+## Phase 8 — Full-names sweep, whole-suite run and sign-off
 
 | ID | Story | Type | Criterion | Status |
 |---|---|---|---|---|
+| AC-45 | US-09 | guard | Given a client, family member, carer and admin who each share a first name with another person in the same run (e.g. a second client Margaret Lee), when each role opens every screen of its dashboard (Family: Home including its header and greeting, Calendar, Task detail, Task log, Budget, Info, Settings; Carer: Home, notifications, Patients, patient screens, Calendar, Settings; Admin: Home, Staff, Clients, Manage, client view, Settings), then every person name shown, the client's name included, is the full first and last name and never the first name alone (CHG-032). | NOT MET |
 | AC-42 | US-01 | happy | Given a fresh local stack, when `npm run test:journey` runs three times in a row, then every phase passes each time (apart from tests marked `test.fail()` for a recorded defect), and no `int-12-` rows remain afterwards. | NOT MET |
 | AC-43 | US-01 | review | Given each phase, then its main journey has been walked through by hand in a real Chrome window with all three roles, with no console errors, and screenshots are saved in `evidence/`. | NOT MET |
 | AC-44 | US-01 | review | Given every failure that turned out to be a product defect, then it is listed in PROGRESS.md with steps to reproduce and raised with the human as a Parking lot item or feature proposal; none is fixed inside INT-12. | NOT MET |

@@ -38,5 +38,11 @@
 ### FD-05 — Items added beyond the original request
 - Date: 2026-10-03
 - Context: the human asked for missed features to be appended.
-- Decision: added event documents (AC-16, AC-23), Settings and client info edits (AC-18, AC-22, AC-38), Overdue clearing (AC-34), pending costs (AC-36), shift cancel (AC-28), carer deactivation (AC-29), client removal (AC-31), Admin Home counts (AC-30), wrong-password and role routing (AC-11), expired reset links (AC-10), budget emails (AC-40, AC-41).
+- Decision: added event documents (AC-16, AC-23), Settings and client info edits (AC-18, AC-22, AC-38), Overdue clearing (AC-34), pending costs (AC-36), shift cancel (AC-28), carer deactivation (AC-29), client removal (AC-31), Admin Home counts (AC-30), wrong-password and role routing (AC-11), expired reset links (AC-10), budget emails (AC-40, AC-41), and, at the human's request on 2026-10-03, a full-names sweep of every screen with the client's name included, Family Home too (AC-45, enforcing CHG-032).
+
+### FD-06 — Full-names sweep enforces CHG-032; first-name-only screens are defects
+- Date: 2026-10-03
+- Context: CHG-032 already says every displayed person name, the client's included, is first and last name, but no feature has swept every screen (the sweep is not scheduled). The human asked that INT-12 make sure of it everywhere, including the client's name on the Family Home.
+- Decision: AC-45 opens every screen of each dashboard with people who share first names and fails on any bare first name. Each screen found showing a first name only is a defect under FD-02: recorded with its screen and element, marked `test.fail()`, and raised with the human for a fix feature.
+- Human confirmation required: no (human request, 2026-10-03; follows CHG-032)
 - Human confirmation required: yes (with CHG-055)

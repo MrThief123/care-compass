@@ -64,6 +64,7 @@ E2E_PORT=3150 E2E_DATA_SOURCE=supabase npm run test:journey -- --grep @phase-3  
 | T-39 | AC-39 | 6 | e2e | Organisation change: old admin and carer lose the client; new admin gains it; history intact for family and new admin. | ☐ | — |
 | T-40 | AC-40 | 7 | e2e | Threshold email to family and admin only, once; naming client and bucket. | ☐ | — |
 | T-41 | AC-41 | 7 | e2e | Pending-cost email to family and admin only, once, with the approved sentence. | ☐ | — |
+| T-45 | AC-45 | 8 | e2e | On every screen of each dashboard, with first names shared across people, every displayed person name, the client's included (Family Home header and greeting too), is first and last name; a bare first name fails. | ☐ | — |
 | T-42 | AC-42 | 8 | e2e | Three consecutive full runs green; no leftover rows. | ☐ | — |
 | T-43 | AC-43 | 8 | review | Chrome walkthrough per phase; no console errors; screenshots saved. | ☐ | — |
 | T-44 | AC-44 | 8 | review | Defects listed with repro steps and raised with the human. | ☐ | — |

@@ -35,7 +35,7 @@ The feature is worked one phase at a time (Phase 0 to Phase 8). Each phase is a 
 | 5 | Carer → Family and Admin | Carer sees only their clients, no edits off shift, ticks and costs deduct the budget once, pending costs, carer-made events, carer settings |
 | 6 | Organisation change | Family moves organisation: old admin and carer lose the client, new admin gains it, history kept |
 | 7 | Budget emails | Threshold and pending-cost emails reach the right people after a carer's completion |
-| 8 | Whole-suite run and sign-off | All phases green three runs in a row, no leftover rows, real-browser walkthrough recorded, defects listed |
+| 8 | Full-names sweep, whole-suite run and sign-off | Every screen shows full names for every person, the client included (Family Home too); all phases green three runs in a row, no leftover rows, real-browser walkthrough recorded, defects listed |
 
 ## User value
 The team and the client can trust that what one person does on the app is what everyone else sees. Regressions in the core loop (schedule → deliver → record → pay) are caught before release.
@@ -66,7 +66,7 @@ The team and the client can trust that what one person does on the app is what e
 - FR-01: The suite refuses to start unless `NEXT_PUBLIC_SUPABASE_URL` is a local address and `E2E_DATA_SOURCE=supabase`.
 - FR-02: Every person and organisation the suite creates has an `int-12-<runId>` marker in its email or name, and clean-up removes them all, also when a test fails.
 - FR-03: All times are checked in `Australia/Melbourne`. Dates are chosen relative to "now" so shifts can be current, future or past on any day the suite runs.
-- FR-04: Every displayed person name is checked as first and last name (CHG-032).
+- FR-04: Every displayed person name is checked as first and last name (CHG-032), the client's name included, on every screen and in every phase; AC-45 is the dedicated sweep of every screen.
 - FR-05: Test titles start `[INT-12][AC-xx]` and carry a `@phase-N` tag.
 
 ## UI / UX Requirements
