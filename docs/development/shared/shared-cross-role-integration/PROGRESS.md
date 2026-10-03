@@ -30,7 +30,7 @@ Last updated: 2026-10-03
 | 8 | Whole-suite run and sign-off | NOT STARTED | AC-42 to AC-44 |
 
 ## Completed
-- Feature pack written (CHG-054).
+- Feature pack written (CHG-055).
 
 ## In progress
 - Nothing.

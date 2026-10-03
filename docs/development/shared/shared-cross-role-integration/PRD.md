@@ -11,7 +11,7 @@
 | Lane | I — Integration |
 | Sprint | SPRINT · planned D20–D21 |
 | Status / owner | See PROGRESS.md |
-| Added by | CHG-054 (human request, 2026-10-03) |
+| Added by | CHG-055 (human request, 2026-10-03) |
 
 ## Purpose
 One integration suite that proves every main feature works end to end in a real browser, and that a change made by any one role is seen by the other two.
@@ -107,7 +107,7 @@ The team and the client can trust that what one person does on the app is what e
 
 ## Traceability
 - Product requirements: REQ-04, REQ-17, REQ-18, REQ-19, REQ-23, REQ-24, REQ-25, REQ-26, REQ-28, REQ-31, REQ-32, REQ-37, REQ-N4, REQ-N5, REQ-N6
-- Source: human request in session, 2026-10-03 (CHG-054)
+- Source: human request in session, 2026-10-03 (CHG-055)
 
 ## Labels
 Statements marked PROPOSED are implementation proposals, not confirmed requirements.

@@ -1117,7 +1117,16 @@ Template for future entries:
 - Human confirmation: Dhruv Verma, 2026-10-03 (in-session).
 - Docs updated: DECISIONS.md (this entry), the ADM-09 pack, DEVELOPMENT_PLAN.md card, status page.
 
-### CHG-054 — New feature INT-12: cross-role integration journey
+### CHG-054 — CI security audit checks production dependencies only
+- Date / requested by: 2026-10-03 / Dhruv Verma (human, project lead)
+- Type: CI policy change (no feature scope change)
+- Description: on 2026-10-03 `npm audit --audit-level=high` began failing on `main` for GHSA-vfj7-8cjw-p6xm (`braces` stack-exhaustion DoS, versions up to and including 3.0.3, no patched release). It reaches the project only through the dev tooling chain `eslint-config-next` → `@next/eslint-plugin-next` → `fast-glob` → `micromatch` → `braces`. `npm audit fix --force` would downgrade `eslint-config-next` to 14.2.35, which does not work with Next 16. The audit step now runs `npm audit --omit=dev --audit-level=high`, so production dependencies are still gated at high severity (0 found today) and dev-only advisories no longer block merges.
+- Source / justification: human, in-session 2026-10-03: chose "audit production dependencies only" over an advisory allowlist or waiting for a patch.
+- Impact: `.github/workflows/ci.yaml` only. Dev-only advisories are no longer reported by CI; review them with a local `npm audit` when upgrading tooling. Revisit when `braces` publishes a fix.
+- Human confirmation: Dhruv Verma, 2026-10-03 (in-session).
+- Docs updated: DECISIONS.md (this entry).
+
+### CHG-055 — New feature INT-12: cross-role integration journey
 - Date / requested by: 2026-10-03 / Dhruv Verma (human, project lead)
 - Type: new feature (scope addition, test-only)
 - Description: the human asked for one integration feature that tests every main feature in a real browser and proves that a change by Family, Carer or Admin is seen by the other two: calendar, events (create, open, edit), budget (view, Update funds), cost deduction when a task is ticked, organisation change, sign-in, two-factor, carer account creation and shift-based edit rights, admin shifts, Staff and Clients lists agreeing, and password reset. New feature **INT-12** (Lane I, `docs/development/shared/shared-cross-role-integration/`, planned D20–D21, 44 criteria) is a phased Playwright suite under `tests/e2e/int-12/` (phases 0 to 8, worked one at a time). Items the human asked to have appended where missed are listed in INT-12 FD-05. "Seen by" means after in-app navigation, not live push (FD-01: the app has no Realtime). Two-factor is admin-only (FD-03). Defects found are recorded and raised, not fixed inside INT-12 (FD-02).

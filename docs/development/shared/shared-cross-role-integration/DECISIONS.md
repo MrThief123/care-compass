@@ -14,14 +14,14 @@
 - Reason: tests what the product does today; catches stale pages and stale client caches.
 - Alternatives considered: live push without navigation (would fail by design; would be a new feature).
 - Consequences: if the human wants live updates, raise a new feature.
-- Human confirmation required: yes (Dhruv Verma, when approving CHG-054)
+- Human confirmation required: yes (Dhruv Verma, when approving CHG-055)
 
 ### FD-02 — Defects found are recorded, not fixed here
 - Date: 2026-10-03
 - Context: an integration suite will find real bugs; fixing them inside INT-12 would grow scope across every lane's folders.
 - Decision: a product defect gets a `test.fail()` with its defect ID, a PROGRESS.md entry with repro steps, and is raised with the human as a Parking lot item or feature proposal (AC-44).
 - Reason: CLAUDE.md §6 and §4.2.
-- Human confirmation required: yes (with CHG-054)
+- Human confirmation required: yes (with CHG-055)
 
 ### FD-03 — Two-factor is admin-only
 - Date: 2026-10-03
@@ -39,4 +39,4 @@
 - Date: 2026-10-03
 - Context: the human asked for missed features to be appended.
 - Decision: added event documents (AC-16, AC-23), Settings and client info edits (AC-18, AC-22, AC-38), Overdue clearing (AC-34), pending costs (AC-36), shift cancel (AC-28), carer deactivation (AC-29), client removal (AC-31), Admin Home counts (AC-30), wrong-password and role routing (AC-11), expired reset links (AC-10), budget emails (AC-40, AC-41).
-- Human confirmation required: yes (with CHG-054)
+- Human confirmation required: yes (with CHG-055)

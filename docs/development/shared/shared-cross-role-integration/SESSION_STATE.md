@@ -2,8 +2,8 @@
 
 Last session date: 2026-10-03
 Current branch: `docs/int-12-cross-role-integration` (planning only; feature branch not yet created)
-Worked on: wrote the INT-12 feature pack from the human's request (CHG-054)
-What changed: this folder; DECISIONS.md CHG-054; DEVELOPMENT_PLAN.md row, card, totals, next number, INT-08 dependency
+Worked on: wrote the INT-12 feature pack from the human's request (CHG-055)
+What changed: this folder; DECISIONS.md CHG-055; DEVELOPMENT_PLAN.md row, card, totals, next number, INT-08 dependency
 Tests run: none (docs only)
 Test results: —
 Current blocker: F0-24 and ADM-11 not merged
