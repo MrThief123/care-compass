@@ -36,3 +36,8 @@
 - Date: 2026-10-03 · Assumption
 - Context: the Admin mock clients use ids like `margaret`; the Family mock fixtures use `client-margaret`. They do not meet.
 - Decision: the guard is a no-op in mock mode (as `assertClientAccess`); end-to-end behaviour is tested and demoed against the local Supabase stack with `DATA_SOURCE=supabase`. No mock id mapping is added.
+
+### FD-07 — Admin calendar loader lives in Lane A
+- Date: 2026-10-03 · Non-blocking, within FD-02's limit
+- Context: `loadFamilyCalendar` takes a role of `"family" | "carer"` and calls `getCurrentUser(role)`, which redirects an admin. Widening that type would be a third Lane F edit.
+- Decision: `src/features/admin-client-view/load-calendar.ts` reads the same contract functions with `getCurrentUser("admin")` and reuses `parseCalendarParams`, `visibleRange` and `selectLog`. Nothing in Lane F changes for it.
