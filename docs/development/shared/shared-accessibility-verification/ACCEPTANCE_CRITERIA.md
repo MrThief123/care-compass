@@ -5,6 +5,6 @@ Each criterion is observable and maps to at least one test in TEST_PLAN.md. Crit
 | ID | Story | Type | Criterion (Given / When / Then) | Status |
 |---|---|---|---|---|
 | AC-01 | US-01 | happy | Given every dashboard route with seed data, when axe runs, then no serious or critical violations are reported. | NOT MET |
-| AC-02 | US-01 | happy | Given keyboard only, when Helen marks a task done from the calendar, then every step is reachable with visible focus. | NOT MET |
+| AC-02 | US-01 | happy | Given keyboard only, when Helen marks a task done from the calendar, then every step is reachable with visible focus. | MET |
 
 Status values: NOT MET · MET (test passing) · BLOCKED (cite OQ/PD).
