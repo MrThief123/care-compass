@@ -18,15 +18,15 @@ Tests are written before production code (TESTING.md §2). Run them and confirm 
 | T-03 | AC-01, AC-02 | component | The client bar shows the name (long names wrap), "Back to clients" → `/admin/clients`, five nav links with the current one `aria-current`; axe clean | ☑ | FAIL (component missing) |
 | T-04 | AC-05 | unit | `assertAdminClientAccess` calls `notFound()` for no row, malformed id and a database error; returns for a readable client; no-op in mock mode | ☑ | FAIL (module missing) |
 | T-05 | AC-05 | component | The client layout calls the guard first and renders the bar plus children when allowed | ☑ | FAIL (layout missing) |
-| T-06 | AC-02, AC-03 | component | Budget and Edit budget links stay under a given `basePath`; with none they stay under `/family/<id>` | ☑ | FAIL (no prop yet) |
-| T-07 | AC-04, AC-05 | db | An admin of the client's organisation can insert and update events, add an override, tick and untick (including another's tick), edit client info, insert a document row, add funds; every row names the admin; another organisation's admin and an AAL1 admin are refused everywhere | ☑ | FAIL (admin refused until the migration) |
-| T-08 | AC-04 | db | `care_events.test.sql`: the two admin-refused assertions now expect success (HUMAN REVIEW) | ☑ | FAIL (expected, until the migration) |
-| T-09 | AC-03 | integration | Admin session: `saveBudgetEdit` adds $500 to a bucket; `getFundHistory` shows the entry recorded by the admin's full name | ☑ | NOT RUN here (see Results) |
-| T-10 | AC-04 | integration | Admin session: `saveClientInfoSection`, `createEvent` with a cost, `setOccurrenceDone` and `setOccurrenceUndone` succeed and name the admin | ☑ | NOT RUN here |
-| T-11 | AC-05 | integration | Other organisation's admin: `getClientHeaderSummary` throws, `saveBudgetEdit` / `createEvent` / `saveClientInfoSection` refused, nothing changes | ☑ | NOT RUN here |
-| T-12 | AC-01, AC-02 | e2e | Click a client's name; Family Home shows in the admin layout with the bar and Back link; move through Home, Info, Calendar, Budget, Care log keeping that client; links never leave `/admin/clients/<id>/` | ☑ | NOT RUN here |
-| T-13 | AC-03, AC-04 | e2e | In the browser: add $500 in Edit budget, History reads "Recorded by <admin>"; edit Description; add an event; tick a task, Care log reads "Done by <admin>" | ☑ | NOT RUN here |
-| T-14 | AC-05 | e2e | Another organisation's admin, an unknown id and a malformed id each show the not-found page | ☑ | NOT RUN here |
+| T-06 | AC-02, AC-03 | component | Budget and Edit budget links stay under a given `basePath`; with none they stay under `/family/<id>` | ☑ | FAIL: 2 of 4 (the basePath cases); the 2 default-path cases pass |
+| T-07 | AC-04, AC-05 | db | An admin of the client's organisation can insert and update events, add an override, tick and untick (including another's tick), edit client info, insert a document row, add funds; every row names the admin; another organisation's admin and an AAL1 admin are refused everywhere | ☑ | FAIL: 11 of 31 (events, overrides, tick, untick refused until the migration; the other 20 pass already) |
+| T-08 | AC-04 | db | `care_events.test.sql`: the two admin-refused assertions now expect success (HUMAN REVIEW) | ☑ | FAIL: 2 of 69 (the two flipped assertions) |
+| T-09 | AC-03 | integration | Admin session: `saveBudgetEdit` adds $500 to a bucket; `getFundHistory` shows the entry recorded by the admin's full name | ☑ | PASS already (regression guard: admin budget writes shipped in F0-12) |
+| T-10 | AC-04 | integration | Admin session: `saveClientInfoSection`, `createEvent` with a cost, `setOccurrenceDone` and `setOccurrenceUndone` succeed and name the admin | ☑ | FAIL (expected: `createEvent` refused by RLS until the migration) |
+| T-11 | AC-05 | integration | Other organisation's admin: `getClientHeaderSummary` throws, `saveBudgetEdit` / `createEvent` / `saveClientInfoSection` refused, nothing changes | ☑ | PASS already (regression guard: refusal holds before and after) |
+| T-12 | AC-01, AC-02 | e2e | Click a client's name; Family Home shows in the admin layout with the bar and Back link; move through Home, Info, Calendar, Budget, Care log keeping that client; links never leave `/admin/clients/<id>/` | ☑ | WRITTEN, NOT RUN (needs a build on the local stack, see handoff) |
+| T-13 | AC-03, AC-04 | e2e | In the browser: add $500 in Edit budget, History reads "Recorded by <admin>"; edit Description; add an event; tick a task, Care log reads "Done by <admin>" | ☑ | WRITTEN, NOT RUN (needs a build on the local stack, see handoff) |
+| T-14 | AC-05 | e2e | Another organisation's admin, an unknown id and a malformed id each show the not-found page | ☑ | WRITTEN, NOT RUN (needs a build on the local stack, see handoff) |
 
 Test titles start `[ADM-11][AC-xx]`.
 

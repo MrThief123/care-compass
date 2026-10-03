@@ -30,12 +30,14 @@ Last updated: 2026-10-03
 ## Tests
 - Written: 14 / 14 planned (T-01 to T-14)
 - Passing: 0
-- Failing: see Results
-- Last run: —
-- Tests-first evidence: see Results
+- Failing: 18 assertions across 6 files, all for the expected reason (see TEST_PLAN)
+- Last run: 2026-10-03
+- Tests-first evidence: Vitest: client-view-link 3 fail, budget-base-path 2 fail, client-bar / client-routes / client-access / layout fail on the missing module. pgTAP: admin_client_view 11 of 31 fail, care_events 2 of 69 fail (the flipped assertions). Integration: 1 fail (createEvent), 2 pass as regression guards. e2e written, not run (needs the local stack build). Lint 0 errors.
 
 ## Files changed
 - Docs in this folder.
+- New tests: `src/features/admin-clients/client-view-link.test.tsx`, `src/features/admin-client-view/{client-routes,client-bar}.test.ts(x)`, `src/server/admin/client-access.test.ts`, `src/app/(admin)/admin/clients/[clientId]/layout.test.tsx`, `src/features/family-budget/budget-base-path.test.tsx`, `supabase/tests/admin_client_view.test.sql`, `tests/integration/admin-client-view.test.ts`, `tests/e2e/admin-client-view.spec.ts`.
+- Changed test: `supabase/tests/care_events.test.sql` (two assertions flipped, **HUMAN REVIEW: test expectation changed**, FD-01).
 
 ## Decisions
 - FD-01 migration for admin event writes (flips two pgTAP assertions: HUMAN REVIEW: test expectation changed)

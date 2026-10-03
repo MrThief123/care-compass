@@ -4,8 +4,8 @@ Last session date: 2026-10-03
 Current branch: `feature/admin-client-view` (worktree `/Users/dhruv/Documents/Dev/care-compass-adm-11`)
 Worked on: claim, docs, tests first
 What changed: this folder, new tests (see PROGRESS.md)
-Tests run: see PROGRESS.md Results
-Test results: —
+Tests run: Vitest (new files), pgTAP (two files), integration (new), lint
+Test results: failing for the expected reasons, see PROGRESS.md
 Current blocker: none
 Important discoveries: admins cannot write care events today (`can_edit_care_events`); Family budget views hard-code `/family/<id>`; Admin mock ids do not match Family mock ids, so verify against local Supabase
 Important decisions: FD-01 to FD-06 in DECISIONS.md
