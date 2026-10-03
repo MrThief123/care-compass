@@ -1,8 +1,9 @@
 # Progress — F0-24 Auth emails: working reset and invite links, set-password page
 
-Status: NOT STARTED
+Owner: MrThief123
+Status: IN PROGRESS
 Jira: —
-Branch: `feature/shared-auth-emails` (not yet created)
+Branch: `feature/shared-auth-emails`
 PR target: `main`
 Last updated: 2026-10-02
 
