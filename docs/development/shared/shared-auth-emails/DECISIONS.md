@@ -9,6 +9,11 @@ None blocking.
 - FD-03 (2026-10-02, human-confirmed): the sender is Resend via SMTP for Supabase Auth, the same provider INT-01 uses. The human must create the domain records (SPF/DKIM) and the SMTP credentials; names only in `.env.example`, never values.
 - FD-04 (2026-10-02, human-confirmed): Resend invite sits in the Admin Staff edit panel and shows only for staff who have not signed in.
 
+- FD-05 (2026-10-03, default, no human decision needed): `/auth/confirm` accepts only `type=recovery` and `type=invite`. Other OTP types (signup, email_change, magiclink) are refused as an expired link, so the route cannot be used to mint a session from a token type the app never emails.
+- FD-06 (2026-10-03, default): "has not signed in" for Resend invite means the carer is in `admin_pending_staff_ids()` (`email_confirmed_at` null, ADM-08 FD-07), the same rule that shows the Pending tag. Resend uses `inviteUserByEmail` again, which Supabase refuses for an accepted account, a second line of defence.
+- FD-07 (2026-10-03): the template files are in the repo and registered in `supabase/config.toml`, which configures the local stack only. Hosted needs `supabase config push` (or pasting the two templates in the dashboard) as a human step; ticked in the checklist below.
+- FD-08 (2026-10-03): `resetPassword` and the new `setPassword` share one private helper in `src/server/auth/actions.ts`. `resetPassword`'s result and messages are unchanged. `setPassword` returns `redirectTo` from the same resolver `signIn` uses, so an invited admin-role account would hit the MFA gate the same way.
+
 ## Hosted checklist (human, tick when done on the hosted project)
 - [ ] Custom SMTP set (host, port, user, sender address, sender name)
 - [ ] Sender domain verified (SPF, DKIM)

@@ -17,15 +17,18 @@ Last updated: 2026-10-03
 - Feature documentation drafted (CHG-047).
 
 ## In progress
-- None
+- Waiting on a local Supabase stack to run the integration and e2e tests (see Tests).
 
 ## Remaining
-- Implementation: templates + config, confirm route (`code`), `/set-password`, `setPassword` action, `resendStaffInvite` + button, hosted checklist update.
+- Start Docker and `supabase start`, run `tests/integration/auth-emails.test.ts` and `tests/e2e/auth-emails.spec.ts`, plus the regression specs; record results. Then mark AC-01 to AC-06 MET.
+- Human: tick the hosted checklist in DECISIONS.md (AC-07) and run `supabase config push`.
+- Refresh `care-compass-status.html` (`node scripts/status-page.mjs`) and open the PR once the above is green and the human approves.
 
 ## Acceptance criteria status
-- 0 / 7 MET
+- 0 / 7 MET. Implemented, unit/component-verified: AC-01 (route), AC-02, AC-03 (action and form), AC-05 (action and button), AC-06. NOT verified end to end: needs the local stack. AC-04 is Supabase's own refusal, covered only by the integration test. AC-07 needs the human.
 
 ## Tests
-- Written: 6 / 7 (T-07 is review)
-- Unit/component tests run and FAIL for the expected reason (feature not built): confirm route ignores `code` and `type=invite`; `setPassword`, `resendStaffInvite` and `/set-password` form do not exist; no Resend invite button. 22 failing, 0 unexpected.
-- Integration (`tests/integration/auth-emails.test.ts`) and e2e (`tests/e2e/auth-emails.spec.ts`) written but NOT run: Docker/local Supabase and Mailpit are not available in this session (`docker info` hangs). Must be run before the PR.
+- Unit/component: 6 new test files, all green (182 tests across `src/app/(auth)`, `src/server/auth`, `src/server/admin`, `src/features/admin-staff`); `tsc --noEmit` clean; eslint clean on touched files.
+- Written first and confirmed failing for the right reason (22 failures before implementation).
+- Integration `tests/integration/auth-emails.test.ts` and e2e `tests/e2e/auth-emails.spec.ts`: written, NOT RUN (no Docker in the session that wrote them).
+- Full `vitest run` on this branch: 197 failures in 14 files this feature does not touch (family task/budget/home, admin-manage). Two of them were re-run on a clean tree and fail the same way (`cookies` was called outside a request scope), so pre-existing; not investigated here.

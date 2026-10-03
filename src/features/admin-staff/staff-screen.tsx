@@ -14,7 +14,12 @@ import { Icon } from "@/components/ui/icon";
 import { requiredPhoneError } from "@/lib/phone/au-phone";
 import { cn } from "@/lib/utils";
 import type { CarerAssignment } from "@/server/admin/assignments-queries";
-import { createStaff, deactivateStaff, updateStaff } from "@/server/admin/staff-actions";
+import {
+  createStaff,
+  deactivateStaff,
+  resendStaffInvite,
+  updateStaff,
+} from "@/server/admin/staff-actions";
 import type { AdminStaffData } from "@/server/admin/staff-queries";
 import type { StaffMember } from "@/types/domain";
 
@@ -209,6 +214,12 @@ export function StaffScreen({
     close(fullName(saved) + (selectedId ? " saved" : " invited. Pending until they sign up."));
   }
 
+  async function resendInvite() {
+    if (!selectedId) return;
+    const outcome = await resendStaffInvite(selectedId);
+    setNotice(outcome.ok ? "Invite sent again." : outcome.error.message);
+  }
+
   async function confirmDeactivation() {
     const target = selected;
     setConfirmDeactivate(false);
@@ -332,9 +343,14 @@ export function StaffScreen({
                 error={errors.jobTitle}
               />
               {selectedId && pendingIds.has(selectedId) && (
-                <p className="text-body-small text-text-secondary">
-                  Invite sent. Pending until they sign up.
-                </p>
+                <div className="flex flex-col items-start gap-2">
+                  <p className="text-body-small text-text-secondary">
+                    Invite sent. Pending until they sign up.
+                  </p>
+                  <Button type="button" variant="secondary" onClick={resendInvite}>
+                    Resend invite
+                  </Button>
+                </div>
               )}
               <p role="status" className="text-body-small text-text-secondary">
                 {notice}

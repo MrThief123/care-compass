@@ -260,3 +260,66 @@ export async function deactivateStaff(id: string): Promise<ActionResult<StaffMem
     },
   };
 }
+
+const ResendInviteIdSchema = z.string().uuid();
+const RESEND_FAILED_MESSAGE = "Couldn't send the invite. Please try again.";
+
+/**
+ * F0-24 AC-05 (FD-04): sends the invite email again to a carer who has not signed in yet. The
+ * caller must be an active admin with a completed TOTP challenge (AAL2, F0-21), because the send
+ * runs with the service role and no RLS policy can stop it. The carer is read under the caller's
+ * own session, so RLS hides one from another organisation (NOT_FOUND), and only a carer still in
+ * `admin_pending_staff_ids()` is sent to; someone who has already accepted is refused.
+ */
+export async function resendStaffInvite(id: string): Promise<ActionResult<{ id: string }>> {
+  const parsedId = ResendInviteIdSchema.safeParse(id);
+  const mode = getDataSourceMode();
+
+  if (mode === "mock") {
+    const { listMockPendingStaffIds } = await import("@/server/admin/staff-mock-store");
+    return listMockPendingStaffIds().includes(id)
+      ? { ok: true, data: { id } }
+      : { ok: false, error: { code: "NOT_ALLOWED", message: RESEND_FAILED_MESSAGE } };
+  }
+
+  if (!parsedId.success) {
+    return { ok: false, error: { code: "VALIDATION", message: RESEND_FAILED_MESSAGE } };
+  }
+
+  const { createClient } = await import("@/lib/supabase/server");
+  const supabase = await createClient();
+  const { data: caller } = await supabase.auth.getUser();
+  if (!caller.user) {
+    return { ok: false, error: { code: "NOT_ALLOWED", message: "You must be signed in." } };
+  }
+
+  const [{ data: callerProfile }, { data: aal }] = await Promise.all([
+    supabase.from("profiles").select("role, is_active").eq("id", caller.user.id).maybeSingle(),
+    supabase.auth.mfa.getAuthenticatorAssuranceLevel(),
+  ]);
+  if (callerProfile?.role !== "admin" || !callerProfile.is_active || aal?.currentLevel !== "aal2") {
+    return { ok: false, error: { code: "NOT_ALLOWED", message: RESEND_FAILED_MESSAGE } };
+  }
+
+  const { data: carer } = await supabase
+    .from("profiles")
+    .select("role, email")
+    .eq("id", parsedId.data)
+    .maybeSingle();
+  if (!carer || carer.role !== "carer" || !carer.email) {
+    return { ok: false, error: { code: "NOT_FOUND", message: RESEND_FAILED_MESSAGE } };
+  }
+
+  const { data: pendingIds, error: pendingError } = await supabase.rpc("admin_pending_staff_ids");
+  if (pendingError || !pendingIds?.includes(parsedId.data)) {
+    return { ok: false, error: { code: "NOT_ALLOWED", message: RESEND_FAILED_MESSAGE } };
+  }
+
+  const { resendStaffInviteEmail } = await import("@/server/jobs/admin-invite-staff");
+  try {
+    await resendStaffInviteEmail(carer.email);
+  } catch {
+    return { ok: false, error: { code: "UNEXPECTED", message: RESEND_FAILED_MESSAGE } };
+  }
+  return { ok: true, data: { id: parsedId.data } };
+}
