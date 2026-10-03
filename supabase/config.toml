@@ -148,7 +148,7 @@ otp_expiry = 3600
 
 # Uncomment to customize email template
 # F0-24: both link to <site_url>/auth/confirm?token_hash=...&type=...&next=... so they work for the
-# app's reset (PKCE) and the admin API's invite (no code verifier). Hosted: `supabase config push`.
+# app's reset (PKCE) and the admin API's invite (no code verifier). Hosted: paste in the dashboard after SMTP is on (not `supabase config push`, F0-24 FD-07).
 [auth.email.template.recovery]
 subject = "Reset your Care Compass password"
 content_path = "./supabase/templates/recovery.html"

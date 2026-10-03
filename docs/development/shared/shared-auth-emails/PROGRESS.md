@@ -21,7 +21,7 @@ Last updated: 2026-10-03
 
 ## Remaining
 - Start Docker and `supabase start`, run `tests/integration/auth-emails.test.ts` and `tests/e2e/auth-emails.spec.ts`, plus the regression specs; record results. Then mark AC-01 to AC-06 MET.
-- Human: tick the hosted checklist in DECISIONS.md (AC-07) and run `supabase config push`.
+- Human: set up custom SMTP, paste the two templates in the Supabase dashboard (not `supabase config push`, DECISIONS.md FD-07), and tick the hosted checklist in DECISIONS.md (AC-07).
 - Refresh `care-compass-status.html` (`node scripts/status-page.mjs`) and open the PR once the above is green and the human approves.
 
 ## Acceptance criteria status

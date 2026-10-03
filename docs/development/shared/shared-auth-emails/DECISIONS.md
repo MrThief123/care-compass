@@ -11,7 +11,7 @@ None blocking.
 
 - FD-05 (2026-10-03, default, no human decision needed): `/auth/confirm` accepts only `type=recovery` and `type=invite`. Other OTP types (signup, email_change, magiclink) are refused as an expired link, so the route cannot be used to mint a session from a token type the app never emails.
 - FD-06 (2026-10-03, default): "has not signed in" for Resend invite means the carer is in `admin_pending_staff_ids()` (`email_confirmed_at` null, ADM-08 FD-07), the same rule that shows the Pending tag. Resend uses `inviteUserByEmail` again, which Supabase refuses for an accepted account, a second line of defence.
-- FD-07 (2026-10-03): the template files are in the repo and registered in `supabase/config.toml`, which configures the local stack only. Hosted needs `supabase config push` (or pasting the two templates in the dashboard) as a human step; ticked in the checklist below.
+- FD-07 (2026-10-03, revised 2026-10-03): the template files are in the repo and registered in `supabase/config.toml`, which configures the local stack only. On the hosted project, paste the two templates (and their subjects) into the dashboard under Authentication → Emails → Templates, after custom SMTP is on. Do not use `supabase config push`: Supabase rejects template changes until custom SMTP is set ("not available for free tier projects using the default email provider"), and the push also sends the whole local `[auth]` block (`site_url = http://127.0.0.1:3000`, localhost redirects, `jwt_expiry`, OTP settings), which would overwrite the hosted values and break the links. Ticked in the checklist below.
 - FD-08 (2026-10-03): `resetPassword` and the new `setPassword` share one private helper in `src/server/auth/actions.ts`. `resetPassword`'s result and messages are unchanged. `setPassword` returns `redirectTo` from the same resolver `signIn` uses, so an invited admin-role account would hit the MFA gate the same way.
 
 ## Hosted checklist (human, tick when done on the hosted project)
@@ -19,7 +19,7 @@ None blocking.
 - [ ] Sender domain verified (SPF, DKIM)
 - [ ] Site URL = the deployed origin
 - [ ] Redirect allow-list includes `<origin>/auth/confirm` and `<origin>/set-password`
-- [ ] Recovery and invite templates installed (paste, or `supabase config push`)
+- [ ] Recovery and invite templates installed (paste in the dashboard, after SMTP; not `supabase config push`, FD-07)
 - [ ] "Confirm email" is off on hosted (FD-02)
 - [ ] Email OTP expiry and Auth email rate limits recorded
 - [ ] A real reset and a real invite sent to an address outside the project team and followed to sign-in
