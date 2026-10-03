@@ -167,10 +167,8 @@ jobs:
   docker-build-push:
     name: Build and Push Docker Image
 
-    # TEMPORARY, FOR TESTING: build and push the image on EVERY push to EVERY branch, so each push
-    # can be deployed (deploy.yaml waits for this commit's image). Every image gets the commit tag;
-    # only main also moves `latest`, so a branch never replaces what `latest` means.
-    if: github.event_name == 'push'
+    # Only build/push the Docker image from main.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
     runs-on: ubuntu-latest
 
@@ -200,5 +198,5 @@ jobs:
             NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
 
           tags: |
-            ${{ github.ref == 'refs/heads/main' && format('{0}/care-compass:latest', secrets.DOCKERHUB_USERNAME) || '' }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/care-compass:latest
             ${{ secrets.DOCKERHUB_USERNAME }}/care-compass:${{ github.sha }}

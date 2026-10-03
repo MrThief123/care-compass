@@ -1,16 +1,11 @@
 name: Deploy
 
-# TEMPORARY, FOR TESTING: deploys on EVERY push to EVERY branch (and by hand, which also offers
-# Stop). A push deploys the image CI built for that exact commit (CI builds one on every branch
-# for now), after waiting for it; a manual run deploys `latest` (main).
-# To go back to the safe trigger, replace the `on:` block with:
-#   on:
-#     workflow_run: { workflows: [CI], types: [completed], branches: [main] }
-#     workflow_dispatch: { ...same inputs... }
-# and set the deploy job's `if` to: github.event_name == 'workflow_dispatch' && inputs.action == 'deploy'
-#   || github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success'
+# Deploys on a push to main, or by hand (Deploy or Stop). Other branches never deploy. A push waits
+# for the image CI builds for that commit (CI's last job pushes it, in parallel with this
+# workflow) so it never ships the previous build.
 on:
   push:
+    branches: [main]
   workflow_dispatch:
     inputs:
       action:
@@ -27,7 +22,7 @@ env:
 jobs:
   deploy:
     name: Deploy to EC2
-    # TEMPORARY: every push deploys; a manual run deploys only when 'deploy' is chosen.
+    # A push to main deploys; a manual run deploys only when 'deploy' is chosen.
     if: github.event_name == 'push' || inputs.action == 'deploy'
     runs-on: ubuntu-latest
 
@@ -35,7 +30,7 @@ jobs:
     #   name: production
 
     env:
-      # A push deploys the image CI built for THIS commit; a manual run deploys `latest` (main).
+      # A push to main deploys the image CI built for THIS commit; a manual run deploys `latest`.
       IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/care-compass
       IMAGE_TAG: ${{ github.event_name == 'push' && github.sha || 'latest' }}
 
