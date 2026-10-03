@@ -192,6 +192,8 @@ export function FamilySettingsView({
   const canChange = choices.some((organisation) => !organisation.isCurrent);
   // ADM-05: removed by the organisation and not yet moved; the banner goes once a change succeeds.
   const removed = header.organisationRemoved === true && current.id === undefined;
+  // Never registered (or removed): choosing one gives it access, nobody loses any.
+  const unregistered = !organisationName;
   const chosen = choices.find((organisation) => organisation.id === chosenId);
 
   function openPicker() {
@@ -283,6 +285,12 @@ export function FamilySettingsView({
               There is no other organisation registered with Care Compass yet.
             </p>
           )}
+          {/* Not registered yet: the same picker registers the client (CHG: register from Settings). */}
+          {unregistered && canChange && (
+            <div>
+              <Button onClick={openPicker}>Choose organisation</Button>
+            </div>
+          )}
         </CardShell>
       )}
 
@@ -358,7 +366,7 @@ export function FamilySettingsView({
         tone="destructive"
         title="Change organisation?"
         body={
-          removed
+          unregistered
             ? `Choosing ${chosen?.name ?? "this organisation"} gives them access to ${firstName}'s routines, events, budget, documents and history. You can change organisation later in Settings.`
             : `Switching ${firstName}'s care to a new organisation keeps her routines, events, budget, documents and history. Assigned nurses and all future shifts will be cleared, and ${organisationName} will lose access immediately. This can't be undone from your side.`
         }

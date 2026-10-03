@@ -14,11 +14,16 @@ import { StaffScreen } from "./staff-screen";
  * asserted without depending on the mock data source's own state; that round trip is covered
  * separately, against the real mock contract, by staff-actions.test.ts.
  */
-const mocks = vi.hoisted(() => ({ createStaff: vi.fn(), updateStaff: vi.fn() }));
+const mocks = vi.hoisted(() => ({
+  createStaff: vi.fn(),
+  updateStaff: vi.fn(),
+  resendStaffInvite: vi.fn(),
+}));
 
 vi.mock("@/server/admin/staff-actions", () => ({
   createStaff: mocks.createStaff,
   updateStaff: mocks.updateStaff,
+  resendStaffInvite: mocks.resendStaffInvite,
 }));
 
 function staffMember(overrides: Partial<StaffMember> & Pick<StaffMember, "id">): StaffMember {
@@ -295,5 +300,42 @@ describe("[ADM-08][AC-11] keyboard focus around the side panel", () => {
     expect(screen.getByLabelText("First name")).toHaveFocus();
     await userEvent.keyboard("{Escape}");
     expect(add).toHaveFocus();
+  });
+});
+
+describe("[F0-24][AC-05] Resend invite in the staff panel (FD-04)", () => {
+  it("[F0-24][AC-05] shows Resend invite only for a carer who has not signed in", async () => {
+    render(<StaffScreen data={{ ...data, pendingIds: [data.staff[2]!.id] }} />);
+    await userEvent.click(screen.getByRole("button", { name: "Edit Sarah Nguyen" }));
+    expect(screen.getByRole("button", { name: "Resend invite" })).toBeVisible();
+    await userEvent.click(screen.getByRole("button", { name: "Close" }));
+    await userEvent.click(screen.getByRole("button", { name: "Edit Aisha Rahman" }));
+    expect(screen.queryByRole("button", { name: "Resend invite" })).not.toBeInTheDocument();
+  });
+
+  it("[F0-24][AC-05] is absent when adding a new carer", async () => {
+    render(<StaffScreen data={{ ...data, pendingIds: [data.staff[2]!.id] }} />);
+    await userEvent.click(screen.getByRole("button", { name: "Add Staff" }));
+    expect(screen.queryByRole("button", { name: "Resend invite" })).not.toBeInTheDocument();
+  });
+
+  it("[F0-24][AC-05] pressing it calls resendStaffInvite and announces success", async () => {
+    mocks.resendStaffInvite.mockResolvedValue({ ok: true, data: { id: data.staff[2]!.id } });
+    render(<StaffScreen data={{ ...data, pendingIds: [data.staff[2]!.id] }} />);
+    await userEvent.click(screen.getByRole("button", { name: "Edit Sarah Nguyen" }));
+    await userEvent.click(screen.getByRole("button", { name: "Resend invite" }));
+    expect(mocks.resendStaffInvite).toHaveBeenCalledWith(data.staff[2]!.id);
+    expect(await screen.findByText("Invite sent again.")).toBeVisible();
+  });
+
+  it("[F0-24][AC-05] shows the error message when the resend is refused", async () => {
+    mocks.resendStaffInvite.mockResolvedValue({
+      ok: false,
+      error: { code: "NOT_ALLOWED", message: "Couldn't send the invite. Please try again." },
+    });
+    render(<StaffScreen data={{ ...data, pendingIds: [data.staff[2]!.id] }} />);
+    await userEvent.click(screen.getByRole("button", { name: "Edit Sarah Nguyen" }));
+    await userEvent.click(screen.getByRole("button", { name: "Resend invite" }));
+    expect(await screen.findByText("Couldn't send the invite. Please try again.")).toBeVisible();
   });
 });

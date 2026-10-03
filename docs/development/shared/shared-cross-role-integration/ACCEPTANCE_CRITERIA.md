@@ -8,9 +8,9 @@ Names below (Helen Carter, family; Margaret Carter, client; Aisha Rahman, carer;
 
 | ID | Story | Type | Criterion (Given / When / Then) | Status |
 |---|---|---|---|---|
-| AC-01 | US-01 | guard | Given `NEXT_PUBLIC_SUPABASE_URL` is not a local address or `E2E_DATA_SOURCE` is not `supabase`, when the suite starts, then every INT-12 test is skipped with a message saying why, and nothing is written to any database. | NOT MET |
-| AC-02 | US-01 | happy | Given a local stack, when any phase runs, then it seeds its own organisation, admin with TOTP, carer, family and client, and after the phase (passed or failed) no user, organisation or client carrying that run's `int-12-<runId>` marker remains. | NOT MET |
-| AC-03 | US-01 | happy | Given a local stack, when `npm run test:journey` runs, then phases 1 to 7 run in order with one worker, and each phase can also be run alone with `--grep @phase-N`. | NOT MET |
+| AC-01 | US-01 | guard | Given `NEXT_PUBLIC_SUPABASE_URL` is not a local address or `E2E_DATA_SOURCE` is not `supabase`, when the suite starts, then every INT-12 test is skipped with a message saying why, and nothing is written to any database. | MET |
+| AC-02 | US-01 | happy | Given a local stack, when any phase runs, then it seeds its own organisation, admin with TOTP, carer, family and client, and after the phase (passed or failed) no user, organisation or client carrying that run's `int-12-<runId>` marker remains. | MET |
+| AC-03 | US-01 | happy | Given a local stack, when `npm run test:journey` runs, then phases 1 to 7 run in order with one worker, and each phase can also be run alone with `--grep @phase-N`. | MET |
 
 ## Phase 1 — Accounts, sign-in, 2FA and passwords
 

@@ -23,9 +23,9 @@ E2E_PORT=3150 E2E_DATA_SOURCE=supabase npm run test:journey -- --grep @phase-3  
 
 | Test ID | Covers | Phase | Level | Test description | Written first? | Result |
 |---|---|---|---|---|---|---|
-| T-01 | AC-01 | 0 | e2e | With a hosted URL or the mock data source, every INT-12 test reports skipped with the reason. | ☐ | — |
-| T-02 | AC-02 | 0 | e2e | After a phase that passes and one forced to fail, a service-role query finds no rows with the run marker. | ☐ | — |
-| T-03 | AC-03 | 0 | e2e | `test:journey --list` shows phases in order; `--grep @phase-2` runs only Phase 2. | ☐ | — |
+| T-01 | AC-01 | 0 | e2e | With a hosted URL or the mock data source, every INT-12 test reports skipped with the reason. | Yes | PASS (guard function and refusal tested everywhere; a guarded-mode run showed 7 skipped with the reason) |
+| T-02 | AC-02 | 0 | e2e | After a phase that passes and one forced to fail, a service-role query finds no rows with the run marker. | Yes | PASS (also: half-way seed, append-only rows, three signed-in contexts, mail reader) |
+| T-03 | AC-03 | 0 | e2e | `test:journey --list` shows phases in order; `--grep @phase-2` runs only Phase 2. | Yes | PASS (one worker, file order, `--grep @phase-0` lists only Phase 0) |
 | T-04 | AC-04 | 1 | e2e | Family sign-up lands on the client's Home; sign out and in returns there. | ☐ | — |
 | T-05 | AC-05 | 1 | e2e | Organisation sign-up, TOTP enrolment from the shown secret, Admin Home; second sign-in asks for a code only. | ☐ | — |
 | T-06 | AC-06 | 1 | e2e | Wrong code: error, cleared field, stays on code step; `/admin/*` before a code goes back to the code step. | ☐ | — |
