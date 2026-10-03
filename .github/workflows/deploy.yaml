@@ -192,7 +192,7 @@ jobs:
 
   stop:
     name: Stop EC2
-    if: inputs.action == 'stop'
+    # if: inputs.action == 'stop'
     runs-on: ubuntu-latest
 
     steps:
