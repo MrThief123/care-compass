@@ -1,7 +1,7 @@
 # Progress — INT-09 Overdue and upcoming care alert emails
 
 Owner: MrThief123
-Status: READY FOR PR
+Status: MERGED TO DEV (merged to `main` in #221, 2026-10-03). A real send needs the hosted Resend, Vercel env and SMTP set-up (human)
 Jira: —
 Branch: `feature/shared-care-alert-emails`
 PR target: `main`
