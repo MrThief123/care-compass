@@ -1,18 +1,21 @@
 name: Deploy
 
-# on:
-#   workflow_dispatch:
-#     inputs:
-#       action:
-#         description: "Choose deployment action"
-#         required: true
-#         type: choice
-#         options:
-#           - deploy
-#           - stop
-
+# Deploys the image CI just pushed: only after the whole CI workflow succeeded on main (the
+# image is built and pushed by CI's last job), or by hand. Never on a push to another branch.
 on:
-  push:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      action:
+        description: "Choose deployment action"
+        required: true
+        type: choice
+        options:
+          - deploy
+          - stop
 
 env:
   AWS_REGION: ${{ secrets.AWS_REGION }}
@@ -20,7 +23,9 @@ env:
 jobs:
   deploy:
     name: Deploy to EC2
-    # if: inputs.action == 'deploy'
+    if: >-
+      (github.event_name == 'workflow_dispatch' && inputs.action == 'deploy') ||
+      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
     runs-on: ubuntu-latest
 
     environment:
@@ -63,12 +68,11 @@ jobs:
           echo "EC2 IP: $IP"
 
       - name: Configure SSH
+        env:
+          EC2_SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
         run: |
           mkdir -p ~/.ssh
-
-          echo "${{ secrets.EC2_SSH_PRIVATE_KEY }}" \
-            > ~/.ssh/care-compass.pem
-
+          printf '%s\n' "$EC2_SSH_PRIVATE_KEY" > ~/.ssh/care-compass.pem
           chmod 600 ~/.ssh/care-compass.pem
 
       - name: Wait for SSH
@@ -85,12 +89,51 @@ jobs:
             sleep 5
           done
 
+      - name: Write the runtime environment file on EC2
+        # Runtime values only reach the container through this file (never the image: the image has
+        # just the two public NEXT_PUBLIC_* values, baked in at build). Secrets come in as env vars,
+        # so they are masked in logs and never appear in a script.
+        env:
+          DATA_SOURCE: ${{ secrets.DATA_SOURCE }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          RESEND_FROM_EMAIL: ${{ secrets.RESEND_FROM_EMAIL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          JOBS_SECRET: ${{ secrets.JOBS_SECRET }}
+        run: |
+          umask 077
+          for name in DATA_SOURCE NEXT_PUBLIC_SUPABASE_URL NEXT_PUBLIC_SUPABASE_ANON_KEY \
+                      SUPABASE_SERVICE_ROLE_KEY RESEND_API_KEY RESEND_FROM_EMAIL CRON_SECRET JOBS_SECRET; do
+            if [ -z "${!name}" ]; then
+              echo "::error::GitHub secret $name is not set"
+              exit 1
+            fi
+          done
+          {
+            printf 'DATA_SOURCE=%s\n' "$DATA_SOURCE"
+            printf 'NEXT_PUBLIC_SUPABASE_URL=%s\n' "$NEXT_PUBLIC_SUPABASE_URL"
+            printf 'NEXT_PUBLIC_SUPABASE_ANON_KEY=%s\n' "$NEXT_PUBLIC_SUPABASE_ANON_KEY"
+            printf 'SUPABASE_SERVICE_ROLE_KEY=%s\n' "$SUPABASE_SERVICE_ROLE_KEY"
+            printf 'RESEND_API_KEY=%s\n' "$RESEND_API_KEY"
+            printf 'RESEND_FROM_EMAIL=%s\n' "$RESEND_FROM_EMAIL"
+            printf 'CRON_SECRET=%s\n' "$CRON_SECRET"
+            printf 'JOBS_SECRET=%s\n' "$JOBS_SECRET"
+          } > runtime.env
+          ssh \
+            -o StrictHostKeyChecking=no \
+            -i ~/.ssh/care-compass.pem \
+            "${{ secrets.EC2_SSH_USER }}@${{ steps.ec2.outputs.ip }}" \
+            'umask 077 && cat > ~/.env.local' < runtime.env
+          rm -f runtime.env
+
       - name: Deploy Docker container
         run: |
           ssh \
             -o StrictHostKeyChecking=no \
             -i ~/.ssh/care-compass.pem \
-            "${{ secrets.EC2_SSH_USER }}@${{ steps.ec2.outputs.ip }}" << 'EOF'
+            "${{ secrets.EC2_SSH_USER }}@${{ steps.ec2.outputs.ip }}" << 'DEPLOY_SCRIPT'
 
             set -e
 
@@ -111,14 +154,6 @@ jobs:
 
             echo "Removing old container..."
             docker rm care-compass || true
-
-            echo "Creating environment file..."
-            cat > ~/.env.local << EOF
-            DATA_SOURCE=${{ secrets.DATA_SOURCE }}
-            NEXT_PUBLIC_SUPABASE_URL=${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-            NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-            SUPABASE_SERVICE_ROLE_KEY=${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-            EOF
 
             chmod 600 ~/.env.local
 
@@ -141,7 +176,7 @@ jobs:
             echo "Final disk usage:"
             df -h
 
-          EOF
+          DEPLOY_SCRIPT
 
       - name: Deployment complete
         run: |
@@ -149,7 +184,7 @@ jobs:
           echo "Deployment successful!"
           echo "================================"
           echo "EC2 IP: ${{ steps.ec2.outputs.ip }}"
-          echo "Application: http://${{ steps.ec2.outputs.ip }}:8080"
+          echo "Application: https://care-compass.online"
 
   stop:
     name: Stop EC2

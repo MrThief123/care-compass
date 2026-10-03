@@ -4,10 +4,14 @@ on:
   push:
   workflow_dispatch:
 
+# Only the two PUBLIC Supabase values reach CI. The service-role key is deliberately not here: no
+# job needs it (it is optional in src/lib/env.ts, and the client-bundle check looks for its name,
+# not its value), and handing the production key to every job and every third-party action would
+# let any test that forgot its local-only guard write to the production database. It reaches only
+# the running container, through deploy.yaml.
 env:
   NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
   NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-  SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
 
 jobs:
   lint:
