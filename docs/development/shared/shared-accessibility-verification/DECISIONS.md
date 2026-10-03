@@ -25,3 +25,9 @@ HUMAN REVIEW: test expectation changed — removed the invalid H1-only readiness
 The Patients directory has no heading element. Requiring any heading prevented axe from inspecting it, so T-01 now requires nonempty main content instead. The missing heading remains a manual-review observation; no axe assertion was removed. The task-detail fixture key was corrected from an equivalent UTC instant to the application's canonical Melbourne-offset representation, as required by build-occurrences.ts. This fixes an invalid fixture link, not app behavior. Network-idle and font readiness waits keep contrast measurements off transient renders. Every route writes evidence even when another route fails. Keyboard checks also cover opening Margaret from the Carer and Admin directories.
 
 Local Auth containers initially had TOTP disabled despite config.toml enabling it; restarting the stack with the current config resolved enrollment. No auth code or config was edited.
+
+## FD-04 — Human accepts current appearance for this audit handoff (2026-10-03)
+
+The human reviewed the listed blockers and instructed: "looking at it visually, it looks fine, so continue with INT-06 as is". Record acceptance of the current appearance and proceed with the audit deliverable without implementing INT06-BUG-01..04. These findings are retained as deferred follow-ups, not deleted or treated as passing.
+
+This instruction authorizes proceeding with the audit as-is. It does not change the text of AC-01, establish automated WCAG compliance, authorize test skips, or resolve the repository formatting failure. Status is IMPLEMENTED (audit delivered, known findings), not READY FOR PR or COMPLETE under the unchanged gates. Prepare a draft PR for explicit human approval per AGENTS.md section 8. No production or test changes.

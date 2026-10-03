@@ -1,6 +1,6 @@
 ﻿# Progress — INT-06 Accessibility verification across dashboards
 
-Status: BLOCKED (TECHNICAL; was IN PROGRESS)
+Status: IMPLEMENTED
 Owner: Kav1sh-11
 Lane: I — Integration
 Sprint: SPRINT · planned D20
@@ -8,11 +8,11 @@ Branch: `feature/shared-accessibility-verification`
 PR target: `main`
 Last updated: 2026-10-03
 
-## Blockers
+## Known findings and unmet standard gates
 
 - AC-01 fails: 24 of 40 route/view combinations have serious color-contrast findings (305 repeated element instances). Four separate proposed bug features are specified in docs/ACCESSIBILITY_REPORT.md. Fixes are explicitly outside INT-06 scope and require the owning lanes.
 - `npm run verify` stops at checkout-wide formatting differences (711 files); lint and typecheck passed. No unrelated files were reformatted.
-- Human triage/controlled feature IDs are needed for the report's follow-up bug features; no plan requirements were changed.
+- Human accepted the current appearance and directed proceeding as-is (FD-04). The four bug groups are deferred; their implementation is not a prerequisite for handing off this audit. AC-01 remains NOT MET and standard readiness is not claimed.
 
 ## Dependencies status
 
@@ -50,7 +50,7 @@ The human approved local database initialization. It applied existing migrations
 
 ## Remaining / exact next action
 
-Human triage of the four bug features, then lane-owned fixes in separate branches. Once merged, merge main here and rerun the audit plus relevant verification. Resolve or agree handling of the checkout-wide formatting blocker before marking READY FOR PR. No PR opened; prior human approval is required.
+Review PR_DRAFT.md and obtain explicit approval to open a draft PR to main with known failures disclosed. No visual fixes are planned for this feature, per FD-04. Standard READY FOR PR/COMPLETE gates remain unmet: AC-01 and full verify are not green.
 
 ## Ready for PR
 
@@ -59,3 +59,7 @@ No — AC-01 and the full verify gate are not green.
 ## Final handoff checks
 
 Changed test/package formatting, targeted ESLint, TypeScript and git diff checks passed. The refreshed status page was opened in Chromium at 390 × 844: no console errors and no horizontal overflow. GitHub CLI is unavailable; status-page generation retained prior PR metadata. Audit evidence and feature state are committed on the claimed branch; no PR was opened.
+
+## Human direction
+
+FD-04: proceed with the existing appearance and audit findings as-is. Latest origin/main remains 8c9d644 and is already merged. Documentation-only follow-up; previous executed test results remain unchanged.

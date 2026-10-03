@@ -2,6 +2,10 @@
 
 Date: 2026-10-03. App baseline: `8c9d644` (main). Audit branch: `feature/shared-accessibility-verification`.
 
+## Human disposition
+
+On 2026-10-03, the human reviewed the listed issues, accepted the current appearance and directed proceeding with INT-06 as-is (feature FD-04). Deliver this audit with the contrast findings retained and fixes deferred. This is acceptance of the audit handoff, not a passing axe result; AC-01 and full verify remain failed.
+
 ## Result
 
 **Accessibility release check failed.** All 40 dashboard route/view combinations loaded and were audited. 24 had serious `color-contrast` violations, covering 305 element instances. These are repeated instances of four defect groups, not 305 independent bugs. No critical violations were reported. AC-01 remains NOT MET.
