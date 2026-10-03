@@ -24,3 +24,7 @@ _No decisions recorded yet._
 - Human confirmation required: yes/no (who, when)
 - Test changes caused (if any): test ID, reason, flagged for review yes/no
 -->
+
+## FD-01 — Confirmed local budget and dataset (2026-10-03)
+
+The human confirmed p95 below 1 second for Home, Calendar week and Task log, using 500 recurring events per client across 50 synthetic clients. Measure 20 samples per operation using nearest-rank p95 (19th sorted sample). Keep warm-up separate. Local-only assurance, not a production SLA. OQ-01 and OQ-17 were already answered in root DECISIONS.md (PD-030/PD-050).

@@ -1,19 +1,19 @@
 # Progress — INT-07 Scale and performance verification
 
-Status: NOT STARTED
-Owner: unclaimed
+Status: IN PROGRESS
+Owner: Kav1sh-11
 Lane: I — Integration
-Sprint: POST-SPRINT · planned —
-Branch: `feature/shared-calendar-scale-performance` (not yet created)
+Sprint: SPRINT · planned D19
+Branch: `feature/shared-calendar-scale-performance`
 PR target: `main (per OQ-01 — shared work)`
-Last updated: 2026-09-17 (planning pack generated)
+Last updated: 2026-10-03
 
 ## Blockers
-- OQ-01 — Branch parent and naming for shared (foundation and cross-cutting) work
+- None: OQ-01 answered; user confirmed the proposed budget and scale.
 
 ## Dependencies status
-- FAM-14 — NOT STARTED
-- ADM-01 — NOT STARTED
+- FAM-14 — MERGED TO DEV
+- ADM-01 — MERGED TO DEV
 
 ## Completed
 - Feature documentation drafted (Claude Chat planning pack)
