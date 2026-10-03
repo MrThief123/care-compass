@@ -2,6 +2,7 @@ import { adminClientBase } from "@/features/admin-client-view/client-routes";
 import { loadFamilyBudgetData, type FamilyBudgetData } from "@/features/family-budget/budget-data";
 import { BudgetErrorState } from "@/features/family-budget/budget-error-state";
 import { FamilyBudgetView } from "@/features/family-budget/family-budget-view";
+import { assertAdminClientAccess } from "@/server/admin/client-access";
 
 export default async function FamilyBudgetPage({
   params,
@@ -9,6 +10,9 @@ export default async function FamilyBudgetPage({
   params: Promise<{ clientId: string }>;
 }) {
   const { clientId } = await params;
+  // A layout does not stop its page rendering: check here too, outside the try, so a client the
+  // admin may not open reads nothing and logs nothing (ADM-11 FD-03).
+  await assertAdminClientAccess(clientId);
 
   let data: FamilyBudgetData;
   try {

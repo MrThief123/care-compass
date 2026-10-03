@@ -2,13 +2,12 @@
 
 Last session date: 2026-10-03
 Current branch: `feature/admin-client-view` (worktree `/Users/dhruv/Documents/Dev/care-compass-adm-11`)
-Worked on: claim, docs, tests first
-What changed: this folder, new tests (see PROGRESS.md)
-Tests run: Vitest (new files), pgTAP (two files), integration (new), lint
-Test results: failing for the expected reasons, see PROGRESS.md
+Worked on: implementation, full checks, real-browser verification
+What changed: see PROGRESS.md (Files changed)
+Tests run: new Vitest files, full `npm test`, `supabase test db`, integration, e2e, lint, typecheck, format:check
+Test results: all ADM-11 tests pass; see PROGRESS.md for the 11 unrelated integration failures after `supabase db reset`
 Current blocker: none
-Important discoveries: admins cannot write care events today (`can_edit_care_events`); Family budget views hard-code `/family/<id>`; Admin mock ids do not match Family mock ids, so verify against local Supabase
-Important decisions: FD-01 to FD-06 in DECISIONS.md
-Exact next action: implement: migration, guard, layout and bar, routes, name links, basePath on two Family views; then make the tests pass
-Files likely to be touched next: `supabase/migrations/<new>.sql`, `src/server/admin/client-access.ts`, `src/app/(admin)/admin/clients/[clientId]/**`, `src/features/admin-client-view/**`, `src/features/admin-clients/clients-screen.tsx`, `src/features/family-budget/{family-budget-view,edit-budget-view}.tsx`
-Warning for next session: only the two Family budget views may be edited in Lane F, additively; never run `.env.local` e2e; use the worktree, not the main checkout
+Important discoveries: a layout does not stop its page rendering, so home, info, budget and edit budget call `assertAdminClientAccess` themselves (silent not-found, no logs); `loadFamilyCalendar` rejects an admin role, so Lane A has its own loader (FD-07); a symlinked `node_modules` breaks Turbopack builds, use `npm ci` in the worktree
+Important decisions: FD-01 to FD-07 in DECISIONS.md
+Exact next action: human says "yes" to open the PR to `main` (title `ADM-11 Admin — Client view`); flag in the PR: migration, two flipped care_events assertions, Lane F `basePath`, client bar HUMAN REVIEW (PD-052)
+Warning for next session: never run `.env.local` e2e; use the worktree, not the main checkout
