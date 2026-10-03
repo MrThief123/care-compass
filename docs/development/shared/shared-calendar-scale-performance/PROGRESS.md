@@ -51,3 +51,7 @@ Last updated: 2026-10-03
 
 ## Ready for PR
 - No
+
+## Test-first evidence — 2026-10-03
+
+`npx vitest run --config tests/performance/vitest.config.ts tests/performance/seed-scale.test.ts` failed because scripts/seed-scale does not yet exist. Tests were written before that implementation. Dedicated tests/performance configuration keeps expensive opt-in performance integration checks separate from the ordinary regression suite without skipped tests. No acceptance expectation changed.
