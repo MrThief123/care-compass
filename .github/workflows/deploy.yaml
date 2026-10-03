@@ -2,20 +2,24 @@ name: Deploy
 
 # Deploys the image CI just pushed: only after the whole CI workflow succeeded on main (the
 # image is built and pushed by CI's last job), or by hand. Never on a push to another branch.
-on:
-  workflow_run:
-    workflows: [CI]
-    types: [completed]
-    branches: [main]
-  workflow_dispatch:
-    inputs:
-      action:
-        description: "Choose deployment action"
-        required: true
-        type: choice
-        options:
-          - deploy
-          - stop
+# on:
+#   workflow_run:
+#     workflows: [CI]
+#     types: [completed]
+#     branches: [main]
+#   workflow_dispatch:
+#     inputs:
+#       action:
+#         description: "Choose deployment action"
+#         required: true
+#         type: choice
+#         options:
+#           - deploy
+#           - stop
+
+on: 
+  push
+
 
 env:
   AWS_REGION: ${{ secrets.AWS_REGION }}
@@ -23,9 +27,9 @@ env:
 jobs:
   deploy:
     name: Deploy to EC2
-    if: >-
-      (github.event_name == 'workflow_dispatch' && inputs.action == 'deploy') ||
-      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
+    # if: >-
+    #   (github.event_name == 'workflow_dispatch' && inputs.action == 'deploy') ||
+    #   (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
     runs-on: ubuntu-latest
 
     environment:
