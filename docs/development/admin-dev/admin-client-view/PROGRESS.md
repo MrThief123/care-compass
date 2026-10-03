@@ -1,49 +1,56 @@
 # Progress — ADM-11 Admin — Client view
 
-Status: NOT STARTED
-Branch: `feature/admin-client-view` (not yet created)
-PR target: `admin-dev`
-Last updated: 2026-09-25
+Status: IN PROGRESS
+Owner: Dhruv Verma
+Lane: A — Admin
+Sprint: SPRINT · planned D19–D20
+Branch: `feature/admin-client-view`
+PR target: `main` (CHG-036)
+Last updated: 2026-10-03
 
 ## Blockers
-- Depends on ADM-04 and the Family wiring features it renders (see PRD Dependencies).
+- None. No blocking decisions (PD-058 answered). FD-01 to FD-03 answered by the human 2026-10-03.
 
 ## Dependencies status
-- ADM-04, FAM-01, FAM-04, FAM-06, FAM-07, FAM-09, FAM-10, FAM-11, FAM-14, FAM-15 — NOT STARTED
+- ADM-04, FAM-01, FAM-04, FAM-06, FAM-07, FAM-09, FAM-10, FAM-11, FAM-14, FAM-15 — MERGED (`plan-status.mjs` lists ADM-11 as Ready to start)
 
 ## Completed
-- Feature docs created by CHG-020 (2026-09-25).
+- Claimed.
+- Docs reconciled with the code: PR target, `tasks` route, migration and basePath scope; FD-01 to FD-06; TEST_PLAN T-01 to T-14.
 
 ## In progress
-- None
+- Tests written first (see Tests).
 
 ## Remaining
-- AC-01 to AC-05
+- AC-01 to AC-05: migration, admin guard, client layout and bar, routes, name links, `basePath` on two Family views.
 
 ## Acceptance criteria status
 - 0 / 5 MET
 
 ## Tests
-- Written: 0 / 5
+- Written: 14 / 14 planned (T-01 to T-14)
 - Passing: 0
-- Failing: 0
+- Failing: see Results
 - Last run: —
-- Tests-first evidence: —
+- Tests-first evidence: see Results
 
 ## Files changed
-- None
+- Docs in this folder.
 
 ## Decisions
-- None
+- FD-01 migration for admin event writes (flips two pgTAP assertions: HUMAN REVIEW: test expectation changed)
+- FD-02 additive `basePath` on two Lane F views
+- FD-03 admin not-found guard
+- FD-04 route `tasks`; FD-05 client bar and nav (HUMAN REVIEW, PD-052); FD-06 no mock mode
 
 ## Problems encountered
 - None
 
 ## Assumptions
-- None
+- FD-04, FD-05, FD-06
 
 ## Next action
-- Once dependencies merge: START FEATURE ADM-11.
+- Implement in a fresh session from the handoff prompt.
 
 ## Ready for PR
 - No
