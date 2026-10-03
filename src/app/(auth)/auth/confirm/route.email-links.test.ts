@@ -92,3 +92,34 @@ describe("[F0-24][AC-06] off-site next is ignored on both link forms", () => {
     expect(response.headers.get("location")).toBe(`${ORIGIN}/reset-password`);
   });
 });
+
+describe("[F0-24][AC-01] the redirect stays on the host the browser used", () => {
+  it("[F0-24][AC-01] follows the Host header, so the session cookie (host-only) is sent on the next page", async () => {
+    const request = new NextRequest(`${ORIGIN}/auth/confirm?token_hash=hash&type=recovery`, {
+      headers: { host: "127.0.0.1:3100" },
+    });
+    const response = await GET(request);
+    expect(response.headers.get("location")).toBe("http://127.0.0.1:3100/reset-password");
+  });
+
+  it("[F0-24][AC-01] prefers x-forwarded-host and x-forwarded-proto behind a proxy", async () => {
+    const request = new NextRequest(`${ORIGIN}/auth/confirm?token_hash=hash&type=invite`, {
+      headers: {
+        host: "internal:3000",
+        "x-forwarded-host": "app.example",
+        "x-forwarded-proto": "https",
+      },
+    });
+    const response = await GET(request);
+    expect(response.headers.get("location")).toBe("https://app.example/set-password");
+  });
+
+  it("[F0-24][AC-06] an off-site next is still ignored against that origin", async () => {
+    const request = new NextRequest(
+      `${ORIGIN}/auth/confirm?token_hash=hash&type=recovery&next=${encodeURIComponent("http://localhost:3000/x")}`,
+      { headers: { host: "127.0.0.1:3100" } },
+    );
+    const response = await GET(request);
+    expect(response.headers.get("location")).toBe("http://127.0.0.1:3100/reset-password");
+  });
+});

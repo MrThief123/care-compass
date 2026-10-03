@@ -17,18 +17,19 @@ Last updated: 2026-10-03
 - Feature documentation drafted (CHG-047).
 
 ## In progress
-- Waiting on a local Supabase stack to run the integration and e2e tests (see Tests).
+- Waiting on the human for the hosted set-up (AC-07).
 
 ## Remaining
-- Start Docker and `supabase start`, run `tests/integration/auth-emails.test.ts` and `tests/e2e/auth-emails.spec.ts`, plus the regression specs; record results. Then mark AC-01 to AC-06 MET.
 - Human: set up custom SMTP, paste the two templates in the Supabase dashboard (not `supabase config push`, DECISIONS.md FD-07), and tick the hosted checklist in DECISIONS.md (AC-07).
-- Refresh `care-compass-status.html` (`node scripts/status-page.mjs`) and open the PR once the above is green and the human approves.
+- Refresh `care-compass-status.html` (`node scripts/status-page.mjs`), then ask the human for approval to open the PR.
 
 ## Acceptance criteria status
-- 0 / 7 MET. Implemented, unit/component-verified: AC-01 (route), AC-02, AC-03 (action and form), AC-05 (action and button), AC-06. NOT verified end to end: needs the local stack. AC-04 is Supabase's own refusal, covered only by the integration test. AC-07 needs the human.
+- 6 / 7 MET (AC-01 to AC-06). AC-07 needs the human to tick the hosted checklist.
 
 ## Tests
-- Unit/component: 6 new test files, all green (182 tests across `src/app/(auth)`, `src/server/auth`, `src/server/admin`, `src/features/admin-staff`); `tsc --noEmit` clean; eslint clean on touched files.
-- Written first and confirmed failing for the right reason (22 failures before implementation).
-- Integration `tests/integration/auth-emails.test.ts` and e2e `tests/e2e/auth-emails.spec.ts`: written, NOT RUN (no Docker in the session that wrote them).
-- Full `vitest run` on this branch: 197 failures in 14 files this feature does not touch (family task/budget/home, admin-manage). Two of them were re-run on a clean tree and fail the same way (`cookies` was called outside a request scope), so pre-existing; not investigated here.
+- Unit/component: new files all green; `tsc --noEmit` clean; eslint clean on touched files.
+- Integration `tests/integration/auth-emails.test.ts`: 7 / 7 pass on the local stack (real emails read from the local mail catcher).
+- E2E `tests/e2e/auth-emails.spec.ts`: 2 / 2 pass (production build, local stack, port 3100).
+- Regression on the local stack: `auth.spec.ts`, `sign-up.spec.ts`, `auth-hardening.spec.ts`, `admin-mfa.spec.ts`, `admin-staff-panel.spec.ts` pass; `supabase test db` PASS (920 tests) after `supabase migration up --local` (the local database was 13 migrations behind; the first ADM-08 e2e failure and a shifts SQL failure were that, not this feature).
+- Not caused by this feature, seen in the full runs: `tests/integration/shared-dev-seed-data.test.ts` (4; the local database has no seed data loaded) and `admin-edit-shift.test.ts` (2; date-dependent); and 197 failing unit tests in 14 files (family task/budget/home, admin-manage; `cookies` called outside a request scope), 48 of which were re-run on a clean tree and fail the same way. Not investigated.
+- A bug found by the e2e run and fixed test-first: FD-09 above.

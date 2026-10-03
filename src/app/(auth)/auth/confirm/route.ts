@@ -16,10 +16,11 @@ export async function GET(request: NextRequest) {
   const type = searchParams.get("type");
   const code = searchParams.get("code");
 
+  const base = browserOrigin(request);
   const emailType = type === "recovery" || type === "invite" ? type : null;
   const next =
-    sameOriginUrl(searchParams.get("next"), request.url) ??
-    new URL(emailType === "invite" ? SET_PASSWORD_PATH : DEFAULT_NEXT, request.url);
+    sameOriginUrl(searchParams.get("next"), base) ??
+    new URL(emailType === "invite" ? SET_PASSWORD_PATH : DEFAULT_NEXT, base);
 
   if (tokenHash && emailType) {
     const supabase = await createClient();
@@ -31,7 +32,21 @@ export async function GET(request: NextRequest) {
     if (!error) return NextResponse.redirect(next);
   }
 
-  return NextResponse.redirect(new URL("/sign-in?reason=reset-link-expired", request.url));
+  return NextResponse.redirect(new URL("/sign-in?reason=reset-link-expired", base));
+}
+
+/**
+ * The origin the browser used, not `request.url`: Next reports `localhost` there even when the
+ * link was opened on `127.0.0.1`, and the session cookie set here is host-only, so redirecting to
+ * a different host would arrive signed out. Same headers `getOrigin` in `src/server/auth/actions.ts`
+ * trusts; they only ever point a person back at the host they already used.
+ */
+function browserOrigin(request: NextRequest): string {
+  const host = request.headers.get("x-forwarded-host") ?? request.headers.get("host");
+  if (!host) return request.url;
+  const proto =
+    request.headers.get("x-forwarded-proto") ?? new URL(request.url).protocol.replace(":", "");
+  return `${proto}://${host}`;
 }
 
 const DEFAULT_NEXT = "/reset-password";
