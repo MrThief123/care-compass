@@ -28,6 +28,6 @@ Last updated: 2026-10-03
 - 0 / 8 MET
 
 ## Tests
-- Written: 0 / 9
+- Written: 9 / 9 (T-01 to T-09) across pgTAP (`supabase/tests/care_overdue_alert_notifications.test.sql`), unit (`src/server/jobs/care-overdue-alerts-logic.test.ts`, `src/app/api/jobs/care-overdue-alerts/route.test.ts`) and integration (`tests/integration/care-overdue-alerts.test.ts`).
+- Confirmed failing for the expected reason (feature not built): the job, logic and route modules do not resolve; the pgTAP table does not exist (10/10 fail).
 - Passing: 0
-- Failing: 0
