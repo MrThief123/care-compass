@@ -28,3 +28,7 @@ None blocking. OQ-40 was ANSWERED 2026-10-03 (PD-062 in the root `DECISIONS.md`)
 
 ### FD-06 — Reuse and one copy
 - Occurrences come from the pure `buildOccurrences` (F0-11) with rows the job reads under the service role; no second recurrence or status logic. Recipient resolution is a copy of INT-11's (that one is private to its file, INT-11 FD-08); folding the three copies into one helper is a follow-up, not part of this feature.
+
+### FD-07 — Test expectation changed (genuine test bug)
+- Test: `[INT-09][AC-08]` "names the task, the client's full name and the Melbourne due time", `src/server/jobs/care-overdue-alerts-logic.test.ts`.
+- Before: expected `10:00 am on 3 October` for the instant `2026-10-02T23:00:00.000Z`. After: `9:00 am on 3 October`. Reason: Melbourne is AEST (UTC+10) until daylight saving starts at 2 am on 4 October 2026, so 23:00 UTC on the 2nd is 9:00 am on the 3rd; my own comment and expectation were wrong, the code was right. The daylight-saving test beside it (4 October, both sides of the change) is unchanged and passes.

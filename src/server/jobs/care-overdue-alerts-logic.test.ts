@@ -107,11 +107,11 @@ describe("[INT-09][AC-08] overdueAlertMessage (FD-03)", () => {
     const message = overdueAlertMessage({
       title: "Morning medication",
       clientName: "Margaret Wells",
-      start: "2026-10-02T23:00:00.000Z", // 09:00 AEST... 10:00 AEDT on 3 October
+      start: "2026-10-02T23:00:00.000Z", // 09:00 AEST on 3 October (daylight saving starts on the 4th)
     });
     expect(message.subject).toBe("Schedule of Care Program — overdue care");
     expect(message.text).toBe(
-      '"Morning medication" for Margaret Wells was due at 10:00 am on 3 October and has not been marked done. Log in to follow it up.',
+      '"Morning medication" for Margaret Wells was due at 9:00 am on 3 October and has not been marked done. Log in to follow it up.',
     );
   });
 
