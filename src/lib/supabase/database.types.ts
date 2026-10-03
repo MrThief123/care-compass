@@ -503,6 +503,32 @@ export type Database = {
           },
         ];
       };
+      care_overdue_alert_notifications: {
+        Row: {
+          event_id: string;
+          original_start: string;
+          sent_at: string;
+        };
+        Insert: {
+          event_id: string;
+          original_start: string;
+          sent_at?: string;
+        };
+        Update: {
+          event_id?: string;
+          original_start?: string;
+          sent_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "care_overdue_alert_notifications_event_id_fkey";
+            columns: ["event_id"];
+            isOneToOne: false;
+            referencedRelation: "care_events";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       carer_notifications: {
         Row: {
           client_id: string | null;
