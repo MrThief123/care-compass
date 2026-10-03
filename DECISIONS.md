@@ -1116,3 +1116,12 @@ Template for future entries:
 - Impact: ADM-09 keeps 9 criteria (AC-02, AC-06, AC-07, AC-08 reworded to cancel only), so DEVELOPMENT_PLAN totals are unchanged by this entry. Tests removed or changed (HUMAN REVIEW: test expectation changed): see ADM-09 FD-08. The database migration is kept as written, including the reassign and client-change guard, as hardening.
 - Human confirmation: Dhruv Verma, 2026-10-03 (in-session).
 - Docs updated: DECISIONS.md (this entry), the ADM-09 pack, DEVELOPMENT_PLAN.md card, status page.
+
+### CHG-054 — New feature INT-12: cross-role integration journey
+- Date / requested by: 2026-10-03 / Dhruv Verma (human, project lead)
+- Type: new feature (scope addition, test-only)
+- Description: the human asked for one integration feature that tests every main feature in a real browser and proves that a change by Family, Carer or Admin is seen by the other two: calendar, events (create, open, edit), budget (view, Update funds), cost deduction when a task is ticked, organisation change, sign-in, two-factor, carer account creation and shift-based edit rights, admin shifts, Staff and Clients lists agreeing, and password reset. New feature **INT-12** (Lane I, `docs/development/shared/shared-cross-role-integration/`, planned D20–D21, 44 criteria) is a phased Playwright suite under `tests/e2e/int-12/` (phases 0 to 8, worked one at a time). Items the human asked to have appended where missed are listed in INT-12 FD-05. "Seen by" means after in-app navigation, not live push (FD-01: the app has no Realtime). Two-factor is admin-only (FD-03). Defects found are recorded and raised, not fixed inside INT-12 (FD-02).
+- Source / justification: human, in-session 2026-10-03.
+- Impact: DEVELOPMENT_PLAN.md gains the INT-12 row and card (totals 93 to 94 active features, 460 to 504 criteria; next INT number INT-13). INT-08 now also depends on INT-12, so release readiness comes after the full journey is green. INT-12 depends on F0-24 and ADM-11 (not merged on 2026-10-03) plus merged features. No production code, migration or `src/server/**` contract changes. `docs/JIRA_BACKLOG.csv` not updated (predates CHG-047 and later additions).
+- Human confirmation: pending (Dhruv Verma to confirm FD-01, FD-02, FD-05 and the INT-08 dependency before the PR).
+- Docs updated: DECISIONS.md (this entry), DEVELOPMENT_PLAN.md (row, card, totals, next number, INT-08 row and card), the INT-12 pack, status page.

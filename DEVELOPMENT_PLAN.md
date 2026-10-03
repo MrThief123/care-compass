@@ -1,7 +1,7 @@
 # DEVELOPMENT PLAN — Care Compass
 
 Version 0.2 · 17 September 2026 · Status: DRAFT (controlled after planning freeze) · Supersedes v0.1 dashboard-by-dashboard phases
-Totals: **93 active features** (94 listed; CAR-08 retired) · **460 acceptance criteria** across 5 phases (UI-04 and its 10 criteria added by CHG-004, 2026-09-19; UI-05 and its 13 criteria added under CHG-009, 2026-09-24; F0-17 and its 8 criteria added by CHG-010, 2026-09-24; CHG-020, 2026-09-25: FAM-UI-08 (6 criteria) and ADM-11 (5) added, FAM-UI-05 +5 criteria, CAR-08 and its 2 criteria retired; CHG-021, 2026-09-25: FAM-UI-05 +4 criteria; CHG-022, 2026-09-25: FAM-UI-05 +5 criteria; CHG-027, 2026-09-26: F0-18 and its 9 criteria added; CHG-037, 2026-09-30: F0-19 and its 6 criteria added; CHG-040, 2026-09-30: F0-20 and its 10 criteria added; CHG-041, 2026-10-01: F0-21 and its 6 criteria added; CHG-042, 2026-10-01: F0-22 and its 8 criteria added; CHG-045, 2026-10-02: F0-23 and its 8 criteria added; CHG-047, 2026-10-02: F0-24 (7 criteria) and INT-09 (5 criteria) added, every remaining post-sprint feature pulled into the sprint, sprint extended to D21; CHG-050, 2026-10-02: INT-10 and its 4 criteria added (PL-26 promoted); CHG-051, 2026-10-02: FAM-16 and its 11 criteria added (PL-27 promoted); CHG-052, 2026-10-02: INT-11 and its 8 criteria added (PL-25 promoted); ADM-09, 2026-10-03: 1 criterion grown to 9 (+8, FD-05); the Jira import `docs/JIRA_BACKLOG.csv` predates all eight). Jira import: `docs/JIRA_BACKLOG.csv`.
+Totals: **94 active features** (95 listed; CAR-08 retired) · **504 acceptance criteria** across 5 phases (UI-04 and its 10 criteria added by CHG-004, 2026-09-19; UI-05 and its 13 criteria added under CHG-009, 2026-09-24; F0-17 and its 8 criteria added by CHG-010, 2026-09-24; CHG-020, 2026-09-25: FAM-UI-08 (6 criteria) and ADM-11 (5) added, FAM-UI-05 +5 criteria, CAR-08 and its 2 criteria retired; CHG-021, 2026-09-25: FAM-UI-05 +4 criteria; CHG-022, 2026-09-25: FAM-UI-05 +5 criteria; CHG-027, 2026-09-26: F0-18 and its 9 criteria added; CHG-037, 2026-09-30: F0-19 and its 6 criteria added; CHG-040, 2026-09-30: F0-20 and its 10 criteria added; CHG-041, 2026-10-01: F0-21 and its 6 criteria added; CHG-042, 2026-10-01: F0-22 and its 8 criteria added; CHG-045, 2026-10-02: F0-23 and its 8 criteria added; CHG-047, 2026-10-02: F0-24 (7 criteria) and INT-09 (5 criteria) added, every remaining post-sprint feature pulled into the sprint, sprint extended to D21; CHG-050, 2026-10-02: INT-10 and its 4 criteria added (PL-26 promoted); CHG-051, 2026-10-02: FAM-16 and its 11 criteria added (PL-27 promoted); CHG-052, 2026-10-02: INT-11 and its 8 criteria added (PL-25 promoted); ADM-09, 2026-10-03: 1 criterion grown to 9 (+8, FD-05); CHG-054, 2026-10-03: INT-12 and its 44 criteria added; the Jira import `docs/JIRA_BACKLOG.csv` predates all eight). Jira import: `docs/JIRA_BACKLOG.csv`.
 
 ---
 
@@ -212,10 +212,11 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 | 5 | INT-05 | Access-control regression matrix | I | D12–D13 | STRETCH | FAM-15, CAR-06, ADM-07 | OQ-01 | `feature/shared-access-control-regression` | NOT STARTED |
 | 6 | INT-06 | Accessibility verification across dashboards | I | D20 | SPRINT | FAM-15, CAR-09, ADM-10 | OQ-01 | `feature/shared-accessibility-verification` | NOT STARTED |
 | 7 | INT-07 | Scale and performance verification | I | D19 | SPRINT | FAM-14, ADM-01 | OQ-01 | `feature/shared-calendar-scale-performance` | NOT STARTED |
-| 8 | INT-08 | Release readiness and client handover | I | D21 | SPRINT | INT-02, INT-03, INT-04, INT-05, INT-06, INT-07, F0-24, INT-09, FAM-11, CAR-07, ADM-03, ADM-05, ADM-08, ADM-09, ADM-11 | OQ-01, OQ-17 | `feature/shared-release-readiness-handover` | NOT STARTED |
+| 8 | INT-08 | Release readiness and client handover | I | D21 | SPRINT | INT-02, INT-03, INT-04, INT-05, INT-06, INT-07, F0-24, INT-09, FAM-11, CAR-07, ADM-03, ADM-05, ADM-08, ADM-09, ADM-11, INT-12 | OQ-01, OQ-17 | `feature/shared-release-readiness-handover` | NOT STARTED |
 | 9 | INT-09 | Overdue and upcoming care alert emails | B | D17–D18 | SPRINT | INT-01, F0-11, F0-24 | OQ-40 | `feature/shared-care-alert-emails` | NOT STARTED |
 | 10 | INT-10 | Budget threshold email names the bucket | B | D18 | SPRINT | INT-01 | — | `feature/shared-budget-threshold-email-bucket-name` | READY FOR PR |
 | 11 | INT-11 | Pending-cost email | B | D19 | SPRINT | INT-01, F0-11, F0-12 | — | `feature/shared-pending-cost-email` | IN PROGRESS |
+| 12 | INT-12 | Cross-role integration journey | I | D20–D21 | SPRINT | F0-17, F0-18, F0-20, F0-24, FAM-04, FAM-06, FAM-07, FAM-08, FAM-09, FAM-10, FAM-11, FAM-12, FAM-13, FAM-15, CAR-02, CAR-03, CAR-04, CAR-05, CAR-06, CAR-07, CAR-09, ADM-01, ADM-02, ADM-03, ADM-05, ADM-07, ADM-08, ADM-09, ADM-11, INT-01, INT-10, INT-11 | — | `feature/shared-cross-role-integration` | NOT STARTED |
 
 
 ---
@@ -1291,7 +1292,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Dashboard / stream:** shared · **Lane:** I · **Days:** D21 · **Sprint:** SPRINT · **PR target:** `main (per OQ-01 — shared work)` · **Branch:** `feature/shared-release-readiness-handover`
 - **Description:** Prepares the application and documentation for release to main and handover to a non-technical client.
 - **User value:** The client can keep using and extending the system after the team leaves (NFR-9, CM-0309).
-- **Dependencies:** INT-02, INT-03, INT-04, INT-05, INT-06, INT-07, F0-24, INT-09, FAM-11, CAR-07, ADM-03, ADM-05, ADM-08, ADM-09, ADM-11 (CHG-047: last, so it covers the final state) · **Blocking decisions:** OQ-01, OQ-17
+- **Dependencies:** INT-02, INT-03, INT-04, INT-05, INT-06, INT-07, F0-24, INT-09, FAM-11, CAR-07, ADM-03, ADM-05, ADM-08, ADM-09, ADM-11, INT-12 (CHG-047: last, so it covers the final state; INT-12 added by CHG-054) · **Blocking decisions:** OQ-01, OQ-17
 - **Jira summary:** Deployment runbook, environment and backup plan, plain-English user guide, glossary and handover pack
 - **Acceptance criteria summary:** 2 criteria — every technical term used appears in the glossary; the app deploys and a backup restore succeeds
 - **Testing summary:** 2 review
@@ -1332,13 +1333,24 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Requirements:** REQ-31 (PL-26 promoted)
 - **Docs:** `docs/development/shared/shared-budget-threshold-email-bucket-name/` · **Status:** See PROGRESS.md
 
+### INT-12 — Cross-role integration journey
+- **Dashboard / stream:** shared · **Lane:** I · **Days:** D20–D21 · **Sprint:** SPRINT · **PR target:** `main` · **Branch:** `feature/shared-cross-role-integration`
+- **Description:** One phased Playwright suite (`tests/e2e/int-12/`, `npm run test:journey`) on a local Supabase stack that checks every main feature in a real browser and that a change by any of Family, Carer or Admin is seen by the other two. Phases, worked one at a time: 0 harness; 1 sign-up, sign-in, admin TOTP, carer invite, password reset; 2 Family calendar, events, documents, budget, settings; 3 Family → Admin and Carer; 4 Admin → Family and Carer (shifts, events, ticks, top-ups, cancel, deactivate, remove client, lists agree); 5 Carer → Family and Admin (own clients only, no edits off shift, costs deducted once, pending costs); 6 organisation change; 7 budget emails; 8 three green runs, Chrome walkthrough, defects raised. Defects are recorded and raised, not fixed here. Added by CHG-054.
+- **User value:** Proves the core loop (schedule → deliver → record → pay) works across all three dashboards before release.
+- **Dependencies:** F0-17, F0-18, F0-20, F0-24, FAM-04, FAM-06, FAM-07, FAM-08, FAM-09, FAM-10, FAM-11, FAM-12, FAM-13, FAM-15, CAR-02, CAR-03, CAR-04, CAR-05, CAR-06, CAR-07, CAR-09, ADM-01, ADM-02, ADM-03, ADM-05, ADM-07, ADM-08, ADM-09, ADM-11, INT-01, INT-10, INT-11 · **Blocking decisions:** None
+- **Jira summary:** Phased cross-role e2e suite covering every main feature and Family/Carer/Admin data sync
+- **Acceptance criteria summary:** 44 criteria in 9 phases — local-only harness with clean-up; sign-up, admin 2FA, carer invite, reset for all roles; Family calendar, events, documents, budget, settings; each role's changes seen by the other two; costs deducted once and pending costs paid; shift cancel, carer deactivation and client removal; organisation change keeps history; budget emails to the right people once; three green runs and a recorded Chrome walkthrough
+- **Testing summary:** 42 e2e, 2 review
+- **Requirements:** REQ-04, REQ-17, REQ-18, REQ-19, REQ-23, REQ-24, REQ-25, REQ-26, REQ-28, REQ-31, REQ-32, REQ-37, REQ-N4, REQ-N5, REQ-N6
+- **Docs:** `docs/development/shared/shared-cross-role-integration/` · **Status:** See PROGRESS.md
+
 ---
 
 ## 6. Parking lot (not scheduled)
 See PRD.md §17. Promotion requires a CHG entry, human confirmation, and new feature docs from `docs/templates/FEATURE_TEMPLATE/`.
 
 ## 7. Adding a new feature
-1. Propose ID (next number: `FAM-17`, `FAM-UI-09`, `CAR-10`, `ADM-12`, `UI-04`, `INT-12`, `F0-18`), slug `<stream>-<name>`, lane and planned day.
+1. Propose ID (next number: `FAM-17`, `FAM-UI-09`, `CAR-10`, `ADM-12`, `UI-04`, `INT-13`, `F0-18`), slug `<stream>-<name>`, lane and planned day.
 2. Record CHG-xxx in DECISIONS.md; get human confirmation if material.
 3. Copy `docs/templates/FEATURE_TEMPLATE/` to `docs/development/<stream>/<slug>/` and complete it.
 4. Add the row to §4 and a card to §5; add to `docs/JIRA_BACKLOG.csv`; update root PROGRESS.md.
