@@ -1,20 +1,20 @@
 # Progress — INT-06 Accessibility verification across dashboards
 
-Status: NOT STARTED
-Owner: unclaimed
+Status: IN PROGRESS
+Owner: Kav1sh-11
 Lane: I — Integration
-Sprint: POST-SPRINT · planned —
-Branch: `feature/shared-accessibility-verification` (not yet created)
+Sprint: SPRINT · planned D20
+Branch: `feature/shared-accessibility-verification`
 PR target: `main (per OQ-01 — shared work)`
-Last updated: 2026-09-17 (planning pack generated)
+Last updated: 2026-10-03
 
 ## Blockers
-- OQ-01 — Branch parent and naming for shared (foundation and cross-cutting) work
+- None. OQ-01 answered in root DECISIONS.md.
 
 ## Dependencies status
-- FAM-15 — NOT STARTED
-- CAR-09 — NOT STARTED
-- ADM-10 — NOT STARTED
+- FAM-15 — MERGED TO DEV
+- CAR-09 — MERGED TO DEV
+- ADM-10 — MERGED TO DEV
 
 ## Completed
 - Feature documentation drafted (Claude Chat planning pack)
@@ -48,7 +48,7 @@ Last updated: 2026-09-17 (planning pack generated)
 - PROPOSED items in PRD.md are unconfirmed until validated in F0-01 or answered in DECISIONS.md.
 
 ## Next action
-- Wait for answers to OQ-01; then complete dependencies, run START FEATURE INT-06, and write the tests in TEST_PLAN.md first.
+- Claim branch, then write the route audit and keyboard journey tests.
 
 ## Ready for PR
 - No
