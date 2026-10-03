@@ -1,7 +1,7 @@
 import { FamilyHomeView } from "@/features/family-home/family-home-view";
 import { loadFamilyHomeData, type FamilyHomeData } from "@/features/family-home/home-data";
 import { HomeErrorState } from "@/features/family-home/home-error-state";
-import { assertClientAccess } from "@/server/clients/queries";
+import { assertClientAccess, getClientHeaderSummary } from "@/server/clients/queries";
 
 export default async function FamilyHomePage({
   params,
@@ -29,5 +29,22 @@ export default async function FamilyHomePage({
     return <HomeErrorState />;
   }
 
-  return <FamilyHomeView clientId={clientId} data={data} today={new Date()} />;
+  // ADM-05: the removed-organisation banner. A failed header read must not stop Home rendering.
+  let removedFor: string | undefined;
+  try {
+    const header = await getClientHeaderSummary(clientId);
+    if (header.organisationRemoved) removedFor = header.firstName;
+  } catch {
+    // Home still renders, without the banner.
+  }
+
+  return (
+    <FamilyHomeView
+      clientId={clientId}
+      data={data}
+      today={new Date()}
+      organisationRemoved={removedFor !== undefined}
+      clientFirstName={removedFor}
+    />
+  );
 }

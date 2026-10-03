@@ -18,6 +18,7 @@ import { requestOwnPasswordReset, updateFamilyContactDetails } from "@/server/pr
 import type { FamilyContactDetails } from "@/server/profiles/queries";
 
 import { OrganisationChoices } from "./organisation-choices";
+import { OrganisationRemovedBanner } from "./organisation-removed-banner";
 import { familyInfoSchema, type FamilyInfoValues } from "./settings-schema";
 
 export interface FamilySettingsViewProps {
@@ -189,6 +190,9 @@ export function FamilySettingsView({
     isCurrent: current.id !== undefined ? organisation.id === current.id : organisation.isCurrent,
   }));
   const canChange = choices.some((organisation) => !organisation.isCurrent);
+  // ADM-05: removed by the organisation and not yet moved; the banner goes once a change succeeds.
+  const removed = header.organisationRemoved === true && current.id === undefined;
+  const chosen = choices.find((organisation) => organisation.id === chosenId);
 
   function openPicker() {
     setMessage("");
@@ -246,7 +250,18 @@ export function FamilySettingsView({
       {/* The kit cards title with h3; this keeps the heading order unbroken (FD-08). */}
       <h2 className="sr-only">Your account and organisation</h2>
 
-      {organisationName && canChange ? (
+      {removed ? (
+        <CardShell className="flex flex-col gap-3 p-5">
+          <h3 className="text-title-card text-text-primary">Change organisation</h3>
+          <p className="text-body-default text-text-secondary">
+            Not registered with an organisation.
+          </p>
+          <OrganisationRemovedBanner
+            clientFirstName={firstName}
+            action={<Button onClick={openPicker}>Choose organisation</Button>}
+          />
+        </CardShell>
+      ) : organisationName && canChange ? (
         <SettingsActionCard
           title="Change organisation"
           description={`Currently registered with ${organisationName}.`}
@@ -342,7 +357,11 @@ export function FamilySettingsView({
         open={confirmOpen}
         tone="destructive"
         title="Change organisation?"
-        body={`Switching ${firstName}'s care to a new organisation keeps her routines, events, budget, documents and history. Assigned nurses and all future shifts will be cleared, and ${organisationName} will lose access immediately. This can't be undone from your side.`}
+        body={
+          removed
+            ? `Choosing ${chosen?.name ?? "this organisation"} gives them access to ${firstName}'s routines, events, budget, documents and history. You can change organisation later in Settings.`
+            : `Switching ${firstName}'s care to a new organisation keeps her routines, events, budget, documents and history. Assigned nurses and all future shifts will be cleared, and ${organisationName} will lose access immediately. This can't be undone from your side.`
+        }
         confirmLabel="Change organisation"
         onCancel={() => setConfirmOpen(false)}
         onConfirm={changeOrganisation}

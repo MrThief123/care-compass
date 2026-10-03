@@ -24,7 +24,14 @@ const SECTIONS: ReadonlyArray<{ kind: ClientInfoSectionKind; key: string; title:
   { kind: "medicalHistory", key: "medical_history", title: "Medical history" },
 ];
 
-export type { ClientHeaderSummary, OrganisationChoice } from "@/mocks/queries/clients";
+export type { OrganisationChoice } from "@/mocks/queries/clients";
+
+/**
+ * The header summary, plus `organisationRemoved` (ADM-05): true when an organisation admin removed
+ * the client and the family has not chosen a new organisation yet. Extended here, not in
+ * `src/mocks`, so the mock fixture type stays as Lane S left it; the mock never sets it.
+ */
+export type ClientHeaderSummary = mock.ClientHeaderSummary & { organisationRemoved?: boolean };
 
 /**
  * The header every Family page opens with (F0-22): first and last name, age in
@@ -36,7 +43,7 @@ export type { ClientHeaderSummary, OrganisationChoice } from "@/mocks/queries/cl
  * members cannot read `organisations`, F0-22 FD-01); if that fails the header
  * is returned without it.
  */
-export async function getClientHeaderSummary(clientId: string): Promise<mock.ClientHeaderSummary> {
+export async function getClientHeaderSummary(clientId: string): Promise<ClientHeaderSummary> {
   const mode = getDataSourceMode();
   if (mode === "mock") {
     return mock.getClientHeaderSummary(clientId);
@@ -50,7 +57,9 @@ export async function getClientHeaderSummary(clientId: string): Promise<mock.Cli
   const supabase = await createClient();
   const { data: row, error } = await supabase
     .from("clients")
-    .select("id, first_name, last_name, date_of_birth, suburb, organisation_id")
+    .select(
+      "id, first_name, last_name, date_of_birth, suburb, organisation_id, organisation_removed_at",
+    )
     .eq("id", clientId)
     .maybeSingle();
   if (error || !row) throw failed();
@@ -73,6 +82,8 @@ export async function getClientHeaderSummary(clientId: string): Promise<mock.Cli
     ...(row.date_of_birth ? { age: ageFromDob(row.date_of_birth) } : {}),
     ...(row.suburb ? { suburb: row.suburb } : {}),
     ...(organisationName ? { organisationName } : {}),
+    // A client that signed up with no organisation has no marker, so it is not "removed".
+    ...(!row.organisation_id && row.organisation_removed_at ? { organisationRemoved: true } : {}),
   };
 }
 

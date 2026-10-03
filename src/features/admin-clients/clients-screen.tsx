@@ -7,6 +7,7 @@ import { DataTable } from "@/components/shared/lists/data-table";
 import { EmptyState } from "@/components/shared/states";
 import { Button } from "@/components/ui/button";
 import { CardShell } from "@/components/ui/card-shell";
+import { removeClient } from "@/server/admin/clients-actions";
 
 export interface ClientRow {
   id: string;
@@ -14,29 +15,50 @@ export interface ClientRow {
   familyContact: string;
 }
 
+const REMOVE_FAILED_MESSAGE = "Couldn't remove this client. Try again.";
+
 /**
  * ADM-04 (CHG-035): list only. The Add-client panel PD-037 rejected (a client is created by its
- * family, never by admin) is removed here, not merely left unwired — ADM-UI-04 built it before
- * PD-037/CHG-010 were decided. Remove stays exactly as ADM-UI-04 drew it: a local-state-only preview
- * (no server call); wiring it for real is ADM-05's separate, still-unstarted feature.
+ * family, never by admin) is removed here, not merely left unwired.
+ * ADM-05: Remove calls `removeClient`, which detaches the client from the organisation and keeps
+ * everything the family owns. The row leaves only once the action succeeds.
  */
 export function ClientsScreen({ data }: { data: { clients: ClientRow[] } }) {
   const [clients, setClients] = useState(() => data.clients.map((client) => ({ ...client })));
   const [notice, setNotice] = useState("");
+  const [failure, setFailure] = useState("");
   const listHeading = useRef<HTMLHeadingElement>(null);
   const [pendingRemoval, setPendingRemoval] = useState<ClientRow | null>(null);
   const restoreListFocus = useRef(false);
+  const removing = useRef(false);
   useEffect(() => {
     if (pendingRemoval === null && restoreListFocus.current) {
       restoreListFocus.current = false;
       listHeading.current?.focus();
     }
   }, [pendingRemoval]);
-  function confirmRemoval() {
-    if (!pendingRemoval) return;
-    setClients((current) => current.filter((client) => client.id !== pendingRemoval.id));
-    setNotice(pendingRemoval.name + " removed. Changes reset when you reload.");
-    restoreListFocus.current = true;
+  async function confirmRemoval() {
+    if (!pendingRemoval || removing.current) return;
+    removing.current = true;
+    const target = pendingRemoval;
+    setNotice("");
+    setFailure("");
+    let message = "";
+    try {
+      const result = await removeClient(target.id);
+      if (!result.ok) message = result.error.message || REMOVE_FAILED_MESSAGE;
+    } catch {
+      message = REMOVE_FAILED_MESSAGE;
+    } finally {
+      removing.current = false;
+    }
+    if (message) {
+      setFailure(message);
+    } else {
+      setClients((current) => current.filter((client) => client.id !== target.id));
+      setNotice(target.name + " removed.");
+      restoreListFocus.current = true;
+    }
     setPendingRemoval(null);
   }
   return (
@@ -102,15 +124,30 @@ export function ClientsScreen({ data }: { data: { clients: ClientRow[] } }) {
         <p role="status" className="text-body-small text-text-secondary">
           {notice}
         </p>
+        {failure ? (
+          <p role="alert" className="text-body-small text-text-alert-strong">
+            {failure}
+          </p>
+        ) : null}
       </CardShell>
       <ConfirmationModal
         open={pendingRemoval !== null}
         title="Remove client?"
-        body={<>Are you sure you want to remove {pendingRemoval?.name}?</>}
+        body={
+          <>
+            <p className="[overflow-wrap:anywhere]">
+              Are you sure you want to remove {pendingRemoval?.name}?
+            </p>
+            <p className="mt-2">
+              Your staff will lose access to this client. The family keeps all of their records and
+              will be asked to choose a new organisation.
+            </p>
+          </>
+        }
         confirmLabel="Yes, remove"
         cancelLabel="Cancel"
         tone="destructive"
-        onConfirm={confirmRemoval}
+        onConfirm={() => void confirmRemoval()}
         onCancel={() => setPendingRemoval(null)}
       />
     </div>

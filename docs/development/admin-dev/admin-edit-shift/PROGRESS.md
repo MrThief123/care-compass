@@ -1,6 +1,6 @@
 # Progress — ADM-09 Admin — Edit, extend or cancel a shift
 
-Status: IN REVIEW (PR #212)
+Status: MERGED TO DEV (merged to `main` in #212, 2026-10-02)
 Owner: Dhruv Verma
 Lane: A — Admin
 Sprint: SPRINT · planned D17

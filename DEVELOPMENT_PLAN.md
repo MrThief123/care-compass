@@ -1134,11 +1134,11 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Description:** Implements the Remove link on the Admin client list.
 - **User value:** Organisations can stop serving a client cleanly.
 - **Dependencies:** ADM-04 · **Blocking decisions:** OQ-06, OQ-07, OQ-19
-- **Jira summary:** 'Remove' a client from the organisation without losing the client's records (semantics undecided)
-- **Acceptance criteria summary:** 2 criteria — zero rows are returned; all events are returned
-- **Testing summary:** 2 db
+- **Jira summary:** 'Remove' a client from the organisation without losing the client's records (detach, PD-036)
+- **Acceptance criteria summary:** 10 criteria — zero rows for the organisation and all events for the family (AC-01, AC-02); the client is kept, future shifts cancelled and the running one ended; refused for anyone but the client's admin at AAL2; confirmation and error handling; the family header reports the removal; Family Settings and Home banners with Choose organisation (no notification system, FD-04)
+- **Testing summary:** 5 db (one pgTAP file), 1 unit, 3 component, 1 integration
 - **Requirements:** REQ-04, REQ-N6
-- **Docs:** `docs/development/admin-dev/admin-client-remove/` · **Status:** NOT STARTED
+- **Docs:** `docs/development/admin-dev/admin-client-remove/` · **Status:** IN PROGRESS
 
 ### ADM-06 — Admin — Manage: staff and client selection
 - **Dashboard / stream:** admin · **Lane:** A · **Days:** D9 · **Sprint:** SPRINT · **PR target:** `main` · **Branch:** `feature/admin-manage-selection`
