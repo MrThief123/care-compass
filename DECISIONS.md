@@ -1116,3 +1116,12 @@ Template for future entries:
 - Impact: ADM-09 keeps 9 criteria (AC-02, AC-06, AC-07, AC-08 reworded to cancel only), so DEVELOPMENT_PLAN totals are unchanged by this entry. Tests removed or changed (HUMAN REVIEW: test expectation changed): see ADM-09 FD-08. The database migration is kept as written, including the reassign and client-change guard, as hardening.
 - Human confirmation: Dhruv Verma, 2026-10-03 (in-session).
 - Docs updated: DECISIONS.md (this entry), the ADM-09 pack, DEVELOPMENT_PLAN.md card, status page.
+
+### CHG-054 — CI security audit checks production dependencies only
+- Date / requested by: 2026-10-03 / Dhruv Verma (human, project lead)
+- Type: CI policy change (no feature scope change)
+- Description: on 2026-10-03 `npm audit --audit-level=high` began failing on `main` for GHSA-vfj7-8cjw-p6xm (`braces` stack-exhaustion DoS, versions up to and including 3.0.3, no patched release). It reaches the project only through the dev tooling chain `eslint-config-next` → `@next/eslint-plugin-next` → `fast-glob` → `micromatch` → `braces`. `npm audit fix --force` would downgrade `eslint-config-next` to 14.2.35, which does not work with Next 16. The audit step now runs `npm audit --omit=dev --audit-level=high`, so production dependencies are still gated at high severity (0 found today) and dev-only advisories no longer block merges.
+- Source / justification: human, in-session 2026-10-03: chose "audit production dependencies only" over an advisory allowlist or waiting for a patch.
+- Impact: `.github/workflows/ci.yaml` only. Dev-only advisories are no longer reported by CI; review them with a local `npm audit` when upgrading tooling. Revisit when `braces` publishes a fix.
+- Human confirmation: Dhruv Verma, 2026-10-03 (in-session).
+- Docs updated: DECISIONS.md (this entry).
