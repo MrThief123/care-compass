@@ -4,7 +4,7 @@
 -- admin), client information, documents and the budget, each naming the admin; another organisation's
 -- admin and an admin below AAL2 are refused everywhere.
 begin;
-select plan(31);
+select plan(29);
 
 insert into organisations (id, name) values
   ('11111111-1111-1111-1111-111111111111', 'Banksia Home Care'),
@@ -77,23 +77,21 @@ select lives_ok(
   $$ insert into care_event_overrides (event_id, original_start, kind, created_by) values ('e1111111-1111-1111-1111-111111111111', '2026-12-07 09:00:00+11', 'cancelled', 'a2222222-2222-2222-2222-222222222222') $$,
   '[ADM-11][AC-04] Priya can change one occurrence of a series');
 
-select lives_ok(
+-- carer_only_tick_off: only the carer on shift marks a task done, so neither Priya nor Helen can.
+select throws_ok(
   $$ select set_occurrence_done('e1111111-1111-1111-1111-111111111111', '2026-11-30 09:00:00+11') $$,
-  '[ADM-11][AC-04] Priya can mark a task done');
-select is(
-  (select actor_display_name from care_event_completions where event_id = 'e1111111-1111-1111-1111-111111111111' and original_start = '2026-11-30 09:00:00+11' and action = 'done'),
-  'Priya Nair',
-  '[ADM-11][AC-04] and the Care log reads "Done by Priya Nair"');
-select lives_ok(
-  $$ select set_occurrence_undone('e1111111-1111-1111-1111-111111111111', '2026-11-30 09:00:00+11') $$,
-  '[ADM-11][AC-04] Priya can undo her own tick');
+  '42501', null, '[ADM-11][AC-04] Priya cannot mark a task done: only the carer on shift can');
 
 reset role;
 select pg_temp.login('a1111111-1111-1111-1111-111111111111');
-select lives_ok(
+select throws_ok(
   $$ select set_occurrence_done('e1111111-1111-1111-1111-111111111111', '2026-12-14 09:00:00+11') $$,
-  '[ADM-11][AC-04] Helen ticks another occurrence');
+  '42501', null, '[ADM-11][AC-04] Helen cannot mark a task done either');
+
+-- A carer's tick, written as the table owner (this file has no carer on shift).
 reset role;
+insert into care_event_completions (event_id, client_id, original_start, action, actor_id, actor_display_name)
+  values ('e1111111-1111-1111-1111-111111111111', 'b1111111-1111-1111-1111-111111111111', '2026-12-14 09:00:00+11', 'done', 'a1111111-1111-1111-1111-111111111111', 'A Carer');
 select pg_temp.login('a2222222-2222-2222-2222-222222222222');
 select lives_ok(
   $$ select set_occurrence_undone('e1111111-1111-1111-1111-111111111111', '2026-12-14 09:00:00+11') $$,

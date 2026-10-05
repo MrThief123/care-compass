@@ -357,11 +357,12 @@ describe("[CAR-06][AC-07] carers never get the family-only controls", () => {
 describe("[CAR-06][AC-08] the Family screens are unchanged", () => {
   const FAMILY_USER = { firstName: "Helen", lastName: "Doyle" };
 
-  it("[CAR-06][AC-08] T-08 the Family Calendar keeps its /family links, Enter event and tick boxes", async () => {
+  it("[CAR-06][AC-08] T-08 the Family Calendar keeps its /family links and Enter event, and has no tick boxes", async () => {
     mocks.getCurrentUser.mockResolvedValue(FAMILY_USER);
     const { container } = render(await FamilyCalendarPage(withSearch(MARGARET)));
 
-    expect(within(tasksPanel()).getByLabelText("Physiotherapy")).toBeEnabled();
+    // HUMAN REVIEW: test expectation changed (carer_only_tick_off). Was a tick box for Physiotherapy.
+    expect(within(tasksPanel()).queryByRole("checkbox")).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Enter event" })).toHaveAttribute(
       "href",
       expect.stringMatching(new RegExp(`^/family/${MARGARET}/events/new`)),

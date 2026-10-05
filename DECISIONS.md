@@ -1147,3 +1147,11 @@ Template for future entries:
 - Impact: DEVELOPMENT_PLAN.md gains the INT-12 row and card (totals 93 to 94 active features, 460 to 505 criteria; next INT number INT-13). INT-08 now also depends on INT-12, so release readiness comes after the full journey is green. INT-12 depends on F0-24 and ADM-11 (not merged on 2026-10-03) plus merged features. No production code, migration or `src/server/**` contract changes. `docs/JIRA_BACKLOG.csv` not updated (predates CHG-047 and later additions).
 - Human confirmation: pending (Dhruv Verma to confirm FD-01, FD-02, FD-05 and the INT-08 dependency before the PR).
 - Docs updated: DECISIONS.md (this entry), DEVELOPMENT_PLAN.md (row, card, totals, next number, INT-08 row and card), the INT-12 pack, status page.
+
+### CHG-056 — Only the carer on shift ticks a task Done
+- Date / requested by: 2026-10-05 / the human owner (in-session)
+- Type: behaviour change (supersedes the "family at any time" part of OQ-09 for ticking Done, and ADM-11 FD-01 / PD-058 for ticking)
+- Description: a tick says care was delivered, so only the carer on an active shift for the client can set it. The Family calendar (and the Admin client calendar) list each task with its status and no tick boxes. `set_occurrence_done` refuses anyone else with 42501 (migration `20261005105808_carer_only_tick_off.sql`). Undo is unchanged: the family or an admin can still undo a tick (OQ-10), though no screen offers it to them now.
+- Impact: FAM-05's tick criteria now apply to the carer's calendar (CAR-06). Tests changed (HUMAN REVIEW: test expectation changed): `care_events`, `budget` and `admin_client_view` database tests tick as the carer on shift and expect the family and an admin to be refused; `family-calendar.test.tsx` renders the view with `canTick`; CAR-06 T-08 expects no tick boxes on the Family calendar.
+- Human confirmation: the human owner, 2026-10-05 (in-session request: "the family should not be able to tick off a task, only the carer").
+- Docs updated: DECISIONS.md (this entry). The FAM-05 and CAR-06 packs are not edited here.

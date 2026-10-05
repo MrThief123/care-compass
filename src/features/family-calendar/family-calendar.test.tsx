@@ -1,6 +1,7 @@
 import { act, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { axe } from "jest-axe";
+import { cloneElement } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import CalendarError from "@/app/(family)/family/[clientId]/calendar/error";
@@ -122,12 +123,20 @@ function taskLog(items: Occurrence[]): TaskLogResult {
   return { items, page: 1, pageSize: 20, total: items.length };
 }
 
-async function renderCalendar(search: Record<string, string> = {}) {
-  const ui = await FamilyCalendarPage({
+async function calendarPage(search: Record<string, string> = {}) {
+  return FamilyCalendarPage({
     params: Promise.resolve({ clientId: CLIENT_ID }),
     searchParams: Promise.resolve(search),
   });
-  return render(ui);
+}
+
+/**
+ * The calendar as the person who can tick sees it. Only a carer on shift ticks (carer_only_tick_off),
+ * and the carer's page passes `canTick`; the Family page does not, so these tests turn it on here.
+ * The tests named for Helen test the tick behaviour of the shared view, not who may tick.
+ */
+async function renderCalendar(search: Record<string, string> = {}) {
+  return render(cloneElement(await calendarPage(search), { canTick: true }));
 }
 
 function tasksPanel() {
@@ -914,5 +923,14 @@ describe("who is caring, on the grids", () => {
 
     expect(screen.getAllByText(/Aisha Rahman on duty/).length).toBeGreaterThan(0);
     expect(within(tasksPanel()).queryByText(/on duty/)).not.toBeInTheDocument();
+  });
+});
+
+describe("only the carer on shift ticks", () => {
+  it("the Family calendar has no tick boxes and still lists each task with its status", async () => {
+    render(await calendarPage());
+
+    expect(within(tasksPanel()).queryByRole("checkbox")).not.toBeInTheDocument();
+    expect(within(tasksPanel()).getByText("Physiotherapy")).toBeInTheDocument();
   });
 });

@@ -48,7 +48,7 @@ export interface FamilyCalendarViewProps {
   actorName: string;
   /** Where the links go; defaults to `/family/<id>`. A carer's Calendar sets it (CHG-043). */
   basePath?: string;
-  /** False: the Tasks panel lists each task's status with no tick boxes (carer off shift). */
+  /** True only for a carer on shift (CHG-056): otherwise the Tasks panel lists each status with no tick boxes. */
   canTick?: boolean;
   /** False: no Enter event link (carers, CHG-043). */
   canAddEvent?: boolean;
@@ -72,7 +72,7 @@ export function FamilyCalendarView({
   shifts = [],
   actorName,
   basePath,
-  canTick = true,
+  canTick = false,
   canAddEvent = true,
 }: FamilyCalendarViewProps) {
   const router = useRouter();

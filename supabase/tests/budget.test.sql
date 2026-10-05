@@ -196,7 +196,7 @@ select is((select count(*) from budget_fund_entries where bucket_id = pg_temp.bi
 -- ---------------------------------------------------------------------------
 reset role;
 update care_events set cost = 40, bucket_id = pg_temp.bid(10) where id = 'e1111111-1111-1111-1111-111111111111';
-select pg_temp.login('a1111111-1111-1111-1111-111111111111');
+select pg_temp.login('a3333333-3333-3333-3333-333333333333'); -- only the carer on shift ticks (carer_only_tick_off)
 
 select lives_ok($$ select set_occurrence_done('e1111111-1111-1111-1111-111111111111', '2026-11-30 09:00:00+11') $$,
   '[F0-12][AC-07] completing a costed occurrence works');
@@ -239,9 +239,10 @@ select is((select pending_count from budget_bucket_summary('b1111111-1111-1111-1
 select is((select threshold_state from budget_bucket_summary('b1111111-1111-1111-1111-111111111111') where name = 'ev'), 'depleted',
   '[F0-12][AC-08] a bucket with a pending cost is depleted');
 
-reset role;
-update care_events set cost = 5 where id = 'e1111111-1111-1111-1111-111111111111';
+-- The family sets the new cost (a cost change is guarded by who the caller is), then the carer ticks.
 select pg_temp.login('a1111111-1111-1111-1111-111111111111');
+update care_events set cost = 5 where id = 'e1111111-1111-1111-1111-111111111111';
+select pg_temp.login('a3333333-3333-3333-3333-333333333333'); -- only the carer on shift ticks (carer_only_tick_off)
 select lives_ok($$ select set_occurrence_done('e1111111-1111-1111-1111-111111111111', '2026-12-21 09:00:00+11') $$,
   '[F0-12][AC-08] a later, smaller cost completes');
 select is((select status from budget_costs where event_id = 'e1111111-1111-1111-1111-111111111111' and original_start = '2026-12-21 09:00:00+11'), 'pending',
@@ -250,6 +251,8 @@ select is((select amount from budget_costs where event_id = 'e1111111-1111-1111-
   '[F0-12][AC-08] the earlier cost keeps its $40: a change to the event applies to future completions only');
 select is((select pending_count from budget_bucket_summary('b1111111-1111-1111-1111-111111111111') where name = 'ev'), 2::bigint,
   '[F0-12][AC-08] two costs are pending');
+
+select pg_temp.login('a1111111-1111-1111-1111-111111111111');
 
 -- ---------------------------------------------------------------------------
 -- AC-09: adding funds pays pending costs whole, oldest first
@@ -342,7 +345,7 @@ select throws_ok(format($$ select remove_bucket(%L) $$, pg_temp.bid(12)), '22023
 select lives_ok(format($$ select add_funds(%L, 10, 'Quarterly top-up') $$, pg_temp.bid(9)), '[F0-12][AC-15] adding funds with a note works');
 select is((select recorded_by from budget_fund_entries where bucket_id = pg_temp.bid(9) and note = 'Quarterly top-up'), 'a1111111-1111-1111-1111-111111111111'::uuid, '[F0-12][AC-15] the row records the signed-in user');
 select is((select recorded_by_name from budget_fund_entries where bucket_id = pg_temp.bid(9) and note = 'Quarterly top-up'), 'Helen Doyle', '[F0-12][AC-15] and a snapshot of their name');
-select is((select recorded_by from budget_costs where event_id = 'e1111111-1111-1111-1111-111111111111' and original_start = '2026-11-30 09:00:00+11'), 'a1111111-1111-1111-1111-111111111111'::uuid, '[F0-12][AC-15] a charged cost records who completed the occurrence');
+select is((select recorded_by from budget_costs where event_id = 'e1111111-1111-1111-1111-111111111111' and original_start = '2026-11-30 09:00:00+11'), 'a3333333-3333-3333-3333-333333333333'::uuid, '[F0-12][AC-15] a charged cost records who completed the occurrence (the carer on shift)');
 select is((select count(*) from pg_proc where proname in ('add_funds', 'remove_funds', 'add_bucket', 'rename_bucket', 'remove_bucket') and 'p_actor_id' = any (proargnames)), 0::bigint, '[F0-12][AC-15] no change function takes the actor as a parameter');
 
 -- ---------------------------------------------------------------------------
