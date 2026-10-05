@@ -13,7 +13,7 @@ import { taskDetailHrefFrom } from "@/features/family-task-detail/task-detail-or
 import type { LocalDate } from "@/lib/dates/week-range";
 import { setOccurrenceDone, setOccurrenceUndone } from "@/server/events/actions";
 import type { ClientShift } from "@/server/events/queries";
-import type { Occurrence } from "@/types/domain";
+import type { AnyOccurrence, Occurrence } from "@/types/domain";
 
 import { applyTick } from "./apply-ticks";
 import { dayHeading, melbourneDay, rangeLabel } from "./calendar-format";
@@ -30,6 +30,7 @@ import {
 import { CalendarToolbar } from "./calendar-toolbar";
 import { LogPanel } from "./log-panel";
 import { OnDutyPanel } from "./on-duty-panel";
+import { isShiftEntry, shiftsAsEntries } from "./shift-occurrences";
 import { TasksPanel } from "./tasks-panel";
 import { useCalendarShortcuts } from "./use-calendar-shortcuts";
 
@@ -125,10 +126,14 @@ export function FamilyCalendarView({
 
   const current: CalendarParams = { ...params, date: selected };
   // A task opened here remembers this view and day, so Task detail's Back returns to them (CHG-014).
-  const openOccurrence = (occurrence: Occurrence) =>
+  const openOccurrence = (occurrence: AnyOccurrence) => {
+    if (isShiftEntry(occurrence)) return;
     router.push(
       taskDetailHrefFrom(clientId, occurrence.key, { from: "calendar", view: current }, basePath),
     );
+  };
+  // The grids also draw who is on duty, as blocks beside the care events.
+  const gridOccurrences: AnyOccurrence[] = [...occurrences, ...shiftsAsEntries(shifts, clientId)];
   const dayOccurrences = occurrences.filter(
     (occurrence) => melbourneDay(occurrence.start) === selected,
   );
@@ -166,7 +171,7 @@ export function FamilyCalendarView({
           <WeekGrid
             weekStart={range.from}
             today={today}
-            occurrences={occurrences}
+            occurrences={gridOccurrences}
             now={now}
             onSelectDay={select}
             onSelectOccurrence={openOccurrence}
@@ -174,7 +179,7 @@ export function FamilyCalendarView({
         )}
         {params.view === "day" && (
           <DayTimeline
-            occurrences={occurrences}
+            occurrences={gridOccurrences}
             now={now}
             onSelect={openOccurrence}
             className="px-2"
@@ -185,7 +190,7 @@ export function FamilyCalendarView({
             month={`${params.month}-01`}
             today={today}
             selected={selected}
-            occurrences={occurrences}
+            occurrences={gridOccurrences}
             onSelectDate={select}
             className="p-3"
           />

@@ -12,6 +12,7 @@ const mocks = vi.hoisted(() => ({
   push: vi.fn(),
   getToday: vi.fn(),
   getOccurrences: vi.fn(),
+  getClientShifts: vi.fn(),
   getTaskLog: vi.fn(),
   getCurrentUser: vi.fn(),
   setOccurrenceDone: vi.fn(),
@@ -24,7 +25,7 @@ vi.mock("next/navigation", () => ({
 vi.mock("@/server/events/queries", () => ({
   getToday: mocks.getToday,
   getOccurrences: mocks.getOccurrences,
-  getClientShifts: async () => [],
+  getClientShifts: mocks.getClientShifts,
   getTaskLog: mocks.getTaskLog,
 }));
 vi.mock("@/server/auth/queries", () => ({ getCurrentUser: mocks.getCurrentUser }));
@@ -140,6 +141,7 @@ function logPanel() {
 beforeEach(() => {
   mocks.getToday.mockResolvedValue("2026-11-30");
   mocks.getOccurrences.mockResolvedValue(DESIGN_WEEK);
+  mocks.getClientShifts.mockResolvedValue([]);
   mocks.getTaskLog.mockResolvedValue(taskLog(LOG));
   mocks.getCurrentUser.mockResolvedValue({ firstName: "Helen", lastName: "Doyle" });
   mocks.setOccurrenceDone.mockResolvedValue({
@@ -895,5 +897,22 @@ describe("[FAM-05][AC-04] Log panel listing", () => {
       expect.stringMatching(/^Evening medication.*Done · Aisha Rahman$/),
       expect.stringMatching(/^Weekly weigh-in.*Overdue$/),
     ]);
+  });
+});
+
+describe("who is caring, on the grids", () => {
+  it("draws each carer's shift as a block beside the events, and not as a task", async () => {
+    mocks.getClientShifts.mockResolvedValue([
+      {
+        id: "shift-1",
+        carerName: "Aisha Rahman",
+        start: at("2026-11-30", "08:00"),
+        end: at("2026-11-30", "12:00"),
+      },
+    ]);
+    await renderCalendar();
+
+    expect(screen.getAllByText(/Aisha Rahman on duty/).length).toBeGreaterThan(0);
+    expect(within(tasksPanel()).queryByText(/on duty/)).not.toBeInTheDocument();
   });
 });
