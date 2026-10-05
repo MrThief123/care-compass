@@ -33,10 +33,9 @@ export interface TaskLogQueryInput {
 }
 
 /**
- * Lower bound `getTaskLog`'s Supabase read expands from (FAM-02): any date before this app can
- * have created a `care_events` row. Recurrence expansion steps forward from each event's own
- * anchor regardless of how much earlier `range.from` is (src/lib/recurrence `expand.ts`), so this
- * never truncates real history and never costs extra work.
+ * Lower bound for task-log history (FAM-02), before this app could have created
+ * a care event. Indexed recurrence reads seek from each event's own anchor;
+ * this bound does not require materialising empty years before that anchor.
  */
 const TASK_LOG_EARLIEST_DATE = "2000-01-01";
 
@@ -144,17 +143,13 @@ export async function getTaskLog(
     return mock.getTaskLog(clientId, parsed);
   }
 
-  // FAM-02 (OQ-31, proposed default): reads up to the end of today, oldest bound fixed rather
-  // than unbounded, since a range is what `loadOccurrences` needs. `expandOccurrences` always
-  // steps forward from each event's own anchor (src/lib/recurrence `expand.ts`), never from
-  // `range.from`, so an earlier bound here never costs extra work — it only has to predate every
-  // event this app will ever hold. Filtering, ordering, paging and `total` reuse the mock's own pure
-  // `queryTaskLog`, so both data sources answer identically for the same rows.
+  // INT-07: read the same full-history source rows under RLS, but count ordinary
+  // recurrence candidates without materialising them. Overrides/completions and
+  // the selected page still use the existing occurrence/status semantics.
   const today = await getToday();
-  const { loadOccurrences, melbourneDaysToInstants } = await import("./occurrences");
+  const { loadTaskLog, melbourneDaysToInstants } = await import("./occurrences");
   const range = melbourneDaysToInstants({ from: TASK_LOG_EARLIEST_DATE, to: today });
-  const occurrences = await loadOccurrences(clientId, range, new Date());
-  return mock.queryTaskLog(occurrences, parsed);
+  return loadTaskLog(clientId, range, new Date(), parsed);
 }
 
 /**

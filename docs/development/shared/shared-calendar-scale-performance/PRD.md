@@ -28,9 +28,10 @@ Meets 'hundreds of items, no limitation' (brief item 2) and NFR-5.
 - System
 
 ## Scope
-- Scale seed script (e.g. 500 recurring events per client, 50 clients).
-- Measure server render times locally; PROPOSED budget p95 < 1 s for Home, Calendar week, Task log first page.
+- Scale seed script: 500 recurring events per client across 50 synthetic clients (confirmed by the human on 2026-10-03; FD-01).
+- Measure server render times locally; confirmed budget p95 < 1 s for Home, Calendar week, Task log first page (human confirmation 2026-10-03; FD-01).
 - EXPLAIN ANALYZE key queries; add indexes via migration.
+- Optimise the shared task-log/occurrence read path to meet the unchanged local budget, preserving totals, filters, pagination, recurrence/DST, completions/overrides and RLS (human-approved extension on 2026-10-04; FD-06).
 
 ## Out of Scope
 - Production load testing (needs hosting, OQ-17)

@@ -2,6 +2,7 @@
 import { expect, it } from "vitest";
 
 import { queryTaskLog } from "@/mocks/queries/events";
+
 import { buildOccurrences, type BuildOccurrencesInput, type EventRow } from "./build-occurrences";
 import { buildTaskLog } from "./build-task-log";
 
@@ -125,11 +126,22 @@ it("[INT-07][AC-01][PRD] orders DST-gap shifts by instant and reflects fresh com
   input.overrides = [];
   input.completions = [];
   for (const status of [undefined, "overdue", "planned", "done"] as const) {
-    expect(buildTaskLog(input, { status })).toEqual(queryTaskLog(buildOccurrences(input), { status }));
+    expect(buildTaskLog(input, { status })).toEqual(
+      queryTaskLog(buildOccurrences(input), { status }),
+    );
   }
-  const completed = { event_id: "gap", original_start: "2026-10-04T03:30:00+11:00", action: "done", actor_display_name: "Synthetic Carer", occurred_at: "2026-10-04T03:30:00+11:00", seq: 1 };
+  const completed = {
+    event_id: "gap",
+    original_start: "2026-10-04T03:30:00+11:00",
+    action: "done",
+    actor_display_name: "Synthetic Carer",
+    occurred_at: "2026-10-04T03:30:00+11:00",
+    seq: 1,
+  };
   input.completions = [completed];
-  expect(buildTaskLog(input, { status: "done" })).toEqual(queryTaskLog(buildOccurrences(input), { status: "done" }));
+  expect(buildTaskLog(input, { status: "done" })).toEqual(
+    queryTaskLog(buildOccurrences(input), { status: "done" }),
+  );
   expect(buildTaskLog(input, { status: "done" }).total).toBe(1);
   input.completions.push({ ...completed, seq: 2, action: "undone" });
   expect(buildTaskLog(input, { status: "done" }).total).toBe(0);

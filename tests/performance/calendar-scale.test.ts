@@ -53,14 +53,14 @@ it("[INT-07][AC-01] Calendar week query p95 is below 1000 ms over twenty authent
   expect(warmup.length).toBeGreaterThanOrEqual(1_000);
   expect(new Set(warmup.map((row) => row.key)).size).toBe(warmup.length);
   const samples: number[] = [];
-  await mkdir(".next/int07", { recursive: true });
+  await mkdir("test-results/int07", { recursive: true });
   for (let index = 0; index < 20; index++) {
     const start = performance.now();
     const rows = await query();
     samples.push(performance.now() - start);
     expect(rows.length).toBe(warmup.length);
     await writeFile(
-      ".next/int07/calendar-query.json",
+      "test-results/int07/calendar-query.json",
       JSON.stringify(
         {
           dataset: seed,
