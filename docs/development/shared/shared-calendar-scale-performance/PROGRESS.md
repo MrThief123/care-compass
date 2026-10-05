@@ -1,6 +1,6 @@
 # Progress — INT-07 Scale and performance verification
 
-Status: READY FOR PR
+Status: PR OPEN
 Owner: Kav1sh-11
 Lane: I — Integration
 Sprint: SPRINT · planned D19
@@ -10,7 +10,7 @@ Last updated: 2026-10-05
 
 ## Blockers
 
-None for implementation. Explicit human approval is required to open the PR (AGENTS.md §8 / DEVELOPMENT_WORKFLOW.md §7). No INT-07 PR opened.
+None. The human explicitly approved opening the INT-07 PR on 2026-10-05 and instructed that no work follow its creation.
 
 ## Dependencies and decisions
 
@@ -37,4 +37,6 @@ Tests-first commits: `613e394` (missing scale module), `195a238` (missing indexe
 
 ## Remaining
 
-Human review and approval to open `INT-07 Scale and performance verification` against main. Runtime evidence is ignored; committed report and JSON contain reproducible methods and non-secret samples. Final status-page/browser check and branch push are recorded in SESSION_STATE.md.
+Human review of the PR to main. Runtime evidence is ignored; the committed report and JSON contain methods and non-secret samples. No follow-up action will be taken after opening the PR in this session.
+
+PR handoff — 2026-10-05: main remains 817aa9b; existing validation remains current. Human approval received. The PR is opened as the final action after this handoff commit/push.

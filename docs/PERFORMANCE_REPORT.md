@@ -1,6 +1,6 @@
 # INT-07 — Scale and performance verification
 
-Completed locally on 2026-10-05, based on main `817aa9b`. The human approved both the workload/budget (FD-01) and the shared-code fix (FD-06). No INT-07 PR has been opened yet.
+Completed locally on 2026-10-05, based on main `817aa9b`. The human approved both the workload/budget (FD-01) and the shared-code fix (FD-06). The human approved opening the INT-07 PR on 2026-10-05; PR creation is the final handoff action.
 
 ## Final results
 
