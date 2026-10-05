@@ -17,6 +17,7 @@ import { z } from "zod";
 
 import type { Database } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
+import { refreshCachedPages } from "@/server/refresh-cache";
 import type { Role } from "@/types/domain";
 
 import { discardUnregisteredAccount, registerAccount } from "./registration";
@@ -208,6 +209,8 @@ export async function signUp(input: unknown): Promise<AuthActionResult<{ redirec
 export async function signOut(): Promise<void> {
   const supabase = await createClient();
   await supabase.auth.signOut();
+  // Drops the client router cache so the next person on this browser never sees this session's pages.
+  refreshCachedPages();
   redirect("/sign-in");
 }
 

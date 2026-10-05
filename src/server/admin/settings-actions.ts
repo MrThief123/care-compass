@@ -6,9 +6,11 @@
  * failure. Writes only through `admin_update_organisation`, which takes no organisation id: the
  * organisation is the calling admin's own (FD-02).
  */
+
 import { fieldErrors } from "@/components/shared/forms/validation";
 import type { Database } from "@/lib/supabase/database.types";
 import { getDataSourceMode } from "@/server/data-source";
+import { refreshCachedPages } from "@/server/refresh-cache";
 
 import { formatAbn, organisationSettingsSchema } from "./settings-schema";
 
@@ -28,7 +30,7 @@ export type SettingsActionResult<T> =
 
 const SAVE_FAILED = "Couldn't save the organisation details. Try again.";
 
-export async function updateOrganisationSettings(
+async function updateOrganisationSettingsImpl(
   input: OrganisationSettings,
 ): Promise<SettingsActionResult<OrganisationSettings>> {
   const parsed = fieldErrors(organisationSettingsSchema, input);
@@ -74,6 +76,14 @@ export async function updateOrganisationSettings(
     logFailure(error instanceof Error ? error.name : undefined);
     return { ok: false, error: { code: "UNEXPECTED", message: SAVE_FAILED } };
   }
+}
+
+export async function updateOrganisationSettings(
+  ...args: Parameters<typeof updateOrganisationSettingsImpl>
+): ReturnType<typeof updateOrganisationSettingsImpl> {
+  const result = await updateOrganisationSettingsImpl(...args);
+  if ((result as { ok?: boolean }).ok !== false) refreshCachedPages();
+  return result;
 }
 
 /** A feature tag and an error code only: the message may carry client data (ARCHITECTURE.md §12.5). */

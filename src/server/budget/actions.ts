@@ -13,6 +13,7 @@ import { z } from "zod";
 
 import { createClient } from "@/lib/supabase/server";
 import { getDataSourceMode } from "@/server/data-source";
+import { refreshCachedPages } from "@/server/refresh-cache";
 
 export interface BudgetEditInput {
   buckets: {
@@ -91,7 +92,7 @@ const FIELD_PATH = /^(buckets\.\d+\.(amount|name|remove)|added\.\d+\.(name|start
  * Saves the whole Edit budget page for `clientId` in one transaction. Who may: the client's family and their
  * organisation's admins (the database decides). `DATA_SOURCE=mock` returns `NOT_AVAILABLE`: nothing persists.
  */
-export async function saveBudgetEdit(
+async function saveBudgetEditImpl(
   clientId: string,
   edit: BudgetEditInput,
 ): Promise<BudgetActionResult> {
@@ -167,4 +168,12 @@ export async function saveBudgetEdit(
     );
     return { ok: false, error: { code: "UNEXPECTED", message: GENERAL_MESSAGE } };
   }
+}
+
+export async function saveBudgetEdit(
+  ...args: Parameters<typeof saveBudgetEditImpl>
+): ReturnType<typeof saveBudgetEditImpl> {
+  const result = await saveBudgetEditImpl(...args);
+  if ((result as { ok?: boolean }).ok !== false) refreshCachedPages();
+  return result;
 }

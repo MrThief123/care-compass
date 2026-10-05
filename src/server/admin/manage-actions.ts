@@ -17,6 +17,7 @@ import { localToMelbourneIso } from "@/lib/dates/melbourne-time";
 import type { Database } from "@/lib/supabase/database.types";
 import { ADMIN_MANAGE } from "@/mocks/admin-manage";
 import { getDataSourceMode } from "@/server/data-source";
+import { refreshCachedPages } from "@/server/refresh-cache";
 
 import { assignShiftSchema, type AssignShiftValues } from "./assign-shift-schema";
 import { toManageShift, type ManageShift } from "./manage-queries";
@@ -43,7 +44,7 @@ const NOT_SIGNED_UP = "This carer hasn't signed up yet, so they can't be given s
 /** RLS refusal, and the F0-10 org trigger's `raise exception`. */
 const REFUSAL_CODES = new Set(["42501", "P0001"]);
 
-export async function assignShift(input: AssignShiftInput): Promise<AssignShiftResult> {
+async function assignShiftImpl(input: AssignShiftInput): Promise<AssignShiftResult> {
   const parsed = fieldErrors(assignShiftSchema, input);
   if (!parsed.ok) {
     return {
@@ -119,6 +120,14 @@ export async function assignShift(input: AssignShiftInput): Promise<AssignShiftR
   }
 }
 
+export async function assignShift(
+  ...args: Parameters<typeof assignShiftImpl>
+): ReturnType<typeof assignShiftImpl> {
+  const result = await assignShiftImpl(...args);
+  if ((result as { ok?: boolean }).ok !== false) refreshCachedPages();
+  return result;
+}
+
 /** A feature tag and an error code only: the message may carry client data (ARCHITECTURE.md §12.5). */
 
 type ShiftFailure = {
@@ -141,7 +150,7 @@ const notFound = (): ShiftFailure => ({
 });
 
 /** Cancel a live shift: sets `cancelled_at`, keeps the row (PD-053). Ended shifts are NOT_FOUND. */
-export async function cancelShift(shiftId: string): Promise<CancelShiftResult> {
+async function cancelShiftImpl(shiftId: string): Promise<CancelShiftResult> {
   const parsed = cancelShiftSchema.safeParse(shiftId);
   if (!parsed.success) {
     const message = parsed.error.issues[0]?.message ?? "Choose a shift.";
@@ -183,6 +192,14 @@ export async function cancelShift(shiftId: string): Promise<CancelShiftResult> {
     logFailure("cancelShift", error instanceof Error ? error.name : undefined);
     return { ok: false, error: { code: "UNEXPECTED", message: CANCEL_FAILED } };
   }
+}
+
+export async function cancelShift(
+  ...args: Parameters<typeof cancelShiftImpl>
+): ReturnType<typeof cancelShiftImpl> {
+  const result = await cancelShiftImpl(...args);
+  if ((result as { ok?: boolean }).ok !== false) refreshCachedPages();
+  return result;
 }
 
 /** A feature tag and an error code only: the message may carry client data (ARCHITECTURE.md §12.5). */

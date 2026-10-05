@@ -8,6 +8,10 @@ const nextConfig: NextConfig = {
     // Action default is 1 MB; with proxy.ts the body is also buffered, by default only to 10 MB.
     serverActions: { bodySizeLimit: "21mb" },
     proxyClientMaxBodySize: "21mb",
+    // Pages visited in the last 30 s come from the browser's router cache instead of the database
+    // when switching back and forth. Server Actions that change data call revalidatePath (or the
+    // screen calls router.refresh()) and sign-out clears it, so a change is never hidden.
+    staleTimes: { dynamic: 30, static: 180 },
   },
   // F0-21 FD-11: browsers use HTTPS only for 2 years after the first visit. No includeSubDomains
   // or preload: the production domain isn't settled and both are hard to undo.
