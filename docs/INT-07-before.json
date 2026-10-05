@@ -1,0 +1,68 @@
+{
+    "baseline":  "4c9d388",
+    "stage":  "before shared-code fix",
+    "budgetMs":  1000,
+    "clients":  50,
+    "eventsPerClient":  500,
+    "pages":  [
+                  {
+                      "name":  "Home",
+                      "samplesMs":  [
+                                        64768.77150000002,
+                                        68137.8087
+                                    ],
+                      "p95Ms":  null,
+                      "completedSamples":  2,
+                      "plannedSamples":  20,
+                      "result":  "FAIL - two over-budget samples"
+                  },
+                  {
+                      "name":  "Calendar week",
+                      "samplesMs":  [
+                                        31669.834399999992,
+                                        32835.8251
+                                    ],
+                      "p95Ms":  null,
+                      "completedSamples":  2,
+                      "plannedSamples":  20,
+                      "result":  "FAIL - two over-budget samples"
+                  },
+                  {
+                      "name":  "Task log first page",
+                      "samplesMs":  [
+                                        31862.0495,
+                                        30895.745200000005
+                                    ],
+                      "p95Ms":  null,
+                      "completedSamples":  2,
+                      "plannedSamples":  20,
+                      "result":  "FAIL - two over-budget samples"
+                  }
+              ],
+    "calendarQuery":  {
+                          "samplesMs":  [
+                                            593.5524999999998,
+                                            585.3158999999996,
+                                            596.3342000000002,
+                                            708.0502999999999,
+                                            695.7239,
+                                            1008.4980000000014,
+                                            607.5100000000002,
+                                            623.4565000000002,
+                                            556.5977000000003,
+                                            655.6207999999988,
+                                            661.4105,
+                                            644.8495999999996,
+                                            601.792300000001,
+                                            590.2111000000004,
+                                            623.2807999999986,
+                                            602.8533000000007,
+                                            612.3125,
+                                            620.3073000000004,
+                                            613.3287999999993,
+                                            601.5301
+                                        ],
+                          "p95Ms":  708.0502999999999,
+                          "occurrenceCount":  1125
+                      }
+}
