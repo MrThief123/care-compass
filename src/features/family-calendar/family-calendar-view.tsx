@@ -12,6 +12,7 @@ import { addEventHrefFrom } from "@/features/family-event-form/event-form-return
 import { taskDetailHrefFrom } from "@/features/family-task-detail/task-detail-origin";
 import type { LocalDate } from "@/lib/dates/week-range";
 import { setOccurrenceDone, setOccurrenceUndone } from "@/server/events/actions";
+import type { ClientShift } from "@/server/events/queries";
 import type { Occurrence } from "@/types/domain";
 
 import { applyTick } from "./apply-ticks";
@@ -28,6 +29,7 @@ import {
 } from "./calendar-params";
 import { CalendarToolbar } from "./calendar-toolbar";
 import { LogPanel } from "./log-panel";
+import { OnDutyPanel } from "./on-duty-panel";
 import { TasksPanel } from "./tasks-panel";
 import { useCalendarShortcuts } from "./use-calendar-shortcuts";
 
@@ -39,6 +41,8 @@ export interface FamilyCalendarViewProps {
   occurrences: Occurrence[];
   /** Latest done or overdue tasks, newest first. */
   log: Occurrence[];
+  /** Carers on duty in the visible range; the On duty panel shows the selected day's. */
+  shifts?: ClientShift[];
   /** The signed-in person, shown on a task they tick (CHG-016). */
   actorName: string;
   /** Where the links go; defaults to `/family/<id>`. A carer's Calendar sets it (CHG-043). */
@@ -64,6 +68,7 @@ export function FamilyCalendarView({
   params,
   occurrences: loaded,
   log,
+  shifts = [],
   actorName,
   basePath,
   canTick = true,
@@ -196,7 +201,10 @@ export function FamilyCalendarView({
           errorMessage={tickError}
           readOnly={!canTick}
         />
-        <LogPanel clientId={clientId} occurrences={log} calendar={current} basePath={basePath} />
+        <div className="flex min-w-0 flex-col gap-5">
+          <OnDutyPanel dateLabel={dayHeading(selected)} date={selected} shifts={shifts} />
+          <LogPanel clientId={clientId} occurrences={log} calendar={current} basePath={basePath} />
+        </div>
       </div>
     </div>
   );

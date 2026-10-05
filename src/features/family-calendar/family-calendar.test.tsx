@@ -24,6 +24,7 @@ vi.mock("next/navigation", () => ({
 vi.mock("@/server/events/queries", () => ({
   getToday: mocks.getToday,
   getOccurrences: mocks.getOccurrences,
+  getClientShifts: async () => [],
   getTaskLog: mocks.getTaskLog,
 }));
 vi.mock("@/server/auth/queries", () => ({ getCurrentUser: mocks.getCurrentUser }));
