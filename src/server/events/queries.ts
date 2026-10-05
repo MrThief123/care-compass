@@ -313,3 +313,36 @@ export async function getOccurrences(
     type === "events" ? isPlainEvent(occurrence) : !isPlainEvent(occurrence),
   );
 }
+
+export type ClientShift = mock.ClientShift;
+
+/**
+ * Who is on duty: the client's carers' shifts overlapping the Melbourne days `range.from` to
+ * `range.to`, earliest first, cancelled shifts left out. Readable by the client's family and carers
+ * (`client_shift_carers`); only a name and the shift window leave the database.
+ */
+export async function getClientShifts(
+  clientId: string,
+  range: OccurrenceRange,
+): Promise<ClientShift[]> {
+  const parsed = OccurrenceRangeSchema.parse(range);
+  if (getDataSourceMode() === "mock") return mock.getClientShifts(clientId, parsed);
+
+  const { melbourneDaysToInstants } = await import("./occurrences");
+  const instants = melbourneDaysToInstants(parsed);
+  const { createClient } = await import("@/lib/supabase/server");
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("client_shift_carers", {
+    p_client_id: clientId,
+    p_from: instants.from,
+    p_to: instants.to,
+  });
+  // No message from the database: it may name a client (ARCHITECTURE.md §12.5).
+  if (error || !data) throw new Error("getClientShifts: could not load who is on duty.");
+  return data.map((row) => ({
+    id: row.shift_id,
+    carerName: row.carer_display_name,
+    start: row.starts_at,
+    end: row.ends_at,
+  }));
+}

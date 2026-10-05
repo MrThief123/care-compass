@@ -10,6 +10,7 @@
 import { z } from "zod";
 
 import { getDataSourceMode } from "@/server/data-source";
+import { refreshCachedPages } from "@/server/refresh-cache";
 
 export type ClientActionResult<T = undefined> =
   | { ok: true; data: T }
@@ -35,7 +36,7 @@ const FAILED = "Couldn't change the organisation. Try again.";
  * ended, future shifts cancelled, the old organisation loses access at once).
  * With `DATA_SOURCE=mock` (Phase 1 screens) nothing can change, and it says so.
  */
-export async function changeClientOrganisation(
+async function changeClientOrganisationImpl(
   clientId: string,
   newOrganisationId: string,
 ): Promise<ClientActionResult> {
@@ -102,6 +103,14 @@ export async function changeClientOrganisation(
   }
 }
 
+export async function changeClientOrganisation(
+  ...args: Parameters<typeof changeClientOrganisationImpl>
+): ReturnType<typeof changeClientOrganisationImpl> {
+  const result = await changeClientOrganisationImpl(...args);
+  if ((result as { ok?: boolean }).ok !== false) refreshCachedPages();
+  return result;
+}
+
 const INFO_SECTION_KEYS = {
   description: "description",
   habits: "habits",
@@ -126,7 +135,7 @@ const SHIFT_ENDED = "Your shift has ended, so changes can't be saved.";
  * that is enforced by RLS, not here, so an RLS refusal (42501) is the shift-ended case.
  * With `DATA_SOURCE=mock` nothing can change, and it says so.
  */
-export async function saveClientInfoSection(
+async function saveClientInfoSectionImpl(
   clientId: string,
   kind: keyof typeof INFO_SECTION_KEYS,
   content: string,
@@ -188,4 +197,12 @@ export async function saveClientInfoSection(
     );
     return { ok: false, error: { code: "UNEXPECTED", message: SAVE_FAILED } };
   }
+}
+
+export async function saveClientInfoSection(
+  ...args: Parameters<typeof saveClientInfoSectionImpl>
+): ReturnType<typeof saveClientInfoSectionImpl> {
+  const result = await saveClientInfoSectionImpl(...args);
+  if ((result as { ok?: boolean }).ok !== false) refreshCachedPages();
+  return result;
 }

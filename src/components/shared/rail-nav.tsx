@@ -31,6 +31,7 @@ export function RailNav({ role, basePath }: RailNavProps) {
           <Link
             key={item.segment}
             href={`${basePath}/${item.segment}`}
+            prefetch
             aria-current={active ? "page" : undefined}
             className={cn(
               "flex flex-col items-center gap-1 rounded-control py-3 text-label-caps",

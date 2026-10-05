@@ -30,6 +30,7 @@ export default async function CarerPatientCalendarPage({
         params={data.params}
         occurrences={data.occurrences}
         log={data.log}
+        shifts={data.shifts}
         actorName={data.actorName}
         basePath={carerPatientBase(clientId)}
         canTick={patient.onShift}

@@ -12,7 +12,8 @@ import { addEventHrefFrom } from "@/features/family-event-form/event-form-return
 import { taskDetailHrefFrom } from "@/features/family-task-detail/task-detail-origin";
 import type { LocalDate } from "@/lib/dates/week-range";
 import { setOccurrenceDone, setOccurrenceUndone } from "@/server/events/actions";
-import type { Occurrence } from "@/types/domain";
+import type { ClientShift } from "@/server/events/queries";
+import type { AnyOccurrence, Occurrence } from "@/types/domain";
 
 import { applyTick } from "./apply-ticks";
 import { dayHeading, melbourneDay, rangeLabel } from "./calendar-format";
@@ -28,6 +29,8 @@ import {
 } from "./calendar-params";
 import { CalendarToolbar } from "./calendar-toolbar";
 import { LogPanel } from "./log-panel";
+import { OnDutyPanel } from "./on-duty-panel";
+import { isShiftEntry, shiftsAsEntries } from "./shift-occurrences";
 import { TasksPanel } from "./tasks-panel";
 import { useCalendarShortcuts } from "./use-calendar-shortcuts";
 
@@ -39,6 +42,8 @@ export interface FamilyCalendarViewProps {
   occurrences: Occurrence[];
   /** Latest done or overdue tasks, newest first. */
   log: Occurrence[];
+  /** Carers on duty in the visible range; the On duty panel shows the selected day's. */
+  shifts?: ClientShift[];
   /** The signed-in person, shown on a task they tick (CHG-016). */
   actorName: string;
   /** Where the links go; defaults to `/family/<id>`. A carer's Calendar sets it (CHG-043). */
@@ -64,6 +69,7 @@ export function FamilyCalendarView({
   params,
   occurrences: loaded,
   log,
+  shifts = [],
   actorName,
   basePath,
   canTick = true,
@@ -120,10 +126,14 @@ export function FamilyCalendarView({
 
   const current: CalendarParams = { ...params, date: selected };
   // A task opened here remembers this view and day, so Task detail's Back returns to them (CHG-014).
-  const openOccurrence = (occurrence: Occurrence) =>
+  const openOccurrence = (occurrence: AnyOccurrence) => {
+    if (isShiftEntry(occurrence)) return;
     router.push(
       taskDetailHrefFrom(clientId, occurrence.key, { from: "calendar", view: current }, basePath),
     );
+  };
+  // The grids also draw who is on duty, as blocks beside the care events.
+  const gridOccurrences: AnyOccurrence[] = [...occurrences, ...shiftsAsEntries(shifts, clientId)];
   const dayOccurrences = occurrences.filter(
     (occurrence) => melbourneDay(occurrence.start) === selected,
   );
@@ -161,7 +171,7 @@ export function FamilyCalendarView({
           <WeekGrid
             weekStart={range.from}
             today={today}
-            occurrences={occurrences}
+            occurrences={gridOccurrences}
             now={now}
             onSelectDay={select}
             onSelectOccurrence={openOccurrence}
@@ -169,7 +179,7 @@ export function FamilyCalendarView({
         )}
         {params.view === "day" && (
           <DayTimeline
-            occurrences={occurrences}
+            occurrences={gridOccurrences}
             now={now}
             onSelect={openOccurrence}
             className="px-2"
@@ -180,7 +190,7 @@ export function FamilyCalendarView({
             month={`${params.month}-01`}
             today={today}
             selected={selected}
-            occurrences={occurrences}
+            occurrences={gridOccurrences}
             onSelectDate={select}
             className="p-3"
           />
@@ -196,7 +206,10 @@ export function FamilyCalendarView({
           errorMessage={tickError}
           readOnly={!canTick}
         />
-        <LogPanel clientId={clientId} occurrences={log} calendar={current} basePath={basePath} />
+        <div className="flex min-w-0 flex-col gap-5">
+          <OnDutyPanel dateLabel={dayHeading(selected)} date={selected} shifts={shifts} />
+          <LogPanel clientId={clientId} occurrences={log} calendar={current} basePath={basePath} />
+        </div>
       </div>
     </div>
   );

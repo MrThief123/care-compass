@@ -18,6 +18,7 @@ import { z } from "zod";
 import { validateDocumentFile } from "@/lib/documents/validate-document";
 import { createClient } from "@/lib/supabase/server";
 import { getDataSourceMode } from "@/server/data-source";
+import { refreshCachedPages } from "@/server/refresh-cache";
 
 import { detachDocumentRow, insertDocumentRow, selectDocumentStoragePath } from "./db";
 
@@ -58,7 +59,7 @@ const UploadInputSchema = z.object({
  * optional `eventId`, and `file` (a browser File), the Server Actions convention for file
  * uploads (Next.js forms guide).
  */
-export async function uploadDocument(
+async function uploadDocumentImpl(
   formData: FormData,
 ): Promise<DocumentActionResult<{ documentId: string; storagePath: string }>> {
   if (getDataSourceMode() === "mock") {
@@ -137,6 +138,14 @@ export async function uploadDocument(
   return { ok: true, data: { documentId, storagePath } };
 }
 
+export async function uploadDocument(
+  ...args: Parameters<typeof uploadDocumentImpl>
+): ReturnType<typeof uploadDocumentImpl> {
+  const result = await uploadDocumentImpl(...args);
+  if ((result as { ok?: boolean }).ok !== false) refreshCachedPages();
+  return result;
+}
+
 /** AC-02: a signed URL for an existing, accessible document. RLS decides "accessible". */
 export async function getDocumentUrl(
   documentId: string,
@@ -167,7 +176,7 @@ export async function getDocumentUrl(
 }
 
 /** AC-05: perpetual retention (CIS3) — sets `detached_at`; the row and the object stay. */
-export async function detachDocument(documentId: string): Promise<DocumentActionResult> {
+async function detachDocumentImpl(documentId: string): Promise<DocumentActionResult> {
   if (getDataSourceMode() === "mock") {
     return { ok: false, error: { code: "NOT_AVAILABLE", message: NOT_AVAILABLE_MESSAGE } };
   }
@@ -187,6 +196,14 @@ export async function detachDocument(documentId: string): Promise<DocumentAction
   return { ok: true, data: undefined };
 }
 
+export async function detachDocument(
+  ...args: Parameters<typeof detachDocumentImpl>
+): ReturnType<typeof detachDocumentImpl> {
+  const result = await detachDocumentImpl(...args);
+  if ((result as { ok?: boolean }).ok !== false) refreshCachedPages();
+  return result;
+}
+
 /**
  * F0-23 (CHG-045): after Add event's `createEvent` returns an id, links the files chosen
  * before the event existed. Each id goes through the guarded `link_document_to_event`
@@ -194,7 +211,7 @@ export async function detachDocument(documentId: string): Promise<DocumentAction
  * what. One refusal never stops the others: `failedIds` lists the documents that did not
  * attach, and the caller names them to the user. Errors carry no filename, id or detail.
  */
-export async function linkDocumentsToEvent(input: {
+async function linkDocumentsToEventImpl(input: {
   eventId: string;
   documentIds: string[];
 }): Promise<DocumentActionResult<{ failedIds: string[] }>> {
@@ -232,4 +249,12 @@ export async function linkDocumentsToEvent(input: {
   }
 
   return { ok: true, data: { failedIds } };
+}
+
+export async function linkDocumentsToEvent(
+  ...args: Parameters<typeof linkDocumentsToEventImpl>
+): ReturnType<typeof linkDocumentsToEventImpl> {
+  const result = await linkDocumentsToEventImpl(...args);
+  if ((result as { ok?: boolean }).ok !== false) refreshCachedPages();
+  return result;
 }

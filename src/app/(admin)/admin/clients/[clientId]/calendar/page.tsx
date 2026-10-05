@@ -23,6 +23,7 @@ export default async function AdminClientCalendarPage({
       params={data.params}
       occurrences={data.occurrences}
       log={data.log}
+      shifts={data.shifts}
       actorName={data.actorName}
       basePath={adminClientBase(clientId)}
     />

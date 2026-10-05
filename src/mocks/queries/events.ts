@@ -12,6 +12,8 @@ import {
   OCCURRENCES_BY_CLIENT_ID,
   PLAIN_EVENT_OCCURRENCES_BY_CLIENT_ID,
   REFERENCE_DATE,
+  SHIFTS,
+  STAFF_MEMBERS,
   UPCOMING_OCCURRENCES_BY_CLIENT_ID,
 } from "@/mocks/fixtures";
 import { melbourneDateKey } from "@/mocks/melbourne-time";
@@ -401,4 +403,35 @@ export async function updateEvent(input: UpdateEventInput): Promise<void> {
       row.start = input.startsAt;
     }
   }
+}
+
+/** A carer's shift for a client, with the carer's full name (`client_shift_carers`). */
+export interface ClientShift {
+  id: string;
+  carerName: string;
+  start: string;
+  end: string;
+}
+
+/** The client's shifts that overlap a Melbourne day from `range.from` to `range.to`, earliest first. */
+export async function getClientShifts(
+  clientId: string,
+  range: OccurrenceRange,
+): Promise<ClientShift[]> {
+  return SHIFTS.filter(
+    (shift) =>
+      shift.clientId === clientId &&
+      melbourneDateKey(shift.start) <= range.to &&
+      melbourneDateKey(shift.end) >= range.from,
+  )
+    .sort((a, b) => Date.parse(a.start) - Date.parse(b.start))
+    .map((shift) => {
+      const carer = STAFF_MEMBERS.find((staff) => staff.id === shift.carerId);
+      return {
+        id: shift.id,
+        carerName: carer ? `${carer.firstName} ${carer.lastName}` : "Unknown",
+        start: shift.start,
+        end: shift.end,
+      };
+    });
 }
