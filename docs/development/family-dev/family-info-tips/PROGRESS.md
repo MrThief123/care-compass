@@ -3,7 +3,7 @@
 Status: IN PROGRESS
 Owner: Prajeet
 Lane: F — Family
-Sprint: SPRINT
+Sprint: SPRINT · planned D21
 Branch: `feature/family-info-tips`
 PR target: `main`
 Last updated: 2026-10-06 (claimed; CHG-057; docs pack)
