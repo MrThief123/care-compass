@@ -301,6 +301,12 @@ describe("[FAM-UI-02][AC-09] Enter event (CHG-017)", () => {
     );
   });
 
+  it("[FAM-17][AC-07] the Family Calendar route has an info tip beside it", async () => {
+    await renderCalendar();
+
+    expect(screen.getByRole("button", { name: "About Enter event" })).toBeInTheDocument();
+  });
+
   it("[FAM-UI-02][AC-09] T-09 it sits just before the D/W/M control and is 44px tall", async () => {
     await renderCalendar();
 

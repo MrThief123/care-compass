@@ -1155,3 +1155,12 @@ Template for future entries:
 - Impact: FAM-05's tick criteria now apply to the carer's calendar (CAR-06). Tests changed (HUMAN REVIEW: test expectation changed): `care_events`, `budget` and `admin_client_view` database tests tick as the carer on shift and expect the family and an admin to be refused; `family-calendar.test.tsx` renders the view with `canTick`; CAR-06 T-08 expects no tick boxes on the Family calendar.
 - Human confirmation: the human owner, 2026-10-05 (in-session request: "the family should not be able to tick off a task, only the carer").
 - Docs updated: DECISIONS.md (this entry). The FAM-05 and CAR-06 packs are not edited here.
+
+### CHG-057 — New feature FAM-17: info tips on main Family buttons (PL-05 partly promoted)
+- Date / requested by: 2026-10-06 / the human owner (in-session)
+- Type: scope addition (new feature; Parking lot promotion, tooltips only)
+- Description: promotes the tooltip half of PL-05 (OQ-25). New feature **FAM-17** (Family lane, `docs/development/family-dev/family-info-tips/`, `feature/family-info-tips`, 10 criteria): a hand-rolled `InfoTip` toggletip (hover, focus and click; Esc closes; 44px target) beside Family Home and Calendar "Enter event" and Budget "Edit" and "Export", with the wording in one map. Carer and Admin are not touched. The editable FAQ and staff discussion board stay parked; OQ-25 stays OPEN. One new shared file, `src/components/ui/info-tip.tsx`, is a flagged additive Lane S edit kept inside this PR (precedent: CHG-051).
+- Source / justification: human, in-session 2026-10-06: approved promotion, Family dashboard first, hand-rolled component.
+- Impact: DEVELOPMENT_PLAN.md gains the FAM-17 row and card (94 to 95 active, 508 to 518 criteria; next number FAM-18); PRD.md §17 notes PL-05's tooltips promoted. No contract, migration or dependency change. No existing test changes expected.
+- Human confirmation: the human owner, 2026-10-06 (in-session).
+- Docs updated: DECISIONS.md (this entry), DEVELOPMENT_PLAN.md, PRD.md §17, the FAM-17 pack.

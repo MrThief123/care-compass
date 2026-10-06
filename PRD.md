@@ -192,7 +192,7 @@ Note: OOS-5 (rostering out of scope) is superseded by later client meetings and 
 | PL-02 | Warning Notification Entities registry | CIS5 Notifications | OQ-28 |
 | PL-03 | **Promoted to INT-09 by CHG-047.** Health appointment reminder emails (e.g. one week before) | CIS5 Notifications; US C-8; UC-F04 | No design |
 | PL-04 | Staff discussion board with accepted answers | CIS5 FAQ answer | OQ-25 |
-| PL-05 | Contextual help tooltips and editable FAQ | CIS3 Access 6; CIS5; CM-0309 | OQ-25 |
+| PL-05 | Contextual help tooltips (promoted to FAM-17 by CHG-057, Family first) and editable FAQ (still parked) | CIS3 Access 6; CIS5; CM-0309 | OQ-25 |
 | PL-06 | Audit log viewer (search, filter, CSV export) | FR-10.2; US A-13 COULD; DD §5 | No final design |
 | PL-07 | Care history and financial reports | FR-9.1, 9.2; US A-14 COULD | No design |
 | PL-08 | Printable schedule; client data export with family/POA approval | TM-2808; US A-15, P-16; CIS3 Data 7 | OQ-18 |
