@@ -4,6 +4,6 @@ Each criterion is observable and maps to at least one test in TEST_PLAN.md. Crit
 
 | ID | Story | Type | Criterion (Given / When / Then) | Status |
 |---|---|---|---|---|
-| AC-01 | US-01 | happy | Given the scale seed, when the Calendar week query runs 20 times, then p95 duration is under the agreed budget. | NOT MET |
+| AC-01 | US-01 | happy | Given the scale seed, when the Calendar week query runs 20 times, then p95 duration is under the agreed budget. | MET |
 
 Status values: NOT MET · MET (test passing) · BLOCKED (cite OQ/PD).
