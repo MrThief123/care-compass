@@ -65,6 +65,56 @@ function stepDate(
   }
 }
 
+/** Count and seek unmodified candidates without materialising a series' history.
+ * Uses the same anchor arithmetic, inclusive until and safety cap as expansion.
+ * Indices are relative to the requested half-open wall-clock range.
+ */
+export function recurrenceWindow(rule: RecurrenceRule, range: DateRange) {
+  const parsed = recurrenceRuleSchema.parse(rule);
+  const bounds = dateRangeSchema.parse(range);
+  const anchor = parseLocalDateTime(parsed.anchor);
+  const start = parseLocalDateTime(bounds.start).getTime();
+  const end = parseLocalDateTime(bounds.end).getTime();
+  const until = parsed.until ? parseLocalDate(parsed.until) : undefined;
+  const cap = parsed.frequency === "none" ? 1 : MAX_OCCURRENCES_PER_RULE;
+  const candidate = (index: number) => stepDate(anchor, parsed.frequency, parsed.interval, index);
+  const lowerBound = (predicate: (date: LocalMoment) => boolean) => {
+    let low = 0;
+    let high = cap;
+    while (low < high) {
+      const middle = Math.floor((low + high) / 2);
+      const date = candidate(middle);
+      // A valid but huge interval can step beyond JavaScript's Date range.
+      // Such candidates follow every valid date; retain the finite prefix.
+      if (Number.isNaN(date.getTime()) || predicate(date)) high = middle;
+      else low = middle + 1;
+    }
+    return low;
+  };
+  const first = lowerBound((date) => date.getTime() >= start);
+  const last = lowerBound(
+    (date) =>
+      date.getTime() >= end ||
+      (parsed.frequency !== "none" && !!until && isAfterLocalDate(date, until)),
+  );
+  const count = end > start ? Math.max(0, last - first) : 0;
+  return {
+    count,
+    at(index: number): string {
+      if (!Number.isInteger(index) || index < 0 || index >= count)
+        throw new RangeError("Recurrence index outside window");
+      return formatLocalDateTime(candidate(first + index));
+    },
+    indexOf(local: string): number {
+      const target = parseLocalDateTime(local).getTime();
+      const index = lowerBound((date) => date.getTime() >= target) - first;
+      return index >= 0 && index < count && candidate(first + index).getTime() === target
+        ? index
+        : -1;
+    },
+  };
+}
+
 /**
  * Expands a recurrence rule into concrete occurrences within
  * `[range.start, range.end)`, applying any per-occurrence overrides.
@@ -104,7 +154,6 @@ export function expandOccurrences(
   );
 
   const anchor = parseLocalDateTime(parsedRule.anchor);
-  const until = parsedRule.until ? parseLocalDate(parsedRule.until) : undefined;
 
   const occurrences: Occurrence[] = [];
 
@@ -132,17 +181,9 @@ export function expandOccurrences(
     return occurrences;
   }
 
-  for (let n = 0; n < MAX_OCCURRENCES_PER_RULE; n++) {
-    const candidate = stepDate(anchor, parsedRule.frequency, parsedRule.interval, n);
-    if (candidate.getTime() >= rangeEnd.getTime()) {
-      break;
-    }
-    if (until && isAfterLocalDate(candidate, until)) {
-      break;
-    }
-    if (candidate.getTime() >= rangeStart.getTime()) {
-      addCandidate(candidate);
-    }
+  const window = recurrenceWindow(parsedRule, parsedRange);
+  for (let n = 0; n < window.count; n++) {
+    addCandidate(parseLocalDateTime(window.at(n)));
   }
 
   occurrences.sort((a, b) => a.start.localeCompare(b.start));

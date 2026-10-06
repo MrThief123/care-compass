@@ -126,7 +126,23 @@ export function queryTaskLog<T extends AnyOccurrence>(
   occurrences: readonly T[],
   query: TypedTaskLogQuery = {},
 ): TaskLogResult<T> {
-  const { q, status, type, page = 1 } = query;
+  const { page = 1 } = query;
+  const matching = matchingTaskLogOccurrences(occurrences, query);
+  const offset = (page - 1) * TASK_LOG_PAGE_SIZE;
+  return {
+    items: matching.slice(offset, offset + TASK_LOG_PAGE_SIZE),
+    page,
+    pageSize: TASK_LOG_PAGE_SIZE,
+    total: matching.length,
+  };
+}
+
+/** Shared filtering/order semantics; the real indexed reader uses this for exceptional rows. */
+export function matchingTaskLogOccurrences<T extends AnyOccurrence>(
+  occurrences: readonly T[],
+  query: TypedTaskLogQuery = {},
+): T[] {
+  const { q, status, type } = query;
   const needle = q?.trim().toLowerCase();
 
   const matching = occurrences
@@ -138,13 +154,7 @@ export function queryTaskLog<T extends AnyOccurrence>(
     })
     .sort(newestFirst);
 
-  const offset = (page - 1) * TASK_LOG_PAGE_SIZE;
-  return {
-    items: matching.slice(offset, offset + TASK_LOG_PAGE_SIZE),
-    page,
-    pageSize: TASK_LOG_PAGE_SIZE,
-    total: matching.length,
-  };
+  return matching;
 }
 
 export async function getTaskLog(
