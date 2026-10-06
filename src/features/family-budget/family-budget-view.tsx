@@ -6,6 +6,8 @@ import { useCallback, useEffect, useState } from "react";
 import { EmptyState } from "@/components/shared/states";
 import { Button } from "@/components/ui/button";
 import { CardShell } from "@/components/ui/card-shell";
+import { InfoTip } from "@/components/ui/info-tip";
+import { HELP_TEXT } from "@/features/family-help/help-text";
 import { BudgetBucketTile } from "@/features/family-home/budget-bucket-tile";
 import { cn } from "@/lib/utils";
 import type { FundEntry } from "@/types/domain";
@@ -40,11 +42,14 @@ export function FamilyBudgetView({
   clientId,
   data,
   basePath,
+  showHelp = false,
 }: {
   clientId: string;
   data: FamilyBudgetData;
   /** Where the client's screens live; defaults to `/family/<clientId>` (ADM-11 FD-02). */
   basePath?: string;
+  /** Family only (FAM-17): info tips beside Edit and Export. */
+  showHelp?: boolean;
 }) {
   const { buckets, history } = useHeldBudget(clientId, data);
   const { takeAnnouncement } = useBudgetHolder();
@@ -75,12 +80,17 @@ export function FamilyBudgetView({
               Funds by source
             </h2>
             {/* It navigates, so it is a link styled as the kit's primary Button (as Home's 'Enter event'). */}
-            <Link
-              href={`${basePath ?? `/family/${clientId}`}/budget/edit`}
-              className="inline-flex h-11 shrink-0 items-center justify-center rounded-control bg-primary px-5 text-body-emphasis text-primary-foreground transition-colors outline-none hover:bg-primary/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
-            >
-              Edit
-            </Link>
+            <div className="flex shrink-0 items-center gap-1">
+              <Link
+                href={`${basePath ?? `/family/${clientId}`}/budget/edit`}
+                className="inline-flex h-11 shrink-0 items-center justify-center rounded-control bg-primary px-5 text-body-emphasis text-primary-foreground transition-colors outline-none hover:bg-primary/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+              >
+                Edit
+              </Link>
+              {showHelp && (
+                <InfoTip label={HELP_TEXT.editBudget.label} text={HELP_TEXT.editBudget.text} />
+              )}
+            </div>
             <p
               role="status"
               className={cn(
@@ -135,9 +145,17 @@ export function FamilyBudgetView({
               History
             </h2>
             {history.length > 0 && (
-              <Button type="button" variant="secondary" onClick={exportHistory}>
-                Export
-              </Button>
+              <div className="flex shrink-0 items-center gap-1">
+                <Button type="button" variant="secondary" onClick={exportHistory}>
+                  Export
+                </Button>
+                {showHelp && (
+                  <InfoTip
+                    label={HELP_TEXT.exportHistory.label}
+                    text={HELP_TEXT.exportHistory.text}
+                  />
+                )}
+              </div>
             )}
           </div>
           {history.length === 0 ? (

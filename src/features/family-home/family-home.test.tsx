@@ -326,6 +326,12 @@ describe("[FAM-UI-01] Family Home layout and navigation (PRD Scope, no AC)", () 
     expect(within(today).getByText("Mon 30 Nov · day view")).toBeInTheDocument();
   });
 
+  it("[FAM-17][AC-07] the Family Home route has an info tip beside 'Enter event'", async () => {
+    await renderHome();
+
+    expect(screen.getByRole("button", { name: "About Enter event" })).toBeInTheDocument();
+  });
+
   it("[FAM-UI-01][Scope] 'Enter event' is a primary link to /family/<id>/events/new", async () => {
     await renderHome();
 

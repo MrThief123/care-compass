@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
 
@@ -34,7 +34,7 @@ describe("InfoTip", () => {
     expect(screen.getByRole("tooltip")).toHaveTextContent(TEXT);
 
     await user.unhover(button);
-    expect(screen.queryByRole("tooltip")).not.toBeInTheDocument();
+    await waitFor(() => expect(screen.queryByRole("tooltip")).not.toBeInTheDocument());
   });
 
   it("[FAM-17][AC-03] stays open when the pointer moves onto the tip", async () => {
@@ -43,6 +43,7 @@ describe("InfoTip", () => {
 
     await user.hover(screen.getByRole("button", { name: "About Enter event" }));
     await user.hover(screen.getByRole("tooltip"));
+    await new Promise((resolve) => setTimeout(resolve, 300));
 
     expect(screen.getByRole("tooltip")).toBeInTheDocument();
   });

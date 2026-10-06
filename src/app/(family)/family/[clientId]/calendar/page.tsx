@@ -26,6 +26,7 @@ export default async function FamilyCalendarPage({
       log={data.log}
       shifts={data.shifts}
       actorName={data.actorName}
+      showHelp
     />
   );
 }

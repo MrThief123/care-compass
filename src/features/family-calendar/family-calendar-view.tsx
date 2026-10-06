@@ -52,6 +52,8 @@ export interface FamilyCalendarViewProps {
   canTick?: boolean;
   /** False: no Enter event link (carers, CHG-043). */
   canAddEvent?: boolean;
+  /** Family only (FAM-17): info tips beside the main buttons. */
+  showHelp?: boolean;
 }
 
 /**
@@ -74,6 +76,7 @@ export function FamilyCalendarView({
   basePath,
   canTick = false,
   canAddEvent = true,
+  showHelp = false,
 }: FamilyCalendarViewProps) {
   const router = useRouter();
   const range = visibleRange(params);
@@ -159,6 +162,7 @@ export function FamilyCalendarView({
         onViewChange={changeView}
         onStep={step}
         onToday={goToday}
+        showHelp={showHelp}
         enterEventHref={
           canAddEvent
             ? addEventHrefFrom(clientId, { from: "calendar", view: current }, basePath)
