@@ -4,11 +4,13 @@
 |---|---|
 | Feature ID | FAM-17 |
 | Dashboard / stream | Family |
-| Phase | Phase 3 polish (sprint) |
-| PR target | `main` (CHG-036) |
+| Phase | Phase 3 — Data wiring & behaviour (parallel: Family · Carer · Admin) |
+| Development branch (PR target) | `main` |
 | Feature branch | `feature/family-info-tips` |
 | Documentation | `docs/development/family-dev/family-info-tips/` |
-| Status | See PROGRESS.md |
+| Lane | F — Family |
+| Sprint | SPRINT · planned D21 |
+| Status / owner | See PROGRESS.md |
 
 ## Purpose
 Say in a few words what a main button does, without leaving the screen.
@@ -48,7 +50,7 @@ Families understand a button before pressing it.
 
 ## Dependencies
 - Features: FAM-UI-01, FAM-UI-02, FAM-UI-05, UI-02 (all merged)
-- Blocking open decisions: None
+- Blocking open decisions (must be answered before START FEATURE): None
 - Non-blocking open decisions: OQ-25 (FAQ and discussion board stay parked)
 
 ## Inputs
