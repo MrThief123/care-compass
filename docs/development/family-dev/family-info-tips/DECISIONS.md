@@ -29,3 +29,8 @@
 - Date: 2026-10-06
 - Decision: icon via the kit's `info` icon; surface, border and text colours from tokens; contrast checked.
 - Human confirmation required: yes, a design check at PR review.
+
+### FD-05 — Tip sits before "Enter event" on the Calendar toolbar; 150ms leave grace
+- Date: 2026-10-06
+- Decision: on the Calendar toolbar the "i" goes before the link, not after, so the existing FAM-UI-02 T-09 invariant (the link is directly before D/W/M) holds with no test change. Elsewhere it sits after the button. The tip closes 150ms after the pointer leaves, so crossing from the "i" to the tip does not lose it.
+- Test changes caused: none.
