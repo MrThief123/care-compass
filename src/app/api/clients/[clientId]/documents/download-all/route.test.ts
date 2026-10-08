@@ -93,8 +93,8 @@ describe("[F0-25][AC-11] download-all route failures", () => {
     expect(await response.json()).toEqual({ message: "Documents are not available yet." });
   });
 
-  it("[F0-25][AC-11] a missing storage object fails the whole request, no partial zip", async () => {
-    mocks.files = { "p/a": "AAA", "p/b": null };
+  it("[F0-25][AC-11] an unreadable first storage object fails the request, no partial zip", async () => {
+    mocks.files = { "p/a": null, "p/b": "BBB" };
     const response = await call();
     expect(response.status).toBe(502);
     expect(response.headers.get("content-type")).not.toBe("application/zip");

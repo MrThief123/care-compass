@@ -35,5 +35,13 @@ None.
 ### FD-08 — Shared Lane S edit
 - `src/components/shared/nav-config.ts` gets one additive Family item (flagged, kept in this PR; precedent FAM-17 FD-02).
 
+### FD-09 — Download all is a plain link
+- The link points at the zip route with `download`. A refusal (mock mode, 401, 404, 413) shows the browser's own failed-download notice rather than an in-page message. Revisit if users hit the 300-file limit.
+
+### FD-10 — Zip stream failure after the first file
+- The first file is read before the response starts (clean 502). A later failure errors the stream so the browser reports a failed download instead of saving a broken archive.
+
 ## Test expectation changes
-None yet.
+- `src/components/shared/rail.test.tsx` [F0-15][AC-02]: Family rail list gains "Documents" after "Info" (before: Home, Info, Calendar, Budget, Settings). Reason: recorded requirement change CHG-058.
+- `src/features/carer-patients/carer-patients.test.tsx` [CAR-UI-02][AC-07]: patient tabs gain "Documents" after "Info" and its href. Reason: CHG-058.
+- HUMAN REVIEW: test expectation changed (both are additions, no assertion removed).

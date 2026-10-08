@@ -3,8 +3,8 @@
  * Read only by `src/server/documents/queries.ts` — never imported directly by
  * `src/app` or `src/features`.
  */
-import { DOCUMENTS, EVENT_DOCUMENTS } from "@/mocks/fixtures";
-import type { DocumentRef, EventDocument } from "@/types/domain";
+import { CARE_EVENTS, DOCUMENTS, EVENT_DOCUMENTS } from "@/mocks/fixtures";
+import type { ClientDocument, DocumentRef, EventDocument } from "@/types/domain";
 
 /** Oldest upload first (by instant, not string); ties by id ascending. */
 function oldestUploadFirst(
@@ -57,4 +57,42 @@ export function selectClientDocuments(
 
 export async function getClientDocuments(clientId: string): Promise<DocumentRef[]> {
   return selectClientDocuments(DOCUMENTS, clientId);
+}
+
+/** Type and size of the client-level fixtures, which `DocumentRef` does not carry. */
+const CLIENT_DOCUMENT_DETAILS: Record<string, { mimeType: string; sizeBytes: number }> = {
+  "doc-margaret-care-plan": { mimeType: "application/pdf", sizeBytes: 152_400 },
+  "doc-margaret-medication-schedule": { mimeType: "application/pdf", sizeBytes: 64_800 },
+};
+const DEFAULT_DETAILS = { mimeType: "application/pdf", sizeBytes: 100_000 };
+
+/** Newest upload first (by instant); ties by id ascending. */
+function newestUploadFirst(
+  a: Pick<ClientDocument, "id" | "uploadedAt">,
+  b: Pick<ClientDocument, "id" | "uploadedAt">,
+): number {
+  return oldestUploadFirst(b, a) || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0);
+}
+
+/**
+ * Every document of one client, client-level and event-attached, newest upload first (F0-25).
+ * Returns copies, so a caller that edits what it was given cannot change the fixtures.
+ */
+export async function getAllClientDocuments(clientId: string): Promise<ClientDocument[]> {
+  const clientLevel: ClientDocument[] = selectClientDocuments(DOCUMENTS, clientId).map(
+    (document) => ({
+      id: document.id,
+      clientId: document.clientId,
+      name: document.name,
+      ...(CLIENT_DOCUMENT_DETAILS[document.id] ?? DEFAULT_DETAILS),
+      uploadedAt: document.uploadedAt,
+      uploadedBy: document.uploadedBy,
+    }),
+  );
+  const eventTitles = new Map(CARE_EVENTS.map((event) => [event.id, event.title]));
+  const attached: ClientDocument[] = EVENT_DOCUMENTS.filter(
+    (document) => document.clientId === clientId,
+  ).map((document) => ({ ...document, eventTitle: eventTitles.get(document.eventId) }));
+
+  return [...clientLevel, ...attached].sort(newestUploadFirst);
 }

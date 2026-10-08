@@ -311,6 +311,17 @@ export const EventDocumentSchema = z.object({
 });
 export type EventDocument = z.infer<typeof EventDocumentSchema>;
 
+/**
+ * Any non-detached document of a client, for the Documents page (F0-25, CHG-058): a client-level
+ * file (no event) or a file attached to a care event, with the event's title for the "Attached
+ * to" column. Metadata only, like `EventDocument`.
+ */
+export const ClientDocumentSchema = EventDocumentSchema.extend({
+  eventId: z.string().optional(),
+  eventTitle: z.string().optional(),
+});
+export type ClientDocument = z.infer<typeof ClientDocumentSchema>;
+
 // ---------------------------------------------------------------------------
 // Carer notifications
 // ---------------------------------------------------------------------------

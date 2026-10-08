@@ -4,7 +4,9 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { ClientDocument } from "@/types/domain";
 
 const mocks = vi.hoisted(() => ({ getAllClientDocuments: vi.fn() }));
-vi.mock("@/server/documents/queries", () => ({ getAllClientDocuments: mocks.getAllClientDocuments }));
+vi.mock("@/server/documents/queries", () => ({
+  getAllClientDocuments: mocks.getAllClientDocuments,
+}));
 vi.mock("@/server/documents/actions", () => ({ getDocumentUrl: vi.fn() }));
 vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh: vi.fn() }) }));
 
@@ -19,7 +21,9 @@ const DOC: ClientDocument = {
   uploadedAt: "2026-10-02T09:30:00+11:00",
 };
 
-beforeEach(() => mocks.getAllClientDocuments.mockReset());
+beforeEach(() => {
+  mocks.getAllClientDocuments.mockReset();
+});
 
 describe("[F0-25][AC-13][AC-14] Family documents page", () => {
   it("[F0-25][AC-13] renders the client's documents and no upload control", async () => {

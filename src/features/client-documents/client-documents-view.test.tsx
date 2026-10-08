@@ -51,7 +51,9 @@ function rowNames(): string[] {
     .map((row) => within(row).getAllByRole("cell")[0]!.textContent ?? "");
 }
 
-beforeEach(() => mocks.getDocumentUrl.mockReset());
+beforeEach(() => {
+  mocks.getDocumentUrl.mockReset();
+});
 
 describe("[F0-25][AC-04] rows", () => {
   it("[F0-25][AC-04] shows name, type, size, date added in Melbourne time, who added it and the event", () => {
