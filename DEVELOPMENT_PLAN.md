@@ -1,7 +1,7 @@
 # DEVELOPMENT PLAN — Care Compass
 
 Version 0.2 · 17 September 2026 · Status: DRAFT (controlled after planning freeze) · Supersedes v0.1 dashboard-by-dashboard phases
-Totals: **95 active features** (96 listed; CAR-08 retired) · **518 acceptance criteria** across 5 phases (UI-04 and its 10 criteria added by CHG-004, 2026-09-19; UI-05 and its 13 criteria added under CHG-009, 2026-09-24; F0-17 and its 8 criteria added by CHG-010, 2026-09-24; CHG-020, 2026-09-25: FAM-UI-08 (6 criteria) and ADM-11 (5) added, FAM-UI-05 +5 criteria, CAR-08 and its 2 criteria retired; CHG-021, 2026-09-25: FAM-UI-05 +4 criteria; CHG-022, 2026-09-25: FAM-UI-05 +5 criteria; CHG-027, 2026-09-26: F0-18 and its 9 criteria added; CHG-037, 2026-09-30: F0-19 and its 6 criteria added; CHG-040, 2026-09-30: F0-20 and its 10 criteria added; CHG-041, 2026-10-01: F0-21 and its 6 criteria added; CHG-042, 2026-10-01: F0-22 and its 8 criteria added; CHG-045, 2026-10-02: F0-23 and its 8 criteria added; CHG-047, 2026-10-02: F0-24 (7 criteria) and INT-09 (5 criteria) added, every remaining post-sprint feature pulled into the sprint, sprint extended to D21; CHG-050, 2026-10-02: INT-10 and its 4 criteria added (PL-26 promoted); CHG-051, 2026-10-02: FAM-16 and its 11 criteria added (PL-27 promoted); CHG-052, 2026-10-02: INT-11 and its 8 criteria added (PL-25 promoted); ADM-09, 2026-10-03: 1 criterion grown to 9 (+8, FD-05); CHG-055, 2026-10-03: INT-12 and its 45 criteria added; OQ-40, 2026-10-03: INT-09 5 criteria rewritten and grown to 8 (+3); CHG-057, 2026-10-06: FAM-17 and its 10 criteria added (PL-05 tooltips promoted); the Jira import `docs/JIRA_BACKLOG.csv` predates all eight). Jira import: `docs/JIRA_BACKLOG.csv`.
+Totals: **96 active features** (97 listed; CAR-08 retired) · **534 acceptance criteria** across 5 phases (UI-04 and its 10 criteria added by CHG-004, 2026-09-19; UI-05 and its 13 criteria added under CHG-009, 2026-09-24; F0-17 and its 8 criteria added by CHG-010, 2026-09-24; CHG-020, 2026-09-25: FAM-UI-08 (6 criteria) and ADM-11 (5) added, FAM-UI-05 +5 criteria, CAR-08 and its 2 criteria retired; CHG-021, 2026-09-25: FAM-UI-05 +4 criteria; CHG-022, 2026-09-25: FAM-UI-05 +5 criteria; CHG-027, 2026-09-26: F0-18 and its 9 criteria added; CHG-037, 2026-09-30: F0-19 and its 6 criteria added; CHG-040, 2026-09-30: F0-20 and its 10 criteria added; CHG-041, 2026-10-01: F0-21 and its 6 criteria added; CHG-042, 2026-10-01: F0-22 and its 8 criteria added; CHG-045, 2026-10-02: F0-23 and its 8 criteria added; CHG-047, 2026-10-02: F0-24 (7 criteria) and INT-09 (5 criteria) added, every remaining post-sprint feature pulled into the sprint, sprint extended to D21; CHG-050, 2026-10-02: INT-10 and its 4 criteria added (PL-26 promoted); CHG-051, 2026-10-02: FAM-16 and its 11 criteria added (PL-27 promoted); CHG-052, 2026-10-02: INT-11 and its 8 criteria added (PL-25 promoted); ADM-09, 2026-10-03: 1 criterion grown to 9 (+8, FD-05); CHG-055, 2026-10-03: INT-12 and its 45 criteria added; OQ-40, 2026-10-03: INT-09 5 criteria rewritten and grown to 8 (+3); CHG-057, 2026-10-06: FAM-17 and its 10 criteria added (PL-05 tooltips promoted); CHG-058, 2026-10-08: F0-25 and its 16 criteria added (client Documents page); the Jira import `docs/JIRA_BACKLOG.csv` predates all eight). Jira import: `docs/JIRA_BACKLOG.csv`.
 
 ---
 
@@ -159,6 +159,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 | 16 | F0-22 | Client header wiring and family route guard | S | D12 | SPRINT | F0-06, F0-07, F0-15 | — | `feature/shared-client-header-wiring` | NOT STARTED |
 | 17 | F0-23 | Link uploaded documents to a new event | S | D13 | SPRINT | F0-11, F0-13, FAM-08 | — | `feature/shared-document-event-linking` | IN PROGRESS |
 | 18 | F0-24 | Auth emails: working reset and invite links, set-password page | S | D15–D16 | SPRINT | F0-07, F0-17, ADM-02 | — | `feature/shared-auth-emails` | NOT STARTED |
+| 19 | F0-25 | Client Documents page (Family and Carer) | S | D21 | SPRINT | F0-13, UI-04, FAM-UI-04, F0-15, CAR-UI-02 | — | `feature/shared-client-documents-page` | IN PROGRESS |
 
 ### Phase 3 — Data wiring & behaviour (parallel: Family · Carer · Admin)
 
@@ -769,6 +770,17 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Testing summary:** 1 unit, 2 e2e (reset and invite, reading the local Mailpit), 1 integration
 - **Requirements:** REQ-01, REQ-06
 - **Docs:** `docs/development/shared/shared-auth-emails/` · **Status:** NOT STARTED
+
+### F0-25 — Client Documents page (Family and Carer)
+- **Dashboard / stream:** shared · **Lane:** S · **Days:** D21 · **Sprint:** SPRINT · **PR target:** `main` · **Branch:** `feature/shared-client-documents-page`
+- **Description:** A Documents page per client (Family rail item, Carer patient tab): all documents, search, sort by name, size and date added, per-file open, and Download all as one .zip. Added by CHG-058. No migration (`uploaded_at` already exists).
+- **User value:** Families and carers find and take away any document in seconds.
+- **Dependencies:** F0-13, UI-04, FAM-UI-04, F0-15, CAR-UI-02 · **Blocking decisions:** None
+- **Jira summary:** Client Documents page with search, sort and download-all (Family and Carer)
+- **Acceptance criteria summary:** 16 criteria — nav item and tab; all-documents contract; row details; search; sort; no-match and empty states; Download all and zip route (access, errors, limit); open via signed URL; carer access; accessibility; regression
+- **Testing summary:** 3 unit, 1 route, 8 component, 1 regression
+- **Requirements:** CIS3 document storage
+- **Docs:** `docs/development/shared/shared-client-documents-page/` · **Status:** IN PROGRESS
 
 ## Phase 3 — Data wiring & behaviour (parallel: Family · Carer · Admin) — feature detail
 

@@ -1164,3 +1164,12 @@ Template for future entries:
 - Impact: DEVELOPMENT_PLAN.md gains the FAM-17 row and card (94 to 95 active, 508 to 518 criteria; next number FAM-18); PRD.md §17 notes PL-05's tooltips promoted. No contract, migration or dependency change. No existing test changes expected.
 - Human confirmation: the human owner, 2026-10-06 (in-session).
 - Docs updated: DECISIONS.md (this entry), DEVELOPMENT_PLAN.md, PRD.md §17, the FAM-17 pack.
+
+### CHG-058 — New feature F0-25: client Documents page (Family and Carer)
+- Date / requested by: 2026-10-08 / the human owner (in-session)
+- Type: scope addition (new feature)
+- Description: new shared feature **F0-25** (`docs/development/shared/shared-client-documents-page/`, `feature/shared-client-documents-page`, 16 criteria): a Documents page for a client, as a Family rail item and a Carer patient tab, with search, sort by name, size and date added, per-file open and Download all (.zip). Covers client-level and event documents. Carers may view and download for assigned patients on or off shift; no upload on the page.
+- Source / justification: human, in-session 2026-10-08, who also approved the zip approach (new dependency `fflate`) and asked for the schema check: `documents.uploaded_at` already gives date added, so there is no migration.
+- Impact: DEVELOPMENT_PLAN.md gains the F0-25 row and card (95 to 96 active, 518 to 534 criteria). New read function `getAllClientDocuments` in `src/server/documents/queries.ts` (additive). One additive item in the shared `nav-config.ts`. New API route and one dependency. Existing rail/tab test expectations gain one entry.
+- Human confirmation: the human owner, 2026-10-08 (in-session).
+- Docs updated: DECISIONS.md (this entry), DEVELOPMENT_PLAN.md, the F0-25 pack.
