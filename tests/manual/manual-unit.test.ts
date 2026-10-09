@@ -4,12 +4,12 @@
 
 import { describe, expect, it } from "vitest";
 
-import { formatMoney } from "@/lib/format/money";
-import { formatDuration } from "@/lib/format/duration";
-import { displayName } from "@/lib/format/display-name";
-import { ageFromDob } from "@/lib/format/age";
-import { isAustralianPhone, requiredPhoneError } from "@/lib/phone/au-phone";
 import { validateDocumentFile } from "@/lib/documents/validate-document";
+import { ageFromDob } from "@/lib/format/age";
+import { displayName } from "@/lib/format/display-name";
+import { formatDuration } from "@/lib/format/duration";
+import { formatMoney } from "@/lib/format/money";
+import { isAustralianPhone, requiredPhoneError } from "@/lib/phone/au-phone";
 
 describe("money", () => {
   it("shows a whole dollar amount", () => {
