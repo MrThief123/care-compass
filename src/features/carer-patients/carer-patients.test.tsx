@@ -270,15 +270,22 @@ describe("[CAR-UI-02] Patient header and tabs", () => {
     expect(screen.getByText("tab content")).toBeInTheDocument();
   });
 
-  it("[CAR-UI-02][AC-07] has tabs Home, Info, Calendar, Care log linking to the patient's routes", async () => {
+  it("[CAR-UI-02][AC-07] [F0-25][AC-02] has tabs Home, Info, Documents, Calendar, Care log linking to the patient's routes", async () => {
     await renderLayout(MARGARET);
 
     const nav = screen.getByRole("navigation", { name: /Margaret/ });
     const tabs = within(nav).getAllByRole("link");
-    expect(tabs.map((tab) => tab.textContent)).toEqual(["Home", "Info", "Calendar", "Care log"]);
+    expect(tabs.map((tab) => tab.textContent)).toEqual([
+      "Home",
+      "Info",
+      "Documents",
+      "Calendar",
+      "Care log",
+    ]);
     expect(tabs.map((tab) => tab.getAttribute("href"))).toEqual([
       `/carer/patients/${MARGARET}/home`,
       `/carer/patients/${MARGARET}/info`,
+      `/carer/patients/${MARGARET}/documents`,
       `/carer/patients/${MARGARET}/calendar`,
       `/carer/patients/${MARGARET}/tasks`,
     ]);

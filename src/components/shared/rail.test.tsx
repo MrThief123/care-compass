@@ -14,12 +14,12 @@ describe("Rail", () => {
     expect(await axe(container)).toHaveNoViolations();
   });
 
-  it("[F0-15][AC-02] Family rail items are exactly Home, Info, Calendar, Budget, Settings in order", () => {
+  it("[F0-15][AC-02][F0-25][AC-01] Family rail items are exactly Home, Info, Documents, Calendar, Budget, Settings in order", () => {
     render(<Rail role="family" basePath="/family/client-margaret" />);
     const labels = within(screen.getByRole("navigation"))
       .getAllByRole("link")
       .map((link) => link.textContent);
-    expect(labels).toEqual(["Home", "Info", "Calendar", "Budget", "Settings"]);
+    expect(labels).toEqual(["Home", "Info", "Documents", "Calendar", "Budget", "Settings"]);
   });
 
   // CHG-031: the Carer Calendar merged into Carer Home, so the rail has no Calendar item.
