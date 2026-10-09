@@ -14,6 +14,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:integration": "vitest run tests/integration",
+    "test:manual": "vitest run --config tests/manual/vitest.config.ts",
     "db:seed": "node scripts/seed.mjs",
     "db:types": "supabase gen types typescript --local > src/lib/supabase/database.types.ts",
     "check:client-bundle-secrets": "node scripts/check-client-bundle-secrets.mjs",
