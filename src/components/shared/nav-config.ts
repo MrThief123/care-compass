@@ -3,7 +3,7 @@
  * Home · Info · Calendar · Budget · Settings. Carer: Home · Patients ·
  * Calendar · Settings. Admin: Home · Manage · Staff · Clients ·
  * Settings."). Carer has no Calendar item since CHG-031 merged it into
- * Carer Home. The single source both `Rail` (nav list) and `ScreenTitle`
+ * Carer Home. Family gains Documents after Info (F0-25, CHG-058). The single source both `Rail` (nav list) and `ScreenTitle`
  * (header screen name derived from the route) read from.
  */
 import type { IconName } from "@/components/ui/icon";
@@ -19,6 +19,7 @@ export const RAIL_NAV_ITEMS: Record<Role, RailNavItemConfig[]> = {
   family: [
     { segment: "home", label: "Home", icon: "home" },
     { segment: "info", label: "Info", icon: "info" },
+    { segment: "documents", label: "Documents", icon: "file" },
     { segment: "calendar", label: "Calendar", icon: "calendar" },
     { segment: "budget", label: "Budget", icon: "dollar" },
     { segment: "settings", label: "Settings", icon: "sliders" },

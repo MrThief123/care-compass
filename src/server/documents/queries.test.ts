@@ -1,8 +1,12 @@
 // @vitest-environment node
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { EVENT_DOCUMENTS, MARGARET_CLIENT_ID } from "@/mocks/fixtures";
-import { getClientDocuments, getEventDocuments } from "@/server/documents/queries";
+import { DOCUMENTS, EVENT_DOCUMENTS, MARGARET_CLIENT_ID } from "@/mocks/fixtures";
+import {
+  getAllClientDocuments,
+  getClientDocuments,
+  getEventDocuments,
+} from "@/server/documents/queries";
 
 beforeEach(() => {
   vi.stubEnv("DATA_SOURCE", "mock");
@@ -98,3 +102,36 @@ describe("[FAM-UI-04][AC-03] getClientDocuments", () => {
 });
 
 // The Supabase branch is covered by [CAR-04][AC-08] in clients/info-sections.test.ts (FD-01).
+
+describe("[F0-25][AC-03] getAllClientDocuments (mock)", () => {
+  it("[F0-25][AC-03] returns client-level and event documents for the client only, newest upload first", async () => {
+    const documents = await getAllClientDocuments(MARGARET_CLIENT_ID);
+
+    const expectedIds = [
+      ...DOCUMENTS.filter((d) => d.clientId === MARGARET_CLIENT_ID).map((d) => d.id),
+      ...EVENT_DOCUMENTS.filter((d) => d.clientId === MARGARET_CLIENT_ID).map((d) => d.id),
+    ].sort();
+    expect(documents.map((d) => d.id).sort()).toEqual(expectedIds);
+    expect(documents.every((d) => d.clientId === MARGARET_CLIENT_ID)).toBe(true);
+
+    const times = documents.map((d) => Date.parse(d.uploadedAt));
+    expect(times).toEqual([...times].sort((a, b) => b - a));
+  });
+
+  it("[F0-25][AC-03] every document has a type and size, and event files carry the event title", async () => {
+    const documents = await getAllClientDocuments(MARGARET_CLIENT_ID);
+
+    expect(documents.every((d) => d.mimeType.length > 0 && d.sizeBytes > 0)).toBe(true);
+    const chart = documents.find((d) => d.id === "doc-margaret-medication-chart");
+    expect(chart?.eventId).toBeDefined();
+    expect(chart?.eventTitle).toBeTruthy();
+    const carePlan = documents.find((d) => d.id === "doc-margaret-care-plan");
+    expect(carePlan?.eventId).toBeUndefined();
+    expect(carePlan?.eventTitle).toBeUndefined();
+  });
+
+  it("[F0-25][AC-03] an unknown client, or an object-prototype name, returns []", async () => {
+    expect(await getAllClientDocuments("client-does-not-exist")).toEqual([]);
+    expect(await getAllClientDocuments("constructor")).toEqual([]);
+  });
+});
