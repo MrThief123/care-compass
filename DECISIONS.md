@@ -1180,5 +1180,5 @@ Template for future entries:
 - Description: the client-details screen is labelled **Client Details** instead of **Info** everywhere it is navigated to: the Family rail item (and the header screen name derived from it), the Carer patient tabs and the Admin client bar. The Family rail icon changes from the info circle (`info`) to an ID card (`id-card`, lucide `IdCard`). Routes stay `/info`; component and file names are unchanged.
 - Source / justification: human request, in-session 2026-10-10.
 - Impact: `src/components/shared/nav-config.ts`, `src/components/ui/icon.tsx` (one additive icon), `src/features/carer-patients/patient-tabs.tsx`, `src/features/admin-client-view/client-routes.ts`, and `src/components/shared/rail-nav.tsx` (rail labels centred, since "Client Details" wraps to two lines). Test expectations that named the "Info" link change to "Client Details" (rail, carer tabs, admin client bar and routes, and the app-shell, admin-client-view and cross-role-sync e2e specs); two new rail tests, for the icon and the centred labels. The Admin rail "Clients" item also changes from `info` to `id-card`, at the human's request.
-- Human confirmation: PENDING.
+- Human confirmation: the human owner, 2026-10-10 (in-session).
 - Docs updated: DECISIONS.md (this entry).
