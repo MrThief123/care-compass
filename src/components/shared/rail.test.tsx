@@ -36,6 +36,14 @@ describe("Rail", () => {
     expect(item).toEqual({ segment: "info", label: "Client Details", icon: "id-card" });
   });
 
+  // CHG-059: "Client Details" wraps to two lines in the rail, so each line stays centred under its icon.
+  it("[F0-15][PRD] centres every rail label, so a two-line label sits under its icon", () => {
+    render(<Rail role="family" basePath="/family/client-margaret" />);
+    for (const link of within(screen.getByRole("navigation")).getAllByRole("link")) {
+      expect(link).toHaveClass("text-center");
+    }
+  });
+
   // CHG-031: the Carer Calendar merged into Carer Home, so the rail has no Calendar item.
   it("[F0-15][AC-03] Carer rail items are exactly Home, Patients, Settings", () => {
     render(<Rail role="carer" basePath="/carer" />);
