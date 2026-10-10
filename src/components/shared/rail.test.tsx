@@ -44,6 +44,12 @@ describe("Rail", () => {
     }
   });
 
+  // CHG-059: the Admin Clients item shares the Family Client Details icon.
+  it("[F0-15][AC-04] Admin Clients item uses the id-card icon", () => {
+    const item = RAIL_NAV_ITEMS.admin.find((i) => i.segment === "clients");
+    expect(item?.icon).toBe("id-card");
+  });
+
   // CHG-031: the Carer Calendar merged into Carer Home, so the rail has no Calendar item.
   it("[F0-15][AC-03] Carer rail items are exactly Home, Patients, Settings", () => {
     render(<Rail role="carer" basePath="/carer" />);
