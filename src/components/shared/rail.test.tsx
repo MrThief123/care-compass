@@ -20,7 +20,14 @@ describe("Rail", () => {
     const labels = within(screen.getByRole("navigation"))
       .getAllByRole("link")
       .map((link) => link.textContent);
-    expect(labels).toEqual(["Home", "Client Details", "Documents", "Calendar", "Budget", "Settings"]);
+    expect(labels).toEqual([
+      "Home",
+      "Client Details",
+      "Documents",
+      "Calendar",
+      "Budget",
+      "Settings",
+    ]);
   });
 
   // CHG-059: Info became Client Details, with an ID card icon in place of the info circle.
