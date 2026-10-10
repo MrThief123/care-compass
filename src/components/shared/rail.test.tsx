@@ -6,6 +6,7 @@ vi.mock("next/navigation", () => ({
   usePathname: () => "/family/client-margaret/home",
 }));
 
+import { RAIL_NAV_ITEMS } from "./nav-config";
 import { Rail } from "./rail";
 
 describe("Rail", () => {
@@ -14,12 +15,18 @@ describe("Rail", () => {
     expect(await axe(container)).toHaveNoViolations();
   });
 
-  it("[F0-15][AC-02][F0-25][AC-01] Family rail items are exactly Home, Info, Documents, Calendar, Budget, Settings in order", () => {
+  it("[F0-15][AC-02][F0-25][AC-01] Family rail items are exactly Home, Client Details, Documents, Calendar, Budget, Settings in order", () => {
     render(<Rail role="family" basePath="/family/client-margaret" />);
     const labels = within(screen.getByRole("navigation"))
       .getAllByRole("link")
       .map((link) => link.textContent);
-    expect(labels).toEqual(["Home", "Info", "Documents", "Calendar", "Budget", "Settings"]);
+    expect(labels).toEqual(["Home", "Client Details", "Documents", "Calendar", "Budget", "Settings"]);
+  });
+
+  // CHG-059: Info became Client Details, with an ID card icon in place of the info circle.
+  it("[F0-15][AC-02] Family Client Details item uses the id-card icon", () => {
+    const item = RAIL_NAV_ITEMS.family.find((i) => i.segment === "info");
+    expect(item).toEqual({ segment: "info", label: "Client Details", icon: "id-card" });
   });
 
   // CHG-031: the Carer Calendar merged into Carer Home, so the rail has no Calendar item.

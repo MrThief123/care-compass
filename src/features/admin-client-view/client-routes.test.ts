@@ -15,10 +15,10 @@ describe("[ADM-11][AC-01] adminClientBase", () => {
 });
 
 describe("[ADM-11][AC-02] adminClientScreens", () => {
-  it("[ADM-11][AC-02] lists Home, Info, Calendar, Budget and Care log under the client", () => {
+  it("[ADM-11][AC-02] lists Home, Client Details, Calendar, Budget and Care log under the client", () => {
     expect(adminClientScreens("c1")).toEqual([
       { label: "Home", href: "/admin/clients/c1/home" },
-      { label: "Info", href: "/admin/clients/c1/info" },
+      { label: "Client Details", href: "/admin/clients/c1/info" },
       { label: "Calendar", href: "/admin/clients/c1/calendar" },
       { label: "Budget", href: "/admin/clients/c1/budget" },
       { label: "Care log", href: "/admin/clients/c1/tasks" },

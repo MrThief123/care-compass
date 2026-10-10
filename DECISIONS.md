@@ -1173,3 +1173,12 @@ Template for future entries:
 - Impact: DEVELOPMENT_PLAN.md gains the F0-25 row and card (95 to 96 active, 518 to 534 criteria). New read function `getAllClientDocuments` in `src/server/documents/queries.ts` (additive). One additive item in the shared `nav-config.ts`. New API route and one dependency. Existing rail/tab test expectations gain one entry.
 - Human confirmation: the human owner, 2026-10-08 (in-session).
 - Docs updated: DECISIONS.md (this entry), DEVELOPMENT_PLAN.md, the F0-25 pack.
+
+### CHG-059 — "Info" tab renamed "Client Details", with an ID card icon
+- Date / requested by: 2026-10-10 / the human owner (in-session)
+- Type: copy and icon change (no behaviour change)
+- Description: the client-details screen is labelled **Client Details** instead of **Info** everywhere it is navigated to: the Family rail item (and the header screen name derived from it), the Carer patient tabs and the Admin client bar. The Family rail icon changes from the info circle (`info`) to an ID card (`id-card`, lucide `IdCard`). Routes stay `/info`; component and file names are unchanged.
+- Source / justification: human request, in-session 2026-10-10.
+- Impact: `src/components/shared/nav-config.ts`, `src/components/ui/icon.tsx` (one additive icon), `src/features/carer-patients/patient-tabs.tsx`, `src/features/admin-client-view/client-routes.ts`. Test expectations that named the "Info" link change to "Client Details" (rail, carer tabs, admin client bar and routes, and the app-shell, admin-client-view and cross-role-sync e2e specs); one new rail test for the icon. The Admin rail "Clients" item keeps its `info` icon.
+- Human confirmation: PENDING.
+- Docs updated: DECISIONS.md (this entry).

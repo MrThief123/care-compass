@@ -179,7 +179,7 @@ test.describe("Cross-role sync in a real browser", () => {
           // Still showing the old text until it moves: nothing pushes to an open page.
           await page.getByRole("link", { name: "Calendar", exact: true }).first().click();
           await page.waitForLoadState("networkidle");
-          await page.getByRole("link", { name: "Info", exact: true }).first().click();
+          await page.getByRole("link", { name: "Client Details", exact: true }).first().click();
           await expect(page.getByText(text), `${reader} reads ${writer}'s change`).toBeVisible();
           await expect(page.getByText("Tea at 7am.")).toHaveCount(0);
         }
