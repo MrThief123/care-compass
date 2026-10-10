@@ -33,7 +33,7 @@ export const RAIL_NAV_ITEMS: Record<Role, RailNavItemConfig[]> = {
     { segment: "home", label: "Home", icon: "home" },
     { segment: "manage", label: "Manage", icon: "clipboard-check" },
     { segment: "staff", label: "Staff", icon: "person" },
-    { segment: "clients", label: "Clients", icon: "info" },
+    { segment: "clients", label: "Clients", icon: "id-card" },
     { segment: "settings", label: "Settings", icon: "sliders" },
   ],
 };
