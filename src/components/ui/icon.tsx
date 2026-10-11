@@ -14,6 +14,7 @@ import {
   File,
   Info,
   Home,
+  IdCard,
   Loader2,
   LogOut,
   Plus,
@@ -27,6 +28,7 @@ import {
 const ICONS = {
   home: Home,
   info: Info,
+  "id-card": IdCard,
   calendar: Calendar,
   dollar: CircleDollarSign,
   sliders: SlidersHorizontal,

@@ -34,7 +34,7 @@ export function RailNav({ role, basePath }: RailNavProps) {
             prefetch
             aria-current={active ? "page" : undefined}
             className={cn(
-              "flex flex-col items-center gap-1 rounded-control py-3 text-label-caps",
+              "flex flex-col items-center gap-1 rounded-control py-3 text-center text-label-caps",
               active ? "bg-bg-surface text-text-brand" : "text-text-on-dark hover:bg-white/10",
             )}
           >

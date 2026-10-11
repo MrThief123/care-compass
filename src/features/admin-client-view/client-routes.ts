@@ -10,7 +10,7 @@ export function adminClientScreens(clientId: string): AdminClientScreen[] {
   const base = adminClientBase(clientId);
   return [
     { label: "Home", href: `${base}/home` },
-    { label: "Info", href: `${base}/info` },
+    { label: "Client Details", href: `${base}/info` },
     { label: "Calendar", href: `${base}/calendar` },
     { label: "Budget", href: `${base}/budget` },
     { label: "Care log", href: `${base}/tasks` },
