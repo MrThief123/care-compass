@@ -17,5 +17,7 @@ Last updated: 2026-10-11
 ## Completed
 - Claimed; feature pack written; CHG-060 recorded
 
+- Tests written first and run: 27 of 28 fail for the right reason (`deleteEventOccurrence`, `DeleteEventButton`, 'Ends' and `endDate` do not exist yet)
+
 ## Next
-- Tests first (T-01 to T-09), then implementation
+- Implementation
