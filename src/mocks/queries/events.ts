@@ -306,6 +306,8 @@ export interface CreateEventInput {
   durationMinutes: number;
   recurrenceFrequency: CareEvent["recurrenceFrequency"];
   completionMode: CareEvent["completionMode"];
+  /** ISO date the series stops after, inclusive (FAM-18); absent repeats forever. */
+  recurrenceEndDate?: string;
 }
 
 /**
@@ -327,6 +329,7 @@ export async function createEvent(input: CreateEventInput): Promise<string> {
     durationMinutes: input.durationMinutes,
     recurrenceFrequency: input.recurrenceFrequency,
     completionMode: input.completionMode,
+    ...(input.recurrenceEndDate ? { recurrenceEndDate: input.recurrenceEndDate } : {}),
   };
   CARE_EVENTS.push(event);
 
@@ -361,6 +364,8 @@ export interface UpdateEventInput {
   recurrenceFrequency: CareEvent["recurrenceFrequency"];
   completionMode: CareEvent["completionMode"];
   scope: "occurrence" | "series";
+  /** FAM-18: a date sets the series end, `null` clears it, absent leaves it. */
+  recurrenceEndDate?: string | null;
 }
 
 /**
@@ -394,6 +399,13 @@ export async function updateEvent(input: UpdateEventInput): Promise<void> {
   event.recurrenceFrequency = input.recurrenceFrequency;
   event.completionMode = input.completionMode;
   event.durationMinutes = input.durationMinutes;
+  if (input.recurrenceEndDate !== undefined) {
+    if (input.recurrenceEndDate && input.recurrenceFrequency !== "none") {
+      event.recurrenceEndDate = input.recurrenceEndDate;
+    } else {
+      delete event.recurrenceEndDate;
+    }
+  }
   if (input.scope === "series" && !wasRecurring) {
     event.start = input.startsAt;
   }
@@ -413,6 +425,67 @@ export async function updateEvent(input: UpdateEventInput): Promise<void> {
       row.start = input.startsAt;
     }
   }
+}
+
+export interface DeleteEventOccurrenceInput {
+  clientId: string;
+  eventId: string;
+  /** The deleted occurrence's original start (its `key`'s second half). */
+  occurrenceOriginalStart: string;
+  scope: "occurrence" | "future";
+  /** The Melbourne day before the occurrence, for 'future' (computed by the action). */
+  dayBefore: string;
+}
+
+/**
+ * Phase 1 mock mutation for FAM-18, mirroring the Supabase rules: 'occurrence' (and any one-off)
+ * removes that occurrence's row; 'future' removes it and every later not-done row and ends the
+ * event the day before. A Done occurrence is refused. Rows are static fixtures, so removing a row
+ * is how a cancelled override reads here.
+ */
+export async function deleteEventOccurrence(
+  input: DeleteEventOccurrenceInput,
+): Promise<"deleted" | "not-found" | "done"> {
+  const event = CARE_EVENTS.find(
+    (candidate) => candidate.id === input.eventId && candidate.clientId === input.clientId,
+  );
+  if (!event) return "not-found";
+
+  const tables = [
+    OCCURRENCES_BY_CLIENT_ID,
+    UPCOMING_OCCURRENCES_BY_CLIENT_ID,
+    PLAIN_EVENT_OCCURRENCES_BY_CLIENT_ID,
+  ] as unknown as Record<string, AnyOccurrence[]>[];
+  const originalStartOf = (row: AnyOccurrence) => row.key.slice(row.eventId.length + 1);
+  const isDone = (row: AnyOccurrence) => !isPlainEvent(row) && row.status === "done";
+  const targetKey = `${input.eventId}:${input.occurrenceOriginalStart}`;
+
+  const target = tables
+    .flatMap((table) => (Object.hasOwn(table, input.clientId) ? table[input.clientId]! : []))
+    .find((row) => row.key === targetKey);
+  if (!target) return "not-found";
+  if (isDone(target)) return "done";
+
+  const cutoff = Date.parse(input.occurrenceOriginalStart);
+  const removes = (row: AnyOccurrence) =>
+    row.eventId === input.eventId &&
+    (input.scope === "future" && event.recurrenceFrequency !== "none"
+      ? Date.parse(originalStartOf(row)) >= cutoff && !isDone(row)
+      : row.key === targetKey);
+
+  for (const table of tables) {
+    const rows = Object.hasOwn(table, input.clientId) ? table[input.clientId] : undefined;
+    if (!rows) continue;
+    for (let index = rows.length - 1; index >= 0; index -= 1) {
+      if (removes(rows[index]!)) rows.splice(index, 1);
+    }
+  }
+
+  if (input.scope === "future" && event.recurrenceFrequency !== "none") {
+    const current = event.recurrenceEndDate;
+    event.recurrenceEndDate = current && current < input.dayBefore ? current : input.dayBefore;
+  }
+  return "deleted";
 }
 
 /** A carer's shift for a client, with the carer's full name (`client_shift_carers`). */

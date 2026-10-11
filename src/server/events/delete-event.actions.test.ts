@@ -32,7 +32,9 @@ vi.mock("@/lib/supabase/server", () => {
     for (const name of ["select", "eq", "order", "limit"]) chain[name] = () => chain;
     chain.single = async () => result();
     chain.maybeSingle = async () =>
-      state.op === "select" ? { data: mocks.reads.get(`${table}:select`) ?? null, error: null } : result();
+      state.op === "select"
+        ? { data: mocks.reads.get(`${table}:select`) ?? null, error: null }
+        : result();
     chain.then = (resolve: (value: unknown) => void) => resolve(result());
     return chain;
   }

@@ -28,3 +28,20 @@ None.
 ### FD-05 — Delete lives on Task detail only; design gap
 - Date: 2026-10-11
 - Decision: matches "when you view an event". No Figma frame: built from tokens and flagged for design review.
+
+### FD-06 — 'Ends' built in the Family feature, not the shared kit
+- Date: 2026-10-11
+- Decision: the field is rendered by `EventFormScreen` and held in its state, so no Lane S file changes. It sits under Title/times (the kit fixes the order), not directly under 'Recurring'. CHG-060 and the PRD said the shared `EventFormValues` would gain `endDate`; that is no longer needed.
+
+### FD-07 — Task detail gains opt-in `canDelete` and `recurring` props
+- Date: 2026-10-11
+- Decision: the Admin client view renders the same `TaskDetailView` and (pre-existing) still shows an 'Edit event' link, so Delete follows its own flag, off by default. The Family page and the on-shift Carer page set it; Admin never does (AC-16). The Carer page now also reads `getEvent` to know whether the event repeats, but does not pass `event` (that would add the Details card and cost to the Carer page).
+
+### FD-08 — Existing tests changed (infrastructure only)
+- Date: 2026-10-11
+- Tests: `src/app/(family)/family/[clientId]/tasks/[occurrenceKey]/page.test.tsx`, `page.fam15.test.tsx`, `page.edge.test.tsx`.
+- Before: rendered the Task detail page with no router. After: each adds a `next/navigation` mock (`useRouter`, keeping `notFound`), because Task detail now holds the client-side 'Delete event' button. No assertion changed or removed. Not a behaviour change, so no HUMAN REVIEW flag.
+
+### FD-09 — Local test runs need DATA_SOURCE=mock
+- Date: 2026-10-11
+- `.env.local` sets `DATA_SOURCE=supabase` (hosted project), so on this machine `npx vitest run` fails 30+ unrelated mock-contract tests unless run as `DATA_SOURCE=mock npx vitest run`. Not caused by this feature; recorded so the PR's test commands are reproducible.

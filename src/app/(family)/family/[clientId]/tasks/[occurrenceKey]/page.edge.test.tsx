@@ -6,6 +6,11 @@ const getEventDocuments = vi.hoisted(() => vi.fn());
 const getEvent = vi.hoisted(() => vi.fn());
 const getBudgetSummary = vi.hoisted(() => vi.fn());
 
+// FAM-18: Task detail now holds a client 'Delete event' button that calls `useRouter`.
+vi.mock("next/navigation", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("next/navigation")>()),
+  useRouter: () => ({ push: () => {}, refresh: () => {} }),
+}));
 vi.mock("@/server/events/queries", () => ({ getOccurrence, getEvent }));
 vi.mock("@/server/budget/queries", () => ({ getBudgetSummary }));
 vi.mock("@/server/documents/queries", () => ({ getEventDocuments }));

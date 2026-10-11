@@ -69,6 +69,7 @@ export default async function EditEventPage({
       documents={documents}
       buckets={buckets}
       initialCost={costValuesFromEvent(event)}
+      initialEndDate={event.recurrenceEndDate}
       returnHref={editEventReturnHref(clientId, viewed?.key, origin)}
     />
   );

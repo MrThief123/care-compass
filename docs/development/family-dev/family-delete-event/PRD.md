@@ -83,5 +83,5 @@ Care plans stay accurate: cancelled appointments disappear, and a course of care
 
 ## Technical Considerations
 - New server action `deleteEventOccurrence` in `src/server/events/actions.ts` (mock and Supabase branches). Cancel uses the existing `care_event_overrides` upsert (kind `cancelled`); future sets `care_events.recurrence_until`. No new contract is shared with another in-flight feature, but `createEvent` / `updateEvent` gain an optional `endDate` (CLAUDE.md §3 contracts rule: checked, none other in flight).
-- `EventFormValues` (shared forms kit) gains `endDate`: an additive, flagged Lane S edit kept in this PR (precedent CHG-051).
+- 'Ends' is built in `src/features/family-event-form/` through the `extraFields` slot, like Title and Cost, so the shared forms kit (`EventForm`, `EventFormValues`) is not touched (FD-06).
 - Carer routes reuse the Family screens; any carer page edit is additive (props only).

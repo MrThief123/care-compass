@@ -8,7 +8,7 @@
  */
 import { z } from "zod";
 
-import { localToMelbourneIso } from "@/lib/dates/melbourne-time";
+import { localToMelbourneIso, melbourneDateKey } from "@/lib/dates/melbourne-time";
 import { getDataSourceMode } from "@/server/data-source";
 import { parseOccurrenceKey } from "@/server/events/occurrence-key";
 import { RECURRENCE_TO_DB } from "@/server/events/recurrence-mapping";
@@ -212,6 +212,12 @@ export async function setOccurrenceUndone(key: string): Promise<ActionResult<und
 const LOCAL_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 const LOCAL_TIME_PATTERN = /^([01]\d|2[0-3]):([0-5]\d)$/;
 
+/** FAM-18: an 'Ends' date before the event's Date. The form checks it first; this is the backstop. */
+const END_BEFORE_DATE_RESULT: ActionResult<never> = {
+  ok: false,
+  error: { code: "VALIDATION", message: "Ends must be on or after the Date." },
+};
+
 /** An event's cost and the bucket that pays it (FAM-11, FD-07). */
 const EventCostSchema = z.object({
   amount: z.number().positive().multipleOf(0.01),
@@ -263,6 +269,8 @@ const CreateEventInputSchema = z.object({
   isTask: z.boolean(),
   /** Cost and bucket (FAM-11); absent for no cost. */
   cost: EventCostSchema.optional(),
+  /** FAM-18: the day the series stops after, inclusive; absent repeats forever. */
+  endDate: z.string().regex(LOCAL_DATE_PATTERN).optional(),
 });
 export type CreateEventInput = z.infer<typeof CreateEventInputSchema>;
 
@@ -298,7 +306,11 @@ async function createEventImpl(input: CreateEventInput): Promise<ActionResult<Cr
     recurrence,
     isTask,
     cost,
+    endDate,
   } = parsed.data;
+  if (endDate && endDate < date) return END_BEFORE_DATE_RESULT;
+  // A one-off has nothing to end.
+  const recurrenceEnd = recurrence !== "none" ? endDate : undefined;
   const startsAt = localToMelbourneIso(`${date}T${startTime}`);
   const completionMode = isTask ? "manual" : "automatic";
 
@@ -313,6 +325,7 @@ async function createEventImpl(input: CreateEventInput): Promise<ActionResult<Cr
       durationMinutes,
       recurrenceFrequency: recurrence,
       completionMode,
+      ...(recurrenceEnd ? { recurrenceEndDate: recurrenceEnd } : {}),
     });
     return { ok: true, data: { eventId } };
   }
@@ -329,6 +342,7 @@ async function createEventImpl(input: CreateEventInput): Promise<ActionResult<Cr
         starts_at: startsAt,
         duration_minutes: durationMinutes,
         recurrence: RECURRENCE_TO_DB[recurrence],
+        recurrence_until: recurrenceEnd ?? null,
         completion_mode: completionMode,
       })
       .select("id")
@@ -412,6 +426,8 @@ const UpdateEventInputSchema = z.object({
   scope: UpdateEventScopeSchema,
   /** Cost and bucket (FAM-11): a value sets them, `null` clears them, absent leaves them as they are. */
   cost: EventCostSchema.nullable().optional(),
+  /** FAM-18: a date sets the series end, `null` clears it, absent leaves it as it is. */
+  endDate: z.string().regex(LOCAL_DATE_PATTERN).nullable().optional(),
 });
 export type UpdateEventInput = z.infer<typeof UpdateEventInputSchema>;
 
@@ -461,7 +477,11 @@ async function updateEventImpl(input: UpdateEventInput): Promise<ActionResult<Up
     isTask,
     scope,
     cost,
+    endDate,
   } = parsed.data;
+  if (endDate && endDate < date) return END_BEFORE_DATE_RESULT;
+  // A one-off has nothing to end, so stopping a repeat clears the end date too.
+  const recurrenceEnd = recurrence === "none" && endDate !== undefined ? null : endDate;
   const startsAt = localToMelbourneIso(`${date}T${startTime}`);
   const completionMode = isTask ? "manual" : "automatic";
 
@@ -480,6 +500,7 @@ async function updateEventImpl(input: UpdateEventInput): Promise<ActionResult<Up
         recurrenceFrequency: recurrence,
         completionMode,
         scope,
+        ...(recurrenceEnd !== undefined ? { recurrenceEndDate: recurrenceEnd } : {}),
       });
       return { ok: true, data: { eventId } };
     } catch (error) {
@@ -502,6 +523,7 @@ async function updateEventImpl(input: UpdateEventInput): Promise<ActionResult<Up
       recurrence: RECURRENCE_TO_DB[recurrence],
       duration_minutes: durationMinutes,
       completion_mode: completionMode,
+      ...(recurrenceEnd !== undefined ? { recurrence_until: recurrenceEnd } : {}),
     };
 
     if (scope === "occurrence") {
@@ -578,6 +600,155 @@ export async function updateEvent(
   ...args: Parameters<typeof updateEventImpl>
 ): ReturnType<typeof updateEventImpl> {
   const result = await updateEventImpl(...args);
+  if ((result as { ok?: boolean }).ok !== false) refreshCachedPages();
+  return result;
+}
+
+const DeleteEventOccurrenceInputSchema = z.object({
+  clientId: z.string().min(1),
+  eventId: z.string().min(1),
+  /** The deleted occurrence's original start (its identity, PD-004). */
+  occurrenceOriginalStart: z.string().min(1),
+  scope: z.enum(["occurrence", "future"]),
+});
+export type DeleteEventOccurrenceInput = z.infer<typeof DeleteEventOccurrenceInputSchema>;
+
+const DELETE_EVENT_FAILED_MESSAGE = "Couldn't delete. Please try again.";
+const DELETE_EVENT_NOT_ALLOWED = "Not permitted to delete this event.";
+const DELETE_EVENT_DONE_MESSAGE = "Completed care can't be deleted.";
+
+/** `YYYY-MM-DD` minus one day. */
+function dayBefore(date: string): string {
+  const [year, month, day] = date.split("-").map(Number);
+  return new Date(Date.UTC(year!, month! - 1, day! - 1)).toISOString().slice(0, 10);
+}
+
+/**
+ * FAM-18: deletes one occurrence of an event, or that occurrence and every later one. Nothing is
+ * physically removed (no role has DELETE, and completions are append-only): "occurrence" upserts a
+ * `cancelled` override (PD-004); "future" ends the series the Melbourne day before the occurrence
+ * by setting `recurrence_until`, never lengthening an earlier end. A one-off event has one
+ * occurrence, so either scope cancels it. A Done occurrence is refused. Permission is RLS's
+ * (`can_edit_care_events`: the client's family, or a carer on shift), not re-checked here.
+ */
+async function deleteEventOccurrenceImpl(
+  input: DeleteEventOccurrenceInput,
+): Promise<ActionResult<undefined>> {
+  const parsed = DeleteEventOccurrenceInputSchema.safeParse(input);
+  if (!parsed.success) {
+    return {
+      ok: false,
+      error: { code: "VALIDATION", message: DELETE_EVENT_FAILED_MESSAGE },
+    };
+  }
+  const { clientId, eventId, occurrenceOriginalStart, scope } = parsed.data;
+  const notAllowed: ActionResult<never> = {
+    ok: false,
+    error: { code: "NOT_ALLOWED", message: DELETE_EVENT_NOT_ALLOWED },
+  };
+  const done: ActionResult<never> = {
+    ok: false,
+    error: { code: "VALIDATION", message: DELETE_EVENT_DONE_MESSAGE },
+  };
+
+  if (getDataSourceMode() === "mock") {
+    const mockEvents = await import("@/mocks/queries/events");
+    const outcome = await mockEvents.deleteEventOccurrence({
+      clientId,
+      eventId,
+      occurrenceOriginalStart,
+      scope,
+      dayBefore: dayBefore(melbourneDateKey(occurrenceOriginalStart)),
+    });
+    if (outcome === "done") return done;
+    if (outcome === "not-found") {
+      return { ok: false, error: { code: "NOT_FOUND", message: "That event could not be found." } };
+    }
+    return { ok: true, data: undefined };
+  }
+
+  try {
+    const { createClient } = await import("@/lib/supabase/server");
+    const supabase = await createClient();
+
+    const { data: event, error: readError } = await supabase
+      .from("care_events")
+      .select("id, starts_at, recurrence, recurrence_until")
+      .eq("id", eventId)
+      .eq("client_id", clientId)
+      .maybeSingle();
+    // Read access is at least as broad as delete access, so an unreadable event is NOT_ALLOWED,
+    // the same answer as a refused write: it does not say which.
+    if (readError || !event) return notAllowed;
+
+    const { data: latest, error: completionError } = await supabase
+      .from("care_event_completions")
+      .select("action")
+      .eq("event_id", eventId)
+      .eq("original_start", occurrenceOriginalStart)
+      .order("seq", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (completionError) {
+      return { ok: false, error: { code: "UNEXPECTED", message: DELETE_EVENT_FAILED_MESSAGE } };
+    }
+    if (latest?.action === "done") return done;
+
+    if (scope === "future" && event.recurrence !== null) {
+      const endsOn = dayBefore(melbourneDateKey(occurrenceOriginalStart));
+      const { error } = await supabase
+        .from("care_events")
+        .update({
+          recurrence_until:
+            event.recurrence_until && event.recurrence_until < endsOn
+              ? event.recurrence_until
+              : endsOn,
+        })
+        .eq("id", eventId)
+        .eq("client_id", clientId)
+        .select("id")
+        .single();
+      if (error) return mapDeleteEventError(error.code);
+      return { ok: true, data: undefined };
+    }
+
+    const { error } = await supabase.from("care_event_overrides").upsert(
+      {
+        event_id: eventId,
+        client_id: clientId,
+        original_start: occurrenceOriginalStart,
+        kind: "cancelled",
+        // A cancelled row carries no new values (care_event_overrides_kind_shape), so a prior
+        // 'modified' override on this occurrence is overwritten cleanly.
+        new_starts_at: null,
+        new_duration_minutes: null,
+        new_completion_mode: null,
+      },
+      { onConflict: "event_id,original_start" },
+    );
+    if (error) return mapDeleteEventError(error.code);
+    return { ok: true, data: undefined };
+  } catch (error) {
+    console.error(
+      "[events] deleteEventOccurrence failed:",
+      error instanceof Error ? error.name : "unknown",
+    );
+    return { ok: false, error: { code: "UNEXPECTED", message: DELETE_EVENT_FAILED_MESSAGE } };
+  }
+}
+
+function mapDeleteEventError(code: string | null | undefined): ActionResult<never> {
+  // RLS silently drops an UPDATE's row rather than raising; PGRST116 is `.single()` seeing none.
+  if (code === "42501" || code === "PGRST116") {
+    return { ok: false, error: { code: "NOT_ALLOWED", message: DELETE_EVENT_NOT_ALLOWED } };
+  }
+  return { ok: false, error: { code: "UNEXPECTED", message: DELETE_EVENT_FAILED_MESSAGE } };
+}
+
+export async function deleteEventOccurrence(
+  ...args: Parameters<typeof deleteEventOccurrenceImpl>
+): ReturnType<typeof deleteEventOccurrenceImpl> {
+  const result = await deleteEventOccurrenceImpl(...args);
   if ((result as { ok?: boolean }).ok !== false) refreshCachedPages();
   return result;
 }

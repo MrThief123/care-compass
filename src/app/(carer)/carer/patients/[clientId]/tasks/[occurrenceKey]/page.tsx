@@ -6,7 +6,7 @@ import { resolveTaskDetailOrigin } from "@/features/family-task-detail/task-deta
 import { TaskDetailView } from "@/features/family-task-detail/task-detail-view";
 import { decodeOccurrenceKey } from "@/features/family-task-log/task-routes";
 import { getEventDocuments } from "@/server/documents/queries";
-import { getOccurrence, getToday } from "@/server/events/queries";
+import { getEvent, getOccurrence, getToday } from "@/server/events/queries";
 
 /**
  * Carer · Task detail (CAR-06 FD-02, CHG-048): the Family Task detail under the carer's own
@@ -29,7 +29,10 @@ export default async function CarerTaskDetailPage({
 
   if (!occurrence) notFound();
 
-  const documents = await getEventDocuments(clientId, occurrence.eventId);
+  const [documents, event] = await Promise.all([
+    getEventDocuments(clientId, occurrence.eventId),
+    getEvent(clientId, occurrence.eventId),
+  ]);
 
   return (
     <TaskDetailView
@@ -37,6 +40,8 @@ export default async function CarerTaskDetailPage({
       occurrence={occurrence}
       documents={documents}
       origin={origin}
+      canDelete={patient.onShift}
+      recurring={event !== undefined && event.recurrenceFrequency !== "none"}
       basePath={carerPatientBase(clientId)}
       canEdit={patient.onShift}
     />

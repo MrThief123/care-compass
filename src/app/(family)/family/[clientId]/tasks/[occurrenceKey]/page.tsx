@@ -45,6 +45,8 @@ export default async function TaskDetailPage({
       documents={documents}
       origin={origin}
       event={event}
+      canDelete
+      recurring={event !== undefined && event.recurrenceFrequency !== "none"}
       bucketName={bucketName}
     />
   );

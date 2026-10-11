@@ -1,9 +1,15 @@
 import { render, screen, within } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { taskDetailHref } from "@/features/family-task-log/task-routes";
 
 import TaskDetailPage from "./page";
+
+// FAM-18: Task detail now holds a client 'Delete event' button that calls `useRouter`.
+vi.mock("next/navigation", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("next/navigation")>()),
+  useRouter: () => ({ push: () => {}, refresh: () => {} }),
+}));
 
 const ID = "client-margaret";
 const MORNING_MEDICATION_KEY = "event-margaret-morning-meds:2026-11-30T09:00:00+11:00";

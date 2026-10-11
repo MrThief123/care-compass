@@ -10,7 +10,7 @@ import { getOccurrences } from "@/server/events/queries";
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn(), revalidateTag: vi.fn() }));
 
 const CLIENT = "client-margaret";
-const RANGE = { from: "2020-01-01", to: "2040-12-31" };
+const RANGE = { from: "2026-11-23", to: "2026-12-06" };
 
 beforeEach(() => vi.stubEnv("DATA_SOURCE", "mock"));
 

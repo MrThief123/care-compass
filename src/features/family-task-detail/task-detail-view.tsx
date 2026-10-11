@@ -20,6 +20,8 @@ import {
 } from "@/types/domain";
 
 import { BackLink } from "./back-link";
+import { DeleteEventButton } from "./delete-event-button";
+import { backLinkFor } from "./task-detail-origin";
 
 import type { TaskDetailOrigin } from "./task-detail-origin";
 
@@ -37,6 +39,12 @@ export interface TaskDetailViewProps {
   basePath?: string;
   /** False: no Edit event link (a carer with no shift in progress, CHG-048). */
   canEdit?: boolean;
+  /**
+   * FAM-18: show 'Delete event' (a Family or on-shift Carer page sets it; Admin never does, and
+   * it is off by default). `recurring` makes the dialog offer 'This and all future occurrences'.
+   */
+  canDelete?: boolean;
+  recurring?: boolean;
   /** The event itself: adds the Details card (repeat, times, tick-off, cost). Absent: no card. */
   event?: CareEvent;
   /** Name of the bucket that pays the event's cost. */
@@ -78,6 +86,8 @@ export function TaskDetailView({
   origin,
   basePath,
   canEdit = true,
+  canDelete = false,
+  recurring = false,
   event,
   bucketName,
 }: TaskDetailViewProps) {
@@ -127,12 +137,24 @@ export function TaskDetailView({
             </p>
           </div>
           {canEdit && (
-            <Link
-              href={editEventHrefFrom(clientId, occurrence, origin, basePath)}
-              className={EDIT_EVENT_BUTTON}
-            >
-              Edit event
-            </Link>
+            <div className="flex flex-wrap items-center gap-2">
+              <Link
+                href={editEventHrefFrom(clientId, occurrence, origin, basePath)}
+                className={EDIT_EVENT_BUTTON}
+              >
+                Edit event
+              </Link>
+              {/* FAM-18: completed care stays in the record, so a Done occurrence has no delete. */}
+              {canDelete && (plain || occurrence.status !== "done") && (
+                <DeleteEventButton
+                  clientId={clientId}
+                  eventId={occurrence.eventId}
+                  occurrenceKey={occurrence.key}
+                  recurring={recurring}
+                  returnHref={backLinkFor(clientId, origin, basePath).href}
+                />
+              )}
+            </div>
           )}
         </div>
       </div>

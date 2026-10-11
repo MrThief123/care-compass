@@ -2,8 +2,8 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { EventFormScreen } from "@/features/family-event-form/event-form-screen";
 import { editEventDetailsValues } from "@/features/family-event-form/event-details";
+import { EventFormScreen } from "@/features/family-event-form/event-form-screen";
 import {
   EMPTY_EVENT_VALUES,
   editEventValues,
@@ -107,7 +107,7 @@ describe("[FAM-18] Ends on Add event", () => {
 
     expect(screen.getByLabelText("Ends")).toBeInvalid();
     expect(screen.getByLabelText("Ends")).toHaveAccessibleDescription(
-      "Ends must be on or after the Date.",
+      /Ends must be on or after the Date\./,
     );
     expect(mocks.createEvent).not.toHaveBeenCalled();
   });
@@ -115,7 +115,10 @@ describe("[FAM-18] Ends on Add event", () => {
 
 describe("[FAM-18] Ends on Edit event", () => {
   async function renderEdit(endDate?: string) {
-    const event = { ...(await getEvent(CLIENT_ID, "event-margaret-physio"))!, recurrenceEndDate: endDate };
+    const event = {
+      ...(await getEvent(CLIENT_ID, "event-margaret-physio"))!,
+      recurrenceEndDate: endDate,
+    };
     render(
       <EventFormScreen
         mode="edit"
@@ -142,7 +145,9 @@ describe("[FAM-18] Ends on Edit event", () => {
     await user.clear(screen.getByLabelText("Ends"));
     await user.type(screen.getByLabelText("Ends"), "2027-03-31");
     await user.click(screen.getByRole("button", { name: "Save event" }));
-    expect(mocks.updateEvent).toHaveBeenCalledWith(expect.objectContaining({ endDate: "2027-03-31" }));
+    expect(mocks.updateEvent).toHaveBeenCalledWith(
+      expect.objectContaining({ endDate: "2027-03-31" }),
+    );
   });
 
   it("[FAM-18][AC-15] clearing a saved end date sends endDate null", async () => {

@@ -10,7 +10,11 @@ import { DeleteEventButton } from "./delete-event-button";
  * event the choice between 'This occurrence' and 'This and all future occurrences'. The action is
  * mocked so the exact payload can be asserted; the data source itself is covered elsewhere.
  */
-const mocks = vi.hoisted(() => ({ push: vi.fn(), refresh: vi.fn(), deleteEventOccurrence: vi.fn() }));
+const mocks = vi.hoisted(() => ({
+  push: vi.fn(),
+  refresh: vi.fn(),
+  deleteEventOccurrence: vi.fn(),
+}));
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: mocks.push, refresh: mocks.refresh }),
@@ -118,7 +122,9 @@ describe("[FAM-18] DeleteEventButton", () => {
     await user.click(screen.getByRole("button", { name: "Delete event" }));
     await user.click(screen.getByRole("button", { name: "Delete" }));
 
-    expect(await screen.findByRole("alert")).toHaveTextContent("Couldn't delete. Please try again.");
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Couldn't delete. Please try again.",
+    );
     expect(screen.getByRole("dialog")).toBeInTheDocument();
     expect(mocks.push).not.toHaveBeenCalled();
   });
