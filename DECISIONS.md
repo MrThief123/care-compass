@@ -1182,3 +1182,12 @@ Template for future entries:
 - Impact: `src/components/shared/nav-config.ts`, `src/components/ui/icon.tsx` (one additive icon), `src/features/carer-patients/patient-tabs.tsx`, `src/features/admin-client-view/client-routes.ts`, and `src/components/shared/rail-nav.tsx` (rail labels centred, since "Client Details" wraps to two lines). Test expectations that named the "Info" link change to "Client Details" (rail, carer tabs, admin client bar and routes, and the app-shell, admin-client-view and cross-role-sync e2e specs); two new rail tests, for the icon and the centred labels. The Admin rail "Clients" item also changes from `info` to `id-card`, at the human's request.
 - Human confirmation: the human owner, 2026-10-10 (in-session).
 - Docs updated: DECISIONS.md (this entry).
+
+### CHG-060 — Info tip icon changes from "i" to "?"
+- Date / requested by: 2026-10-12 / the human owner (in-session)
+- Type: icon change (no behaviour change)
+- Description: the FAM-17 info tip button shows a question mark (lucide `CircleQuestionMark`, new additive `help` icon) instead of an info circle. Its accessible name ("About <label>"), 44px target, hover, focus, click and Esc behaviour are unchanged. The `info` icon stays for its other uses (status banners, Client Details empty states).
+- Source / justification: human request, in-session 2026-10-12.
+- Impact: `src/components/ui/info-tip.tsx` (icon), `src/components/ui/icon.tsx` (one additive icon), FAM-17 pack wording ("i" to "?", AC-01 and the PRD). Test change: one added test in `info-tip.test.tsx` asserting the `help` icon; no existing expectation changes. No new requirement, contract or dependency.
+- Human confirmation: the human owner, 2026-10-12 (in-session).
+- Docs updated: DECISIONS.md (this entry), FAM-17 PRD and AC-01 wording.

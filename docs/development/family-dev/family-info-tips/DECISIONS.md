@@ -27,10 +27,16 @@
 
 ### FD-04 — No Figma design; built from tokens
 - Date: 2026-10-06
-- Decision: icon via the kit's `info` icon; surface, border and text colours from tokens; contrast checked.
+- Decision: icon via the kit's `help` icon (a question mark since CHG-060; was `info`); surface, border and text colours from tokens; contrast checked.
 - Human confirmation required: yes, a design check at PR review.
 
 ### FD-05 — Tip sits before "Enter event" on the Calendar toolbar; 150ms leave grace
 - Date: 2026-10-06
-- Decision: on the Calendar toolbar the "i" goes before the link, not after, so the existing FAM-UI-02 T-09 invariant (the link is directly before D/W/M) holds with no test change. Elsewhere it sits after the button. The tip closes 150ms after the pointer leaves, so crossing from the "i" to the tip does not lose it.
+- Decision: on the Calendar toolbar the "?" goes before the link, not after, so the existing FAM-UI-02 T-09 invariant (the link is directly before D/W/M) holds with no test change. Elsewhere it sits after the button. The tip closes 150ms after the pointer leaves, so crossing from the "?" to the tip does not lose it.
 - Test changes caused: none.
+
+### FD-06 — Question mark icon (CHG-060)
+- Date: 2026-10-12
+- Decision: the tip button shows a "?" (`help` icon) instead of an "i".
+- Human confirmation: the human owner, 2026-10-12 (in-session).
+- Test changes caused: one test added (`[FAM-17][AC-01]` icon); none changed.

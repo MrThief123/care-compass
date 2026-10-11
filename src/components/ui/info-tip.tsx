@@ -13,18 +13,18 @@ export interface InfoTipProps {
   label: string;
   /** One short sentence saying what that button does. */
   text: string;
-  /** Which edge of the "i" the tip lines up with; `end` opens leftwards, away from the screen edge. */
+  /** Which edge of the "?" the tip lines up with; `end` opens leftwards, away from the screen edge. */
   align?: "start" | "end";
   className?: string;
 }
 
 /**
- * A small "i" button that explains the main button beside it (FAM-17).
+ * A small "?" button that explains the main button beside it (FAM-17).
  * A toggletip, not a hover-only tooltip: the tip shows on hover and on keyboard
  * focus, a click or tap pins it open, and Esc, blur, an outside click or a second
  * click close it (WCAG 1.4.13: dismissible, hoverable, persistent). The tip sits
  * inside the same wrapper as the button, so moving the pointer onto it does not
- * close it. The "i" is a 44px target; the icon is small.
+ * close it. The "?" is a 44px target; the icon is small.
  */
 export function InfoTip({ label, text, align = "end", className }: InfoTipProps) {
   const tipId = useId();
@@ -91,7 +91,7 @@ export function InfoTip({ label, text, align = "end", className }: InfoTipProps)
         }}
         className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-control text-text-secondary transition-colors outline-none hover:bg-bg-inset focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
       >
-        <Icon name="info" aria-hidden />
+        <Icon name="help" aria-hidden />
       </button>
       {open && (
         // The padding bridges the gap to the button, so the pointer can cross it.

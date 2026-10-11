@@ -11,7 +11,7 @@ Last updated: 2026-10-06 (implemented, all 10 ACs MET, browser-checked)
 ## Blockers
 - None. No open blocking decisions; the human approved scope in-session on 2026-10-06 (CHG-057).
 - For the human in the PR: FD-02 (flagged additive Lane S file `src/components/ui/info-tip.tsx`), FD-04 (no Figma design, built from tokens: please check the look).
-- Known: at 390px wide the tip (256px) can run over the side rail when the "i" is near the left; the app is desktop-first (REQ-N10), not fixed here.
+- Known: at 390px wide the tip (256px) can run over the side rail when the "?" is near the left; the app is desktop-first (REQ-N10), not fixed here.
 - No existing test expectation changed. Three tests were added to existing Family suites (Home, Calendar, Budget).
 
 ## Dependencies status
