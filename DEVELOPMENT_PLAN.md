@@ -1,7 +1,7 @@
 # DEVELOPMENT PLAN — Care Compass
 
 Version 0.2 · 17 September 2026 · Status: DRAFT (controlled after planning freeze) · Supersedes v0.1 dashboard-by-dashboard phases
-Totals: **96 active features** (97 listed; CAR-08 retired) · **534 acceptance criteria** across 5 phases (UI-04 and its 10 criteria added by CHG-004, 2026-09-19; UI-05 and its 13 criteria added under CHG-009, 2026-09-24; F0-17 and its 8 criteria added by CHG-010, 2026-09-24; CHG-020, 2026-09-25: FAM-UI-08 (6 criteria) and ADM-11 (5) added, FAM-UI-05 +5 criteria, CAR-08 and its 2 criteria retired; CHG-021, 2026-09-25: FAM-UI-05 +4 criteria; CHG-022, 2026-09-25: FAM-UI-05 +5 criteria; CHG-027, 2026-09-26: F0-18 and its 9 criteria added; CHG-037, 2026-09-30: F0-19 and its 6 criteria added; CHG-040, 2026-09-30: F0-20 and its 10 criteria added; CHG-041, 2026-10-01: F0-21 and its 6 criteria added; CHG-042, 2026-10-01: F0-22 and its 8 criteria added; CHG-045, 2026-10-02: F0-23 and its 8 criteria added; CHG-047, 2026-10-02: F0-24 (7 criteria) and INT-09 (5 criteria) added, every remaining post-sprint feature pulled into the sprint, sprint extended to D21; CHG-050, 2026-10-02: INT-10 and its 4 criteria added (PL-26 promoted); CHG-051, 2026-10-02: FAM-16 and its 11 criteria added (PL-27 promoted); CHG-052, 2026-10-02: INT-11 and its 8 criteria added (PL-25 promoted); ADM-09, 2026-10-03: 1 criterion grown to 9 (+8, FD-05); CHG-055, 2026-10-03: INT-12 and its 45 criteria added; OQ-40, 2026-10-03: INT-09 5 criteria rewritten and grown to 8 (+3); CHG-057, 2026-10-06: FAM-17 and its 10 criteria added (PL-05 tooltips promoted); CHG-058, 2026-10-08: F0-25 and its 16 criteria added (client Documents page); the Jira import `docs/JIRA_BACKLOG.csv` predates all eight). Jira import: `docs/JIRA_BACKLOG.csv`.
+Totals: **97 active features** (98 listed; CAR-08 retired) · **551 acceptance criteria** across 5 phases (UI-04 and its 10 criteria added by CHG-004, 2026-09-19; UI-05 and its 13 criteria added under CHG-009, 2026-09-24; F0-17 and its 8 criteria added by CHG-010, 2026-09-24; CHG-020, 2026-09-25: FAM-UI-08 (6 criteria) and ADM-11 (5) added, FAM-UI-05 +5 criteria, CAR-08 and its 2 criteria retired; CHG-021, 2026-09-25: FAM-UI-05 +4 criteria; CHG-022, 2026-09-25: FAM-UI-05 +5 criteria; CHG-027, 2026-09-26: F0-18 and its 9 criteria added; CHG-037, 2026-09-30: F0-19 and its 6 criteria added; CHG-040, 2026-09-30: F0-20 and its 10 criteria added; CHG-041, 2026-10-01: F0-21 and its 6 criteria added; CHG-042, 2026-10-01: F0-22 and its 8 criteria added; CHG-045, 2026-10-02: F0-23 and its 8 criteria added; CHG-047, 2026-10-02: F0-24 (7 criteria) and INT-09 (5 criteria) added, every remaining post-sprint feature pulled into the sprint, sprint extended to D21; CHG-050, 2026-10-02: INT-10 and its 4 criteria added (PL-26 promoted); CHG-051, 2026-10-02: FAM-16 and its 11 criteria added (PL-27 promoted); CHG-052, 2026-10-02: INT-11 and its 8 criteria added (PL-25 promoted); ADM-09, 2026-10-03: 1 criterion grown to 9 (+8, FD-05); CHG-055, 2026-10-03: INT-12 and its 45 criteria added; OQ-40, 2026-10-03: INT-09 5 criteria rewritten and grown to 8 (+3); CHG-057, 2026-10-06: FAM-17 and its 10 criteria added (PL-05 tooltips promoted); CHG-058, 2026-10-08: F0-25 and its 16 criteria added (client Documents page); CHG-060, 2026-10-11: FAM-18 and its 17 criteria added (delete event and recurrence end date); the Jira import `docs/JIRA_BACKLOG.csv` predates all eight). Jira import: `docs/JIRA_BACKLOG.csv`.
 
 ---
 
@@ -182,6 +182,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 | 15 | FAM-15 | Family — Task detail | F | D11 | SPRINT | F0-11, F0-13, FAM-UI-07 | OQ-29, OQ-10 | `feature/family-task-detail` | NOT STARTED |
 | 15a | FAM-16 | Family — Event form and calendar polish (CHG-051) | F | D18 | SPRINT | FAM-06, FAM-07, FAM-14, FAM-15, CAR-07, UI-01, UI-02 | — | `feature/family-event-form-calendar-polish` | IN PROGRESS |
 | 15b | FAM-17 | Family — Info tips on main buttons (CHG-057) | F | D21 | SPRINT | FAM-UI-01, FAM-UI-02, FAM-UI-05, UI-02 | — | `feature/family-info-tips` | IN PROGRESS |
+| 15c | FAM-18 | Family — Delete event and recurrence end date (CHG-060) | F | D21 | SPRINT | FAM-06, FAM-07, FAM-15, CAR-07, F0-09, F0-11, UI-02 | — | `feature/family-delete-event` | IN PROGRESS |
 | 16 | CAR-01 | ~~Carer Home — Today's calendar and Tasks~~ (retired, CHG-033) | C | — | SPRINT | F0-10, F0-11, CAR-UI-01 | OQ-33, OQ-09 | `feature/carer-home-today` | RETIRED (CHG-033) |
 | 17 | CAR-02 | Carer — Notifications card and bell | C | D9 | SPRINT | F0-10, F0-13, CAR-UI-01 | OQ-14 | `feature/carer-notifications` | NOT STARTED |
 | 18 | CAR-03 | Carer — Patients | C | D8 | SPRINT | F0-06, F0-10, F0-18, CAR-UI-02 | OQ-09 | `feature/carer-patients` | IN PROGRESS |
@@ -989,6 +990,17 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Testing summary:** 1 unit, 9 component
 - **Requirements:** PL-05
 - **Docs:** `docs/development/family-dev/family-info-tips/` · **Status:** IN PROGRESS
+
+### FAM-18 — Family — Delete event and recurrence end date
+- **Dashboard / stream:** family · **Lane:** F · **Days:** D21 · **Sprint:** SPRINT · **PR target:** `main` · **Branch:** `feature/family-delete-event`
+- **Description:** CHG-060: a 'Delete event' button on Task detail for Family and on-shift Carer (one-off: confirm; recurring: this occurrence or this and all future), and an optional 'Ends' date on the event form (Add and Edit). No migration: cancelled override and `recurrence_until`.
+- **User value:** Cancelled care leaves the schedule and a course of care stops by itself, without losing history.
+- **Dependencies:** FAM-06, FAM-07, FAM-15, CAR-07, F0-09, F0-11, UI-02 · **Blocking decisions:** None
+- **Jira summary:** Delete event (this / this and future) and recurrence end date
+- **Acceptance criteria summary:** 17 criteria — button shown/absent; one-off confirm; recurring choice; this occurrence; this and future keeps history; first occurrence removes series; cancel; Done not deletable; carer on/off shift; other family refused; failure; Ends field; inclusive end; end validation; Edit prefill; Admin none; a11y
+- **Testing summary:** 2 unit, 5 component, 2 integration
+- **Requirements:** FR-2.5, OQ-12, PD-045
+- **Docs:** `docs/development/family-dev/family-delete-event/` · **Status:** IN PROGRESS
 
 ### CAR-01 — Carer Home — Today's calendar and Tasks
 - **Dashboard / stream:** carer · **Lane:** C · **Days:** D8 · **Sprint:** SPRINT · **PR target:** `main` · **Branch:** `feature/carer-home-today`
