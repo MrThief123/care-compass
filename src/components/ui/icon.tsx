@@ -8,6 +8,7 @@ import {
   ChevronRight,
   ChevronUp,
   CircleDollarSign,
+  CircleQuestionMark,
   ClipboardCheck,
   Eye,
   EyeOff,
@@ -28,6 +29,7 @@ import {
 const ICONS = {
   home: Home,
   info: Info,
+  help: CircleQuestionMark,
   "id-card": IdCard,
   calendar: Calendar,
   dollar: CircleDollarSign,

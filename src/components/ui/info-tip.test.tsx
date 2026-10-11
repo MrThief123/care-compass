@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
 
@@ -23,6 +23,14 @@ describe("InfoTip", () => {
     expect(button.className).toMatch(/\bh-11\b/);
     expect(button.className).toMatch(/\bw-11\b/);
     expect(screen.queryByRole("tooltip")).not.toBeInTheDocument();
+  });
+
+  it("[FAM-17][AC-01] CHG-060: the button shows a question mark, not an 'i'", () => {
+    setup();
+
+    const button = screen.getByRole("button", { name: "About Enter event" });
+    expect(within(button).getByTestId("icon-help")).toBeInTheDocument();
+    expect(within(button).queryByTestId("icon-info")).not.toBeInTheDocument();
   });
 
   it("[FAM-17][AC-02] shows on hover and hides when the pointer leaves", async () => {
