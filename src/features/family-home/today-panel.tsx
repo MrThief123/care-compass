@@ -1,12 +1,12 @@
 import { EmptyState } from "@/components/shared/states";
 import { CardShell } from "@/components/ui/card-shell";
-import type { Occurrence } from "@/types/domain";
+import type { AnyOccurrence } from "@/types/domain";
 
 import { TodayTimeline } from "./today-timeline";
 
 export interface TodayPanelProps {
   clientId: string;
-  occurrences: Occurrence[];
+  occurrences: AnyOccurrence[];
   /** Short date for the caption, e.g. "Mon 30 Nov". */
   dateLabel: string;
   basePath?: string;

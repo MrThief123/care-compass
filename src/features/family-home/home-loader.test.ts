@@ -205,6 +205,16 @@ describe("[FAM-UI-01][PRD] Recent activity is right for any length of history", 
   });
 });
 
+describe("[UI-05][AC-07] the Today timeline reads plain events as well as tasks", () => {
+  it("[UI-05][AC-07] asks the contract for today's tasks and plain events", async () => {
+    mocks.getTaskLog.mockImplementation(contractOver([]));
+
+    await loadFamilyHomeData(CLIENT_ID);
+
+    expect(mocks.getTodayOccurrences).toHaveBeenCalledWith(CLIENT_ID, { type: "all" });
+  });
+});
+
 describe("[FAM-UI-01][PRD] page one of each status is enough", () => {
   it("[FAM-UI-01][PRD] the contract's page holds at least the rows the screen takes from it", () => {
     // Recent activity and the Overdue card each read only page one of a status list.
