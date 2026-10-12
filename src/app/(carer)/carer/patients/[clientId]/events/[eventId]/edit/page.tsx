@@ -7,7 +7,10 @@ import { editEventDetailsValues } from "@/features/family-event-form/event-detai
 import { editEventReturnHref } from "@/features/family-event-form/event-form-return";
 import { EventFormScreen } from "@/features/family-event-form/event-form-screen";
 import { editEventValues, isTaskEvent } from "@/features/family-event-form/event-form-values";
-import { resolveTaskDetailOrigin } from "@/features/family-task-detail/task-detail-origin";
+import {
+  backLinkFor,
+  resolveTaskDetailOrigin,
+} from "@/features/family-task-detail/task-detail-origin";
 import { getBudgetSummary } from "@/server/budget/queries";
 import { getEventDocuments } from "@/server/documents/queries";
 import { parseOccurrenceKey } from "@/server/events/occurrence-key";
@@ -73,6 +76,7 @@ export default async function CarerEditEventPage({
       buckets={buckets}
       initialCost={costValuesFromEvent(event)}
       returnHref={editEventReturnHref(clientId, viewed?.key, origin, base)}
+      deleteReturnHref={backLinkFor(clientId, origin, base).href}
       notAllowedMessage={`Your shift with ${patient.firstName} has ended, so this event wasn't saved.`}
     />
   );

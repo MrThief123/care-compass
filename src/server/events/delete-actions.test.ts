@@ -77,7 +77,10 @@ describe("deleteEvent", () => {
   });
 
   it("[F0-27][AC-03] a one-off event is deleted by cancelling its one occurrence, whatever the scope", async () => {
-    mocks.maybeSingle.mockResolvedValue({ data: { starts_at: FIRST, recurrence: null }, error: null });
+    mocks.maybeSingle.mockResolvedValue({
+      data: { starts_at: FIRST, recurrence: null },
+      error: null,
+    });
     const result = await deleteEvent({ ...base, occurrenceOriginalStart: FIRST, scope: "future" });
     expect(result.ok).toBe(true);
     expect(mocks.upsert).toHaveBeenCalledTimes(1);

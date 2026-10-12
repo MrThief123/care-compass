@@ -1,2 +1,1 @@
-# Session state — F0-27
-Claimed 2026-10-12. Next: tests first (TEST_PLAN), then `deleteEvent` action and the edit-screen button.
+Code and tests done 2026-10-12. Next: human review, real-DB check, plan row/CHG, then PR with approval.

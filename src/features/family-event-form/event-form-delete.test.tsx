@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -84,7 +84,7 @@ describe("Delete event", () => {
     const user = userEvent.setup();
     renderEdit(oneOff);
     await user.click(screen.getByRole("button", { name: "Delete event" }));
-    await user.click(screen.getByRole("button", { name: "Cancel" }));
+    await user.click(within(screen.getByRole("dialog")).getByRole("button", { name: "Cancel" }));
     expect(screen.queryByRole("dialog")).toBeNull();
     expect(mocks.deleteEvent).not.toHaveBeenCalled();
   });
@@ -117,7 +117,9 @@ describe("Delete event", () => {
     renderEdit(weekly);
     await user.click(screen.getByRole("button", { name: "Delete event" }));
     await user.click(screen.getByRole("button", { name: "Delete this event" }));
-    expect(mocks.deleteEvent).toHaveBeenCalledWith(expect.objectContaining({ scope: "occurrence" }));
+    expect(mocks.deleteEvent).toHaveBeenCalledWith(
+      expect.objectContaining({ scope: "occurrence" }),
+    );
     expect(mocks.push).toHaveBeenCalledWith(DELETE_RETURN);
   });
 
