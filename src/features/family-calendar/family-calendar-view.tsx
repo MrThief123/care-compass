@@ -13,7 +13,7 @@ import { taskDetailHrefFrom } from "@/features/family-task-detail/task-detail-or
 import type { LocalDate } from "@/lib/dates/week-range";
 import { setOccurrenceDone, setOccurrenceUndone } from "@/server/events/actions";
 import type { ClientShift } from "@/server/events/queries";
-import type { AnyOccurrence, Occurrence } from "@/types/domain";
+import { isPlainEvent, type AnyOccurrence, type Occurrence } from "@/types/domain";
 
 import { applyTick } from "./apply-ticks";
 import { dayHeading, melbourneDay, rangeLabel } from "./calendar-format";
@@ -38,8 +38,8 @@ export interface FamilyCalendarViewProps {
   clientId: string;
   today: LocalDate;
   params: CalendarParams;
-  /** Every occurrence on the visible days, oldest first. */
-  occurrences: Occurrence[];
+  /** Every occurrence on the visible days, tasks and plain events (UI-05), oldest first. */
+  occurrences: AnyOccurrence[];
   /** Latest done or overdue tasks, newest first. */
   log: Occurrence[];
   /** Carers on duty in the visible range; the On duty panel shows the selected day's. */
@@ -137,8 +137,10 @@ export function FamilyCalendarView({
   };
   // The grids also draw who is on duty, as blocks beside the care events.
   const gridOccurrences: AnyOccurrence[] = [...occurrences, ...shiftsAsEntries(shifts, clientId)];
-  const dayOccurrences = occurrences.filter(
-    (occurrence) => melbourneDay(occurrence.start) === selected,
+  // The Tasks panel is a checklist: a plain event has nothing to tick, so it is on the grids only.
+  const dayTasks = occurrences.filter(
+    (occurrence): occurrence is Occurrence =>
+      !isPlainEvent(occurrence) && melbourneDay(occurrence.start) === selected,
   );
 
   const changeView = (view: CalendarView) => {
@@ -204,7 +206,7 @@ export function FamilyCalendarView({
       <div className="grid min-w-0 grid-cols-1 gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
         <TasksPanel
           dateLabel={dayHeading(selected)}
-          occurrences={dayOccurrences}
+          occurrences={dayTasks}
           isTicked={(occurrence) => ticks[occurrence.key] ?? occurrence.status === "done"}
           onToggle={toggleTick}
           errorMessage={tickError}

@@ -313,7 +313,7 @@ describe("[FAM-UI-01] Family Home layout and navigation (PRD Scope, no AC)", () 
   it("[FAM-UI-01][Scope] reads every panel through the contract for the route's client", async () => {
     await renderHome();
 
-    expect(mocks.getTodayOccurrences).toHaveBeenCalledWith(CLIENT_ID);
+    expect(mocks.getTodayOccurrences).toHaveBeenCalledWith(CLIENT_ID, { type: "all" });
     expect(mocks.getTaskLog).toHaveBeenCalledWith(CLIENT_ID, { status: "overdue" });
     expect(mocks.getTaskLog).toHaveBeenCalledWith(CLIENT_ID, { status: "done" });
     expect(mocks.getBudgetSummary).toHaveBeenCalledWith(CLIENT_ID);

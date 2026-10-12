@@ -39,11 +39,14 @@ export default async function EditEventPage({
 
   const requested =
     typeof occurrenceParam === "string"
-      ? await getOccurrence(clientId, occurrenceParam)
+      ? await getOccurrence(clientId, occurrenceParam, { type: "all" })
       : undefined;
   const viewed = requested?.eventId === event.id ? requested : undefined;
   const occurrence =
-    viewed ?? (await getTodayOccurrences(clientId)).find((today) => today.eventId === event.id);
+    viewed ??
+    (await getTodayOccurrences(clientId, { type: "all" })).find(
+      (today) => today.eventId === event.id,
+    );
   const origin = await resolveTaskDetailOrigin(raw, () => getToday());
 
   const [documents, buckets] = await Promise.all([
