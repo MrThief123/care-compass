@@ -2,7 +2,7 @@ import { render, screen, within } from "@testing-library/react";
 import { axe } from "jest-axe";
 import { describe, expect, it } from "vitest";
 
-import type { Occurrence } from "@/types/domain";
+import type { AnyOccurrence, PlainEventOccurrence } from "@/types/domain";
 
 import {
   CLIENT_ID,
@@ -40,7 +40,7 @@ const CHECK_IN = occurrence({
 });
 const DESIGN_DAY = [MORNING, PHYSIOTHERAPY, CHECK_IN];
 
-function renderTimeline(occurrences: Occurrence[], now: Date | null = null) {
+function renderTimeline(occurrences: AnyOccurrence[], now: Date | null = null) {
   return render(<TodayTimeline clientId={CLIENT_ID} occurrences={occurrences} now={now} />);
 }
 
@@ -281,5 +281,39 @@ describe("[FAM-UI-01][PRD] Today timeline at volume and with awkward text", () =
     const { container } = renderTimeline(denseDay(32), new Date(melbourne("10:30")));
 
     expect(await axe(container)).toHaveNoViolations();
+  });
+});
+
+describe("[UI-05][AC-07] Today timeline draws a plain event", () => {
+  const WALK: PlainEventOccurrence = {
+    key: `event-walk:${melbourne("14:00")}`,
+    eventId: "event-walk",
+    clientId: CLIENT_ID,
+    title: "Afternoon walk",
+    description: "",
+    start: melbourne("14:00"),
+    durationMinutes: 45,
+    kind: "event",
+  };
+
+  it("[UI-05][AC-07] a plain event gets a row with its title, duration and an 'Event' label, no status", () => {
+    renderTimeline([MORNING, WALK]);
+
+    const block = screen.getByRole("link", { name: /Afternoon walk/ });
+    for (const text of ["Afternoon walk", "45 min", "Event"]) {
+      expect(isShownAtRest(within(block).getByText(text)), text).toBe(true);
+    }
+    expect(within(block).queryByText(/Planned|Done|Overdue/)).toBeNull();
+    expect(within(block).queryByTestId("icon-check")).toBeNull();
+    expect(within(block).queryByTestId("icon-alert-triangle")).toBeNull();
+  });
+
+  it("[UI-05][AC-07] a plain event's row opens its detail", () => {
+    renderTimeline([WALK]);
+
+    expect(screen.getByRole("link", { name: /Afternoon walk/ })).toHaveAttribute(
+      "href",
+      expect.stringContaining(encodeURIComponent(WALK.key)),
+    );
   });
 });
