@@ -47,7 +47,7 @@ Families and carers record whatever matters for this person without waiting for 
 ## Functional Requirements
 - Title: required, trimmed, 1–60 characters; must not match another section on the same client, including the built-in titles and "Documentation" (case-insensitive).
 - Text: optional, up to 5,000 characters (same as the built-ins). A section with no text reads "Nothing added yet."
-- At most 20 custom sections per client (PROPOSED, FD-03). At the limit Add section is replaced by a short note.
+- At most 20 custom sections per client (FD-03). At the limit Add section is replaced by a short note.
 - A saved add, edit or removal survives a reload. Add, edit and delete are audited; delete keeps the old title and text in the audit row.
 - A refused save (for example, the carer's shift ended mid-edit) shows the server's message and keeps the draft.
 
@@ -73,7 +73,7 @@ Families and carers record whatever matters for this person without waiting for 
 - Two people add the same title at once: the unique index refuses the second one with the same duplicate message.
 - Section removed by someone else while being edited: save shows "This section no longer exists." and the list refreshes.
 - Read failure: the page's existing error state.
-- Mock data mode: changes stay in memory for the session, as the built-in sections already do.
+- Mock data mode: fixture custom sections show; add, edit and remove say "Saving changes is not available yet.", as the built-in sections already do.
 
 ## Security / Permissions
 - RLS is the only gate. The UI hides controls a user cannot use (absent, not disabled), but never grants access.

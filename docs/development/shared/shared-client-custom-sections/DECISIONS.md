@@ -16,7 +16,7 @@
 
 ### FD-03 — Limits (PROPOSED defaults)
 - Decision: title 1–60 characters; text up to 5,000 (as the built-ins); at most 20 custom sections per client.
-- Human confirmation: proposed; confirm when reviewing.
+- Human confirmation: the human owner, 2026-10-12 (in-session, "yes").
 
 ### FD-04 — Delete confirms; audit keeps the text
 - Decision: inline confirmation "Remove <title>? Its text will be lost." with Remove and Keep. The audit trigger stores the old row, so the text can be recovered by an operator. No restore in the UI.
