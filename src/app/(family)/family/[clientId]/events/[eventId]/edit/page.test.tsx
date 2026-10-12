@@ -92,6 +92,20 @@ describe("[FAM-UI-03] /family/[clientId]/events/[eventId]/edit (real mock contra
     );
   });
 
+  it("[UI-05][AC-07] ?occurrence= of a plain event opens that occurrence's date, not the event's first", async () => {
+    await renderEdit("event-margaret-walk", {
+      occurrence: "event-margaret-walk:2026-11-28T14:00:00+11:00",
+    });
+
+    expect(screen.getByLabelText("Date")).toHaveValue("Saturday 28 November 2026");
+  });
+
+  it("[UI-05][AC-07] with no ?occurrence=, a plain event opens on today's occurrence, as a task does", async () => {
+    await renderEdit("event-margaret-walk");
+
+    expect(screen.getByLabelText("Date")).toHaveValue("Monday 30 November 2026");
+  });
+
   it("[FAM-UI-03][AC-03] shows document tiles 'Physio referral.pdf' and 'Exercise plan.pdf' and an 'Add file' tile", async () => {
     await renderEdit();
 

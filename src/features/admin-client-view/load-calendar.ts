@@ -15,7 +15,7 @@ export async function loadAdminClientCalendar(
   const today = await getToday();
   const params = parseCalendarParams(search, today);
   const [occurrences, taskLog, user, shifts] = await Promise.all([
-    getOccurrences(clientId, visibleRange(params)),
+    getOccurrences(clientId, visibleRange(params), { type: "all" }),
     getTaskLog(clientId),
     getCurrentUser("admin"),
     getClientShifts(clientId, visibleRange(params)),

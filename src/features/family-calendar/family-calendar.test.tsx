@@ -173,10 +173,14 @@ describe("[FAM-UI-02][AC-01] default week", () => {
     expect(screen.getByRole("radio", { name: "W" })).toHaveAttribute("aria-checked", "true");
     expect(screen.getByRole("radio", { name: "D" })).toHaveAttribute("aria-checked", "false");
     expect(screen.getByRole("heading", { level: 1, name: "30 Nov – 6 Dec 2026" })).toBeVisible();
-    expect(mocks.getOccurrences).toHaveBeenCalledWith(CLIENT_ID, {
-      from: "2026-11-30",
-      to: "2026-12-06",
-    });
+    expect(mocks.getOccurrences).toHaveBeenCalledWith(
+      CLIENT_ID,
+      {
+        from: "2026-11-30",
+        to: "2026-12-06",
+      },
+      { type: "all" },
+    );
   });
 
   it("[FAM-UI-02][AC-01] opens on the week of whatever day the contract says is today", async () => {
@@ -185,10 +189,14 @@ describe("[FAM-UI-02][AC-01] default week", () => {
     await renderCalendar();
 
     expect(screen.getByRole("heading", { level: 1, name: "8 Mar – 14 Mar 2027" })).toBeVisible();
-    expect(mocks.getOccurrences).toHaveBeenCalledWith(CLIENT_ID, {
-      from: "2027-03-08",
-      to: "2027-03-14",
-    });
+    expect(mocks.getOccurrences).toHaveBeenCalledWith(
+      CLIENT_ID,
+      {
+        from: "2027-03-08",
+        to: "2027-03-14",
+      },
+      { type: "all" },
+    );
   });
 
   it("[FAM-UI-02][AC-01] a nonsense view or date param falls back to this week", async () => {
@@ -555,10 +563,14 @@ describe("[FAM-UI-02][AC-05] D / W / M", () => {
 
     expect(screen.getByRole("radio", { name: "M" })).toHaveAttribute("aria-checked", "true");
     expect(screen.getByRole("heading", { level: 1, name: "December 2026" })).toBeVisible();
-    expect(mocks.getOccurrences).toHaveBeenCalledWith(CLIENT_ID, {
-      from: "2026-11-30",
-      to: "2027-01-10",
-    });
+    expect(mocks.getOccurrences).toHaveBeenCalledWith(
+      CLIENT_ID,
+      {
+        from: "2026-11-30",
+        to: "2027-01-10",
+      },
+      { type: "all" },
+    );
     expect(screen.getByTestId("month-grid-day-2026-12-31")).toHaveAttribute(
       "data-in-month",
       "true",
@@ -572,10 +584,14 @@ describe("[FAM-UI-02][AC-05] D / W / M", () => {
 
     expect(screen.getByRole("radio", { name: "D" })).toHaveAttribute("aria-checked", "true");
     expect(screen.getByRole("heading", { level: 1, name: "Friday 4 December 2026" })).toBeVisible();
-    expect(mocks.getOccurrences).toHaveBeenCalledWith(CLIENT_ID, {
-      from: "2026-12-04",
-      to: "2026-12-04",
-    });
+    expect(mocks.getOccurrences).toHaveBeenCalledWith(
+      CLIENT_ID,
+      {
+        from: "2026-12-04",
+        to: "2026-12-04",
+      },
+      { type: "all" },
+    );
     expect(screen.queryByTestId("week-grid-day-2026-12-04")).toBeNull();
   });
 

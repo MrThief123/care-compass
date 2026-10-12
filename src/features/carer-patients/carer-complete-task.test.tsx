@@ -243,7 +243,7 @@ describe("[CAR-06][AC-06] Calendar, Home and Care log read the patient's data an
   it("[CAR-06][AC-06] T-06 the Calendar reads Margaret's days and every link stays under her carer pages", async () => {
     const { container } = await renderCarerCalendar();
 
-    expect(mocks.getOccurrences).toHaveBeenCalledWith(MARGARET, expect.anything());
+    expect(mocks.getOccurrences).toHaveBeenCalledWith(MARGARET, expect.anything(), { type: "all" });
     const links = hrefs(container);
     expect(links.length).toBeGreaterThan(0);
     for (const href of links) expect(href.startsWith(`/carer/patients/${MARGARET}/`)).toBe(true);
@@ -264,7 +264,7 @@ describe("[CAR-06][AC-06] Calendar, Home and Care log read the patient's data an
   it("[CAR-06][AC-06] T-06 Home shows Margaret's day and budget with every link under her carer pages", async () => {
     const { container } = await renderCarerHome();
 
-    expect(mocks.getTodayOccurrences).toHaveBeenCalledWith(MARGARET);
+    expect(mocks.getTodayOccurrences).toHaveBeenCalledWith(MARGARET, { type: "all" });
     expect(screen.getByText("Physiotherapy")).toBeVisible();
     expect(screen.getByText("Core supports")).toBeVisible();
     for (const href of hrefs(container)) {
