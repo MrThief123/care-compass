@@ -160,7 +160,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 | 17 | F0-23 | Link uploaded documents to a new event | S | D13 | SPRINT | F0-11, F0-13, FAM-08 | — | `feature/shared-document-event-linking` | IN PROGRESS |
 | 18 | F0-24 | Auth emails: working reset and invite links, set-password page | S | D15–D16 | SPRINT | F0-07, F0-17, ADM-02 | — | `feature/shared-auth-emails` | NOT STARTED |
 | 19 | F0-25 | Client Documents page (Family and Carer) | S | D21 | SPRINT | F0-13, UI-04, FAM-UI-04, F0-15, CAR-UI-02 | — | `feature/shared-client-documents-page` | IN PROGRESS |
-| 20 | F0-26 | Custom sections on Client Details (Family, Carer and Admin) | S | D21 | SPRINT | FAM-09, CAR-04, ADM-11, F0-08, F0-21 | — | `feature/shared-client-custom-sections` | IN PROGRESS |
+| 20 | F0-26 | Custom sections on Client Details (Family, Carer and Admin) | S | D21 | SPRINT | FAM-09, CAR-04, ADM-11, F0-08, F0-21 | — | `feature/shared-client-custom-sections` | READY FOR PR |
 
 ### Phase 3 — Data wiring & behaviour (parallel: Family · Carer · Admin)
 

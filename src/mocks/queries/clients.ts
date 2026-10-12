@@ -5,13 +5,14 @@
  */
 import { ageFromDob } from "@/lib/format/age";
 import {
+  CLIENT_CUSTOM_SECTIONS,
   CLIENT_INFO_SECTIONS,
   CLIENTS,
   ORGANISATION,
   OTHER_ORGANISATIONS,
   REFERENCE_DATE,
 } from "@/mocks/fixtures";
-import type { ClientInfoSection, ClientInfoSectionKind } from "@/types/domain";
+import type { ClientCustomSection, ClientInfoSection, ClientInfoSectionKind } from "@/types/domain";
 
 export interface ClientHeaderSummary {
   id: string;
@@ -78,4 +79,11 @@ export function selectClientInfoSections(
 
 export async function getClientInfoSections(clientId: string): Promise<ClientInfoSection[]> {
   return selectClientInfoSections(CLIENT_INFO_SECTIONS, clientId);
+}
+
+/** F0-26: the client's custom sections, oldest first, as copies. */
+export async function getClientCustomSections(clientId: string): Promise<ClientCustomSection[]> {
+  return CLIENT_CUSTOM_SECTIONS.filter((section) => section.clientId === clientId).map(
+    (section) => ({ ...section }),
+  );
 }

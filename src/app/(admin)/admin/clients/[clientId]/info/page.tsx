@@ -2,6 +2,8 @@ import { FamilyInfoView } from "@/features/family-info/family-info-view";
 import { loadFamilyInfoData, type FamilyInfoData } from "@/features/family-info/info-data";
 import { InfoErrorState } from "@/features/family-info/info-error-state";
 import { assertAdminClientAccess } from "@/server/admin/client-access";
+import { getClientCustomSections } from "@/server/clients/custom-sections";
+import type { ClientCustomSection } from "@/types/domain";
 
 /** Admin · client Info (ADM-11): the Family Info with edit and documents (RLS allows admins). */
 export default async function AdminClientInfoPage({
@@ -15,8 +17,12 @@ export default async function AdminClientInfoPage({
   await assertAdminClientAccess(clientId);
 
   let data: FamilyInfoData;
+  let customSections: ClientCustomSection[];
   try {
-    data = await loadFamilyInfoData(clientId);
+    [data, customSections] = await Promise.all([
+      loadFamilyInfoData(clientId),
+      getClientCustomSections(clientId),
+    ]);
   } catch (error) {
     console.error(
       "[admin-client-view] could not load info data:",
@@ -25,5 +31,5 @@ export default async function AdminClientInfoPage({
     return <InfoErrorState />;
   }
 
-  return <FamilyInfoView clientId={clientId} data={data} canEdit />;
+  return <FamilyInfoView clientId={clientId} data={data} customSections={customSections} canEdit />;
 }

@@ -27,3 +27,11 @@
 
 ### FD-06 — Cross-lane edits kept in this PR
 - Decision: `src/features/family-info/` (Lane F) and `src/features/carer-patients/` (Lane C) gain the custom-section list; Admin reuses `FamilyInfoView` (ADM-11). Flagged for review; precedent CHG-058.
+
+### FD-07 — Implementation notes (2026-10-12)
+- Pages read `getClientCustomSections` alongside `loadFamilyInfoData` in one `Promise.all`, inside the existing try, after the access check; a rejected read shows each page's existing error state. The app pages under `src/app/(family|carer|admin)/…/info/page.tsx` change by that one read and one prop.
+- The 20-section limit trigger is SECURITY DEFINER and takes a per-client advisory lock, so two adds at once can't both take the 20th place.
+- `database.types.ts` regenerated with `npm run db:types` and formatted; the only change is the new table.
+- The custom cards' Remove has the built-in Edit's 20px inset so the right edges line up; Edit and Remove sit on the heading row and wrap under a long title.
+- Seed: Margaret has "Communication" (written) and "Sleep" (empty) for local previews.
+- No new dependencies.

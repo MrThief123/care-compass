@@ -133,6 +133,18 @@ insert into public.client_info_sections (client_id, key, body, updated_by, updat
    'Type 2 diabetes (diagnosed 2019), mild osteoarthritis. Known allergy: penicillin. See attached care plan for full medication schedule.',
    '10000000-0000-4000-8000-000000000011', '2026-09-01T10:00:00+10:00');
 
+-- Custom Client Details sections (F0-26): one written, one still empty.
+insert into public.client_custom_info_sections
+  (id, client_id, title, body, created_by, updated_by, created_at, updated_at) values
+  ('c5000000-0000-4000-8000-000000000001', 'c0000000-0000-4000-8000-000000000001', 'Communication',
+   'Hard of hearing in her left ear. Speak on her right side and give her time to answer.',
+   '10000000-0000-4000-8000-000000000011', '10000000-0000-4000-8000-000000000011',
+   '2026-09-20T10:00:00+10:00', '2026-09-20T10:00:00+10:00'),
+  ('c5000000-0000-4000-8000-000000000002', 'c0000000-0000-4000-8000-000000000001', 'Sleep',
+   null,
+   '10000000-0000-4000-8000-000000000011', '10000000-0000-4000-8000-000000000011',
+   '2026-09-21T10:00:00+10:00', '2026-09-21T10:00:00+10:00');
+
 -- ---------------------------------------------------------------------------
 -- Budgets
 -- ---------------------------------------------------------------------------
