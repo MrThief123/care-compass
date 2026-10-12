@@ -1191,3 +1191,12 @@ Template for future entries:
 - Impact: `src/components/ui/info-tip.tsx` (icon), `src/components/ui/icon.tsx` (one additive icon), FAM-17 pack wording ("i" to "?", AC-01 and the PRD). Test change: one added test in `info-tip.test.tsx` asserting the `help` icon; no existing expectation changes. No new requirement, contract or dependency.
 - Human confirmation: the human owner, 2026-10-12 (in-session).
 - Docs updated: DECISIONS.md (this entry), FAM-17 PRD and AC-01 wording.
+
+### CHG-061 — New feature F0-26: custom sections on Client Details
+- Date / requested by: 2026-10-12 / Peter (client), relayed by the human owner in-session
+- Type: scope addition (new feature; REQ-11 "new headings" partly promoted)
+- Description: new shared feature **F0-26** (`docs/development/shared/shared-client-custom-sections/`, `feature/shared-client-custom-sections`, 16 criteria): on Client Details, users can add their own titled sections below Description, Habits and Medical history, rename them, edit their text and delete them, similar to how buckets are added and removed in the budget. The three built-in sections stay fixed (no rename or delete). Deleting a section asks for an inline confirmation ("its text will be lost"); the audit log keeps the old text. Shown on Family, Carer and Admin Client Details. Family, an on-shift carer and an admin of the client's organisation may add, rename, edit and delete. An off-shift carer reads only.
+- Source / justification: client request (Peter), confirmed by the human owner in-session 2026-10-12, with these answers: managed by family, on-shift carer and org admin; built-ins fixed; confirm then delete; all three dashboards.
+- Impact: DEVELOPMENT_PLAN.md gains the F0-26 row and card (96 to 97 active, 534 to 550 criteria). PRD.md REQ-11 row notes the promotion of "new headings"; summary flags and proforma forms stay parked (PL-13, PL-22, OQ-38 stays OPEN). New migration: table `client_custom_info_sections` with RLS (select, insert, update and **delete**) and an audit trigger; `client_info_sections` is not changed. New contract functions in `src/server/clients/` (additive). Edits to `src/features/family-info/` and `src/features/carer-patients/` are flagged cross-lane edits kept in this PR (precedent: CHG-058). No new dependency. Existing Info test expectations are not expected to change.
+- Human confirmation: the human owner, 2026-10-12 (in-session).
+- Docs updated: DECISIONS.md (this entry), DEVELOPMENT_PLAN.md, PRD.md REQ-11, the F0-26 pack.

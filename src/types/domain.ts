@@ -85,6 +85,18 @@ export const ClientInfoSectionSchema = z.object({
 });
 export type ClientInfoSection = z.infer<typeof ClientInfoSectionSchema>;
 
+/** F0-26: a section a family member, on-shift carer or admin added under the built-in three. */
+export const ClientCustomSectionSchema = z.object({
+  id: z.string(),
+  clientId: z.string(),
+  title: z.string(),
+  /** "" when nothing is written yet. */
+  content: z.string(),
+  /** ISO datetime. */
+  updatedAt: z.string(),
+});
+export type ClientCustomSection = z.infer<typeof ClientCustomSectionSchema>;
+
 // ---------------------------------------------------------------------------
 // Care events and occurrences
 // ---------------------------------------------------------------------------
