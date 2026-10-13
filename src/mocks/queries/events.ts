@@ -415,6 +415,52 @@ export async function updateEvent(input: UpdateEventInput): Promise<void> {
   }
 }
 
+export interface DeleteEventInput {
+  clientId: string;
+  eventId: string;
+  /** The viewed occurrence's original start (its identity). */
+  occurrenceOriginalStart: string;
+  scope: "occurrence" | "future";
+}
+
+/**
+ * Phase 1 mock mutation (F0-27): drops the viewed occurrence, or it and every later one, from the
+ * in-memory rows; the event itself goes when no occurrence of it is left or it is a one-off.
+ */
+export async function deleteEvent(input: DeleteEventInput): Promise<void> {
+  const index = CARE_EVENTS.findIndex(
+    (candidate) => candidate.id === input.eventId && candidate.clientId === input.clientId,
+  );
+  if (index === -1) throw new Error("That event could not be found.");
+  const event = CARE_EVENTS[index]!;
+
+  const viewedMs = Date.parse(input.occurrenceOriginalStart);
+  const removeAll = input.scope === "future" || event.recurrenceFrequency === "none";
+  for (const byClient of [
+    OCCURRENCES_BY_CLIENT_ID,
+    UPCOMING_OCCURRENCES_BY_CLIENT_ID,
+    PLAIN_EVENT_OCCURRENCES_BY_CLIENT_ID,
+  ] as Readonly<Record<string, AnyOccurrence[]>>[]) {
+    const rows = Object.hasOwn(byClient, input.clientId) ? byClient[input.clientId] : undefined;
+    if (!rows) continue;
+    for (let i = rows.length - 1; i >= 0; i--) {
+      const row = rows[i]!;
+      if (row.eventId !== input.eventId) continue;
+      const originalMs = Date.parse(row.key.slice(row.eventId.length + 1));
+      if (originalMs === viewedMs || (removeAll && originalMs >= viewedMs)) rows.splice(i, 1);
+    }
+  }
+
+  const stillHasRows = [
+    ...rowsFor(OCCURRENCES_BY_CLIENT_ID, input.clientId),
+    ...rowsFor(UPCOMING_OCCURRENCES_BY_CLIENT_ID, input.clientId),
+    ...rowsFor(PLAIN_EVENT_OCCURRENCES_BY_CLIENT_ID, input.clientId),
+  ].some((row) => row.eventId === input.eventId);
+  if (event.recurrenceFrequency === "none" || (input.scope === "future" && !stillHasRows)) {
+    CARE_EVENTS.splice(index, 1);
+  }
+}
+
 /** A carer's shift for a client, with the carer's full name (`client_shift_carers`). */
 export interface ClientShift {
   id: string;
