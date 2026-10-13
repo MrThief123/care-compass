@@ -1,13 +1,17 @@
-import { IBM_Plex_Sans } from "next/font/google";
+import localFont from "next/font/local";
 
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import "./globals.css";
 
-const ibmPlexSans = IBM_Plex_Sans({
+// Self-hosted (IBM Plex Sans, latin, SIL OFL): the build never fetches from Google Fonts, which failed
+// inside the Docker build. Files from @fontsource/ibm-plex-sans 5.3.0.
+const ibmPlexSans = localFont({
   variable: "--font-ibm-plex-sans",
-  weight: ["400", "500"],
-  subsets: ["latin"],
+  src: [
+    { path: "./fonts/ibm-plex-sans-latin-400-normal.woff2", weight: "400", style: "normal" },
+    { path: "./fonts/ibm-plex-sans-latin-500-normal.woff2", weight: "500", style: "normal" },
+  ],
 });
 
 export const metadata: Metadata = {
