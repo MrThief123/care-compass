@@ -1,11 +1,8 @@
 name: Deploy
 
-# Deploys on a push to main, or by hand (Deploy or Stop). Other branches never deploy. A push waits
-# for the image CI builds for that commit (CI's last job pushes it, in parallel with this
-# workflow) so it never ships the previous build.
+# Runs only when triggered by hand (Actions > Deploy > Run workflow: Deploy or Stop). A push never
+# deploys. Deploy ships the `latest` image, which CI pushes on every push to main.
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
     inputs:
       action:
@@ -22,17 +19,15 @@ env:
 jobs:
   deploy:
     name: Deploy to EC2
-    # A push to main deploys; a manual run deploys only when 'deploy' is chosen.
-    if: github.event_name == 'push' || inputs.action == 'deploy'
+    if: inputs.action == 'deploy'
     runs-on: ubuntu-latest
 
     # environment:
     #   name: production
 
     env:
-      # A push to main deploys the image CI built for THIS commit; a manual run deploys `latest`.
       IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/care-compass
-      IMAGE_TAG: ${{ github.event_name == 'push' && github.sha || 'latest' }}
+      IMAGE_TAG: latest
 
     steps:
       - name: Log in to Docker Hub
@@ -40,21 +35,6 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Wait for this commit's image
-        # CI builds and pushes it in parallel with this workflow. Deploying `latest` right away would
-        # race it and ship the previous build; wait (up to 25 minutes) for the exact tag instead.
-        run: |
-          echo "Waiting for $IMAGE:$IMAGE_TAG ..."
-          for attempt in $(seq 1 100); do
-            if docker manifest inspect "$IMAGE:$IMAGE_TAG" > /dev/null 2>&1; then
-              echo "Found $IMAGE:$IMAGE_TAG"
-              exit 0
-            fi
-            sleep 15
-          done
-          echo "::error::$IMAGE:$IMAGE_TAG was not pushed within 25 minutes (did CI's docker job run and pass?)"
-          exit 1
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -208,8 +188,7 @@ jobs:
 
   stop:
     name: Stop EC2
-    # Never on a push (that would stop the server the deploy job just started): manual run only.
-    if: github.event_name == 'workflow_dispatch' && inputs.action == 'stop'
+    if: inputs.action == 'stop'
     runs-on: ubuntu-latest
 
     steps:
