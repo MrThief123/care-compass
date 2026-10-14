@@ -13,3 +13,4 @@ Last updated: 2026-10-14
 
 ## Completed
 - Claimed; CHG-063; DEVELOPMENT_PLAN row and card; feature pack
+- Tests first: T-01–T-08 written, all failing for the right reason (TEST_PLAN results)
