@@ -43,7 +43,7 @@ const PHONE = /^[0-9 +()-]{6,20}$/;
 const PHONE_MESSAGE = "Enter a valid phone number.";
 
 /** Trims, turns blank into "not set", then applies `inner` to what is left. */
-function optional(inner: z.ZodType<string>) {
+function optional(inner: z.ZodType<string, string>) {
   return z
     .string()
     .optional()
