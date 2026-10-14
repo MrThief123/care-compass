@@ -31,7 +31,7 @@ None.
 
 ### FD-06 — 'Ends' built in the Family feature, not the shared kit
 - Date: 2026-10-11
-- Decision: the field is rendered by `EventFormScreen` and held in its state, so no Lane S file changes. It sits under Title/times (the kit fixes the order), not directly under 'Recurring'. CHG-060 and the PRD said the shared `EventFormValues` would gain `endDate`; that is no longer needed.
+- Decision: the field is rendered by `EventFormScreen` and held in its state, so no Lane S file changes. It sits under Title/times (the kit fixes the order), not directly under 'Recurring'. CHG-062 and the PRD said the shared `EventFormValues` would gain `endDate`; that is no longer needed.
 
 ### FD-07 — Task detail gains opt-in `canDelete` and `recurring` props
 - Date: 2026-10-11
@@ -45,3 +45,19 @@ None.
 ### FD-09 — Local test runs need DATA_SOURCE=mock
 - Date: 2026-10-11
 - `.env.local` sets `DATA_SOURCE=supabase` (hosted project), so on this machine `npx vitest run` fails 30+ unrelated mock-contract tests unless run as `DATA_SOURCE=mock npx vitest run`. Not caused by this feature; recorded so the PR's test commands are reproducible.
+
+### FD-10 — Delete reuses F0-27's `deleteEvent` (merge with `main`)
+- Date: 2026-10-14
+- Context: F0-27 (#242) merged a shared `deleteEvent` (`src/server/events/delete-actions.ts`, Delete on the edit screen) while FAM-18 was open; FAM-18 had its own `deleteEventOccurrence`. Two delete flows would break "one pattern per problem" (ARCHITECTURE.md §12).
+- Decision (the human owner, 2026-10-14, in-session): keep F0-27's action. FAM-18 drops `deleteEventOccurrence` and its mock mutation; the Task detail `DeleteEventButton` calls `deleteEvent` (same input shape). FAM-18 still adds the Task detail entry point and the 'Ends' date.
+- Behaviour that now follows F0-27: 'This and all future' from the first occurrence sets `is_active = false` (FD-01 had preferred `recurrence_until`); AC-06 passes against local Supabase either way. 'Future' no longer keeps an earlier, shorter end date: it always writes the day before.
+- Added to F0-27's `deleteEvent` (the human owner chose it, 2026-10-14): a Done occurrence is refused with "Completed care can't be deleted." in both the Supabase path (latest `care_event_completions` row) and the mock, so AC-08 holds for both Delete buttons. Recorded in the F0-27 pack FD-04.
+- CHG renumbered CHG-060 to CHG-062 (`main` used CHG-060 and CHG-061 first).
+
+### FD-11 — Tests changed by the merge (HUMAN REVIEW: test expectation changed)
+- Date: 2026-10-14
+- `src/server/events/delete-event.actions.test.ts` renamed `end-date.actions.test.ts`. Before: 10 `deleteEventOccurrence` tests plus 4 end-date tests. After: the 4 end-date tests only; the delete tests are removed with the action they tested. Their behaviour is covered by F0-27's `delete-actions.test.ts` (occurrence, future, one-off, first occurrence, failure, not allowed) and the three FAM-18 AC-08 tests added there. Assertions dropped with no equivalent: 'future never lengthens an earlier end date' (F0-27 does not do this) and 'rejects a malformed input'.
+- `src/mocks/queries/events.delete.test.ts` removed (tested the removed mock `deleteEventOccurrence`); the mock Done refusal is now tested in `delete-actions.test.ts`.
+- `delete-event-button.test.tsx` and `tests/integration/family-delete-event.test.ts`: retargeted from `deleteEventOccurrence` in `actions` to `deleteEvent` in `delete-actions`. No assertion changed.
+- `src/server/events/delete-actions.test.ts` (F0-27): the faked client's `select` now answers the `care_event_completions` lookup (infrastructure); 3 tests added, none changed.
+

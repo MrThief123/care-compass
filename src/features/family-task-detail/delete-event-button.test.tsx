@@ -13,19 +13,19 @@ import { DeleteEventButton } from "./delete-event-button";
 const mocks = vi.hoisted(() => ({
   push: vi.fn(),
   refresh: vi.fn(),
-  deleteEventOccurrence: vi.fn(),
+  deleteEvent: vi.fn(),
 }));
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: mocks.push, refresh: mocks.refresh }),
 }));
-vi.mock("@/server/events/actions", () => ({ deleteEventOccurrence: mocks.deleteEventOccurrence }));
+vi.mock("@/server/events/delete-actions", () => ({ deleteEvent: mocks.deleteEvent }));
 
 const KEY = "event-margaret-physio:2026-11-30T11:30:00+11:00";
 const BACK = "/family/client-margaret/calendar";
 
 beforeEach(() => {
-  mocks.deleteEventOccurrence.mockResolvedValue({ ok: true, data: undefined });
+  mocks.deleteEvent.mockResolvedValue({ ok: true, data: undefined });
 });
 afterEach(() => vi.resetAllMocks());
 
@@ -61,7 +61,7 @@ describe("[FAM-18] DeleteEventButton", () => {
     expect(screen.queryByRole("radio")).not.toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Delete" }));
 
-    expect(mocks.deleteEventOccurrence).toHaveBeenCalledWith({
+    expect(mocks.deleteEvent).toHaveBeenCalledWith({
       clientId: "client-margaret",
       eventId: "event-margaret-physio",
       occurrenceOriginalStart: "2026-11-30T11:30:00+11:00",
@@ -92,9 +92,7 @@ describe("[FAM-18] DeleteEventButton", () => {
     await user.click(screen.getByRole("radio", { name: "This and all future occurrences" }));
     await user.click(screen.getByRole("button", { name: "Delete" }));
 
-    expect(mocks.deleteEventOccurrence).toHaveBeenCalledWith(
-      expect.objectContaining({ scope: "future" }),
-    );
+    expect(mocks.deleteEvent).toHaveBeenCalledWith(expect.objectContaining({ scope: "future" }));
     expect(mocks.push).toHaveBeenCalledWith(BACK);
   });
 
@@ -108,13 +106,13 @@ describe("[FAM-18] DeleteEventButton", () => {
     await user.click(screen.getByRole("button", { name: "Delete event" }));
     await user.keyboard("{Escape}");
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
-    expect(mocks.deleteEventOccurrence).not.toHaveBeenCalled();
+    expect(mocks.deleteEvent).not.toHaveBeenCalled();
     expect(mocks.push).not.toHaveBeenCalled();
   });
 
   it("[FAM-18][AC-11] a failed delete shows the message, keeps the dialog open and does not navigate", async () => {
     const user = userEvent.setup();
-    mocks.deleteEventOccurrence.mockResolvedValue({
+    mocks.deleteEvent.mockResolvedValue({
       ok: false,
       error: { code: "UNEXPECTED", message: "Couldn't delete. Please try again." },
     });

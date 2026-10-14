@@ -8,19 +8,20 @@ import {
   melbourneMinutesOfDay,
   melbourneTimeRange,
 } from "@/components/shared/calendar/melbourne-time";
-import { STATUS_CUE } from "@/components/shared/calendar/status-cue";
+import { occurrenceCue } from "@/components/shared/calendar/status-cue";
+import { EventPill } from "@/components/shared/event-pill";
 import { StatusPill } from "@/components/shared/status-pill";
 import { formatDuration } from "@/lib/format/duration";
 import { cn } from "@/lib/utils";
-import type { Occurrence } from "@/types/domain";
+import { isPlainEvent, type AnyOccurrence } from "@/types/domain";
 
 import { homeRoutes } from "./home-routes";
 import { layoutDay } from "./today-layout";
 
 export interface TodayTimelineProps {
   clientId: string;
-  /** Today's occurrences, in any order and any number. */
-  occurrences: Occurrence[];
+  /** Today's tasks and plain events, in any order and any number. */
+  occurrences: AnyOccurrence[];
   /** Pins the current-time line (tests); omit to track the real clock, `null` for no line. */
   now?: Date | null;
   basePath?: string;
@@ -28,7 +29,8 @@ export interface TodayTimelineProps {
 }
 
 /** The pill's own text, which is also its hover title when a long name is cut short. */
-function statusText(occurrence: Occurrence): string {
+function statusText(occurrence: AnyOccurrence): string {
+  if (isPlainEvent(occurrence)) return "Event";
   if (occurrence.status === "done") return `Done · ${occurrence.actor ?? "—"}`;
   return occurrence.status === "overdue" ? "Overdue" : "Planned";
 }
@@ -78,7 +80,7 @@ export function TodayTimeline({
 
       <ul aria-label="Care events today" className="absolute inset-y-0 right-0 left-16">
         {layout.blocks.map(({ occurrence, top, height, pushed }) => {
-          const cue = STATUS_CUE[occurrence.status];
+          const cue = occurrenceCue(occurrence);
           const minutes = Number.isFinite(occurrence.durationMinutes)
             ? Math.max(0, occurrence.durationMinutes)
             : 0;
@@ -123,11 +125,16 @@ export function TodayTimeline({
                   {formatDuration(minutes)}
                 </span>
                 <span title={status} className="ml-auto flex max-w-[40%] min-w-0 shrink-0">
-                  <StatusPill
-                    status={occurrence.status}
-                    actorName={occurrence.actor ?? "—"}
-                    className="min-w-0"
-                  />
+                  {/* A plain event has no status: the neutral "Event" label stands in (UI-05). */}
+                  {isPlainEvent(occurrence) ? (
+                    <EventPill className="min-w-0" />
+                  ) : (
+                    <StatusPill
+                      status={occurrence.status}
+                      actorName={occurrence.actor ?? "—"}
+                      className="min-w-0"
+                    />
+                  )}
                 </span>
               </Link>
             </li>

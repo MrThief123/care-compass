@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { ChipGroup, ConfirmationModal } from "@/components/shared/forms";
-import { deleteEventOccurrence } from "@/server/events/actions";
+import { deleteEvent } from "@/server/events/delete-actions";
 
 export interface DeleteEventButtonProps {
   clientId: string;
@@ -65,7 +65,7 @@ export function DeleteEventButton({
     if (!originalStart || busy) return;
     setBusy(true);
     setError(undefined);
-    const result = await deleteEventOccurrence({
+    const result = await deleteEvent({
       clientId,
       eventId,
       occurrenceOriginalStart: originalStart,

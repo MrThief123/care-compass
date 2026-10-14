@@ -2,7 +2,7 @@ import type { LocalDate } from "@/lib/dates/week-range";
 import { getCurrentUser } from "@/server/auth/queries";
 import { getClientShifts, getOccurrences, getTaskLog, getToday } from "@/server/events/queries";
 import type { ClientShift } from "@/server/events/queries";
-import type { Occurrence } from "@/types/domain";
+import type { AnyOccurrence, Occurrence } from "@/types/domain";
 
 import { parseCalendarParams, visibleRange, type CalendarParams } from "./calendar-params";
 
@@ -12,7 +12,8 @@ export const LOG_ROWS = 3;
 export interface FamilyCalendarData {
   today: LocalDate;
   params: CalendarParams;
-  occurrences: Occurrence[];
+  /** Tasks and plain events (UI-05): an event saved with the task switch off is drawn too. */
+  occurrences: AnyOccurrence[];
   log: Occurrence[];
   /** Carers on duty in the visible range (their shifts), earliest first. */
   shifts: ClientShift[];
@@ -41,7 +42,7 @@ export async function loadFamilyCalendar(
   const today = await getToday();
   const params = parseCalendarParams(search, today);
   const [occurrences, taskLog, user, shifts] = await Promise.all([
-    getOccurrences(clientId, visibleRange(params)),
+    getOccurrences(clientId, visibleRange(params), { type: "all" }),
     getTaskLog(clientId),
     getCurrentUser(role),
     getClientShifts(clientId, visibleRange(params)),

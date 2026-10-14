@@ -1183,7 +1183,25 @@ Template for future entries:
 - Human confirmation: the human owner, 2026-10-10 (in-session).
 - Docs updated: DECISIONS.md (this entry).
 
-### CHG-060 — New feature FAM-18: delete event and recurrence end date
+### CHG-060 — Info tip icon changes from "i" to "?"
+- Date / requested by: 2026-10-12 / the human owner (in-session)
+- Type: icon change (no behaviour change)
+- Description: the FAM-17 info tip button shows a question mark (lucide `CircleQuestionMark`, new additive `help` icon) instead of an info circle. Its accessible name ("About <label>"), 44px target, hover, focus, click and Esc behaviour are unchanged. The `info` icon stays for its other uses (status banners, Client Details empty states).
+- Source / justification: human request, in-session 2026-10-12.
+- Impact: `src/components/ui/info-tip.tsx` (icon), `src/components/ui/icon.tsx` (one additive icon), FAM-17 pack wording ("i" to "?", AC-01 and the PRD). Test change: one added test in `info-tip.test.tsx` asserting the `help` icon; no existing expectation changes. No new requirement, contract or dependency.
+- Human confirmation: the human owner, 2026-10-12 (in-session).
+- Docs updated: DECISIONS.md (this entry), FAM-17 PRD and AC-01 wording.
+
+### CHG-061 — New feature F0-26: custom sections on Client Details
+- Date / requested by: 2026-10-12 / Peter (client), relayed by the human owner in-session
+- Type: scope addition (new feature; REQ-11 "new headings" partly promoted)
+- Description: new shared feature **F0-26** (`docs/development/shared/shared-client-custom-sections/`, `feature/shared-client-custom-sections`, 16 criteria): on Client Details, users can add their own titled sections below Description, Habits and Medical history, rename them, edit their text and delete them, similar to how buckets are added and removed in the budget. The three built-in sections stay fixed (no rename or delete). Deleting a section asks for an inline confirmation ("its text will be lost"); the audit log keeps the old text. Shown on Family, Carer and Admin Client Details. Family, an on-shift carer and an admin of the client's organisation may add, rename, edit and delete. An off-shift carer reads only.
+- Source / justification: client request (Peter), confirmed by the human owner in-session 2026-10-12, with these answers: managed by family, on-shift carer and org admin; built-ins fixed; confirm then delete; all three dashboards.
+- Impact: DEVELOPMENT_PLAN.md gains the F0-26 row and card (96 to 97 active, 534 to 550 criteria). PRD.md REQ-11 row notes the promotion of "new headings"; summary flags and proforma forms stay parked (PL-13, PL-22, OQ-38 stays OPEN). New migration: table `client_custom_info_sections` with RLS (select, insert, update and **delete**) and an audit trigger; `client_info_sections` is not changed. New contract functions in `src/server/clients/` (additive). Edits to `src/features/family-info/` and `src/features/carer-patients/` are flagged cross-lane edits kept in this PR (precedent: CHG-058). No new dependency. Existing Info test expectations are not expected to change.
+- Human confirmation: the human owner, 2026-10-12 (in-session).
+- Docs updated: DECISIONS.md (this entry), DEVELOPMENT_PLAN.md, PRD.md REQ-11, the F0-26 pack.
+
+### CHG-062 — New feature FAM-18: delete event and recurrence end date
 - Date / requested by: 2026-10-11 / the human owner (in-session)
 - Type: scope addition (new feature; reverses the "Deleting events" out-of-scope lines of FAM-07 and CAR-07)
 - Description: new feature **FAM-18** (Family lane, `docs/development/family-dev/family-delete-event/`, `feature/family-delete-event`, 17 criteria). A 'Delete event' button on Task detail for Family and for a Carer on shift (not Admin): a one-off event gets a confirmation; a recurring event offers 'This occurrence' or 'This and all future occurrences'. The event form (Add and Edit) gains an optional 'Ends' date for repeating events (OQ-12 already says events repeat "unless an end date is set").
@@ -1191,3 +1209,4 @@ Template for future entries:
 - Impact: DEVELOPMENT_PLAN.md gains the FAM-18 row and card (96 to 97 active, 534 to 551 criteria; next number FAM-19). No migration or RLS change: soft delete only (cancelled override; `recurrence_until`). `createEvent`/`updateEvent` gain optional `endDate`; new `deleteEventOccurrence` action; `EventFormValues` in the shared forms kit gains `endDate` (flagged additive Lane S edit, kept in this PR); carer pages touched props-only. Closes the pending-cost-on-delete question (FD-03: moot). No existing test expectation expected to change.
 - Human confirmation: the human owner, 2026-10-11 (in-session).
 - Docs updated: DECISIONS.md (this entry), DEVELOPMENT_PLAN.md, the FAM-18 pack.
+- Merge note (2026-10-14, the human owner): first recorded as CHG-060 on the FAM-18 branch; renumbered CHG-062 because `main` took CHG-060 (info tip icon) and CHG-061 (F0-26) first. F0-27 (#242) merged a shared `deleteEvent` (`src/server/events/delete-actions.ts`) while FAM-18 was open, so FAM-18 drops its own `deleteEventOccurrence` action and mock mutation and its Task detail 'Delete event' button calls F0-27's `deleteEvent` (one pattern per problem). FAM-18 still adds the Task detail entry point and the 'Ends' date. See the FAM-18 pack FD-10.

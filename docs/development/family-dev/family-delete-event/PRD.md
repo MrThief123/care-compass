@@ -10,7 +10,7 @@
 | Documentation | `docs/development/family-dev/family-delete-event/` |
 | Lane | F — Family |
 | Sprint | SPRINT · D21 |
-| Change | CHG-060 (new requirement, human-approved in-session 2026-10-11) |
+| Change | CHG-062 (new requirement, human-approved in-session 2026-10-11) |
 | Status / owner | See PROGRESS.md |
 
 ## Purpose

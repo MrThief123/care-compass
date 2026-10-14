@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { fieldErrors } from "@/components/shared/forms";
 import { instantToMelbourneLocal } from "@/lib/dates/melbourne-time";
-import type { CareEvent, Occurrence } from "@/types/domain";
+import type { AnyOccurrence, CareEvent } from "@/types/domain";
 
 /**
  * Title, Start time and End time (OQ-22/PD-047; End time replaces Duration, CHG-051): first-class
@@ -81,7 +81,7 @@ export function validateEventDetails(values: EventDetailsValues): Record<string,
  */
 export function editEventDetailsValues(
   event: CareEvent,
-  occurrence?: Occurrence,
+  occurrence?: AnyOccurrence,
 ): EventDetailsValues {
   const start = occurrence?.start ?? event.start;
   const durationMinutes = occurrence?.durationMinutes ?? event.durationMinutes;

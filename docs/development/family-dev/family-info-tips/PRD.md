@@ -19,7 +19,7 @@ Say in a few words what a main button does, without leaving the screen.
 CIS3 Access 6 and CM-0309 ask for "?"/"i" help bubbles and contextual help. Parked as PL-05 (OQ-25). Family members are not always technical; "Edit" or "Export" alone does not say what will happen.
 
 ## Description
-A small "i" button sits beside the main Family buttons. Hover, keyboard focus or a click or tap opens a short one-sentence tip. Esc, moving away or a click elsewhere closes it. One hand-rolled `InfoTip` component; the wording lives in one map.
+A small "?" button sits beside the main Family buttons. Hover, keyboard focus or a click or tap opens a short one-sentence tip. Esc, moving away or a click elsewhere closes it. One hand-rolled `InfoTip` component; the wording lives in one map.
 
 ## User value
 Families understand a button before pressing it.
@@ -39,7 +39,7 @@ Families understand a button before pressing it.
 - Editing help text in the UI.
 
 ## Functional Requirements
-- The "i" button has an accessible name that says which button it explains ("About Enter event").
+- The "?" button has an accessible name that says which button it explains ("About Enter event").
 - The tip opens on pointer hover, keyboard focus and click/tap; closes on Esc, pointer leave (pointer may move onto the tip first), blur and outside click.
 - `aria-describedby` links the button to the tip while it is open.
 
@@ -60,7 +60,7 @@ Families understand a button before pressing it.
 - Rendered tip; no data read or written.
 
 ## Error / Edge Cases
-- Touch: tapping the "i" opens; tapping elsewhere closes.
+- Touch: tapping the "?" opens; tapping elsewhere closes.
 - Tip near the viewport edge stays on screen.
 
 ## Security / Permissions

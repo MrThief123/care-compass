@@ -587,6 +587,61 @@ export type Database = {
           },
         ];
       };
+      client_custom_info_sections: {
+        Row: {
+          body: string | null;
+          client_id: string;
+          created_at: string;
+          created_by: string | null;
+          id: string;
+          title: string;
+          updated_at: string;
+          updated_by: string | null;
+        };
+        Insert: {
+          body?: string | null;
+          client_id: string;
+          created_at?: string;
+          created_by?: string | null;
+          id?: string;
+          title: string;
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Update: {
+          body?: string | null;
+          client_id?: string;
+          created_at?: string;
+          created_by?: string | null;
+          id?: string;
+          title?: string;
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "client_custom_info_sections_client_id_fkey";
+            columns: ["client_id"];
+            isOneToOne: false;
+            referencedRelation: "clients";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "client_custom_info_sections_created_by_fkey";
+            columns: ["created_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "client_custom_info_sections_updated_by_fkey";
+            columns: ["updated_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       client_family_members: {
         Row: {
           client_id: string;

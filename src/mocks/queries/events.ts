@@ -427,63 +427,60 @@ export async function updateEvent(input: UpdateEventInput): Promise<void> {
   }
 }
 
-export interface DeleteEventOccurrenceInput {
+export interface DeleteEventInput {
   clientId: string;
   eventId: string;
-  /** The deleted occurrence's original start (its `key`'s second half). */
+  /** The viewed occurrence's original start (its identity). */
   occurrenceOriginalStart: string;
   scope: "occurrence" | "future";
-  /** The Melbourne day before the occurrence, for 'future' (computed by the action). */
-  dayBefore: string;
 }
 
 /**
- * Phase 1 mock mutation for FAM-18, mirroring the Supabase rules: 'occurrence' (and any one-off)
- * removes that occurrence's row; 'future' removes it and every later not-done row and ends the
- * event the day before. A Done occurrence is refused. Rows are static fixtures, so removing a row
- * is how a cancelled override reads here.
+ * Phase 1 mock mutation (F0-27): drops the viewed occurrence, or it and every later one, from the
+ * in-memory rows; the event itself goes when no occurrence of it is left or it is a one-off. A Done
+ * occurrence is refused and nothing changes (FAM-18 AC-08).
  */
-export async function deleteEventOccurrence(
-  input: DeleteEventOccurrenceInput,
-): Promise<"deleted" | "not-found" | "done"> {
-  const event = CARE_EVENTS.find(
+export async function deleteEvent(input: DeleteEventInput): Promise<"deleted" | "done"> {
+  const index = CARE_EVENTS.findIndex(
     (candidate) => candidate.id === input.eventId && candidate.clientId === input.clientId,
   );
-  if (!event) return "not-found";
+  if (index === -1) throw new Error("That event could not be found.");
+  const event = CARE_EVENTS[index]!;
 
-  const tables = [
+  const viewedMs = Date.parse(input.occurrenceOriginalStart);
+  const viewed = [
+    ...rowsFor(OCCURRENCES_BY_CLIENT_ID, input.clientId),
+    ...rowsFor(UPCOMING_OCCURRENCES_BY_CLIENT_ID, input.clientId),
+  ].find(
+    (row) =>
+      row.eventId === input.eventId &&
+      Date.parse(row.key.slice(row.eventId.length + 1)) === viewedMs,
+  );
+  if (viewed?.status === "done") return "done";
+
+  const removeAll = input.scope === "future" || event.recurrenceFrequency === "none";
+  for (const byClient of [
     OCCURRENCES_BY_CLIENT_ID,
     UPCOMING_OCCURRENCES_BY_CLIENT_ID,
     PLAIN_EVENT_OCCURRENCES_BY_CLIENT_ID,
-  ] as unknown as Record<string, AnyOccurrence[]>[];
-  const originalStartOf = (row: AnyOccurrence) => row.key.slice(row.eventId.length + 1);
-  const isDone = (row: AnyOccurrence) => !isPlainEvent(row) && row.status === "done";
-  const targetKey = `${input.eventId}:${input.occurrenceOriginalStart}`;
-
-  const target = tables
-    .flatMap((table) => (Object.hasOwn(table, input.clientId) ? table[input.clientId]! : []))
-    .find((row) => row.key === targetKey);
-  if (!target) return "not-found";
-  if (isDone(target)) return "done";
-
-  const cutoff = Date.parse(input.occurrenceOriginalStart);
-  const removes = (row: AnyOccurrence) =>
-    row.eventId === input.eventId &&
-    (input.scope === "future" && event.recurrenceFrequency !== "none"
-      ? Date.parse(originalStartOf(row)) >= cutoff && !isDone(row)
-      : row.key === targetKey);
-
-  for (const table of tables) {
-    const rows = Object.hasOwn(table, input.clientId) ? table[input.clientId] : undefined;
+  ] as Readonly<Record<string, AnyOccurrence[]>>[]) {
+    const rows = Object.hasOwn(byClient, input.clientId) ? byClient[input.clientId] : undefined;
     if (!rows) continue;
-    for (let index = rows.length - 1; index >= 0; index -= 1) {
-      if (removes(rows[index]!)) rows.splice(index, 1);
+    for (let i = rows.length - 1; i >= 0; i--) {
+      const row = rows[i]!;
+      if (row.eventId !== input.eventId) continue;
+      const originalMs = Date.parse(row.key.slice(row.eventId.length + 1));
+      if (originalMs === viewedMs || (removeAll && originalMs >= viewedMs)) rows.splice(i, 1);
     }
   }
 
-  if (input.scope === "future" && event.recurrenceFrequency !== "none") {
-    const current = event.recurrenceEndDate;
-    event.recurrenceEndDate = current && current < input.dayBefore ? current : input.dayBefore;
+  const stillHasRows = [
+    ...rowsFor(OCCURRENCES_BY_CLIENT_ID, input.clientId),
+    ...rowsFor(UPCOMING_OCCURRENCES_BY_CLIENT_ID, input.clientId),
+    ...rowsFor(PLAIN_EVENT_OCCURRENCES_BY_CLIENT_ID, input.clientId),
+  ].some((row) => row.eventId === input.eventId);
+  if (event.recurrenceFrequency === "none" || (input.scope === "future" && !stillHasRows)) {
+    CARE_EVENTS.splice(index, 1);
   }
   return "deleted";
 }

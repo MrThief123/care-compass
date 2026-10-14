@@ -24,6 +24,7 @@ import type {
   CarerNotification,
   CareEvent,
   Client,
+  ClientCustomSection,
   ClientInfoSection,
   DocumentRef,
   EventDocument,
@@ -864,6 +865,28 @@ export const CLIENT_INFO_SECTIONS: ClientInfoSection[] = [
     content:
       "Type 2 diabetes (diagnosed 2019), mild osteoarthritis. Known allergy: penicillin. See attached care plan for full medication schedule.",
     updatedAt: "2026-09-01T10:00:00+10:00",
+  },
+];
+
+/**
+ * Custom Client Details sections (F0-26), read through `getClientCustomSections`, oldest first.
+ * On Robert, not Margaret, so the Family Info screens drawn from `family-04-info.png` keep their
+ * four cards; the dev seed gives Margaret some instead.
+ */
+export const CLIENT_CUSTOM_SECTIONS: ClientCustomSection[] = [
+  {
+    id: "custom-robert-communication",
+    clientId: ROBERT_CLIENT_ID,
+    title: "Communication",
+    content: "Hard of hearing in his left ear. Speak on his right side, in short sentences.",
+    updatedAt: "2026-09-20T10:00:00+10:00",
+  },
+  {
+    id: "custom-robert-behaviours",
+    clientId: ROBERT_CLIENT_ID,
+    title: "Behaviours of concern",
+    content: "Can become unsettled late in the afternoon. A walk in the garden usually helps.",
+    updatedAt: "2026-09-21T10:00:00+10:00",
   },
 ];
 

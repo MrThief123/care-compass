@@ -4,10 +4,17 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { EventForm, Field, type EventFormValues } from "@/components/shared/forms";
+import {
+  ConfirmationModal,
+  EventForm,
+  Field,
+  type EventFormValues,
+} from "@/components/shared/forms";
+import { Button } from "@/components/ui/button";
 import type { LocalDate } from "@/lib/dates/week-range";
 import { linkDocumentsToEvent } from "@/server/documents/actions";
 import { createEvent, updateEvent } from "@/server/events/actions";
+import { deleteEvent } from "@/server/events/delete-actions";
 import type { BudgetBucketSummary, EventDocument } from "@/types/domain";
 
 import { EditScopeFields } from "./edit-scope-fields";
@@ -59,6 +66,8 @@ export interface EventFormScreenProps {
   returnHref: string;
   /** Shown instead of the action's own message when a save is refused as NOT_ALLOWED (CHG-048). */
   notAllowedMessage?: string;
+  /** Where to go after Delete event (F0-27). Edit event only; without it there is no Delete event button. */
+  deleteReturnHref?: string;
 }
 
 const TITLES = { add: "Add event", edit: "Edit event" } as const;
@@ -85,6 +94,7 @@ export function EventFormScreen({
   initialEndDate,
   returnHref,
   notAllowedMessage,
+  deleteReturnHref,
 }: EventFormScreenProps) {
   const router = useRouter();
   const [values, setValues] = useState(initialValues);
@@ -101,6 +111,26 @@ export function EventFormScreen({
   const [pendingDocuments, setPendingDocuments] = useState<{ id: string; name: string }[]>([]);
   const [unlinkedNames, setUnlinkedNames] = useState<string[]>();
   const hasSavedCost = hasCostText(initialCost);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const canDelete = mode === "edit" && deleteReturnHref !== undefined;
+  const isRecurring = values.recurrence !== "none";
+
+  // F0-27: the viewed occurrence only, or it and every later one.
+  async function remove(deleteScope: "occurrence" | "future") {
+    setConfirmingDelete(false);
+    setSaveError(undefined);
+    const result = await deleteEvent({
+      clientId,
+      eventId: eventId!,
+      occurrenceOriginalStart: occurrenceOriginalStart!,
+      scope: deleteScope,
+    });
+    if (!result.ok) {
+      setSaveError(refusalMessage(result.error));
+      return;
+    }
+    router.push(deleteReturnHref!);
+  }
 
   function refusalMessage(error: { code: string; message: string }): string {
     return error.code === "NOT_ALLOWED" && notAllowedMessage ? notAllowedMessage : error.message;
@@ -290,6 +320,39 @@ export function EventFormScreen({
       >
         {saveError}
       </p>
+      {canDelete && (
+        <>
+          <div>
+            <Button variant="destructive" onClick={() => setConfirmingDelete(true)}>
+              Delete event
+            </Button>
+          </div>
+          <ConfirmationModal
+            open={confirmingDelete}
+            tone="destructive"
+            title="Delete this event?"
+            body={
+              isRecurring ? (
+                <div className="flex flex-col gap-3">
+                  <p>
+                    Choose what to delete. Past occurrences, ticks and costs already charged stay.
+                  </p>
+                  <div>
+                    <Button variant="destructive" onClick={() => remove("future")}>
+                      Delete all future events
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                "This event will be removed from the calendar."
+              )
+            }
+            confirmLabel={isRecurring ? "Delete this event" : "Delete"}
+            onConfirm={() => remove("occurrence")}
+            onCancel={() => setConfirmingDelete(false)}
+          />
+        </>
+      )}
     </div>
   );
 }

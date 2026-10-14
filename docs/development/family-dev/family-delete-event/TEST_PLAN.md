@@ -8,9 +8,9 @@ Tests first (TESTING.md §2). Titles start `[FAM-18][AC-xx]`. Run, confirm they 
 | Test ID | Covers | Level | Description | Written first? | Result |
 |---|---|---|---|---|---|
 | T-01 | AC-01, AC-08, AC-16 | component | Task detail shows 'Delete event' only when `canEdit` and the occurrence is not Done; absent for Admin read-only. | ☑ | see note |
-| T-02 | AC-02 | component | One-off: confirm dialog, `deleteEventOccurrence` called, return to origin. | ☑ | see note |
+| T-02 | AC-02 | component | One-off: confirm dialog, F0-27 `deleteEvent` called, return to origin. | ☑ | see note |
 | T-03 | AC-03, AC-07 | component | Recurring dialog options and default; Cancel and Esc do nothing. | ☑ | see note |
-| T-04 | AC-04, AC-05, AC-06 | unit (mock) + integration | Mock `deleteEventOccurrence`: occurrence cancel, future cap (day before, Melbourne), first-occurrence removes series, completions kept. | ☑ | see note |
+| T-04 | AC-04, AC-05, AC-06 | unit (mock) + integration | F0-27 `deleteEvent` (FD-10): occurrence cancel, future cap (day before, Melbourne), first-occurrence removes series, completions kept. | ☑ | see note |
 | T-05 | AC-08, AC-09, AC-10 | integration (Supabase) | RLS: family and on-shift carer delete; off-shift carer, other family, Admin refused; Done refused. | ☑ | see note |
 | T-06 | AC-11 | component | Failure message, dialog stays open. | ☑ | see note |
 | T-07 | AC-12, AC-14 | component | 'Ends' visibility by Recurring value; end before date error. | ☑ | see note |
@@ -24,3 +24,10 @@ FAM-06, FAM-07, FAM-15, CAR-07 suites; recurrence engine tests; Calendar and Log
 - Unit/component/action/mock tests: all pass (`DATA_SOURCE=mock npx vitest run`: 252 files, 2805 tests; the 44 skipped files are the Supabase integration files).
 - `tests/integration/family-delete-event.test.ts` (T-04, T-05, T-08 against real RLS): written, typechecks and lints, **not run**: the local Supabase stack needs Docker, which was not running. Run it with `supabase start` and the three local variables from `supabase status -o env` before the PR.
 - Playwright e2e and a real-browser check: not run (see PROGRESS.md).
+
+## Results (2026-10-14, after merging `main` and reusing F0-27's `deleteEvent`, FD-10/FD-11)
+- `DATA_SOURCE=mock npx vitest run --exclude 'tests/integration/**'`: 253 files, 2866 tests, all pass.
+- `tests/integration/family-delete-event.test.ts` against local Supabase: 7/7 pass (AC-08 needed the Done guard added to `deleteEvent`).
+- Full `tests/integration`: the only failures are 13 tests that fail the same way on `main` (FAM-07 AC-02, F0-11, FAM-05, FAM-02, FAM-15, ADM-11, cross-role sync, F0-16, F0-17); `budget-thresholds` failed once in the full run and passed twice alone.
+- `npx supabase test db`: 35 files, 971 tests, PASS. `npm run typecheck`, `npm run lint` (0 errors; 3 warnings in files this PR does not touch), prettier on changed files, `npm run build`: clean.
+- Playwright e2e and a browser check: not run.

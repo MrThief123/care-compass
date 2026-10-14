@@ -1,7 +1,8 @@
 import { EmptyState } from "@/components/shared/states";
 import { CardShell } from "@/components/ui/card-shell";
+import { CustomSections } from "@/features/client-custom-sections/custom-sections";
 import type { FamilyInfoData } from "@/features/family-info/info-data";
-import type { ClientInfoSectionKind } from "@/types/domain";
+import type { ClientCustomSection, ClientInfoSectionKind } from "@/types/domain";
 
 import { CarerDocumentationCard } from "./carer-documentation-card";
 import { CarerInfoSectionCard } from "./carer-info-section-card";
@@ -13,21 +14,29 @@ const SECTIONS: ReadonlyArray<{ kind: ClientInfoSectionKind; title: string }> = 
 ];
 
 /**
- * Carer · Info (CAR-04): Description, Habits, Medical history and Documentation. On shift
+ * Carer · Info (CAR-04): Description, Habits, Medical history, any custom sections (F0-26) and
+ * Documentation. On shift
  * every section has a card, written or not, so a carer can add a first entry; off shift a
  * section that was never written is left out, and with nothing at all one empty state shows.
  */
 export function CarerInfoView({
   clientId,
   data,
+  customSections = [],
   canEdit,
 }: {
   clientId: string;
   data: FamilyInfoData;
+  /** Sections added under the built-in three (F0-26), oldest first. */
+  customSections?: ClientCustomSection[];
   canEdit: boolean;
 }) {
   const { sections, documents } = data;
-  const isEmpty = !canEdit && sections.length === 0 && documents.length === 0;
+  const isEmpty =
+    !canEdit &&
+    sections.length === 0 &&
+    documents.length === 0 &&
+    customSections.every((section) => section.content.trim() === "");
 
   return (
     <div className="flex flex-col gap-[22px] px-6 py-5">
@@ -56,6 +65,7 @@ export function CarerInfoView({
               />
             );
           })}
+          <CustomSections clientId={clientId} sections={customSections} canEdit={canEdit} />
           <CarerDocumentationCard clientId={clientId} documents={documents} canEdit={canEdit} />
         </>
       )}

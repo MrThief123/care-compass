@@ -13,7 +13,7 @@
  * Pure, so the arithmetic is tested without rendering anything.
  */
 import { melbourneMinutesOfDay } from "@/components/shared/calendar/melbourne-time";
-import type { Occurrence } from "@/types/domain";
+import type { AnyOccurrence } from "@/types/domain";
 
 /** Height of one hour on an unstretched scale (the design's 44px rows). */
 export const ROW_PX = 44;
@@ -37,7 +37,7 @@ export interface TimelineWindow {
 }
 
 export interface TimelineBlock {
-  occurrence: Occurrence;
+  occurrence: AnyOccurrence;
   /** Pixels from the top of the canvas. */
   top: number;
   height: number;
@@ -65,7 +65,7 @@ export interface DayLayout extends TimelineWindow {
   yAt: (minutesOfDay: number) => number | null;
 }
 
-function duration(occurrence: Occurrence): number {
+function duration(occurrence: AnyOccurrence): number {
   return Number.isFinite(occurrence.durationMinutes) ? Math.max(0, occurrence.durationMinutes) : 0;
 }
 
@@ -79,7 +79,7 @@ function compareKeys(a: string, b: string): number {
  * before 07:00 and later for one that runs past 19:00, never past the day's
  * edges. Nothing is hidden below a fold.
  */
-export function timelineWindow(occurrences: Occurrence[]): TimelineWindow {
+export function timelineWindow(occurrences: AnyOccurrence[]): TimelineWindow {
   let startHour: number = DEFAULT_START_HOUR;
   let endHour: number = DEFAULT_END_HOUR;
   for (const occurrence of occurrences) {
@@ -92,7 +92,7 @@ export function timelineWindow(occurrences: Occurrence[]): TimelineWindow {
   return { startHour: Math.max(0, startHour), endHour: Math.min(24, endHour) };
 }
 
-export function layoutDay(occurrences: Occurrence[]): DayLayout {
+export function layoutDay(occurrences: AnyOccurrence[]): DayLayout {
   const { startHour, endHour } = timelineWindow(occurrences);
 
   // Time order; events that start together longest first, then by key, so the

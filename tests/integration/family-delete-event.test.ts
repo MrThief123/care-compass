@@ -7,7 +7,7 @@ import type { Database } from "@/lib/supabase/database.types";
 import { createAdminClient } from "@/server/jobs/supabase-admin";
 
 // [FAM-18] Delete an event, or an occurrence, and give a repeating event an end date, through the
-// `deleteEventOccurrence` / `createEvent` Server Actions against a real database: family, or a carer on
+// `deleteEvent` (F0-27) / `createEvent` Server Actions against a real database: family, or a carer on
 // shift (`can_edit_care_events`, F0-11 / PD-041); nobody else. Nothing is physically deleted. Needs a running local
 // Supabase stack (`supabase start`, migrations applied); runs only when NEXT_PUBLIC_SUPABASE_URL
 // is a local address and skips against a hosted project. If `.env.local` points at a hosted
@@ -192,8 +192,8 @@ async function deleteAs(
   scope: "occurrence" | "future",
 ) {
   return withSession(session, async () => {
-    const { deleteEventOccurrence } = await import("@/server/events/actions");
-    return deleteEventOccurrence({
+    const { deleteEvent } = await import("@/server/events/delete-actions");
+    return deleteEvent({
       clientId,
       eventId,
       occurrenceOriginalStart: occurrenceStart(weeks),

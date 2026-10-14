@@ -77,3 +77,19 @@ Authorisation: root DECISIONS.md CHG-009 (human, 2026-09-24). The human approved
 - Decision: AC-13 marked MET on that evidence. Every other test passes: 510 / 515 in `npm run test` (500 / 500 under `src/`), 6 / 8 Playwright. No existing test changed.
 - Also found (pre-existing, outside UI-05, not fixed): on the showcase `/`, the standalone `CurrentTimeLine` example has no positioned wrapper, so its `absolute` red line sits against the page and crosses the "Navigation Rail" label, at a height that follows the clock. Reported to the human.
 - Human confirmation required: no. The human may overrule the AC-13 judgement at PR review.
+
+### FD-10 — Plain events saved but never shown (bug fix after UI-05, reported by the human)
+- Date: 2026-10-12
+- Report (Dhruv Verma, deployment): creating an event with the task switch off "doesn't actually save"; a task does, on Home and Calendar alike.
+- Cause: the event was saved (`createEvent` writes `completion_mode = 'automatic'` exactly as it writes a task). It was not drawn: the screens read occurrences through `getOccurrences` / `getTodayOccurrences` / `getOccurrence` without `type`, and the contract's default is tasks only (FD-01, FD-03). No screen had switched to `type: "all"` after UI-05, so plain events never reached any view.
+- Fix (`fix/plain-events-hidden-on-views`):
+  - Calendars (Family, Carer, Admin): `loadFamilyCalendar` and `loadAdminClientCalendar` read `{ type: "all" }`. The grids already draw plain events (AC-07); the Tasks panel lists tasks only, since a plain event has nothing to tick.
+  - Home Today timeline (Family, Carer, Admin): `loadFamilyHomeData` reads today with `{ type: "all" }`; `TodayTimeline` shows `EventPill` and the event cue for a plain event in place of a status pill. Overdue and Recent activity stay task-only (a plain event has no status).
+  - Edit event (Family, Carer, Admin): the viewed or today's occurrence is read with `{ type: "all" }`, so a plain event opens on that occurrence's date rather than its first; a plain event shows Planned in the form, as with no occurrence.
+- Tests first in 04973fd (9 new, all failing for this reason). **HUMAN REVIEW: test expectation changed** — 7 existing assertions pinned the tasks-only call and now expect the `type` option; no behaviour assertion was removed:
+  - `family-calendar.test.tsx` (FAM-UI-02 AC-01 ×2, AC-05 month, day view): `getOccurrences(CLIENT_ID, range)` → `getOccurrences(CLIENT_ID, range, { type: "all" })`.
+  - `carer-complete-task.test.tsx` (CAR-06 AC-06 calendar, home): same for `getOccurrences`; `getTodayOccurrences(MARGARET)` → `getTodayOccurrences(MARGARET, { type: "all" })`.
+  - `family-home.test.tsx` (FAM-UI-01 Scope): `getTodayOccurrences(CLIENT_ID)` → `getTodayOccurrences(CLIENT_ID, { type: "all" })`.
+  - Reason: requirement bug — those assertions encoded the defect itself.
+- Folder ownership: a cross-lane fix touching `src/features/family-*`, `src/features/admin-client-view` and the three dashboards' edit pages; no shared kit component changed.
+- Human confirmation required: yes, at PR review.
