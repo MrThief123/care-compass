@@ -171,7 +171,7 @@ describe("[F0-28][AC-15] mock mode", () => {
       ok: true,
       data: undefined,
     });
-    const { address: _address, ...withoutAddress } = DETAILS;
+    const withoutAddress = { ...DETAILS, address: undefined };
     expect(await getClientDetails(clientId)).toEqual(withoutAddress);
     expect((await getClientHeaderSummary(clientId)).suburb).toBe("Brunswick");
     expect(mocks.rpc).not.toHaveBeenCalled();

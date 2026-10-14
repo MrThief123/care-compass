@@ -12,6 +12,7 @@ import {
   OTHER_ORGANISATIONS,
   REFERENCE_DATE,
 } from "@/mocks/fixtures";
+import type { ClientDetails } from "@/server/clients/client-details-schema";
 import type { ClientCustomSection, ClientInfoSection, ClientInfoSectionKind } from "@/types/domain";
 
 export interface ClientHeaderSummary {
@@ -86,4 +87,39 @@ export async function getClientCustomSections(clientId: string): Promise<ClientC
   return CLIENT_CUSTOM_SECTIONS.filter((section) => section.clientId === clientId).map(
     (section) => ({ ...section }),
   );
+}
+
+/**
+ * F0-28: each fixture client's personal details. The date of birth and suburb come from the
+ * client fixture; nothing else is set until a save.
+ */
+const CLIENT_DETAILS = new Map<string, ClientDetails>(
+  CLIENTS.map((client) => [
+    client.id,
+    { dateOfBirth: client.dob, ...(client.suburb ? { suburb: client.suburb } : {}) },
+  ]),
+);
+
+export async function getClientDetails(clientId: string): Promise<ClientDetails> {
+  const details = CLIENT_DETAILS.get(clientId);
+  if (!details) throw new Error(`getClientDetails: no client found for id "${clientId}".`);
+  return { ...details };
+}
+
+/**
+ * Phase 1 mock mutation (F0-28): replaces the client's details, and keeps the header's date of
+ * birth and suburb in step. False for an unknown client.
+ */
+export async function saveClientDetails(
+  clientId: string,
+  details: ClientDetails,
+): Promise<boolean> {
+  const client = CLIENTS.find((candidate) => candidate.id === clientId);
+  if (!client) return false;
+  CLIENT_DETAILS.set(clientId, { ...details });
+  // The fixture type needs a date of birth, so a cleared one keeps the old age in the header.
+  if (details.dateOfBirth) client.dob = details.dateOfBirth;
+  if (details.suburb) client.suburb = details.suburb;
+  else delete client.suburb;
+  return true;
 }
