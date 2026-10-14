@@ -161,7 +161,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 | 18 | F0-24 | Auth emails: working reset and invite links, set-password page | S | D15–D16 | SPRINT | F0-07, F0-17, ADM-02 | — | `feature/shared-auth-emails` | NOT STARTED |
 | 19 | F0-25 | Client Documents page (Family and Carer) | S | D21 | SPRINT | F0-13, UI-04, FAM-UI-04, F0-15, CAR-UI-02 | — | `feature/shared-client-documents-page` | IN PROGRESS |
 | 20 | F0-26 | Custom sections on Client Details (Family, Carer and Admin) | S | D21 | SPRINT | FAM-09, CAR-04, ADM-11, F0-08, F0-21 | — | `feature/shared-client-custom-sections` | READY FOR PR |
-| 20 | F0-28 | Client personal details (sign-up, Family Settings, Client Details) | S | D22 | SPRINT | F0-17, F0-22, FAM-12, FAM-09, CAR-04, ADM-11 | — | `feature/shared-client-profile-details` | READY FOR PR |
+| 20 | F0-28 | Client personal details (sign-up, Family Settings, Client Details) | S | D22 | SPRINT | F0-17, F0-22, FAM-12, FAM-09, CAR-04, ADM-11 | — | `feature/shared-client-profile-details` | PR OPEN |
 
 ### Phase 3 — Data wiring & behaviour (parallel: Family · Carer · Admin)
 
@@ -804,7 +804,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Acceptance criteria summary:** 16 criteria — sign-up fields; sign-up unchanged without them; sign-up saves them; validation; details save failure; Settings view; edit/save/cancel; clear a field; Settings validation; save failure; Client Details card; carer/admin read-only; only family may save; header age/suburb; contract; accessibility
 - **Testing summary:** 3 unit, 1 database (pgTAP), 3 component, 1 integration
 - **Requirements:** REQ-36 (sign-up), REQ-11 (client record)
-- **Docs:** `docs/development/shared/shared-client-profile-details/` · **Status:** READY FOR PR
+- **Docs:** `docs/development/shared/shared-client-profile-details/` · **Status:** PR OPEN
 
 ## Phase 3 — Data wiring & behaviour (parallel: Family · Carer · Admin) — feature detail
 

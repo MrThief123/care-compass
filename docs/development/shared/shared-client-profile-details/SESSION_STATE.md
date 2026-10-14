@@ -7,4 +7,4 @@ Tests run: see TEST_PLAN.md results (unit 2888, integration 3/3 for F0-28, pgTAP
 Not run: browser visual check; full e2e suite.
 Current blocker: none. HUMAN REVIEW items in PROGRESS.md.
 Warning for next session: CHG-062 (FAM-18, PR #243) and CHG-063 (this) both change the DEVELOPMENT_PLAN totals line; whichever merges second needs it recounted (99 active, 583 criteria with both).
-Exact next action: human approval, then open the PR `F0-28 Client personal details` to `main`.
+Exact next action: teammate review and merge of PR #247.

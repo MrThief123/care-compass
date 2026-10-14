@@ -1,6 +1,6 @@
 # Progress — F0-28 Client personal details (sign-up, Family Settings, Client Details)
 
-Status: READY FOR PR
+Status: PR OPEN (#247)
 Owner: Shwethan Potu
 Lane: S — Shared
 Sprint: SPRINT
