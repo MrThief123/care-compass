@@ -109,7 +109,7 @@ reset role;
 select is(
   (select concat_ws('|', email is null, address is null, emergency_contact_name is null, phone)
    from clients where id = 'b1111111-1111-1111-1111-111111111111'),
-  'true|true|true|0400 111 222',
+  't|t|t|0400 111 222',
   '[F0-28][AC-08] cleared fields are null; kept fields stay'
 );
 
@@ -185,7 +185,7 @@ reset role;
 select is(
   (select concat_ws('|', email is null, address is null, phone)
    from clients where id = 'b1111111-1111-1111-1111-111111111111'),
-  'true|true|0400 111 222',
+  't|t|0400 111 222',
   '[F0-28][AC-13] refused calls changed nothing'
 );
 

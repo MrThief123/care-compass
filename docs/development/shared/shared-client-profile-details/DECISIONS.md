@@ -25,3 +25,12 @@ None.
 ### FD-05 — 2FA parked
 - Date: 2026-10-14
 - Decision: the human's request also asked for optional 2FA for family and carers; they parked it ("lets worry about the optional 2fa later"). It would reverse CHG-040 and needs its own CHG.
+
+### FD-06 — Own tests corrected before implementation finished
+- Date: 2026-10-14
+- `supabase/tests/client_details.test.sql` T-04, two assertions: before `'true|…'`, after `'t|…'`. Postgres renders a boolean as `t` in `concat_ws`; a genuine test bug, no behaviour change.
+- T-04 and T-08 first seeded `carer_client_assignments`, which CAR-03 dropped (carer access is now an unfinished shift, `is_assigned_carer`). Both now give Aisha an upcoming shift; fixed before any implementation, no behaviour change.
+
+### FD-07 — Generated types patched by hand
+- Date: 2026-10-14
+- The local Supabase CLI is newer than the one that last generated `database.types.ts`, and its output rewrites unrelated parts of the file (`ComputedFields`, formatting). Only the six `clients` columns and `save_client_details` were added, exactly as the CLI generates them. Like `set_event_cost`, the generated Args are non-null strings although the function takes null to clear; the action casts.

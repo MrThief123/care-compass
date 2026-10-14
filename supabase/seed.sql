@@ -108,6 +108,18 @@ insert into public.clients (id, organisation_id, first_name, last_name, date_of_
   ('c0000000-0000-4000-8000-000000000007', 'a0000000-0000-4000-8000-000000000001', 'Jean', 'Ahmed', '1938-11-02', 'Fairfield VIC', '2026-09-01T09:00:00+10:00', '2026-09-01T09:00:00+10:00'),
   ('c0000000-0000-4000-8000-000000000008', 'a0000000-0000-4000-8000-000000000002', 'Walter', 'Simmons', '1945-02-20', 'Ringwood VIC', '2026-09-01T09:00:00+10:00', '2026-09-01T09:00:00+10:00');
 
+-- F0-28: Margaret's personal details, so Settings and Client Details show a full card. Synthetic:
+-- example.com addresses and ACMA's fictitious 0491 570 xxx mobile numbers. Robert has none, for
+-- the empty card.
+update public.clients
+set email = 'margaret.doyle@example.com',
+    phone = '0491 570 156',
+    address = '12 Example Street',
+    emergency_contact_name = 'Helen Doyle',
+    emergency_contact_relationship = 'Daughter',
+    emergency_contact_phone = '0491 570 157'
+where id = 'c0000000-0000-4000-8000-000000000001';
+
 -- Harold and Jean have no family account in the design.
 insert into public.client_family_members (client_id, profile_id, relationship_label) values
   ('c0000000-0000-4000-8000-000000000001', '10000000-0000-4000-8000-000000000011', 'Daughter'),
