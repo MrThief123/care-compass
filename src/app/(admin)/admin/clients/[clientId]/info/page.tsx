@@ -2,6 +2,7 @@ import { FamilyInfoView } from "@/features/family-info/family-info-view";
 import { loadFamilyInfoData, type FamilyInfoData } from "@/features/family-info/info-data";
 import { InfoErrorState } from "@/features/family-info/info-error-state";
 import { assertAdminClientAccess } from "@/server/admin/client-access";
+import { getClientDetails, type ClientDetails } from "@/server/clients/client-details";
 import { getClientCustomSections } from "@/server/clients/custom-sections";
 import type { ClientCustomSection } from "@/types/domain";
 
@@ -18,10 +19,12 @@ export default async function AdminClientInfoPage({
 
   let data: FamilyInfoData;
   let customSections: ClientCustomSection[];
+  let personalDetails: ClientDetails;
   try {
-    [data, customSections] = await Promise.all([
+    [data, customSections, personalDetails] = await Promise.all([
       loadFamilyInfoData(clientId),
       getClientCustomSections(clientId),
+      getClientDetails(clientId),
     ]);
   } catch (error) {
     console.error(
@@ -31,5 +34,13 @@ export default async function AdminClientInfoPage({
     return <InfoErrorState />;
   }
 
-  return <FamilyInfoView clientId={clientId} data={data} customSections={customSections} canEdit />;
+  return (
+    <FamilyInfoView
+      clientId={clientId}
+      data={data}
+      customSections={customSections}
+      personalDetails={personalDetails}
+      canEdit
+    />
+  );
 }

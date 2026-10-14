@@ -128,10 +128,17 @@ describe("[FAM-UI-04] Family Info", () => {
     await renderInfo();
 
     const headings = screen.getAllByRole("heading", { level: 2 }).map((h) => h.textContent);
-    expect(headings).toEqual(["Description", "Habits", "Medical history", "Documentation"]);
+    // F0-28 (CHG-063): the read-only Personal details card comes first.
+    expect(headings).toEqual([
+      "Personal details",
+      "Description",
+      "Habits",
+      "Medical history",
+      "Documentation",
+    ]);
 
-    // Each card is a labelled region, so the four are exactly what a screen reader lists.
-    expect(screen.getAllByRole("region")).toHaveLength(4);
+    // Each card is a labelled region, so the five are exactly what a screen reader lists.
+    expect(screen.getAllByRole("region")).toHaveLength(5);
 
     expect(within(card("Description")).getByText(DESCRIPTION)).toBeInTheDocument();
     expect(within(card("Habits")).getByText(HABITS)).toBeInTheDocument();

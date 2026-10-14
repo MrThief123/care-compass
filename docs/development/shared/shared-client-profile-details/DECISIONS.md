@@ -40,3 +40,11 @@ None.
 - Date: 2026-10-14
 - `tests/e2e/sign-up.spec.ts` lines 47 and 214: before `getByLabel("Email")`, after `getByLabel("Email", { exact: true })`. Playwright's label match is a substring, so 'Their email' (AC-01) made it match two fields. Selector only; no assertion changed or removed, so no HUMAN REVIEW flag.
 
+
+### FD-09 — Existing Client Details tests changed (HUMAN REVIEW: test expectation changed)
+- Date: 2026-10-14
+- Reason: recorded requirement change CHG-063 adds the 'Personal details' card first on Client Details, so tests that list every card heading or count the regions see one more.
+- `src/features/family-info/family-info.test.tsx` `[FAM-UI-04][AC-01]`: before headings `[Description, Habits, Medical history, Documentation]` and 4 regions; after `Personal details` first and 5 regions.
+- `src/features/family-info/family-info-wired.test.tsx` `[FAM-09][AC-02] T-02`: before `[Description, Habits, Medical history, Documentation]`; after `Personal details` first.
+- `src/features/client-custom-sections/custom-sections-pages.test.tsx` `[F0-26][AC-01]` and `[F0-26][AC-12]`: before `[Description, Habits, Medical history, Communication, Sleep, Documentation]`; after `Personal details` first.
+- No assertion removed; the relative order these tests protect is unchanged.

@@ -1,6 +1,8 @@
 import { EmptyState } from "@/components/shared/states";
 import { CardShell } from "@/components/ui/card-shell";
 import { CustomSections } from "@/features/client-custom-sections/custom-sections";
+import { PersonalDetailsCard } from "@/features/client-profile-details/personal-details-card";
+import type { ClientDetails } from "@/server/clients/client-details-schema";
 import type { ClientCustomSection, ClientInfoSectionKind } from "@/types/domain";
 
 import { DocumentationCard } from "./documentation-card";
@@ -21,10 +23,14 @@ export interface FamilyInfoViewProps {
   customSections?: ClientCustomSection[];
   /** Family may edit a client's information (PRD Scope: `canEdit=true`). */
   canEdit?: boolean;
+  /** The client's personal details (F0-28), drawn first and read-only; left out when absent. */
+  personalDetails?: ClientDetails;
+  /** Family only: where the personal details are edited. */
+  settingsHref?: string;
 }
 
 /**
- * Family · Info (FAM-UI-04): the Description, Habits, Medical history and
+ * Family · Info (FAM-UI-04): Personal details (F0-28, read-only), then the Description, Habits, Medical history and
  * Documentation cards, with any custom sections (F0-26) before Documentation. Composed here rather than from the shared
  * `ClientInfoView` (FD-01). The client's name and summary line are the shell
  * header's, not repeated here (FD-08). With no sections and no documents the
@@ -37,6 +43,8 @@ export function FamilyInfoView({
   data,
   customSections = [],
   canEdit = true,
+  personalDetails,
+  settingsHref,
 }: FamilyInfoViewProps) {
   const { sections, documents } = data;
   const isEmpty =
@@ -47,6 +55,9 @@ export function FamilyInfoView({
 
   return (
     <div className="flex flex-col gap-[22px] px-6 py-5">
+      {personalDetails && (
+        <PersonalDetailsCard details={personalDetails} settingsHref={settingsHref} />
+      )}
       {isEmpty ? (
         <CardShell>
           <EmptyState

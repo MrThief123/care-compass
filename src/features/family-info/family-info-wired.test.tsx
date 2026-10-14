@@ -101,7 +101,14 @@ describe("[FAM-09] order", () => {
     await renderInfo();
 
     const headings = screen.getAllByRole("heading", { level: 2 }).map((h) => h.textContent);
-    expect(headings).toEqual(["Description", "Habits", "Medical history", "Documentation"]);
+    // F0-28 (CHG-063): the read-only Personal details card comes first.
+    expect(headings).toEqual([
+      "Personal details",
+      "Description",
+      "Habits",
+      "Medical history",
+      "Documentation",
+    ]);
   });
 });
 
