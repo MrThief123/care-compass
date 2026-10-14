@@ -79,7 +79,6 @@ describe("[F0-28] sign-up 'More about them'", () => {
         accountType: "family",
         clientPhone: "0400 111 222",
         clientSuburb: "Brunswick",
-        clientEmail: "",
       }),
     );
   });

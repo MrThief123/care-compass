@@ -12,6 +12,30 @@ import { Button } from "@/components/ui/button";
 import { CardShell } from "@/components/ui/card-shell";
 import { signUp } from "@/server/auth/actions";
 import { SignUpInputSchema, type AccountType } from "@/server/auth/sign-up-schema";
+import { CLIENT_DETAIL_FIELDS, type ClientDetailKey } from "@/server/clients/client-details-schema";
+
+/** F0-28: sign-up's own key and label for each client detail ("Email" is already the person's). */
+const DETAIL_FIELDS: ReadonlyArray<{
+  key: ClientDetailKey;
+  name: string;
+  label: string;
+  type: (typeof CLIENT_DETAIL_FIELDS)[number]["type"];
+}> = CLIENT_DETAIL_FIELDS.map(({ key, label, type }) => ({
+  key,
+  type,
+  name: `client${key[0]!.toUpperCase()}${key.slice(1)}`,
+  label:
+    key === "emergencyContactRelationship"
+      ? "Emergency contact relationship"
+      : key.startsWith("emergencyContact")
+        ? label
+        : `Their ${label.toLowerCase()}`,
+}));
+
+const NO_DETAILS = Object.fromEntries(DETAIL_FIELDS.map(({ key }) => [key, ""])) as Record<
+  ClientDetailKey,
+  string
+>;
 
 const ACCOUNT_TYPE_OPTIONS = [
   { value: "family", label: "Family member" },
@@ -22,6 +46,7 @@ const ACCOUNT_TYPE_OPTIONS = [
  * AC-01 to AC-04, AC-08: a public sign-up form built from the same card, field and button
  * components as `/sign-in`. Only the fields for the chosen account type exist, so hidden
  * fields are never submitted. There is no carer option: carers are invited (PD-040, PD-057).
+ * A family account can also add the client's personal details, all optional (F0-28).
  */
 export function SignUpForm() {
   const router = useRouter();
@@ -34,6 +59,7 @@ export function SignUpForm() {
   const [clientFirstName, setClientFirstName] = useState("");
   const [clientLastName, setClientLastName] = useState("");
   const [organisationName, setOrganisationName] = useState("");
+  const [details, setDetails] = useState(NO_DETAILS);
   const [errors, setErrors] = useState<FieldErrors>({});
   const [formError, setFormError] = useState<{ message: string; emailExists: boolean } | null>(
     null,
@@ -47,7 +73,12 @@ export function SignUpForm() {
     const shared = { accountType, firstName, lastName, email, password, confirmPassword };
     const values =
       accountType === "family"
-        ? { ...shared, clientFirstName, clientLastName }
+        ? {
+            ...shared,
+            clientFirstName,
+            clientLastName,
+            ...Object.fromEntries(DETAIL_FIELDS.map(({ key, name }) => [name, details[key]])),
+          }
         : { ...shared, organisationName };
 
     const checked = fieldErrors(SignUpInputSchema, values);
@@ -153,6 +184,26 @@ export function SignUpForm() {
               required
               disabled={isPending}
             />
+            <fieldset className="flex flex-col gap-4">
+              <legend className="mb-1 text-title-card text-text-primary">
+                More about them (optional)
+              </legend>
+              <p className="text-body-small text-text-secondary">
+                You can add or change these later in Settings.
+              </p>
+              {DETAIL_FIELDS.map(({ key, name, label, type }) => (
+                <Field
+                  key={key}
+                  label={label}
+                  type={type}
+                  name={name}
+                  value={details[key]}
+                  onChange={(value) => setDetails((current) => ({ ...current, [key]: value }))}
+                  error={errors[name]}
+                  disabled={isPending}
+                />
+              ))}
+            </fieldset>
           </>
         ) : (
           <Field

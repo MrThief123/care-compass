@@ -30,7 +30,13 @@ None.
 - Date: 2026-10-14
 - `supabase/tests/client_details.test.sql` T-04, two assertions: before `'true|…'`, after `'t|…'`. Postgres renders a boolean as `t` in `concat_ws`; a genuine test bug, no behaviour change.
 - T-04 and T-08 first seeded `carer_client_assignments`, which CAR-03 dropped (carer access is now an unfinished shift, `is_assigned_carer`). Both now give Aisha an upcoming shift; fixed before any implementation, no behaviour change.
+- T-05 `[F0-28][AC-03] the details are sent with the sign-up`: before it expected `clientEmail: ""` in the call; after, that key is not asserted. The form sends the schema's parsed values, where a blank detail is unset. Own test, not yet passing; no behaviour change.
 
 ### FD-07 — Generated types patched by hand
 - Date: 2026-10-14
 - The local Supabase CLI is newer than the one that last generated `database.types.ts`, and its output rewrites unrelated parts of the file (`ComputedFields`, formatting). Only the six `clients` columns and `save_client_details` were added, exactly as the CLI generates them. Like `set_event_cost`, the generated Args are non-null strings although the function takes null to clear; the action casts.
+
+### FD-08 — F0-17 e2e selector made exact
+- Date: 2026-10-14
+- `tests/e2e/sign-up.spec.ts` lines 47 and 214: before `getByLabel("Email")`, after `getByLabel("Email", { exact: true })`. Playwright's label match is a substring, so 'Their email' (AC-01) made it match two fields. Selector only; no assertion changed or removed, so no HUMAN REVIEW flag.
+

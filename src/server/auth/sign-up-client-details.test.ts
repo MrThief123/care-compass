@@ -148,9 +148,9 @@ describe("[F0-28] signUp with client details", () => {
       error: null,
     }));
     const { signUp } = await import("./actions");
-    const { clientFirstName: _first, clientLastName: _last, ...shared } = family;
+    // The organisation schema strips the client keys, the details among them.
     await signUp({
-      ...shared,
+      ...family,
       accountType: "organisation",
       organisationName: "Banksia Home Care",
       clientSuburb: "Brunswick",
