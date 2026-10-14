@@ -11,6 +11,7 @@ const mocks = vi.hoisted(() => ({
   update: vi.fn(),
   eq: vi.fn(),
   maybeSingle: vi.fn(),
+  latestCompletion: vi.fn(),
   revalidatePath: vi.fn(),
 }));
 
@@ -18,7 +19,17 @@ vi.mock("next/cache", () => ({ revalidatePath: mocks.revalidatePath }));
 vi.mock("@/lib/supabase/server", () => ({
   createClient: async () => ({
     from: (table: string) => ({
-      select: () => ({ eq: () => ({ eq: () => ({ maybeSingle: mocks.maybeSingle }) }) }),
+      select: () => {
+        // care_events reads the event; care_event_completions reads the occurrence's latest action.
+        const read = {
+          eq: () => read,
+          order: () => read,
+          limit: () => read,
+          maybeSingle:
+            table === "care_event_completions" ? mocks.latestCompletion : mocks.maybeSingle,
+        };
+        return read;
+      },
       upsert: (row: unknown, options: unknown) => mocks.upsert(table, row, options),
       update: (values: unknown) => {
         mocks.update(table, values);
@@ -57,6 +68,7 @@ beforeEach(() => {
     data: { starts_at: FIRST, recurrence: { frequency: "weekly", interval: 1 } },
     error: null,
   });
+  mocks.latestCompletion.mockResolvedValue({ data: null, error: null });
 });
 
 afterEach(() => {
@@ -120,5 +132,40 @@ describe("deleteEvent", () => {
   it("[F0-27][AC-09] refreshes cached pages after a delete", async () => {
     await deleteEvent({ ...base, scope: "occurrence" });
     expect(mocks.revalidatePath).toHaveBeenCalledWith("/", "layout");
+  });
+
+  it("[FAM-18][AC-08] refuses a Done occurrence and writes nothing, whatever the scope", async () => {
+    mocks.latestCompletion.mockResolvedValue({ data: { action: "done" }, error: null });
+    for (const scope of ["occurrence", "future"] as const) {
+      const result = await deleteEvent({ ...base, scope });
+      expect(result).toEqual({
+        ok: false,
+        error: { code: "VALIDATION", message: "Completed care can't be deleted." },
+      });
+    }
+    expect(mocks.upsert).not.toHaveBeenCalled();
+    expect(mocks.update).not.toHaveBeenCalled();
+  });
+
+  it("[FAM-18][AC-08] an undone occurrence can be deleted", async () => {
+    mocks.latestCompletion.mockResolvedValue({ data: { action: "undone" }, error: null });
+    const result = await deleteEvent({ ...base, scope: "occurrence" });
+    expect(result.ok).toBe(true);
+  });
+
+  it("[FAM-18][AC-08] in mock mode, refuses a Done occurrence and keeps it", async () => {
+    vi.stubEnv("DATA_SOURCE", "mock");
+    const { OCCURRENCES_BY_CLIENT_ID } = await import("@/mocks/fixtures");
+    const done = Object.values(OCCURRENCES_BY_CLIENT_ID)
+      .flat()
+      .find((row) => row.status === "done")!;
+    const result = await deleteEvent({
+      clientId: done.clientId,
+      eventId: done.eventId,
+      occurrenceOriginalStart: done.key.slice(done.eventId.length + 1),
+      scope: "occurrence",
+    });
+    expect(result).toMatchObject({ ok: false, error: { code: "VALIDATION" } });
+    expect(OCCURRENCES_BY_CLIENT_ID[done.clientId]).toContainEqual(done);
   });
 });

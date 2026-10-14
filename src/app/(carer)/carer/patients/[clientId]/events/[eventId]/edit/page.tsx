@@ -75,6 +75,7 @@ export default async function CarerEditEventPage({
       documents={documents}
       buckets={buckets}
       initialCost={costValuesFromEvent(event)}
+      initialEndDate={event.recurrenceEndDate}
       returnHref={editEventReturnHref(clientId, viewed?.key, origin, base)}
       deleteReturnHref={backLinkFor(clientId, origin, base).href}
       notAllowedMessage={`Your shift with ${patient.firstName} has ended, so this event wasn't saved.`}
