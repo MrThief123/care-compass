@@ -212,6 +212,12 @@ export async function setOccurrenceUndone(key: string): Promise<ActionResult<und
 const LOCAL_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 const LOCAL_TIME_PATTERN = /^([01]\d|2[0-3]):([0-5]\d)$/;
 
+/** FAM-18: an 'Ends' date before the event's Date. The form checks it first; this is the backstop. */
+const END_BEFORE_DATE_RESULT: ActionResult<never> = {
+  ok: false,
+  error: { code: "VALIDATION", message: "Ends must be on or after the Date." },
+};
+
 /** An event's cost and the bucket that pays it (FAM-11, FD-07). */
 const EventCostSchema = z.object({
   amount: z.number().positive().multipleOf(0.01),
@@ -263,6 +269,8 @@ const CreateEventInputSchema = z.object({
   isTask: z.boolean(),
   /** Cost and bucket (FAM-11); absent for no cost. */
   cost: EventCostSchema.optional(),
+  /** FAM-18: the day the series stops after, inclusive; absent repeats forever. */
+  endDate: z.string().regex(LOCAL_DATE_PATTERN).optional(),
 });
 export type CreateEventInput = z.infer<typeof CreateEventInputSchema>;
 
@@ -298,7 +306,11 @@ async function createEventImpl(input: CreateEventInput): Promise<ActionResult<Cr
     recurrence,
     isTask,
     cost,
+    endDate,
   } = parsed.data;
+  if (endDate && endDate < date) return END_BEFORE_DATE_RESULT;
+  // A one-off has nothing to end.
+  const recurrenceEnd = recurrence !== "none" ? endDate : undefined;
   const startsAt = localToMelbourneIso(`${date}T${startTime}`);
   const completionMode = isTask ? "manual" : "automatic";
 
@@ -313,6 +325,7 @@ async function createEventImpl(input: CreateEventInput): Promise<ActionResult<Cr
       durationMinutes,
       recurrenceFrequency: recurrence,
       completionMode,
+      ...(recurrenceEnd ? { recurrenceEndDate: recurrenceEnd } : {}),
     });
     return { ok: true, data: { eventId } };
   }
@@ -329,6 +342,7 @@ async function createEventImpl(input: CreateEventInput): Promise<ActionResult<Cr
         starts_at: startsAt,
         duration_minutes: durationMinutes,
         recurrence: RECURRENCE_TO_DB[recurrence],
+        recurrence_until: recurrenceEnd ?? null,
         completion_mode: completionMode,
       })
       .select("id")
@@ -412,6 +426,8 @@ const UpdateEventInputSchema = z.object({
   scope: UpdateEventScopeSchema,
   /** Cost and bucket (FAM-11): a value sets them, `null` clears them, absent leaves them as they are. */
   cost: EventCostSchema.nullable().optional(),
+  /** FAM-18: a date sets the series end, `null` clears it, absent leaves it as it is. */
+  endDate: z.string().regex(LOCAL_DATE_PATTERN).nullable().optional(),
 });
 export type UpdateEventInput = z.infer<typeof UpdateEventInputSchema>;
 
@@ -461,7 +477,11 @@ async function updateEventImpl(input: UpdateEventInput): Promise<ActionResult<Up
     isTask,
     scope,
     cost,
+    endDate,
   } = parsed.data;
+  if (endDate && endDate < date) return END_BEFORE_DATE_RESULT;
+  // A one-off has nothing to end, so stopping a repeat clears the end date too.
+  const recurrenceEnd = recurrence === "none" && endDate !== undefined ? null : endDate;
   const startsAt = localToMelbourneIso(`${date}T${startTime}`);
   const completionMode = isTask ? "manual" : "automatic";
 
@@ -480,6 +500,7 @@ async function updateEventImpl(input: UpdateEventInput): Promise<ActionResult<Up
         recurrenceFrequency: recurrence,
         completionMode,
         scope,
+        ...(recurrenceEnd !== undefined ? { recurrenceEndDate: recurrenceEnd } : {}),
       });
       return { ok: true, data: { eventId } };
     } catch (error) {
@@ -502,6 +523,7 @@ async function updateEventImpl(input: UpdateEventInput): Promise<ActionResult<Up
       recurrence: RECURRENCE_TO_DB[recurrence],
       duration_minutes: durationMinutes,
       completion_mode: completionMode,
+      ...(recurrenceEnd !== undefined ? { recurrence_until: recurrenceEnd } : {}),
     };
 
     if (scope === "occurrence") {

@@ -1201,6 +1201,16 @@ Template for future entries:
 - Human confirmation: the human owner, 2026-10-12 (in-session).
 - Docs updated: DECISIONS.md (this entry), DEVELOPMENT_PLAN.md, PRD.md REQ-11, the F0-26 pack.
 
+### CHG-062 — New feature FAM-18: delete event and recurrence end date
+- Date / requested by: 2026-10-11 / the human owner (in-session)
+- Type: scope addition (new feature; reverses the "Deleting events" out-of-scope lines of FAM-07 and CAR-07)
+- Description: new feature **FAM-18** (Family lane, `docs/development/family-dev/family-delete-event/`, `feature/family-delete-event`, 17 criteria). A 'Delete event' button on Task detail for Family and for a Carer on shift (not Admin): a one-off event gets a confirmation; a recurring event offers 'This occurrence' or 'This and all future occurrences'. The event form (Add and Edit) gains an optional 'Ends' date for repeating events (OQ-12 already says events repeat "unless an end date is set").
+- Source / justification: human, in-session 2026-10-11: "when you view event there should be a delete event button ... option to delete this or all future occurrences ... when creating a reoccurring event need an option to have an end date"; "family and nurse [carer] as they are the only people that can view the events"; "go with your recommendations for the rest".
+- Impact: DEVELOPMENT_PLAN.md gains the FAM-18 row and card (96 to 97 active, 534 to 551 criteria; next number FAM-19). No migration or RLS change: soft delete only (cancelled override; `recurrence_until`). `createEvent`/`updateEvent` gain optional `endDate`; new `deleteEventOccurrence` action; `EventFormValues` in the shared forms kit gains `endDate` (flagged additive Lane S edit, kept in this PR); carer pages touched props-only. Closes the pending-cost-on-delete question (FD-03: moot). No existing test expectation expected to change.
+- Human confirmation: the human owner, 2026-10-11 (in-session).
+- Docs updated: DECISIONS.md (this entry), DEVELOPMENT_PLAN.md, the FAM-18 pack.
+- Merge note (2026-10-14, the human owner): first recorded as CHG-060 on the FAM-18 branch; renumbered CHG-062 because `main` took CHG-060 (info tip icon) and CHG-061 (F0-26) first. F0-27 (#242) merged a shared `deleteEvent` (`src/server/events/delete-actions.ts`) while FAM-18 was open, so FAM-18 drops its own `deleteEventOccurrence` action and mock mutation and its Task detail 'Delete event' button calls F0-27's `deleteEvent` (one pattern per problem). FAM-18 still adds the Task detail entry point and the 'Ends' date. See the FAM-18 pack FD-10.
+
 ### CHG-063 — New feature F0-28: client personal details at sign-up, in Family Settings and on Client Details
 - Date / requested by: 2026-10-14 / the human owner (in-session)
 - Type: scope addition (new feature)

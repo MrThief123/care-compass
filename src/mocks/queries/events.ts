@@ -306,6 +306,8 @@ export interface CreateEventInput {
   durationMinutes: number;
   recurrenceFrequency: CareEvent["recurrenceFrequency"];
   completionMode: CareEvent["completionMode"];
+  /** ISO date the series stops after, inclusive (FAM-18); absent repeats forever. */
+  recurrenceEndDate?: string;
 }
 
 /**
@@ -327,6 +329,7 @@ export async function createEvent(input: CreateEventInput): Promise<string> {
     durationMinutes: input.durationMinutes,
     recurrenceFrequency: input.recurrenceFrequency,
     completionMode: input.completionMode,
+    ...(input.recurrenceEndDate ? { recurrenceEndDate: input.recurrenceEndDate } : {}),
   };
   CARE_EVENTS.push(event);
 
@@ -361,6 +364,8 @@ export interface UpdateEventInput {
   recurrenceFrequency: CareEvent["recurrenceFrequency"];
   completionMode: CareEvent["completionMode"];
   scope: "occurrence" | "series";
+  /** FAM-18: a date sets the series end, `null` clears it, absent leaves it. */
+  recurrenceEndDate?: string | null;
 }
 
 /**
@@ -394,6 +399,13 @@ export async function updateEvent(input: UpdateEventInput): Promise<void> {
   event.recurrenceFrequency = input.recurrenceFrequency;
   event.completionMode = input.completionMode;
   event.durationMinutes = input.durationMinutes;
+  if (input.recurrenceEndDate !== undefined) {
+    if (input.recurrenceEndDate && input.recurrenceFrequency !== "none") {
+      event.recurrenceEndDate = input.recurrenceEndDate;
+    } else {
+      delete event.recurrenceEndDate;
+    }
+  }
   if (input.scope === "series" && !wasRecurring) {
     event.start = input.startsAt;
   }
@@ -425,9 +437,10 @@ export interface DeleteEventInput {
 
 /**
  * Phase 1 mock mutation (F0-27): drops the viewed occurrence, or it and every later one, from the
- * in-memory rows; the event itself goes when no occurrence of it is left or it is a one-off.
+ * in-memory rows; the event itself goes when no occurrence of it is left or it is a one-off. A Done
+ * occurrence is refused and nothing changes (FAM-18 AC-08).
  */
-export async function deleteEvent(input: DeleteEventInput): Promise<void> {
+export async function deleteEvent(input: DeleteEventInput): Promise<"deleted" | "done"> {
   const index = CARE_EVENTS.findIndex(
     (candidate) => candidate.id === input.eventId && candidate.clientId === input.clientId,
   );
@@ -435,6 +448,16 @@ export async function deleteEvent(input: DeleteEventInput): Promise<void> {
   const event = CARE_EVENTS[index]!;
 
   const viewedMs = Date.parse(input.occurrenceOriginalStart);
+  const viewed = [
+    ...rowsFor(OCCURRENCES_BY_CLIENT_ID, input.clientId),
+    ...rowsFor(UPCOMING_OCCURRENCES_BY_CLIENT_ID, input.clientId),
+  ].find(
+    (row) =>
+      row.eventId === input.eventId &&
+      Date.parse(row.key.slice(row.eventId.length + 1)) === viewedMs,
+  );
+  if (viewed?.status === "done") return "done";
+
   const removeAll = input.scope === "future" || event.recurrenceFrequency === "none";
   for (const byClient of [
     OCCURRENCES_BY_CLIENT_ID,
@@ -459,6 +482,7 @@ export async function deleteEvent(input: DeleteEventInput): Promise<void> {
   if (event.recurrenceFrequency === "none" || (input.scope === "future" && !stillHasRows)) {
     CARE_EVENTS.splice(index, 1);
   }
+  return "deleted";
 }
 
 /** A carer's shift for a client, with the carer's full name (`client_shift_carers`). */

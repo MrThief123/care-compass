@@ -216,7 +216,7 @@ export async function getEvent(clientId: string, eventId: string): Promise<CareE
   const { data, error } = await supabase
     .from("care_events")
     .select(
-      "id, client_id, title, description, starts_at, duration_minutes, recurrence, completion_mode, cost, bucket_id",
+      "id, client_id, title, description, starts_at, duration_minutes, recurrence, recurrence_until, completion_mode, cost, bucket_id",
     )
     .eq("id", eventId)
     .eq("client_id", clientId)
@@ -233,6 +233,7 @@ export async function getEvent(clientId: string, eventId: string): Promise<CareE
     start: data.starts_at,
     durationMinutes: data.duration_minutes,
     recurrenceFrequency: dbToRecurrence(data.recurrence as DbRecurrence | null),
+    ...(data.recurrence_until ? { recurrenceEndDate: data.recurrence_until } : {}),
     completionMode: data.completion_mode as CareEvent["completionMode"],
     cost: data.cost ?? undefined,
     bucketId: data.bucket_id ?? undefined,
