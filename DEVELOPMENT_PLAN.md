@@ -1,7 +1,7 @@
 # DEVELOPMENT PLAN — Care Compass
 
 Version 0.2 · 17 September 2026 · Status: DRAFT (controlled after planning freeze) · Supersedes v0.1 dashboard-by-dashboard phases
-Totals: **98 active features** (99 listed; CAR-08 retired) · **567 acceptance criteria** across 5 phases (UI-04 and its 10 criteria added by CHG-004, 2026-09-19; UI-05 and its 13 criteria added under CHG-009, 2026-09-24; F0-17 and its 8 criteria added by CHG-010, 2026-09-24; CHG-020, 2026-09-25: FAM-UI-08 (6 criteria) and ADM-11 (5) added, FAM-UI-05 +5 criteria, CAR-08 and its 2 criteria retired; CHG-021, 2026-09-25: FAM-UI-05 +4 criteria; CHG-022, 2026-09-25: FAM-UI-05 +5 criteria; CHG-027, 2026-09-26: F0-18 and its 9 criteria added; CHG-037, 2026-09-30: F0-19 and its 6 criteria added; CHG-040, 2026-09-30: F0-20 and its 10 criteria added; CHG-041, 2026-10-01: F0-21 and its 6 criteria added; CHG-042, 2026-10-01: F0-22 and its 8 criteria added; CHG-045, 2026-10-02: F0-23 and its 8 criteria added; CHG-047, 2026-10-02: F0-24 (7 criteria) and INT-09 (5 criteria) added, every remaining post-sprint feature pulled into the sprint, sprint extended to D21; CHG-050, 2026-10-02: INT-10 and its 4 criteria added (PL-26 promoted); CHG-051, 2026-10-02: FAM-16 and its 11 criteria added (PL-27 promoted); CHG-052, 2026-10-02: INT-11 and its 8 criteria added (PL-25 promoted); ADM-09, 2026-10-03: 1 criterion grown to 9 (+8, FD-05); CHG-055, 2026-10-03: INT-12 and its 45 criteria added; OQ-40, 2026-10-03: INT-09 5 criteria rewritten and grown to 8 (+3); CHG-057, 2026-10-06: FAM-17 and its 10 criteria added (PL-05 tooltips promoted); CHG-058, 2026-10-08: F0-25 and its 16 criteria added (client Documents page); CHG-061, 2026-10-12: F0-26 and its 16 criteria added (custom Client Details sections); CHG-062, 2026-10-11: FAM-18 and its 17 criteria added (delete event and recurrence end date); the Jira import `docs/JIRA_BACKLOG.csv` predates all nine). Jira import: `docs/JIRA_BACKLOG.csv`.
+Totals: **99 active features** (100 listed; CAR-08 retired) · **583 acceptance criteria** across 5 phases (UI-04 and its 10 criteria added by CHG-004, 2026-09-19; UI-05 and its 13 criteria added under CHG-009, 2026-09-24; F0-17 and its 8 criteria added by CHG-010, 2026-09-24; CHG-020, 2026-09-25: FAM-UI-08 (6 criteria) and ADM-11 (5) added, FAM-UI-05 +5 criteria, CAR-08 and its 2 criteria retired; CHG-021, 2026-09-25: FAM-UI-05 +4 criteria; CHG-022, 2026-09-25: FAM-UI-05 +5 criteria; CHG-027, 2026-09-26: F0-18 and its 9 criteria added; CHG-037, 2026-09-30: F0-19 and its 6 criteria added; CHG-040, 2026-09-30: F0-20 and its 10 criteria added; CHG-041, 2026-10-01: F0-21 and its 6 criteria added; CHG-042, 2026-10-01: F0-22 and its 8 criteria added; CHG-045, 2026-10-02: F0-23 and its 8 criteria added; CHG-047, 2026-10-02: F0-24 (7 criteria) and INT-09 (5 criteria) added, every remaining post-sprint feature pulled into the sprint, sprint extended to D21; CHG-050, 2026-10-02: INT-10 and its 4 criteria added (PL-26 promoted); CHG-051, 2026-10-02: FAM-16 and its 11 criteria added (PL-27 promoted); CHG-052, 2026-10-02: INT-11 and its 8 criteria added (PL-25 promoted); ADM-09, 2026-10-03: 1 criterion grown to 9 (+8, FD-05); CHG-055, 2026-10-03: INT-12 and its 45 criteria added; OQ-40, 2026-10-03: INT-09 5 criteria rewritten and grown to 8 (+3); CHG-057, 2026-10-06: FAM-17 and its 10 criteria added (PL-05 tooltips promoted); CHG-058, 2026-10-08: F0-25 and its 16 criteria added (client Documents page); CHG-061, 2026-10-12: F0-26 and its 16 criteria added (custom Client Details sections); CHG-062, 2026-10-11: FAM-18 and its 17 criteria added (delete event and recurrence end date); CHG-063, 2026-10-14: F0-28 and its 16 criteria added (client personal details); the Jira import `docs/JIRA_BACKLOG.csv` predates all nine). Jira import: `docs/JIRA_BACKLOG.csv`.
 
 ---
 
@@ -161,6 +161,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 | 18 | F0-24 | Auth emails: working reset and invite links, set-password page | S | D15–D16 | SPRINT | F0-07, F0-17, ADM-02 | — | `feature/shared-auth-emails` | NOT STARTED |
 | 19 | F0-25 | Client Documents page (Family and Carer) | S | D21 | SPRINT | F0-13, UI-04, FAM-UI-04, F0-15, CAR-UI-02 | — | `feature/shared-client-documents-page` | IN PROGRESS |
 | 20 | F0-26 | Custom sections on Client Details (Family, Carer and Admin) | S | D21 | SPRINT | FAM-09, CAR-04, ADM-11, F0-08, F0-21 | — | `feature/shared-client-custom-sections` | READY FOR PR |
+| 20 | F0-28 | Client personal details (sign-up, Family Settings, Client Details) | S | D22 | SPRINT | F0-17, F0-22, FAM-12, FAM-09, CAR-04, ADM-11 | — | `feature/shared-client-profile-details` | PR OPEN |
 
 ### Phase 3 — Data wiring & behaviour (parallel: Family · Carer · Admin)
 
@@ -794,6 +795,17 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Testing summary:** 3 unit, 1 database (pgTAP), 9 component, 1 e2e, 1 regression
 - **Requirements:** REQ-11 (new headings)
 - **Docs:** `docs/development/shared/shared-client-custom-sections/` · **Status:** IN PROGRESS
+
+### F0-28 — Client personal details (sign-up, Family Settings, Client Details)
+- **Dashboard / stream:** shared · **Lane:** S · **Days:** D22 · **Sprint:** SPRINT · **PR target:** `main` · **Branch:** `feature/shared-client-profile-details`
+- **Description:** Optional client details at family sign-up (date of birth shown as age, email, phone, address, suburb, emergency contact), editable in Family Settings and shown read-only on Client Details for Family, Carer and Admin. Added by CHG-063. Six nullable columns on `clients` and a family-only `save_client_details`.
+- **User value:** Everyone caring for the person knows their age, how to reach them and who to call in an emergency.
+- **Dependencies:** F0-17, F0-22, FAM-12, FAM-09, CAR-04, ADM-11 · **Blocking decisions:** None
+- **Jira summary:** Client personal details: sign-up, Family Settings, Client Details
+- **Acceptance criteria summary:** 16 criteria — sign-up fields; sign-up unchanged without them; sign-up saves them; validation; details save failure; Settings view; edit/save/cancel; clear a field; Settings validation; save failure; Client Details card; carer/admin read-only; only family may save; header age/suburb; contract; accessibility
+- **Testing summary:** 3 unit, 1 database (pgTAP), 3 component, 1 integration
+- **Requirements:** REQ-36 (sign-up), REQ-11 (client record)
+- **Docs:** `docs/development/shared/shared-client-profile-details/` · **Status:** PR OPEN
 
 ## Phase 3 — Data wiring & behaviour (parallel: Family · Carer · Admin) — feature detail
 

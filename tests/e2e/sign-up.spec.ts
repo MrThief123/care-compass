@@ -44,7 +44,7 @@ async function fillFamilySignUp(page: Page, email: string, clientLastName: strin
   await page.getByRole("radio", { name: "Family member" }).check();
   await page.getByLabel("Your first name").fill("Grace");
   await page.getByLabel("Your last name").fill("Smith");
-  await page.getByLabel("Email").fill(email);
+  await page.getByLabel("Email", { exact: true }).fill(email);
   await page.getByLabel("Password", { exact: true }).fill(PASSWORD);
   await page.getByLabel("Confirm password").fill(PASSWORD);
   await page.getByLabel("Their first name").fill("Harold");
@@ -211,7 +211,7 @@ test.describe("[F0-17][AC-08] /sign-up page", () => {
   }) => {
     await page.goto("/sign-up");
     await page.getByRole("radio", { name: "Family member" }).check();
-    await page.getByLabel("Email").fill("someone@example.test");
+    await page.getByLabel("Email", { exact: true }).fill("someone@example.test");
     await page.getByLabel("Password", { exact: true }).fill("abc");
     await page.getByLabel("Confirm password").fill("abd");
     await page.getByRole("button", { name: "Create an account" }).click();

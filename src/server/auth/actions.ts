@@ -17,12 +17,14 @@ import { z } from "zod";
 
 import type { Database } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
+import { saveClientDetailsArgs } from "@/server/clients/client-details-rpc";
+import { hasAnyClientDetail } from "@/server/clients/client-details-schema";
 import { refreshCachedPages } from "@/server/refresh-cache";
 import type { Role } from "@/types/domain";
 
 import { discardUnregisteredAccount, registerAccount } from "./registration";
 import { resolveMfaGatePath, resolveRoleHomePath } from "./routing";
-import { SignUpInputSchema } from "./sign-up-schema";
+import { clientDetailsFromSignUp, SignUpInputSchema } from "./sign-up-schema";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 
@@ -187,6 +189,21 @@ export async function signUp(input: unknown): Promise<AuthActionResult<{ redirec
       ok: false,
       error: { code: "REGISTRATION_FAILED", message: REGISTRATION_FAILED_MESSAGE },
     };
+  }
+
+  // F0-28 FD-02: optional client details are saved once the client exists. They are optional,
+  // so a failure here keeps the account; the family can add them in Settings (AC-05).
+  const details = clientDetailsFromSignUp(values);
+  const clientId = (registered.data as { client_id?: string | null } | null)?.client_id;
+  if (clientId && hasAnyClientDetail(details)) {
+    const { error: detailsError } = await supabase.rpc(
+      "save_client_details",
+      saveClientDetailsArgs(clientId, details),
+    );
+    if (detailsError) {
+      // A feature tag and the error's code only: no name or detail (ARCHITECTURE.md §12.5).
+      console.error("[auth] signUp could not save the client details:", detailsError.code);
+    }
   }
 
   const { data: profile } = await supabase

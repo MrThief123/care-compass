@@ -1210,3 +1210,13 @@ Template for future entries:
 - Human confirmation: the human owner, 2026-10-11 (in-session).
 - Docs updated: DECISIONS.md (this entry), DEVELOPMENT_PLAN.md, the FAM-18 pack.
 - Merge note (2026-10-14, the human owner): first recorded as CHG-060 on the FAM-18 branch; renumbered CHG-062 because `main` took CHG-060 (info tip icon) and CHG-061 (F0-26) first. F0-27 (#242) merged a shared `deleteEvent` (`src/server/events/delete-actions.ts`) while FAM-18 was open, so FAM-18 drops its own `deleteEventOccurrence` action and mock mutation and its Task detail 'Delete event' button calls F0-27's `deleteEvent` (one pattern per problem). FAM-18 still adds the Task detail entry point and the 'Ends' date. See the FAM-18 pack FD-10.
+
+### CHG-063 — New feature F0-28: client personal details at sign-up, in Family Settings and on Client Details
+- Date / requested by: 2026-10-14 / the human owner (in-session)
+- Type: scope addition (new feature)
+- Description: new shared feature **F0-28** (`docs/development/shared/shared-client-profile-details/`, `feature/shared-client-profile-details`, 16 criteria). Family sign-up gains an optional 'More about them' group: date of birth (shown as age), client email, client phone, street address, suburb and an emergency contact (name, relationship, phone). Family Settings gains a card to view and edit them; Client Details (Family, Carer, Admin) shows them read-only.
+- Source / justification: human, in-session 2026-10-14: "add more info for client when family signs up, their email, age, etc and this should be visible in the settings for family and show up in client details". Answers given: all of date of birth, email and phone, address and suburb, emergency contact; all optional; editable by family in Settings; read-only on Client Details.
+- Not included: the same request's "optional 2fa for carer and family"; the human parked it ("lets worry about the optional 2fa later"). It would reverse CHG-040 and needs its own CHG.
+- Impact: DEVELOPMENT_PLAN.md gains the F0-28 row and card (97 to 98 active, 550 to 566 criteria; CHG-062 / FAM-18 in PR #243 changes the same totals). New migration: six nullable columns on `clients` (additive) and function `save_client_details` (family only). `clients` is read by F0-22 (header), FAM-13 and ADM-05; their reads are unchanged. New contract functions in `src/server/clients/` and an additive call in `signUp` (F0-17). Cross-lane edits to Family Settings, Family/Carer Client Details and the sign-up page kept in this PR (precedent CHG-058, CHG-061). No new dependency.
+- Human confirmation: the human owner, 2026-10-14 (in-session).
+- Docs updated: DECISIONS.md (this entry), DEVELOPMENT_PLAN.md, the F0-28 pack.

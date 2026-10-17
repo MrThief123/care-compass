@@ -716,38 +716,56 @@ export type Database = {
       };
       clients: {
         Row: {
+          address: string | null;
           avatar_path: string | null;
           created_at: string;
           date_of_birth: string | null;
+          email: string | null;
+          emergency_contact_name: string | null;
+          emergency_contact_phone: string | null;
+          emergency_contact_relationship: string | null;
           first_name: string;
           id: string;
           last_name: string;
           organisation_id: string | null;
           organisation_removed_at: string | null;
+          phone: string | null;
           suburb: string | null;
           updated_at: string;
         };
         Insert: {
+          address?: string | null;
           avatar_path?: string | null;
           created_at?: string;
           date_of_birth?: string | null;
+          email?: string | null;
+          emergency_contact_name?: string | null;
+          emergency_contact_phone?: string | null;
+          emergency_contact_relationship?: string | null;
           first_name: string;
           id?: string;
           last_name: string;
           organisation_id?: string | null;
           organisation_removed_at?: string | null;
+          phone?: string | null;
           suburb?: string | null;
           updated_at?: string;
         };
         Update: {
+          address?: string | null;
           avatar_path?: string | null;
           created_at?: string;
           date_of_birth?: string | null;
+          email?: string | null;
+          emergency_contact_name?: string | null;
+          emergency_contact_phone?: string | null;
+          emergency_contact_relationship?: string | null;
           first_name?: string;
           id?: string;
           last_name?: string;
           organisation_id?: string | null;
           organisation_removed_at?: string | null;
+          phone?: string | null;
           suburb?: string | null;
           updated_at?: string;
         };
@@ -1387,6 +1405,20 @@ export type Database = {
           p_buckets: Json;
           p_client_id: string;
           p_note?: string;
+        };
+        Returns: undefined;
+      };
+      save_client_details: {
+        Args: {
+          p_address: string;
+          p_client_id: string;
+          p_date_of_birth: string;
+          p_email: string;
+          p_emergency_contact_name: string;
+          p_emergency_contact_phone: string;
+          p_emergency_contact_relationship: string;
+          p_phone: string;
+          p_suburb: string;
         };
         Returns: undefined;
       };

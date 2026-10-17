@@ -119,7 +119,9 @@ describe("[F0-26][AC-01] Family Client Details", () => {
     render(await FamilyInfoPage(params(MARGARET)));
 
     expect(mocks.getClientCustomSections).toHaveBeenCalledWith(MARGARET);
+    // F0-28 (CHG-063): the read-only Personal details card comes first.
     expect(headings()).toEqual([
+      "Personal details",
       "Description",
       "Habits",
       "Medical history",
@@ -174,7 +176,9 @@ describe("[F0-26][AC-12] Carer Client Details", () => {
   it("[F0-26][AC-12] on shift: custom sections in place, with Add section, Edit and Remove section", async () => {
     render(await CarerInfoPage(params(MARGARET)));
 
+    // F0-28 (CHG-063): the read-only Personal details card comes first.
     expect(headings()).toEqual([
+      "Personal details",
       "Description",
       "Habits",
       "Medical history",
