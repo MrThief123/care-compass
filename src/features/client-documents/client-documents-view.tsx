@@ -7,9 +7,12 @@ import { EmptyState } from "@/components/shared/states";
 import { CardShell } from "@/components/ui/card-shell";
 import { Icon } from "@/components/ui/icon";
 import { fileTypeLabel, formatFileSize } from "@/features/family-task-detail/document-format";
+import { TagList } from "@/features/tags/tag-list";
 import { getDocumentUrl } from "@/server/documents/actions";
+import { sortTagNames, uniqueTagNames } from "@/server/tags/tag-input";
 import type { ClientDocument } from "@/types/domain";
 
+import { DocumentTagsDialog } from "./document-tags-dialog";
 import { formatDateAdded } from "./documents-format";
 import {
   filterDocuments,
@@ -33,22 +36,59 @@ const NONE = "—";
 export interface ClientDocumentsViewProps {
   clientId: string;
   documents: ClientDocument[];
+  /** F0-29: each tagged document's tags, by document id. */
+  tagsById?: Record<string, string[]>;
+  /** F0-29: the client's tags, offered when editing a document's tags. */
+  tagOptions?: string[];
+  /** F0-29: Family may edit tags; a carer sees them and filters only. */
+  canEditTags?: boolean;
 }
+
+/** The Tag select's value for "All tags"; never a tag name, since a name is at least one character. */
+const ALL_TAGS = "";
 
 /**
  * The Documents page (F0-25): every document of one client, with search, sorting, a per-file
  * open and Download all. The same screen for Family and for a carer on a patient's profile; it
- * has no upload, which stays on Info and the event form. Search and sort run over the loaded list.
+ * has no upload, which stays on Info and the event form. Search, Tag and sort run over the loaded
+ * list. Tags (F0-29): a Tags column when any document has one or the family may edit them, and a
+ * Tag filter over the tags in use; the family edits a document's tags in a dialog.
  */
-export function ClientDocumentsView({ clientId, documents }: ClientDocumentsViewProps) {
+export function ClientDocumentsView({
+  clientId,
+  documents,
+  tagsById = {},
+  tagOptions = [],
+  canEditTags = false,
+}: ClientDocumentsViewProps) {
   const [query, setQuery] = useState("");
+  const [tagFilter, setTagFilter] = useState(ALL_TAGS);
   const [sort, setSort] = useState<string>("date-desc");
   const [error, setError] = useState("");
+  // Tags saved here since the page loaded, shown until the refreshed page carries them.
+  const [savedTags, setSavedTags] = useState<Record<string, string[]>>({});
+  const [editing, setEditing] = useState<ClientDocument>();
+
+  const tagsOf = (documentId: string): string[] =>
+    savedTags[documentId] ?? (Object.hasOwn(tagsById, documentId) ? tagsById[documentId]! : []);
+  const tagsInUse = sortTagNames(
+    uniqueTagNames(documents.flatMap((document) => tagsOf(document.id))),
+  );
+  const showTags = canEditTags || tagsInUse.length > 0;
 
   const shown = useMemo(() => {
     const [key, direction] = sort.split("-") as [DocumentSortKey, DocumentSortDirection];
-    return sortDocuments(filterDocuments(documents, query), key, direction);
-  }, [documents, query, sort]);
+    const needle = tagFilter.toLowerCase();
+    const tagged =
+      tagFilter === ALL_TAGS
+        ? documents
+        : documents.filter((document) =>
+            (savedTags[document.id] ?? tagsById[document.id] ?? []).some(
+              (tag) => tag.toLowerCase() === needle,
+            ),
+          );
+    return sortDocuments(filterDocuments(tagged, query), key, direction);
+  }, [documents, query, sort, tagFilter, tagsById, savedTags]);
 
   async function openDocument(documentId: string) {
     setError("");
@@ -118,6 +158,32 @@ export function ClientDocumentsView({ clientId, documents }: ClientDocumentsView
         <span className="[overflow-wrap:anywhere]">{document.eventTitle ?? NONE}</span>
       ),
     },
+    ...(showTags
+      ? [
+          {
+            key: "tags",
+            header: "Tags",
+            render: (document: ClientDocument) => {
+              const tags = tagsOf(document.id);
+              return (
+                <div className="flex max-w-56 flex-col items-start gap-1">
+                  {tags.length > 0 ? <TagList tags={tags} /> : <span>{NONE}</span>}
+                  {canEditTags && (
+                    <button
+                      type="button"
+                      aria-label={`Edit tags for ${document.name}`}
+                      onClick={() => setEditing(document)}
+                      className="min-h-11 cursor-pointer text-left text-body-small text-text-brand underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+                    >
+                      Edit tags
+                    </button>
+                  )}
+                </div>
+              );
+            },
+          } satisfies DataTableColumn<ClientDocument>,
+        ]
+      : []),
   ];
 
   return (
@@ -137,6 +203,23 @@ export function ClientDocumentsView({ clientId, documents }: ClientDocumentsView
             />
           </span>
         </label>
+        {tagsInUse.length > 0 && (
+          <label className="flex flex-col gap-1 text-body-small text-text-secondary">
+            Tag
+            <select
+              value={tagFilter}
+              onChange={(event) => setTagFilter(event.target.value)}
+              className="h-11 rounded-control border border-border-default bg-bg-surface px-3 text-body-default text-text-primary"
+            >
+              <option value={ALL_TAGS}>All tags</option>
+              {tagsInUse.map((tag) => (
+                <option key={tag} value={tag}>
+                  {tag}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
         <label className="flex flex-col gap-1 text-body-small text-text-secondary">
           Sort by
           <select
@@ -179,7 +262,10 @@ export function ClientDocumentsView({ clientId, documents }: ClientDocumentsView
             />
             <button
               type="button"
-              onClick={() => setQuery("")}
+              onClick={() => {
+                setQuery("");
+                setTagFilter(ALL_TAGS);
+              }}
               className="mb-4 inline-flex h-11 items-center rounded-control border border-border-brand px-4 text-sm font-medium text-secondary-foreground hover:bg-secondary/40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
             >
               Clear search
@@ -189,6 +275,20 @@ export function ClientDocumentsView({ clientId, documents }: ClientDocumentsView
           <DataTable columns={columns} rows={shown} rowKey={(document) => document.id} />
         )}
       </CardShell>
+
+      {editing && (
+        <DocumentTagsDialog
+          clientId={clientId}
+          document={editing}
+          options={sortTagNames(uniqueTagNames([...tagOptions, ...tagsInUse]))}
+          initialTags={tagsOf(editing.id)}
+          onSaved={(tags) => {
+            setSavedTags((current) => ({ ...current, [editing.id]: sortTagNames(tags) }));
+            setEditing(undefined);
+          }}
+          onClose={() => setEditing(undefined)}
+        />
+      )}
     </div>
   );
 }

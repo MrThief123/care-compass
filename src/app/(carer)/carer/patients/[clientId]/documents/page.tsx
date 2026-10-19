@@ -2,6 +2,7 @@ import { findCarerPatient } from "@/features/carer-patients/find-patient";
 import { ClientDocumentsView } from "@/features/client-documents/client-documents-view";
 import { DocumentsErrorState } from "@/features/client-documents/documents-error-state";
 import { getAllClientDocuments } from "@/server/documents/queries";
+import { getDocumentTagsByClient } from "@/server/tags/queries";
 import type { ClientDocument } from "@/types/domain";
 
 export default async function PatientDocumentsPage({
@@ -15,8 +16,13 @@ export default async function PatientDocumentsPage({
   await findCarerPatient(clientId);
 
   let documents: ClientDocument[];
+  let tagsById: Record<string, string[]>;
   try {
-    documents = await getAllClientDocuments(clientId);
+    // F0-29: a carer sees the tags and filters by them, but does not edit them.
+    [documents, tagsById] = await Promise.all([
+      getAllClientDocuments(clientId),
+      getDocumentTagsByClient(clientId),
+    ]);
   } catch (error) {
     console.error(
       "[client-documents] could not load documents:",
@@ -25,5 +31,5 @@ export default async function PatientDocumentsPage({
     return <DocumentsErrorState />;
   }
 
-  return <ClientDocumentsView clientId={clientId} documents={documents} />;
+  return <ClientDocumentsView clientId={clientId} documents={documents} tagsById={tagsById} />;
 }
