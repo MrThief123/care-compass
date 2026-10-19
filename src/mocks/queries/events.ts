@@ -17,6 +17,7 @@ import {
   UPCOMING_OCCURRENCES_BY_CLIENT_ID,
 } from "@/mocks/fixtures";
 import { melbourneDateKey } from "@/mocks/melbourne-time";
+import { eventIdsWithTag } from "@/mocks/queries/tags";
 import { isPlainEvent, TASK_LOG_PAGE_SIZE } from "@/types/domain";
 import type {
   AnyOccurrence,
@@ -161,7 +162,14 @@ export async function getTaskLog(
   clientId: string,
   query: TypedTaskLogQuery = {},
 ): Promise<TaskLogResult<AnyOccurrence>> {
-  return queryTaskLog(rowsOfType(clientId, query.type), query);
+  const rows = rowsOfType(clientId, query.type);
+  if (query.tag === undefined) return queryTaskLog(rows, query);
+  // F0-29: the events with the tag first, then the log over only their rows (FD-04).
+  const tagged = eventIdsWithTag(clientId, query.tag);
+  return queryTaskLog(
+    rows.filter((row) => tagged.has(row.eventId)),
+    query,
+  );
 }
 
 /**

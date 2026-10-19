@@ -17,6 +17,8 @@
  */
 import { z } from "zod";
 
+import { TagNameSchema } from "@/server/tags/tag-input";
+
 // ---------------------------------------------------------------------------
 // Organisation
 // ---------------------------------------------------------------------------
@@ -398,6 +400,8 @@ export const TaskLogQuerySchema = z.object({
   status: OccurrenceStatusSchema.optional(),
   type: OccurrenceTypeFilterSchema.optional(),
   page: z.number().int().positive().optional(),
+  /** F0-29: only the events with this tag, matched in any case. */
+  tag: TagNameSchema.optional(),
 });
 /**
  * The full validated query, including `type` (UI-05). `TaskLogQuery` keeps its

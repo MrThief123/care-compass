@@ -30,6 +30,8 @@ export interface TaskLogQueryInput {
   q?: string;
   status?: OccurrenceStatus;
   page?: number;
+  /** F0-29: only the events with this tag, in any case (FD-04). */
+  tag?: string;
 }
 
 /**
@@ -109,7 +111,8 @@ export async function getTodayOccurrences(
  * - Page size: 20 (`TASK_LOG_PAGE_SIZE`). A page beyond the last returns empty
  *   `items` with the true `total` and the requested `page`; it does not throw.
  * - `q`: trimmed, case-insensitive substring of the task title. `status`:
- *   exact match.
+ *   exact match. `tag` (F0-29): only the events carrying that tag, in any
+ *   case; a valid name no event has gives an empty log (FD-04).
  * - `type` (UI-05, CHG-009): `all` returns tasks and plain events together,
  *   `tasks` only tasks, `events` only plain events; the result is then typed
  *   `TaskLogResult<AnyOccurrence>`. Omitted means **tasks only**, typed

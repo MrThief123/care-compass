@@ -1018,3 +1018,27 @@ export const CARER_NOTIFICATIONS: CarerNotification[] = [
     read: true,
   },
 ];
+
+// ---------------------------------------------------------------------------
+// Tags (F0-29): Margaret's list, on her events and documents; Robert has none.
+// Mutable: the mock tag actions change them in place, like the other mock mutations.
+// ---------------------------------------------------------------------------
+
+/** Each client's tags, in the order they were made. */
+export const CLIENT_TAGS: Record<string, string[]> = {
+  [MARGARET_CLIENT_ID]: ["Medication", "Therapy", "Doctors"],
+};
+
+/** Each event's tags, by event id; names are spelled as in `CLIENT_TAGS`. */
+export const EVENT_TAGS: Record<string, string[]> = {
+  "event-margaret-morning-meds": ["Medication"],
+  "event-margaret-evening-meds": ["Medication"],
+  "event-margaret-physio": ["Therapy"],
+  "event-margaret-med-review": ["Doctors", "Medication"],
+};
+
+/** Each document's tags, by document id. */
+export const DOCUMENT_TAGS: Record<string, string[]> = {
+  "doc-margaret-physio-referral": ["Doctors", "Therapy"],
+  "doc-margaret-medication-chart": ["Medication"],
+};

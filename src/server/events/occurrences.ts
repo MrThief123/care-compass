@@ -64,14 +64,36 @@ export async function loadTaskLog(
   now: Date,
   query: TypedTaskLogQuery,
 ) {
-  return buildTaskLog(await loadOccurrenceInputs(clientId, range, now), query);
+  return buildTaskLog(await loadOccurrenceInputs(clientId, range, now, { tag: query.tag }), query);
+}
+
+/**
+ * F0-29: the ids of the client's events that carry `tag`, in any case (FD-04). Tag names are
+ * matched here rather than with `ilike`, where `%` and `_` in a name would be wildcards.
+ */
+async function eventIdsWithTag(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  clientId: string,
+  tag: string,
+): Promise<string[]> {
+  const { data, error } = await supabase
+    .from("care_event_tags")
+    .select("event_id, tag:client_tags(name)")
+    .eq("client_id", clientId);
+  if (error || !data) throw new Error(FAILED);
+  const needle = tag.toLowerCase();
+  return [
+    ...new Set(
+      data.filter((row) => row.tag?.name.toLowerCase() === needle).map((row) => row.event_id),
+    ),
+  ];
 }
 
 async function loadOccurrenceInputs(
   clientId: string,
   range: InstantRange,
   now: Date,
-  options: { keepCancelledWithCompletion?: boolean } = {},
+  { tag, ...options }: { keepCancelledWithCompletion?: boolean; tag?: string } = {},
 ): Promise<BuildOccurrencesInput> {
   const empty: BuildOccurrencesInput = {
     events: [],
@@ -87,11 +109,16 @@ async function loadOccurrenceInputs(
 
   const supabase = await createClient();
 
-  const { data: events, error: eventsError } = await supabase
+  const taggedIds = tag === undefined ? undefined : await eventIdsWithTag(supabase, clientId, tag);
+  if (taggedIds?.length === 0) return empty;
+
+  let eventsQuery = supabase
     .from("care_events")
     .select(EVENT_COLUMNS)
     .eq("client_id", clientId)
     .lt("starts_at", range.to);
+  if (taggedIds) eventsQuery = eventsQuery.in("id", taggedIds);
+  const { data: events, error: eventsError } = await eventsQuery;
   // No message from the database in any error: it may name a client or a row (ARCHITECTURE.md §12.5).
   if (eventsError || !events) throw new Error(FAILED);
   if (events.length === 0) return empty;

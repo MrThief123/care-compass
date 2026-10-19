@@ -13,6 +13,7 @@ import { getDataSourceMode } from "@/server/data-source";
 import { parseOccurrenceKey } from "@/server/events/occurrence-key";
 import { RECURRENCE_TO_DB } from "@/server/events/recurrence-mapping";
 import { refreshCachedPages } from "@/server/refresh-cache";
+import { TagNamesSchema } from "@/server/tags/tag-input";
 import { RecurrenceFrequencySchema } from "@/types/domain";
 
 export type ActionResult<T> =
@@ -258,6 +259,34 @@ async function saveEventCost(
   };
 }
 
+const TAGS_NOT_SAVED: ActionResult<never> = {
+  ok: false,
+  error: {
+    code: "UNEXPECTED",
+    message: "The event was saved, but its tags weren't. Open the event and add them again.",
+  },
+};
+
+/**
+ * Replaces an event's tags through `set_event_tags` (F0-29, family only; FD-03), after the event
+ * itself is saved, as `saveEventCost` does. Returns an error result, or undefined when saved.
+ */
+async function saveEventTags(
+  supabase: Awaited<ReturnType<typeof import("@/lib/supabase/server").createClient>>,
+  eventId: string,
+  tags: string[],
+): Promise<ActionResult<never> | undefined> {
+  const { error } = await supabase.rpc("set_event_tags", { p_event_id: eventId, p_names: tags });
+  if (!error) return undefined;
+  if (error.code === "42501") {
+    return {
+      ok: false,
+      error: { code: "NOT_ALLOWED", message: "Only the client's family can change tags." },
+    };
+  }
+  return TAGS_NOT_SAVED;
+}
+
 const CreateEventInputSchema = z.object({
   clientId: z.string().min(1),
   title: z.string().trim().min(1),
@@ -271,6 +300,8 @@ const CreateEventInputSchema = z.object({
   cost: EventCostSchema.optional(),
   /** FAM-18: the day the series stops after, inclusive; absent repeats forever. */
   endDate: z.string().regex(LOCAL_DATE_PATTERN).optional(),
+  /** F0-29: the event's tags (family only); absent saves none. */
+  tags: TagNamesSchema.optional(),
 });
 export type CreateEventInput = z.infer<typeof CreateEventInputSchema>;
 
@@ -307,6 +338,7 @@ async function createEventImpl(input: CreateEventInput): Promise<ActionResult<Cr
     isTask,
     cost,
     endDate,
+    tags,
   } = parsed.data;
   if (endDate && endDate < date) return END_BEFORE_DATE_RESULT;
   // A one-off has nothing to end.
@@ -327,6 +359,10 @@ async function createEventImpl(input: CreateEventInput): Promise<ActionResult<Cr
       completionMode,
       ...(recurrenceEnd ? { recurrenceEndDate: recurrenceEnd } : {}),
     });
+    if (tags?.length) {
+      const mockTags = await import("@/mocks/queries/tags");
+      await mockTags.setEventTags(clientId, eventId, tags);
+    }
     return { ok: true, data: { eventId } };
   }
 
@@ -385,6 +421,11 @@ async function createEventImpl(input: CreateEventInput): Promise<ActionResult<Cr
       }
     }
 
+    if (tags?.length) {
+      const tagsFailure = await saveEventTags(supabase, data.id, tags);
+      if (tagsFailure) return TAGS_NOT_SAVED;
+    }
+
     return { ok: true, data: { eventId: data.id } };
   } catch (error) {
     console.error("[events] createEvent failed:", error instanceof Error ? error.name : "unknown");
@@ -428,6 +469,8 @@ const UpdateEventInputSchema = z.object({
   cost: EventCostSchema.nullable().optional(),
   /** FAM-18: a date sets the series end, `null` clears it, absent leaves it as it is. */
   endDate: z.string().regex(LOCAL_DATE_PATTERN).nullable().optional(),
+  /** F0-29: replaces the event's tags (family only); absent leaves them as they are. */
+  tags: TagNamesSchema.optional(),
 });
 export type UpdateEventInput = z.infer<typeof UpdateEventInputSchema>;
 
@@ -478,6 +521,7 @@ async function updateEventImpl(input: UpdateEventInput): Promise<ActionResult<Up
     scope,
     cost,
     endDate,
+    tags,
   } = parsed.data;
   if (endDate && endDate < date) return END_BEFORE_DATE_RESULT;
   // A one-off has nothing to end, so stopping a repeat clears the end date too.
@@ -502,6 +546,10 @@ async function updateEventImpl(input: UpdateEventInput): Promise<ActionResult<Up
         scope,
         ...(recurrenceEnd !== undefined ? { recurrenceEndDate: recurrenceEnd } : {}),
       });
+      if (tags !== undefined) {
+        const mockTags = await import("@/mocks/queries/tags");
+        await mockTags.setEventTags(clientId, eventId, tags);
+      }
       return { ok: true, data: { eventId } };
     } catch (error) {
       return {
@@ -551,6 +599,10 @@ async function updateEventImpl(input: UpdateEventInput): Promise<ActionResult<Up
         const costFailure = await saveEventCost(supabase, eventId, cost);
         if (costFailure) return costFailure;
       }
+      if (tags !== undefined) {
+        const tagsFailure = await saveEventTags(supabase, eventId, tags);
+        if (tagsFailure) return tagsFailure;
+      }
       return { ok: true, data: { eventId } };
     }
 
@@ -587,6 +639,10 @@ async function updateEventImpl(input: UpdateEventInput): Promise<ActionResult<Up
     if (cost !== undefined) {
       const costFailure = await saveEventCost(supabase, eventId, cost);
       if (costFailure) return costFailure;
+    }
+    if (tags !== undefined) {
+      const tagsFailure = await saveEventTags(supabase, eventId, tags);
+      if (tagsFailure) return tagsFailure;
     }
 
     return { ok: true, data: { eventId } };
