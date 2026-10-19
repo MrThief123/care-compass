@@ -25,7 +25,7 @@ export type LoadedTaskLog =
  * the rows on screen. The order the contract returns is kept (newest first); nothing is
  * re-sorted here, since re-sorting one page can never surface rows from another. A page past
  * the end (a shared link after tasks were removed, or a typed number) is answered with a
- * redirect to the last page that exists, keeping the search and Status.
+ * redirect to the last page that exists, keeping the search, Status and Tag.
  */
 export async function loadTaskLog(
   clientId: string,
@@ -37,6 +37,7 @@ export async function loadTaskLog(
   const query: TaskLogQueryInput = { page: params.page };
   if (params.q) query.q = params.q;
   if (params.status) query.status = params.status;
+  if (params.tag) query.tag = params.tag;
 
   const { items, total, pageSize } = await getTaskLog(clientId, query);
   const lastPage = lastPageFor(total, pageSize);

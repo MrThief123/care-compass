@@ -1,3 +1,5 @@
+import { TagNameSchema } from "@/server/tags/tag-input";
+
 import { resolveBasePath } from "./base-path";
 import { MAX_PAGE, normaliseQuery, type TaskLogParams } from "./task-log-params";
 
@@ -6,20 +8,22 @@ import { MAX_PAGE, normaliseQuery, type TaskLogParams } from "./task-log-params"
  * Occurrence keys are `${eventId}:${originalStartISO}` (ARCHITECTURE.md
  * §6.2), so they contain `:` and `+` and must be URL-encoded in a path.
  *
- * The Task log's URL is its state: `?q=&status=&page=` (CHG-005, shared with
- * Home). A link is only ever built from values that pass validation here, so
+ * The Task log's URL is its state: `?q=&status=&tag=&page=` (CHG-005, shared
+ * with Home; `tag` F0-29). A link is only ever built from values that pass validation here, so
  * nothing read from a URL is echoed back as-is.
  */
 
 const STATUSES = new Set(["planned", "done", "overdue"]);
 
-/** The Task log's own query string (`q=&status=&page=`, defaults left out), without a `?`. */
+/** The Task log's own query string (`q=&status=&tag=&page=`, defaults left out), without a `?`. */
 export function taskLogQuery(view: Partial<TaskLogParams> | undefined): string {
   if (!view) return "";
   const search = new URLSearchParams();
   const q = normaliseQuery(view.q ?? "");
   if (q) search.set("q", q);
   if (view.status && STATUSES.has(view.status)) search.set("status", view.status);
+  const tag = view.tag === undefined ? undefined : TagNameSchema.safeParse(view.tag);
+  if (tag?.success) search.set("tag", tag.data);
   if (typeof view.page === "number" && Number.isInteger(view.page) && view.page > 1) {
     search.set("page", String(Math.min(view.page, MAX_PAGE)));
   }

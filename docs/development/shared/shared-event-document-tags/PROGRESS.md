@@ -10,6 +10,7 @@ Last updated: 2026-10-19
 
 ## Blockers
 - None. Scope given by the human in-session 2026-10-19 (CHG-064).
+- HUMAN REVIEW: test expectation changed: four Task log page tests now expect the event's tags after the task title (FD-07).
 
 ## Completed
 - Claimed; CHG-064; DEVELOPMENT_PLAN row and card; PL-28; feature pack

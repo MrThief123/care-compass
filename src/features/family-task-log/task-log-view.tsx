@@ -56,6 +56,10 @@ export interface TaskLogViewProps {
   params: TaskLogParams;
   /** Where the links go; defaults to `/family/<id>` (a carer sets it, CHG-043). */
   basePath?: string;
+  /** F0-29: the client's tags, A to Z, for the Tag select; none means no Tag select. */
+  tagOptions?: string[];
+  /** F0-29: each tagged event's tags, by event id, shown under the task titles. */
+  tagsByEvent?: Record<string, string[]>;
 }
 
 type StatusChoice = "all" | OccurrenceStatus;
@@ -71,6 +75,9 @@ function toStatusChoice(value: string): StatusChoice | undefined {
   return STATUS_OPTIONS.find((option) => option.value === value)?.value;
 }
 
+/** The Tag select's value for "All tags"; never a tag name, since a name is at least one character. */
+const ALL_TAGS = "";
+
 /**
  * Family · Task log (FAM-UI-07): title, search, Status select, the
  * DATE · TASK · NURSE · STATUS table and a pager. The page shows one page of
@@ -85,10 +92,13 @@ export function TaskLogView({
   pageSize,
   params,
   basePath,
+  tagOptions = [],
+  tagsByEvent,
 }: TaskLogViewProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [status, setOptimisticStatus] = useOptimistic<StatusChoice>(params.status ?? "all");
+  const [tag, setOptimisticTag] = useOptimistic(params.tag ?? ALL_TAGS);
 
   // What is in the box (it runs ahead of the URL while someone types), the URL's search as of the
   // last render, and the last search this component sent to the URL.
@@ -116,14 +126,21 @@ export function TaskLogView({
 
   useEffect(() => () => clearTimeout(timer.current), []);
 
-  /** Puts a search and Status in the URL on page 1 (changing either resets the page). */
-  function go(next: { q: string; status?: OccurrenceStatus }) {
+  /** Puts a search, Status and Tag in the URL on page 1 (changing any resets the page). */
+  function go(change: { q: string; status?: OccurrenceStatus; tag?: string | null }) {
     clearTimeout(timer.current);
     const current = latest.current;
-    if (next.q === current.q && next.status === current.status) return;
+    // `tag` absent keeps the current one; `null` is All tags.
+    const next = {
+      q: change.q,
+      status: change.status,
+      tag: change.tag === undefined ? current.tag : (change.tag ?? undefined),
+    };
+    if (next.q === current.q && next.status === current.status && next.tag === current.tag) return;
     setSentQ(next.q);
     startTransition(() => {
       setOptimisticStatus(next.status ?? "all");
+      setOptimisticTag(next.tag ?? ALL_TAGS);
       router.replace(taskLogHref(clientId, { ...next, page: 1 }, basePath), { scroll: false });
     });
   }
@@ -138,7 +155,14 @@ export function TaskLogView({
     );
   }
 
-  const filtered = params.q !== "" || params.status !== undefined;
+  const filtered = params.q !== "" || params.status !== undefined || params.tag !== undefined;
+  // A tag in the URL that is not (or no longer) in the list still shows as chosen.
+  const tagNames =
+    params.tag && !tagOptions.includes(params.tag) ? [...tagOptions, params.tag] : tagOptions;
+  const tagChoices: FieldOption[] = [
+    { value: ALL_TAGS, label: "All tags" },
+    ...tagNames.map((name) => ({ value: name, label: name })),
+  ];
   const { from, to } = pageRange(params.page, pageSize, total);
 
   return (
@@ -180,6 +204,22 @@ export function TaskLogView({
           }}
           options={STATUS_OPTIONS}
         />
+        {tagNames.length > 0 && (
+          <Field
+            className="w-[220px] max-w-full shrink-0 gap-2"
+            label="Tag"
+            type="select"
+            value={tag}
+            onChange={(value) =>
+              go({
+                q: normaliseQuery(draft),
+                status: latest.current.status,
+                tag: value === ALL_TAGS ? null : value,
+              })
+            }
+            options={tagChoices}
+          />
+        )}
       </div>
 
       <CardShell className="px-2 py-3" aria-busy={isPending}>
@@ -202,6 +242,7 @@ export function TaskLogView({
             items={items}
             params={params}
             basePath={basePath}
+            tagsByEvent={tagsByEvent}
             onOpen={(occurrence) =>
               router.push(taskDetailHref(clientId, occurrence.key, params, basePath))
             }

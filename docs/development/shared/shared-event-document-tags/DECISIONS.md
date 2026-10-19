@@ -29,3 +29,10 @@ None.
 ### FD-06 — Cross-lane edits kept in this PR
 - Date: 2026-10-19
 - Decision: `src/features/family-event-form/`, `src/features/family-task-log/`, `src/features/client-documents/` and their Family and Carer routes are edited here so one PR ships the feature (precedent: CHG-058, CHG-061, CHG-063).
+
+### FD-07 — Four Task log page tests now expect tags after the task title (HUMAN REVIEW: test expectation changed)
+- Date: 2026-10-19
+- Tests: `src/app/(family)/family/[clientId]/tasks/page.test.tsx` — `[FAM-UI-07][AC-01]`, `[FAM-UI-07][AC-02]`, `[FAM-14][AC-01]`, `[FAM-14][AC-02]`.
+- Before: the TASK cell's text was the title only, e.g. "Medication review".
+- After: the TASK cell's text is the title followed by the event's tags, e.g. "Medication reviewDoctorsMedication", because the mock fixtures now tag Morning medication, Physiotherapy and Medication review, and AC-08 puts tags under the title.
+- Reason: recorded requirement change (CHG-064, AC-08). Only the expected strings changed; no assertion was removed or weakened.

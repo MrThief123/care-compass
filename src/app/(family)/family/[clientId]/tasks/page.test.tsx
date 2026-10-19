@@ -58,10 +58,11 @@ describe("[FAM-UI-07] /family/[clientId]/tasks page (real mock contract, DATA_SO
       );
     expect(firstThree).toEqual([
       ["Mon 30 Nov", "Afternoon check-in", "Aisha Rahman", "Planned"],
-      ["Mon 30 Nov", "Physiotherapy", "Aisha Rahman", "Planned"],
+      // The TASK cell ends with the event's tags (F0-29 FD-07).
+      ["Mon 30 Nov", "PhysiotherapyTherapy", "Aisha Rahman", "Planned"],
       [
         "Mon 30 Nov",
-        "Morning medication",
+        "Morning medicationMedication",
         "Aisha Rahman",
         "Done · Aisha RahmanCompleted 14 minutes late",
       ],
@@ -133,7 +134,8 @@ describe("[FAM-UI-07] /family/[clientId]/tasks page (real mock contract, DATA_SO
     );
     expect(rows).toEqual([
       ["Weekly weigh-in", "—"],
-      ["Medication review", "—"],
+      // The TASK cell ends with the event's tags (F0-29 FD-07).
+      ["Medication reviewDoctorsMedication", "—"],
     ]);
     expect(screen.getByLabelText("Status")).toHaveDisplayValue("Overdue");
     expect(screen.queryByRole("navigation", { name: "Task log pages" })).not.toBeInTheDocument();
@@ -275,13 +277,14 @@ describe("[FAM-14] Family — Task log", () => {
       .filter((row) => row[0] === "Mon 30 Nov");
     expect(monday).toEqual(
       expect.arrayContaining([
+        // The TASK cell ends with the event's tags (F0-29 FD-07).
         [
           "Mon 30 Nov",
-          "Morning medication",
+          "Morning medicationMedication",
           "Aisha Rahman",
           "Done · Aisha RahmanCompleted 14 minutes late",
         ],
-        ["Mon 30 Nov", "Physiotherapy", "Aisha Rahman", "Planned"],
+        ["Mon 30 Nov", "PhysiotherapyTherapy", "Aisha Rahman", "Planned"],
         ["Mon 30 Nov", "Afternoon check-in", "Aisha Rahman", "Planned"],
       ]),
     );
@@ -298,7 +301,8 @@ describe("[FAM-14] Family — Task log", () => {
     );
     expect(rows).toEqual([
       ["Weekly weigh-in", "—"],
-      ["Medication review", "—"],
+      // The TASK cell ends with the event's tags (F0-29 FD-07).
+      ["Medication reviewDoctorsMedication", "—"],
     ]);
   });
 

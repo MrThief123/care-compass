@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { StatusPill } from "@/components/shared/status-pill";
 import { Icon } from "@/components/ui/icon";
+import { TagList } from "@/features/tags/tag-list";
 import { formatShortDate } from "@/lib/format/date";
 import { cn } from "@/lib/utils";
 import type { Occurrence } from "@/types/domain";
@@ -22,6 +23,8 @@ export interface TaskLogTableProps {
   /** Whole-row pointer navigation; the title link is the keyboard and screen-reader way in. */
   onOpen: (occurrence: Occurrence) => void;
   basePath?: string;
+  /** F0-29: each tagged event's tags, by event id, shown under the task title. */
+  tagsByEvent?: Record<string, string[]>;
 }
 
 /**
@@ -60,7 +63,14 @@ const HEAD_CELL = cn(CELL, "text-left text-label-caps text-text-secondary");
  * (`line-clamp`, `truncate`), so the DOM, and a screen reader, keep the whole value; the full
  * text is also in `title` for hover.
  */
-export function TaskLogTable({ clientId, items, params, onOpen, basePath }: TaskLogTableProps) {
+export function TaskLogTable({
+  clientId,
+  items,
+  params,
+  onOpen,
+  basePath,
+  tagsByEvent = {},
+}: TaskLogTableProps) {
   return (
     <div className="@container">
       <table role="table" className="block w-full text-left">
@@ -130,6 +140,14 @@ export function TaskLogTable({ clientId, items, params, onOpen, basePath }: Task
                       {occurrence.title}
                     </span>
                   </Link>
+                  <TagList
+                    tags={
+                      Object.hasOwn(tagsByEvent, occurrence.eventId)
+                        ? tagsByEvent[occurrence.eventId]!
+                        : []
+                    }
+                    className="pb-1"
+                  />
                 </td>
 
                 {/* Beside the date on the card layout, so a middle dot separates them (its

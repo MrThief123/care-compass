@@ -1,10 +1,11 @@
 import { z } from "zod";
 
+import { TagNameSchema } from "@/server/tags/tag-input";
 import type { OccurrenceStatus } from "@/types/domain";
 
 /**
- * The Task log's view state lives in the URL: `?q=<text>&status=<planned|done|overdue>&page=<n>`
- * (CHG-005, shared with Home). Everything read from a URL is untrusted, so it
+ * The Task log's view state lives in the URL: `?q=<text>&status=<planned|done|overdue>&tag=<name>&page=<n>`
+ * (CHG-005, shared with Home; `tag` F0-29). Everything read from a URL is untrusted, so it
  * is cleaned here, once, before it reaches the `getTaskLog` contract (which
  * rejects invalid input with a ZodError) or is written back into a link.
  */
@@ -24,6 +25,8 @@ export interface TaskLogParams {
   status?: OccurrenceStatus;
   /** 1-based; 1 when absent or invalid. */
   page: number;
+  /** F0-29: a valid tag name (`TagNameSchema`, normalised); absent means all tags. */
+  tag?: string;
 }
 
 // Mirrors `OccurrenceStatusSchema` in `@/types/domain` (importing that value would pull every domain
@@ -77,9 +80,12 @@ export function parseTaskLogParams(raw: RawSearchParams | undefined): TaskLogPar
   const pageText = PageParamSchema.safeParse(firstValue(source.page)?.trim());
   const page = pageText.success ? Math.min(Math.max(Number(pageText.data), 1), MAX_PAGE) : 1;
 
+  const tag = TagNameSchema.safeParse(firstValue(source.tag) ?? "");
+
   return {
     q: normaliseQuery(firstValue(source.q) ?? ""),
     status: status.success ? status.data : undefined,
     page,
+    ...(tag.success ? { tag: tag.data } : {}),
   };
 }
