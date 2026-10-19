@@ -5,6 +5,7 @@ import { resolveTaskDetailOrigin } from "@/features/family-task-detail/task-deta
 import { melbourneDateKey } from "@/features/family-task-log/melbourne-time";
 import { getBudgetSummary } from "@/server/budget/queries";
 import { getOccurrences, getToday } from "@/server/events/queries";
+import { getClientTags } from "@/server/tags/queries";
 
 /** The first and last day (inclusive) of the calendar month a `YYYY-MM-DD` date falls in. */
 function monthBounds(anyDateInMonth: string): { from: string; to: string } {
@@ -26,7 +27,8 @@ async function datesWithItemsFor(clientId: string, month: string): Promise<strin
  * designed); the layout is Edit event's, empty, with no documents yet (FD-02).
  * The picker opens on the current Melbourne month. Save event and Cancel go back
  * to the Calendar view it was opened from (`from=calendar` plus `view / date /
- * month`, re-validated, CHG-017), else to Family Home (CHG-015).
+ * month`, re-validated, CHG-017), else to Family Home (CHG-015). The client's tags make the
+ * Tags field (F0-29).
  */
 export default async function NewEventPage({
   params,
@@ -37,10 +39,11 @@ export default async function NewEventPage({
 }) {
   const { clientId } = await params;
   const month = melbourneDateKey(new Date().toISOString());
-  const [origin, buckets, datesWithItems] = await Promise.all([
+  const [origin, buckets, datesWithItems, tagOptions] = await Promise.all([
     searchParams.then((raw) => resolveTaskDetailOrigin(raw, () => getToday())),
     getBudgetSummary(clientId),
     datesWithItemsFor(clientId, month),
+    getClientTags(clientId),
   ]);
   return (
     <EventFormScreen
@@ -53,6 +56,7 @@ export default async function NewEventPage({
       documents={[]}
       buckets={buckets}
       returnHref={addEventReturnHref(clientId, origin)}
+      tagOptions={tagOptions}
     />
   );
 }

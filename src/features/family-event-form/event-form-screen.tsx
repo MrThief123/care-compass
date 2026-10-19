@@ -11,6 +11,7 @@ import {
   type EventFormValues,
 } from "@/components/shared/forms";
 import { Button } from "@/components/ui/button";
+import { TagPicker } from "@/features/tags/tag-picker";
 import type { LocalDate } from "@/lib/dates/week-range";
 import { linkDocumentsToEvent } from "@/server/documents/actions";
 import { createEvent, updateEvent } from "@/server/events/actions";
@@ -68,6 +69,13 @@ export interface EventFormScreenProps {
   notAllowedMessage?: string;
   /** Where to go after Delete event (F0-27). Edit event only; without it there is no Delete event button. */
   deleteReturnHref?: string;
+  /**
+   * The client's tags (F0-29). Family pages pass them and get a Tags field; without them (a
+   * carer's form) there is none and saving leaves the event's tags as they are.
+   */
+  tagOptions?: string[];
+  /** The event's saved tags on Edit event. */
+  initialTags?: string[];
 }
 
 const TITLES = { add: "Add event", edit: "Edit event" } as const;
@@ -95,6 +103,8 @@ export function EventFormScreen({
   returnHref,
   notAllowedMessage,
   deleteReturnHref,
+  tagOptions,
+  initialTags = [],
 }: EventFormScreenProps) {
   const router = useRouter();
   const [values, setValues] = useState(initialValues);
@@ -106,6 +116,7 @@ export function EventFormScreen({
   const [scope, setScope] = useState<EditScope>("occurrence");
   const [endDate, setEndDate] = useState(initialEndDate ?? "");
   const [endDateError, setEndDateError] = useState<string>();
+  const [tags, setTags] = useState(initialTags);
   const [saveError, setSaveError] = useState<string>();
   // Files chosen on Add event, linked to the event once `createEvent` returns an id (F0-23).
   const [pendingDocuments, setPendingDocuments] = useState<{ id: string; name: string }[]>([]);
@@ -170,6 +181,8 @@ export function EventFormScreen({
     // Sent only when it matters: a date sets it, `null` clears a saved one (also when the event
     // stopped repeating), otherwise it is left out.
     const endDateField = repeats && endDate ? { endDate } : initialEndDate ? { endDate: null } : {};
+    // F0-29: sent only from a form that shows Tags, so a carer's save leaves them as they are.
+    const tagsField = tagOptions ? { tags } : {};
 
     if (mode === "edit") {
       const result = await updateEvent({
@@ -185,6 +198,7 @@ export function EventFormScreen({
         isTask,
         scope,
         ...endDateField,
+        ...tagsField,
         // FAM-11: the cost as typed, `null` when a saved cost was cleared, left out when there never was one.
         ...(parsedCost
           ? { cost: { amount: parsedCost.amount, bucketId: parsedCost.bucketId } }
@@ -210,6 +224,7 @@ export function EventFormScreen({
       recurrence: values.recurrence,
       isTask,
       ...(repeats && endDate ? { endDate } : {}),
+      ...tagsField,
       ...(parsedCost ? { cost: { amount: parsedCost.amount, bucketId: parsedCost.bucketId } } : {}),
     });
     if (!result.ok) {
@@ -298,6 +313,7 @@ export function EventFormScreen({
               errors={costErrors}
               hasSavedCost={hasSavedCost}
             />
+            {tagOptions && <TagPicker options={tagOptions} value={tags} onChange={setTags} />}
           </>
         }
         documents={
