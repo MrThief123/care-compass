@@ -421,6 +421,52 @@ export type Database = {
           },
         ];
       };
+      care_event_tags: {
+        Row: {
+          client_id: string;
+          created_at: string;
+          event_id: string;
+          id: string;
+          tag_id: string;
+        };
+        Insert: {
+          client_id: string;
+          created_at?: string;
+          event_id: string;
+          id?: string;
+          tag_id: string;
+        };
+        Update: {
+          client_id?: string;
+          created_at?: string;
+          event_id?: string;
+          id?: string;
+          tag_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "care_event_tags_client_id_fkey";
+            columns: ["client_id"];
+            isOneToOne: false;
+            referencedRelation: "clients";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "care_event_tags_event_id_fkey";
+            columns: ["event_id"];
+            isOneToOne: false;
+            referencedRelation: "care_events";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "care_event_tags_tag_id_fkey";
+            columns: ["tag_id"];
+            isOneToOne: false;
+            referencedRelation: "client_tags";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       care_events: {
         Row: {
           bucket_id: string | null;
@@ -714,6 +760,45 @@ export type Database = {
           },
         ];
       };
+      client_tags: {
+        Row: {
+          client_id: string;
+          created_at: string;
+          created_by: string | null;
+          id: string;
+          name: string;
+        };
+        Insert: {
+          client_id: string;
+          created_at?: string;
+          created_by?: string | null;
+          id?: string;
+          name: string;
+        };
+        Update: {
+          client_id?: string;
+          created_at?: string;
+          created_by?: string | null;
+          id?: string;
+          name?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "client_tags_client_id_fkey";
+            columns: ["client_id"];
+            isOneToOne: false;
+            referencedRelation: "clients";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "client_tags_created_by_fkey";
+            columns: ["created_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       clients: {
         Row: {
           address: string | null;
@@ -775,6 +860,52 @@ export type Database = {
             columns: ["organisation_id"];
             isOneToOne: false;
             referencedRelation: "organisations";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      document_tags: {
+        Row: {
+          client_id: string;
+          created_at: string;
+          document_id: string;
+          id: string;
+          tag_id: string;
+        };
+        Insert: {
+          client_id: string;
+          created_at?: string;
+          document_id: string;
+          id?: string;
+          tag_id: string;
+        };
+        Update: {
+          client_id?: string;
+          created_at?: string;
+          document_id?: string;
+          id?: string;
+          tag_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "document_tags_client_id_fkey";
+            columns: ["client_id"];
+            isOneToOne: false;
+            referencedRelation: "clients";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "document_tags_document_id_fkey";
+            columns: ["document_id"];
+            isOneToOne: false;
+            referencedRelation: "documents";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "document_tags_tag_id_fkey";
+            columns: ["tag_id"];
+            isOneToOne: false;
+            referencedRelation: "client_tags";
             referencedColumns: ["id"];
           },
         ];
@@ -1423,6 +1554,10 @@ export type Database = {
         Returns: undefined;
       };
       session_is_aal2: { Args: never; Returns: boolean };
+      set_document_tags: {
+        Args: { p_document_id: string; p_names: string[] };
+        Returns: undefined;
+      };
       set_event_cost: {
         Args: { p_bucket_id: string; p_cost: number; p_event_id: string };
         Returns: {
@@ -1450,6 +1585,10 @@ export type Database = {
           isOneToOne: true;
           isSetofReturn: false;
         };
+      };
+      set_event_tags: {
+        Args: { p_event_id: string; p_names: string[] };
+        Returns: undefined;
       };
       set_occurrence_done: {
         Args: { p_event_id: string; p_original_start: string };
