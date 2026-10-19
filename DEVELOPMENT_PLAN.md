@@ -162,7 +162,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 | 19 | F0-25 | Client Documents page (Family and Carer) | S | D21 | SPRINT | F0-13, UI-04, FAM-UI-04, F0-15, CAR-UI-02 | — | `feature/shared-client-documents-page` | IN PROGRESS |
 | 20 | F0-26 | Custom sections on Client Details (Family, Carer and Admin) | S | D21 | SPRINT | FAM-09, CAR-04, ADM-11, F0-08, F0-21 | — | `feature/shared-client-custom-sections` | READY FOR PR |
 | 20 | F0-28 | Client personal details (sign-up, Family Settings, Client Details) | S | D22 | SPRINT | F0-17, F0-22, FAM-12, FAM-09, CAR-04, ADM-11 | — | `feature/shared-client-profile-details` | PR OPEN |
-| 21 | F0-29 | Tags on events and documents (Task log and Documents filters) | S | D22 | SPRINT | F0-11, F0-13, FAM-06, FAM-07, FAM-UI-07, CAR-06, F0-25 | — | `feature/shared-event-document-tags` | IN PROGRESS |
+| 21 | F0-29 | Tags on events and documents (Task log and Documents filters) | S | D22 | SPRINT | F0-11, F0-13, FAM-06, FAM-07, FAM-UI-07, CAR-06, F0-25 | — | `feature/shared-event-document-tags` | READY FOR PR |
 
 ### Phase 3 — Data wiring & behaviour (parallel: Family · Carer · Admin)
 
@@ -817,7 +817,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Acceptance criteria summary:** 16 criteria — tag on add; tags on edit; tag validation; carer form has no tags; only family may tag; tag save failure; Task log tag filter; tags on log rows; bad or unused tag in URL; Documents tags and filter; edit document tags; carer read-only tags; document tag save failure; contract; no tags unchanged; accessibility
 - **Testing summary:** 2 unit, 1 database (pgTAP), 4 component, 1 integration
 - **Requirements:** REQ-21 (Care log), REQ-22 (documents located and retrieved)
-- **Docs:** `docs/development/shared/shared-event-document-tags/` · **Status:** IN PROGRESS
+- **Docs:** `docs/development/shared/shared-event-document-tags/` · **Status:** READY FOR PR
 
 ## Phase 3 — Data wiring & behaviour (parallel: Family · Carer · Admin) — feature detail
 

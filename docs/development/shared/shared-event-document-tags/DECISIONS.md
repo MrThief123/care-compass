@@ -36,3 +36,13 @@ None.
 - Before: the TASK cell's text was the title only, e.g. "Medication review".
 - After: the TASK cell's text is the title followed by the event's tags, e.g. "Medication reviewDoctorsMedication", because the mock fixtures now tag Morning medication, Physiotherapy and Medication review, and AC-08 puts tags under the title.
 - Reason: recorded requirement change (CHG-064, AC-08). Only the expected strings changed; no assertion was removed or weakened.
+
+### FD-08 — Own pgTAP check corrected before the feature finished
+- Date: 2026-10-20
+- Test: `supabase/tests/tags.test.sql`, "[F0-29][AC-05] refused calls added no tags".
+- Before: counted every `client_tags` row (want 3). After: counts only the test's two clients.
+- Reason: genuine test bug. The local database also holds the seed's three tags for the demo client, so it saw 6. The refusals themselves were already checked separately. This is a new test in this branch; no existing test changed.
+
+### FD-09 — Edit tags dialog reuses the kit `ConfirmationModal`
+- Date: 2026-10-20
+- Decision: the dialog uses `ConfirmationModal` (focus trap, Escape, focus return) rather than a second dialog pattern. That modal always shows a warning triangle beside the title, which suits a confirmation better than an edit. Left as is and flagged for human review; an optional icon prop on the kit modal would be a small shared change.

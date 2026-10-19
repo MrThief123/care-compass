@@ -1,9 +1,8 @@
 # Session State — F0-29 Tags on events and documents
 
-Last session date: 2026-10-19
-Current branch: `feature/shared-event-document-tags` (from `main`, pushed)
-Worked on: the whole feature, tests first, one commit per step.
-Tests run: Vitest full on mock (2963 pass), typecheck, lint, prettier, build, dev-server render check.
-Not run: `npx supabase test db` (T-03), integration T-08, browser visual check — Docker was not running.
-Current blocker: none in code; AC-05 needs pgTAP to run.
-Exact next action: start Docker, `npx supabase start`, `npx supabase db reset`, `npm run db:types` (check the diff matches the hand edit), `npx supabase test db`, `npx vitest run tests/integration/shared-event-document-tags.test.ts`; then browser check and, with human approval, open the PR.
+Last session date: 2026-10-20
+Current branch: `feature/shared-event-document-tags` (from `main`, `main` merged 2026-10-20, pushed)
+Worked on: merged `main`; ran pgTAP, integration and a browser check; fixed one of my own pgTAP checks (FD-08); added `client_tag_ids` to the types.
+Tests run: see TEST_PLAN.md results (unit 2963, pgTAP 1028, integration F0-29 1/1, full integration same failures as `main`, browser 1280/390).
+Current blocker: none. HUMAN REVIEW items in PROGRESS.md.
+Exact next action: human approval, then open PR "F0-29 Tags on events and documents" to `main`.

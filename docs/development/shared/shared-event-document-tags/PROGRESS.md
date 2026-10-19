@@ -1,16 +1,16 @@
 # Progress — F0-29 Tags on events and documents (Task log and Documents filters)
 
-Status: IN PROGRESS
+Status: READY FOR PR
 Owner: Shwethan Potu
 Lane: S — Shared
 Sprint: SPRINT
 Branch: `feature/shared-event-document-tags`
 PR target: `main`
-Last updated: 2026-10-19
+Last updated: 2026-10-20
 
 ## Blockers
 - None. Scope given by the human in-session 2026-10-19 (CHG-064).
-- Not run: pgTAP T-03 and integration T-08 (Docker not running), browser visual check. Needed before the PR.
+- HUMAN REVIEW: the Edit tags dialog shows the kit modal's warning triangle (FD-09).
 - HUMAN REVIEW: no Figma frame for the tag picker, Tag selects or Edit tags dialog; built from the kit and tokens.
 - HUMAN REVIEW: test expectation changed: four Task log page tests now expect the event's tags after the task title (FD-07).
 
@@ -20,4 +20,7 @@ Last updated: 2026-10-19
 - Database: `client_tags`, `care_event_tags`, `document_tags`, family-only `set_event_tags` / `set_document_tags`, synthetic seed for Margaret
 - Contracts: `TagNamesSchema`, `src/server/tags/` (mock and Supabase), `tags` on `createEvent` / `updateEvent`, `tag` on `getTaskLog`
 - Tag picker; Tags on Family Add/Edit event; Task log Tag filter and row tags (Family and Carer); Documents Tags column, Tag filter and Edit tags
-- 15 of 16 ACs MET; AC-05 waits on pgTAP (TEST_PLAN results)
+- All 16 ACs MET; suite results in TEST_PLAN.md (pgTAP, integration and browser check run 2026-10-20)
+
+## Commits on this branch
+claim → CHG-064 and pack → tests first → feat(db) → contracts → event form → Task log → Documents → results → merge main → pgTAP fix and results
