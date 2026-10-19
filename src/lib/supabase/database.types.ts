@@ -1374,6 +1374,10 @@ export type Database = {
         Args: { p_client_id: string; p_items: Json };
         Returns: number;
       };
+      client_tag_ids: {
+        Args: { p_client_id: string; p_names: string[] };
+        Returns: string[];
+      };
       client_shift_carers: {
         Args: { p_client_id: string; p_from: string; p_to: string };
         Returns: {

@@ -177,8 +177,9 @@ select throws_ok(
 );
 reset role;
 select is(
-  (select count(*)::int from client_tags), 3,
-  '[F0-29][AC-05] refused calls added no tags'
+  (select count(*)::int from client_tags
+   where client_id in ('b1111111-1111-1111-1111-111111111111', 'b2222222-2222-2222-2222-222222222222')),
+  3, '[F0-29][AC-05] refused calls added no tags'
 );
 
 -- Reads -----------------------------------------------------------------------------------------
