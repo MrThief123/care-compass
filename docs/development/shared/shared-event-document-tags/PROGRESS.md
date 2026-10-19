@@ -12,4 +12,4 @@ Last updated: 2026-10-19
 - None. Scope given by the human in-session 2026-10-19 (CHG-064).
 
 ## Completed
-- Claimed
+- Claimed; CHG-064; DEVELOPMENT_PLAN row and card; PL-28; feature pack

@@ -1220,3 +1220,13 @@ Template for future entries:
 - Impact: DEVELOPMENT_PLAN.md gains the F0-28 row and card (97 to 98 active, 550 to 566 criteria; CHG-062 / FAM-18 in PR #243 changes the same totals). New migration: six nullable columns on `clients` (additive) and function `save_client_details` (family only). `clients` is read by F0-22 (header), FAM-13 and ADM-05; their reads are unchanged. New contract functions in `src/server/clients/` and an additive call in `signUp` (F0-17). Cross-lane edits to Family Settings, Family/Carer Client Details and the sign-up page kept in this PR (precedent CHG-058, CHG-061). No new dependency.
 - Human confirmation: the human owner, 2026-10-14 (in-session).
 - Docs updated: DECISIONS.md (this entry), DEVELOPMENT_PLAN.md, the F0-28 pack.
+
+### CHG-064 — New feature F0-29: tags on events and documents, filtered on the Task log and Documents page
+- Date / requested by: 2026-10-19 / the human owner (in-session)
+- Type: scope addition (new feature)
+- Description: new shared feature **F0-29** (`docs/development/shared/shared-event-document-tags/`, `feature/shared-event-document-tags`, 16 criteria). Families tag care events (Add/Edit event) and documents (Documents page) with per-client, free-text tags such as "Doctors"; the Task log and the Documents page (Family and Carer) gain a Tag filter and show the tags.
+- Source / justification: human, in-session 2026-10-19: "create a tagging system for events and task so for example I can assign a tag like doctors and then be able to filter by doctors in the care log and the same for documents". Answers given: per-client free-text tags; family only adds or changes them; documents have their own tags; filters on the Task log and Documents page, Calendar parked (the human accepted the recommendation).
+- Not included: Calendar tag filter (PL-28); renaming, deleting or colouring tags; carer or admin tagging.
+- Impact: DEVELOPMENT_PLAN.md gains the F0-29 row and card (99 to 100 active, 583 to 599 criteria); PRD.md §17 gains PL-28. New migration: tables `client_tags`, `care_event_tags`, `document_tags` (RLS, audit) and family-only functions `set_event_tags`, `set_document_tags`; additive, no existing table changes. New contracts in `src/server/tags/`; additive optional `tags` on `createEvent` / `updateEvent` and `tag` on `getTaskLog` (`src/server/events/`). Cross-lane edits to the event form, Task log and Documents page kept in this PR (precedent CHG-058, CHG-061, CHG-063). No new dependency.
+- Human confirmation: the human owner, 2026-10-19 (in-session).
+- Docs updated: DECISIONS.md (this entry), DEVELOPMENT_PLAN.md, PRD.md §17, the F0-29 pack.

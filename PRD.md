@@ -215,6 +215,7 @@ Note: OOS-5 (rostering out of scope) is superseded by later client meetings and 
 | PL-25 | **Promoted to INT-11 by CHG-052.** Email Family and admins when an event cost goes pending (split from INT-01's card by CHG-044) | PD-058, REQ-37; INT-01 card | CHG-044; CHG-052 |
 | PL-26 | **Promoted to INT-10 by CHG-050.** INT-01's threshold warning email names the bucket (e.g. "Government allocation"), not only the client, for clients with more than one bucket | REQ-31; INT-01 | CHG-044 |
 | PL-27 | **Promoted to FAM-16 by CHG-051.** Event form and calendar polish, one feature: (1) a completed overdue task says how late it was done ("Completed 2 days, 3 hours late") on Task detail and the Log; (2) the "Pick a date" calendar rings today's date lightly and always shows the month of the active date, for every role; (3) the event form takes a start and end time like shift assignments, instead of Duration in minutes | Human, 2026-10-02 (CAR-07 review) | CHG-049 |
+| PL-28 | Filter the Calendar (day, week, month) by tag, as the Task log and Documents page do (F0-29) | human, in-session 2026-10-19 | CHG-064 |
 
 
 ## 18. Dependencies
