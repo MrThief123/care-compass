@@ -46,6 +46,7 @@ vi.mock("@/server/shifts/queries", () => ({ getCarerPatients: mocks.getCarerPati
 vi.mock("@/server/events/queries", () => ({
   getToday: mocks.getToday,
   getOccurrences: mocks.getOccurrences,
+  getClientShifts: async () => [],
   getTodayOccurrences: mocks.getTodayOccurrences,
   getTaskLog: mocks.getTaskLog,
 }));
@@ -242,7 +243,7 @@ describe("[CAR-06][AC-06] Calendar, Home and Care log read the patient's data an
   it("[CAR-06][AC-06] T-06 the Calendar reads Margaret's days and every link stays under her carer pages", async () => {
     const { container } = await renderCarerCalendar();
 
-    expect(mocks.getOccurrences).toHaveBeenCalledWith(MARGARET, expect.anything());
+    expect(mocks.getOccurrences).toHaveBeenCalledWith(MARGARET, expect.anything(), { type: "all" });
     const links = hrefs(container);
     expect(links.length).toBeGreaterThan(0);
     for (const href of links) expect(href.startsWith(`/carer/patients/${MARGARET}/`)).toBe(true);
@@ -263,7 +264,7 @@ describe("[CAR-06][AC-06] Calendar, Home and Care log read the patient's data an
   it("[CAR-06][AC-06] T-06 Home shows Margaret's day and budget with every link under her carer pages", async () => {
     const { container } = await renderCarerHome();
 
-    expect(mocks.getTodayOccurrences).toHaveBeenCalledWith(MARGARET);
+    expect(mocks.getTodayOccurrences).toHaveBeenCalledWith(MARGARET, { type: "all" });
     expect(screen.getByText("Physiotherapy")).toBeVisible();
     expect(screen.getByText("Core supports")).toBeVisible();
     for (const href of hrefs(container)) {
@@ -356,11 +357,12 @@ describe("[CAR-06][AC-07] carers never get the family-only controls", () => {
 describe("[CAR-06][AC-08] the Family screens are unchanged", () => {
   const FAMILY_USER = { firstName: "Helen", lastName: "Doyle" };
 
-  it("[CAR-06][AC-08] T-08 the Family Calendar keeps its /family links, Enter event and tick boxes", async () => {
+  it("[CAR-06][AC-08] T-08 the Family Calendar keeps its /family links and Enter event, and has no tick boxes", async () => {
     mocks.getCurrentUser.mockResolvedValue(FAMILY_USER);
     const { container } = render(await FamilyCalendarPage(withSearch(MARGARET)));
 
-    expect(within(tasksPanel()).getByLabelText("Physiotherapy")).toBeEnabled();
+    // HUMAN REVIEW: test expectation changed (carer_only_tick_off). Was a tick box for Physiotherapy.
+    expect(within(tasksPanel()).queryByRole("checkbox")).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Enter event" })).toHaveAttribute(
       "href",
       expect.stringMatching(new RegExp(`^/family/${MARGARET}/events/new`)),

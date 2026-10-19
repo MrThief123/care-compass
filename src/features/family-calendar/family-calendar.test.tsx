@@ -1,6 +1,7 @@
 import { act, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { axe } from "jest-axe";
+import { cloneElement } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import CalendarError from "@/app/(family)/family/[clientId]/calendar/error";
@@ -12,6 +13,7 @@ const mocks = vi.hoisted(() => ({
   push: vi.fn(),
   getToday: vi.fn(),
   getOccurrences: vi.fn(),
+  getClientShifts: vi.fn(),
   getTaskLog: vi.fn(),
   getCurrentUser: vi.fn(),
   setOccurrenceDone: vi.fn(),
@@ -24,6 +26,7 @@ vi.mock("next/navigation", () => ({
 vi.mock("@/server/events/queries", () => ({
   getToday: mocks.getToday,
   getOccurrences: mocks.getOccurrences,
+  getClientShifts: mocks.getClientShifts,
   getTaskLog: mocks.getTaskLog,
 }));
 vi.mock("@/server/auth/queries", () => ({ getCurrentUser: mocks.getCurrentUser }));
@@ -120,12 +123,20 @@ function taskLog(items: Occurrence[]): TaskLogResult {
   return { items, page: 1, pageSize: 20, total: items.length };
 }
 
-async function renderCalendar(search: Record<string, string> = {}) {
-  const ui = await FamilyCalendarPage({
+async function calendarPage(search: Record<string, string> = {}) {
+  return FamilyCalendarPage({
     params: Promise.resolve({ clientId: CLIENT_ID }),
     searchParams: Promise.resolve(search),
   });
-  return render(ui);
+}
+
+/**
+ * The calendar as the person who can tick sees it. Only a carer on shift ticks (carer_only_tick_off),
+ * and the carer's page passes `canTick`; the Family page does not, so these tests turn it on here.
+ * The tests named for Helen test the tick behaviour of the shared view, not who may tick.
+ */
+async function renderCalendar(search: Record<string, string> = {}) {
+  return render(cloneElement(await calendarPage(search), { canTick: true }));
 }
 
 function tasksPanel() {
@@ -139,6 +150,7 @@ function logPanel() {
 beforeEach(() => {
   mocks.getToday.mockResolvedValue("2026-11-30");
   mocks.getOccurrences.mockResolvedValue(DESIGN_WEEK);
+  mocks.getClientShifts.mockResolvedValue([]);
   mocks.getTaskLog.mockResolvedValue(taskLog(LOG));
   mocks.getCurrentUser.mockResolvedValue({ firstName: "Helen", lastName: "Doyle" });
   mocks.setOccurrenceDone.mockResolvedValue({
@@ -161,10 +173,14 @@ describe("[FAM-UI-02][AC-01] default week", () => {
     expect(screen.getByRole("radio", { name: "W" })).toHaveAttribute("aria-checked", "true");
     expect(screen.getByRole("radio", { name: "D" })).toHaveAttribute("aria-checked", "false");
     expect(screen.getByRole("heading", { level: 1, name: "30 Nov – 6 Dec 2026" })).toBeVisible();
-    expect(mocks.getOccurrences).toHaveBeenCalledWith(CLIENT_ID, {
-      from: "2026-11-30",
-      to: "2026-12-06",
-    });
+    expect(mocks.getOccurrences).toHaveBeenCalledWith(
+      CLIENT_ID,
+      {
+        from: "2026-11-30",
+        to: "2026-12-06",
+      },
+      { type: "all" },
+    );
   });
 
   it("[FAM-UI-02][AC-01] opens on the week of whatever day the contract says is today", async () => {
@@ -173,10 +189,14 @@ describe("[FAM-UI-02][AC-01] default week", () => {
     await renderCalendar();
 
     expect(screen.getByRole("heading", { level: 1, name: "8 Mar – 14 Mar 2027" })).toBeVisible();
-    expect(mocks.getOccurrences).toHaveBeenCalledWith(CLIENT_ID, {
-      from: "2027-03-08",
-      to: "2027-03-14",
-    });
+    expect(mocks.getOccurrences).toHaveBeenCalledWith(
+      CLIENT_ID,
+      {
+        from: "2027-03-08",
+        to: "2027-03-14",
+      },
+      { type: "all" },
+    );
   });
 
   it("[FAM-UI-02][AC-01] a nonsense view or date param falls back to this week", async () => {
@@ -287,6 +307,12 @@ describe("[FAM-UI-02][AC-09] Enter event (CHG-017)", () => {
       "href",
       `${NEW}?from=calendar&view=week&date=2026-12-03`,
     );
+  });
+
+  it("[FAM-17][AC-07] the Family Calendar route has an info tip beside it", async () => {
+    await renderCalendar();
+
+    expect(screen.getByRole("button", { name: "About Enter event" })).toBeInTheDocument();
   });
 
   it("[FAM-UI-02][AC-09] T-09 it sits just before the D/W/M control and is 44px tall", async () => {
@@ -537,10 +563,14 @@ describe("[FAM-UI-02][AC-05] D / W / M", () => {
 
     expect(screen.getByRole("radio", { name: "M" })).toHaveAttribute("aria-checked", "true");
     expect(screen.getByRole("heading", { level: 1, name: "December 2026" })).toBeVisible();
-    expect(mocks.getOccurrences).toHaveBeenCalledWith(CLIENT_ID, {
-      from: "2026-11-30",
-      to: "2027-01-10",
-    });
+    expect(mocks.getOccurrences).toHaveBeenCalledWith(
+      CLIENT_ID,
+      {
+        from: "2026-11-30",
+        to: "2027-01-10",
+      },
+      { type: "all" },
+    );
     expect(screen.getByTestId("month-grid-day-2026-12-31")).toHaveAttribute(
       "data-in-month",
       "true",
@@ -554,10 +584,14 @@ describe("[FAM-UI-02][AC-05] D / W / M", () => {
 
     expect(screen.getByRole("radio", { name: "D" })).toHaveAttribute("aria-checked", "true");
     expect(screen.getByRole("heading", { level: 1, name: "Friday 4 December 2026" })).toBeVisible();
-    expect(mocks.getOccurrences).toHaveBeenCalledWith(CLIENT_ID, {
-      from: "2026-12-04",
-      to: "2026-12-04",
-    });
+    expect(mocks.getOccurrences).toHaveBeenCalledWith(
+      CLIENT_ID,
+      {
+        from: "2026-12-04",
+        to: "2026-12-04",
+      },
+      { type: "all" },
+    );
     expect(screen.queryByTestId("week-grid-day-2026-12-04")).toBeNull();
   });
 
@@ -894,5 +928,31 @@ describe("[FAM-05][AC-04] Log panel listing", () => {
       expect.stringMatching(/^Evening medication.*Done · Aisha Rahman$/),
       expect.stringMatching(/^Weekly weigh-in.*Overdue$/),
     ]);
+  });
+});
+
+describe("who is caring, on the grids", () => {
+  it("draws each carer's shift as a block beside the events, and not as a task", async () => {
+    mocks.getClientShifts.mockResolvedValue([
+      {
+        id: "shift-1",
+        carerName: "Aisha Rahman",
+        start: at("2026-11-30", "08:00"),
+        end: at("2026-11-30", "12:00"),
+      },
+    ]);
+    await renderCalendar();
+
+    expect(screen.getAllByText(/Aisha Rahman on duty/).length).toBeGreaterThan(0);
+    expect(within(tasksPanel()).queryByText(/on duty/)).not.toBeInTheDocument();
+  });
+});
+
+describe("only the carer on shift ticks", () => {
+  it("the Family calendar has no tick boxes and still lists each task with its status", async () => {
+    render(await calendarPage());
+
+    expect(within(tasksPanel()).queryByRole("checkbox")).not.toBeInTheDocument();
+    expect(within(tasksPanel()).getByText("Physiotherapy")).toBeInTheDocument();
   });
 });

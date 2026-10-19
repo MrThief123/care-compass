@@ -7,7 +7,8 @@ import { cn } from "@/lib/utils";
 
 const TABS = [
   { segment: "home", label: "Home" },
-  { segment: "info", label: "Info" },
+  { segment: "info", label: "Client Details" },
+  { segment: "documents", label: "Documents" },
   { segment: "calendar", label: "Calendar" },
   { segment: "tasks", label: "Care log" },
 ] as const;
@@ -25,6 +26,7 @@ export function PatientTabs({ clientId, firstName }: { clientId: string; firstNa
           <Link
             key={segment}
             href={href}
+            prefetch
             aria-current={current ? "page" : undefined}
             className={cn(
               "flex min-h-11 items-center border-b-2 px-4 text-body-emphasis focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",

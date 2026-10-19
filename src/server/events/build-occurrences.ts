@@ -14,6 +14,7 @@ import { z } from "zod";
 import { instantToMelbourneLocal, localToMelbourneIso } from "@/lib/dates/melbourne-time";
 import { deriveStatus, type LatestCompletion } from "@/lib/occurrences/derive-status";
 import { expandOccurrences, type RecurrenceOverride, type RecurrenceRule } from "@/lib/recurrence";
+import type { Occurrence as RecurrenceOccurrence } from "@/lib/recurrence";
 import type { AnyOccurrence } from "@/types/domain";
 
 /** The `care_events` columns this needs. Timestamps are ISO strings, as PostgREST returns them. */
@@ -85,7 +86,7 @@ const CompletionModeSchema = z.enum(["manual", "automatic"]);
  * because the clocks jump forward past it, moves forward an hour rather than failing the whole
  * query, as calendars do.
  */
-function localToIso(local: string): string {
+export function localToIso(local: string): string {
   try {
     return localToMelbourneIso(local);
   } catch {
@@ -97,7 +98,7 @@ function localToIso(local: string): string {
   }
 }
 
-function overrideForEngine(row: OverrideRow): RecurrenceOverride {
+export function overrideForEngine(row: OverrideRow): RecurrenceOverride {
   const originalStart = instantToMelbourneLocal(row.original_start);
   if (row.kind === "cancelled") {
     return { type: "cancelled", originalStart };
@@ -113,7 +114,31 @@ function overrideForEngine(row: OverrideRow): RecurrenceOverride {
 const byStartThenKey = (a: AnyOccurrence, b: AnyOccurrence) =>
   Date.parse(a.start) - Date.parse(b.start) || (a.key < b.key ? -1 : a.key > b.key ? 1 : 0);
 
-export function buildOccurrences(input: BuildOccurrencesInput): AnyOccurrence[] {
+/** Shared event validation and bounds for full expansion and indexed task-log reads. */
+export function eventExpansion(event: EventRow, rangeEnd: string) {
+  const recurrence =
+    event.recurrence === null ? undefined : RecurrenceJsonSchema.safeParse(event.recurrence);
+  if (recurrence && !recurrence.success) throw new Error("care event has an invalid recurrence");
+  const eventMode = CompletionModeSchema.parse(event.completion_mode);
+  const rule: RecurrenceRule = {
+    frequency: recurrence?.data.frequency ?? "none",
+    interval: recurrence?.data.interval ?? 1,
+    anchor: instantToMelbourneLocal(event.starts_at),
+    ...(event.recurrence_until && { until: event.recurrence_until }),
+  };
+  let end = rangeEnd;
+  if (!event.is_active) {
+    const stoppedAt = instantToMelbourneLocal(event.deactivated_at ?? event.created_at);
+    if (stoppedAt < end) end = stoppedAt;
+  }
+  return { rule, end, eventMode };
+}
+
+/** `selected` is used internally by task-log paging, with candidates from the recurrence engine. */
+export function buildOccurrences(
+  input: BuildOccurrencesInput,
+  selected?: ReadonlyMap<string, RecurrenceOccurrence[]>,
+): AnyOccurrence[] {
   const { events, shifts, range, now, keepCancelledWithCompletion = false } = input;
   const { completions } = input;
   const overrides = keepCancelledWithCompletion
@@ -152,39 +177,17 @@ export function buildOccurrences(input: BuildOccurrencesInput): AnyOccurrence[] 
   const result: AnyOccurrence[] = [];
 
   for (const event of events) {
-    const recurrence =
-      event.recurrence === null ? undefined : RecurrenceJsonSchema.safeParse(event.recurrence);
-    if (recurrence && !recurrence.success) {
-      // Not the title or any id: the message may reach a log (ARCHITECTURE.md §12.5).
-      throw new Error("care event has an invalid recurrence");
-    }
-    const eventMode = CompletionModeSchema.parse(event.completion_mode);
-
-    const rule: RecurrenceRule = {
-      frequency: recurrence?.data.frequency ?? "none",
-      interval: recurrence?.data.interval ?? 1,
-      anchor: instantToMelbourneLocal(event.starts_at),
-      ...(event.recurrence_until && { until: event.recurrence_until }),
-    };
-
-    // A deactivated event stops generating occurrences from when it was deactivated (AC-08);
-    // earlier ones stay, with their completions, for history.
-    let end = rangeEnd;
-    if (!event.is_active) {
-      const stoppedAt = instantToMelbourneLocal(event.deactivated_at ?? event.created_at);
-      if (stoppedAt < end) end = stoppedAt;
-    }
+    const { rule, end, eventMode } = eventExpansion(event, rangeEnd);
 
     const eventOverrides = overrides.filter((row) => row.event_id === event.id);
     const overrideByOriginal = new Map(
       eventOverrides.map((row) => [Date.parse(row.original_start), row]),
     );
 
-    for (const occurrence of expandOccurrences(
-      rule,
-      { start: rangeStart, end },
-      eventOverrides.map(overrideForEngine),
-    )) {
+    const candidates = selected
+      ? (selected.get(event.id) ?? [])
+      : expandOccurrences(rule, { start: rangeStart, end }, eventOverrides.map(overrideForEngine));
+    for (const occurrence of candidates) {
       const originalIso = localToIso(occurrence.originalStart);
       const startIso = localToIso(occurrence.start);
       const override = overrideByOriginal.get(Date.parse(originalIso));

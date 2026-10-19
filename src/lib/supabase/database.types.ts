@@ -503,6 +503,32 @@ export type Database = {
           },
         ];
       };
+      care_overdue_alert_notifications: {
+        Row: {
+          event_id: string;
+          original_start: string;
+          sent_at: string;
+        };
+        Insert: {
+          event_id: string;
+          original_start: string;
+          sent_at?: string;
+        };
+        Update: {
+          event_id?: string;
+          original_start?: string;
+          sent_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "care_overdue_alert_notifications_event_id_fkey";
+            columns: ["event_id"];
+            isOneToOne: false;
+            referencedRelation: "care_events";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       carer_notifications: {
         Row: {
           client_id: string | null;
@@ -557,6 +583,61 @@ export type Database = {
             columns: ["shift_id"];
             isOneToOne: false;
             referencedRelation: "shifts";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      client_custom_info_sections: {
+        Row: {
+          body: string | null;
+          client_id: string;
+          created_at: string;
+          created_by: string | null;
+          id: string;
+          title: string;
+          updated_at: string;
+          updated_by: string | null;
+        };
+        Insert: {
+          body?: string | null;
+          client_id: string;
+          created_at?: string;
+          created_by?: string | null;
+          id?: string;
+          title: string;
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Update: {
+          body?: string | null;
+          client_id?: string;
+          created_at?: string;
+          created_by?: string | null;
+          id?: string;
+          title?: string;
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "client_custom_info_sections_client_id_fkey";
+            columns: ["client_id"];
+            isOneToOne: false;
+            referencedRelation: "clients";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "client_custom_info_sections_created_by_fkey";
+            columns: ["created_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "client_custom_info_sections_updated_by_fkey";
+            columns: ["updated_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
             referencedColumns: ["id"];
           },
         ];
@@ -635,38 +716,56 @@ export type Database = {
       };
       clients: {
         Row: {
+          address: string | null;
           avatar_path: string | null;
           created_at: string;
           date_of_birth: string | null;
+          email: string | null;
+          emergency_contact_name: string | null;
+          emergency_contact_phone: string | null;
+          emergency_contact_relationship: string | null;
           first_name: string;
           id: string;
           last_name: string;
           organisation_id: string | null;
           organisation_removed_at: string | null;
+          phone: string | null;
           suburb: string | null;
           updated_at: string;
         };
         Insert: {
+          address?: string | null;
           avatar_path?: string | null;
           created_at?: string;
           date_of_birth?: string | null;
+          email?: string | null;
+          emergency_contact_name?: string | null;
+          emergency_contact_phone?: string | null;
+          emergency_contact_relationship?: string | null;
           first_name: string;
           id?: string;
           last_name: string;
           organisation_id?: string | null;
           organisation_removed_at?: string | null;
+          phone?: string | null;
           suburb?: string | null;
           updated_at?: string;
         };
         Update: {
+          address?: string | null;
           avatar_path?: string | null;
           created_at?: string;
           date_of_birth?: string | null;
+          email?: string | null;
+          emergency_contact_name?: string | null;
+          emergency_contact_phone?: string | null;
+          emergency_contact_relationship?: string | null;
           first_name?: string;
           id?: string;
           last_name?: string;
           organisation_id?: string | null;
           organisation_removed_at?: string | null;
+          phone?: string | null;
           suburb?: string | null;
           updated_at?: string;
         };
@@ -1306,6 +1405,20 @@ export type Database = {
           p_buckets: Json;
           p_client_id: string;
           p_note?: string;
+        };
+        Returns: undefined;
+      };
+      save_client_details: {
+        Args: {
+          p_address: string;
+          p_client_id: string;
+          p_date_of_birth: string;
+          p_email: string;
+          p_emergency_contact_name: string;
+          p_emergency_contact_phone: string;
+          p_emergency_contact_relationship: string;
+          p_phone: string;
+          p_suburb: string;
         };
         Returns: undefined;
       };

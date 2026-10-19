@@ -8,9 +8,11 @@
  * With `DATA_SOURCE=mock` (Phase 1 screens) they validate and succeed without
  * touching a database, so the screen behaves as it did on fixtures.
  */
+
 import { fieldErrors } from "@/components/shared/forms/validation";
 import type { CarerContactDetails, FamilyContactDetails } from "@/mocks/queries/profiles";
 import { getDataSourceMode } from "@/server/data-source";
+import { refreshCachedPages } from "@/server/refresh-cache";
 
 import { requestPasswordReset } from "../auth/actions";
 
@@ -44,7 +46,7 @@ const SIGNED_OUT = "Your session has ended. Sign in again.";
  * (`profiles_update_self`, 20260925010000_profiles_self_update.sql). The email is
  * the contact email, never the login email (PD-054, OQ-35).
  */
-export async function updateFamilyContactDetails(
+async function updateFamilyContactDetailsImpl(
   input: FamilyInfoValues,
 ): Promise<ProfileActionResult<FamilyContactDetails>> {
   const parsed = fieldErrors(familyInfoSchema, input);
@@ -90,12 +92,20 @@ export async function updateFamilyContactDetails(
   }
 }
 
+export async function updateFamilyContactDetails(
+  ...args: Parameters<typeof updateFamilyContactDetailsImpl>
+): ReturnType<typeof updateFamilyContactDetailsImpl> {
+  const result = await updateFamilyContactDetailsImpl(...args);
+  if ((result as { ok?: boolean }).ok !== false) refreshCachedPages();
+  return result;
+}
+
 /**
  * CAR-09 AC-04: saves the signed-in carer's name, phone and contact email.
  * Address, job title, role, organisation and any id are never read from the
  * caller or written (FD-03); `job_title` is also outside the column grant.
  */
-export async function updateCarerContactDetails(
+async function updateCarerContactDetailsImpl(
   input: CarerInfoValues,
 ): Promise<ProfileActionResult<CarerContactDetails>> {
   const parsed = fieldErrors(carerInfoSchema, input);
@@ -158,6 +168,14 @@ export async function updateCarerContactDetails(
     logFailure("updateCarerContactDetails", error);
     return { ok: false, error: { code: "UNEXPECTED", message: SAVE_FAILED } };
   }
+}
+
+export async function updateCarerContactDetails(
+  ...args: Parameters<typeof updateCarerContactDetailsImpl>
+): ReturnType<typeof updateCarerContactDetailsImpl> {
+  const result = await updateCarerContactDetailsImpl(...args);
+  if ((result as { ok?: boolean }).ok !== false) refreshCachedPages();
+  return result;
 }
 
 /**

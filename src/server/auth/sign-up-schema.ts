@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { requiredText } from "@/components/shared/forms/validation";
+import { clientDetailsShape, type ClientDetails } from "@/server/clients/client-details-schema";
 
 /**
  * F0-17 sign-up input. One schema for the form (field errors as the person types) and for
@@ -31,6 +32,15 @@ const familySchema = z.object({
   ...shared,
   clientFirstName: requiredText("Their first name"),
   clientLastName: requiredText("Their last name"),
+  // F0-28: optional 'More about them', the client details schema under sign-up's own keys.
+  clientDateOfBirth: clientDetailsShape.dateOfBirth,
+  clientEmail: clientDetailsShape.email,
+  clientPhone: clientDetailsShape.phone,
+  clientAddress: clientDetailsShape.address,
+  clientSuburb: clientDetailsShape.suburb,
+  clientEmergencyContactName: clientDetailsShape.emergencyContactName,
+  clientEmergencyContactRelationship: clientDetailsShape.emergencyContactRelationship,
+  clientEmergencyContactPhone: clientDetailsShape.emergencyContactPhone,
 });
 
 const organisationSchema = z.object({
@@ -51,3 +61,21 @@ export const SignUpInputSchema = z
   });
 
 export type SignUpInput = z.infer<typeof SignUpInputSchema>;
+
+/** F0-28: the client details a family sign-up carries, without the keys left unset. */
+export function clientDetailsFromSignUp(input: SignUpInput): ClientDetails {
+  if (input.accountType !== "family") return {};
+  const details: ClientDetails = {
+    dateOfBirth: input.clientDateOfBirth,
+    email: input.clientEmail,
+    phone: input.clientPhone,
+    address: input.clientAddress,
+    suburb: input.clientSuburb,
+    emergencyContactName: input.clientEmergencyContactName,
+    emergencyContactRelationship: input.clientEmergencyContactRelationship,
+    emergencyContactPhone: input.clientEmergencyContactPhone,
+  };
+  return Object.fromEntries(
+    Object.entries(details).filter(([, value]) => value !== undefined),
+  ) as ClientDetails;
+}

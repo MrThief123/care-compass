@@ -51,7 +51,7 @@ Each requirement links to sources and to the features that implement it. Require
 | REQ-08 | Access | Staff are identified by name (and optional reference); organisations differ on showing full surname or initial. | MUST · CONFIRMED (display AMBIGUOUS, OQ-13) | CIS5 Rostering & Q&A; UI-D33 | ADM-02 |
 | REQ-09 | Access | MFA is not mandatory for any role, including Admin (PD-040, reaffirmed by CHG-010 on 2026-09-24). | SHOULD · CONFIRMED (PD-040, CHG-010) | NFR-3; ADR-03; TM-2108 | F0-07 |
 | REQ-10 | Client record | Client information page with key descriptive, habit and medical information and documentation; editable by Family and by Carers within shift restrictions; opened first when selecting a client. | MUST · CONFIRMED (field list AMBIGUOUS, OQ-38) | CIS3 Data 1–2; CIS5 Front page; CM-0309; UI-D9, D10, D29; Design Info | UI-03, FAM-09, CAR-04 |
-| REQ-11 | Client record | Client information can be extended with new headings, summary flags and organisation proforma forms archived on provider change. | SHOULD · CONFIRMED requirement, PARKED (PL-13, OQ-38) | CIS3 Data 2A, 2B; US A-11, A-12 | Not scheduled — see Parking lot |
+| REQ-11 | Client record | Client information can be extended with new headings, summary flags and organisation proforma forms archived on provider change. | SHOULD · CONFIRMED requirement, PARKED (PL-13, OQ-38) | CIS3 Data 2A, 2B; US A-11, A-12 | New headings: F0-26 (CHG-061). Summary flags and proforma forms not scheduled — see Parking lot |
 | REQ-12 | Client record | The client's name and avatar anchor Family page headers; the signed-in user is shown separately. | MUST · CONFIRMED | UI-D16; DD §1 | F0-15 |
 | REQ-13 | Scheduling | Care events (Care Need Items) can be one-off or recurring, with no limit on number. | MUST · CONFIRMED | BRIEF I, items 1–3; FR-1.3, FR-2.1, FR-2.6; US C-5 | F0-09, F0-11, FAM-06 |
 | REQ-14 | Scheduling | Schedules are perpetual: recurrences carry forward indefinitely without re-entry and can be changed later. | MUST · CONFIRMED | BRIEF item 3; CIS5 Perpetual; FR-2.4 | F0-09, F0-11, FAM-04, FAM-06, FAM-07 |
@@ -192,7 +192,7 @@ Note: OOS-5 (rostering out of scope) is superseded by later client meetings and 
 | PL-02 | Warning Notification Entities registry | CIS5 Notifications | OQ-28 |
 | PL-03 | **Promoted to INT-09 by CHG-047.** Health appointment reminder emails (e.g. one week before) | CIS5 Notifications; US C-8; UC-F04 | No design |
 | PL-04 | Staff discussion board with accepted answers | CIS5 FAQ answer | OQ-25 |
-| PL-05 | Contextual help tooltips and editable FAQ | CIS3 Access 6; CIS5; CM-0309 | OQ-25 |
+| PL-05 | Contextual help tooltips (promoted to FAM-17 by CHG-057, Family first) and editable FAQ (still parked) | CIS3 Access 6; CIS5; CM-0309 | OQ-25 |
 | PL-06 | Audit log viewer (search, filter, CSV export) | FR-10.2; US A-13 COULD; DD §5 | No final design |
 | PL-07 | Care history and financial reports | FR-9.1, 9.2; US A-14 COULD | No design |
 | PL-08 | Printable schedule; client data export with family/POA approval | TM-2808; US A-15, P-16; CIS3 Data 7 | OQ-18 |

@@ -1,4 +1,4 @@
-export { expandOccurrences } from "@/lib/recurrence/expand";
+export { expandOccurrences, recurrenceWindow } from "@/lib/recurrence/expand";
 export { CARE_COMPASS_TIME_ZONE } from "@/lib/recurrence/local-time";
 export {
   cancelledOverrideSchema,

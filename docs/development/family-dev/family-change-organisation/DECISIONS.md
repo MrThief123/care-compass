@@ -97,3 +97,9 @@ Record feature-level decisions here using the template below. Project-wide decis
 - Human confirmation required: yes/no (who, when)
 - Test changes caused (if any): test ID, reason, flagged for review yes/no
 -->
+
+### FD-XX — A client with no organisation can choose one from Settings (supersedes the "client has none" part of FD-02)
+- Date: 2026-10-04
+- Context: a family whose client never had an organisation saw "Not registered with an organisation." and no way to register (FD-02 removed the button). The human reported it as a bug.
+- Decision: when the client has no organisation and at least one exists, the card shows a "Choose organisation" button that opens the same picker and confirmation as the removed-by-admin case (ADM-05). The confirmation says choosing gives that organisation access (nobody loses it). With no organisation to choose from, the card is unchanged. No server change: `transfer_client_organisation` already accepts a client with a null organisation.
+- Test changes: `organisation-removed.test.tsx` "a client that never had an organisation has no banner, no Change and no Choose button" replaced by a test that the Choose button registers the client, plus one that it is absent when there are no organisations. **HUMAN REVIEW: test expectation changed (requirement change requested by the human).**

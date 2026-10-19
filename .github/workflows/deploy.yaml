@@ -1,5 +1,7 @@
 name: Deploy
 
+# Runs only when triggered by hand (Actions > Deploy > Run workflow: Deploy or Stop). A push never
+# deploys. Deploy ships the `latest` image, which CI pushes on every push to main.
 on:
   workflow_dispatch:
     inputs:
@@ -11,157 +13,208 @@ on:
           - deploy
           - stop
 
-env:
-  AWS_REGION: ${{ secrets.AWS_REGION }}
+# env:
+#   AWS_REGION: ${{ secrets.AWS_REGION }}
 
 jobs:
   deploy:
-    name: Deploy to EC2
+    name: Deploy
     if: inputs.action == 'deploy'
     runs-on: ubuntu-latest
 
-    environment:
-      name: production
+    # environment:
+    #   name: production
+
+    env:
+      IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/care-compass
+      IMAGE_TAG: latest
 
     steps:
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Start EC2 instance
-        run: |
-          echo "Starting EC2..."
+      - name: EC2 deploy disabled
+        run: echo "EC2 steps are commented out in this workflow."
 
-          aws ec2 start-instances \
-            --instance-ids "${{ secrets.EC2_INSTANCE_ID }}"
+      # --- EC2 steps disabled: everything below is commented out. ---
+#       - name: Configure AWS credentials
+#         uses: aws-actions/configure-aws-credentials@v4
+#         with:
+#           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+#           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+#           aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Wait for EC2 to start
-        run: |
-          echo "Waiting for EC2..."
+#       - name: Start EC2 instance
+#         run: |
+#           echo "Starting EC2..."
 
-          aws ec2 wait instance-running \
-            --instance-ids "${{ secrets.EC2_INSTANCE_ID }}"
+#           aws ec2 start-instances \
+#             --instance-ids "${{ secrets.EC2_INSTANCE_ID }}"
 
-          echo "EC2 is running."
+#       - name: Wait for EC2 to start
+#         run: |
+#           echo "Waiting for EC2..."
 
-      - name: Get EC2 public IP
-        id: ec2
-        run: |
-          IP=$(aws ec2 describe-instances \
-            --instance-ids "${{ secrets.EC2_INSTANCE_ID }}" \
-            --query 'Reservations[0].Instances[0].PublicIpAddress' \
-            --output text)
+#           aws ec2 wait instance-running \
+#             --instance-ids "${{ secrets.EC2_INSTANCE_ID }}"
 
-          echo "ip=$IP" >> "$GITHUB_OUTPUT"
+#           echo "EC2 is running."
 
-          echo "EC2 IP: $IP"
+#       - name: Get EC2 public IP
+#         id: ec2
+#         run: |
+#           IP=$(aws ec2 describe-instances \
+#             --instance-ids "${{ secrets.EC2_INSTANCE_ID }}" \
+#             --query 'Reservations[0].Instances[0].PublicIpAddress' \
+#             --output text)
 
-      - name: Configure SSH
-        run: |
-          mkdir -p ~/.ssh
+#           echo "ip=$IP" >> "$GITHUB_OUTPUT"
 
-          echo "${{ secrets.EC2_SSH_PRIVATE_KEY }}" \
-            > ~/.ssh/care-compass.pem
+#           echo "EC2 IP: $IP"
 
-          chmod 600 ~/.ssh/care-compass.pem
+#       - name: Configure SSH
+#         env:
+#           EC2_SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+#         run: |
+#           mkdir -p ~/.ssh
+#           printf '%s\n' "$EC2_SSH_PRIVATE_KEY" > ~/.ssh/care-compass.pem
+#           chmod 600 ~/.ssh/care-compass.pem
 
-      - name: Wait for SSH
-        run: |
-          echo "Waiting for SSH..."
+#       - name: Wait for SSH
+#         run: |
+#           echo "Waiting for SSH..."
 
-          until ssh \
-            -o StrictHostKeyChecking=no \
-            -o ConnectTimeout=5 \
-            -i ~/.ssh/care-compass.pem \
-            "${{ secrets.EC2_SSH_USER }}@${{ steps.ec2.outputs.ip }}" \
-            "echo SSH ready"
-          do
-            sleep 5
-          done
+#           until ssh \
+#             -o StrictHostKeyChecking=no \
+#             -o ConnectTimeout=5 \
+#             -i ~/.ssh/care-compass.pem \
+#             "${{ secrets.EC2_SSH_USER }}@${{ steps.ec2.outputs.ip }}" \
+#             "echo SSH ready"
+#           do
+#             sleep 5
+#           done
 
-      - name: Deploy Docker container
-        run: |
-          ssh \
-            -o StrictHostKeyChecking=no \
-            -i ~/.ssh/care-compass.pem \
-            "${{ secrets.EC2_SSH_USER }}@${{ steps.ec2.outputs.ip }}" << 'EOF'
+#       - name: Write the runtime environment file on EC2
+#         # Runtime values only reach the container through this file (never the image: the image has
+#         # just the two public NEXT_PUBLIC_* values, baked in at build). Secrets come in as env vars,
+#         # so they are masked in logs and never appear in a script.
+#         env:
+#           DATA_SOURCE: ${{ secrets.DATA_SOURCE }}
+#           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+#           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+#           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+#           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+#         run: |
+#           umask 077
+#           for name in DATA_SOURCE NEXT_PUBLIC_SUPABASE_URL NEXT_PUBLIC_SUPABASE_ANON_KEY \
+#                       SUPABASE_SERVICE_ROLE_KEY RESEND_API_KEY; do
+#             if [ -z "${!name}" ]; then
+#               echo "::error::GitHub secret $name is not set"
+#               exit 1
+#             fi
+#           done
+#           {
+#             printf 'DATA_SOURCE=%s\n' "$DATA_SOURCE"
+#             printf 'NEXT_PUBLIC_SUPABASE_URL=%s\n' "$NEXT_PUBLIC_SUPABASE_URL"
+#             printf 'NEXT_PUBLIC_SUPABASE_ANON_KEY=%s\n' "$NEXT_PUBLIC_SUPABASE_ANON_KEY"
+#             printf 'SUPABASE_SERVICE_ROLE_KEY=%s\n' "$SUPABASE_SERVICE_ROLE_KEY"
+#             printf 'RESEND_API_KEY=%s\n' "$RESEND_API_KEY"
+#           } > runtime.env
+#           ssh \
+#             -o StrictHostKeyChecking=no \
+#             -i ~/.ssh/care-compass.pem \
+#             "${{ secrets.EC2_SSH_USER }}@${{ steps.ec2.outputs.ip }}" \
+#             'umask 077 && cat > ~/.env.local' < runtime.env
+#           rm -f runtime.env
 
-            set -e
+#       - name: Deploy Docker container
+#         run: |
+#           ssh \
+#             -o StrictHostKeyChecking=no \
+#             -i ~/.ssh/care-compass.pem \
+#             "${{ secrets.EC2_SSH_USER }}@${{ steps.ec2.outputs.ip }}" \
+#             "bash -s -- '$IMAGE:$IMAGE_TAG'" << 'DEPLOY_SCRIPT'
 
-            echo "Disk usage before deployment..."
-            df -h
+#             set -e
+#             IMAGE_REF="$1"
 
-            echo "Docker disk usage..."
-            docker system df
+#             echo "Disk usage before deployment..."
+#             df -h
 
-            echo "Removing unused Docker images..."
-            docker image prune -af
+#             echo "Docker disk usage..."
+#             docker system df
 
-            echo "Pulling latest Docker image..."
-            docker pull mrthief123/care-compass:latest
+#             echo "Removing unused Docker images..."
+#             docker image prune -af
 
-            echo "Stopping old container..."
-            docker stop care-compass || true
+#             echo "Pulling $IMAGE_REF ..."
+#             docker pull "$IMAGE_REF"
 
-            echo "Removing old container..."
-            docker rm care-compass || true
+#             echo "Stopping old container..."
+#             docker stop care-compass || true
 
-            echo "Starting new container..."
-            docker run -d \
-              --name care-compass \
-              --restart unless-stopped \
-              -p 8080:3000 \
-              mrthief123/care-compass:latest
+#             echo "Removing old container..."
+#             docker rm care-compass || true
 
-            echo "Removing unused Docker images after deployment..."
-            docker image prune -af
+#             chmod 600 ~/.env.local
 
-            echo "Deployment complete."
+#             echo "Starting new container..."
+#             docker run -d \
+#               --name care-compass \
+#               --restart unless-stopped \
+#               -p 8080:3000 \
+#               --env-file ~/.env.local \
+#               "$IMAGE_REF"
 
-            echo "Container status:"
-            docker ps
+#             echo "Removing unused Docker images after deployment..."
+#             docker image prune -af
 
-            echo "Final disk usage:"
-            df -h
+#             echo "Deployment complete."
 
-          EOF
+#             echo "Container status:"
+#             docker ps
 
-      - name: Deployment complete
-        run: |
-          echo "================================"
-          echo "Deployment successful!"
-          echo "================================"
-          echo "EC2 IP: ${{ steps.ec2.outputs.ip }}"
-          echo "Application: http://${{ steps.ec2.outputs.ip }}:8080"
+#             echo "Final disk usage:"
+#             df -h
 
-  stop:
-    name: Stop EC2
-    if: inputs.action == 'stop'
-    runs-on: ubuntu-latest
+#           DEPLOY_SCRIPT
 
-    steps:
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
+#       - name: Deployment complete
+#         run: |
+#           echo "================================"
+#           echo "Deployment successful!"
+#           echo "================================"
+#           echo "EC2 IP: ${{ steps.ec2.outputs.ip }}"
+#           echo "Application: https://care-compass.online"
 
-      - name: Stop EC2 instance
-        run: |
-          echo "Stopping EC2..."
+#   stop:
+#     name: Stop EC2
+#     if: inputs.action == 'stop'
+#     runs-on: ubuntu-latest
 
-          aws ec2 stop-instances \
-            --instance-ids "${{ secrets.EC2_INSTANCE_ID }}"
+#     steps:
+#       - name: Configure AWS credentials
+#         uses: aws-actions/configure-aws-credentials@v4
+#         with:
+#           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+#           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+#           aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Wait for EC2 to stop
-        run: |
-          echo "Waiting for EC2 to stop..."
+#       - name: Stop EC2 instance
+#         run: |
+#           echo "Stopping EC2..."
 
-          aws ec2 wait instance-stopped \
-            --instance-ids "${{ secrets.EC2_INSTANCE_ID }}"
+#           aws ec2 stop-instances \
+#             --instance-ids "${{ secrets.EC2_INSTANCE_ID }}"
 
-          echo "EC2 stopped."
+#       - name: Wait for EC2 to stop
+#         run: |
+#           echo "Waiting for EC2 to stop..."
+
+#           aws ec2 wait instance-stopped \
+#             --instance-ids "${{ secrets.EC2_INSTANCE_ID }}"
+
+#           echo "EC2 stopped."

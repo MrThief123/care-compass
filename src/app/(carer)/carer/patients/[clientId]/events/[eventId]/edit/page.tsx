@@ -7,7 +7,10 @@ import { editEventDetailsValues } from "@/features/family-event-form/event-detai
 import { editEventReturnHref } from "@/features/family-event-form/event-form-return";
 import { EventFormScreen } from "@/features/family-event-form/event-form-screen";
 import { editEventValues, isTaskEvent } from "@/features/family-event-form/event-form-values";
-import { resolveTaskDetailOrigin } from "@/features/family-task-detail/task-detail-origin";
+import {
+  backLinkFor,
+  resolveTaskDetailOrigin,
+} from "@/features/family-task-detail/task-detail-origin";
 import { getBudgetSummary } from "@/server/budget/queries";
 import { getEventDocuments } from "@/server/documents/queries";
 import { parseOccurrenceKey } from "@/server/events/occurrence-key";
@@ -39,11 +42,14 @@ export default async function CarerEditEventPage({
 
   const requested =
     typeof occurrenceParam === "string"
-      ? await getOccurrence(clientId, occurrenceParam)
+      ? await getOccurrence(clientId, occurrenceParam, { type: "all" })
       : undefined;
   const viewed = requested?.eventId === event.id ? requested : undefined;
   const occurrence =
-    viewed ?? (await getTodayOccurrences(clientId)).find((today) => today.eventId === event.id);
+    viewed ??
+    (await getTodayOccurrences(clientId, { type: "all" })).find(
+      (today) => today.eventId === event.id,
+    );
   const origin = await resolveTaskDetailOrigin(raw, () => getToday());
 
   const [documents, buckets] = await Promise.all([
@@ -69,7 +75,9 @@ export default async function CarerEditEventPage({
       documents={documents}
       buckets={buckets}
       initialCost={costValuesFromEvent(event)}
+      initialEndDate={event.recurrenceEndDate}
       returnHref={editEventReturnHref(clientId, viewed?.key, origin, base)}
+      deleteReturnHref={backLinkFor(clientId, origin, base).href}
       notAllowedMessage={`Your shift with ${patient.firstName} has ended, so this event wasn't saved.`}
     />
   );

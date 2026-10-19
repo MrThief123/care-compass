@@ -10,7 +10,7 @@ Tests are written **before** production code (TESTING.md §2). Run them, confirm
 
 | Test ID | Covers | Level | Test description | Written first? | Result |
 |---|---|---|---|---|---|
-| T-01 | AC-01 | integration | Given the scale seed, when the Calendar week query runs 20 times, then p95 duration is under the agreed budget. | ☐ | NOT RUN |
+| T-01 | AC-01 | integration | Given the scale seed, when the Calendar week query runs 20 times, then p95 duration is under the agreed budget. | ☑ | PASS — 20 samples; p95 415.513 ms |
 
 ## Regression scope
 - Run the full unit/component suite and `supabase test db` before marking READY FOR PR.
@@ -21,3 +21,7 @@ Tests are written **before** production code (TESTING.md §2). Run them, confirm
 
 ## Coverage mapping rule
 Every AC must have ≥1 test. Tests may only be modified after implementation begins for reasons in TESTING.md §6, recorded in DECISIONS.md.
+
+## INT-07 implementation coverage
+
+T-01 runs in `tests/performance/calendar-scale.test.ts` using the dedicated opt-in config (FD-02/FD-07). Three seed/measurement tests and three production page tests cover the confirmed workload and page budgets. Ten additional correctness tests cover indexed recurrence and exact task-log parity, including overflow and DST-gap completion regressions. See PERFORMANCE_REPORT.md for commands, regression results and measurement limitations. No existing assertion was removed or relaxed.

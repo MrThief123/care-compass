@@ -22,6 +22,8 @@ export interface FamilyHomeViewProps {
   readOnly?: boolean;
   /** Read-only Home that still has Enter event: a carer on shift (CAR-07, CHG-048). */
   canAddEvent?: boolean;
+  /** Family only (FAM-17): info tips beside the main buttons. */
+  showHelp?: boolean;
   /** Family only (ADM-05): the organisation removed the client; shows a banner linking to Settings. */
   organisationRemoved?: boolean;
   /** Names the client in that banner. */
@@ -46,6 +48,7 @@ export function FamilyHomeView({
   basePath,
   readOnly = false,
   canAddEvent = false,
+  showHelp = false,
   organisationRemoved = false,
   clientFirstName = "your family member",
 }: FamilyHomeViewProps) {
@@ -67,7 +70,7 @@ export function FamilyHomeView({
       <div className="grid min-w-0 grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_340px] xl:grid-rows-[auto_auto_1fr]">
         {(!readOnly || canAddEvent) && (
           <div className="min-w-0 lg:col-span-2 xl:col-span-1 xl:col-start-2 xl:row-start-1">
-            <EnterEventLink clientId={clientId} basePath={basePath} />
+            <EnterEventLink clientId={clientId} basePath={basePath} showHelp={showHelp} />
           </div>
         )}
         <div className="flex min-w-0 lg:col-span-2 xl:col-span-1 xl:col-start-1 xl:row-span-3 xl:row-start-1">

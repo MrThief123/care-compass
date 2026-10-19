@@ -1,6 +1,7 @@
 {
   "crons": [
     { "path": "/api/jobs/budget-thresholds", "schedule": "0 21 * * *" },
-    { "path": "/api/jobs/pending-cost-emails", "schedule": "0 21 * * *" }
+    { "path": "/api/jobs/pending-cost-emails", "schedule": "0 21 * * *" },
+    { "path": "/api/jobs/care-overdue-alerts", "schedule": "0 21 * * *" }
   ]
 }

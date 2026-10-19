@@ -14,6 +14,7 @@ import {
   updateMockStaff,
 } from "@/server/admin/staff-mock-store";
 import { getDataSourceMode } from "@/server/data-source";
+import { refreshCachedPages } from "@/server/refresh-cache";
 import type { StaffMember } from "@/types/domain";
 
 export type ActionResult<T> =
@@ -57,7 +58,7 @@ function toFields(input: StaffFieldsInput) {
  * session). If the profile insert fails after the invite succeeded, `admin_discard_staff_invite`
  * removes the half-made account so the same email can be tried again.
  */
-export async function createStaff(input: StaffFieldsInput): Promise<ActionResult<StaffMember>> {
+async function createStaffImpl(input: StaffFieldsInput): Promise<ActionResult<StaffMember>> {
   const parsed = StaffFieldsSchema.safeParse(input);
   if (!parsed.success) {
     return {
@@ -118,7 +119,19 @@ export async function createStaff(input: StaffFieldsInput): Promise<ActionResult
     p_job_title: fields.jobTitle,
   });
   if (error || !data) {
-    await supabase.rpc("admin_discard_staff_invite", { p_user_id: userId });
+    // Code and message only: the message can name a missing function or a constraint, never the
+    // invitee's details (no PII in logs, CLAUDE.md §7).
+    console.error("createStaff: admin_create_staff_profile failed", error?.code, error?.message);
+    const { error: discardError } = await supabase.rpc("admin_discard_staff_invite", {
+      p_user_id: userId,
+    });
+    if (discardError) {
+      console.error(
+        "createStaff: admin_discard_staff_invite failed",
+        discardError.code,
+        discardError.message,
+      );
+    }
     return {
       ok: false,
       error: {
@@ -143,9 +156,17 @@ export async function createStaff(input: StaffFieldsInput): Promise<ActionResult
   };
 }
 
+export async function createStaff(
+  ...args: Parameters<typeof createStaffImpl>
+): ReturnType<typeof createStaffImpl> {
+  const result = await createStaffImpl(...args);
+  if ((result as { ok?: boolean }).ok !== false) refreshCachedPages();
+  return result;
+}
+
 /** Edits an existing carer's own organisation's profile fields, through `admin_update_staff`
  * (RLS-backed: rejects a profile outside the caller's organisation or that isn't a carer, AC-04). */
-export async function updateStaff(
+async function updateStaffImpl(
   id: string,
   input: StaffFieldsInput,
 ): Promise<ActionResult<StaffMember>> {
@@ -208,6 +229,14 @@ export async function updateStaff(
   };
 }
 
+export async function updateStaff(
+  ...args: Parameters<typeof updateStaffImpl>
+): ReturnType<typeof updateStaffImpl> {
+  const result = await updateStaffImpl(...args);
+  if ((result as { ok?: boolean }).ok !== false) refreshCachedPages();
+  return result;
+}
+
 const DEACTIVATE_FAILED_MESSAGE = "Couldn't deactivate. Please try again.";
 
 /**
@@ -216,7 +245,7 @@ const DEACTIVATE_FAILED_MESSAGE = "Couldn't deactivate. Please try again.";
  * are kept. The function refuses (42501) a caller who is not an active admin at AAL2 and a target
  * who is not a carer of that organisation.
  */
-export async function deactivateStaff(id: string): Promise<ActionResult<StaffMember>> {
+async function deactivateStaffImpl(id: string): Promise<ActionResult<StaffMember>> {
   if (!id.trim()) {
     return { ok: false, error: { code: "VALIDATION", message: "Choose a staff member." } };
   }
@@ -259,4 +288,75 @@ export async function deactivateStaff(id: string): Promise<ActionResult<StaffMem
       isActive: data.is_active,
     },
   };
+}
+
+export async function deactivateStaff(
+  ...args: Parameters<typeof deactivateStaffImpl>
+): ReturnType<typeof deactivateStaffImpl> {
+  const result = await deactivateStaffImpl(...args);
+  if ((result as { ok?: boolean }).ok !== false) refreshCachedPages();
+  return result;
+}
+
+const ResendInviteIdSchema = z.string().uuid();
+const RESEND_FAILED_MESSAGE = "Couldn't send the invite. Please try again.";
+
+/**
+ * F0-24 AC-05 (FD-04): sends the invite email again to a carer who has not signed in yet. The
+ * caller must be an active admin with a completed TOTP challenge (AAL2, F0-21), because the send
+ * runs with the service role and no RLS policy can stop it. The carer is read under the caller's
+ * own session, so RLS hides one from another organisation (NOT_FOUND), and only a carer still in
+ * `admin_pending_staff_ids()` is sent to; someone who has already accepted is refused.
+ */
+export async function resendStaffInvite(id: string): Promise<ActionResult<{ id: string }>> {
+  const parsedId = ResendInviteIdSchema.safeParse(id);
+  const mode = getDataSourceMode();
+
+  if (mode === "mock") {
+    const { listMockPendingStaffIds } = await import("@/server/admin/staff-mock-store");
+    return listMockPendingStaffIds().includes(id)
+      ? { ok: true, data: { id } }
+      : { ok: false, error: { code: "NOT_ALLOWED", message: RESEND_FAILED_MESSAGE } };
+  }
+
+  if (!parsedId.success) {
+    return { ok: false, error: { code: "VALIDATION", message: RESEND_FAILED_MESSAGE } };
+  }
+
+  const { createClient } = await import("@/lib/supabase/server");
+  const supabase = await createClient();
+  const { data: caller } = await supabase.auth.getUser();
+  if (!caller.user) {
+    return { ok: false, error: { code: "NOT_ALLOWED", message: "You must be signed in." } };
+  }
+
+  const [{ data: callerProfile }, { data: aal }] = await Promise.all([
+    supabase.from("profiles").select("role, is_active").eq("id", caller.user.id).maybeSingle(),
+    supabase.auth.mfa.getAuthenticatorAssuranceLevel(),
+  ]);
+  if (callerProfile?.role !== "admin" || !callerProfile.is_active || aal?.currentLevel !== "aal2") {
+    return { ok: false, error: { code: "NOT_ALLOWED", message: RESEND_FAILED_MESSAGE } };
+  }
+
+  const { data: carer } = await supabase
+    .from("profiles")
+    .select("role, email")
+    .eq("id", parsedId.data)
+    .maybeSingle();
+  if (!carer || carer.role !== "carer" || !carer.email) {
+    return { ok: false, error: { code: "NOT_FOUND", message: RESEND_FAILED_MESSAGE } };
+  }
+
+  const { data: pendingIds, error: pendingError } = await supabase.rpc("admin_pending_staff_ids");
+  if (pendingError || !pendingIds?.includes(parsedId.data)) {
+    return { ok: false, error: { code: "NOT_ALLOWED", message: RESEND_FAILED_MESSAGE } };
+  }
+
+  const { resendStaffInviteEmail } = await import("@/server/jobs/admin-invite-staff");
+  try {
+    await resendStaffInviteEmail(carer.email);
+  } catch {
+    return { ok: false, error: { code: "UNEXPECTED", message: RESEND_FAILED_MESSAGE } };
+  }
+  return { ok: true, data: { id: parsedId.data } };
 }

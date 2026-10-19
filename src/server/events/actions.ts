@@ -12,6 +12,7 @@ import { localToMelbourneIso } from "@/lib/dates/melbourne-time";
 import { getDataSourceMode } from "@/server/data-source";
 import { parseOccurrenceKey } from "@/server/events/occurrence-key";
 import { RECURRENCE_TO_DB } from "@/server/events/recurrence-mapping";
+import { refreshCachedPages } from "@/server/refresh-cache";
 import { RecurrenceFrequencySchema } from "@/types/domain";
 
 export type ActionResult<T> =
@@ -25,6 +26,15 @@ const SetOccurrenceDoneInputSchema = z.object({ key: z.string().min(1) });
 
 /** FAM-05's copy for a failed tick or untick (PRD.md Error/Edge cases, PROPOSED). */
 const TICK_FAILED_MESSAGE = "Couldn't save. Please try again.";
+
+/**
+ * A tick or untick changes the calendar, task log, home timelines and (through the charge trigger)
+ * the budget, on pages the client may have cached. Revalidating the root layout drops the server
+ * and client router caches, so every page reads the new state on its next visit.
+ */
+function refreshAfterTick(): void {
+  refreshCachedPages();
+}
 
 /** What a tick-off confirms, once the server has recorded it. */
 export interface TickResult {
@@ -55,6 +65,7 @@ export async function setOccurrenceDone(key: string): Promise<ActionResult<TickR
       const currentUser = await getCurrentUser();
       const actorName = `${currentUser.firstName} ${currentUser.lastName}`;
       const result = await mockEvents.setOccurrenceDone(parsed.data.key, actorName);
+      refreshAfterTick();
       return {
         ok: true,
         data: {
@@ -108,6 +119,7 @@ export async function setOccurrenceDone(key: string): Promise<ActionResult<TickR
       }
     }
 
+    refreshAfterTick();
     return { ok: true, data: { actor: data.actor_display_name, completedAt: data.occurred_at } };
   } catch (error) {
     // A feature tag and the error's class only: the message may carry client data (ARCHITECTURE.md §12.5).
@@ -139,6 +151,7 @@ export async function setOccurrenceUndone(key: string): Promise<ActionResult<und
     try {
       const mockEvents = await import("@/mocks/queries/events");
       await mockEvents.setOccurrenceUndone(parsed.data.key);
+      refreshAfterTick();
       return { ok: true, data: undefined };
     } catch (error) {
       return {
@@ -185,6 +198,7 @@ export async function setOccurrenceUndone(key: string): Promise<ActionResult<und
       }
     }
 
+    refreshAfterTick();
     return { ok: true, data: undefined };
   } catch (error) {
     console.error(
@@ -197,6 +211,12 @@ export async function setOccurrenceUndone(key: string): Promise<ActionResult<und
 
 const LOCAL_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 const LOCAL_TIME_PATTERN = /^([01]\d|2[0-3]):([0-5]\d)$/;
+
+/** FAM-18: an 'Ends' date before the event's Date. The form checks it first; this is the backstop. */
+const END_BEFORE_DATE_RESULT: ActionResult<never> = {
+  ok: false,
+  error: { code: "VALIDATION", message: "Ends must be on or after the Date." },
+};
 
 /** An event's cost and the bucket that pays it (FAM-11, FD-07). */
 const EventCostSchema = z.object({
@@ -249,6 +269,8 @@ const CreateEventInputSchema = z.object({
   isTask: z.boolean(),
   /** Cost and bucket (FAM-11); absent for no cost. */
   cost: EventCostSchema.optional(),
+  /** FAM-18: the day the series stops after, inclusive; absent repeats forever. */
+  endDate: z.string().regex(LOCAL_DATE_PATTERN).optional(),
 });
 export type CreateEventInput = z.infer<typeof CreateEventInputSchema>;
 
@@ -266,9 +288,7 @@ const CREATE_EVENT_FAILED_MESSAGE = "Couldn't save. Please try again.";
  * `care_events_insert`'s RLS policy (family only, or a carer on an active
  * shift — ARCHITECTURE.md "authorisation lives in RLS"), not re-checked here.
  */
-export async function createEvent(
-  input: CreateEventInput,
-): Promise<ActionResult<CreateEventResult>> {
+async function createEventImpl(input: CreateEventInput): Promise<ActionResult<CreateEventResult>> {
   const parsed = CreateEventInputSchema.safeParse(input);
   if (!parsed.success) {
     return {
@@ -286,7 +306,11 @@ export async function createEvent(
     recurrence,
     isTask,
     cost,
+    endDate,
   } = parsed.data;
+  if (endDate && endDate < date) return END_BEFORE_DATE_RESULT;
+  // A one-off has nothing to end.
+  const recurrenceEnd = recurrence !== "none" ? endDate : undefined;
   const startsAt = localToMelbourneIso(`${date}T${startTime}`);
   const completionMode = isTask ? "manual" : "automatic";
 
@@ -301,6 +325,7 @@ export async function createEvent(
       durationMinutes,
       recurrenceFrequency: recurrence,
       completionMode,
+      ...(recurrenceEnd ? { recurrenceEndDate: recurrenceEnd } : {}),
     });
     return { ok: true, data: { eventId } };
   }
@@ -317,6 +342,7 @@ export async function createEvent(
         starts_at: startsAt,
         duration_minutes: durationMinutes,
         recurrence: RECURRENCE_TO_DB[recurrence],
+        recurrence_until: recurrenceEnd ?? null,
         completion_mode: completionMode,
       })
       .select("id")
@@ -366,6 +392,14 @@ export async function createEvent(
   }
 }
 
+export async function createEvent(
+  ...args: Parameters<typeof createEventImpl>
+): ReturnType<typeof createEventImpl> {
+  const result = await createEventImpl(...args);
+  if ((result as { ok?: boolean }).ok !== false) refreshCachedPages();
+  return result;
+}
+
 /**
  * FAM-07's scope choice (PD-045): "occurrence" writes a `care_event_overrides` row for the
  * viewed occurrence's start (PD-004) — every other field is a series-level column, so it always
@@ -392,6 +426,8 @@ const UpdateEventInputSchema = z.object({
   scope: UpdateEventScopeSchema,
   /** Cost and bucket (FAM-11): a value sets them, `null` clears them, absent leaves them as they are. */
   cost: EventCostSchema.nullable().optional(),
+  /** FAM-18: a date sets the series end, `null` clears it, absent leaves it as it is. */
+  endDate: z.string().regex(LOCAL_DATE_PATTERN).nullable().optional(),
 });
 export type UpdateEventInput = z.infer<typeof UpdateEventInputSchema>;
 
@@ -420,9 +456,7 @@ function mapUpdateEventError(code: string | null | undefined): ActionResult<neve
   }
 }
 
-export async function updateEvent(
-  input: UpdateEventInput,
-): Promise<ActionResult<UpdateEventResult>> {
+async function updateEventImpl(input: UpdateEventInput): Promise<ActionResult<UpdateEventResult>> {
   const parsed = UpdateEventInputSchema.safeParse(input);
   if (!parsed.success) {
     return {
@@ -443,7 +477,11 @@ export async function updateEvent(
     isTask,
     scope,
     cost,
+    endDate,
   } = parsed.data;
+  if (endDate && endDate < date) return END_BEFORE_DATE_RESULT;
+  // A one-off has nothing to end, so stopping a repeat clears the end date too.
+  const recurrenceEnd = recurrence === "none" && endDate !== undefined ? null : endDate;
   const startsAt = localToMelbourneIso(`${date}T${startTime}`);
   const completionMode = isTask ? "manual" : "automatic";
 
@@ -462,6 +500,7 @@ export async function updateEvent(
         recurrenceFrequency: recurrence,
         completionMode,
         scope,
+        ...(recurrenceEnd !== undefined ? { recurrenceEndDate: recurrenceEnd } : {}),
       });
       return { ok: true, data: { eventId } };
     } catch (error) {
@@ -484,6 +523,7 @@ export async function updateEvent(
       recurrence: RECURRENCE_TO_DB[recurrence],
       duration_minutes: durationMinutes,
       completion_mode: completionMode,
+      ...(recurrenceEnd !== undefined ? { recurrence_until: recurrenceEnd } : {}),
     };
 
     if (scope === "occurrence") {
@@ -554,4 +594,12 @@ export async function updateEvent(
     console.error("[events] updateEvent failed:", error instanceof Error ? error.name : "unknown");
     return { ok: false, error: { code: "UNEXPECTED", message: UPDATE_EVENT_FAILED_MESSAGE } };
   }
+}
+
+export async function updateEvent(
+  ...args: Parameters<typeof updateEventImpl>
+): ReturnType<typeof updateEventImpl> {
+  const result = await updateEventImpl(...args);
+  if ((result as { ok?: boolean }).ok !== false) refreshCachedPages();
+  return result;
 }

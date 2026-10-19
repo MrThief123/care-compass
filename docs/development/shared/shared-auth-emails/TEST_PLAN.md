@@ -13,13 +13,13 @@ Tests first (TESTING.md §2); confirm each fails for the expected reason before 
 
 | Test ID | Covers | Level | Test description | Written first? | Result |
 |---|---|---|---|---|---|
-| T-01 | AC-01 | e2e | Request a reset, open the emailed link, set a new password, sign in; old password refused. | Yes | — |
-| T-02 | AC-02 | unit + integration | Used twice, expired, tampered, no token → expired-link redirect and no session. | Yes | — |
-| T-03 | AC-03 | e2e | Admin invites a carer, carer follows the emailed link, sets a password, lands on `/carer/home`. | Yes | — |
-| T-04 | AC-04 | integration | Invite an existing email: no new user, no email. | Yes | — |
-| T-05 | AC-05 | integration + component | Resend as same-org admin sends one email; refused for signed-in carer, other-org admin, carer, family. Button shows only before first sign-in. | Yes | — |
-| T-06 | AC-06 | unit | Same response for registered and unregistered; off-site `next` ignored (extends the F0-21 tests). | Yes | — |
-| T-07 | AC-07 | review | Templates, config, `.env.example` and the checklist exist; human ticks the hosted items. | No | — |
+| T-01 | AC-01 | e2e | Request a reset, open the emailed link, set a new password, sign in; old password refused. | Yes | PASS (e2e, local stack) |
+| T-02 | AC-02 | unit + integration | Used twice, expired, tampered, no token → expired-link redirect and no session. | Yes | PASS (unit + integration) |
+| T-03 | AC-03 | e2e | Admin invites a carer, carer follows the emailed link, sets a password, lands on `/carer/home`. | Yes | PASS (e2e, local stack) |
+| T-04 | AC-04 | integration | Invite an existing email: no new user, no email. | Yes | PASS (integration) |
+| T-05 | AC-05 | integration + component | Resend as same-org admin sends one email; refused for signed-in carer, other-org admin, carer, family. Button shows only before first sign-in. | Yes | PASS (integration for the email send; unit for the action's permission checks; component for the button) |
+| T-06 | AC-06 | unit | Same response for registered and unregistered; off-site `next` ignored (extends the F0-21 tests). | Yes | PASS (unit + integration) |
+| T-07 | AC-07 | review | Templates, config, `.env.example` and the checklist exist; human ticks the hosted items. | No | Pending the human (hosted checklist) |
 
 ## Regression
 `vitest run`, `supabase test db`, auth e2e specs (`auth.spec.ts`, `sign-up.spec.ts`, `auth-hardening.spec.ts`, `admin-mfa.spec.ts`) must stay green.

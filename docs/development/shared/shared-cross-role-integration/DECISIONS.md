@@ -45,3 +45,12 @@
 - Context: CHG-032 already says every displayed person name, the client's included, is first and last name, but no feature has swept every screen (the sweep is not scheduled). The human asked that INT-12 make sure of it everywhere, including the client's name on the Family Home.
 - Decision: AC-45 opens every screen of each dashboard with people who share first names and fails on any bare first name. Each screen found showing a first name only is a defect under FD-02: recorded with its screen and element, marked `test.fail()`, and raised with the human for a fix feature.
 - Human confirmation required: yes (with CHG-055; requested by the human on 2026-10-03, follows CHG-032)
+
+### FD-07 — Clean-up of append-only rows uses the local database container (Phase 0)
+- Date: 2026-10-03
+- Context: AC-02 requires that no user, organisation or client with the run marker remains. Completions, costs, fund entries and documents are append-only on purpose (triggers refuse delete), and `completions`, `costs`, `fund entries` and `buckets` reference clients with `on delete restrict`, so the API alone can never remove a run that ticked a task or topped up a budget.
+- Decision: after a run, its clients' rows in those four tables (and its admin's audit rows) are deleted inside one transaction in the LOCAL Postgres container (`docker exec ... psql`) with `session_replication_role = replica` for that transaction only; everything else is removed through the service-role API in foreign-key order. The container is `supabase_db_<project_id>` from `supabase/config.toml`, never "the first one found" (a second local stack was running during this work), and ids are checked to be uuids before use. It runs only after `assertLocal()` has passed.
+- Reason: the only way to meet AC-02 without weakening the production append-only triggers.
+- Alternatives considered: leave the rows behind (breaks AC-02); disable the triggers in a migration (weakens production rules, rejected).
+- Consequences: Phase 0 to 8 clean-up needs Docker and the local stack's own container. Storage objects of uploaded documents are not removed yet; Phase 2 (documents) adds that.
+- Human confirmation required: no (test-support only, local only).

@@ -17,11 +17,14 @@ import { z } from "zod";
 
 import type { Database } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
+import { saveClientDetailsArgs } from "@/server/clients/client-details-rpc";
+import { hasAnyClientDetail } from "@/server/clients/client-details-schema";
+import { refreshCachedPages } from "@/server/refresh-cache";
 import type { Role } from "@/types/domain";
 
 import { discardUnregisteredAccount, registerAccount } from "./registration";
 import { resolveMfaGatePath, resolveRoleHomePath } from "./routing";
-import { SignUpInputSchema } from "./sign-up-schema";
+import { clientDetailsFromSignUp, SignUpInputSchema } from "./sign-up-schema";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 
@@ -188,6 +191,21 @@ export async function signUp(input: unknown): Promise<AuthActionResult<{ redirec
     };
   }
 
+  // F0-28 FD-02: optional client details are saved once the client exists. They are optional,
+  // so a failure here keeps the account; the family can add them in Settings (AC-05).
+  const details = clientDetailsFromSignUp(values);
+  const clientId = (registered.data as { client_id?: string | null } | null)?.client_id;
+  if (clientId && hasAnyClientDetail(details)) {
+    const { error: detailsError } = await supabase.rpc(
+      "save_client_details",
+      saveClientDetailsArgs(clientId, details),
+    );
+    if (detailsError) {
+      // A feature tag and the error's code only: no name or detail (ARCHITECTURE.md §12.5).
+      console.error("[auth] signUp could not save the client details:", detailsError.code);
+    }
+  }
+
   const { data: profile } = await supabase
     .from("profiles")
     .select("id, role, organisation_id")
@@ -208,6 +226,8 @@ export async function signUp(input: unknown): Promise<AuthActionResult<{ redirec
 export async function signOut(): Promise<void> {
   const supabase = await createClient();
   await supabase.auth.signOut();
+  // Drops the client router cache so the next person on this browser never sees this session's pages.
+  refreshCachedPages();
   redirect("/sign-in");
 }
 
@@ -240,8 +260,19 @@ const ResetPasswordInputSchema = z.object({
   password: z.string().min(8, "Password must be at least 8 characters."),
 });
 
-/** Sets a new password from the recovery session `auth/confirm` established from the emailed link. */
-export async function resetPassword(input: { password: string }): Promise<AuthActionResult> {
+type PasswordUpdate =
+  | { ok: true; userId: string; supabase: SupabaseClient<Database> }
+  | { ok: false; error: Extract<AuthActionResult, { ok: false }>["error"] };
+
+/**
+ * Sets the password of the session `/auth/confirm` established from an emailed link. Shared by
+ * `resetPassword` and `setPassword`; no session (link expired, used, or never opened) is the same
+ * "request a new one" answer for both.
+ */
+async function updateOwnPassword(
+  input: { password: string },
+  noSession: string,
+): Promise<PasswordUpdate> {
   const parsed = ResetPasswordInputSchema.safeParse(input);
   if (!parsed.success) {
     return {
@@ -259,10 +290,7 @@ export async function resetPassword(input: { password: string }): Promise<AuthAc
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return {
-      ok: false,
-      error: { code: "UNEXPECTED", message: "Your reset link has expired. Request a new one." },
-    };
+    return { ok: false, error: { code: "UNEXPECTED", message: noSession } };
   }
 
   const { error } = await supabase.auth.updateUser({ password: parsed.data.password });
@@ -276,7 +304,39 @@ export async function resetPassword(input: { password: string }): Promise<AuthAc
     };
   }
 
-  return { ok: true, data: undefined };
+  return { ok: true, userId: user.id, supabase };
+}
+
+/** Sets a new password from the recovery session `auth/confirm` established from the emailed link. */
+export async function resetPassword(input: { password: string }): Promise<AuthActionResult> {
+  const result = await updateOwnPassword(input, "Your reset link has expired. Request a new one.");
+  return result.ok ? { ok: true, data: undefined } : result;
+}
+
+/**
+ * F0-24 AC-03: an invited carer sets their first password from the invite session, is already
+ * signed in by it, and goes to the role home (or an MFA gate), exactly as `signIn` would send them.
+ */
+export async function setPassword(input: {
+  password: string;
+}): Promise<AuthActionResult<{ redirectTo: string }>> {
+  const result = await updateOwnPassword(
+    input,
+    "Your invite link has expired. Ask your administrator to send a new invite.",
+  );
+  if (!result.ok) return result;
+
+  const { data: profile } = await result.supabase
+    .from("profiles")
+    .select("id, role, organisation_id, is_active")
+    .eq("id", result.userId)
+    .maybeSingle();
+  if (!profile || !profile.is_active) {
+    await result.supabase.auth.signOut();
+    return { ok: false, error: { code: "INACTIVE", message: "Your access has been withdrawn." } };
+  }
+
+  return { ok: true, data: { redirectTo: await resolvePostSignInPath(result.supabase, profile) } };
 }
 
 // ---------------------------------------------------------------------------

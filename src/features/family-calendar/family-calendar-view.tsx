@@ -12,7 +12,8 @@ import { addEventHrefFrom } from "@/features/family-event-form/event-form-return
 import { taskDetailHrefFrom } from "@/features/family-task-detail/task-detail-origin";
 import type { LocalDate } from "@/lib/dates/week-range";
 import { setOccurrenceDone, setOccurrenceUndone } from "@/server/events/actions";
-import type { Occurrence } from "@/types/domain";
+import type { ClientShift } from "@/server/events/queries";
+import { isPlainEvent, type AnyOccurrence, type Occurrence } from "@/types/domain";
 
 import { applyTick } from "./apply-ticks";
 import { dayHeading, melbourneDay, rangeLabel } from "./calendar-format";
@@ -28,6 +29,8 @@ import {
 } from "./calendar-params";
 import { CalendarToolbar } from "./calendar-toolbar";
 import { LogPanel } from "./log-panel";
+import { OnDutyPanel } from "./on-duty-panel";
+import { isShiftEntry, shiftsAsEntries } from "./shift-occurrences";
 import { TasksPanel } from "./tasks-panel";
 import { useCalendarShortcuts } from "./use-calendar-shortcuts";
 
@@ -35,18 +38,22 @@ export interface FamilyCalendarViewProps {
   clientId: string;
   today: LocalDate;
   params: CalendarParams;
-  /** Every occurrence on the visible days, oldest first. */
-  occurrences: Occurrence[];
+  /** Every occurrence on the visible days, tasks and plain events (UI-05), oldest first. */
+  occurrences: AnyOccurrence[];
   /** Latest done or overdue tasks, newest first. */
   log: Occurrence[];
+  /** Carers on duty in the visible range; the On duty panel shows the selected day's. */
+  shifts?: ClientShift[];
   /** The signed-in person, shown on a task they tick (CHG-016). */
   actorName: string;
   /** Where the links go; defaults to `/family/<id>`. A carer's Calendar sets it (CHG-043). */
   basePath?: string;
-  /** False: the Tasks panel lists each task's status with no tick boxes (carer off shift). */
+  /** True only for a carer on shift (CHG-056): otherwise the Tasks panel lists each status with no tick boxes. */
   canTick?: boolean;
   /** False: no Enter event link (carers, CHG-043). */
   canAddEvent?: boolean;
+  /** Family only (FAM-17): info tips beside the main buttons. */
+  showHelp?: boolean;
 }
 
 /**
@@ -64,10 +71,12 @@ export function FamilyCalendarView({
   params,
   occurrences: loaded,
   log,
+  shifts = [],
   actorName,
   basePath,
-  canTick = true,
+  canTick = false,
   canAddEvent = true,
+  showHelp = false,
 }: FamilyCalendarViewProps) {
   const router = useRouter();
   const range = visibleRange(params);
@@ -120,12 +129,18 @@ export function FamilyCalendarView({
 
   const current: CalendarParams = { ...params, date: selected };
   // A task opened here remembers this view and day, so Task detail's Back returns to them (CHG-014).
-  const openOccurrence = (occurrence: Occurrence) =>
+  const openOccurrence = (occurrence: AnyOccurrence) => {
+    if (isShiftEntry(occurrence)) return;
     router.push(
       taskDetailHrefFrom(clientId, occurrence.key, { from: "calendar", view: current }, basePath),
     );
-  const dayOccurrences = occurrences.filter(
-    (occurrence) => melbourneDay(occurrence.start) === selected,
+  };
+  // The grids also draw who is on duty, as blocks beside the care events.
+  const gridOccurrences: AnyOccurrence[] = [...occurrences, ...shiftsAsEntries(shifts, clientId)];
+  // The Tasks panel is a checklist: a plain event has nothing to tick, so it is on the grids only.
+  const dayTasks = occurrences.filter(
+    (occurrence): occurrence is Occurrence =>
+      !isPlainEvent(occurrence) && melbourneDay(occurrence.start) === selected,
   );
 
   const changeView = (view: CalendarView) => {
@@ -149,6 +164,7 @@ export function FamilyCalendarView({
         onViewChange={changeView}
         onStep={step}
         onToday={goToday}
+        showHelp={showHelp}
         enterEventHref={
           canAddEvent
             ? addEventHrefFrom(clientId, { from: "calendar", view: current }, basePath)
@@ -161,7 +177,7 @@ export function FamilyCalendarView({
           <WeekGrid
             weekStart={range.from}
             today={today}
-            occurrences={occurrences}
+            occurrences={gridOccurrences}
             now={now}
             onSelectDay={select}
             onSelectOccurrence={openOccurrence}
@@ -169,7 +185,7 @@ export function FamilyCalendarView({
         )}
         {params.view === "day" && (
           <DayTimeline
-            occurrences={occurrences}
+            occurrences={gridOccurrences}
             now={now}
             onSelect={openOccurrence}
             className="px-2"
@@ -180,7 +196,7 @@ export function FamilyCalendarView({
             month={`${params.month}-01`}
             today={today}
             selected={selected}
-            occurrences={occurrences}
+            occurrences={gridOccurrences}
             onSelectDate={select}
             className="p-3"
           />
@@ -190,13 +206,16 @@ export function FamilyCalendarView({
       <div className="grid min-w-0 grid-cols-1 gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
         <TasksPanel
           dateLabel={dayHeading(selected)}
-          occurrences={dayOccurrences}
+          occurrences={dayTasks}
           isTicked={(occurrence) => ticks[occurrence.key] ?? occurrence.status === "done"}
           onToggle={toggleTick}
           errorMessage={tickError}
           readOnly={!canTick}
         />
-        <LogPanel clientId={clientId} occurrences={log} calendar={current} basePath={basePath} />
+        <div className="flex min-w-0 flex-col gap-5">
+          <OnDutyPanel dateLabel={dayHeading(selected)} date={selected} shifts={shifts} />
+          <LogPanel clientId={clientId} occurrences={log} calendar={current} basePath={basePath} />
+        </div>
       </div>
     </div>
   );

@@ -4,10 +4,17 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { EventForm, type EventFormValues } from "@/components/shared/forms";
+import {
+  ConfirmationModal,
+  EventForm,
+  Field,
+  type EventFormValues,
+} from "@/components/shared/forms";
+import { Button } from "@/components/ui/button";
 import type { LocalDate } from "@/lib/dates/week-range";
 import { linkDocumentsToEvent } from "@/server/documents/actions";
 import { createEvent, updateEvent } from "@/server/events/actions";
+import { deleteEvent } from "@/server/events/delete-actions";
 import type { BudgetBucketSummary, EventDocument } from "@/types/domain";
 
 import { EditScopeFields } from "./edit-scope-fields";
@@ -53,10 +60,14 @@ export interface EventFormScreenProps {
   initialCost?: EventCostValues;
   /** Title, Start time and End time (PD-047): the event's own, on Edit; empty on Add. */
   initialDetails?: EventDetailsValues;
+  /** FAM-18: the event's saved end date (`YYYY-MM-DD`) on Edit event; absent repeats forever. */
+  initialEndDate?: string;
   /** Where Save event and Cancel go (CHG-015, `event-form-return.ts`); already validated. */
   returnHref: string;
   /** Shown instead of the action's own message when a save is refused as NOT_ALLOWED (CHG-048). */
   notAllowedMessage?: string;
+  /** Where to go after Delete event (F0-27). Edit event only; without it there is no Delete event button. */
+  deleteReturnHref?: string;
 }
 
 const TITLES = { add: "Add event", edit: "Edit event" } as const;
@@ -80,8 +91,10 @@ export function EventFormScreen({
   buckets,
   initialCost = EMPTY_EVENT_COST,
   initialDetails = EMPTY_EVENT_DETAILS,
+  initialEndDate,
   returnHref,
   notAllowedMessage,
+  deleteReturnHref,
 }: EventFormScreenProps) {
   const router = useRouter();
   const [values, setValues] = useState(initialValues);
@@ -91,11 +104,33 @@ export function EventFormScreen({
   const [details, setDetails] = useState(initialDetails);
   const [detailsErrors, setDetailsErrors] = useState<Record<string, string>>({});
   const [scope, setScope] = useState<EditScope>("occurrence");
+  const [endDate, setEndDate] = useState(initialEndDate ?? "");
+  const [endDateError, setEndDateError] = useState<string>();
   const [saveError, setSaveError] = useState<string>();
   // Files chosen on Add event, linked to the event once `createEvent` returns an id (F0-23).
   const [pendingDocuments, setPendingDocuments] = useState<{ id: string; name: string }[]>([]);
   const [unlinkedNames, setUnlinkedNames] = useState<string[]>();
   const hasSavedCost = hasCostText(initialCost);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const canDelete = mode === "edit" && deleteReturnHref !== undefined;
+  const isRecurring = values.recurrence !== "none";
+
+  // F0-27: the viewed occurrence only, or it and every later one.
+  async function remove(deleteScope: "occurrence" | "future") {
+    setConfirmingDelete(false);
+    setSaveError(undefined);
+    const result = await deleteEvent({
+      clientId,
+      eventId: eventId!,
+      occurrenceOriginalStart: occurrenceOriginalStart!,
+      scope: deleteScope,
+    });
+    if (!result.ok) {
+      setSaveError(refusalMessage(result.error));
+      return;
+    }
+    router.push(deleteReturnHref!);
+  }
 
   function refusalMessage(error: { code: string; message: string }): string {
     return error.code === "NOT_ALLOWED" && notAllowedMessage ? notAllowedMessage : error.message;
@@ -114,6 +149,14 @@ export function EventFormScreen({
   // EventForm has already checked its own fields (Date); Cost (FD-02) and Title/Start
   // time/End time are checked here, then the event is created or updated before navigating away.
   async function save() {
+    // FAM-18: Ends only counts for a repeating event, and never before the Date.
+    const repeats = values.recurrence !== "none";
+    const nextEndDateError =
+      repeats && endDate && values.date && endDate < values.date
+        ? "Ends must be on or after the Date."
+        : undefined;
+    setEndDateError(nextEndDateError);
+    if (nextEndDateError) return;
     const nextCostErrors = validateEventCost(cost, buckets);
     const nextDetailsErrors = validateEventDetails(details);
     setCostErrors(nextCostErrors);
@@ -124,6 +167,9 @@ export function EventFormScreen({
     const parsedDetails = parseEventDetails(details)!;
     const parsedCost = parseEventCost(cost);
     setSaveError(undefined);
+    // Sent only when it matters: a date sets it, `null` clears a saved one (also when the event
+    // stopped repeating), otherwise it is left out.
+    const endDateField = repeats && endDate ? { endDate } : initialEndDate ? { endDate: null } : {};
 
     if (mode === "edit") {
       const result = await updateEvent({
@@ -138,6 +184,7 @@ export function EventFormScreen({
         recurrence: values.recurrence,
         isTask,
         scope,
+        ...endDateField,
         // FAM-11: the cost as typed, `null` when a saved cost was cleared, left out when there never was one.
         ...(parsedCost
           ? { cost: { amount: parsedCost.amount, bucketId: parsedCost.bucketId } }
@@ -162,6 +209,7 @@ export function EventFormScreen({
       durationMinutes: parsedDetails.durationMinutes,
       recurrence: values.recurrence,
       isTask,
+      ...(repeats && endDate ? { endDate } : {}),
       ...(parsedCost ? { cost: { amount: parsedCost.amount, bucketId: parsedCost.bucketId } } : {}),
     });
     if (!result.ok) {
@@ -222,6 +270,20 @@ export function EventFormScreen({
           <>
             {/* Title, Start time and End time (OQ-22/PD-047). */}
             <EventDetailsFields values={details} onChange={changeDetails} errors={detailsErrors} />
+            {/* FAM-18: optional, only for a repeating event; empty means it repeats forever. */}
+            {values.recurrence !== "none" && (
+              <Field
+                label="Ends"
+                type="date"
+                value={endDate}
+                onChange={(next) => {
+                  setEndDate(next);
+                  setEndDateError(undefined);
+                }}
+                hint="Optional. Leave empty to repeat forever."
+                error={endDateError}
+              />
+            )}
             {/* PD-045: only meaningful for a recurring event — a one-off's one occurrence is
                 its whole series, so there is nothing to choose between. */}
             {mode === "edit" && values.recurrence !== "none" && (
@@ -258,6 +320,39 @@ export function EventFormScreen({
       >
         {saveError}
       </p>
+      {canDelete && (
+        <>
+          <div>
+            <Button variant="destructive" onClick={() => setConfirmingDelete(true)}>
+              Delete event
+            </Button>
+          </div>
+          <ConfirmationModal
+            open={confirmingDelete}
+            tone="destructive"
+            title="Delete this event?"
+            body={
+              isRecurring ? (
+                <div className="flex flex-col gap-3">
+                  <p>
+                    Choose what to delete. Past occurrences, ticks and costs already charged stay.
+                  </p>
+                  <div>
+                    <Button variant="destructive" onClick={() => remove("future")}>
+                      Delete all future events
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                "This event will be removed from the calendar."
+              )
+            }
+            confirmLabel={isRecurring ? "Delete this event" : "Delete"}
+            onConfirm={() => remove("occurrence")}
+            onCancel={() => setConfirmingDelete(false)}
+          />
+        </>
+      )}
     </div>
   );
 }

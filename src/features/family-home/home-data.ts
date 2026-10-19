@@ -6,7 +6,7 @@
 import { getBudgetSummary } from "@/server/budget/queries";
 import { settleEndedEventCosts } from "@/server/budget/settle";
 import { getTaskLog, getTodayOccurrences } from "@/server/events/queries";
-import type { BudgetBucketSummary, Occurrence } from "@/types/domain";
+import type { AnyOccurrence, BudgetBucketSummary, Occurrence } from "@/types/domain";
 
 /** Rows in the Recent activity card (the design shows five). */
 export const RECENT_ACTIVITY_LIMIT = 5;
@@ -23,7 +23,8 @@ export interface BudgetTotals {
 }
 
 export interface FamilyHomeData {
-  today: Occurrence[];
+  /** Today's tasks and plain events (UI-05). */
+  today: AnyOccurrence[];
   overdue: { items: Occurrence[]; total: number };
   recent: Occurrence[];
   budget: BudgetBucketSummary[];
@@ -103,7 +104,7 @@ export async function loadFamilyHomeData(clientId: string): Promise<FamilyHomeDa
   // FAM-11: charge any plain event that has ended, so the budget tiles include it.
   await settleEndedEventCosts(clientId);
   const [today, overdue, done, budget] = await Promise.all([
-    getTodayOccurrences(clientId),
+    getTodayOccurrences(clientId, { type: "all" }),
     getTaskLog(clientId, { status: "overdue" }),
     getTaskLog(clientId, { status: "done" }),
     getBudgetSummary(clientId),

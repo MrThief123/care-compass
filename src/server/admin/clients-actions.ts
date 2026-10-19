@@ -10,6 +10,7 @@ import { z } from "zod";
 import { ADMIN_CLIENTS } from "@/mocks/admin-clients";
 import { isMockClientRemoved, removeMockClient } from "@/server/admin/clients-mock-store";
 import { getDataSourceMode } from "@/server/data-source";
+import { refreshCachedPages } from "@/server/refresh-cache";
 
 export type ActionResult<T> =
   | { ok: true; data: T }
@@ -21,7 +22,7 @@ export type ActionResult<T> =
 const ClientIdSchema = z.string().trim().min(1);
 const REMOVE_FAILED_MESSAGE = "Couldn't remove this client. Try again.";
 
-export async function removeClient(id: string): Promise<ActionResult<{ id: string }>> {
+async function removeClientImpl(id: string): Promise<ActionResult<{ id: string }>> {
   const parsed = ClientIdSchema.safeParse(id);
   if (!parsed.success) {
     return { ok: false, error: { code: "VALIDATION", message: "Choose a client to remove." } };
@@ -50,4 +51,12 @@ export async function removeClient(id: string): Promise<ActionResult<{ id: strin
     };
   }
   return { ok: true, data: { id: clientId } };
+}
+
+export async function removeClient(
+  ...args: Parameters<typeof removeClientImpl>
+): ReturnType<typeof removeClientImpl> {
+  const result = await removeClientImpl(...args);
+  if ((result as { ok?: boolean }).ok !== false) refreshCachedPages();
+  return result;
 }

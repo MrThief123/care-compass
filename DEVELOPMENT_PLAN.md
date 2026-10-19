@@ -1,7 +1,7 @@
 # DEVELOPMENT PLAN — Care Compass
 
 Version 0.2 · 17 September 2026 · Status: DRAFT (controlled after planning freeze) · Supersedes v0.1 dashboard-by-dashboard phases
-Totals: **94 active features** (95 listed; CAR-08 retired) · **505 acceptance criteria** across 5 phases (UI-04 and its 10 criteria added by CHG-004, 2026-09-19; UI-05 and its 13 criteria added under CHG-009, 2026-09-24; F0-17 and its 8 criteria added by CHG-010, 2026-09-24; CHG-020, 2026-09-25: FAM-UI-08 (6 criteria) and ADM-11 (5) added, FAM-UI-05 +5 criteria, CAR-08 and its 2 criteria retired; CHG-021, 2026-09-25: FAM-UI-05 +4 criteria; CHG-022, 2026-09-25: FAM-UI-05 +5 criteria; CHG-027, 2026-09-26: F0-18 and its 9 criteria added; CHG-037, 2026-09-30: F0-19 and its 6 criteria added; CHG-040, 2026-09-30: F0-20 and its 10 criteria added; CHG-041, 2026-10-01: F0-21 and its 6 criteria added; CHG-042, 2026-10-01: F0-22 and its 8 criteria added; CHG-045, 2026-10-02: F0-23 and its 8 criteria added; CHG-047, 2026-10-02: F0-24 (7 criteria) and INT-09 (5 criteria) added, every remaining post-sprint feature pulled into the sprint, sprint extended to D21; CHG-050, 2026-10-02: INT-10 and its 4 criteria added (PL-26 promoted); CHG-051, 2026-10-02: FAM-16 and its 11 criteria added (PL-27 promoted); CHG-052, 2026-10-02: INT-11 and its 8 criteria added (PL-25 promoted); ADM-09, 2026-10-03: 1 criterion grown to 9 (+8, FD-05); CHG-055, 2026-10-03: INT-12 and its 45 criteria added; the Jira import `docs/JIRA_BACKLOG.csv` predates all eight). Jira import: `docs/JIRA_BACKLOG.csv`.
+Totals: **99 active features** (100 listed; CAR-08 retired) · **583 acceptance criteria** across 5 phases (UI-04 and its 10 criteria added by CHG-004, 2026-09-19; UI-05 and its 13 criteria added under CHG-009, 2026-09-24; F0-17 and its 8 criteria added by CHG-010, 2026-09-24; CHG-020, 2026-09-25: FAM-UI-08 (6 criteria) and ADM-11 (5) added, FAM-UI-05 +5 criteria, CAR-08 and its 2 criteria retired; CHG-021, 2026-09-25: FAM-UI-05 +4 criteria; CHG-022, 2026-09-25: FAM-UI-05 +5 criteria; CHG-027, 2026-09-26: F0-18 and its 9 criteria added; CHG-037, 2026-09-30: F0-19 and its 6 criteria added; CHG-040, 2026-09-30: F0-20 and its 10 criteria added; CHG-041, 2026-10-01: F0-21 and its 6 criteria added; CHG-042, 2026-10-01: F0-22 and its 8 criteria added; CHG-045, 2026-10-02: F0-23 and its 8 criteria added; CHG-047, 2026-10-02: F0-24 (7 criteria) and INT-09 (5 criteria) added, every remaining post-sprint feature pulled into the sprint, sprint extended to D21; CHG-050, 2026-10-02: INT-10 and its 4 criteria added (PL-26 promoted); CHG-051, 2026-10-02: FAM-16 and its 11 criteria added (PL-27 promoted); CHG-052, 2026-10-02: INT-11 and its 8 criteria added (PL-25 promoted); ADM-09, 2026-10-03: 1 criterion grown to 9 (+8, FD-05); CHG-055, 2026-10-03: INT-12 and its 45 criteria added; OQ-40, 2026-10-03: INT-09 5 criteria rewritten and grown to 8 (+3); CHG-057, 2026-10-06: FAM-17 and its 10 criteria added (PL-05 tooltips promoted); CHG-058, 2026-10-08: F0-25 and its 16 criteria added (client Documents page); CHG-061, 2026-10-12: F0-26 and its 16 criteria added (custom Client Details sections); CHG-062, 2026-10-11: FAM-18 and its 17 criteria added (delete event and recurrence end date); CHG-063, 2026-10-14: F0-28 and its 16 criteria added (client personal details); the Jira import `docs/JIRA_BACKLOG.csv` predates all nine). Jira import: `docs/JIRA_BACKLOG.csv`.
 
 ---
 
@@ -159,6 +159,9 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 | 16 | F0-22 | Client header wiring and family route guard | S | D12 | SPRINT | F0-06, F0-07, F0-15 | — | `feature/shared-client-header-wiring` | NOT STARTED |
 | 17 | F0-23 | Link uploaded documents to a new event | S | D13 | SPRINT | F0-11, F0-13, FAM-08 | — | `feature/shared-document-event-linking` | IN PROGRESS |
 | 18 | F0-24 | Auth emails: working reset and invite links, set-password page | S | D15–D16 | SPRINT | F0-07, F0-17, ADM-02 | — | `feature/shared-auth-emails` | NOT STARTED |
+| 19 | F0-25 | Client Documents page (Family and Carer) | S | D21 | SPRINT | F0-13, UI-04, FAM-UI-04, F0-15, CAR-UI-02 | — | `feature/shared-client-documents-page` | IN PROGRESS |
+| 20 | F0-26 | Custom sections on Client Details (Family, Carer and Admin) | S | D21 | SPRINT | FAM-09, CAR-04, ADM-11, F0-08, F0-21 | — | `feature/shared-client-custom-sections` | READY FOR PR |
+| 20 | F0-28 | Client personal details (sign-up, Family Settings, Client Details) | S | D22 | SPRINT | F0-17, F0-22, FAM-12, FAM-09, CAR-04, ADM-11 | — | `feature/shared-client-profile-details` | PR OPEN |
 
 ### Phase 3 — Data wiring & behaviour (parallel: Family · Carer · Admin)
 
@@ -180,6 +183,8 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 | 14 | FAM-14 | Family — Task log | F | D11 | SPRINT | F0-11, FAM-UI-07 | OQ-29 | `feature/family-task-log` | NOT STARTED |
 | 15 | FAM-15 | Family — Task detail | F | D11 | SPRINT | F0-11, F0-13, FAM-UI-07 | OQ-29, OQ-10 | `feature/family-task-detail` | NOT STARTED |
 | 15a | FAM-16 | Family — Event form and calendar polish (CHG-051) | F | D18 | SPRINT | FAM-06, FAM-07, FAM-14, FAM-15, CAR-07, UI-01, UI-02 | — | `feature/family-event-form-calendar-polish` | IN PROGRESS |
+| 15b | FAM-17 | Family — Info tips on main buttons (CHG-057) | F | D21 | SPRINT | FAM-UI-01, FAM-UI-02, FAM-UI-05, UI-02 | — | `feature/family-info-tips` | IN PROGRESS |
+| 15c | FAM-18 | Family — Delete event and recurrence end date (CHG-062) | F | D21 | SPRINT | FAM-06, FAM-07, FAM-15, CAR-07, F0-09, F0-11, UI-02 | — | `feature/family-delete-event` | IN PROGRESS |
 | 16 | CAR-01 | ~~Carer Home — Today's calendar and Tasks~~ (retired, CHG-033) | C | — | SPRINT | F0-10, F0-11, CAR-UI-01 | OQ-33, OQ-09 | `feature/carer-home-today` | RETIRED (CHG-033) |
 | 17 | CAR-02 | Carer — Notifications card and bell | C | D9 | SPRINT | F0-10, F0-13, CAR-UI-01 | OQ-14 | `feature/carer-notifications` | NOT STARTED |
 | 18 | CAR-03 | Carer — Patients | C | D8 | SPRINT | F0-06, F0-10, F0-18, CAR-UI-02 | OQ-09 | `feature/carer-patients` | IN PROGRESS |
@@ -213,7 +218,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 | 6 | INT-06 | Accessibility verification across dashboards | I | D20 | SPRINT | FAM-15, CAR-09, ADM-10 | OQ-01 | `feature/shared-accessibility-verification` | NOT STARTED |
 | 7 | INT-07 | Scale and performance verification | I | D19 | SPRINT | FAM-14, ADM-01 | OQ-01 | `feature/shared-calendar-scale-performance` | NOT STARTED |
 | 8 | INT-08 | Release readiness and client handover | I | D21 | SPRINT | INT-02, INT-03, INT-04, INT-05, INT-06, INT-07, F0-24, INT-09, FAM-11, CAR-07, ADM-03, ADM-05, ADM-08, ADM-09, ADM-11, INT-12 | OQ-01, OQ-17 | `feature/shared-release-readiness-handover` | NOT STARTED |
-| 9 | INT-09 | Overdue and upcoming care alert emails | B | D17–D18 | SPRINT | INT-01, F0-11, F0-24 | OQ-40 | `feature/shared-care-alert-emails` | NOT STARTED |
+| 9 | INT-09 | Overdue and upcoming care alert emails | B | D17–D18 | SPRINT | INT-01, F0-11, F0-24 | — | `feature/shared-care-alert-emails` | NOT STARTED |
 | 10 | INT-10 | Budget threshold email names the bucket | B | D18 | SPRINT | INT-01 | — | `feature/shared-budget-threshold-email-bucket-name` | READY FOR PR |
 | 11 | INT-11 | Pending-cost email | B | D19 | SPRINT | INT-01, F0-11, F0-12 | — | `feature/shared-pending-cost-email` | IN PROGRESS |
 | 12 | INT-12 | Cross-role integration journey | I | D20–D21 | SPRINT | F0-17, F0-18, F0-20, F0-24, FAM-04, FAM-06, FAM-07, FAM-08, FAM-09, FAM-10, FAM-11, FAM-12, FAM-13, FAM-15, CAR-02, CAR-03, CAR-04, CAR-05, CAR-06, CAR-07, CAR-09, ADM-01, ADM-02, ADM-03, ADM-05, ADM-07, ADM-08, ADM-09, ADM-11, INT-01, INT-10, INT-11 | — | `feature/shared-cross-role-integration` | NOT STARTED |
@@ -769,6 +774,39 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Requirements:** REQ-01, REQ-06
 - **Docs:** `docs/development/shared/shared-auth-emails/` · **Status:** NOT STARTED
 
+### F0-25 — Client Documents page (Family and Carer)
+- **Dashboard / stream:** shared · **Lane:** S · **Days:** D21 · **Sprint:** SPRINT · **PR target:** `main` · **Branch:** `feature/shared-client-documents-page`
+- **Description:** A Documents page per client (Family rail item, Carer patient tab): all documents, search, sort by name, size and date added, per-file open, and Download all as one .zip. Added by CHG-058. No migration (`uploaded_at` already exists).
+- **User value:** Families and carers find and take away any document in seconds.
+- **Dependencies:** F0-13, UI-04, FAM-UI-04, F0-15, CAR-UI-02 · **Blocking decisions:** None
+- **Jira summary:** Client Documents page with search, sort and download-all (Family and Carer)
+- **Acceptance criteria summary:** 16 criteria — nav item and tab; all-documents contract; row details; search; sort; no-match and empty states; Download all and zip route (access, errors, limit); open via signed URL; carer access; accessibility; regression
+- **Testing summary:** 3 unit, 1 route, 8 component, 1 regression
+- **Requirements:** CIS3 document storage
+- **Docs:** `docs/development/shared/shared-client-documents-page/` · **Status:** IN PROGRESS
+
+### F0-26 — Custom sections on Client Details (Family, Carer and Admin)
+- **Dashboard / stream:** shared · **Lane:** S · **Days:** D21 · **Sprint:** SPRINT · **PR target:** `main` · **Branch:** `feature/shared-client-custom-sections`
+- **Description:** Add, rename, edit and delete custom titled sections on Client Details, below the fixed Description, Habits and Medical history (like adding and removing budget buckets). Family, an on-shift carer and an org admin manage them; delete asks for confirmation. Added by CHG-061. New table `client_custom_info_sections` with RLS and audit.
+- **User value:** Families and carers record whatever matters for this person (for example "Communication", "Behaviours of concern") without waiting for a new field.
+- **Dependencies:** FAM-09, CAR-04, ADM-11, F0-08, F0-21 · **Blocking decisions:** None
+- **Jira summary:** Custom Client Details sections: add, rename, edit, delete (Family, Carer, Admin)
+- **Acceptance criteria summary:** 16 criteria — sections listed in order; add; title and text validation; edit text; rename; delete with confirm; built-ins fixed; per-client limit; contract; RLS by role; audit; carer on/off shift; admin view; error states; accessibility; regression
+- **Testing summary:** 3 unit, 1 database (pgTAP), 9 component, 1 e2e, 1 regression
+- **Requirements:** REQ-11 (new headings)
+- **Docs:** `docs/development/shared/shared-client-custom-sections/` · **Status:** IN PROGRESS
+
+### F0-28 — Client personal details (sign-up, Family Settings, Client Details)
+- **Dashboard / stream:** shared · **Lane:** S · **Days:** D22 · **Sprint:** SPRINT · **PR target:** `main` · **Branch:** `feature/shared-client-profile-details`
+- **Description:** Optional client details at family sign-up (date of birth shown as age, email, phone, address, suburb, emergency contact), editable in Family Settings and shown read-only on Client Details for Family, Carer and Admin. Added by CHG-063. Six nullable columns on `clients` and a family-only `save_client_details`.
+- **User value:** Everyone caring for the person knows their age, how to reach them and who to call in an emergency.
+- **Dependencies:** F0-17, F0-22, FAM-12, FAM-09, CAR-04, ADM-11 · **Blocking decisions:** None
+- **Jira summary:** Client personal details: sign-up, Family Settings, Client Details
+- **Acceptance criteria summary:** 16 criteria — sign-up fields; sign-up unchanged without them; sign-up saves them; validation; details save failure; Settings view; edit/save/cancel; clear a field; Settings validation; save failure; Client Details card; carer/admin read-only; only family may save; header age/suburb; contract; accessibility
+- **Testing summary:** 3 unit, 1 database (pgTAP), 3 component, 1 integration
+- **Requirements:** REQ-36 (sign-up), REQ-11 (client record)
+- **Docs:** `docs/development/shared/shared-client-profile-details/` · **Status:** PR OPEN
+
 ## Phase 3 — Data wiring & behaviour (parallel: Family · Carer · Admin) — feature detail
 
 ### FAM-01 — Family Home — Today day-view timeline
@@ -965,6 +1003,28 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Testing summary:** 2 unit, 7 component
 - **Requirements:** REQ-17, REQ-18, REQ-19, PD-047
 - **Docs:** `docs/development/family-dev/family-event-form-calendar-polish/` · **Status:** IN PROGRESS
+
+### FAM-17 — Family — Info tips on main buttons
+- **Dashboard / stream:** family · **Lane:** F · **Days:** D21 · **Sprint:** SPRINT · **PR target:** `main` · **Branch:** `feature/family-info-tips`
+- **Description:** Tooltip half of PL-05 (CHG-057): a hand-rolled `InfoTip` toggletip next to Family Home and Calendar "Enter event" and Budget "Edit" and "Export".
+- **User value:** Families understand a button before pressing it.
+- **Dependencies:** FAM-UI-01, FAM-UI-02, FAM-UI-05, UI-02 · **Blocking decisions:** None
+- **Jira summary:** Info tips beside main Family buttons
+- **Acceptance criteria summary:** 10 criteria — named 44px button; hover, focus and click open; moving onto the tip keeps it; Esc closes; Home, Calendar and Budget placements; copy at most 100 characters and axe clean; Carer and Admin unchanged
+- **Testing summary:** 1 unit, 9 component
+- **Requirements:** PL-05
+- **Docs:** `docs/development/family-dev/family-info-tips/` · **Status:** IN PROGRESS
+
+### FAM-18 — Family — Delete event and recurrence end date
+- **Dashboard / stream:** family · **Lane:** F · **Days:** D21 · **Sprint:** SPRINT · **PR target:** `main` · **Branch:** `feature/family-delete-event`
+- **Description:** CHG-062: a 'Delete event' button on Task detail for Family and on-shift Carer (one-off: confirm; recurring: this occurrence or this and all future), and an optional 'Ends' date on the event form (Add and Edit). No migration: cancelled override and `recurrence_until`. Delete calls F0-27's shared `deleteEvent`, which refuses a Done occurrence (FAM-18 FD-10).
+- **User value:** Cancelled care leaves the schedule and a course of care stops by itself, without losing history.
+- **Dependencies:** FAM-06, FAM-07, FAM-15, CAR-07, F0-09, F0-11, UI-02 · **Blocking decisions:** None
+- **Jira summary:** Delete event (this / this and future) and recurrence end date
+- **Acceptance criteria summary:** 17 criteria — button shown/absent; one-off confirm; recurring choice; this occurrence; this and future keeps history; first occurrence removes series; cancel; Done not deletable; carer on/off shift; other family refused; failure; Ends field; inclusive end; end validation; Edit prefill; Admin none; a11y
+- **Testing summary:** 2 unit, 5 component, 2 integration
+- **Requirements:** FR-2.5, OQ-12, PD-045
+- **Docs:** `docs/development/family-dev/family-delete-event/` · **Status:** IN PROGRESS
 
 ### CAR-01 — Carer Home — Today's calendar and Tasks
 - **Dashboard / stream:** carer · **Lane:** C · **Days:** D8 · **Sprint:** SPRINT · **PR target:** `main` · **Branch:** `feature/carer-home-today`
@@ -1303,10 +1363,10 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 - **Dashboard / stream:** shared · **Lane:** B · **Days:** D17–D18 · **Sprint:** SPRINT · **PR target:** `main` · **Branch:** `feature/shared-care-alert-emails`
 - **Description:** A scheduled job that emails the right people when care is overdue (REQ-17's Overdue state) and, if decided, a reminder before upcoming care. Reuses INT-01's `EmailProvider`, Vercel Cron and secret-checked job route, and the once-per-trigger idempotency pattern. Added by CHG-047.
 - **User value:** Missed care is noticed without someone having to open the app.
-- **Dependencies:** INT-01, F0-11, F0-24 · **Blocking decisions:** OQ-40 (OPEN: what triggers an alert, who receives it, how soon, wording)
+- **Dependencies:** INT-01, F0-11, F0-24 · **Blocking decisions:** None (OQ-40 ANSWERED 2026-10-03, PD-062: one email per overdue task, 30 minutes after due, to Family and current org admins, no upcoming reminders in v1)
 - **Jira summary:** Scheduled overdue-care alert emails (and upcoming-care reminders if decided)
-- **Acceptance criteria summary:** 5 criteria (provisional, rewritten once OQ-40 is answered) — an overdue task emails the decided recipients once; the same task is not emailed twice; a completed task is never emailed; a send failure retries and records nothing; the endpoint refuses callers without the secret
-- **Testing summary:** 1 pgTAP, 1 unit, 1 integration
+- **Acceptance criteria summary:** 8 criteria — an overdue task (30 minutes past due) emails Family and current org admins once; never twice; never for done, cancelled, plain, too-new or too-old items; a send failure records nothing and retries; the route refuses callers without the secret; no-recipient, inactive and transferred-client cases; at most 100 per run on a daily cron; the email names the task, client and due time
+- **Testing summary:** 1 pgTAP, 3 unit, 3 integration (T-08 spans unit and integration)
 - **Requirements:** REQ-33 (PL-03 promoted; PL-23 stays parked; PL-25 was promoted to INT-11 by CHG-052)
 - **Docs:** `docs/development/shared/shared-care-alert-emails/` · **Status:** NOT STARTED
 
@@ -1350,7 +1410,7 @@ Branch names follow `feature/<slug>`; shared branches depend on OQ-01. Statuses 
 See PRD.md §17. Promotion requires a CHG entry, human confirmation, and new feature docs from `docs/templates/FEATURE_TEMPLATE/`.
 
 ## 7. Adding a new feature
-1. Propose ID (next number: `FAM-17`, `FAM-UI-09`, `CAR-10`, `ADM-12`, `UI-04`, `INT-13`, `F0-18`), slug `<stream>-<name>`, lane and planned day.
+1. Propose ID (next number: `FAM-19`, `FAM-UI-09`, `CAR-10`, `ADM-12`, `UI-04`, `INT-13`, `F0-18`), slug `<stream>-<name>`, lane and planned day.
 2. Record CHG-xxx in DECISIONS.md; get human confirmation if material.
 3. Copy `docs/templates/FEATURE_TEMPLATE/` to `docs/development/<stream>/<slug>/` and complete it.
 4. Add the row to §4 and a card to §5; add to `docs/JIRA_BACKLOG.csv`; update root PROGRESS.md.

@@ -3,7 +3,7 @@
 -- plus the CHG-001 / CHG-009 rules: plain events cannot be ticked off, per-occurrence mode overrides,
 -- and OQ-10 undo. AC-01 to AC-03 and AC-08 (occurrence listing, status) are TypeScript, tested elsewhere.
 begin;
-select plan(69);
+select plan(70);
 
 -- ---------------------------------------------------------------------------
 -- Seed: two organisations, five people, three clients, shifts, events
@@ -190,14 +190,20 @@ select lives_ok(
 -- ---------------------------------------------------------------------------
 -- Ticking off (AC-04, AC-05) and who may
 -- ---------------------------------------------------------------------------
+-- carer_only_tick_off: only the carer on an active shift ticks a task off; the family, an admin
+-- and a carer off shift are refused.
 select pg_temp.login('a1111111-1111-1111-1111-111111111111');
+select throws_ok(
+  $$ select set_occurrence_done('e1111111-1111-1111-1111-111111111111', '2026-11-30 09:00:00+11') $$,
+  '42501', null, 'Helen (family) cannot tick off Margaret''s morning medication: only the carer on shift can');
+select pg_temp.login('a3333333-3333-3333-3333-333333333333');
 select lives_ok(
   $$ select set_occurrence_done('e1111111-1111-1111-1111-111111111111', '2026-11-30 09:00:00+11') $$,
-  'AC-04: Helen ticks off Margaret''s morning medication');
+  'AC-04: Aisha, on shift, ticks off Margaret''s morning medication');
 select results_eq(
   $$ select actor_id, actor_display_name, organisation_id, action, client_id from care_event_completions where event_id = 'e1111111-1111-1111-1111-111111111111' $$,
-  $$ values ('a1111111-1111-1111-1111-111111111111'::uuid, 'Helen Doyle'::text, null::uuid, 'done'::text, 'b1111111-1111-1111-1111-111111111111'::uuid) $$,
-  'AC-04: one completion row, actor Helen, her name and no organisation snapshotted');
+  $$ values ('a3333333-3333-3333-3333-333333333333'::uuid, 'Aisha Rahman'::text, '11111111-1111-1111-1111-111111111111'::uuid, 'done'::text, 'b1111111-1111-1111-1111-111111111111'::uuid) $$,
+  'AC-04: one completion row, actor Aisha, her name and organisation snapshotted');
 
 select is(
   (select id from set_occurrence_done('e1111111-1111-1111-1111-111111111111', '2026-11-30 09:00:00+11')),
@@ -230,7 +236,7 @@ reset role;
 insert into care_event_overrides (event_id, original_start, kind, new_completion_mode, created_by) values
   ('e2222222-2222-2222-2222-222222222222', '2026-12-01 14:00:00+11', 'modified', 'manual', 'a1111111-1111-1111-1111-111111111111'),
   ('e1111111-1111-1111-1111-111111111111', '2026-12-07 09:00:00+11', 'modified', 'automatic', 'a1111111-1111-1111-1111-111111111111');
-select pg_temp.login('a1111111-1111-1111-1111-111111111111');
+select pg_temp.login('a3333333-3333-3333-3333-333333333333');
 select lives_ok(
   $$ select set_occurrence_done('e2222222-2222-2222-2222-222222222222', '2026-12-01 14:00:00+11') $$,
   'one occurrence of a plain event made a task by an override can be ticked off');
@@ -263,10 +269,10 @@ select throws_ok(
   '42501', null, 'a carer with no assignment is refused');
 
 select pg_temp.login('a2222222-2222-2222-2222-222222222222');
--- HUMAN REVIEW: test expectation changed (ADM-11 FD-01, PD-058). Was throws_ok 42501 'an admin cannot tick off'.
-select lives_ok(
+-- HUMAN REVIEW: test expectation changed (carer_only_tick_off). Was lives_ok (ADM-11 AC-04, PD-058).
+select throws_ok(
   $$ select set_occurrence_done('e1111111-1111-1111-1111-111111111111', '2026-12-28 09:00:00+11') $$,
-  '[ADM-11][AC-04] an admin of the client''s organisation can tick off (PD-058)');
+  '42501', null, 'an admin of the client''s organisation cannot tick off: only the carer on shift can');
 
 select pg_temp.login('a6666666-6666-6666-6666-666666666666');
 select throws_ok(
@@ -293,7 +299,7 @@ select throws_ok(
   $$ select set_occurrence_undone('e1111111-1111-1111-1111-111111111111', '2026-12-21 09:00:00+11') $$,
   '22023', null, 'undoing an occurrence that is not Done is refused');
 
-select pg_temp.login('a1111111-1111-1111-1111-111111111111');
+select pg_temp.login('a3333333-3333-3333-3333-333333333333');
 select lives_ok(
   $$ select set_occurrence_done('e1111111-1111-1111-1111-111111111111', '2026-12-21 09:00:00+11') $$,
   'after an undo the occurrence can be ticked off again');
@@ -336,8 +342,8 @@ select is(
 -- ---------------------------------------------------------------------------
 select results_eq(
   $$ select actor_id, actor_role, client_id from audit_log where table_name = 'care_event_completions' and action = 'INSERT' and client_id = 'b1111111-1111-1111-1111-111111111111' order by id limit 1 $$,
-  $$ values ('a1111111-1111-1111-1111-111111111111'::uuid, 'family'::text, 'b1111111-1111-1111-1111-111111111111'::uuid) $$,
-  'the first completion is in the audit log, with Helen as the actor and the client');
+  $$ values ('a3333333-3333-3333-3333-333333333333'::uuid, 'carer'::text, 'b1111111-1111-1111-1111-111111111111'::uuid) $$,
+  'the first completion is in the audit log, with Aisha as the actor and the client');
 select ok(
   exists (select 1 from audit_log where table_name = 'care_events' and action = 'INSERT' and client_id = 'b1111111-1111-1111-1111-111111111111'),
   'event creation is in the audit log with the client');

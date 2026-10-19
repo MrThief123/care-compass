@@ -425,6 +425,14 @@ CONFIRMED.
 - Consequences: PL-20's Admin half is superseded by ADM-11; its Carer half stays parked. The row link is wired after ADM-11 merges, as a small follow-up feature (lane A); until then rows stay unlinked. The exact landing (Care log, or the occurrence's Task detail) is settled in that follow-up's PRD.
 - Human confirmation: CONFIRMED 2026-10-02 (Dhruv Verma, in-session).
 
+### PD-062 — Overdue care alert emails: one per overdue task, to Family and current org admins, 30 minutes after due, no upcoming reminders in v1
+- Date: 2026-10-03 · Decided by: MrThief123 (in-session, answering OQ-40)
+- Decision: INT-09 sends one email per overdue task occurrence, once, 30 minutes after the occurrence's due time, to the same recipients as INT-01 (the client's Family members and the current admins of the client's organisation, PD-035 / OQ-28). The carer on shift is not emailed. No upcoming-care reminders in v1 (REQ-33's reminder half is deferred, PL-03 stays partly parked). No quiet hours: an alert is sent whenever it falls due, at any hour. Only tasks are alerted; plain events (no status), completed and cancelled occurrences never are.
+- Reason: the suggested defaults on OQ-40 were accepted; they reuse INT-01's recipient rule and job pieces, so no new recipient logic or scheduler is needed.
+- Alternatives: a daily digest per client (not chosen); also emailing the carer on shift (not chosen); upcoming reminders and quiet hours (not chosen for v1).
+- Consequences: INT-09's criteria are rewritten to this. Email wording was not part of the answer; the feature DECISIONS.md proposes plain wording for the human to confirm in review. A reminder half, a digest, quiet hours or a carer recipient is a new change if wanted later.
+- Human confirmation: CONFIRMED 2026-10-03 (MrThief123, in-session).
+
 ---
 
 ## 3. Open decisions (human input required)
@@ -474,7 +482,7 @@ Claude Code never changes a status in this table, never adds an ANSWERED heading
 | OQ-37 | Admin Home overdue row destination | Rows have chevrons but Admin has no task detail or task log screen (UI Q14). | UI-Q14; Design Admin Home | no | — | Omit navigation until an admin detail view is designed (PL-20). | ANSWERED |
 | OQ-38 | Client information fields | CIS3/CIS5 request DOB, contacts (parents, POA), disability, behaviours of concern up front, date admitted, 'last updated', photo, expandable headings with summary flags and SPO forms with archive. The Info design has Description, Habits, Medical history and Documentation only. | CIS3 Data 1–2; CIS5 Front page; Design Family Info | no | — | Build the design for MVP; remaining fields parked (PL-13, PL-22) pending client confirmation. | OPEN |
 | OQ-39 | Design copy and visual inconsistencies | Manage warning example (11:30–13:00) does not overlap the selected 07:00–11:00 slot; States sheet repeats no-results copy twice; Budget screen bar colours differ from Home; Task log Nurse column misaligned on Planned rows; Task log status filter is a dropdown despite 'chips over dropdowns'; Staff and Clients rail items share an icon. | Design images; DD §5, §7 | no | — | Follow tokens and the rules in UI-§5; generate warning text from real data; confirm copy. | OPEN |
-| OQ-40 | Overdue and upcoming care alert emails | REQ-33 asks for reminders for upcoming care and alerts for overdue care (SHOULD). Undefined: what counts as an alert (every overdue task, or a daily digest per client); recipients (Family only, Family and the organisation's admins as INT-01 does, or the carer on shift); how long after the due time; whether upcoming-care reminders are included and how far ahead; email wording; quiet hours (Australia/Melbourne). | REQ-33; US C-8; UC-F04; CIS5 Notifications; CHG-047 | YES | INT-09 | Do not build on a default. Suggested for discussion: one email per overdue task, to the same recipients as INT-01 (family and current org admins, OQ-28), 30 minutes after the due time, no upcoming reminders in v1, no quiet hours. | OPEN |
+| OQ-40 | Overdue and upcoming care alert emails | REQ-33 asks for reminders for upcoming care and alerts for overdue care (SHOULD). Undefined: what counts as an alert (every overdue task, or a daily digest per client); recipients (Family only, Family and the organisation's admins as INT-01 does, or the carer on shift); how long after the due time; whether upcoming-care reminders are included and how far ahead; email wording; quiet hours (Australia/Melbourne). | REQ-33; US C-8; UC-F04; CIS5 Notifications; CHG-047 | YES | INT-09 | Do not build on a default. Suggested for discussion: one email per overdue task, to the same recipients as INT-01 (family and current org admins, OQ-28), 30 minutes after the due time, no upcoming reminders in v1, no quiet hours. | ANSWERED |
 
 
 ### How to answer
@@ -500,6 +508,11 @@ Docs updated: DECISIONS.md
 Answer: an overdue row on Admin Home opens that client's page in the admin client view (ADM-11), where the admin sees the client's information and Care log and finds the overdue event. No separate Admin task log or task detail.
 Recorded as: PD-061
 Docs updated: DECISIONS.md, PRD.md (§17 PL-20), docs/development/admin-dev/admin-home/PRD.md and DECISIONS.md
+
+### OQ-40 — ANSWERED 2026-10-03 by MrThief123
+Answer: one email per overdue task, once, 30 minutes after the due time, to the client's Family members and the organisation's current admins (as INT-01); no upcoming-care reminders in v1; no quiet hours. Accepted as the suggested defaults, with recipients confirmed as Family and org admins (carer on shift not emailed).
+Recorded as: PD-062
+Docs updated: DECISIONS.md, INT-09 PRD.md, ACCEPTANCE_CRITERIA.md, TEST_PLAN.md, USER_STORIES.md, DECISIONS.md, PROGRESS.md, SESSION_STATE.md, DEVELOPMENT_PLAN.md (INT-09 card)
 
 ---
 
@@ -1134,3 +1147,76 @@ Template for future entries:
 - Impact: DEVELOPMENT_PLAN.md gains the INT-12 row and card (totals 93 to 94 active features, 460 to 505 criteria; next INT number INT-13). INT-08 now also depends on INT-12, so release readiness comes after the full journey is green. INT-12 depends on F0-24 and ADM-11 (not merged on 2026-10-03) plus merged features. No production code, migration or `src/server/**` contract changes. `docs/JIRA_BACKLOG.csv` not updated (predates CHG-047 and later additions).
 - Human confirmation: pending (Dhruv Verma to confirm FD-01, FD-02, FD-05 and the INT-08 dependency before the PR).
 - Docs updated: DECISIONS.md (this entry), DEVELOPMENT_PLAN.md (row, card, totals, next number, INT-08 row and card), the INT-12 pack, status page.
+
+### CHG-056 — Only the carer on shift ticks a task Done
+- Date / requested by: 2026-10-05 / the human owner (in-session)
+- Type: behaviour change (supersedes the "family at any time" part of OQ-09 for ticking Done, and ADM-11 FD-01 / PD-058 for ticking)
+- Description: a tick says care was delivered, so only the carer on an active shift for the client can set it. The Family calendar (and the Admin client calendar) list each task with its status and no tick boxes. `set_occurrence_done` refuses anyone else with 42501 (migration `20261005105808_carer_only_tick_off.sql`). Undo is unchanged: the family or an admin can still undo a tick (OQ-10), though no screen offers it to them now.
+- Impact: FAM-05's tick criteria now apply to the carer's calendar (CAR-06). Tests changed (HUMAN REVIEW: test expectation changed): `care_events`, `budget` and `admin_client_view` database tests tick as the carer on shift and expect the family and an admin to be refused; `family-calendar.test.tsx` renders the view with `canTick`; CAR-06 T-08 expects no tick boxes on the Family calendar.
+- Human confirmation: the human owner, 2026-10-05 (in-session request: "the family should not be able to tick off a task, only the carer").
+- Docs updated: DECISIONS.md (this entry). The FAM-05 and CAR-06 packs are not edited here.
+
+### CHG-057 — New feature FAM-17: info tips on main Family buttons (PL-05 partly promoted)
+- Date / requested by: 2026-10-06 / the human owner (in-session)
+- Type: scope addition (new feature; Parking lot promotion, tooltips only)
+- Description: promotes the tooltip half of PL-05 (OQ-25). New feature **FAM-17** (Family lane, `docs/development/family-dev/family-info-tips/`, `feature/family-info-tips`, 10 criteria): a hand-rolled `InfoTip` toggletip (hover, focus and click; Esc closes; 44px target) beside Family Home and Calendar "Enter event" and Budget "Edit" and "Export", with the wording in one map. Carer and Admin are not touched. The editable FAQ and staff discussion board stay parked; OQ-25 stays OPEN. One new shared file, `src/components/ui/info-tip.tsx`, is a flagged additive Lane S edit kept inside this PR (precedent: CHG-051).
+- Source / justification: human, in-session 2026-10-06: approved promotion, Family dashboard first, hand-rolled component.
+- Impact: DEVELOPMENT_PLAN.md gains the FAM-17 row and card (94 to 95 active, 508 to 518 criteria; next number FAM-18); PRD.md §17 notes PL-05's tooltips promoted. No contract, migration or dependency change. No existing test changes expected.
+- Human confirmation: the human owner, 2026-10-06 (in-session).
+- Docs updated: DECISIONS.md (this entry), DEVELOPMENT_PLAN.md, PRD.md §17, the FAM-17 pack.
+
+### CHG-058 — New feature F0-25: client Documents page (Family and Carer)
+- Date / requested by: 2026-10-08 / the human owner (in-session)
+- Type: scope addition (new feature)
+- Description: new shared feature **F0-25** (`docs/development/shared/shared-client-documents-page/`, `feature/shared-client-documents-page`, 16 criteria): a Documents page for a client, as a Family rail item and a Carer patient tab, with search, sort by name, size and date added, per-file open and Download all (.zip). Covers client-level and event documents. Carers may view and download for assigned patients on or off shift; no upload on the page.
+- Source / justification: human, in-session 2026-10-08, who also approved the zip approach (new dependency `fflate`) and asked for the schema check: `documents.uploaded_at` already gives date added, so there is no migration.
+- Impact: DEVELOPMENT_PLAN.md gains the F0-25 row and card (95 to 96 active, 518 to 534 criteria). New read function `getAllClientDocuments` in `src/server/documents/queries.ts` (additive). One additive item in the shared `nav-config.ts`. New API route and one dependency. Existing rail/tab test expectations gain one entry.
+- Human confirmation: the human owner, 2026-10-08 (in-session).
+- Docs updated: DECISIONS.md (this entry), DEVELOPMENT_PLAN.md, the F0-25 pack.
+
+### CHG-059 — "Info" tab renamed "Client Details", with an ID card icon
+- Date / requested by: 2026-10-10 / the human owner (in-session)
+- Type: copy and icon change (no behaviour change)
+- Description: the client-details screen is labelled **Client Details** instead of **Info** everywhere it is navigated to: the Family rail item (and the header screen name derived from it), the Carer patient tabs and the Admin client bar. The Family rail icon changes from the info circle (`info`) to an ID card (`id-card`, lucide `IdCard`). Routes stay `/info`; component and file names are unchanged.
+- Source / justification: human request, in-session 2026-10-10.
+- Impact: `src/components/shared/nav-config.ts`, `src/components/ui/icon.tsx` (one additive icon), `src/features/carer-patients/patient-tabs.tsx`, `src/features/admin-client-view/client-routes.ts`, and `src/components/shared/rail-nav.tsx` (rail labels centred, since "Client Details" wraps to two lines). Test expectations that named the "Info" link change to "Client Details" (rail, carer tabs, admin client bar and routes, and the app-shell, admin-client-view and cross-role-sync e2e specs); two new rail tests, for the icon and the centred labels. The Admin rail "Clients" item also changes from `info` to `id-card`, at the human's request.
+- Human confirmation: the human owner, 2026-10-10 (in-session).
+- Docs updated: DECISIONS.md (this entry).
+
+### CHG-060 — Info tip icon changes from "i" to "?"
+- Date / requested by: 2026-10-12 / the human owner (in-session)
+- Type: icon change (no behaviour change)
+- Description: the FAM-17 info tip button shows a question mark (lucide `CircleQuestionMark`, new additive `help` icon) instead of an info circle. Its accessible name ("About <label>"), 44px target, hover, focus, click and Esc behaviour are unchanged. The `info` icon stays for its other uses (status banners, Client Details empty states).
+- Source / justification: human request, in-session 2026-10-12.
+- Impact: `src/components/ui/info-tip.tsx` (icon), `src/components/ui/icon.tsx` (one additive icon), FAM-17 pack wording ("i" to "?", AC-01 and the PRD). Test change: one added test in `info-tip.test.tsx` asserting the `help` icon; no existing expectation changes. No new requirement, contract or dependency.
+- Human confirmation: the human owner, 2026-10-12 (in-session).
+- Docs updated: DECISIONS.md (this entry), FAM-17 PRD and AC-01 wording.
+
+### CHG-061 — New feature F0-26: custom sections on Client Details
+- Date / requested by: 2026-10-12 / Peter (client), relayed by the human owner in-session
+- Type: scope addition (new feature; REQ-11 "new headings" partly promoted)
+- Description: new shared feature **F0-26** (`docs/development/shared/shared-client-custom-sections/`, `feature/shared-client-custom-sections`, 16 criteria): on Client Details, users can add their own titled sections below Description, Habits and Medical history, rename them, edit their text and delete them, similar to how buckets are added and removed in the budget. The three built-in sections stay fixed (no rename or delete). Deleting a section asks for an inline confirmation ("its text will be lost"); the audit log keeps the old text. Shown on Family, Carer and Admin Client Details. Family, an on-shift carer and an admin of the client's organisation may add, rename, edit and delete. An off-shift carer reads only.
+- Source / justification: client request (Peter), confirmed by the human owner in-session 2026-10-12, with these answers: managed by family, on-shift carer and org admin; built-ins fixed; confirm then delete; all three dashboards.
+- Impact: DEVELOPMENT_PLAN.md gains the F0-26 row and card (96 to 97 active, 534 to 550 criteria). PRD.md REQ-11 row notes the promotion of "new headings"; summary flags and proforma forms stay parked (PL-13, PL-22, OQ-38 stays OPEN). New migration: table `client_custom_info_sections` with RLS (select, insert, update and **delete**) and an audit trigger; `client_info_sections` is not changed. New contract functions in `src/server/clients/` (additive). Edits to `src/features/family-info/` and `src/features/carer-patients/` are flagged cross-lane edits kept in this PR (precedent: CHG-058). No new dependency. Existing Info test expectations are not expected to change.
+- Human confirmation: the human owner, 2026-10-12 (in-session).
+- Docs updated: DECISIONS.md (this entry), DEVELOPMENT_PLAN.md, PRD.md REQ-11, the F0-26 pack.
+
+### CHG-062 — New feature FAM-18: delete event and recurrence end date
+- Date / requested by: 2026-10-11 / the human owner (in-session)
+- Type: scope addition (new feature; reverses the "Deleting events" out-of-scope lines of FAM-07 and CAR-07)
+- Description: new feature **FAM-18** (Family lane, `docs/development/family-dev/family-delete-event/`, `feature/family-delete-event`, 17 criteria). A 'Delete event' button on Task detail for Family and for a Carer on shift (not Admin): a one-off event gets a confirmation; a recurring event offers 'This occurrence' or 'This and all future occurrences'. The event form (Add and Edit) gains an optional 'Ends' date for repeating events (OQ-12 already says events repeat "unless an end date is set").
+- Source / justification: human, in-session 2026-10-11: "when you view event there should be a delete event button ... option to delete this or all future occurrences ... when creating a reoccurring event need an option to have an end date"; "family and nurse [carer] as they are the only people that can view the events"; "go with your recommendations for the rest".
+- Impact: DEVELOPMENT_PLAN.md gains the FAM-18 row and card (96 to 97 active, 534 to 551 criteria; next number FAM-19). No migration or RLS change: soft delete only (cancelled override; `recurrence_until`). `createEvent`/`updateEvent` gain optional `endDate`; new `deleteEventOccurrence` action; `EventFormValues` in the shared forms kit gains `endDate` (flagged additive Lane S edit, kept in this PR); carer pages touched props-only. Closes the pending-cost-on-delete question (FD-03: moot). No existing test expectation expected to change.
+- Human confirmation: the human owner, 2026-10-11 (in-session).
+- Docs updated: DECISIONS.md (this entry), DEVELOPMENT_PLAN.md, the FAM-18 pack.
+- Merge note (2026-10-14, the human owner): first recorded as CHG-060 on the FAM-18 branch; renumbered CHG-062 because `main` took CHG-060 (info tip icon) and CHG-061 (F0-26) first. F0-27 (#242) merged a shared `deleteEvent` (`src/server/events/delete-actions.ts`) while FAM-18 was open, so FAM-18 drops its own `deleteEventOccurrence` action and mock mutation and its Task detail 'Delete event' button calls F0-27's `deleteEvent` (one pattern per problem). FAM-18 still adds the Task detail entry point and the 'Ends' date. See the FAM-18 pack FD-10.
+
+### CHG-063 — New feature F0-28: client personal details at sign-up, in Family Settings and on Client Details
+- Date / requested by: 2026-10-14 / the human owner (in-session)
+- Type: scope addition (new feature)
+- Description: new shared feature **F0-28** (`docs/development/shared/shared-client-profile-details/`, `feature/shared-client-profile-details`, 16 criteria). Family sign-up gains an optional 'More about them' group: date of birth (shown as age), client email, client phone, street address, suburb and an emergency contact (name, relationship, phone). Family Settings gains a card to view and edit them; Client Details (Family, Carer, Admin) shows them read-only.
+- Source / justification: human, in-session 2026-10-14: "add more info for client when family signs up, their email, age, etc and this should be visible in the settings for family and show up in client details". Answers given: all of date of birth, email and phone, address and suburb, emergency contact; all optional; editable by family in Settings; read-only on Client Details.
+- Not included: the same request's "optional 2fa for carer and family"; the human parked it ("lets worry about the optional 2fa later"). It would reverse CHG-040 and needs its own CHG.
+- Impact: DEVELOPMENT_PLAN.md gains the F0-28 row and card (97 to 98 active, 550 to 566 criteria; CHG-062 / FAM-18 in PR #243 changes the same totals). New migration: six nullable columns on `clients` (additive) and function `save_client_details` (family only). `clients` is read by F0-22 (header), FAM-13 and ADM-05; their reads are unchanged. New contract functions in `src/server/clients/` and an additive call in `signUp` (F0-17). Cross-lane edits to Family Settings, Family/Carer Client Details and the sign-up page kept in this PR (precedent CHG-058, CHG-061). No new dependency.
+- Human confirmation: the human owner, 2026-10-14 (in-session).
+- Docs updated: DECISIONS.md (this entry), DEVELOPMENT_PLAN.md, the F0-28 pack.

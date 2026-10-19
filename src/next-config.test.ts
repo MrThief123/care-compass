@@ -11,3 +11,9 @@ describe("[F0-21][FD-11] browsers are told to use HTTPS only", () => {
     expect(hsts?.value).toBe("max-age=63072000");
   });
 });
+
+describe("client router cache", () => {
+  it("keeps visited pages for a short time so switching pages does not refetch", () => {
+    expect(nextConfig.experimental?.staleTimes?.dynamic).toBeGreaterThan(0);
+  });
+});

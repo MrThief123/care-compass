@@ -31,3 +31,16 @@ export async function inviteStaffAccount(email: string): Promise<{ userId: strin
   }
   return { userId: data.user.id };
 }
+
+/**
+ * F0-24 AC-05: sends a pending carer's invite email again. `inviteUserByEmail` for an account that
+ * has not accepted yet issues a fresh link; for one that has, Supabase refuses, so nothing is sent
+ * to a person who already signed in. Same caller rule as `inviteStaffAccount`: the caller must
+ * already have proved an active AAL2 admin of this carer's organisation. Never logs the email
+ * or the link.
+ */
+export async function resendStaffInviteEmail(email: string): Promise<void> {
+  const admin = createAdminClient();
+  const { error } = await admin.auth.admin.inviteUserByEmail(email);
+  if (error) throw new Error("could not resend this invite");
+}

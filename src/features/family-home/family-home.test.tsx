@@ -313,7 +313,7 @@ describe("[FAM-UI-01] Family Home layout and navigation (PRD Scope, no AC)", () 
   it("[FAM-UI-01][Scope] reads every panel through the contract for the route's client", async () => {
     await renderHome();
 
-    expect(mocks.getTodayOccurrences).toHaveBeenCalledWith(CLIENT_ID);
+    expect(mocks.getTodayOccurrences).toHaveBeenCalledWith(CLIENT_ID, { type: "all" });
     expect(mocks.getTaskLog).toHaveBeenCalledWith(CLIENT_ID, { status: "overdue" });
     expect(mocks.getTaskLog).toHaveBeenCalledWith(CLIENT_ID, { status: "done" });
     expect(mocks.getBudgetSummary).toHaveBeenCalledWith(CLIENT_ID);
@@ -324,6 +324,12 @@ describe("[FAM-UI-01] Family Home layout and navigation (PRD Scope, no AC)", () 
     const today = screen.getByRole("region", { name: "Today" });
 
     expect(within(today).getByText("Mon 30 Nov · day view")).toBeInTheDocument();
+  });
+
+  it("[FAM-17][AC-07] the Family Home route has an info tip beside 'Enter event'", async () => {
+    await renderHome();
+
+    expect(screen.getByRole("button", { name: "About Enter event" })).toBeInTheDocument();
   });
 
   it("[FAM-UI-01][Scope] 'Enter event' is a primary link to /family/<id>/events/new", async () => {

@@ -85,6 +85,18 @@ export const ClientInfoSectionSchema = z.object({
 });
 export type ClientInfoSection = z.infer<typeof ClientInfoSectionSchema>;
 
+/** F0-26: a section a family member, on-shift carer or admin added under the built-in three. */
+export const ClientCustomSectionSchema = z.object({
+  id: z.string(),
+  clientId: z.string(),
+  title: z.string(),
+  /** "" when nothing is written yet. */
+  content: z.string(),
+  /** ISO datetime. */
+  updatedAt: z.string(),
+});
+export type ClientCustomSection = z.infer<typeof ClientCustomSectionSchema>;
+
 // ---------------------------------------------------------------------------
 // Care events and occurrences
 // ---------------------------------------------------------------------------
@@ -310,6 +322,17 @@ export const EventDocumentSchema = z.object({
   uploadedBy: z.string().optional(),
 });
 export type EventDocument = z.infer<typeof EventDocumentSchema>;
+
+/**
+ * Any non-detached document of a client, for the Documents page (F0-25, CHG-058): a client-level
+ * file (no event) or a file attached to a care event, with the event's title for the "Attached
+ * to" column. Metadata only, like `EventDocument`.
+ */
+export const ClientDocumentSchema = EventDocumentSchema.extend({
+  eventId: z.string().optional(),
+  eventTitle: z.string().optional(),
+});
+export type ClientDocument = z.infer<typeof ClientDocumentSchema>;
 
 // ---------------------------------------------------------------------------
 // Carer notifications

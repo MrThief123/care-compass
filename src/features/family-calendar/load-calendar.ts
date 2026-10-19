@@ -1,7 +1,8 @@
 import type { LocalDate } from "@/lib/dates/week-range";
 import { getCurrentUser } from "@/server/auth/queries";
-import { getOccurrences, getTaskLog, getToday } from "@/server/events/queries";
-import type { Occurrence } from "@/types/domain";
+import { getClientShifts, getOccurrences, getTaskLog, getToday } from "@/server/events/queries";
+import type { ClientShift } from "@/server/events/queries";
+import type { AnyOccurrence, Occurrence } from "@/types/domain";
 
 import { parseCalendarParams, visibleRange, type CalendarParams } from "./calendar-params";
 
@@ -11,8 +12,11 @@ export const LOG_ROWS = 3;
 export interface FamilyCalendarData {
   today: LocalDate;
   params: CalendarParams;
-  occurrences: Occurrence[];
+  /** Tasks and plain events (UI-05): an event saved with the task switch off is drawn too. */
+  occurrences: AnyOccurrence[];
   log: Occurrence[];
+  /** Carers on duty in the visible range (their shifts), earliest first. */
+  shifts: ClientShift[];
   /** The signed-in person (their full name, CHG-032), "First Last", shown on a task they tick (CHG-016). */
   actorName: string;
 }
@@ -37,16 +41,18 @@ export async function loadFamilyCalendar(
 ): Promise<FamilyCalendarData> {
   const today = await getToday();
   const params = parseCalendarParams(search, today);
-  const [occurrences, taskLog, user] = await Promise.all([
-    getOccurrences(clientId, visibleRange(params)),
+  const [occurrences, taskLog, user, shifts] = await Promise.all([
+    getOccurrences(clientId, visibleRange(params), { type: "all" }),
     getTaskLog(clientId),
     getCurrentUser(role),
+    getClientShifts(clientId, visibleRange(params)),
   ]);
   return {
     today,
     params,
     occurrences,
     log: selectLog(taskLog.items),
+    shifts,
     actorName: `${user.firstName} ${user.lastName}`,
   };
 }

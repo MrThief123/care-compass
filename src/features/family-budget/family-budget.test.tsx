@@ -522,6 +522,13 @@ describe("[FAM-UI-05] Family Budget", () => {
     expect(screen.queryByRole("form")).not.toBeInTheDocument();
   });
 
+  it("[FAM-17][AC-08] the Family Budget route has info tips beside 'Edit' and 'Export'", async () => {
+    await renderBudget();
+
+    expect(screen.getByRole("button", { name: "About Edit" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "About Export" })).toBeInTheDocument();
+  });
+
   it("[FAM-UI-05][AC-02] History is a table with the columns Date, Description and Amount", async () => {
     await renderBudget();
 

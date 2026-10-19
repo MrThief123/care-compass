@@ -13,10 +13,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { CardShell } from "@/components/ui/card-shell";
 import { changeClientOrganisation } from "@/server/clients/actions";
+import type { ClientDetails } from "@/server/clients/client-details-schema";
 import type { ClientHeaderSummary, OrganisationChoice } from "@/server/clients/queries";
 import { requestOwnPasswordReset, updateFamilyContactDetails } from "@/server/profiles/actions";
 import type { FamilyContactDetails } from "@/server/profiles/queries";
 
+import { ClientDetailsCard } from "./client-details-card";
 import { OrganisationChoices } from "./organisation-choices";
 import { OrganisationRemovedBanner } from "./organisation-removed-banner";
 import { familyInfoSchema, type FamilyInfoValues } from "./settings-schema";
@@ -26,6 +28,8 @@ export interface FamilySettingsViewProps {
   contact: FamilyContactDetails;
   /** Where the client can move to (FAM-13): all organisations, the current one flagged. */
   organisations?: OrganisationChoice[];
+  /** The client's personal details (F0-28); the card is left out when absent. */
+  clientDetails?: ClientDetails;
 }
 
 const RESET_SENT = "We've emailed you a link to reset your password.";
@@ -52,12 +56,14 @@ const FIELDS: ReadonlyArray<{
  * Family · Settings (FAM-UI-06): Change organisation, Family info and Reset
  * username / password. Save and Reset go through the `profiles` Server Actions
  * (FAM-12). 'Change' opens an organisation picker, then the destructive
- * confirmation, and confirming moves the client (FAM-13).
+ * confirmation, and confirming moves the client (FAM-13). '<First>'s details' edits the client's
+ * personal details (F0-28).
  */
 export function FamilySettingsView({
   header,
   contact,
   organisations = [],
+  clientDetails,
 }: FamilySettingsViewProps) {
   const router = useRouter();
   // What Cancel goes back to: the fixture, then whatever was last saved (CHG-024).
@@ -192,6 +198,8 @@ export function FamilySettingsView({
   const canChange = choices.some((organisation) => !organisation.isCurrent);
   // ADM-05: removed by the organisation and not yet moved; the banner goes once a change succeeds.
   const removed = header.organisationRemoved === true && current.id === undefined;
+  // Never registered (or removed): choosing one gives it access, nobody loses any.
+  const unregistered = !organisationName;
   const chosen = choices.find((organisation) => organisation.id === chosenId);
 
   function openPicker() {
@@ -283,6 +291,12 @@ export function FamilySettingsView({
               There is no other organisation registered with Care Compass yet.
             </p>
           )}
+          {/* Not registered yet: the same picker registers the client (CHG: register from Settings). */}
+          {unregistered && canChange && (
+            <div>
+              <Button onClick={openPicker}>Choose organisation</Button>
+            </div>
+          )}
         </CardShell>
       )}
 
@@ -322,6 +336,10 @@ export function FamilySettingsView({
         </CardShell>
       </div>
 
+      {clientDetails && (
+        <ClientDetailsCard clientId={header.id} firstName={firstName} details={clientDetails} />
+      )}
+
       <SettingsActionCard
         title="Reset username / password"
         description="We'll email you a secure link to reset your credentials."
@@ -358,7 +376,7 @@ export function FamilySettingsView({
         tone="destructive"
         title="Change organisation?"
         body={
-          removed
+          unregistered
             ? `Choosing ${chosen?.name ?? "this organisation"} gives them access to ${firstName}'s routines, events, budget, documents and history. You can change organisation later in Settings.`
             : `Switching ${firstName}'s care to a new organisation keeps her routines, events, budget, documents and history. Assigned nurses and all future shifts will be cleared, and ${organisationName} will lose access immediately. This can't be undone from your side.`
         }

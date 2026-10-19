@@ -4,7 +4,9 @@ import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
+import { InfoTip } from "@/components/ui/info-tip";
 import { SegmentedControl, type SegmentedControlOption } from "@/components/ui/segmented-control";
+import { HELP_TEXT } from "@/features/family-help/help-text";
 
 import type { CalendarView } from "./calendar-params";
 
@@ -23,6 +25,8 @@ export interface CalendarToolbarProps {
   onToday: () => void;
   /** Add event, carrying this view so its Save and Cancel return here (CHG-017). */
   enterEventHref?: string;
+  /** Family only (FAM-17): an info tip beside Enter event. */
+  showHelp?: boolean;
 }
 
 /**
@@ -33,7 +37,8 @@ export interface CalendarToolbarProps {
  * say what they move by (DECISIONS.md FD-04). The heading is the page's h1.
  * The arrows and Today name their keyboard shortcuts (`use-calendar-shortcuts`).
  * 'Enter event' (absent when no href is given, as for a carer off shift, CHG-043) is Home's primary action at the toolbar's 44px height, a link
- * styled as the kit's primary Button (CHG-017, DECISIONS.md FD-14).
+ * styled as the kit's primary Button (CHG-017, DECISIONS.md FD-14). Family's info tip
+ * sits before it, so the link stays directly before D/W/M (FAM-17).
  */
 export function CalendarToolbar({
   label,
@@ -42,6 +47,7 @@ export function CalendarToolbar({
   onStep,
   onToday,
   enterEventHref,
+  showHelp = false,
 }: CalendarToolbarProps) {
   const unit = view;
   const arrow =
@@ -82,6 +88,9 @@ export function CalendarToolbar({
         </Button>
       </div>
       <div className="flex shrink-0 items-center gap-3">
+        {enterEventHref && showHelp && (
+          <InfoTip label={HELP_TEXT.enterEvent.label} text={HELP_TEXT.enterEvent.text} />
+        )}
         {enterEventHref && (
           <Link
             href={enterEventHref}

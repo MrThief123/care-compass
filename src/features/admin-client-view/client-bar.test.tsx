@@ -33,14 +33,14 @@ describe("[ADM-11][AC-01] client bar", () => {
 });
 
 describe("[ADM-11][AC-02] client nav", () => {
-  it("[ADM-11][AC-02] has Home, Info, Calendar, Budget and Care log under the client", () => {
+  it("[ADM-11][AC-02] has Home, Client Details, Calendar, Budget and Care log under the client", () => {
     render(<ClientBar clientId="c1" clientName="Margaret Doyle" />);
 
     const nav = screen.getByRole("navigation", { name: "Client screens" });
     const links = within(nav).getAllByRole("link");
     expect(links.map((link) => link.textContent)).toEqual([
       "Home",
-      "Info",
+      "Client Details",
       "Calendar",
       "Budget",
       "Care log",

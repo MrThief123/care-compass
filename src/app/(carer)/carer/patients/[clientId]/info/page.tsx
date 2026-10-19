@@ -3,6 +3,9 @@ import { CarerInfoView } from "@/features/carer-patients/carer-info-view";
 import { ViewOnlyNotice } from "@/features/carer-patients/edit-status";
 import { findCarerPatient } from "@/features/carer-patients/find-patient";
 import { loadFamilyInfoData, type FamilyInfoData } from "@/features/family-info/info-data";
+import { getClientDetails, type ClientDetails } from "@/server/clients/client-details";
+import { getClientCustomSections } from "@/server/clients/custom-sections";
+import type { ClientCustomSection } from "@/types/domain";
 
 export default async function PatientInfoPage({
   params,
@@ -14,8 +17,14 @@ export default async function PatientInfoPage({
   const patient = await findCarerPatient(clientId);
 
   let data: FamilyInfoData;
+  let customSections: ClientCustomSection[];
+  let personalDetails: ClientDetails;
   try {
-    data = await loadFamilyInfoData(clientId);
+    [data, customSections, personalDetails] = await Promise.all([
+      loadFamilyInfoData(clientId),
+      getClientCustomSections(clientId),
+      getClientDetails(clientId),
+    ]);
   } catch (error) {
     console.error(
       "[carer-patients] could not load info data:",
@@ -29,7 +38,13 @@ export default async function PatientInfoPage({
   return (
     <>
       {!patient.onShift && <ViewOnlyNotice firstName={patient.firstName} />}
-      <CarerInfoView clientId={clientId} data={data} canEdit={patient.onShift} />
+      <CarerInfoView
+        clientId={clientId}
+        data={data}
+        customSections={customSections}
+        personalDetails={personalDetails}
+        canEdit={patient.onShift}
+      />
     </>
   );
 }

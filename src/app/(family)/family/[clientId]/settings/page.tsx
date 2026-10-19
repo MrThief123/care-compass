@@ -1,6 +1,7 @@
 import { FamilySettingsView } from "@/features/family-settings/family-settings-view";
 import { SettingsErrorState } from "@/features/family-settings/settings-error-state";
 import { getCurrentUser } from "@/server/auth/queries";
+import { getClientDetails, type ClientDetails } from "@/server/clients/client-details";
 import {
   getClientHeaderSummary,
   getOrganisationChoices,
@@ -19,12 +20,14 @@ export default async function FamilySettingsPage({
   let header: ClientHeaderSummary;
   let contact: FamilyContactDetails;
   let organisations: OrganisationChoice[];
+  let clientDetails: ClientDetails;
   try {
     const user = await getCurrentUser("family");
-    [header, contact, organisations] = await Promise.all([
+    [header, contact, organisations, clientDetails] = await Promise.all([
       getClientHeaderSummary(clientId),
       getFamilyContactDetails(user.profileId),
       getOrganisationChoices(clientId),
+      getClientDetails(clientId),
     ]);
   } catch (error) {
     // A rejected contract read is the screen's error state, not a crash.
@@ -37,5 +40,12 @@ export default async function FamilySettingsPage({
     return <SettingsErrorState />;
   }
 
-  return <FamilySettingsView header={header} contact={contact} organisations={organisations} />;
+  return (
+    <FamilySettingsView
+      header={header}
+      contact={contact}
+      organisations={organisations}
+      clientDetails={clientDetails}
+    />
+  );
 }

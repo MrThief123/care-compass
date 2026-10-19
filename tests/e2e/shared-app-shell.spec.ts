@@ -24,7 +24,7 @@ test("[F0-15][PRD] keeps the rail and its buttons in view while the page scrolls
   const rail = await page.getByRole("complementary", { name: "Family navigation" }).boundingBox();
   expect(rail!.y).toBeCloseTo(0, 0);
   expect(rail!.y + rail!.height).toBeGreaterThanOrEqual(720);
-  for (const name of ["Home", "Info", "Calendar", "Budget", "Settings"]) {
+  for (const name of ["Home", "Client Details", "Calendar", "Budget", "Settings"]) {
     await expect(page.getByRole("link", { name })).toBeInViewport();
   }
 });

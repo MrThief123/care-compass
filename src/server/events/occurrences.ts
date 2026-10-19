@@ -10,15 +10,17 @@
  */
 import { localToMelbourneIso } from "@/lib/dates/melbourne-time";
 import { createClient } from "@/lib/supabase/server";
-import type { AnyOccurrence, OccurrenceRange } from "@/types/domain";
+import type { AnyOccurrence, OccurrenceRange, TypedTaskLogQuery } from "@/types/domain";
 
 import {
   buildOccurrences,
+  type BuildOccurrencesInput,
   type CompletionRow,
   type EventRow,
   type OverrideRow,
   type ShiftCarerRow,
 } from "./build-occurrences";
+import { buildTaskLog } from "./build-task-log";
 
 /** A half-open window of instants: `from` inclusive, `to` exclusive. */
 export interface InstantRange {
@@ -53,8 +55,35 @@ export async function loadOccurrences(
   now: Date,
   options: { keepCancelledWithCompletion?: boolean } = {},
 ): Promise<AnyOccurrence[]> {
+  return buildOccurrences(await loadOccurrenceInputs(clientId, range, now, options));
+}
+
+export async function loadTaskLog(
+  clientId: string,
+  range: InstantRange,
+  now: Date,
+  query: TypedTaskLogQuery,
+) {
+  return buildTaskLog(await loadOccurrenceInputs(clientId, range, now), query);
+}
+
+async function loadOccurrenceInputs(
+  clientId: string,
+  range: InstantRange,
+  now: Date,
+  options: { keepCancelledWithCompletion?: boolean } = {},
+): Promise<BuildOccurrencesInput> {
+  const empty: BuildOccurrencesInput = {
+    events: [],
+    overrides: [],
+    completions: [],
+    shifts: [],
+    range,
+    now,
+    ...options,
+  };
   // An id that is not an id is an unknown client, which the contract says is an empty list.
-  if (!ID_PATTERN.test(clientId)) return [];
+  if (!ID_PATTERN.test(clientId)) return empty;
 
   const supabase = await createClient();
 
@@ -65,7 +94,7 @@ export async function loadOccurrences(
     .lt("starts_at", range.to);
   // No message from the database in any error: it may name a client or a row (ARCHITECTURE.md §12.5).
   if (eventsError || !events) throw new Error(FAILED);
-  if (events.length === 0) return [];
+  if (events.length === 0) return empty;
 
   const [overridesResult, completionsResult, shiftsResult] = await Promise.all([
     supabase
@@ -94,7 +123,7 @@ export async function loadOccurrences(
   if (completionsResult.error || !completionsResult.data) throw new Error(FAILED);
   if (shiftsResult.error || !shiftsResult.data) throw new Error(FAILED);
 
-  return buildOccurrences({
+  return {
     events: events as EventRow[],
     overrides: overridesResult.data as OverrideRow[],
     completions: completionsResult.data as CompletionRow[],
@@ -102,5 +131,5 @@ export async function loadOccurrences(
     range,
     now,
     ...options,
-  });
+  };
 }

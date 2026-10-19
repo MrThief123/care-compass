@@ -1,6 +1,6 @@
 # Progress — ADM-11 Admin — Client view
 
-Status: IN PROGRESS
+Status: MERGED TO DEV (merged to `main` in #214, 2026-10-03; status synced by a docs PR, owner Dhruv Verma)
 Owner: Dhruv Verma
 Lane: A — Admin
 Sprint: SPRINT · planned D19–D20

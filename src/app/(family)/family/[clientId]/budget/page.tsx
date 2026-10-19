@@ -24,5 +24,5 @@ export default async function FamilyBudgetPage({
     return <BudgetErrorState />;
   }
 
-  return <FamilyBudgetView clientId={clientId} data={data} />;
+  return <FamilyBudgetView clientId={clientId} data={data} showHelp />;
 }

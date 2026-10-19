@@ -33,10 +33,9 @@ export interface TaskLogQueryInput {
 }
 
 /**
- * Lower bound `getTaskLog`'s Supabase read expands from (FAM-02): any date before this app can
- * have created a `care_events` row. Recurrence expansion steps forward from each event's own
- * anchor regardless of how much earlier `range.from` is (src/lib/recurrence `expand.ts`), so this
- * never truncates real history and never costs extra work.
+ * Lower bound for task-log history (FAM-02), before this app could have created
+ * a care event. Indexed recurrence reads seek from each event's own anchor;
+ * this bound does not require materialising empty years before that anchor.
  */
 const TASK_LOG_EARLIEST_DATE = "2000-01-01";
 
@@ -144,17 +143,13 @@ export async function getTaskLog(
     return mock.getTaskLog(clientId, parsed);
   }
 
-  // FAM-02 (OQ-31, proposed default): reads up to the end of today, oldest bound fixed rather
-  // than unbounded, since a range is what `loadOccurrences` needs. `expandOccurrences` always
-  // steps forward from each event's own anchor (src/lib/recurrence `expand.ts`), never from
-  // `range.from`, so an earlier bound here never costs extra work — it only has to predate every
-  // event this app will ever hold. Filtering, ordering, paging and `total` reuse the mock's own pure
-  // `queryTaskLog`, so both data sources answer identically for the same rows.
+  // INT-07: read the same full-history source rows under RLS, but count ordinary
+  // recurrence candidates without materialising them. Overrides/completions and
+  // the selected page still use the existing occurrence/status semantics.
   const today = await getToday();
-  const { loadOccurrences, melbourneDaysToInstants } = await import("./occurrences");
+  const { loadTaskLog, melbourneDaysToInstants } = await import("./occurrences");
   const range = melbourneDaysToInstants({ from: TASK_LOG_EARLIEST_DATE, to: today });
-  const occurrences = await loadOccurrences(clientId, range, new Date());
-  return mock.queryTaskLog(occurrences, parsed);
+  return loadTaskLog(clientId, range, new Date(), parsed);
 }
 
 /**
@@ -221,7 +216,7 @@ export async function getEvent(clientId: string, eventId: string): Promise<CareE
   const { data, error } = await supabase
     .from("care_events")
     .select(
-      "id, client_id, title, description, starts_at, duration_minutes, recurrence, completion_mode, cost, bucket_id",
+      "id, client_id, title, description, starts_at, duration_minutes, recurrence, recurrence_until, completion_mode, cost, bucket_id",
     )
     .eq("id", eventId)
     .eq("client_id", clientId)
@@ -238,6 +233,7 @@ export async function getEvent(clientId: string, eventId: string): Promise<CareE
     start: data.starts_at,
     durationMinutes: data.duration_minutes,
     recurrenceFrequency: dbToRecurrence(data.recurrence as DbRecurrence | null),
+    ...(data.recurrence_until ? { recurrenceEndDate: data.recurrence_until } : {}),
     completionMode: data.completion_mode as CareEvent["completionMode"],
     cost: data.cost ?? undefined,
     bucketId: data.bucket_id ?? undefined,
@@ -312,4 +308,37 @@ export async function getOccurrences(
   return occurrences.filter((occurrence) =>
     type === "events" ? isPlainEvent(occurrence) : !isPlainEvent(occurrence),
   );
+}
+
+export type ClientShift = mock.ClientShift;
+
+/**
+ * Who is on duty: the client's carers' shifts overlapping the Melbourne days `range.from` to
+ * `range.to`, earliest first, cancelled shifts left out. Readable by the client's family and carers
+ * (`client_shift_carers`); only a name and the shift window leave the database.
+ */
+export async function getClientShifts(
+  clientId: string,
+  range: OccurrenceRange,
+): Promise<ClientShift[]> {
+  const parsed = OccurrenceRangeSchema.parse(range);
+  if (getDataSourceMode() === "mock") return mock.getClientShifts(clientId, parsed);
+
+  const { melbourneDaysToInstants } = await import("./occurrences");
+  const instants = melbourneDaysToInstants(parsed);
+  const { createClient } = await import("@/lib/supabase/server");
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("client_shift_carers", {
+    p_client_id: clientId,
+    p_from: instants.from,
+    p_to: instants.to,
+  });
+  // No message from the database: it may name a client (ARCHITECTURE.md §12.5).
+  if (error || !data) throw new Error("getClientShifts: could not load who is on duty.");
+  return data.map((row) => ({
+    id: row.shift_id,
+    carerName: row.carer_display_name,
+    start: row.starts_at,
+    end: row.ends_at,
+  }));
 }

@@ -45,6 +45,7 @@ export default async function FamilyHomePage({
       today={new Date()}
       organisationRemoved={removedFor !== undefined}
       clientFirstName={removedFor}
+      showHelp
     />
   );
 }

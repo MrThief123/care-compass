@@ -12,6 +12,8 @@ import {
   OCCURRENCES_BY_CLIENT_ID,
   PLAIN_EVENT_OCCURRENCES_BY_CLIENT_ID,
   REFERENCE_DATE,
+  SHIFTS,
+  STAFF_MEMBERS,
   UPCOMING_OCCURRENCES_BY_CLIENT_ID,
 } from "@/mocks/fixtures";
 import { melbourneDateKey } from "@/mocks/melbourne-time";
@@ -124,7 +126,23 @@ export function queryTaskLog<T extends AnyOccurrence>(
   occurrences: readonly T[],
   query: TypedTaskLogQuery = {},
 ): TaskLogResult<T> {
-  const { q, status, type, page = 1 } = query;
+  const { page = 1 } = query;
+  const matching = matchingTaskLogOccurrences(occurrences, query);
+  const offset = (page - 1) * TASK_LOG_PAGE_SIZE;
+  return {
+    items: matching.slice(offset, offset + TASK_LOG_PAGE_SIZE),
+    page,
+    pageSize: TASK_LOG_PAGE_SIZE,
+    total: matching.length,
+  };
+}
+
+/** Shared filtering/order semantics; the real indexed reader uses this for exceptional rows. */
+export function matchingTaskLogOccurrences<T extends AnyOccurrence>(
+  occurrences: readonly T[],
+  query: TypedTaskLogQuery = {},
+): T[] {
+  const { q, status, type } = query;
   const needle = q?.trim().toLowerCase();
 
   const matching = occurrences
@@ -136,13 +154,7 @@ export function queryTaskLog<T extends AnyOccurrence>(
     })
     .sort(newestFirst);
 
-  const offset = (page - 1) * TASK_LOG_PAGE_SIZE;
-  return {
-    items: matching.slice(offset, offset + TASK_LOG_PAGE_SIZE),
-    page,
-    pageSize: TASK_LOG_PAGE_SIZE,
-    total: matching.length,
-  };
+  return matching;
 }
 
 export async function getTaskLog(
@@ -294,6 +306,8 @@ export interface CreateEventInput {
   durationMinutes: number;
   recurrenceFrequency: CareEvent["recurrenceFrequency"];
   completionMode: CareEvent["completionMode"];
+  /** ISO date the series stops after, inclusive (FAM-18); absent repeats forever. */
+  recurrenceEndDate?: string;
 }
 
 /**
@@ -315,6 +329,7 @@ export async function createEvent(input: CreateEventInput): Promise<string> {
     durationMinutes: input.durationMinutes,
     recurrenceFrequency: input.recurrenceFrequency,
     completionMode: input.completionMode,
+    ...(input.recurrenceEndDate ? { recurrenceEndDate: input.recurrenceEndDate } : {}),
   };
   CARE_EVENTS.push(event);
 
@@ -349,6 +364,8 @@ export interface UpdateEventInput {
   recurrenceFrequency: CareEvent["recurrenceFrequency"];
   completionMode: CareEvent["completionMode"];
   scope: "occurrence" | "series";
+  /** FAM-18: a date sets the series end, `null` clears it, absent leaves it. */
+  recurrenceEndDate?: string | null;
 }
 
 /**
@@ -382,6 +399,13 @@ export async function updateEvent(input: UpdateEventInput): Promise<void> {
   event.recurrenceFrequency = input.recurrenceFrequency;
   event.completionMode = input.completionMode;
   event.durationMinutes = input.durationMinutes;
+  if (input.recurrenceEndDate !== undefined) {
+    if (input.recurrenceEndDate && input.recurrenceFrequency !== "none") {
+      event.recurrenceEndDate = input.recurrenceEndDate;
+    } else {
+      delete event.recurrenceEndDate;
+    }
+  }
   if (input.scope === "series" && !wasRecurring) {
     event.start = input.startsAt;
   }
@@ -401,4 +425,93 @@ export async function updateEvent(input: UpdateEventInput): Promise<void> {
       row.start = input.startsAt;
     }
   }
+}
+
+export interface DeleteEventInput {
+  clientId: string;
+  eventId: string;
+  /** The viewed occurrence's original start (its identity). */
+  occurrenceOriginalStart: string;
+  scope: "occurrence" | "future";
+}
+
+/**
+ * Phase 1 mock mutation (F0-27): drops the viewed occurrence, or it and every later one, from the
+ * in-memory rows; the event itself goes when no occurrence of it is left or it is a one-off. A Done
+ * occurrence is refused and nothing changes (FAM-18 AC-08).
+ */
+export async function deleteEvent(input: DeleteEventInput): Promise<"deleted" | "done"> {
+  const index = CARE_EVENTS.findIndex(
+    (candidate) => candidate.id === input.eventId && candidate.clientId === input.clientId,
+  );
+  if (index === -1) throw new Error("That event could not be found.");
+  const event = CARE_EVENTS[index]!;
+
+  const viewedMs = Date.parse(input.occurrenceOriginalStart);
+  const viewed = [
+    ...rowsFor(OCCURRENCES_BY_CLIENT_ID, input.clientId),
+    ...rowsFor(UPCOMING_OCCURRENCES_BY_CLIENT_ID, input.clientId),
+  ].find(
+    (row) =>
+      row.eventId === input.eventId &&
+      Date.parse(row.key.slice(row.eventId.length + 1)) === viewedMs,
+  );
+  if (viewed?.status === "done") return "done";
+
+  const removeAll = input.scope === "future" || event.recurrenceFrequency === "none";
+  for (const byClient of [
+    OCCURRENCES_BY_CLIENT_ID,
+    UPCOMING_OCCURRENCES_BY_CLIENT_ID,
+    PLAIN_EVENT_OCCURRENCES_BY_CLIENT_ID,
+  ] as Readonly<Record<string, AnyOccurrence[]>>[]) {
+    const rows = Object.hasOwn(byClient, input.clientId) ? byClient[input.clientId] : undefined;
+    if (!rows) continue;
+    for (let i = rows.length - 1; i >= 0; i--) {
+      const row = rows[i]!;
+      if (row.eventId !== input.eventId) continue;
+      const originalMs = Date.parse(row.key.slice(row.eventId.length + 1));
+      if (originalMs === viewedMs || (removeAll && originalMs >= viewedMs)) rows.splice(i, 1);
+    }
+  }
+
+  const stillHasRows = [
+    ...rowsFor(OCCURRENCES_BY_CLIENT_ID, input.clientId),
+    ...rowsFor(UPCOMING_OCCURRENCES_BY_CLIENT_ID, input.clientId),
+    ...rowsFor(PLAIN_EVENT_OCCURRENCES_BY_CLIENT_ID, input.clientId),
+  ].some((row) => row.eventId === input.eventId);
+  if (event.recurrenceFrequency === "none" || (input.scope === "future" && !stillHasRows)) {
+    CARE_EVENTS.splice(index, 1);
+  }
+  return "deleted";
+}
+
+/** A carer's shift for a client, with the carer's full name (`client_shift_carers`). */
+export interface ClientShift {
+  id: string;
+  carerName: string;
+  start: string;
+  end: string;
+}
+
+/** The client's shifts that overlap a Melbourne day from `range.from` to `range.to`, earliest first. */
+export async function getClientShifts(
+  clientId: string,
+  range: OccurrenceRange,
+): Promise<ClientShift[]> {
+  return SHIFTS.filter(
+    (shift) =>
+      shift.clientId === clientId &&
+      melbourneDateKey(shift.start) <= range.to &&
+      melbourneDateKey(shift.end) >= range.from,
+  )
+    .sort((a, b) => Date.parse(a.start) - Date.parse(b.start))
+    .map((shift) => {
+      const carer = STAFF_MEMBERS.find((staff) => staff.id === shift.carerId);
+      return {
+        id: shift.id,
+        carerName: carer ? `${carer.firstName} ${carer.lastName}` : "Unknown",
+        start: shift.start,
+        end: shift.end,
+      };
+    });
 }

@@ -162,7 +162,7 @@ test.describe("[ADM-11] Admin client view against real data", () => {
     }
   });
 
-  test("[ADM-11][AC-02] moving between Home, Info, Calendar, Budget and Care log keeps the client and never leaves /admin/clients/<id>/", async ({
+  test("[ADM-11][AC-02] moving between Home, Client Details, Calendar, Budget and Care log keeps the client and never leaves /admin/clients/<id>/", async ({
     page,
   }) => {
     const s = await seed();
@@ -173,7 +173,7 @@ test.describe("[ADM-11] Admin client view against real data", () => {
 
       const nav = page.getByRole("navigation", { name: "Client screens" });
       for (const [label, segment] of [
-        ["Info", "info"],
+        ["Client Details", "info"],
         ["Calendar", "calendar"],
         ["Budget", "budget"],
         ["Care log", "tasks"],

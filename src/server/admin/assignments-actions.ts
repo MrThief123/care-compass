@@ -10,6 +10,7 @@ import { z } from "zod";
 
 import { removeMockAssignment } from "@/server/admin/assignments-mock-store";
 import { getDataSourceMode } from "@/server/data-source";
+import { refreshCachedPages } from "@/server/refresh-cache";
 
 export type RemoveAssignmentResult =
   | { ok: true; data: { endedShifts: number } }
@@ -26,7 +27,7 @@ const RemoveSchema = z.object({
 const REMOVE_FAILED = "Couldn't remove this client. Try again.";
 const NOT_ALLOWED = "You can't remove this client from this carer.";
 
-export async function removeCarerAssignment(input: {
+async function removeCarerAssignmentImpl(input: {
   carerId: string;
   clientId: string;
 }): Promise<RemoveAssignmentResult> {
@@ -59,6 +60,14 @@ export async function removeCarerAssignment(input: {
     logFailure(error instanceof Error ? error.name : undefined);
     return { ok: false, error: { code: "UNEXPECTED", message: REMOVE_FAILED } };
   }
+}
+
+export async function removeCarerAssignment(
+  ...args: Parameters<typeof removeCarerAssignmentImpl>
+): ReturnType<typeof removeCarerAssignmentImpl> {
+  const result = await removeCarerAssignmentImpl(...args);
+  if ((result as { ok?: boolean }).ok !== false) refreshCachedPages();
+  return result;
 }
 
 /** A feature tag and an error code only: the message may carry client data (ARCHITECTURE.md §12.5). */

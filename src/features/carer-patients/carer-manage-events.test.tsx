@@ -64,6 +64,7 @@ vi.mock("@/server/shifts/queries", () => ({ getCarerPatients: mocks.getCarerPati
 vi.mock("@/server/events/queries", () => ({
   getToday: mocks.getToday,
   getOccurrences: mocks.getOccurrences,
+  getClientShifts: async () => [],
   getOccurrence: mocks.getOccurrence,
   getTodayOccurrences: mocks.getTodayOccurrences,
   getEvent: mocks.getEvent,
