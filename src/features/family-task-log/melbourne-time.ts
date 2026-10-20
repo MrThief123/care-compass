@@ -13,13 +13,6 @@ const TIME_FORMATTER = new Intl.DateTimeFormat("en-AU", {
   hourCycle: "h23",
 });
 
-const DAY_FORMATTER = new Intl.DateTimeFormat("en-AU", {
-  timeZone: MELBOURNE_TIME_ZONE,
-  year: "numeric",
-  month: "2-digit",
-  day: "2-digit",
-});
-
 function partsOf(formatter: Intl.DateTimeFormat, iso: string): Record<string, string> {
   return Object.fromEntries(
     formatter.formatToParts(new Date(iso)).map((part) => [part.type, part.value]),
@@ -32,8 +25,4 @@ export function formatTimeOfDay(iso: string): string {
   return `${parts.hour}:${parts.minute}`;
 }
 
-/** The Melbourne calendar day of an instant as `YYYY-MM-DD`, sortable as text. */
-export function melbourneDateKey(iso: string): string {
-  const parts = partsOf(DAY_FORMATTER, iso);
-  return `${parts.year}-${parts.month}-${parts.day}`;
-}
+export { melbourneDateKey } from "@/lib/dates/melbourne-time";

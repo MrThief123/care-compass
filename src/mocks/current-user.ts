@@ -1,4 +1,4 @@
-import { Role, RoleSchema } from "@/types/domain";
+import { Role } from "@/types/domain";
 
 import { ADMIN_PROFILE, CARER_PROFILES, FAMILY_PROFILES } from "./fixtures";
 
@@ -11,12 +11,6 @@ export interface CurrentUser {
 }
 
 const DEFAULT_ROLE: Role = "family";
-
-/** Pure parser for the `?as=` query parameter; returns null for missing/invalid values. */
-export function resolveMockRole(rawValue: string | null | undefined): Role | null {
-  const parsed = RoleSchema.safeParse(rawValue);
-  return parsed.success ? parsed.data : null;
-}
 
 function profileForRole(role: Role): CurrentUser {
   switch (role) {

@@ -51,19 +51,6 @@ export const UNBROKEN_LABEL = "Z".repeat(60);
 export const NON_ASCII_TITLE = "朝の薬 — Médication du matin 💊";
 export const NON_ASCII_NAME = "Zoë Ñúñez-O’Brien";
 
-/** `count` completed occurrences, newest first, one hour apart, the newest at Mon 30 Nov 2026 09:00. */
-export function doneNewestFirst(count: number): Occurrence[] {
-  const newest = Date.parse(melbourne("09:00"));
-  return Array.from({ length: count }, (_, index) =>
-    occurrence({
-      title: `Completed care ${index + 1}`,
-      start: new Date(newest - index * 3_600_000).toISOString(),
-      status: "done",
-      actor: "Aisha Rahman",
-    }),
-  );
-}
-
 /** `count` overdue occurrences, newest first, one day apart, the newest on Sun 29 Nov 2026. */
 export function overdueNewestFirst(count: number): Occurrence[] {
   const newest = Date.parse(melbourne("10:00", "2026-11-29"));
