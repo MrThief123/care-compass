@@ -30,6 +30,27 @@ npm run db:types             # regenerates src/lib/supabase/database.types.ts fr
 supabase stop                # stops the stack when you're done
 ```
 
+## Supabase hosted setup (first time)
+
+For a fresh hosted Supabase project (for example a new account, or a Vercel deployment). The schema is the SQL files in `supabase/migrations/`; the Supabase CLI applies them.
+
+1. Create the project in the Supabase dashboard and keep the database password.
+2. Apply the schema (the project ref is in the dashboard URL, or Project Settings → General → Reference ID):
+
+```bash
+npx supabase login
+npx supabase link --project-ref <ref>   # prompts for the database password
+npx supabase db push                    # applies every migration; tables appear under `public`
+```
+
+   This goes through Supabase's API, so it works on IPv4-only networks. Pushing with `--db-url` against the direct host `db.<ref>.supabase.co` fails there with "no route to host" (that host is IPv6-only); use the Session pooler string from Connect instead.
+3. Copy `.env.example` to `.env.local` (or set the same variables in Vercel) with the Project URL, anon key and service-role key from Project Settings → API. The service-role key is server-only.
+4. Under Authentication → URL Configuration set the Site URL and Redirect URLs to where the app runs (`http://localhost:3000` locally, or the Vercel URL). Reset and invite links use the Site URL.
+5. Hosted auth emails need custom SMTP (Authentication → SMTP, Resend), because Supabase's built-in mailer is heavily rate-limited.
+6. Sign up in the app. Sign-up needs the migrations applied first, otherwise the auth user is created without a profile row and "account already exists" blocks a retry; delete that user under Authentication → Users and sign up again.
+
+Never run `supabase db reset` against a hosted project: it wipes the data. Run `npm run db:seed` only if you want demo data.
+
 Query Supabase only through `src/lib/supabase/browser.ts` (Client Components) or `src/lib/supabase/server.ts` (Server Components, Server Actions, Route Handlers) — both run as the signed-in user, so RLS stays the authorisation boundary. `src/server/jobs/supabase-admin.ts` is the one service-role (RLS-bypassing) client, restricted by lint to `src/server/jobs/**`.
 
 ## Project docs
