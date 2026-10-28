@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Setting up Care Compass | Care Compass handover</title>
+<meta name="description" content="Put Care Compass online under your own accounts, one step at a time.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="site-header">
+  <a class="brand" href="index.html">Care Compass <span>handover</span></a>
+  <nav class="site-nav" aria-label="Documents"><a href="deployment.html" aria-current="page">Setup guide</a><a href="admin-guide.html">Admin guide</a><a href="carer-guide.html">Carer guide</a><a href="family-guide.html">Family guide</a><a href="admin-signin-code.html">Sign-in code</a></nav>
+</header>
+<div class="layout">
+<nav class="toc" aria-label="On this page"><p>On this page</p><ul><li><a href="#what-you-will-do">What you will do</a></li><li><a href="#your-checklist">Your checklist</a></li><li><a href="#words-you-will-see">Words you will see</a></li><li><a href="#before-you-start">Before you start</a></li><li><a href="#your-codes-table">Your codes table</a></li><li><a href="#step-1-create-a-github-account">Step 1: Create a GitHub account</a></li><li><a href="#step-2-make-your-own-copy-of-care-compass-fork">Step 2: Make your own copy of Care Compass (fork)</a></li><li><a href="#step-3-create-a-supabase-account">Step 3: Create a Supabase account</a></li><li><a href="#step-4-create-your-supabase-project">Step 4: Create your Supabase project</a></li><li><a href="#step-5-copy-your-codes-from-supabase">Step 5: Copy your codes from Supabase</a></li><li><a href="#step-6-give-github-three-of-the-codes">Step 6: Give GitHub three of the codes</a></li><li><a href="#step-7-build-the-database">Step 7: Build the database</a></li><li><a href="#step-8-put-the-website-online-with-vercel">Step 8: Put the website online with Vercel</a></li><li><a href="#step-9-two-settings-in-supabase">Step 9: Two settings in Supabase</a></li><li><a href="#step-10-make-the-password-reset-email-work">Step 10: Make the password reset email work</a></li><li><a href="#step-11-check-it-works">Step 11: Check it works</a></li><li><a href="#if-something-goes-wrong">If something goes wrong</a></li><li><a href="#keeping-your-codes-safe">Keeping your codes safe</a></li><li><a href="#getting-updates-later">Getting updates later</a></li></ul></nav>
+<main>
+<h1>Setting up Care Compass: step by step</h1>
+<p>This guide shows you how to put Care Compass online under your own accounts. You do not need any technical knowledge. Every step says where to click and what you should see. Take your time: the whole job takes about one hour.</p>
+<div class="panel info"><p><strong>If you get stuck:</strong> stop, write down the step number and what the screen says, and contact the Care Compass team. Nothing in this guide can delete your data by accident.</p></div>
+
+<h2 id="what-you-will-do">What you will do</h2>
+<ol>
+<li>Create a GitHub account (where the program lives).</li>
+<li>Make your own copy of the Care Compass program (this is called a "fork").</li>
+<li>Create a Supabase account (where the information is stored) and a project.</li>
+<li>Copy a few codes from Supabase into the table in this guide.</li>
+<li>Give GitHub those codes.</li>
+<li>Press one button in GitHub to build the database.</li>
+<li>Create a Vercel account (it puts the website on the internet) and publish the website.</li>
+<li>Change two settings in Supabase so that sign-up and password reset work.</li>
+</ol>
+
+<h2 id="your-checklist">Your checklist</h2>
+<p>Tick each box on paper as you finish it.</p>
+<ul class="checklist">
+<li>GitHub account created (Step 1)</li>
+<li>Care Compass copied to my GitHub account (Step 2)</li>
+<li>Supabase account created (Step 3)</li>
+<li>Supabase project created, database password saved (Step 4)</li>
+<li>Five codes copied into the table (Step 5)</li>
+<li>Three secrets added in GitHub (Step 6)</li>
+<li>Migrate database finished with a green tick (Step 7)</li>
+<li>Website published on Vercel, web address saved (Step 8)</li>
+<li>Email confirmation switched off, website address added in Supabase (Step 9)</li>
+<li>Reset and invite emails changed (Step 10)</li>
+<li>Test sign-up worked (Step 11)</li>
+</ul>
+
+<h2 id="words-you-will-see">Words you will see</h2>
+<table>
+<thead><tr><th>Word</th><th>What it means</th></tr></thead>
+<tbody>
+<tr><td><strong>Account</strong></td><td>Your own login with a company, made with your email and a password.</td></tr>
+<tr><td><strong>Fork</strong></td><td>Your own copy of the program, kept in your own GitHub account.</td></tr>
+<tr><td><strong>Database</strong></td><td>Where Care Compass stores its information (people, carers, schedules, budgets).</td></tr>
+<tr><td><strong>Key or code</strong></td><td>A long password that lets one company's tool talk to another. Treat it like a bank password.</td></tr>
+<tr><td><strong>Copy and paste</strong></td><td>Click and drag to highlight text, press <strong>Ctrl and C</strong> (Mac: <strong>Command and C</strong>) to copy it, then click where it should go and press <strong>Ctrl and V</strong> (Mac: <strong>Command and V</strong>).</td></tr>
+</tbody>
+</table>
+
+<h2 id="before-you-start">Before you start</h2>
+<ul>
+<li>An email address that you can read, and that you will keep for these accounts.</li>
+<li>About one hour, a computer and a web browser such as Chrome or Safari.</li>
+<li>A place to keep your codes private, for example a notebook kept somewhere safe.</li>
+</ul>
+
+<h2 id="your-codes-table">Your codes table</h2>
+<p>As you go through the steps you will collect the codes below. <strong>Copy each one into the last column when a step tells you to.</strong> The last column starts empty.</p>
+<table>
+<thead><tr><th>Name</th><th>What it is</th><th>Where you find it</th><th>Paste your code here</th></tr></thead>
+<tbody>
+<tr><td><code>SUPABASE_PROJECT_REF</code></td><td>The short name of your Supabase project</td><td>Step 5</td><td></td></tr>
+<tr><td><code>SUPABASE_DB_PASSWORD</code></td><td>The database password you choose</td><td>Step 4</td><td></td></tr>
+<tr><td><code>SUPABASE_ACCESS_TOKEN</code></td><td>A code that lets GitHub use your Supabase</td><td>Step 5</td><td></td></tr>
+<tr><td><code>NEXT_PUBLIC_SUPABASE_URL</code></td><td>The web address of your Supabase project</td><td>Step 5</td><td></td></tr>
+<tr><td><code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code></td><td>The "anon" key (a public key)</td><td>Step 5</td><td></td></tr>
+<tr><td><code>SUPABASE_SERVICE_ROLE_KEY</code></td><td>The "service_role" key (a private key: tell nobody)</td><td>Step 5</td><td></td></tr>
+<tr><td><code>DATA_SOURCE</code></td><td>Tells Care Compass to use your database. It is always the same word.</td><td>Already filled in</td><td><code>supabase</code></td></tr>
+<tr><td>Your Vercel web address</td><td>The address of your finished website</td><td>Step 8</td><td></td></tr>
+</tbody>
+</table>
+
+<h2 id="step-1-create-a-github-account">Step 1: Create a GitHub account</h2>
+<ol>
+<li>Open <strong>github.com</strong> in your browser.</li>
+<li>Click <strong>Sign up</strong> (top right).</li>
+<li>Type your email, choose a password and a username, then follow the instructions on screen.</li>
+<li>GitHub emails you a code. Type it in to finish.</li>
+</ol>
+<figure style="max-width:408px"><a href="images/fe65bf44-0213-4af1-939b-fb21c65b97b7.jpg" target="_blank" rel="noopener"><img src="images/fe65bf44-0213-4af1-939b-fb21c65b97b7.jpg" alt="The GitHub sign-up page" loading="lazy"></a></figure>
+
+<h2 id="step-2-make-your-own-copy-of-care-compass-fork">Step 2: Make your own copy of Care Compass (fork)</h2>
+<ol>
+<li>Open the Care Compass repository on GitHub: <a href="https://github.com/MrThief123/care-compass">https://github.com/MrThief123/care-compass</a>. Make sure you are signed in to your own GitHub account.</li>
+<li>Click the <strong>Fork</strong> button near the top right.</li>
+<li>Leave the settings as they are and click the green <strong>Create fork</strong> button.</li>
+<li>Wait a moment. You now have your own copy. The address at the top of the browser now has your username in it.</li>
+</ol>
+<figure style="max-width:640px"><a href="images/86af7e50-50bf-46f9-b2e6-0c6c053e200e.jpg" target="_blank" rel="noopener"><img src="images/86af7e50-50bf-46f9-b2e6-0c6c053e200e.jpg" alt="The Care Compass repository page on GitHub with the Fork button at the top right" loading="lazy"></a></figure>
+<figure style="max-width:640px"><a href="images/cb0a4b36-3830-494f-a5a2-8340532e2d83.jpg" target="_blank" rel="noopener"><img src="images/cb0a4b36-3830-494f-a5a2-8340532e2d83.jpg" alt="The Create a new fork page with the green Create fork button" loading="lazy"></a></figure>
+
+<h2 id="step-3-create-a-supabase-account">Step 3: Create a Supabase account</h2>
+<ol>
+<li>Open <strong>supabase.com</strong>.</li>
+<li>Click <strong>Start your project</strong>.</li>
+<li>Click <strong>Continue with GitHub</strong>. This uses the GitHub account you just made, so there is no new password to remember.</li>
+<li>If GitHub asks you to allow Supabase, click <strong>Authorize</strong>.</li>
+<li>If Supabase asks you to create an organisation, type your business name and continue.</li>
+</ol>
+<figure style="max-width:408px"><a href="images/41b2b510-ac23-4255-bcbd-61cfdb916cf1.jpg" target="_blank" rel="noopener"><img src="images/41b2b510-ac23-4255-bcbd-61cfdb916cf1.jpg" alt="The Supabase sign-in page with the Continue with GitHub button" loading="lazy"></a></figure>
+
+<h2 id="step-4-create-your-supabase-project">Step 4: Create your Supabase project</h2>
+<ol>
+<li>Click <strong>New project</strong>.</li>
+<li><strong>Name:</strong> type <code>care-compass</code>.</li>
+<li><strong>Database password:</strong> click <strong>Generate a password</strong>, then copy it. <strong>Paste it into the table above, in the row SUPABASE_DB_PASSWORD, straight away.</strong> You cannot see it again later.</li>
+<li><strong>Region:</strong> choose the one closest to you. For Australia, choose <strong>Sydney</strong>.</li>
+<li>Click <strong>Create new project</strong>. Wait a few minutes until the project is ready.</li>
+</ol>
+
+<h2 id="step-5-copy-your-codes-from-supabase">Step 5: Copy your codes from Supabase</h2>
+<p>You will collect five codes. Open your project in Supabase, then:</p>
+<h3 id="5a-the-project-reference">5a. The project reference</h3>
+<ol>
+<li>Look at the address in your browser. It looks like <code>supabase.com/dashboard/project/abcdefghijklmnopqrst</code>.</li>
+<li>The letters after <code>/project/</code> are your project reference. Copy them into the table, row <strong>SUPABASE_PROJECT_REF</strong>.</li>
+</ol>
+<h3 id="5b-the-web-address-and-the-two-keys">5b. The web address and the two keys</h3>
+<ol>
+<li>On the left, click the <strong>gear icon</strong> (Project Settings), then click <strong>API Keys</strong> (or <strong>API</strong>).</li>
+<li>Copy the <strong>Project URL</strong> into the table, row <strong>NEXT_PUBLIC_SUPABASE_URL</strong>. It ends in <code>.supabase.co</code>.</li>
+<li>Find the key called <strong>anon</strong> (also called <strong>public</strong>). Click <strong>Copy</strong> and paste it into the row <strong>NEXT_PUBLIC_SUPABASE_ANON_KEY</strong>.</li>
+<li>Find the key called <strong>service_role</strong> (also called <strong>secret</strong>). Click <strong>Reveal</strong>, then <strong>Copy</strong>, and paste it into the row <strong>SUPABASE_SERVICE_ROLE_KEY</strong>.</li>
+</ol>
+<p>If you only see keys named "publishable" and "secret", click the tab called <strong>Legacy API Keys</strong>. The anon and service_role keys are there.</p>
+<figure style="max-width:640px"><a href="images/922e8778-e9e8-4270-a42f-8da7752cfd39.jpg" target="_blank" rel="noopener"><img src="images/922e8778-e9e8-4270-a42f-8da7752cfd39.jpg" alt="The Legacy anon, service_role API keys tab with the anon key and the hidden service_role key" loading="lazy"></a></figure>
+<h3 id="5c-the-access-token">5c. The access token</h3>
+<ol>
+<li>Click your <strong>profile picture</strong> (bottom left or top right), then <strong>Account preferences</strong>, then <strong>Access Tokens</strong>.</li>
+<li>Click <strong>Generate new token</strong>. Name it <code>github</code> and click <strong>Generate token</strong>.</li>
+<li>Copy the token straight away and paste it into the row <strong>SUPABASE_ACCESS_TOKEN</strong>. It is shown only once.</li>
+</ol>
+
+<h2 id="step-6-give-github-three-of-the-codes">Step 6: Give GitHub three of the codes</h2>
+<p>This lets GitHub build your database in the next step.</p>
+<ol>
+<li>Open your copy of Care Compass on GitHub (the one with your username in the address).</li>
+<li>Click the <strong>Settings</strong> tab in the row of tabs near the top.</li>
+<li>On the left, click <strong>Secrets and variables</strong>, then <strong>Actions</strong>.</li>
+<li>Click the green <strong>New repository secret</strong> button.</li>
+<li>In <strong>Name</strong>, type exactly <code>SUPABASE_ACCESS_TOKEN</code>. In <strong>Secret</strong>, paste your access token from the table. Click <strong>Add secret</strong>.</li>
+<li>Repeat for <code>SUPABASE_DB_PASSWORD</code> (paste the database password) and <code>SUPABASE_PROJECT_REF</code> (paste the project reference).</li>
+</ol>
+<p>You should now see three secrets in the list. GitHub never shows their values again. If you make a mistake, add a secret with the same name and it replaces the old one.</p>
+<figure style="max-width:640px"><a href="images/735f08f3-8368-4fa7-a51e-20442750ada7.jpg" target="_blank" rel="noopener"><img src="images/735f08f3-8368-4fa7-a51e-20442750ada7.jpg" alt="The Actions secrets page with the New repository secret button" loading="lazy"></a></figure>
+<p><em>Your list will be shorter: it shows only the secrets you add.</em></p>
+
+<h2 id="step-7-build-the-database">Step 7: Build the database</h2>
+<ol>
+<li>In your copy on GitHub, click the <strong>Actions</strong> tab.</li>
+<li>If you see a message that workflows are disabled, click the green button that says <strong>I understand my workflows, go ahead and enable them</strong>.</li>
+<li>On the left, click <strong>Migrate database</strong>.</li>
+<li>On the right, click <strong>Run workflow</strong>. Leave the branch as <strong>main</strong>.</li>
+<li><strong>First, a safe test:</strong> tick the box <strong>Only list the migrations that would be applied</strong>, then click the green <strong>Run workflow</strong> button. Wait about a minute and refresh the page. A <strong>green tick</strong> means all is well. This test changes nothing.</li>
+<li><strong>Now the real run:</strong> click <strong>Run workflow</strong> again, leave the box <strong>not ticked</strong>, and click the green button. Wait for the green tick.</li>
+<li>To check, open Supabase, click <strong>Table Editor</strong> on the left. You should see a list of tables such as <code>profiles</code> and <code>clients</code>.</li>
+</ol>
+<div class="panel note"><p><strong>If you see a red cross:</strong> click the run, then the step with the red cross, and read the message. A message about "missing secrets" means Step 6 is not finished. A message about a "password" means the database password was copied wrongly: add the <code>SUPABASE_DB_PASSWORD</code> secret again. Then run it again. Running it twice is safe.</p></div>
+<p><strong>1. Click Run workflow. This box opens:</strong></p>
+<figure style="max-width:640px"><a href="images/1fffb976-fa3a-4b20-a65c-1c3af6c0da95.jpg" target="_blank" rel="noopener"><img src="images/1fffb976-fa3a-4b20-a65c-1c3af6c0da95.jpg" alt="The Run workflow box with the branch main and the test tick box" loading="lazy"></a></figure>
+<p><strong>2. For the safe test, tick the box, then click the green Run workflow button in the box:</strong></p>
+<figure style="max-width:640px"><a href="images/366cd7b9-0235-4d23-8641-3139b7798360.jpg" target="_blank" rel="noopener"><img src="images/366cd7b9-0235-4d23-8641-3139b7798360.jpg" alt="The Run workflow box with the test tick box ticked" loading="lazy"></a></figure>
+<p><strong>Watch the whole thing:</strong> this short animation shows both runs, from opening the box to ticking it and pressing the green button.</p>
+<figure style="max-width:640px"><img src="images/run-workflow.gif" alt="Animation: opening Run workflow, ticking the test box and clicking the green button" loading="lazy"></figure>
+<figure style="max-width:640px"><a href="images/72bd220c-d205-4278-a19d-981b6a71277e.jpg" target="_blank" rel="noopener"><img src="images/72bd220c-d205-4278-a19d-981b6a71277e.jpg" alt="The Migrate database workflow page with the Run workflow button" loading="lazy"></a></figure>
+<p>When the database is built, the Table Editor in Supabase lists the tables:</p>
+<figure style="max-width:640px"><a href="images/57c5de8b-1250-4990-8613-4fe355aefaa2.jpg" target="_blank" rel="noopener"><img src="images/57c5de8b-1250-4990-8613-4fe355aefaa2.jpg" alt="The Supabase Table Editor listing the Care Compass tables" loading="lazy"></a></figure>
+
+<h2 id="step-8-put-the-website-online-with-vercel">Step 8: Put the website online with Vercel</h2>
+<ol>
+<li>Open <strong>vercel.com</strong> and click <strong>Sign Up</strong>.</li>
+<li>Choose the free <strong>Hobby</strong> plan, type your name, and click <strong>Continue with GitHub</strong>.</li>
+<li>Click <strong>Add New</strong>, then <strong>Project</strong>.</li>
+<li>Find your copy of Care Compass in the list and click <strong>Import</strong>. If it is not in the list, click <strong>Adjust GitHub App Permissions</strong> and allow access to your copy.</li>
+<li>Leave all the settings as they are. It should say <strong>Next.js</strong>.</li>
+<li>Click <strong>Environment Variables</strong> to open that section. Add four, one at a time. Type the <strong>Name</strong> exactly as shown, paste the value from your table, and click <strong>Add</strong>:
+<ul>
+<li><code>NEXT_PUBLIC_SUPABASE_URL</code></li>
+<li><code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code></li>
+<li><code>SUPABASE_SERVICE_ROLE_KEY</code></li>
+<li><code>DATA_SOURCE</code> with the value <code>supabase</code></li>
+</ul></li>
+<li>Click <strong>Deploy</strong>. Wait a few minutes until you see a success page.</li>
+<li>Click the picture of your website, or <strong>Continue to Dashboard</strong>. Copy the web address of your new site (it ends in <code>.vercel.app</code>) into the last row of your table.</li>
+</ol>
+<figure style="max-width:408px"><a href="images/28faa6f8-bed1-4213-ad61-949684ba7f12.jpg" target="_blank" rel="noopener"><img src="images/28faa6f8-bed1-4213-ad61-949684ba7f12.jpg" alt="The Vercel sign-up page with the Continue with GitHub button" loading="lazy"></a></figure>
+
+<h2 id="step-9-two-settings-in-supabase">Step 9: Two settings in Supabase</h2>
+<p>Go back to Supabase and open your project.</p>
+<h3 id="9a-turn-off-email-confirmation">9a. Turn off email confirmation</h3>
+<ol>
+<li>On the left, click <strong>Authentication</strong>.</li>
+<li>Click <strong>Sign In / Providers</strong>, then click <strong>Email</strong>.</li>
+<li>Switch <strong>Confirm email</strong> <strong>off</strong> (the switch turns grey).</li>
+<li>Click <strong>Save</strong>.</li>
+</ol>
+<p>If you skip this, nobody can create an account. The page says "We couldn't create your account".</p>
+<figure style="max-width:640px"><a href="images/94fa3598-13cc-4855-91ff-aa77145178ff.jpg" target="_blank" rel="noopener"><img src="images/94fa3598-13cc-4855-91ff-aa77145178ff.jpg" alt="The Email provider settings with the Confirm email switch" loading="lazy"></a></figure>
+<h3 id="9b-tell-supabase-your-website-address">9b. Tell Supabase your website address</h3>
+<ol>
+<li>Click <strong>Authentication</strong>, then <strong>URL Configuration</strong>.</li>
+<li>In <strong>Site URL</strong>, paste your Vercel web address from the table. It must start with <code>https://</code> and have nothing after <code>.vercel.app</code>.</li>
+<li>Under <strong>Redirect URLs</strong>, click <strong>Add URL</strong>, paste the same address and type <code>/**</code> straight after it. For example: <code>https://your-site.vercel.app/**</code></li>
+<li>Click <strong>Save</strong>.</li>
+</ol>
+<figure style="max-width:640px"><a href="images/08ba7784-793e-4308-b4bc-4b2d8e9e74c7.jpg" target="_blank" rel="noopener"><img src="images/08ba7784-793e-4308-b4bc-4b2d8e9e74c7.jpg" alt="The URL Configuration page with the Site URL box" loading="lazy"></a></figure>
+
+<h2 id="step-10-make-the-password-reset-email-work">Step 10: Make the password reset email work</h2>
+<p>Supabase's standard emails do not match Care Compass, so change two of them.</p>
+<ol>
+<li>In Supabase click <strong>Authentication</strong>, then <strong>Emails</strong>, then <strong>Templates</strong>.</li>
+<li>Click <strong>Reset password</strong>. In <strong>Subject</strong>, type <code>Reset your Care Compass password</code>. Delete everything in the large box, then copy the whole of <strong>Box A</strong> below and paste it in. Click <strong>Save</strong>.</li>
+<li>Click <strong>Invite user</strong>. In <strong>Subject</strong>, type <code>You have been invited to Care Compass</code>. Delete everything in the large box, then copy the whole of <strong>Box B</strong> below and paste it in. Click <strong>Save</strong>.</li>
+</ol>
+<p><strong>Box A (Reset password)</strong></p>
+<pre><code>&lt;h2&gt;Reset your password&lt;/h2&gt;
+&lt;p&gt;We received a request to reset the password for your Care Compass account.&lt;/p&gt;
+&lt;p&gt;
+  &lt;a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&amp;type=recovery&amp;next=/reset-password"&gt;Choose a new password&lt;/a&gt;
+&lt;/p&gt;
+&lt;p&gt;
+  This link works once and expires. If it has expired, request a new one from the sign-in page. If
+  you did not ask for this, you can ignore this email.
+&lt;/p&gt;</code></pre>
+<p><strong>Box B (Invite user)</strong></p>
+<pre><code>&lt;h2&gt;You have been invited to Care Compass&lt;/h2&gt;
+&lt;p&gt;
+  Your organisation has added you to Care Compass. Set a password to finish setting up your account.
+&lt;/p&gt;
+&lt;p&gt;
+  &lt;a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&amp;type=invite&amp;next=/set-password"&gt;Set your password&lt;/a&gt;
+&lt;/p&gt;
+&lt;p&gt;
+  This link works once and expires. If it has expired, ask your administrator to send a new invite.
+  If you were not expecting this, you can ignore this email.
+&lt;/p&gt;</code></pre>
+<figure style="max-width:640px"><a href="images/b5cc0e98-59f9-41db-b558-5538a78f0605.jpg" target="_blank" rel="noopener"><img src="images/b5cc0e98-59f9-41db-b558-5538a78f0605.jpg" alt="The Emails Templates page listing Invite user and Reset password" loading="lazy"></a></figure>
+
+<h2 id="step-11-check-it-works">Step 11: Check it works</h2>
+<ol>
+<li>Open your Vercel web address in your browser. You should see the Care Compass sign-in page.</li>
+<li>Click <strong>Create an account</strong> and fill in the form.</li>
+<li>You should land on your Home page straight away.</li>
+</ol>
+<p>That is all. The how-to guides for administrators, carers and family members are in the same folder as this page.</p>
+<div class="panel note"><p><strong>Emails:</strong> without extra setup, Supabase sends the password-reset emails itself, but only a few per hour. This is fine for a small start. The Care Compass team keeps the notes for setting up a proper email service in the page <strong>Developer notes</strong>.</p></div>
+
+<h2 id="if-something-goes-wrong">If something goes wrong</h2>
+<table>
+<thead><tr><th>What you see</th><th>What to do</th></tr></thead>
+<tbody>
+<tr><td>"We couldn't create your account" when signing up</td><td>Email confirmation is still switched on. Do Step 9a again and click <strong>Save</strong>.</td></tr>
+<tr><td>The password reset link opens a page that cannot be reached, or an address starting <code>localhost</code></td><td>The website address is missing in Supabase. Do Step 9b, then Step 10, and request a new reset email.</td></tr>
+<tr><td>Migrate database shows a red cross</td><td>Read the note in Step 7. Most often a secret from Step 6 is missing or has a typing mistake. Add it again, then run it again.</td></tr>
+<tr><td>The Table Editor in Supabase is empty</td><td>Only the safe test was run. Run Migrate database again with the box <strong>not</strong> ticked (Step 7).</td></tr>
+<tr><td>Your website shows an error page, or never loads</td><td>In Vercel open your project, click <strong>Settings</strong>, then <strong>Environment Variables</strong>. Check all four names are spelled exactly as in Step 8 and the values were pasted whole. Then click <strong>Deployments</strong>, the three dots beside the newest one, and <strong>Redeploy</strong>.</td></tr>
+<tr><td>Vercel does not list your copy of Care Compass</td><td>On the Import page click <strong>Adjust GitHub App Permissions</strong> and allow access to your copy.</td></tr>
+<tr><td>You cannot find Access Tokens in Supabase</td><td>Open <strong>supabase.com/dashboard/account/tokens</strong> in your browser while signed in.</td></tr>
+<tr><td>You lost a code</td><td>Keys can be shown again in Supabase (Step 5). The database password cannot: in Supabase open <strong>Project Settings</strong>, then <strong>Database</strong>, and reset it, then update the <code>SUPABASE_DB_PASSWORD</code> secret in GitHub.</td></tr>
+</tbody>
+</table>
+
+<h2 id="keeping-your-codes-safe">Keeping your codes safe</h2>
+<ul>
+<li>Keep your codes table on paper or in a password manager. Do not email it or post it anywhere.</li>
+<li>The <code>SUPABASE_SERVICE_ROLE_KEY</code>, <code>SUPABASE_ACCESS_TOKEN</code> and <code>SUPABASE_DB_PASSWORD</code> are private. Never send them to anyone, including in a screenshot.</li>
+<li>If you think one has leaked, tell the Care Compass team straight away. They can help you replace it.</li>
+</ul>
+
+<h2 id="getting-updates-later">Getting updates later</h2>
+<p>When the Care Compass team improves the program, you can bring those improvements into your copy:</p>
+<ol>
+<li>Open your copy of Care Compass on GitHub.</li>
+<li>Click <strong>Sync fork</strong>, then <strong>Update branch</strong>.</li>
+<li>Vercel notices the change and publishes the new version by itself in a few minutes.</li>
+<li>If the Care Compass team tells you the update includes a database change, run <strong>Migrate database</strong> again (Step 7).</li>
+</ol>
+
+</main>
+</div>
+<footer class="site-footer">Care Compass handover documents. The pictures use made-up example people. Print this page with your browser's Print command if you would like a paper copy.</footer>
+</body>
+</html>
